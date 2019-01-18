@@ -6,9 +6,10 @@ import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 /**
  * @author <a href="mailto:Marat.Fayzullin@aplana.com">Файзуллин Марат</a>
@@ -117,5 +118,25 @@ public interface LockDataDao extends PermissionDao {
      * @param keysBlocker множество ключей
      * @return список существующих блокировок
      */
-    List<LockData> fetchAllByKeySet(Set<String> keysBlocker);
+    List<LockData> fetchAllByKeySet(Collection<String> keysBlocker);
+
+    /**
+     * Создает несколько блокировок
+     * @param lockKeysWithDescription   мапа блокировок, где ключом выступает ключ блокировки, а значением -- описание бокировки
+     * @param userId                    идентификатор пользователя устанавливающего блокировки
+     */
+    void lockKeysBatch(Map<String, String> lockKeysWithDescription, int userId);
+
+    /**
+     * Связывает несколько блокировок с асинхронной задачей
+     * @param keys      ключи блокировок
+     * @param taskId    идентификатор задачи
+     */
+    void bindTaskToMultiKeys(Collection<String> keys, long taskId);
+
+    /**
+     * Снять несколько блокировок
+     * @param keys список ключей блокировок
+     */
+    void unlockMiltipleTasks(Collection<String> keys);
 }

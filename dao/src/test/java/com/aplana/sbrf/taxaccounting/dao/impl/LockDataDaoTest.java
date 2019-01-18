@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.model.TARole;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.exception.LockException;
 import com.google.common.collect.HashMultiset;
+import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,11 +20,13 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
@@ -218,5 +221,55 @@ public class LockDataDaoTest extends Assert {
         assertEquals(2, locks.size());
         assertTrue(HashMultiset.create(asList(2L, 4L)).equals(
                 HashMultiset.create(asList(locks.get(0).getId(), locks.get(1).getId()))));
+    }
+
+    @Test
+    public void test_lockKeysBatch() {
+        Map<String, String> locks = new HashMap<>();
+        locks.put("lock_key1", "description1");
+        locks.put("lock_key2", "description2");
+
+        dao.lockKeysBatch(locks, 0);
+
+        dao.lock("c", 0, "");
+        LockData data = dao.get("lock_key1", false);
+        Assertions.assertThat(data).isNotNull();
+        Assertions.assertThat(data.getKey()).isEqualTo("lock_key1");
+        Assertions.assertThat(data.getUserId()).isEqualTo(0);
+        Assertions.assertThat(data.getDescription()).isEqualTo("description1");
+
+        data = dao.get("lock_key2", false);
+        Assertions.assertThat(data).isNotNull();
+        Assertions.assertThat(data.getKey()).isEqualTo("lock_key2");
+        Assertions.assertThat(data.getUserId()).isEqualTo(0);
+        Assertions.assertThat(data.getDescription()).isEqualTo("description2");
+    }
+
+    @Test
+    public void test_bindTaskToMultiKeys() {
+        List<String> keys = Arrays.asList("a", "b", "q");
+
+        dao.bindTaskToMultiKeys(keys, 1L);
+
+        LockData data = dao.get("a", false);
+        Assertions.assertThat(data.getTaskId()).isEqualTo(1L);
+        data = dao.get("b", false);
+        Assertions.assertThat(data.getTaskId()).isEqualTo(1L);
+        data = dao.get("q", false);
+        Assertions.assertThat(data.getTaskId()).isEqualTo(1L);
+    }
+
+    @Test
+    public void test_unlockMiltipleTasks() {
+        List<String> keys = Arrays.asList("a", "b", "q");
+
+        dao.unlockMiltipleTasks(keys);
+
+        LockData data = dao.get("a", false);
+        Assertions.assertThat(data).isNull();
+        data = dao.get("b", false);
+        Assertions.assertThat(data).isNull();
+        data = dao.get("q", false);
+        Assertions.assertThat(data).isNull();
     }
 }

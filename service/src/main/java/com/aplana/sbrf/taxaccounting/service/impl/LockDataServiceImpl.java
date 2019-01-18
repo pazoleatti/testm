@@ -401,6 +401,28 @@ public class LockDataServiceImpl implements LockDataService {
         return null;
     }
 
+    @Override
+    public void bindTaskToMultiKeys(final Collection<String> keys, final long taskId) {
+        tx.executeInNewTransaction(new TransactionLogic<Object>() {
+            @Override
+            public Object execute() {
+                dao.bindTaskToMultiKeys(keys, taskId);
+                return null;
+            }
+        });
+    }
+
+    @Override
+    public void unlockMiltipleTasks(final Collection<String> keys) {
+        tx.executeInNewTransaction(new TransactionLogic<Object>() {
+            @Override
+            public Object execute() {
+                dao.unlockMiltipleTasks(keys);
+                return null;
+            }
+        });
+    }
+
     /**
      * Определение Тербанка пользователя, поставившего блокировку.
      */

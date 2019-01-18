@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.LockDataDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
+import com.aplana.sbrf.taxaccounting.dao.util.DBUtils;
 import com.aplana.sbrf.taxaccounting.model.LockData;
 import com.aplana.sbrf.taxaccounting.model.LockDataDTO;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
@@ -13,19 +14,22 @@ import com.aplana.sbrf.taxaccounting.model.exception.LockException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Реализация дао блокировок
@@ -39,6 +43,9 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
     private static final Log LOG = LogFactory.getLog(LockDataDaoImpl.class);
     private static final String LOCK_DATA_DELETE_ERROR = "Ошибка при удалении блокировок. %s";
     private static final String USER_LOCK_DATA_DELETE_ERROR = "Ошибка при удалении блокировок для пользователя с id = %d. %s";
+
+    @Autowired
+    DBUtils dbUtils;
 
 
     @Override
@@ -219,11 +226,68 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
     }
 
     @Override
-    public List<LockData> fetchAllByKeySet(Set<String> keysBlocker) {
-        return getJdbcTemplate().query(
-                "select id, key, user_id, task_id, date_lock, description from lock_data " +
-                        " where " + SqlUtils.transformToSqlInStatementForString("key", keysBlocker),
-                new LockDataMapper());
+    public List<LockData> fetchAllByKeySet(Collection<String> keysBlocker) {
+        List<String> keys = new ArrayList(keysBlocker);
+        if (keys.size() > IN_CLAUSE_LIMIT) {
+            List<LockData> result = new ArrayList<>();
+            int n = (keys.size() - 1) / IN_CLAUSE_LIMIT + 1;
+            for (int i = 0; i < n; i++) {
+                List<String> subList = keys.subList(i * IN_CLAUSE_LIMIT, Math.min((i + 1) * IN_CLAUSE_LIMIT, keys.size()));
+                List<LockData> subResult = fetchAllByKeySet(subList);
+                result.addAll(subResult);
+            }
+            return result;
+        }
+        try {
+            return getJdbcTemplate().query(
+                    "select id, key, user_id, task_id, date_lock, description from lock_data " +
+                            " where " + SqlUtils.transformToSqlInStatementForString("key", keysBlocker),
+                    new LockDataMapper());
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<>();
+        }
     }
 
+    @Override
+    public void lockKeysBatch(Map<String, String> lockKeysWithDescription, int userId) {
+        List<Long> ids = dbUtils.getNextIds("seq_lock_data", lockKeysWithDescription.size());
+        Date dateLock = new Date();
+        String sql = "insert into lock_data (id, key, user_id, date_lock, description) " +
+                "values (:id, :key, :userId, :dateLock, :description)";
+        List<Map<String, Object>> batchValues = new ArrayList<>(lockKeysWithDescription.size());
+
+        int index = 0;
+        for (Map.Entry<String, String> entry : lockKeysWithDescription.entrySet()) {
+            batchValues.add(new MapSqlParameterSource("id", ids.get(index))
+                    .addValue("key", entry.getKey())
+                    .addValue("userId", userId)
+                    .addValue("dateLock", dateLock)
+                    .addValue("description", entry.getValue())
+                    .getValues());
+            index++;
+        }
+        getNamedParameterJdbcTemplate().batchUpdate(sql, batchValues.toArray(new Map[lockKeysWithDescription.size()]));
+    }
+
+    @Override
+    public void bindTaskToMultiKeys(Collection<String> keys, long taskId) {
+        String sql = "update lock_data set task_id = :taskId where key = :key";
+        List<Map<String, Object>> batchValues = new ArrayList<>(keys.size());
+        for (String key : keys) {
+            batchValues.add(new MapSqlParameterSource("taskId", taskId)
+                    .addValue("key", key)
+                    .getValues());
+        }
+        getNamedParameterJdbcTemplate().batchUpdate(sql, batchValues.toArray(new Map[keys.size()]));
+    }
+
+    @Override
+    public void unlockMiltipleTasks(Collection<String> keys) {
+        String sql = "delete from lock_data where key = :key";
+        List<Map<String, Object>> batchValues = new ArrayList<>(keys.size());
+        for (String key : keys) {
+            batchValues.add(new MapSqlParameterSource("key", key).getValues());
+        }
+        getNamedParameterJdbcTemplate().batchUpdate(sql, batchValues.toArray(new Map[keys.size()]));
+    }
 }

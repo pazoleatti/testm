@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -172,4 +173,17 @@ public interface LockDataService {
      * @return список существующих блокировок
      */
     List<LockDataDTO> fetchAllByKeySet(Set<String> keysBlocker);
+
+    /**
+     * Связывает несколько блокировок с асинхронной задачей
+     * @param keys      ключи блокировок
+     * @param taskId    идентификатор задачи
+     */
+    void bindTaskToMultiKeys(Collection<String> keys, long taskId);
+
+    /**
+     * Снять несколько блокировок
+     * @param keys список ключей блокировок
+     */
+    void unlockMiltipleTasks(Collection<String> keys);
 }

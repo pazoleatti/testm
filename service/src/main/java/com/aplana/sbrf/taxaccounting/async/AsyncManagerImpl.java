@@ -4,12 +4,37 @@ import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
 import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskSerializationException;
 import com.aplana.sbrf.taxaccounting.dao.AsyncTaskDao;
 import com.aplana.sbrf.taxaccounting.dao.AsyncTaskTypeDao;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.AsyncQueue;
+import com.aplana.sbrf.taxaccounting.model.AsyncTaskDTO;
+import com.aplana.sbrf.taxaccounting.model.AsyncTaskData;
+import com.aplana.sbrf.taxaccounting.model.AsyncTaskGroup;
+import com.aplana.sbrf.taxaccounting.model.AsyncTaskState;
+import com.aplana.sbrf.taxaccounting.model.AsyncTaskType;
+import com.aplana.sbrf.taxaccounting.model.AsyncTaskTypeData;
+import com.aplana.sbrf.taxaccounting.model.DeclarationData;
+import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.LockData;
+import com.aplana.sbrf.taxaccounting.model.Notification;
+import com.aplana.sbrf.taxaccounting.model.OperationType;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.TARole;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.TaskInterruptCause;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
-import com.aplana.sbrf.taxaccounting.service.*;
+import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
+import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
+import com.aplana.sbrf.taxaccounting.service.DepartmentService;
+import com.aplana.sbrf.taxaccounting.service.LockDataService;
+import com.aplana.sbrf.taxaccounting.service.NotificationService;
+import com.aplana.sbrf.taxaccounting.service.ServerInfo;
+import com.aplana.sbrf.taxaccounting.service.TAUserService;
+import com.aplana.sbrf.taxaccounting.service.TransactionHelper;
+import com.aplana.sbrf.taxaccounting.service.TransactionLogic;
 import com.aplana.sbrf.taxaccounting.service.component.lock.locker.DeclarationLocker;
 import com.aplana.sbrf.taxaccounting.service.component.operation.AsyncTaskDescriptor;
 import com.aplana.sbrf.taxaccounting.utils.ApplicationInfo;
@@ -228,12 +253,15 @@ public class AsyncManagerImpl implements AsyncManager {
                 if (!MapUtils.isEmpty(params)) {
                     checkParams(params);
                 }
-                LockData lockData = checkAndCreateLocks(operationType, params, logger, user);
-                if (lockData != null) {
+                List<LockData> lockDataList = checkAndCreateLocks(operationType, params, logger, user);
+                if (lockDataList != null && !lockDataList.isEmpty()) {
+                    List<String> keys = new ArrayList<>();
+                    for (LockData lockData : lockDataList) {
+                        keys.add(lockData.getKey());
+                    }
                     AsyncTaskData taskData = null;
                     try {
                         //Постановка новой задачи в очередь
-                        LOG.info(String.format("Постановка в очередь задачи с ключом %s", lockData.getKey()));
                         String description = asyncTaskDescriptor.createDescription(params, operationType);
                         AsyncQueue queue = task.defineTaskLimit(description, user, params);
 
@@ -241,7 +269,8 @@ public class AsyncManagerImpl implements AsyncManager {
                         String priorityNode = applicationInfo.isProductionMode() ? null : serverInfo.getServerName();
                         AsyncTaskType asyncTaskType = AsyncTaskType.getByAsyncTaskTypeId(operationType.getAsyncTaskTypeId());
                         taskData = asyncTaskDao.create(operationType.getAsyncTaskTypeId(), user.getUser().getId(), description, queue, priorityNode, AsyncTaskGroupFactory.getTaskGroup(asyncTaskType), params);
-                        lockDataService.bindTask(lockData.getKey(), taskData.getId());
+
+                        lockDataService.bindTaskToMultiKeys(keys, taskData.getId());
                         logger.info("Задача %s поставлена в очередь на исполнение", description);
                         LOG.info(String.format("Task with id %s was put in queue %s. Task type: %s, priority node: %s",
                                 taskData.getId(), queue.name(), asyncTaskType.getId(), priorityNode));
@@ -256,7 +285,7 @@ public class AsyncManagerImpl implements AsyncManager {
                             asyncTaskDao.delete(taskData.getId());
                             lockDataService.unlockAllByTask(taskData.getId());
                         } else {
-                            lockDataService.unlock(lockData.getKey(), user.getUser().getId(), true);
+                            lockDataService.unlockMiltipleTasks(keys);
                         }
                     }
                 }
@@ -579,11 +608,16 @@ public class AsyncManagerImpl implements AsyncManager {
      * @param params        параметры задачи
      * @param logger        логгер
      * @param userInfo      информация опользователе
-     * @return {@code true} если блокировка установлена
+     * @return список установленных блокировок
      */
-    private synchronized LockData checkAndCreateLocks(OperationType operationType, Map<String, Object> params, Logger logger, TAUserInfo userInfo) {
-        Long declarationDataId = (Long) params.get("declarationDataId");
-        return declarationLocker.establishLock(declarationDataId, operationType, userInfo, logger);
+    private synchronized List<LockData> checkAndCreateLocks(OperationType operationType, Map<String, Object> params, Logger logger, TAUserInfo userInfo) {
+        List<Long> declarationDataIdList = null;
+        if (params.get("declarationDataId") != null) {
+            declarationDataIdList = Collections.singletonList((Long) params.get("declarationDataId"));
+        } else if (params.get("declarationDataIds") != null) {
+            declarationDataIdList = (List<Long>) params.get("declarationDataIds");
+        }
+        return declarationLocker.establishLock(declarationDataIdList, operationType, userInfo, logger);
     }
 
     /**

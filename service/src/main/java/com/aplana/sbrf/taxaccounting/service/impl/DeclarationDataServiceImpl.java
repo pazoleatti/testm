@@ -2605,12 +2605,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             String taskKey = AsyncTaskType.EXPORT_REPORTS.name() + System.currentTimeMillis();
             Map<String, Object> params = new HashMap<>();
             params.put("declarationDataIds", declarationDataIds);
-            asyncManager.executeTask(taskKey, AsyncTaskType.EXPORT_REPORTS, userInfo, params, logger, false, new AbstractStartupAsyncTaskHandler() {
-                @Override
-                protected LockData lockObject(String lockKey, AsyncTaskType taskType, TAUserInfo user) {
-                    return lockDataService.lockAsync(lockKey, user.getUser().getId());
-                }
-            });
+            asyncManager.createTask(OperationType.EXPORT_REPORTS, "Выгрузка отчетности", userInfo, params, logger);
         }
         return new ActionResult(logEntryService.save(logger.getEntries()));
     }

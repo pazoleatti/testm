@@ -87,6 +87,8 @@ public class DeclarationDataKeyLockDescriptorImpl implements DeclarationDataKeyL
             return createBaseDescription(declarationDataId);
         else if (operationType.equals(OperationType.DECLARATION_6NDFL))
             return createBaseDescription(declarationDataId);
+        else if (operationType.equals(OperationType.EXPORT_REPORTS))
+            return createBaseDescription(declarationDataId);
         else
             throw new IllegalArgumentException("Unknown operationType type!");
     }
