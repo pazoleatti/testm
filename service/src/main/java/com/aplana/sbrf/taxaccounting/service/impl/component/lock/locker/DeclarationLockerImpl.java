@@ -18,6 +18,7 @@ import com.aplana.sbrf.taxaccounting.service.TransactionLogic;
 import com.aplana.sbrf.taxaccounting.service.component.lock.DeclarationDataLockKeyGenerator;
 import com.aplana.sbrf.taxaccounting.service.component.lock.descriptor.DeclarationDataKeyLockDescriptor;
 import com.aplana.sbrf.taxaccounting.service.component.lock.locker.DeclarationLocker;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -115,6 +116,15 @@ public class DeclarationLockerImpl implements DeclarationLocker {
         SET_UPDATE_DOC_STATE.addAll(Arrays.asList(OperationType.ACCEPT_DEC, OperationType.CHECK_DEC,
                 OperationType.DELETE_DEC, OperationType.RETURN_DECLARATION));
 
+    }
+
+    @Override
+    public LockData establishLock(Long declarationDataId, OperationType operationType, TAUserInfo userInfo, Logger logger) {
+        List<LockData> lockDataList = establishLock(Collections.singletonList(declarationDataId), operationType, userInfo, logger);
+        if (CollectionUtils.isEmpty(lockDataList)) {
+            return null;
+        }
+        return lockDataList.get(0);
     }
 
     @Override

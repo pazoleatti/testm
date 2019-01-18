@@ -15,6 +15,7 @@ import com.aplana.sbrf.taxaccounting.permissions.BasePermissionEvaluator;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.*;
+import com.aplana.sbrf.taxaccounting.service.component.lock.locker.DeclarationLocker;
 import com.aplana.sbrf.taxaccounting.utils.ApplicationInfo;
 import com.aplana.sbrf.taxaccounting.utils.DepartmentReportPeriodFormatter;
 import org.apache.commons.io.IOUtils;
@@ -28,7 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.security.core.Authentication;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.io.*;
@@ -42,7 +43,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
 
-@RunWith(SpringJUnit4ClassRunner.class)
+@RunWith(SpringRunner.class)
 @ContextConfiguration("DeclarationDataServiceTest.xml")
 public class DeclarationDataServiceImplTest {
 
@@ -78,22 +79,11 @@ public class DeclarationDataServiceImplTest {
     LockDataService lockDataService;
     @Autowired
     BasePermissionEvaluator basePermissionEvaluator;
+    @Autowired
+    DeclarationLocker declarationLocker;
 
     private static final SimpleDateFormat SDF = new SimpleDateFormat("dd.MM.yyyy");
 
-    ////////////////
-    // TODO: (sgoryachkin)
-    // Незнаю как это тестировать. Закормментил тесты
-    //
-    //
-    //
-    ////////////////
-
-    @Test
-    public void testme() {
-        // TODO фиктивный тест, добил чтоб не падала сборка
-        assert 1 == 1;
-    }
 
     @Test
     public void existDeclarationTest() throws ParseException {
@@ -112,14 +102,14 @@ public class DeclarationDataServiceImplTest {
         declarationData.setDeclarationTemplateId(1);
         declarationData.setDepartmentId(1);
         declarationData.setReportPeriodId(1);
-        declarationData.setId(1l);
+        declarationData.setId(1L);
         declarationData.setDepartmentReportPeriodId(1);
 
         DeclarationData declarationData1 = new DeclarationData();
         declarationData1.setDeclarationTemplateId(1);
         declarationData1.setDepartmentId(1);
         declarationData1.setReportPeriodId(2);
-        declarationData1.setId(2l);
+        declarationData1.setId(2L);
         declarationData1.setDepartmentReportPeriodId(2);
 
         TaxPeriod taxPeriod = new TaxPeriod();
@@ -138,8 +128,8 @@ public class DeclarationDataServiceImplTest {
         department.setName("Тестовое подразделение");
 
         List<Long> list = new ArrayList<Long>() {{
-            add(1l);
-            add(2l);
+            add(1L);
+            add(2L);
         }};
 
         when(declarationDataDao.getDeclarationIds(1, 1)).thenReturn(list);
@@ -244,7 +234,7 @@ public class DeclarationDataServiceImplTest {
         drp2.setCorrectionDate(new Date(0));
 
 
-        ArrayList<Relation> sources = new ArrayList<Relation>();
+        ArrayList<Relation> sources = new ArrayList<>();
         DeclarationTemplate declarationTemplate1 = new DeclarationTemplate();
         declarationTemplate1.setName("Тестовый макет");
         declarationTemplate1.setDeclarationFormKind(DeclarationFormKind.PRIMARY);
@@ -325,7 +315,7 @@ public class DeclarationDataServiceImplTest {
         declarationData.setDeclarationTemplateId(declarationTemplate.getId());
         declarationData.setDepartmentId(1);
         declarationData.setReportPeriodId(1);
-        declarationData.setId(1l);
+        declarationData.setId(1L);
         declarationData.setDepartmentReportPeriodId(1);
 
         DeclarationSubreport declarationSubreport = new DeclarationSubreport();
@@ -377,19 +367,16 @@ public class DeclarationDataServiceImplTest {
         ReflectionTestUtils.setField(declarationDataService, "declarationDataScriptingService", scriptingService);
 
         BlobDataService blobDataService = mock(BlobDataService.class);
-        final List<String> strings = new ArrayList<String>();
+        final List<String> strings = new ArrayList<>();
         when(blobDataService.create(anyString(), anyString())).thenAnswer(new Answer<Object>() {
             @Override
             public Object answer(InvocationOnMock invocation) throws Throwable {
                 String path = (String) invocation.getArguments()[0];
-                BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(path)));
-                try {
+                try (BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(path)))) {
                     String s;
                     while ((s = in.readLine()) != null) {
                         strings.add(s);
                     }
-                } finally {
-                    in.close();
                 }
                 return "uuid";
             }
@@ -472,6 +459,7 @@ public class DeclarationDataServiceImplTest {
     public void testCancel() {
         long declarationDataId = 1L;
         String note = "note";
+        String lockKey = "TEST_LOCK";
         TAUserInfo userInfo = mock(TAUserInfo.class);
 
         TAUser user = mock(TAUser.class);
@@ -520,10 +508,12 @@ public class DeclarationDataServiceImplTest {
         when(asnu.get("NAME")).thenReturn(name);
         when(basePermissionEvaluator.hasPermission(any(Authentication.class), any(Serializable.class), anyString(), any(Object.class))).thenReturn(true);
 
+        LockData lock = new LockData(lockKey, userId);
+        when(declarationLocker.establishLock(eq(declarationDataId), eq(OperationType.RETURN_DECLARATION), eq(userInfo), any(Logger.class))).thenReturn(lock);
+
         declarationDataService.cancelDeclarationList(Collections.singletonList(declarationDataId), note, userInfo);
 
         verify(declarationDataDao).setStatus(eq(declarationDataId), any(State.class));
-
     }
 
     @Test
