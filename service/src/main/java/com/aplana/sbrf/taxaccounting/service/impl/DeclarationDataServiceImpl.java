@@ -3171,6 +3171,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
         Map<String, Object> params = new HashMap<>();
         params.put("declarationDataId", declarationDataId);
+        params.put("extendedDescription", createExtendDescription(declarationDataId));
         asyncManager.createTask(OperationType.PDF_DEC, getStandardDeclarationDescription(declarationDataId), userInfo, params, logger);
 
         return logEntryService.save(logger.getEntries());
@@ -3228,5 +3229,23 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         notification.setReportId(null);
         notification.setNotificationType(NotificationType.DEFAULT);
         notificationService.create(Collections.singletonList(notification));
+    }
+
+    private String createExtendDescription(Long declarationDataId) {
+        DeclarationData declarationData = declarationDataDao.get(declarationDataId);
+        Department department = departmentService.getDepartment(declarationData.getDepartmentId());
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.fetchOne(declarationData.getDepartmentReportPeriodId());
+        DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
+        DeclarationType declarationType = declarationTemplate.getType();
+        return String.format("Налоговая форма: Период: \"%s, %s%s\", Подразделение: \"%s\", Вид: \"%s\", № %s, Налоговый орган: \"%s\", КПП: \"%s\", ОКТМО: \"%s\"",
+                departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(),
+                departmentReportPeriod.getReportPeriod().getName(),
+                getCorrectionDateString(departmentReportPeriod),
+                department.getName(),
+                declarationType.getName(),
+                declarationDataId,
+                declarationData.getTaxOrganCode(),
+                declarationData.getKpp(),
+                declarationData.getOktmo());
     }
 }
