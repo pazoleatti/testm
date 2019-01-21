@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.TAInterruptedException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.script.service.DeclarationService;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
 import com.aplana.sbrf.taxaccounting.service.ReportService;
@@ -44,7 +45,7 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
     private static final String FILE_NAME_IN_TEMP_PATTERN = System.getProperty("java.io.tmpdir") + File.separator + "%s.%s";
 
     @Autowired
-    private DeclarationTemplateService declarationTemplateService;
+    private DeclarationService declarationService;
     @Autowired
     private BlobDataService blobDataService;
     @Autowired
@@ -119,7 +120,7 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
 
     boolean validate(DeclarationData data, Logger logger, File xmlFile, String fileName, String xsdBlobDataId, long timeout) {
         if (xsdBlobDataId == null) {
-            xsdBlobDataId = declarationTemplateService.get(data.getDeclarationTemplateId()).getXsdId();
+            xsdBlobDataId = declarationService.findXsdIdByTemplateId(data.getDeclarationTemplateId());
         }
         if (xmlFile != null) {
             return isValid(logger, xmlFile, fileName, xsdBlobDataId, timeout);

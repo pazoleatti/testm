@@ -6,6 +6,7 @@
 		http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd">
 	<import resource="classpath:testDaoContext.xml"/>
 	<jdbc:initialize-database>
+		<jdbc:script location="classpath:data/BlobData.sql" encoding="UTF-8"/>
         <jdbc:script location="classpath:data/TaxType.sql" encoding="UTF-8"/>
 		<jdbc:script location="classpath:data/TaxPeriod.sql" encoding="UTF-8"/>
 		<jdbc:script location="classpath:data/ReportPeriod.sql" encoding="UTF-8"/>
@@ -14,6 +15,5 @@
 		<jdbc:script location="classpath:data/TARole.sql " encoding="UTF-8"/>
 		<jdbc:script location="classpath:data/Event.sql" encoding="UTF-8"/>
 		<jdbc:script location="classpath:data/DeclarationTemplateEventScript.sql" encoding="UTF-8"/>
-		<jdbc:script location="classpath:data/BlobData.sql" encoding="UTF-8"/>
 	</jdbc:initialize-database>
 </beans>

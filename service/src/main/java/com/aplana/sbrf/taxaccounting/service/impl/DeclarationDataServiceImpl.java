@@ -1783,9 +1783,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                                     String xsdBlobDataId) {
         if (xsdBlobDataId == null && declarationData != null) {
             LOG.info(String.format("Получение данных налоговой формы %s", declarationData.getId()));
-            DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
 
-            xsdBlobDataId = declarationTemplate.getXsdId();
+            xsdBlobDataId = declarationTemplateDao.findXsdIdByTemplateId(declarationData.getDeclarationTemplateId());
         }
         if (xsdBlobDataId != null && !xsdBlobDataId.isEmpty()) {
             try {
