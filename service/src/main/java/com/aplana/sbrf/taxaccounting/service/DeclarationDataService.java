@@ -27,8 +27,6 @@ import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
-import com.aplana.sbrf.taxaccounting.model.result.CreateDeclarationExcelTemplateResult;
-import com.aplana.sbrf.taxaccounting.model.result.CreateDeclarationReportResult;
 import com.aplana.sbrf.taxaccounting.model.result.CreateResult;
 import com.aplana.sbrf.taxaccounting.model.result.DeclarationDataExistenceAndKindResult;
 import com.aplana.sbrf.taxaccounting.model.result.DeclarationLockResult;
@@ -267,10 +265,9 @@ public interface DeclarationDataService {
      *
      * @param userInfo          информация о пользователе, выполняющего действие
      * @param declarationDataId идентификатор декларации
-     * @param force             признак для перезапуска задачи
      * @return результат о формировании отчета
      */
-    CreateDeclarationReportResult createReportXlsx(TAUserInfo userInfo, long declarationDataId, boolean force);
+    String createTaskToCreateReportXlsx(TAUserInfo userInfo, long declarationDataId);
 
     /**
      * Возвращает информацию о доступности скачивания отчетов
@@ -660,10 +657,9 @@ public interface DeclarationDataService {
      *
      * @param declarationDataId ид формы
      * @param userInfo          информация о пользователе
-     * @param force             будет ли остановлена уже запущенная задача и запущена занова
      * @return результат создания задачи
      */
-    CreateDeclarationExcelTemplateResult createTaskToCreateExcelTemplate(final long declarationDataId, TAUserInfo userInfo, boolean force);
+    String createTaskToCreateExcelTemplate(final long declarationDataId, TAUserInfo userInfo);
 
     /**
      * Выполняет формирование шаблона Excel-файла для формы

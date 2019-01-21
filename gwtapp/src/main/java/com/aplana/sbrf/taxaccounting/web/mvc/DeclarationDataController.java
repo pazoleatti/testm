@@ -294,10 +294,9 @@ public class DeclarationDataController {
      * @return Результат запуска задачи
      */
     @PostMapping(value = "/actions/declarationData/{declarationDataId}/excelTemplate")
-    public CreateDeclarationExcelTemplateResult createExcelTemplate(@PathVariable int declarationDataId,
-                                                                    @RequestParam boolean force) {
+    public String createExcelTemplate(@PathVariable int declarationDataId) {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        return declarationService.createTaskToCreateExcelTemplate(declarationDataId, userInfo, force);
+        return declarationService.createTaskToCreateExcelTemplate(declarationDataId, userInfo);
     }
 
     /**
@@ -575,9 +574,9 @@ public class DeclarationDataController {
      * @return информация о создании отчета
      */
     @PostMapping(value = "/actions/declarationData/{declarationDataId}/reportXsls")
-    public CreateDeclarationReportResult CreateDeclarationReportXlsx(@PathVariable("declarationDataId") long declarationDataId) {
+    public String сreateDeclarationReportXlsx(@PathVariable("declarationDataId") long declarationDataId) {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        return declarationService.createReportXlsx(userInfo, declarationDataId, false);
+        return declarationService.createTaskToCreateReportXlsx(userInfo, declarationDataId);
     }
 
     /**

@@ -363,35 +363,6 @@
                     });
                 };
 
-                /**
-                 * Обрабатывает результат формирования отчета
-                 * @param response результат
-                 * @param restartFunc функция повторного запуска формирования, если формирование уже запущено, то вызывается эта функция после подтверждения
-                 * @param reportAvailableModel модель отвечающая за доступность скачивания отчета
-                 */
-                function performReportSuccessResponse(response, restartFunc, reportAvailableModel) {
-                    if (response.uuid && response.uuid !== null) {
-                        // задача запустилась
-                        $logPanel.open('log-panel-container', response.uuid);
-                        $scope[reportAvailableModel] = false;
-                    } else {
-                        if (response.status === APP_CONSTANTS.CREATE_ASYNC_TASK_STATUS.NOT_EXIST_XML) {
-                            $dialogs.messageDialog({
-                                content: $filter('translate')('title.noCalculationPerformed')
-                            });
-                        } else if (response.status === APP_CONSTANTS.CREATE_ASYNC_TASK_STATUS.LOCKED) {
-                            $dialogs.confirmDialog({
-                                title: $filter('translate')('title.confirm'),
-                                content: response.restartMsg,
-                                okBtnCaption: $filter('translate')('common.button.yes'),
-                                cancelBtnCaption: $filter('translate')('common.button.no'),
-                                okBtnClick: function () {
-                                    restartFunc(true);
-                                }
-                            });
-                        }
-                    }
-                }
 
                 /**
                  * Флаг, означающий, может ли текущий пользоватеть выполнить редактирование строки в таблице
@@ -594,7 +565,7 @@
                     if (file) {
                         Upload.upload({
                             url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/import",
-                            data: {uploader: file},
+                            data: {uploader: file}
                         }).progress(function (e) {
                         }).then(function (response) {
                             if (response.data.uuid && response.data.uuid !== null) {
@@ -610,7 +581,7 @@
                 $scope.updatePersonsData = function () {
                     $http({
                         method: "GET",
-                        url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/updatePersonsData",
+                        url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/updatePersonsData"
                     }).then(function (response) {
                         if (response.data && response.data !== null) {
                             $logPanel.open('log-panel-container', response.data);
@@ -665,10 +636,10 @@
                 $scope.createReportXlsx = function () {
                     $http({
                         method: "POST",
-                        url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/reportXsls",
+                        url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/reportXsls"
                     }).success(function (response) {
-                        if (response.uuid && response.uuid !== null) {
-                            $logPanel.open('log-panel-container', response.uuid);
+                        if (response) {
+                            $logPanel.open('log-panel-container', response);
                         }
                     });
                 };
@@ -679,7 +650,7 @@
                 $scope.createReportAllRnu = function () {
                     $http({
                         method: "POST",
-                        url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/specific/" + APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.RNU_NDFL_PERSON_ALL_DB,
+                        url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/specific/" + APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.RNU_NDFL_PERSON_ALL_DB
                     }).success(function (response) {
                         if (response) {
                             $logPanel.open('log-panel-container', response);
@@ -693,7 +664,7 @@
                 $scope.createRateReport = function () {
                     $http({
                         method: "POST",
-                        url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/specific/" + APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.RNU_RATE_REPORT,
+                        url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/specific/" + APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.RNU_RATE_REPORT
                     }).success(function (response) {
                         if (response) {
                             $logPanel.open('log-panel-container', response);
@@ -707,7 +678,7 @@
                 $scope.createPaymentReport = function () {
                     $http({
                         method: "POST",
-                        url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/specific/" + APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.RNU_PAYMENT_REPORT,
+                        url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/specific/" + APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.RNU_PAYMENT_REPORT
                     }).success(function (response) {
                         if (response) {
                             $logPanel.open('log-panel-container', response);
@@ -721,7 +692,7 @@
                 $scope.createNdflDetailReport = function () {
                     $http({
                         method: "POST",
-                        url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/specific/" + APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.RNU_NDFL_DETAIL_REPORT,
+                        url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/specific/" + APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.RNU_NDFL_DETAIL_REPORT
                     }).success(function (response) {
                         if (response) {
                             $logPanel.open('log-panel-container', response);
@@ -777,9 +748,11 @@
                 $scope.createExcelTemplate = function () {
                     $http({
                         method: "POST",
-                        url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/excelTemplate",
+                        url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/excelTemplate"
                     }).then(function (response) {
-                        performReportSuccessResponse(response.data, $scope.createExcelTemplate, "availableExcelTemplate");
+                        if (response) {
+                            $logPanel.open('log-panel-container', response.data);
+                        }
                     });
                 };
 

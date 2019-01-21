@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.async.AbstractStartupAsyncTaskHandler;
 import com.aplana.sbrf.taxaccounting.async.AsyncManager;
 import com.aplana.sbrf.taxaccounting.async.AsyncTask;
 import com.aplana.sbrf.taxaccounting.dao.AsyncTaskDao;
@@ -17,7 +16,6 @@ import com.aplana.sbrf.taxaccounting.model.AttachFileType;
 import com.aplana.sbrf.taxaccounting.model.BlobData;
 import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.Column;
-import com.aplana.sbrf.taxaccounting.model.CreateAsyncTaskStatus;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.DeclarationData;
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataFile;
@@ -78,8 +76,6 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDocState;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookKnfType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
-import com.aplana.sbrf.taxaccounting.model.result.CreateDeclarationExcelTemplateResult;
-import com.aplana.sbrf.taxaccounting.model.result.CreateDeclarationReportResult;
 import com.aplana.sbrf.taxaccounting.model.result.CreateResult;
 import com.aplana.sbrf.taxaccounting.model.result.DeclarationDataExistenceAndKindResult;
 import com.aplana.sbrf.taxaccounting.model.result.DeclarationLockResult;
@@ -90,7 +86,6 @@ import com.aplana.sbrf.taxaccounting.model.result.NdflPersonPrepaymentDTO;
 import com.aplana.sbrf.taxaccounting.model.result.PrepareSubreportResult;
 import com.aplana.sbrf.taxaccounting.model.result.ReportAvailableReportDDResult;
 import com.aplana.sbrf.taxaccounting.model.result.ReportAvailableResult;
-import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.permissions.BasePermissionEvaluator;
 import com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission;
 import com.aplana.sbrf.taxaccounting.permissions.logging.TargetIdAndLogger;
@@ -993,40 +988,19 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    public CreateDeclarationReportResult createReportXlsx(final TAUserInfo userInfo, final long declarationDataId,
-                                                          boolean force) {
-        LOG.info(String.format("DeclarationDataServiceImpl.createReportXlsx by %s. declarationDataId: %s; force: %s",
-                userInfo, declarationDataId, force));
-        final DeclarationDataReportType ddReportType = new DeclarationDataReportType(AsyncTaskType.EXCEL_DEC, null);
-        CreateDeclarationReportResult result = new CreateDeclarationReportResult();
-        if (!existDeclarationData(declarationDataId)) {
-            result.setExistDeclarationData(false);
-            result.setDeclarationDataId(declarationDataId);
-        } else {
-            Logger logger = new Logger();
-            final String keyTask = generateAsyncTaskKey(declarationDataId, ddReportType);
-            Pair<Boolean, String> restartStatus = asyncManager.restartTask(keyTask, userInfo, force, logger);
-            if (restartStatus != null && restartStatus.getFirst()) {
-                result.setStatus(CreateAsyncTaskStatus.LOCKED);
-                result.setRestartMsg(restartStatus.getSecond());
-            } else if (restartStatus != null && !restartStatus.getFirst()) {
-                result.setStatus(CreateAsyncTaskStatus.CREATE);
-            } else {
-                result.setStatus(CreateAsyncTaskStatus.CREATE);
-                reportService.deleteByDeclarationAndType(declarationDataId, ddReportType);
-                Map<String, Object> params = new HashMap<String, Object>();
-                params.put("declarationDataId", declarationDataId);
+    public String createTaskToCreateReportXlsx(final TAUserInfo userInfo, final long declarationDataId) {
+        LOG.info(String.format("DeclarationDataServiceImpl.createReportXlsx by %s. declarationDataId: %s",
+                userInfo, declarationDataId));
 
-                asyncManager.executeTask(keyTask, ddReportType.getReportType(), userInfo, params, logger, false, new AbstractStartupAsyncTaskHandler() {
-                    @Override
-                    public LockData lockObject(String lockKey, AsyncTaskType taskType, TAUserInfo user) {
-                        return lockDataService.lock(keyTask, userInfo.getUser().getId(), getDeclarationFullName(declarationDataId, ddReportType));
-                    }
-                });
-            }
-            result.setUuid(logEntryService.save(logger.getEntries()));
-        }
-        return result;
+        Logger logger = new Logger();
+
+        reportService.deleteByDeclarationAndType(declarationDataId, DeclarationDataReportType.EXCEL_DEC);
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("declarationDataId", declarationDataId);
+
+        asyncManager.createTask(OperationType.EXCEL_DEC, getStandardDeclarationDescription(declarationDataId), userInfo, params, logger);
+
+        return logEntryService.save(logger.getEntries());
     }
 
     @Override
@@ -2870,36 +2844,17 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    public CreateDeclarationExcelTemplateResult createTaskToCreateExcelTemplate(final long declarationDataId, TAUserInfo userInfo, boolean force) {
-        LOG.info(String.format("DeclarationDataServiceImpl.createTaskToCreateExcelTemplate by %s. declarationDataId: %s; force: %s",
-                userInfo, declarationDataId, force));
-        final CreateDeclarationExcelTemplateResult result = new CreateDeclarationExcelTemplateResult();
-        final TAUser user = userInfo.getUser();
+    public String createTaskToCreateExcelTemplate(final long declarationDataId, TAUserInfo userInfo) {
+        LOG.info(String.format("DeclarationDataServiceImpl.createTaskToCreateExcelTemplate by %s. declarationDataId: %s",
+                userInfo, declarationDataId));
         Logger logger = new Logger();
 
-        String asyncLockKey = LockData.LockObjects.EXCEL_TEMPLATE_DECLARATION.name() + "_" + declarationDataId;
-        Pair<Boolean, String> restartStatus = asyncManager.restartTask(asyncLockKey, userInfo, force, logger);
-        if (restartStatus != null && restartStatus.getFirst()) {
-            result.setStatus(CreateAsyncTaskStatus.LOCKED);
-            result.setRestartMsg(restartStatus.getSecond());
-        } else if (restartStatus != null && !restartStatus.getFirst()) {
-            result.setStatus(CreateAsyncTaskStatus.CREATE);
-            // в логгере будет что задача запущена и вы добавлены в список получателей оповещения
-        } else {
-            result.setStatus(CreateAsyncTaskStatus.CREATE);
+        Map<String, Object> params = new HashMap<>();
+        params.put("declarationDataId", declarationDataId);
 
-            Map<String, Object> params = new HashMap<>();
-            params.put("declarationDataId", declarationDataId);
-            asyncManager.executeTask(asyncLockKey, AsyncTaskType.EXCEL_TEMPLATE_DEC, userInfo, params, logger, false, new AbstractStartupAsyncTaskHandler() {
-                @Override
-                public LockData lockObject(String keyTask, AsyncTaskType reportType, TAUserInfo userInfo) {
-                    return lockDataService.lockAsync(keyTask, user.getId());
-                }
-            });
-        }
-        result.setUuid(logEntryService.save(logger.getEntries()));
+        asyncManager.createTask(OperationType.EXCEL_TEMPLATE_DEC, getStandardDeclarationDescription(declarationDataId), userInfo, params, logger);
 
-        return result;
+        return logEntryService.save(logger.getEntries());
     }
 
     @Override
