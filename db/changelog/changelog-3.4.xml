@@ -292,7 +292,7 @@
 		</update>
 	</changeSet>
 
-	<!--https://jira.aplana.com/browse/SBRFNDFL-5472 - Новые состояния ЭД-->
+	<!--!!можно не делать, заменен на 3.4-dnovikov-22-->
 	<changeSet id="3.4-dnovikov-18" author="dnovikov">
 		<sql>
 			insert into REF_BOOK_DOC_STATE(id, knd, name) values(SEQ_REF_BOOK_RECORD.nextval, null, 'Не отправлен в ФНС');
@@ -309,7 +309,7 @@
 		</insert>
 	</changeSet>
 
-	<!--https://jira.aplana.com/browse/SBRFNDFL-5472 - Заполнение состояния ЭД у уже созданных ОНФ-->
+	<!--!! можно не делать, заменен на 3.4-dnovikov-22-->
 	<changeSet id="3.4-dnovikov-20" author="dnovikov">
 		<sql>
 			update declaration_data dd set doc_state_id = (select id from ref_book_doc_state where name = 'Не отправлен в ФНС')
@@ -337,6 +337,34 @@
 		<sql>
 			insert into DECLARATION_SUBREPORT(id, declaration_template_id, name, ord, alias)
 			values(SEQ_DECLARATION_SUBREPORT.nextval, 104, 'Уведомление о задолженности', 2, 'dept_notice_dec');
+		</sql>
+	</changeSet>
+
+	<!--https://jira.aplana.com/browse/SBRFNDFL-5466 добавить атрибут дял формы "Показывать возвращенный налог"-->
+	<changeSet id="3.4-dnovikov-21" author="dnovikov">
+		<sql>
+			alter table declaration_data add tax_refund_reflection_mode number(1);
+			comment on column declaration_data.tax_refund_reflection_mode is 'Показывать возвращенный налог (1 - "Показывать в строке 090 Раздела 1", 2 - "Учитывать возврат как отрицательное удержание в Разделе 2", 3 - Не учитывать)';
+		</sql>
+	</changeSet>
+
+	<!--https://conf.aplana.com/pages/viewpage.action?pageId=43976595 Введены идентификаторы для состояний ЭД"-->
+	<changeSet id="3.4-dnovikov-22" author="dnovikov">
+		<sql>
+			update declaration_data dd set doc_state_id = null;
+			delete from ref_book_doc_state;
+			insert into ref_book_doc_state(id, knd, name) values(1, null, 'Не отправлен в ФНС');
+			insert into ref_book_doc_state(id, knd, name) values(2, null, 'Отправлен в ФНС');
+			insert into ref_book_doc_state(id, knd, name) values(3, 1166002, 'Принят');
+			insert into ref_book_doc_state(id, knd, name) values(4, 1166006, 'Отклонен');
+			insert into ref_book_doc_state(id, knd, name) values(5, 1166007, 'Успешно отработан');
+			insert into ref_book_doc_state(id, knd, name) values(6, 1166009, 'Требует уточнения');
+			insert into ref_book_doc_state(id, knd, name) values(7, null, 'Ошибка');
+			update declaration_data dd set doc_state_id = 1 where id in (
+				select dd.id from declaration_data dd
+				join declaration_template dt on dt.id = dd.declaration_template_id
+				join declaration_kind dk on dk.id = dt.form_kind
+				where dk.id = 7);
 		</sql>
 	</changeSet>
 

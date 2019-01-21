@@ -1,8 +1,7 @@
-package com.aplana.sbrf.taxaccounting.model.action;
+package com.aplana.sbrf.taxaccounting.model;
 
-import com.aplana.sbrf.taxaccounting.model.KppOktmoPair;
-import com.aplana.sbrf.taxaccounting.model.ReportFormCreationModeEnum;
-import com.aplana.sbrf.taxaccounting.model.TaxRefundReflectionMode;
+
+import com.aplana.sbrf.taxaccounting.model.action.CreateReportFormsAction;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -16,21 +15,13 @@ import java.util.List;
 @Setter
 @Getter
 @ToString
-public class CreateDeclarationReportAction implements Serializable {
+public class ReportFormsCreationParams implements Serializable {
     /**
-     * Ид подразделения
+     * Ид КНФ, по данным которой будут формироваться ОНФ
      */
-    private Integer departmentId;
+    private Long sourceKnfId;
     /**
-     * Ид периода
-     */
-    private Integer periodId;
-    /**
-     * Ид КНФ. Должно быть задано, если не заданы параметры departmentId и periodId
-     */
-    private Long knfId;
-    /**
-     * Ид типа отчетной формы
+     * Ид типа ОНФ
      */
     private Integer declarationTypeId;
     /**
@@ -48,5 +39,14 @@ public class CreateDeclarationReportAction implements Serializable {
     /**
      * Пары КПП/ОКТМО, по которым будут создаваться ОНФ
      */
+    @ToString.Exclude
     private List<KppOktmoPair> kppOktmoPairs;
+
+    public ReportFormsCreationParams(CreateReportFormsAction action) {
+        declarationTypeId = action.getDeclarationTypeId();
+        adjustNegativeValues= action.isAdjustNegativeValues();
+        taxRefundReflectionMode = action.getTaxRefundReflectionMode();
+        reportFormCreationMode = action.getReportFormCreationMode();
+        kppOktmoPairs = action.getKppOktmoPairs();
+    }
 }

@@ -1,18 +1,18 @@
 package com.aplana.sbrf.taxaccounting.model;
 
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
 /**
  * Пара КПП/ОКТМО
  */
-@Getter
-@Setter
-@EqualsAndHashCode
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class KppOktmoPair implements Serializable {
-    String kpp;
-    String oktmo;
+    private String kpp;
+    private String oktmo;
 }

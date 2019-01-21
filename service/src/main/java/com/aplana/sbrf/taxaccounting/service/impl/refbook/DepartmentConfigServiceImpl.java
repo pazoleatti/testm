@@ -12,6 +12,7 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 import com.aplana.sbrf.taxaccounting.model.result.ImportDepartmentConfigsResult;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
@@ -104,6 +105,11 @@ public class DepartmentConfigServiceImpl implements DepartmentConfigService {
     }
 
     @Override
+    public List<Pair<KppOktmoPair, DepartmentConfig>> findAllByDeclaration(DeclarationData declaration) {
+        return departmentConfigDao.findAllByDeclaration(declaration);
+    }
+
+    @Override
     public int fetchCount(DepartmentConfigsFilter filter) {
         StringBuilder departmentConfigFilter = new StringBuilder().append(DepartmentConfigDetailAliases.DEPARTMENT_ID).append(" = ").append(filter.getDepartmentId());
         if (!isEmpty(filter.getKpp())) {
@@ -123,6 +129,11 @@ public class DepartmentConfigServiceImpl implements DepartmentConfigService {
         RefBookDataProvider provider = refBookFactory.getDataProvider(NDFL_DETAIL.getId());
         Map<String, RefBookValue> record = provider.getRecordData(id);
         return convertToDepartmentConfig(record, null);
+    }
+
+    @Override
+    public DepartmentConfig findByKppAndOktmoAndDate(String kpp, String oktmoCode, Date date) {
+        return departmentConfigDao.findByKppAndOktmoAndDate(kpp, oktmoCode, date);
     }
 
     @Override

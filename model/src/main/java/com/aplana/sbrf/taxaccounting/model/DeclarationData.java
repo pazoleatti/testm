@@ -67,7 +67,7 @@ public class DeclarationData extends IdentityObject<Long> implements SecuredEnti
     /**
      * Статус ЭД
      */
-    private Long docState;
+    private Long docStateId;
     /**
      * Права
      */
@@ -84,6 +84,10 @@ public class DeclarationData extends IdentityObject<Long> implements SecuredEnti
      * Признак, показывающий необходимость корректировки отрицательных значений
      */
     private boolean adjustNegativeValues;
+    /**
+     * см {@link TaxRefundReflectionMode}
+     */
+    private TaxRefundReflectionMode taxRefundReflectionMode;
     /**
      * КПП, включаемые в КНФ для обособленного подразделения (см {@link RefBookKnfType})
      */

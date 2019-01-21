@@ -9,54 +9,10 @@ import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.ndfl.NdflPersonDao;
 import com.aplana.sbrf.taxaccounting.dao.util.DBUtils;
-import com.aplana.sbrf.taxaccounting.model.AsyncTaskData;
-import com.aplana.sbrf.taxaccounting.model.AsyncTaskState;
-import com.aplana.sbrf.taxaccounting.model.AsyncTaskType;
-import com.aplana.sbrf.taxaccounting.model.AttachFileType;
-import com.aplana.sbrf.taxaccounting.model.BlobData;
-import com.aplana.sbrf.taxaccounting.model.Cell;
-import com.aplana.sbrf.taxaccounting.model.Column;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.DeclarationData;
-import com.aplana.sbrf.taxaccounting.model.DeclarationDataFile;
-import com.aplana.sbrf.taxaccounting.model.DeclarationDataFileComment;
-import com.aplana.sbrf.taxaccounting.model.DeclarationDataFilter;
-import com.aplana.sbrf.taxaccounting.model.DeclarationDataJournalItem;
-import com.aplana.sbrf.taxaccounting.model.DeclarationDataReportType;
-import com.aplana.sbrf.taxaccounting.model.DeclarationFormKind;
-import com.aplana.sbrf.taxaccounting.model.DeclarationSubreport;
-import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
-import com.aplana.sbrf.taxaccounting.model.DeclarationTemplateFile;
-import com.aplana.sbrf.taxaccounting.model.DeclarationType;
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
-import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.DescriptionTemplate;
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
-import com.aplana.sbrf.taxaccounting.model.FormStyle;
-import com.aplana.sbrf.taxaccounting.model.LockData;
-import com.aplana.sbrf.taxaccounting.model.Notification;
-import com.aplana.sbrf.taxaccounting.model.NotificationType;
-import com.aplana.sbrf.taxaccounting.model.OperationType;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.PrepareSpecificReportResult;
-import com.aplana.sbrf.taxaccounting.model.Relation;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriodType;
-import com.aplana.sbrf.taxaccounting.model.ScriptSpecificDeclarationDataReportHolder;
-import com.aplana.sbrf.taxaccounting.model.ScriptTaskComplexityHolder;
-import com.aplana.sbrf.taxaccounting.model.State;
-import com.aplana.sbrf.taxaccounting.model.StringColumn;
-import com.aplana.sbrf.taxaccounting.model.SubreportAliasConstants;
-import com.aplana.sbrf.taxaccounting.model.TARole;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
-import com.aplana.sbrf.taxaccounting.model.TaskInterruptCause;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.action.CreateDeclarationDataAction;
-import com.aplana.sbrf.taxaccounting.model.action.CreateDeclarationReportAction;
 import com.aplana.sbrf.taxaccounting.model.action.CreateReportAction;
+import com.aplana.sbrf.taxaccounting.model.action.CreateReportFormsAction;
 import com.aplana.sbrf.taxaccounting.model.action.PrepareSubreportAction;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
@@ -75,42 +31,13 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAsnu;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDocState;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookKnfType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
-import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
-import com.aplana.sbrf.taxaccounting.model.result.CreateResult;
-import com.aplana.sbrf.taxaccounting.model.result.DeclarationDataExistenceAndKindResult;
-import com.aplana.sbrf.taxaccounting.model.result.DeclarationLockResult;
-import com.aplana.sbrf.taxaccounting.model.result.DeclarationResult;
-import com.aplana.sbrf.taxaccounting.model.result.NdflPersonDeductionDTO;
-import com.aplana.sbrf.taxaccounting.model.result.NdflPersonIncomeDTO;
-import com.aplana.sbrf.taxaccounting.model.result.NdflPersonPrepaymentDTO;
-import com.aplana.sbrf.taxaccounting.model.result.PrepareSubreportResult;
-import com.aplana.sbrf.taxaccounting.model.result.ReportAvailableReportDDResult;
-import com.aplana.sbrf.taxaccounting.model.result.ReportAvailableResult;
+import com.aplana.sbrf.taxaccounting.model.result.*;
 import com.aplana.sbrf.taxaccounting.permissions.BasePermissionEvaluator;
 import com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission;
 import com.aplana.sbrf.taxaccounting.permissions.logging.TargetIdAndLogger;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
-import com.aplana.sbrf.taxaccounting.service.AuditService;
-import com.aplana.sbrf.taxaccounting.service.BlobDataService;
-import com.aplana.sbrf.taxaccounting.service.DeclarationDataScriptingService;
-import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
-import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
-import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
-import com.aplana.sbrf.taxaccounting.service.DepartmentService;
-import com.aplana.sbrf.taxaccounting.service.LockDataService;
-import com.aplana.sbrf.taxaccounting.service.LockStateLogger;
-import com.aplana.sbrf.taxaccounting.service.LogBusinessService;
-import com.aplana.sbrf.taxaccounting.service.LogEntryService;
-import com.aplana.sbrf.taxaccounting.service.NdflPersonService;
-import com.aplana.sbrf.taxaccounting.service.NotificationService;
-import com.aplana.sbrf.taxaccounting.service.PeriodService;
-import com.aplana.sbrf.taxaccounting.service.ReportService;
-import com.aplana.sbrf.taxaccounting.service.SourceService;
-import com.aplana.sbrf.taxaccounting.service.TAUserService;
-import com.aplana.sbrf.taxaccounting.service.TransactionHelper;
-import com.aplana.sbrf.taxaccounting.service.TransactionLogic;
-import com.aplana.sbrf.taxaccounting.service.ValidateXMLService;
+import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.component.MoveToCreateFacade;
 import com.aplana.sbrf.taxaccounting.service.component.lock.locker.DeclarationLocker;
 import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
@@ -152,39 +79,13 @@ import org.xml.sax.helpers.DefaultHandler;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
-import java.io.Writer;
+import java.io.*;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipInputStream;
@@ -219,6 +120,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             "(расприняты формы-источники / удалены назначения по формам-источникам, на основе которых ранее выполнена " +
             "консолидация).";
     private static final String CALCULATION_NOT_TOPICAL_SUFFIX = " Для коррекции консолидированных данных необходимо нажать на кнопку \"Рассчитать\"";
+    private static final String DECLARATION_DESCRIPTION = "№: %d, Период: \"%s, %s%s\", Подразделение: \"%s\", Вид: \"%s\"%s";
     private static final String ACCESS_ERR_MSG_FMT = "Нет прав на доступ к налоговой форме. Проверьте назначение формы РНУ НДФЛ (первичная) для подразделения «%s» в «Назначении налоговых форм»%s.";
 
     private final static List<DeclarationDataReportType> reportTypes = Collections.unmodifiableList(Arrays.asList(
@@ -790,9 +692,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             result.setOktmo(declaration.getOktmo());
             result.setTaxOrganCode(declaration.getTaxOrganCode());
             result.setCorrectionNum(declaration.getCorrectionNum());
-            if (declaration.getDocState() != null) {
+            if (declaration.getDocStateId() != null) {
                 RefBookDataProvider stateEDProvider = refBookFactory.getDataProvider(RefBook.Id.DOC_STATE.getId());
-                result.setDocState(stateEDProvider.getRecordData(declaration.getDocState()).get("NAME").getStringValue());
+                result.setDocState(stateEDProvider.getRecordData(declaration.getDocStateId()).get("NAME").getStringValue());
             }
         }
 
@@ -1774,7 +1676,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         }
     }
 
-
     @Override
     public void validateDeclaration(DeclarationData declarationData,
                                     final Logger logger,
@@ -2370,18 +2271,19 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     @Transactional
-    public void createReportForms(Long knfId, DepartmentReportPeriod departmentReportPeriod, int declarationTypeId, boolean adjustNegativeValues, LockStateLogger stateLogger, Logger logger, TAUserInfo userInfo) {
-        LOG.info(String.format("DeclarationDataServiceImpl.createReportForms by %s. departmentReportPeriod: %s; declarationTypeId: %s",
-                userInfo, departmentReportPeriod, declarationTypeId));
+    public void createReportForms2Ndfl(ReportFormsCreationParams params, LockStateLogger stateLogger, Logger logger, TAUserInfo userInfo) {
+        LOG.info(String.format("DeclarationDataServiceImpl.createReportForms by %s. params: %s", userInfo, params));
         Map<String, Object> additionalParameters = new HashMap<>();
         Map<Long, Map<String, Object>> formMap = new HashMap<>();
         additionalParameters.put("formMap", formMap);
         Map<String, Object> scriptParams = new HashMap<>();
         additionalParameters.put("scriptParams", scriptParams);
-        additionalParameters.put("knfId", knfId);
-        additionalParameters.put("adjustNegativeValues", adjustNegativeValues);
+        additionalParameters.put("knfId", params.getSourceKnfId());
+        additionalParameters.put("adjustNegativeValues", params.isAdjustNegativeValues());
+        DeclarationData knf = get(params.getSourceKnfId());
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.fetchOne(knf.getDepartmentReportPeriodId());
         DeclarationData declarationDataTemp = new DeclarationData();
-        declarationDataTemp.setDeclarationTemplateId(declarationTemplateService.getActiveDeclarationTemplateId(declarationTypeId, departmentReportPeriod.getReportPeriod().getId()));
+        declarationDataTemp.setDeclarationTemplateId(declarationTemplateService.getActiveDeclarationTemplateId(params.getDeclarationTypeId(), departmentReportPeriod.getReportPeriod().getId()));
         declarationDataTemp.setDepartmentReportPeriodId(departmentReportPeriod.getId());
         declarationDataScriptingService.executeScript(userInfo, declarationDataTemp, FormDataEvent.CREATE_FORMS, logger, additionalParameters);
 
@@ -2395,7 +2297,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             boolean createForm = true;
             try {
                 Map<String, Object> exchangeParams = entry.getValue();
-                exchangeParams.put("adjustNegativeValues", adjustNegativeValues);
+                exchangeParams.put("adjustNegativeValues", params.isAdjustNegativeValues());
                 createForm = createReportFormXml(scriptLogger, createdReportForm, new Date(), userInfo, exchangeParams, stateLogger);
             } catch (Exception e) {
                 createForm = false;
@@ -2420,6 +2322,24 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             }
         }
         logger.info("Количество успешно созданных форм: %d. Не удалось создать форм: %d.", success, pairKppOktomoTotal - success);
+    }
+
+    @Override
+    @Transactional
+    public void createReportForms(ReportFormsCreationParams params, LockStateLogger stateLogger, Logger logger, TAUserInfo userInfo) {
+        LOG.info(String.format("DeclarationDataServiceImpl.createReportForms by %s. params: %s", userInfo, params));
+        DeclarationData sourceKnf = get(params.getSourceKnfId());
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.fetchOne(sourceKnf.getDepartmentReportPeriodId());
+        DeclarationData declarationDataTemp = new DeclarationData();
+        declarationDataTemp.setDeclarationTemplateId(declarationTemplateService.getActiveDeclarationTemplateId(params.getDeclarationTypeId(), departmentReportPeriod.getReportPeriod().getId()));
+        declarationDataTemp.setDepartmentReportPeriodId(departmentReportPeriod.getId());
+
+        Map<String, Object> additionalParameters = new HashMap<>();
+        additionalParameters.put("reportFormsCreationParams", params);
+        declarationDataScriptingService.executeScript(userInfo, declarationDataTemp, FormDataEvent.CREATE_FORMS, logger, additionalParameters);
+        if (logger.containsLevel(LogLevel.ERROR)) {
+            throw new ServiceException();
+        }
     }
 
     @Override
@@ -2490,36 +2410,30 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    public Map<DeclarationDataReportType, LockData> getLockTaskType(long declarationDataId) {
-        Map<DeclarationDataReportType, LockData> result = new HashMap<DeclarationDataReportType, LockData>();
-        for (DeclarationDataReportType reportType : reportTypes) {
-            LockData lockData = lockDataService.findLock(generateAsyncTaskKey(declarationDataId, reportType));
-            if (lockData != null) {
-                result.put(reportType, lockData);
-            }
-        }
-        return result;
-    }
-
-    @Override
-    public ActionResult createReportsCreateTask(CreateDeclarationReportAction action, TAUserInfo userInfo) {
+    public ActionResult createReportsCreateTask(CreateReportFormsAction action, TAUserInfo userInfo) {
         LOG.info(String.format("DeclarationDataServiceImpl.createReportsCreateTask by %s. action: %s", userInfo, action));
         Logger logger = new Logger();
         ActionResult taskResult = new ActionResult();
 
-        DeclarationData declarationData = findConsolidatedDeclarationForReport(action, logger);
+        DeclarationData knf = findConsolidatedDeclarationForReport(action, logger);
         if (!logger.containsLevel(LogLevel.ERROR)) {
-            final Map<String, Object> params = generateTaskParams(action, declarationData);
+            ReportFormsCreationParams params = new ReportFormsCreationParams(action);
+            params.setSourceKnfId(knf.getId());
+            final Map<String, Object> taskParams = new HashMap<>();
+            taskParams.put("declarationDataId", knf.getId());
+            taskParams.put("declarationTypeId", action.getDeclarationTypeId());
+            taskParams.put("departmentReportPeriodId", knf.getDepartmentReportPeriodId());
+            taskParams.put("params", params);
             asyncManager.createTask(OperationType.getOperationByDeclarationTypeId(action.getDeclarationTypeId()),
-                    getStandardDeclarationDescription(declarationData.getId()),
-                    userInfo, params, logger);
+                    getStandardDeclarationDescription(knf.getId()),
+                    userInfo, taskParams, logger);
 
         }
         taskResult.setUuid(logEntryService.save(logger.getEntries()));
         return taskResult;
     }
 
-    private DeclarationData findConsolidatedDeclarationForReport(CreateDeclarationReportAction action, Logger logger) {
+    private DeclarationData findConsolidatedDeclarationForReport(CreateReportFormsAction action, Logger logger) {
         DeclarationData consolidatedDeclaration;
         if (action.getKnfId() != null) {
             consolidatedDeclaration = declarationDataDao.get(action.getKnfId());
@@ -2566,18 +2480,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         }
         return consolidatedDeclaration;
     }
-
-    private Map<String, Object> generateTaskParams(CreateDeclarationReportAction action, DeclarationData declarationData) {
-        Map<String, Object> params = new HashMap<>();
-
-        params.put("declarationTypeId", action.getDeclarationTypeId());
-        params.put("adjustNegativeValues", action.isAdjustNegativeValues());
-        params.put("declarationDataId", declarationData.getId());
-        params.put("departmentReportPeriodId", declarationData.getDepartmentReportPeriodId());
-
-        return params;
-    }
-
 
     @Override
     public ActionResult asyncExportReports(DeclarationDataFilter filter, TAUserInfo userInfo) {

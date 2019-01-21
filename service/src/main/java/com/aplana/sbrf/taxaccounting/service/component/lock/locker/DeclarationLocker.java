@@ -4,12 +4,14 @@ import com.aplana.sbrf.taxaccounting.model.LockData;
 import com.aplana.sbrf.taxaccounting.model.OperationType;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.service.ScriptExposed;
 
 import java.util.List;
 
 /**
  * Интерфейс отвечающий за проверку и установку блокировки
  */
+@ScriptExposed
 public interface DeclarationLocker {
 
     /**

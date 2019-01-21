@@ -1,11 +1,14 @@
 package com.aplana.sbrf.taxaccounting.dao;
 
 
+import com.aplana.sbrf.taxaccounting.model.DeclarationData;
+import com.aplana.sbrf.taxaccounting.model.KppOktmoPair;
 import com.aplana.sbrf.taxaccounting.model.KppSelect;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.ReportFormCreationKppOktmoPair;
 import com.aplana.sbrf.taxaccounting.model.ReportFormCreationKppOktmoPairFilter;
+import com.aplana.sbrf.taxaccounting.model.refbook.DepartmentConfig;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 
 import java.util.Date;
@@ -34,6 +37,25 @@ public interface DepartmentConfigDao extends PermissionDao {
      * @return страница из значений КПП тербанка
      */
     PagingResult<KppSelect> findAllKppByDepartmentIdAndKpp(int departmentId, String kpp, PagingParams pagingParams);
+
+    /**
+     * Возвращяет настройку подразделений по КПП/ОКТМО и актуальную на дату
+     *
+     * @param kpp       КПП
+     * @param oktmoCode ОКТМО
+     * @param date      дата актуальности
+     * @return найстройка подразделений
+     */
+    DepartmentConfig findByKppAndOktmoAndDate(String kpp, String oktmoCode, Date date);
+
+    /**
+     * Возвращяет пары КПП/ОКТМО из формы и связанные с ними настройки подразделений, которые актуальны на текущую дату или пересекаются с периодом формы.
+     * Если для определенной пары КПП/ОКТМО настройки не найдено, то вернет настройку с id=null
+     *
+     * @param declaration НФ
+     * @return список пар КПП/ОКТМО из формы и связанные с ними настройки подразделений
+     */
+    List<Pair<KppOktmoPair, DepartmentConfig>> findAllByDeclaration(DeclarationData declaration);
 
     /**
      * Возвращяет пары КПП/ОКТМО для формы создания отчетности

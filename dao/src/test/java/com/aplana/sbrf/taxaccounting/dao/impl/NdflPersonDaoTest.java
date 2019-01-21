@@ -1281,7 +1281,7 @@ public class NdflPersonDaoTest {
 
     @Test
     public void testfetchNdflPersonByPairKppOktmo() {
-        List<NdflPerson> result = ndflPersonDao.fetchNdflPersonByPairKppOktmo(Arrays.asList(100L), "99222", "111222333", false);
+        List<NdflPerson> result = ndflPersonDao.fetchNdflPersonByPairKppOktmo(100L, "99222", "111222333", false);
         assertThat(result).hasSize(1);
     }
 

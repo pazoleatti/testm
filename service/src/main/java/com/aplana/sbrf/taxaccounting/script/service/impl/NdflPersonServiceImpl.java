@@ -70,7 +70,7 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     }
 
     @Override
-    public List<NdflPerson> findNdflPersonByPairKppOktmo(List<Long> declarationDataId, String kpp, String oktmo, boolean is2Ndfl2) {
+    public List<NdflPerson> findNdflPersonByPairKppOktmo(long declarationDataId, String kpp, String oktmo, boolean is2Ndfl2) {
         return ndflPersonDao.fetchNdflPersonByPairKppOktmo(declarationDataId, kpp, oktmo, is2Ndfl2);
     }
 
@@ -154,6 +154,11 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     @Override
     public List<NdflPersonIncome> findIncomesForPersonByKppOktmo(List<Long> ndflPersonId, String kpp, String oktmo) {
         return ndflPersonDao.fetchNdflPersonIncomeByNdflPersonKppOktmo(ndflPersonId, kpp, oktmo);
+    }
+
+    @Override
+    public List<NdflPersonIncome> findAllIncomesByDeclarationIdAndKppAndOktmo(long declarationId, String kpp, String oktmo) {
+        return ndflPersonDao.findAllIncomesByDeclarationIdAndKppAndOktmo(declarationId, kpp, oktmo);
     }
 
     @Override
@@ -328,6 +333,11 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     @Override
     public void deleteNdflPersonBatch(List<Long> ids) {
         ndflPersonDao.deleteNdflPersonBatch(ids);
+    }
+
+    @Override
+    public boolean incomeExistsByDeclarationId(long declarationDataId) {
+        return ndflPersonDao.incomeExistsByDeclarationId(declarationDataId);
     }
 
     @Override

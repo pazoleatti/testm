@@ -45,7 +45,7 @@ import java.util.Set;
  * @author <a href="mailto:Marat.Fayzullin@aplana.com">Файзуллин Марат</a>
  * @since 17.07.14 13:50
  */
-
+@ScriptExposed
 public interface LockDataService {
 
     String LOCK_DATA = "Объект заблокирован для редактирования пользователем \"%s\"(id=%s)";

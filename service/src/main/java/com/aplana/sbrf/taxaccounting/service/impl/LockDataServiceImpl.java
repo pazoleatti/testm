@@ -18,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 
 
-@Service
+@Service("lockDataService")
 @Transactional(propagation = Propagation.SUPPORTS)
 public class LockDataServiceImpl implements LockDataService {
 

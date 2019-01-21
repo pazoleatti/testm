@@ -177,7 +177,7 @@ public interface NdflPersonDao {
     List<NdflPersonIncome> fetchIncomesByPeriodAndNdflPersonIdList(List<Long> ndflPersonIdList, Date startDate, Date endDate);
 
     /**
-     * Найти данные о доходах по КПП и ОКТМО для Физлица
+     * Возвращяет данные о доходах для Физлица по КПП и ОКТМО
      *
      * @param ndflPersonId список идентификаторов физического лица
      * @param kpp          кпп
@@ -185,6 +185,16 @@ public interface NdflPersonDao {
      * @return список объектов доходов физического лица
      */
     List<NdflPersonIncome> fetchNdflPersonIncomeByNdflPersonKppOktmo(List<Long> ndflPersonId, String kpp, String oktmo);
+
+    /**
+     * Возвращяет данные о доходах в форме по КПП и ОКТМО
+     *
+     * @param declarationId ид формы
+     * @param kpp           КПП
+     * @param oktmo         ОКТМО
+     * @return список объектов доходов физического лица
+     */
+    List<NdflPersonIncome> findAllIncomesByDeclarationIdAndKppAndOktmo(long declarationId, String kpp, String oktmo);
 
     /**
      * Найти данные о доходах по КПП и ОКТМО для Физлица
@@ -345,7 +355,7 @@ public interface NdflPersonDao {
      * @param is2Ndfl2          выполняется ли для формы 2-НДФЛ(2)
      * @return список физлиц
      */
-    List<NdflPerson> fetchNdflPersonByPairKppOktmo(List<Long> declarationDataId, String kpp, String oktmo, boolean is2Ndfl2);
+    List<NdflPerson> fetchNdflPersonByPairKppOktmo(long declarationDataId, String kpp, String oktmo, boolean is2Ndfl2);
 
     /**
      * Найти доходы из КНФ которая является источником для ОНФ 2-НДФЛ
@@ -572,10 +582,19 @@ public interface NdflPersonDao {
 
     /**
      * Возвращяет true, если в форме имеются строки раздела 1, иначе false
+     *
      * @param declarationDataId ид формы РНУ
      * @return true, если в форме имеются строки раздела 1, иначе false
      */
     boolean ndflPersonExistsByDeclarationId(long declarationDataId);
+
+    /**
+     * Возвращяет признак наличия в форме операции (строк 2 раздела)
+     *
+     * @param declarationDataId ид формы
+     * @return признак наличия в форме операции (строк 2 раздела)
+     */
+    boolean incomeExistsByDeclarationId(long declarationDataId);
 
     /**
      * Проеряет наличие дохода в налоговой форме

@@ -150,6 +150,17 @@ public interface DeclarationDataDao extends PermissionDao {
     DeclarationData findKnfByKnfTypeAndPeriodId(RefBookKnfType knfType, int departmentReportPeriodId);
 
     /**
+     * Возвращяет список форм по типу и отчетному периоду и паре кпп/октмо
+     *
+     * @param declarationTypeId типу формы
+     * @param reportPeriodId    отчетный период
+     * @param kpp               КПП
+     * @param oktmo             ОКТМО
+     * @return список форм
+     */
+    List<DeclarationData> findAllByTypeIdAndReportPeriodIdAndKppAndOktmo(int declarationTypeId, int reportPeriodId, String kpp, String oktmo);
+
+    /**
      * Возвращяет список форм по типу и отчетному периоду подразделения и списку пар кпп/октмо
      *
      * @param declarationTypeId        типу формы

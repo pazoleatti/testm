@@ -1375,9 +1375,9 @@ class Report2Ndfl extends AbstractScriptClass {
 
             List<NdflPerson> ndflPersons
             if (declarationData.declarationTemplateId == DeclarationType.NDFL_2_2) {
-                ndflPersons = ndflPersonService.findNdflPersonByPairKppOktmo([declarationDataConsolidated.id], pair.kpp.toString(), pair.oktmo.toString(), true)
+                ndflPersons = ndflPersonService.findNdflPersonByPairKppOktmo(declarationDataConsolidated.id, pair.kpp.toString(), pair.oktmo.toString(), true)
             } else {
-                ndflPersons = ndflPersonService.findNdflPersonByPairKppOktmo([declarationDataConsolidated.id], pair.kpp.toString(), pair.oktmo.toString(), false)
+                ndflPersons = ndflPersonService.findNdflPersonByPairKppOktmo(declarationDataConsolidated.id, pair.kpp.toString(), pair.oktmo.toString(), false)
             }
 
             if (ndflPersons != null && !ndflPersons.isEmpty()) {
@@ -1481,8 +1481,8 @@ class Report2Ndfl extends AbstractScriptClass {
                 Long stateDocReject = (Long) getProvider(RefBook.Id.DOC_STATE.id).getRecords(null, null, "NAME = 'Отклонен'", null).get(0).id.value
                 Long stateDocNeedClarify = (Long) getProvider(RefBook.Id.DOC_STATE.id).getRecords(null, null, "NAME = 'Требует уточнения'", null).get(0).id.value
                 Long stateDocError = (Long) getProvider(RefBook.Id.DOC_STATE.id).getRecords(null, null, "NAME = 'Ошибка'", null).get(0).id.value
-                if (!(declarationTemplate.declarationFormKind == DeclarationFormKind.REPORTS && (declaration.docState == stateDocReject
-                        || declaration.docState == stateDocNeedClarify || declaration.docState == stateDocError))) {
+                if (!(declarationTemplate.declarationFormKind == DeclarationFormKind.REPORTS && (declaration.docStateId == stateDocReject
+                        || declaration.docStateId == stateDocNeedClarify || declaration.docStateId == stateDocError))) {
                     declarationsForRemove << declaration
                 }
             }

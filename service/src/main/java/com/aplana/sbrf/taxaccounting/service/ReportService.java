@@ -8,6 +8,7 @@ import java.util.List;
 /**
  * Интерфейс для работы с таблицей отчетов
  */
+@ScriptExposed
 public interface ReportService {
     /**
      * Создание записи об отчете декларации

@@ -90,14 +90,24 @@ public interface NdflPersonService {
     List<NdflPersonIncome> findAllIncomesByDeclarationIds(List<Long> declarationDataIds);
 
     /**
-     * Найти данные о доходах по КПП и ОКТМО для Физлица
+     * Возвращяет данные о доходах для Физлица по КПП и ОКТМО
      *
-     * @param ndflPersonId
-     * @param kpp
-     * @param oktmo
-     * @return
+     * @param ndflPersonId список идентификаторов физического лица
+     * @param kpp          кпп
+     * @param oktmo        октмо
+     * @return список объектов доходов физического лица
      */
     List<NdflPersonIncome> findIncomesForPersonByKppOktmo(List<Long> ndflPersonId, String kpp, String oktmo);
+
+    /**
+     * Возвращяет данные о доходах в форме по КПП и ОКТМО
+     *
+     * @param declarationId идентификатор формы
+     * @param kpp           КПП
+     * @param oktmo         ОКТМО
+     * @return список строк 2 раздела
+     */
+    List<NdflPersonIncome> findAllIncomesByDeclarationIdAndKppAndOktmo(long declarationId, String kpp, String oktmo);
 
     /**
      * Найти данные о доходах по КПП и ОКТМО для Физлица
@@ -309,7 +319,7 @@ public interface NdflPersonService {
      * @param oktmo
      * @return
      */
-    List<NdflPerson> findNdflPersonByPairKppOktmo(List<Long> declarationDataId, String kpp, String oktmo, boolean is2Ndfl2);
+    List<NdflPerson> findNdflPersonByPairKppOktmo(long declarationDataId, String kpp, String oktmo, boolean is2Ndfl2);
 
     /**
      * Данные об авансах Физлиц
@@ -480,6 +490,14 @@ public interface NdflPersonService {
      * @param ids список идентификаторов фл
      */
     void deleteNdflPersonBatch(List<Long> ids);
+
+    /**
+     * Возвращяет признак наличия в форме операции (строк 2 раздела)
+     *
+     * @param declarationDataId ид формы
+     * @return признак наличия в форме операции (строк 2 раздела)
+     */
+    boolean incomeExistsByDeclarationId(long declarationDataId);
 
     /**
      * Проеряет наличие дохода в налоговой форме

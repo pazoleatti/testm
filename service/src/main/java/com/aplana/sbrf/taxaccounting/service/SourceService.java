@@ -11,6 +11,7 @@ import java.util.List;
 /**
  * Интерфейс сервиса для работы с привязкой департаментов к подразделениям
  */
+@ScriptExposed
 public interface SourceService {
 
     /**

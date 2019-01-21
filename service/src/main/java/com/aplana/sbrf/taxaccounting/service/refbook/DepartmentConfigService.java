@@ -1,6 +1,8 @@
 package com.aplana.sbrf.taxaccounting.service.refbook;
 
 import com.aplana.sbrf.taxaccounting.model.BlobData;
+import com.aplana.sbrf.taxaccounting.model.DeclarationData;
+import com.aplana.sbrf.taxaccounting.model.KppOktmoPair;
 import com.aplana.sbrf.taxaccounting.model.KppSelect;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
@@ -15,8 +17,10 @@ import com.aplana.sbrf.taxaccounting.model.refbook.DepartmentConfig;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord;
 import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 import com.aplana.sbrf.taxaccounting.model.result.ImportDepartmentConfigsResult;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.ScriptExposed;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -40,6 +44,25 @@ public interface DepartmentConfigService {
      * @return список настроек подразделений
      */
     List<DepartmentConfig> fetchAllByDepartmentId(int departmentId);
+
+    /**
+     * Возвращяет пары КПП/ОКТМО из формы и связанные с ними настройки подразделений, которые актуальны на текущую дату или пересекаются с периодом формы.
+     * Если для определенной пары КПП/ОКТМО настройки не найдено, то вернет настройку с id=null
+     *
+     * @param declaration НФ
+     * @return список пар КПП/ОКТМО из формы и связанные с ними настройки подразделений
+     */
+    List<Pair<KppOktmoPair, DepartmentConfig>> findAllByDeclaration(DeclarationData declaration);
+
+    /**
+     * Возвращяет настройку подразделений по КПП/ОКТМО и актуальную на дату
+     *
+     * @param kpp       КПП
+     * @param oktmoCode ОКТМО
+     * @param date      дата актуальности
+     * @return найстройка подразделений
+     */
+    DepartmentConfig findByKppAndOktmoAndDate(String kpp, String oktmoCode, Date date);
 
     /**
      * Возвращяет список настроек подразделений по КПП/ОКТМО

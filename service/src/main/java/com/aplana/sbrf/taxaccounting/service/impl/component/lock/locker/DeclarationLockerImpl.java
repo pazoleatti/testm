@@ -32,7 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-@Component
+@Component("declarationLocker")
 public class DeclarationLockerImpl implements DeclarationLocker {
 
     private static final Log LOG = LogFactory.getLog(DeclarationLockerImpl.class);

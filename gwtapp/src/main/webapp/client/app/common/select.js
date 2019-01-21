@@ -1202,7 +1202,7 @@
 
                     $scope.kppOkmtoPairsSelect = GetSelectOption.getAjaxSelectOptions(true, true, "controller/rest/departmentConfig/kppOktmoPairsSelect",
                         getFilter, {
-                            property: "kpp, oktmo, relevance",
+                            property: "kpp_, oktmo_",
                             direction: "asc"
                         }, "kppOktmoPairFormatter");
 

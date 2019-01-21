@@ -536,8 +536,23 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         try {
             return getNamedParameterJdbcTemplate().query(sql, params, new NdflPersonDaoImpl.NdflPersonIncomeRowMapper());
         } catch (EmptyResultDataAccessException e) {
-            return new ArrayList<NdflPersonIncome>();
+            return new ArrayList<>();
         }
+    }
+
+    @Override
+    public List<NdflPersonIncome> findAllIncomesByDeclarationIdAndKppAndOktmo(long declarationId, String kpp, String oktmo) {
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("declarationId", declarationId);
+        params.addValue("kpp", kpp);
+        params.addValue("oktmo", oktmo);
+        return getNamedParameterJdbcTemplate().query("" +
+                        "select rba.name as asnu_name, " + createColumns(NdflPersonIncome.COLUMNS, "npi") + "\n" +
+                        " from NDFL_PERSON_INCOME npi \n" +
+                        "join ndfl_person np on np.id = npi.ndfl_person_id \n" +
+                        "left join ref_book_asnu rba on npi.asnu_id = rba.id \n" +
+                        "where np.declaration_data_id = :declarationId and npi.OKTMO = :oktmo and npi.KPP = :kpp ",
+                params, new NdflPersonDaoImpl.NdflPersonIncomeRowMapper());
     }
 
     @Override
@@ -1165,7 +1180,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     @Override
-    public List<NdflPerson> fetchNdflPersonByPairKppOktmo(List<Long> declarationDataId, String kpp, String oktmo, boolean is2Ndfl2) {
+    public List<NdflPerson> fetchNdflPersonByPairKppOktmo(long declarationDataId, String kpp, String oktmo, boolean is2Ndfl2) {
         StringBuilder queryBuilder = new StringBuilder("SELECT DISTINCT /*+rule */")
                 .append(createColumns(NdflPerson.COLUMNS, "np"))
                 .append(", r.record_id ")
@@ -1747,6 +1762,17 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     public boolean ndflPersonExistsByDeclarationId(long declarationDataId) {
         return getJdbcTemplate().queryForObject(
                 "select case when exists (select * from ndfl_person where declaration_data_id = ?) then 1 else 0 end from dual",
+                Boolean.class, declarationDataId);
+    }
+
+    @Override
+    public boolean incomeExistsByDeclarationId(long declarationDataId) {
+        return getJdbcTemplate().queryForObject("" +
+                        "select case when exists (" +
+                        "   select * from ndfl_person_income npi " +
+                        "   join ndfl_person np on np.id = npi.ndfl_person_id " +
+                        "   where np.declaration_data_id = ?" +
+                        ") then 1 else 0 end from dual",
                 Boolean.class, declarationDataId);
     }
 
