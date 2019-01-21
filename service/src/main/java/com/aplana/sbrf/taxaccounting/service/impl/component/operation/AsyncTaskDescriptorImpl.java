@@ -4,11 +4,14 @@ import com.aplana.sbrf.taxaccounting.model.OperationType;
 import com.aplana.sbrf.taxaccounting.service.component.operation.AsyncTaskDescriptor;
 import com.aplana.sbrf.taxaccounting.service.component.operation.CreateReportsAsyncTaskDescriptor;
 import com.aplana.sbrf.taxaccounting.service.component.operation.DeclarationDataAsyncTaskDescriptor;
+import com.aplana.sbrf.taxaccounting.service.component.operation.DeclarationDataReportingMultiModeAsyncTaskDescriptor;
+import com.aplana.sbrf.taxaccounting.service.component.operation.DeclarationDataReportingSingleModeAsyncTaskDescriptor;
 import com.aplana.sbrf.taxaccounting.service.component.operation.ExportReportDescriptor;
 import com.aplana.sbrf.taxaccounting.service.component.operation.SpecReportByPersonDescriptor;
 import com.aplana.sbrf.taxaccounting.service.component.operation.TransportFileAsyncTaskDescriptor;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -22,13 +25,17 @@ public class AsyncTaskDescriptorImpl implements AsyncTaskDescriptor {
     private ExportReportDescriptor exportReportDescriptor;
     private SpecReportByPersonDescriptor specReportByPersonDescriptor;
     private TransportFileAsyncTaskDescriptor transportFileAsyncTaskDescriptor;
+    private DeclarationDataReportingSingleModeAsyncTaskDescriptor declarationDataReportingSingleModeAsyncTaskDescriptor;
+    private DeclarationDataReportingMultiModeAsyncTaskDescriptor declarationDataReportingMultiModeAsyncTaskDescriptor;
 
-    public AsyncTaskDescriptorImpl(DeclarationDataAsyncTaskDescriptor declarationDataAsyncTaskDescriptor, CreateReportsAsyncTaskDescriptor createReportsAsyncTaskDescriptor, ExportReportDescriptor exportReportDescriptor, SpecReportByPersonDescriptor specReportByPersonDescriptor, TransportFileAsyncTaskDescriptor transportFileAsyncTaskDescriptor) {
+    public AsyncTaskDescriptorImpl(DeclarationDataAsyncTaskDescriptor declarationDataAsyncTaskDescriptor, CreateReportsAsyncTaskDescriptor createReportsAsyncTaskDescriptor, ExportReportDescriptor exportReportDescriptor, SpecReportByPersonDescriptor specReportByPersonDescriptor, TransportFileAsyncTaskDescriptor transportFileAsyncTaskDescriptor, DeclarationDataReportingSingleModeAsyncTaskDescriptor declarationDataReportingSingleModeAsyncTaskDescriptor, DeclarationDataReportingMultiModeAsyncTaskDescriptor declarationDataReportingMultiModeAsyncTaskDescriptor) {
         this.declarationDataAsyncTaskDescriptor = declarationDataAsyncTaskDescriptor;
         this.createReportsAsyncTaskDescriptor = createReportsAsyncTaskDescriptor;
         this.exportReportDescriptor = exportReportDescriptor;
         this.specReportByPersonDescriptor = specReportByPersonDescriptor;
         this.transportFileAsyncTaskDescriptor = transportFileAsyncTaskDescriptor;
+        this.declarationDataReportingSingleModeAsyncTaskDescriptor = declarationDataReportingSingleModeAsyncTaskDescriptor;
+        this.declarationDataReportingMultiModeAsyncTaskDescriptor = declarationDataReportingMultiModeAsyncTaskDescriptor;
     }
 
     /**
@@ -44,6 +51,7 @@ public class AsyncTaskDescriptorImpl implements AsyncTaskDescriptor {
         Integer declarationTypeId = null;
         Map<String, Object> subreportParamValues = null;
         String fileName = null;
+        List<Long> declarationDataIds = null;
         if (params.containsKey("declarationDataId")) {
             declarationDataId = (Long) params.get("declarationDataId");
         }
@@ -58,6 +66,9 @@ public class AsyncTaskDescriptorImpl implements AsyncTaskDescriptor {
         }
         if (params.containsKey("fileName")) {
             fileName = (String) params.get("fileName");
+        }
+        if (params.containsKey("declarationDataIds")) {
+            declarationDataIds = (List<Long>) params.get("declarationDataIds");
         }
         if (operationType.equals(OperationType.IMPORT_DECLARATION_EXCEL))
             return declarationDataAsyncTaskDescriptor.createDescription(declarationDataId, "Загрузка данных в ПНФ РНУ НДФЛ");
@@ -107,6 +118,12 @@ public class AsyncTaskDescriptorImpl implements AsyncTaskDescriptor {
             return specReportByPersonDescriptor.createDescription(declarationDataId, subreportParamValues, "Уведомление о задолженности");
         else if (operationType.equals(OperationType.LOAD_TRANSPORT_FILE))
             return transportFileAsyncTaskDescriptor.createDescription(fileName);
+        else if (operationType.equals(OperationType.UPDATE_DOC_STATE))
+            if (declarationDataIds.size() == 1) {
+                return declarationDataReportingSingleModeAsyncTaskDescriptor.createDescription(declarationDataIds.get(0), "Изменение состояния ЭД");
+            } else {
+                return declarationDataReportingMultiModeAsyncTaskDescriptor.createDescription(declarationDataIds, "Изменение состояния ЭД");
+            }
         else {
             throw new IllegalArgumentException("Unknown operationType type!");
         }

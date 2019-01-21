@@ -188,7 +188,9 @@ public class DeclarationLockerImpl implements DeclarationLocker {
                 return doCheckAndLock(declarationDataIdList, operationType, SET_CONSOLIDATE__REPORT_KPP_OKTMO__2NDFL1__2NDFL2__6NDFL, userInfo, logger);
             } else if (operationType.equals(OperationType.EXPORT_REPORTS)) {
                 return doCheckAndLock(declarationDataIdList, operationType, SET_EDIT_FILE__PDF__EXPORT_REPORTS__REPORT_2NDFL1__REPORT_2NDFL2__DEPT_NOTICE, userInfo, logger);
-            } else
+            } else if (operationType.equals(OperationType.UPDATE_DOC_STATE)) {
+                return doCheckAndLock(declarationDataIdList, operationType, SET_UPDATE_DOC_STATE, userInfo, logger);
+            }  else
                 throw new IllegalArgumentException("Unknown operationType type!");
         } catch (Exception e) {
             LOG.error("Выполнение операции невозможно по техническим причинам. Не удалось установить блокировку для выполнения операции \"%s\"", e);

@@ -2734,16 +2734,13 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         if (declarationDataIds.isEmpty()) {
             logger.error("По заданым параметрам не найдено ни одной формы");
         } else {
-            String taskKey = AsyncTaskType.UPDATE_DOC_STATE.name() + System.currentTimeMillis();
             Map<String, Object> params = new HashMap<>();
             params.put("declarationDataIds", declarationDataIds);
             params.put("docStateId", docStateId);
-            asyncManager.executeTask(taskKey, AsyncTaskType.UPDATE_DOC_STATE, userInfo, params, logger, false, new AbstractStartupAsyncTaskHandler() {
-                @Override
-                protected LockData lockObject(String lockKey, AsyncTaskType taskType, TAUserInfo user) {
-                    return lockDataService.lockAsync(lockKey, user.getUser().getId());
-                }
-            });
+            //TODO временная заглушка будет исправлено в 3.4 по завершении аналитиками https://jira.aplana.com/browse/SBRFNDFL-6455
+            String description = "";
+
+            asyncManager.createTask(OperationType.UPDATE_DOC_STATE, description, userInfo, params, logger);
         }
         return new ActionResult(logEntryService.save(logger.getEntries()));
     }
