@@ -313,4 +313,10 @@ public class DeclarationTemplateDaoTest {
         declarationTemplateDao.createTemplateFile(1, Arrays.asList("uuid_1", "uuid_2", "uuid_3"));
         declarationTemplateDao.deleteTemplateFile(1, Arrays.asList("uuid_1", "uuid_2", "uuid_3"));
     }
+
+    @Test
+    public void testFindXsdIdByTemplateId() {
+        Assert.assertNull(declarationTemplateDao.findXsdIdByTemplateId(1));
+        Assert.assertEquals("uuid_2", declarationTemplateDao.findXsdIdByTemplateId(2));
+    }
 }

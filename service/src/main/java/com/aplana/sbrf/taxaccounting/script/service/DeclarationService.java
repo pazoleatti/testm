@@ -312,4 +312,12 @@ public interface DeclarationService {
      * @return идентификаторы найденых налоговых форм
      */
     List<Long> findApplication2DeclarationDataId(int reportYear);
+
+    /**
+     * Поиск ID блоба содержащего XSD файл макета по ID макета
+     *
+     * @param declarationTemplateId ID макета
+     * @return ID блоба содержащего XSD файл макета
+     */
+    String findXsdIdByTemplateId(Integer declarationTemplateId);
 }

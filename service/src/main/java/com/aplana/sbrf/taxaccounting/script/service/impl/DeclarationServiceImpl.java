@@ -391,4 +391,9 @@ public class DeclarationServiceImpl implements DeclarationService {
     public List<Long> findApplication2DeclarationDataId(int reportYear) {
         return declarationDataDao.findApplication2DeclarationDataId(reportYear);
     }
+
+    @Override
+    public String findXsdIdByTemplateId(Integer declarationTemplateId) {
+        return declarationTemplateDao.findXsdIdByTemplateId(declarationTemplateId);
+    }
 }

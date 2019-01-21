@@ -270,4 +270,12 @@ public interface DeclarationTemplateDao extends PermissionDao {
      * @param declarationTemplateId идентификатор макета
      */
     void updateChecks(List<DeclarationTemplateCheck> checks, Integer declarationTemplateId);
+
+    /**
+     * Поиск ID блоба содержащего XSD файл макета по ID макета
+     *
+     * @param declarationTemplateId ID макета
+     * @return ID блоба содержащего XSD файл макета
+     */
+    String findXsdIdByTemplateId(Integer declarationTemplateId);
 }

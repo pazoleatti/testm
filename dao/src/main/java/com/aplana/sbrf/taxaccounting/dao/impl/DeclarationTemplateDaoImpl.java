@@ -764,4 +764,16 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
                 SqlUtils.transformToSqlInStatement("id", ids));
         getJdbcTemplate().update(sql, declarationTemplateId);
     }
+
+    @Override
+    public String findXsdIdByTemplateId(Integer declarationTemplateId) {
+        try {
+            MapSqlParameterSource params = new MapSqlParameterSource();
+            params.addValue("declarationTemplateId", declarationTemplateId);
+            return getNamedParameterJdbcTemplate().queryForObject("select xsd from declaration_template where id = :declarationTemplateId", params, String.class);
+        } catch (EmptyResultDataAccessException e) {
+            LOG.error(String.format("XSD not found in declaration template with id %d!", declarationTemplateId));
+            return null;
+        }
+    }
 }
