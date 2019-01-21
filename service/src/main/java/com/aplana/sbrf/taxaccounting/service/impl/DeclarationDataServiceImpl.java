@@ -3201,13 +3201,13 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.fetchOne(declarationData.getDepartmentReportPeriodId());
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
         DeclarationType declarationType = declarationTemplate.getType();
-        return String.format("Налоговая форма: Период: \"%s, %s%s\", Подразделение: \"%s\", Вид: \"%s\", № %s, Налоговый орган: \"%s\", КПП: \"%s\", ОКТМО: \"%s\"",
+        return String.format("№ %s, Период: \"%s, %s%s\", Подразделение: \"%s\", Вид: \"%s\",  Налоговый орган: \"%s\", КПП: \"%s\", ОКТМО: \"%s\"",
+                declarationDataId,
                 departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(),
                 departmentReportPeriod.getReportPeriod().getName(),
                 getCorrectionDateString(departmentReportPeriod),
                 department.getName(),
                 declarationType.getName(),
-                declarationDataId,
                 declarationData.getTaxOrganCode(),
                 declarationData.getKpp(),
                 declarationData.getOktmo());
