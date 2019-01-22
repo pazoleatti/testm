@@ -86,10 +86,11 @@ public class CreateFormsAsyncTask extends AbstractAsyncTask {
         String taskName = generateTaskName(taskData);
         if (unexpected) {
             Throwable exceptionThrown = (Throwable) taskData.getParams().get("exceptionThrown");
-            return String.format("Не выполнена операция \"%s\". Причина: %s", taskName, exceptionThrown.getMessage());
-        } else {
-            return String.format("Не выполнена операция \"%s\"", taskName);
+            if (exceptionThrown != null && exceptionThrown.getMessage() != null) {
+                return String.format("Не выполнена операция \"%s\". Причина: %s", taskName, exceptionThrown.getMessage());
+            }
         }
+        return String.format("Не выполнена операция \"%s\"", taskName);
     }
 
     private String generateTaskName(AsyncTaskData taskData) {

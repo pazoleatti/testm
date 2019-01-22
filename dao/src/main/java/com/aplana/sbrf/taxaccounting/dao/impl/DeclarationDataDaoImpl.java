@@ -194,7 +194,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                         "join department_report_period drp on dd.department_report_period_id = drp.id\n" +
                         "join declaration_template dt on dt.id = dd.declaration_template_id\n" +
                         "where dt.declaration_type_id = :declarationTypeId and drp.report_period_id = :reportPeriodId and dd.kpp = :kpp and dd.oktmo = :oktmo\n" +
-                        "order by correction_num desc",
+                        "order by correction_num desc, id desc",
                 params, new DeclarationDataRowMapper());
     }
 

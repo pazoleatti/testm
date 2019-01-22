@@ -171,18 +171,22 @@ public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentCon
                 "       join ndfl_person_income npi on npi.ndfl_person_id = np.id" +
                 "       where np.declaration_data_id = :declarationId" +
                 "   ) npi\n" +
-                "   left join actual_department_config dc on dc.kpp = npi.kpp and dc.oktmo_code = npi.oktmo\n" +
+                "   full join actual_department_config dc on dc.kpp = npi.kpp and dc.oktmo_code = npi.oktmo\n" +
                 ")";
         params.addValue("declarationId", declaration.getId());
 
         return getNamedParameterJdbcTemplate().query(baseSelect, params, new RowMapper<Pair<KppOktmoPair, DepartmentConfig>>() {
             @Override
             public Pair<KppOktmoPair, DepartmentConfig> mapRow(ResultSet rs, int rowNum) throws SQLException {
+                KppOktmoPair kppOktmoPair = null;
+                if (rs.getString("dec_kpp") != null) {
+                    kppOktmoPair = new KppOktmoPair(rs.getString("dec_kpp"), rs.getString("dec_oktmo"));
+                }
                 DepartmentConfig departmentConfig = null;
                 if (SqlUtils.getLong(rs, "id") != null) {
                     departmentConfig = new DepartmentConfigMapper().mapRow(rs, rowNum);
                 }
-                return new Pair<>(new KppOktmoPair(rs.getString("dec_kpp"), rs.getString("dec_oktmo")), departmentConfig);
+                return new Pair<>(kppOktmoPair, departmentConfig);
             }
         });
     }

@@ -2340,9 +2340,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         Map<String, Object> additionalParameters = new HashMap<>();
         additionalParameters.put("reportFormsCreationParams", params);
         declarationDataScriptingService.executeScript(userInfo, declarationDataTemp, FormDataEvent.CREATE_FORMS, logger, additionalParameters);
-        if (logger.containsLevel(LogLevel.ERROR)) {
-            throw new ServiceException();
-        }
     }
 
     @Override

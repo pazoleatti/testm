@@ -498,8 +498,9 @@
                                 });
                                 // если выбранный период есть в списке, то оставляем, иначе установливаем самый последний
                                 var currentValue = _.deep($scope, modelPath);
-                                if (!currentValue || !_.find(periods, function (department) {
-                                        return department.id === currentValue.id;
+                                if (!currentValue || !_.find(periods, function (period) {
+                                        return period.id === currentValue.id && (
+                                            !period.correctionDate && !currentValue.correctionDate || period.correctionDate === currentValue.correctionDate);
                                     })) {
                                     var defaultValue = periods[0];
                                     _.deep($scope, modelPath, defaultValue);

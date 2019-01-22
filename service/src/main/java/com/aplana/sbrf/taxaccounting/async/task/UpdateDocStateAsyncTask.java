@@ -58,7 +58,7 @@ public class UpdateDocStateAsyncTask extends AbstractAsyncTask {
         Map<String, Object> params = taskData.getParams();
         long docStateId = (Long) params.get("docStateId");
         RefBookDocState docState = commonRefBookService.fetchRecord(RefBook.Id.DOC_STATE.getId(), docStateId);
-        return "Выполнение операции \"" + getAsyncTaskType().getDescription() + "\"  на состояние ЭД: " + docState.getName() + " завершено.";
+        return "Выполнение операции \"" + getAsyncTaskType().getDescription() + "\"  на состояние ЭД: \"" + docState.getName() + "\" завершено.";
     }
 
     @Override
