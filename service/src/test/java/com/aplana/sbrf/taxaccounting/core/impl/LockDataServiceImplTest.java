@@ -23,11 +23,7 @@ import static org.mockito.Mockito.*;
 
 /**
  * Тестирование сервиса блокировок
- *
- * @author <a href="mailto:Marat.Fayzullin@aplana.com">Файзуллин Марат</a>
- * @since 18.07.14 12:13
  */
-
 public class LockDataServiceImplTest {
 
     private static LockDataService service;
@@ -42,9 +38,9 @@ public class LockDataServiceImplTest {
         auditService = mock(AuditService.class);
         dao = mock(LockDataDao.class);
         when(userDao.getUser(0)).thenReturn(new TAUser());
-        when(dao.get("a", false)).thenReturn(new LockData("a", 0));
-        when(dao.get("b", false)).thenReturn(new LockData("b", 0));
-        when(dao.get("c", false)).thenReturn(new LockData("c", 1));
+        when(dao.findByKey("a")).thenReturn(new LockData("a", 0));
+        when(dao.findByKey("b")).thenReturn(new LockData("b", 0));
+        when(dao.findByKey("c")).thenReturn(new LockData("c", 1));
         ReflectionTestUtils.setField(service, "dao", dao);
         ReflectionTestUtils.setField(service, "userDao", userDao);
         ReflectionTestUtils.setField(service, "auditService", auditService);
@@ -92,8 +88,8 @@ public class LockDataServiceImplTest {
     @Test
     public void unlockIfOlderThan() {
         when(dao.getLockIfOlderThan(10)).thenReturn(Arrays.asList("lock1", "lock2"));
-        when(dao.get("lock1", false)).thenReturn(getLockData("lock1"));
-        when(dao.get("lock2", false)).thenReturn(getLockData("lock2"));
+        when(dao.findByKey("lock1")).thenReturn(getLockData("lock1"));
+        when(dao.findByKey("lock2")).thenReturn(getLockData("lock2"));
 
         service.unlockIfOlderThan(10);
 

@@ -7,34 +7,34 @@ import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-/**
- * @author <a href="mailto:Marat.Fayzullin@aplana.com">Файзуллин Марат</a>
- * @since 17.07.14 14:36
- */
 
 public interface LockDataDao extends PermissionDao {
 
     /**
      * Возвращает информацию о блокировке
      *
-     * @param key  код блокировки
-     * @param like проверяем неполное совпадение ключа?
+     * @param key код блокировки
      * @return возвращает null, если блокировка по данному коду не найдена
      */
-    LockData get(String key, boolean like);
+    LockData findByKey(String key);
 
     /**
-     * Возвращает информацию о блокировке
+     * Проверяет наличие блокировки по ключу.
      *
-     * @param key      код блокировки
-     * @param lockDate дата начала блокировки
-     * @return возвращает null, если блокировка по данному коду не найдена
+     * @param key ключ блокировки
      */
-    LockData get(String key, Date lockDate);
+    boolean existsByKey(String key);
+
+    /**
+     * Проверяет наличие блокировки по ключу и пользователю.
+     *
+     * @param key    ключ блокировки
+     * @param userId идентификатор пользователя
+     */
+    boolean existsByKeyAndUserId(String key, int userId);
 
     /**
      * Создает новую блокировку
@@ -84,7 +84,7 @@ public interface LockDataDao extends PermissionDao {
      *
      * @param taskId идентификатор задачи
      */
-    void unlockAllByTask(long taskId);
+    void unlockAllByTaskId(long taskId);
 
     /**
      * Получает список всех блокировок с учетом фильтра + пейджинг. Используется на форме просмотра блокировок.
@@ -122,21 +122,24 @@ public interface LockDataDao extends PermissionDao {
 
     /**
      * Создает несколько блокировок
-     * @param lockKeysWithDescription   мапа блокировок, где ключом выступает ключ блокировки, а значением -- описание бокировки
-     * @param userId                    идентификатор пользователя устанавливающего блокировки
+     *
+     * @param lockKeysWithDescription мапа блокировок, где ключом выступает ключ блокировки, а значением -- описание бокировки
+     * @param userId                  идентификатор пользователя устанавливающего блокировки
      */
     void lockKeysBatch(Map<String, String> lockKeysWithDescription, int userId);
 
     /**
      * Связывает несколько блокировок с асинхронной задачей
-     * @param keys      ключи блокировок
-     * @param taskId    идентификатор задачи
+     *
+     * @param keys   ключи блокировок
+     * @param taskId идентификатор задачи
      */
     void bindTaskToMultiKeys(Collection<String> keys, long taskId);
 
     /**
      * Снять несколько блокировок
+     *
      * @param keys список ключей блокировок
      */
-    void unlockMiltipleTasks(Collection<String> keys);
+    void unlockMultipleTasks(Collection<String> keys);
 }

@@ -285,7 +285,7 @@ public class AsyncManagerImpl implements AsyncManager {
                             asyncTaskDao.delete(taskData.getId());
                             lockDataService.unlockAllByTask(taskData.getId());
                         } else {
-                            lockDataService.unlockMiltipleTasks(keys);
+                            lockDataService.unlockMultipleTasks(keys);
                         }
                     }
                 }

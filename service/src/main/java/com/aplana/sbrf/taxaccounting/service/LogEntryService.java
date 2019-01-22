@@ -20,31 +20,23 @@ public interface LogEntryService {
      *
      * @param uuid         идентификатор группы логов
      * @param pagingParams Параметры пейджинга
-     * @return
      */
     PagingResult<LogEntry> fetch(String uuid, PagingParams pagingParams);
 
     /**
      * Получить LogEntry целиком
-     *
-     * @param uuid
-     * @return
      */
     List<LogEntry> getAll(String uuid);
 
     /**
      * Сохранить LogEntry
      *
-     * @param logEntry
      * @return uuid null, если ошибок нет
      */
     String save(List<LogEntry> logEntry);
 
     /**
      * Число ошибок каждой из групп ERROR, WARNING и INFO
-     *
-     * @param uuid
-     * @return
      */
     Map<LogLevel, Integer> getLogCount(String uuid);
 
@@ -53,7 +45,6 @@ public interface LogEntryService {
      *
      * @param logEntries новые сообщения
      * @param uuid       идентификатор записи
-     * @return
      */
     String update(List<LogEntry> logEntries, String uuid);
 
@@ -63,6 +54,9 @@ public interface LogEntryService {
      * @param logEntries новые сообещения
      * @param uuid       идентификатор записи
      * @return идентификатор записи
+     * @deprecated не использовали метод с 2015 года, может и не стоит?
+     * todo: кандидат на удаление и рефакторинг вниз по реализации.
      */
+    @Deprecated
     String addFirst(List<LogEntry> logEntries, String uuid);
 }

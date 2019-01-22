@@ -190,7 +190,7 @@ public class DeclarationLockerImpl implements DeclarationLocker {
                 return doCheckAndLock(declarationDataIdList, operationType, SET_EDIT_FILE__PDF__EXPORT_REPORTS__REPORT_2NDFL1__REPORT_2NDFL2__DEPT_NOTICE, userInfo, logger);
             } else if (operationType.equals(OperationType.UPDATE_DOC_STATE)) {
                 return doCheckAndLock(declarationDataIdList, operationType, SET_UPDATE_DOC_STATE, userInfo, logger);
-            }  else
+            } else
                 throw new IllegalArgumentException("Unknown operationType type!");
         } catch (Exception e) {
             LOG.error("Выполнение операции невозможно по техническим причинам. Не удалось установить блокировку для выполнения операции \"%s\"", e);
@@ -263,5 +263,29 @@ public class DeclarationLockerImpl implements DeclarationLocker {
                 }
             }
         });
+    }
+
+
+    @Override
+    public void unlock(final Long declarationDataId, final OperationType operationType, Logger logger) {
+        try {
+            tx.executeInNewTransaction(new TransactionLogic<Boolean>() {
+                @Override
+                public Boolean execute() {
+                    String lockKey = simpleDeclarationDataLockKeyGenerator.generateLockKey(declarationDataId, operationType);
+                    lockDataDao.unlock(lockKey);
+                    return true;
+                }
+            });
+        } catch (Exception e) {
+            logger.error("При удалении блокировки возникла системная ошибка. Удаление блокировки невозможно. Обратитесь за разъяснениями к Администратору.");
+        }
+    }
+
+    @Override
+    public boolean lockExists(Long declarationDataId, OperationType operationType, TAUserInfo userInfo) {
+        String lockKey = simpleDeclarationDataLockKeyGenerator.generateLockKey(declarationDataId, operationType);
+        int userId = userInfo.getUser().getId();
+        return lockDataDao.existsByKeyAndUserId(lockKey, userId);
     }
 }

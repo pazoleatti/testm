@@ -414,7 +414,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
 
             if (reportDao.getDec(dataId, DeclarationDataReportType.PDF_DEC) != null || reportDao.getDec(dataId, DeclarationDataReportType.EXCEL_DEC) != null) {
                 existDec.add(message);
-            } else if (lockDataService.lockExists(decKeyPDF, false) || lockDataService.lockExists(decKeyXLSM, false)) {
+            } else if (lockDataService.lockExists(decKeyPDF) || lockDataService.lockExists(decKeyXLSM)) {
                 existInLockDec.add(message);
             }
         }
@@ -459,7 +459,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
         for (Long dataId : declarationDataService.getFormDataListInActualPeriodByTemplate(template.getId(), template.getVersion())) {
             String decKeyPDF = declarationDataService.generateAsyncTaskKey(dataId, DeclarationDataReportType.PDF_DEC);
             String decKeyXLSM = declarationDataService.generateAsyncTaskKey(dataId, DeclarationDataReportType.EXCEL_DEC);
-            if (lockDataService.lockExists(decKeyPDF, false) || lockDataService.lockExists(decKeyXLSM, false)) {
+            if (lockDataService.lockExists(decKeyPDF) || lockDataService.lockExists(decKeyXLSM)) {
                 lockDataIds.add(dataId);
             }
         }

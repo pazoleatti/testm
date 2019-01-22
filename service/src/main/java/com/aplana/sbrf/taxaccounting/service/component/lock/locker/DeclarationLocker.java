@@ -35,4 +35,23 @@ public interface DeclarationLocker {
      * @return список объектов блокировок в случае успешной установки блокировки иначе null
      */
     List<LockData> establishLock(List<Long> declarationDataIdList, OperationType operationType, TAUserInfo userInfo, Logger logger);
+
+    /**
+     * Снимает блокировку выбранного типа с формы.
+     *
+     * @param declarationDataId идентификатор налоговой формы
+     * @param operationType     тип блокировки
+     * @param logger            логгер
+     */
+    void unlock(Long declarationDataId, OperationType operationType, Logger logger);
+
+    /**
+     * Проверка наличия блокировки на форме.
+     *
+     * @param declarationDataId идентификатор налоговой формы
+     * @param operationType     тип блокировки
+     * @param userInfo          пользователь
+     * @return true, если блокировка выбранного типа имеется и установлена данным пользователем
+     */
+    boolean lockExists(Long declarationDataId, OperationType operationType, TAUserInfo userInfo);
 }
