@@ -1148,6 +1148,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             }
         }
 
+        if (!logger.containsLevel(LogLevel.ERROR)) {
+            result.setSuccess(true);
+        }
         result.setUuid(logEntryService.save(logger.getEntries()));
 
         return result;

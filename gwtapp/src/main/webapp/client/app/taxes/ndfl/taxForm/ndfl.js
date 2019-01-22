@@ -530,9 +530,13 @@
                                 data: [$stateParams.declarationDataId]
                             }).then(function (response) {
                                 if (response.data && response.data.uuid && response.data.uuid !== null) {
-                                    //Обновить страницу и, если есть сообщения, показать их
-                                    var params = (response.data && response.data.uuid && response.data.uuid !== null) ? {uuid: response.data.uuid} : {};
-                                    $state.go("ndflJournal", params, {reload: true});
+                                    if (response.data.success) {
+                                        //Обновить страницу и, если есть сообщения, показать их
+                                        var params = (response.data && response.data.uuid && response.data.uuid !== null) ? {uuid: response.data.uuid} : {};
+                                        $state.go("ndflJournal", params, {reload: true});
+                                    } else {
+                                        $logPanel.open('log-panel-container', response.data.uuid);
+                                    }
                                 }
                             });
                         }
