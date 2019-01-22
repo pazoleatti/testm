@@ -7,11 +7,11 @@ import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookKnfType;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.script.service.DeclarationService;
 import com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils;
 import com.aplana.sbrf.taxaccounting.service.*;
+import com.aplana.sbrf.taxaccounting.service.component.lock.locker.DeclarationLocker;
 import groovy.lang.Closure;
 import net.sf.jasperreports.engine.JasperPrint;
 import org.apache.commons.logging.Log;
@@ -32,7 +32,12 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.zip.ZipInputStream;
 
 
@@ -68,6 +73,8 @@ public class DeclarationServiceImpl implements DeclarationService {
     private LockDataService lockDataService;
     @Autowired
     private LogBusinessService logBusinessService;
+    @Autowired
+    private DeclarationLocker declarationLocker;
 
     @Override
     public DeclarationData getDeclarationData(long declarationDataId) {
@@ -90,13 +97,13 @@ public class DeclarationServiceImpl implements DeclarationService {
     }
 
     @Override
-    public DeclarationData findKnfByKnfTypeAndPeriodId(RefBookKnfType knfType, int departmentReportPeriodId) {
-        return declarationDataDao.findKnfByKnfTypeAndPeriodId(knfType, departmentReportPeriodId);
+    public DeclarationData find(int declarationTypeId, int departmentReportPeriodId, String kpp, String oktmo, String taxOrganCode, Long asnuId, String fileName) {
+        return declarationDataDao.find(declarationTypeId, departmentReportPeriodId, kpp, oktmo, taxOrganCode, asnuId, fileName);
     }
 
     @Override
-    public DeclarationData find(int declarationTypeId, int departmentReportPeriodId, String kpp, String oktmo, String taxOrganCode, Long asnuId, String fileName) {
-        return declarationDataDao.find(declarationTypeId, departmentReportPeriodId, kpp, oktmo, taxOrganCode, asnuId, fileName);
+    public List<DeclarationData> findAllByTypeIdAndReportPeriodIdAndKppAndOktmo(int declarationTypeId, int reportPeriodId, String kpp, String oktmo) {
+        return declarationDataDao.findAllByTypeIdAndReportPeriodIdAndKppAndOktmo(declarationTypeId, reportPeriodId, kpp, oktmo);
     }
 
     @Override
@@ -188,6 +195,11 @@ public class DeclarationServiceImpl implements DeclarationService {
     @Override
     public Long create(DeclarationData newDeclaration, DepartmentReportPeriod departmentReportPeriod, Logger logger, TAUserInfo userInfo, boolean writeAudit) {
         return declarationDataService.create(newDeclaration, departmentReportPeriod, logger, userInfo, writeAudit);
+    }
+
+    @Override
+    public void setFileName(long declarationId, String fileName) {
+        declarationDataDao.setFileName(declarationId, fileName);
     }
 
     @Override
@@ -289,28 +301,8 @@ public class DeclarationServiceImpl implements DeclarationService {
     }
 
     @Override
-    public Map<DeclarationDataReportType, LockData> getLockTaskType(long declarationDataId) {
-        return declarationDataService.getLockTaskType(declarationDataId);
-    }
-
-    @Override
     public String generateAsyncTaskKey(long declarationDataId, DeclarationDataReportType type) {
         return declarationDataService.generateAsyncTaskKey(declarationDataId, type);
-    }
-
-    @Override
-    @Transactional
-    public LockData createDeleteLock(long declarationDataId, TAUserInfo userInfo) {
-        String deleteLockKey = generateAsyncTaskKey(declarationDataId, DeclarationDataReportType.DELETE_DEC);
-        if (declarationDataDao.existDeclarationData(declarationDataId)) {
-            LockData lockData = lockDataService.lock(deleteLockKey, userInfo.getUser().getId(),
-                    declarationDataService.getDeclarationFullName(declarationDataId, DeclarationDataReportType.DELETE_DEC));
-            if (lockData != null) {
-                return null;
-            }
-            return lockDataService.findLock(deleteLockKey);
-        }
-        return null;
     }
 
     @Override
@@ -324,18 +316,12 @@ public class DeclarationServiceImpl implements DeclarationService {
         List<LockData> lockList = new ArrayList<>();
         try {
             for (DeclarationData deletedDeclarationData : deletedDeclarationDataList) {
-                Map<DeclarationDataReportType, LockData> taskTypeMap = getLockTaskType(deletedDeclarationData.getId());
-                if (!taskTypeMap.isEmpty()) {
-                    for (DeclarationDataReportType declarationDataReportType : taskTypeMap.keySet()) {
-                        result.add(new Pair<>(deletedDeclarationData.getId(), declarationDataReportType));
-                    }
+                Logger localLogger = new Logger();
+                LockData deleteLock = declarationLocker.establishLock(deletedDeclarationData.getId(), OperationType.DELETE_DEC, userInfo, localLogger);
+                if (deleteLock != null) {
+                    lockList.add(deleteLock);
                 } else {
-                    LockData deleteLock = createDeleteLock(deletedDeclarationData.getId(), userInfo);
-                    if (deleteLock != null) {
-                        lockList.add(deleteLock);
-                    } else {
-                        result.add(new Pair<>(deletedDeclarationData.getId(), DeclarationDataReportType.DELETE_DEC));
-                    }
+                    result.add(new Pair<>(deletedDeclarationData.getId(), DeclarationDataReportType.DELETE_DEC));
                 }
             }
             if (result.size() == 0) {
@@ -359,7 +345,8 @@ public class DeclarationServiceImpl implements DeclarationService {
         return result;
     }
 
-    private void delete(long declarationDataId, TAUserInfo userInfo) {
+    @Override
+    public void delete(long declarationDataId, TAUserInfo userInfo) {
         if (declarationDataDao.existDeclarationData(declarationDataId)) {
             declarationDataDao.setStatus(declarationDataId, State.CREATED);
             declarationDataService.deleteSync(declarationDataId, userInfo, false);

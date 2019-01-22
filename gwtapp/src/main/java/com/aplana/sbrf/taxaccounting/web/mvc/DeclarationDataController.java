@@ -2,8 +2,8 @@ package com.aplana.sbrf.taxaccounting.web.mvc;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.action.CreateDeclarationDataAction;
-import com.aplana.sbrf.taxaccounting.model.action.CreateDeclarationReportAction;
 import com.aplana.sbrf.taxaccounting.model.action.CreateReportAction;
+import com.aplana.sbrf.taxaccounting.model.action.CreateReportFormsAction;
 import com.aplana.sbrf.taxaccounting.model.action.PrepareSubreportAction;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonFilter;
@@ -307,7 +307,7 @@ public class DeclarationDataController {
      */
     @PostMapping(value = "/actions/declarationData/{declarationDataId}/import")
     public ActionResult importExcel(@RequestParam(value = "uploader") MultipartFile file,
-                                                    @PathVariable int declarationDataId)
+                                    @PathVariable int declarationDataId)
             throws IOException {
         if (file.isEmpty()) {
             throw new ServiceException("Ошибка при загрузке файла \"" + file.getOriginalFilename() + "\". Выбранный файл пуст.");
@@ -337,7 +337,7 @@ public class DeclarationDataController {
      * @return модель {@link CreateDeclarationReportResult}, в которой содержаться данные результате операции создания
      */
     @PostMapping(value = "/actions/declarationData/createReport")
-    public ActionResult createReport(@RequestBody CreateDeclarationReportAction action) {
+    public ActionResult createReport(@RequestBody CreateReportFormsAction action) {
         return declarationService.createReportsCreateTask(action, securityService.currentUserInfo());
     }
 
@@ -554,7 +554,7 @@ public class DeclarationDataController {
      */
     @PostMapping(value = "/actions/declarationData/{declarationDataId}/specific/{alias}")
     public String createSpecificReport(@PathVariable("declarationDataId") long declarationDataId, @PathVariable String alias,
-                                                              @RequestBody(required = false) Ndfl2_6DataReportParams params) {
+                                       @RequestBody(required = false) Ndfl2_6DataReportParams params) {
         TAUserInfo userInfo = securityService.currentUserInfo();
         Map<String, Object> reportParams = new HashMap<>();
         reportParams.put("params", params);

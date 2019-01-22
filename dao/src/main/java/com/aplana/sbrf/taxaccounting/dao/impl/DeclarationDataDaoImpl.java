@@ -181,6 +181,24 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
     }
 
     @Override
+    public List<DeclarationData> findAllByTypeIdAndReportPeriodIdAndKppAndOktmo(int declarationTypeId, int reportPeriodId, String kpp, String oktmo) {
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("declarationTypeId", declarationTypeId);
+        params.addValue("reportPeriodId", reportPeriodId);
+        params.addValue("kpp", kpp);
+        params.addValue("oktmo", oktmo);
+        return getNamedParameterJdbcTemplate().query("" +
+                        "select " + DeclarationDataRowMapper.FIELDS +
+                        "from declaration_data dd " +
+                        "left join ref_book_knf_type knf_type on knf_type.id = dd.knf_type_id\n" +
+                        "join department_report_period drp on dd.department_report_period_id = drp.id\n" +
+                        "join declaration_template dt on dt.id = dd.declaration_template_id\n" +
+                        "where dt.declaration_type_id = :declarationTypeId and drp.report_period_id = :reportPeriodId and dd.kpp = :kpp and dd.oktmo = :oktmo\n" +
+                        "order by correction_num desc",
+                params, new DeclarationDataRowMapper());
+    }
+
+    @Override
     public List<DeclarationData> findAllByTypeIdAndPeriodIdAndKppOktmoPairs(int declarationTypeId, int departmentReportPeriodId, List<Pair<String, String>> kppOktmoPairs) {
         return find(declarationTypeId, null, departmentReportPeriodId, kppOktmoPairs);
     }
@@ -394,17 +412,20 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         params.addValue("knf_type_id", declarationData.getKnfType() != null ? declarationData.getKnfType().getId() : null);
         params.addValue("note", declarationData.getNote());
         params.addValue("file_name", declarationData.getFileName());
-        params.addValue("doc_state_id", declarationData.getDocState());
+        params.addValue("doc_state_id", declarationData.getDocStateId());
         params.addValue("manually_created", declarationData.isManuallyCreated());
         params.addValue("last_data_modified", declarationData.isManuallyCreated() ? null : new Date());
         params.addValue("adjust_negative_values", declarationData.isAdjustNegativeValues());
         params.addValue("correction_num", declarationData.getCorrectionNum());
+        params.addValue("tax_refund_reflection_mode", declarationData.getTaxRefundReflectionMode() != null ? declarationData.getTaxRefundReflectionMode().getId() : null);
 
         getNamedParameterJdbcTemplate().update("" +
                         "insert into declaration_data (id, declaration_template_id, department_report_period_id, state, tax_organ_code, kpp, " +
-                        "   oktmo, asnu_id, knf_type_id, note, file_name, doc_state_id, manually_created, last_data_modified, adjust_negative_values, correction_num) " +
+                        "   oktmo, asnu_id, knf_type_id, note, file_name, doc_state_id, manually_created, last_data_modified, adjust_negative_values, " +
+                        "   correction_num, tax_refund_reflection_mode) " +
                         "values (:id, :declaration_template_id, :department_report_period_id, :state, :tax_organ_code, :kpp, " +
-                        "   :oktmo, :asnu_id, :knf_type_id, :note, :file_name, :doc_state_id, :manually_created, :last_data_modified, :adjust_negative_values, :correction_num)",
+                        "   :oktmo, :asnu_id, :knf_type_id, :note, :file_name, :doc_state_id, :manually_created, :last_data_modified, :adjust_negative_values, " +
+                        "   :correction_num, :tax_refund_reflection_mode)",
                 params);
 
         if (declarationData.getKnfType() != null && declarationData.getKnfType().equals(RefBookKnfType.BY_KPP)) {
@@ -868,7 +889,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 params.addValue("taxOrganCode", declarationData.getTaxOrganCode() != null ? declarationData.getTaxOrganCode().toLowerCase() : null);
                 params.addValue("note", declarationData.getNote() != null ? declarationData.getNote().toLowerCase() : null);
                 params.addValue("fileName", declarationData.getFileName() != null ? declarationData.getFileName().toLowerCase() : null);
-                params.addValue("docState", declarationData.getDocState());
+                params.addValue("docState", declarationData.getDocStateId());
                 countOfExisted = getNamedParameterJdbcTemplate().queryForObject("SELECT COUNT(id) FROM declaration_data WHERE declaration_template_id = :declarationTemplateId" +
                                 " AND department_report_period_id = :departmentReportPeriodId and (:taxOrganCode is null or lower(tax_organ_code) = :taxOrganCode) AND (:kpp is null or lower(kpp) = :kpp)" +
                                 " AND (:oktmo is null or lower(oktmo) = :oktmo) AND (:asnuId is null or asnu_id = :asnuId) AND (:note is null or lower(note) = :note) " +
@@ -883,7 +904,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         final static String FIELDS = " dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.oktmo, dd.state, " +
                 "dd.department_report_period_id, dd.asnu_id, dd.file_name, dd.doc_state_id, dd.manually_created, " +
                 "dd.adjust_negative_values, drp.report_period_id, drp.department_id, dd.note, knf_type.id as knf_type_id, " +
-                "knf_type.name as knf_type_name, dd.last_data_modified, dd.correction_num ";
+                "knf_type.name as knf_type_name, dd.last_data_modified, dd.correction_num, dd.tax_refund_reflection_mode ";
 
         @Override
         public DeclarationData mapRow(ResultSet rs, int index) throws SQLException {
@@ -904,7 +925,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             d.setNote(rs.getString("note"));
             d.setFileName(rs.getString("file_name"));
             d.setState(State.fromId(SqlUtils.getInteger(rs, "state")));
-            d.setDocState(SqlUtils.getLong(rs, "doc_state_id"));
+            d.setDocStateId(SqlUtils.getLong(rs, "doc_state_id"));
             d.setManuallyCreated(SqlUtils.getInteger(rs, "manually_created") == 1);
             d.setAdjustNegativeValues(SqlUtils.getInteger(rs, "adjust_negative_values") == 1);
             Timestamp modifiedDate = rs.getTimestamp("last_data_modified");
@@ -912,6 +933,10 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 d.setLastDataModifiedDate(new Date(modifiedDate.getTime()));
             }
             d.setCorrectionNum(SqlUtils.getInteger(rs, "correction_num"));
+            Integer taxRefundReflectModeId = SqlUtils.getInteger(rs, "tax_refund_reflection_mode");
+            if (taxRefundReflectModeId != null) {
+                d.setTaxRefundReflectionMode(TaxRefundReflectionMode.valueOf(taxRefundReflectModeId));
+            }
             return d;
         }
     }
@@ -937,7 +962,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
     @Override
     public void updateDocState(long declarationId, long docStateId) {
         getJdbcTemplate().update("update declaration_data set doc_state_id = ? " +
-                "where id = ?",
+                        "where id = ?",
                 docStateId, declarationId);
     }
 }

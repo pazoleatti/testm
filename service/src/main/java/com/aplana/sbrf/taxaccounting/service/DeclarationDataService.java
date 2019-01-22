@@ -1,42 +1,14 @@
 package com.aplana.sbrf.taxaccounting.service;
 
-import com.aplana.sbrf.taxaccounting.model.AsyncTaskType;
-import com.aplana.sbrf.taxaccounting.model.BlobData;
-import com.aplana.sbrf.taxaccounting.model.Cell;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.DeclarationData;
-import com.aplana.sbrf.taxaccounting.model.DeclarationDataFile;
-import com.aplana.sbrf.taxaccounting.model.DeclarationDataFileComment;
-import com.aplana.sbrf.taxaccounting.model.DeclarationDataFilter;
-import com.aplana.sbrf.taxaccounting.model.DeclarationDataJournalItem;
-import com.aplana.sbrf.taxaccounting.model.DeclarationDataReportType;
-import com.aplana.sbrf.taxaccounting.model.DeclarationDataSearchResultItem;
-import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.LockData;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.PrepareSpecificReportResult;
-import com.aplana.sbrf.taxaccounting.model.Relation;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
-import com.aplana.sbrf.taxaccounting.model.TaskInterruptCause;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.action.CreateDeclarationDataAction;
-import com.aplana.sbrf.taxaccounting.model.action.CreateDeclarationReportAction;
 import com.aplana.sbrf.taxaccounting.model.action.CreateReportAction;
+import com.aplana.sbrf.taxaccounting.model.action.CreateReportFormsAction;
 import com.aplana.sbrf.taxaccounting.model.action.PrepareSubreportAction;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
-import com.aplana.sbrf.taxaccounting.model.result.CreateResult;
-import com.aplana.sbrf.taxaccounting.model.result.DeclarationDataExistenceAndKindResult;
-import com.aplana.sbrf.taxaccounting.model.result.DeclarationLockResult;
-import com.aplana.sbrf.taxaccounting.model.result.DeclarationResult;
-import com.aplana.sbrf.taxaccounting.model.result.NdflPersonDeductionDTO;
-import com.aplana.sbrf.taxaccounting.model.result.NdflPersonIncomeDTO;
-import com.aplana.sbrf.taxaccounting.model.result.NdflPersonPrepaymentDTO;
-import com.aplana.sbrf.taxaccounting.model.result.PrepareSubreportResult;
-import com.aplana.sbrf.taxaccounting.model.result.ReportAvailableReportDDResult;
-import com.aplana.sbrf.taxaccounting.model.result.ReportAvailableResult;
+import com.aplana.sbrf.taxaccounting.model.result.*;
 import com.aplana.sbrf.taxaccounting.permissions.logging.TargetIdAndLogger;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.util.JRSwapFile;
@@ -534,12 +506,22 @@ public interface DeclarationDataService {
     /**
      * Создание экземпляров отчетных форм
      *
-     * @param knfId                  ид КНФ, по которой будет создана отчетность. Может быть не задан, тогда КНФ будет искаться в заданном периоде
-     * @param departmentReportPeriod если knfId не задан, то отчетный период, в котором будет искаться КНФ
-     * @param declarationTypeId      идентификатор типа декларации
-     * @param adjustNegativeValues   надо ли выполнять корректировку отрицательных значений для 6-НДФЛ
+     * @param params      параметры создания отчетности
+     * @param stateLogger логгер состояния асинхронной задачи
+     * @param logger      логгер с результатами выполнения
+     * @param userInfo    пользователь, запустивший задачу
      */
-    void createReportForms(Long knfId, DepartmentReportPeriod departmentReportPeriod, int declarationTypeId, boolean adjustNegativeValues, LockStateLogger stateLogger, Logger logger, TAUserInfo userInfo);
+    void createReportForms2Ndfl(ReportFormsCreationParams params, LockStateLogger stateLogger, Logger logger, TAUserInfo userInfo);
+
+    /**
+     * Создание экземпляров отчетных форм
+     *
+     * @param params      параметры создания отчетности
+     * @param stateLogger логгер состояния асинхронной задачи
+     * @param logger      логгер с результатами выполнения
+     * @param userInfo    пользователь, запустивший задачу
+     */
+    void createReportForms(ReportFormsCreationParams params, LockStateLogger stateLogger, Logger logger, TAUserInfo userInfo);
 
     /**
      * Создание отчетности для выгрузки
@@ -563,18 +545,13 @@ public interface DeclarationDataService {
     DeclarationDataExistenceAndKindResult fetchDeclarationDataExistenceAndKind(TAUserInfo userInfo, long declarationDataId);
 
     /**
-     * Получает мапу созданных блокировок по основным операциям формы
-     */
-    Map<DeclarationDataReportType, LockData> getLockTaskType(long declarationDataId);
-
-    /**
      * Создание отчётности
      *
      * @param action   параметры создания отчетности
      * @param userInfo информация о пользователе
      * @return результат создания отчетности
      */
-    ActionResult createReportsCreateTask(CreateDeclarationReportAction action, TAUserInfo userInfo);
+    ActionResult createReportsCreateTask(CreateReportFormsAction action, TAUserInfo userInfo);
 
     /**
      * Запускает ассинхронную задачу на выгрузку отчетности для форм
@@ -783,9 +760,10 @@ public interface DeclarationDataService {
 
     /**
      * Создает задачу для генерации pdf отчета
+     *
      * @param userInfo          информация о пользователе
      * @param declarationDataId идентификатор формы
-     * @return  итоговый uuid
+     * @return итоговый uuid
      */
     String createPdfTask(TAUserInfo userInfo, long declarationDataId);
 }

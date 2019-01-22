@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.script.service;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookKnfType;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.service.ScriptExposed;
@@ -52,18 +51,20 @@ public interface DeclarationService {
     List<DeclarationData> findAllByTypeIdAndPeriodId(int declarationTypeId, int departmentReportPeriodId);
 
     /**
-     * Возвращяет консолидированную форму в отчетном периоде подразделения и по типу КНФ
-     *
-     * @param knfType                  типу КНФ
-     * @param departmentReportPeriodId отчетный период подразделения
-     * @return консолидированная форм
-     */
-    DeclarationData findKnfByKnfTypeAndPeriodId(RefBookKnfType knfType, int departmentReportPeriodId);
-
-    /**
      * Поиск декларации в отчетном периоде подразделения + «КПП» и «Налоговый орган»
      */
     DeclarationData find(int declarationTypeId, int departmentReportPeriodId, String kpp, String oktmo, String taxOrganCode, Long asnuId, String fileName);
+
+    /**
+     * Возвращяет список форм по типу и отчетному периоду и паре кпп/октмо
+     *
+     * @param declarationTypeId типу формы
+     * @param reportPeriodId    отчетный период
+     * @param kpp               КПП
+     * @param oktmo             ОКТМО
+     * @return список форм
+     */
+    List<DeclarationData> findAllByTypeIdAndReportPeriodIdAndKppAndOktmo(int declarationTypeId, int reportPeriodId, String kpp, String oktmo);
 
     /**
      * Найти все декларации созданные в отчетном периоде
@@ -126,6 +127,14 @@ public interface DeclarationService {
      * @return идентификатор созданной декларации
      */
     Long create(DeclarationData newDeclaration, DepartmentReportPeriod departmentReportPeriod, Logger logger, TAUserInfo userInfo, boolean writeAudit);
+
+    /**
+     * Установить имя файла
+     *
+     * @param declarationDataId идентификатор налоговой формы
+     * @param fileName          имя файла
+     */
+    void setFileName(long declarationDataId, String fileName);
 
     /**
      * Удаляет все отчеты налоговой формы
@@ -241,23 +250,11 @@ public interface DeclarationService {
     List<Pair<String, String>> findNotPresentedPairKppOktmo(Long declarationDataId);
 
     /**
-     * Получает мапу созданных блокировок по основным операциям формы
-     */
-    Map<DeclarationDataReportType, LockData> getLockTaskType(long declarationDataId);
-
-    /**
      * Генерация ключа блокировки для асинхронных задач по НФ
      *
      * @return код блокировки
      */
     String generateAsyncTaskKey(long declarationDataId, DeclarationDataReportType type);
-
-    /**
-     * Создание блокировки на удаление НФ
-     *
-     * @return если блокировка успешно создана, то возвращает её, иначе null
-     */
-    LockData createDeleteLock(long declarationDataId, TAUserInfo userInfo);
 
     /**
      * Удаляет все формы заданного вида в заданном отчетном периоде
@@ -268,6 +265,14 @@ public interface DeclarationService {
      * @return если удаление прошло успешно, то возвращает пустой список, иначе список Pair<id-формы, типа блокировки>, по которым существует блокировка или произошла ошибка удаления
      */
     List<Pair<Long, DeclarationDataReportType>> deleteForms(int declarationTypeId, int departmentReportPeriodId, List<Pair<String, String>> kppOktmoPairs, Logger logger, TAUserInfo userInfo);
+
+    /**
+     * Удаляет форму
+     *
+     * @param declarationDataId идентификатор формы
+     * @param userInfo          пользователь
+     */
+    void delete(long declarationDataId, TAUserInfo userInfo);
 
     /**
      * метод запускает скрипты с событием проверить

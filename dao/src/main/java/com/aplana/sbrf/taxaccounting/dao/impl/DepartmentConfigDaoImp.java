@@ -1,6 +1,10 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DepartmentConfigDao;
+import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
+import com.aplana.sbrf.taxaccounting.dao.mapper.DepartmentConfigMapper;
+import com.aplana.sbrf.taxaccounting.model.DeclarationData;
+import com.aplana.sbrf.taxaccounting.model.KppOktmoPair;
 import com.aplana.sbrf.taxaccounting.model.KppSelect;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
@@ -10,6 +14,7 @@ import com.aplana.sbrf.taxaccounting.model.SecuredEntity;
 import com.aplana.sbrf.taxaccounting.model.refbook.DepartmentConfig;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDepartment;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import org.apache.commons.lang3.time.FastDateFormat;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Repository;
@@ -24,20 +29,22 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 @Repository
 public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentConfigDao {
 
-    private RowMapper<DepartmentConfig> rowMapper = new RowMapper<DepartmentConfig>() {
-        @Override
-        public DepartmentConfig mapRow(ResultSet rs, int rowNum) throws SQLException {
-            DepartmentConfig departmentConfig = new DepartmentConfig();
-            RefBookDepartment department = new RefBookDepartment();
-            department.setId(rs.getInt("department_id"));
-            departmentConfig.setDepartment(department);
-            return departmentConfig;
-        }
-    };
+    private DepartmentConfig getById(long id) {
+        return getJdbcTemplate().queryForObject("select department_id from ref_book_ndfl_detail where id = ?", new RowMapper<DepartmentConfig>() {
+            @Override
+            public DepartmentConfig mapRow(ResultSet rs, int rowNum) throws SQLException {
+                DepartmentConfig departmentConfig = new DepartmentConfig();
+                RefBookDepartment department = new RefBookDepartment();
+                department.setId(rs.getInt("department_id"));
+                departmentConfig.setDepartment(department);
+                return departmentConfig;
+            }
+        }, id);
+    }
 
     @Override
     public SecuredEntity getSecuredEntity(long id) {
-        return getJdbcTemplate().queryForObject("select department_id from ref_book_ndfl_detail where id = ?", rowMapper, id);
+        return getById(id);
     }
 
     @Override
@@ -97,54 +104,110 @@ public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentCon
     }
 
     @Override
+    public DepartmentConfig findByKppAndOktmoAndDate(String kpp, String oktmoCode, Date date) {
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("kpp", kpp);
+        params.addValue("oktmoCode", oktmoCode);
+        params.addValue("date", date);
+        return getNamedParameterJdbcTemplate().queryForObject("" +
+                        "with department_config as (\n" +
+                        "  select * from (\n" +
+                        "    select rbnd.*, lead(version) over(partition by rbnd.record_id order by version) - interval '1' DAY version_end\n" +
+                        "    from ref_book_ndfl_detail rbnd\n" +
+                        "    where status != -1\n" +
+                        "  ) where status = 0\n" +
+                        ")\n" +
+                        "select " + DepartmentConfigMapper.FIELDS + " \n" +
+                        "from department_config dc\n" +
+                        "join ref_book_oktmo oktmo on oktmo.id = dc.oktmo \n" +
+                        "left join ref_book_present_place pp on pp.id = dc.present_place\n" +
+                        "left join ref_book_reorganization reorg on reorg.id = dc.reorg_form_code\n" +
+                        "left join ref_book_signatory_mark sign on sign.id = dc.signatory_id\n" +
+                        "where kpp = :kpp and oktmo.code = :oktmoCode and :date between dc.version and dc.version_end ",
+                params, new DepartmentConfigMapper());
+    }
+
+    private final static String DEPARTMENT_CONFIG_BY_TB_AND_PERIOD_SQL = "" +
+            "with period as (\n" +
+            "  select * from report_period where id = :reportPeriodId\n" +
+            "),\n" +
+            "department_config as (\n" +
+            "  select * from (\n" +
+            "    select rbnd.*, lead(version) over(partition by rbnd.record_id order by version) - interval '1' DAY version_end\n" +
+            "    from ref_book_ndfl_detail rbnd\n" +
+            "    where status != -1\n" +
+            "  ) where status = 0\n" +
+            "),\n" +
+            "actual_vers as (\n" +
+            "  select dc.kpp, dc.oktmo, max(version) version \n" +
+            "  from department_config dc, period\n" +
+            "  where department_id = :departmentId and (\n" +
+            "    dc.version <= sysdate and (dc.version_end is null or sysdate <= dc.version_end) or\n" +
+            "    dc.version <= period.end_date and (dc.version_end is null or dc.version_end >= period.start_date)\n" +
+            "  )\n" +
+            "  group by dc.kpp, dc.oktmo\n" +
+            "),\n" +
+            "actual_department_config as (\n" +
+            "  select " + DepartmentConfigMapper.FIELDS +
+            "  from department_config dc\n" +
+            "  join actual_vers av on av.kpp = dc.kpp and av.oktmo = dc.oktmo and av.version = dc.version\n" +
+            "  join ref_book_oktmo oktmo on oktmo.id = dc.oktmo\n" +
+            "  left join ref_book_present_place pp on pp.id = dc.present_place\n" +
+            "  left join ref_book_reorganization reorg on reorg.id = dc.reorg_form_code\n" +
+            "  left join ref_book_signatory_mark sign on sign.id = dc.signatory_id\n" +
+            ")\n";
+
+    @Override
+    public List<Pair<KppOktmoPair, DepartmentConfig>> findAllByDeclaration(DeclarationData declaration) {
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("reportPeriodId", declaration.getReportPeriodId());
+        params.addValue("departmentId", declaration.getDepartmentId());
+        String baseSelect = DEPARTMENT_CONFIG_BY_TB_AND_PERIOD_SQL;
+        baseSelect += "" +
+                "select * from (\n" +
+                "   select npi.kpp dec_kpp, npi.oktmo dec_oktmo, dc.* \n" +
+                "   from (" +
+                "       select distinct kpp, oktmo from ndfl_person np\n" +
+                "       join ndfl_person_income npi on npi.ndfl_person_id = np.id" +
+                "       where np.declaration_data_id = :declarationId" +
+                "   ) npi\n" +
+                "   left join actual_department_config dc on dc.kpp = npi.kpp and dc.oktmo_code = npi.oktmo\n" +
+                ")";
+        params.addValue("declarationId", declaration.getId());
+
+        return getNamedParameterJdbcTemplate().query(baseSelect, params, new RowMapper<Pair<KppOktmoPair, DepartmentConfig>>() {
+            @Override
+            public Pair<KppOktmoPair, DepartmentConfig> mapRow(ResultSet rs, int rowNum) throws SQLException {
+                DepartmentConfig departmentConfig = null;
+                if (SqlUtils.getLong(rs, "id") != null) {
+                    departmentConfig = new DepartmentConfigMapper().mapRow(rs, rowNum);
+                }
+                return new Pair<>(new KppOktmoPair(rs.getString("dec_kpp"), rs.getString("dec_oktmo")), departmentConfig);
+            }
+        });
+    }
+
+    @Override
     public PagingResult<ReportFormCreationKppOktmoPair> findAllKppOktmoPairsByFilter(ReportFormCreationKppOktmoPairFilter filter, PagingParams pagingParams) {
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("reportPeriodId", filter.getReportPeriodId());
         params.addValue("departmentId", filter.getDepartmentId());
-        String baseSelect = "" +
-                "with \n" +
-                "period as (\n" +
-                "  select * from report_period where id = :reportPeriodId\n" +
-                "),\n" +
-                "dep_conf as (\n" +
-                "  select * from (\n" +
-                "    select rbnd.*, lead(version) over(partition by rbnd.record_id order by version) - interval '1' DAY version_end\n" +
-                "    from ref_book_ndfl_detail rbnd\n" +
-                "    where status != -1\n" +
-                "  ) where status = 0\n" +
-                "),\n" +
-                "actual_vers as (\n" +
-                "  select dep_conf.kpp, dep_conf.oktmo, max(version) version \n" +
-                "  from dep_conf, period\n" +
-                "  where department_id = :departmentId and (\n" +
-                "    dep_conf.version <= sysdate and (dep_conf.version_end is null or sysdate <= dep_conf.version_end) or\n" +
-                "    dep_conf.version <= period.end_date and (dep_conf.version_end is null or dep_conf.version_end >= period.start_date)\n" +
-                "  )\n" +
-                "  group by dep_conf.kpp, dep_conf.oktmo\n" +
-                ")\n" +
-                ", actual_dep_conf as (\n" +
-                "  select dep_conf.id, dep_conf.kpp, oktmo.code oktmo, " +
-                "   case when dep_conf.version_end < sysdate then 'действует до ' || to_char(dep_conf.version_end, 'dd.mm.yyyy') end as relevance" +
-                "  from dep_conf\n" +
-                "  join actual_vers av on av.kpp = dep_conf.kpp and av.oktmo = dep_conf.oktmo and av.version = dep_conf.version\n" +
-                "  join ref_book_oktmo oktmo on oktmo.id = dep_conf.oktmo\n" +
-                ")\n";
+        String baseSelect = DEPARTMENT_CONFIG_BY_TB_AND_PERIOD_SQL;
         if (filter.getDeclarationId() != null) {
-            baseSelect += "select * from (\n" +
-                    "   select dep_conf.id, npi.kpp, npi.oktmo, \n" +
-                    "      case when dep_conf.id is null then 'не относится к ТБ в периоде' \n" +
-                    "      else dep_conf.relevance end as relevance \n" +
+            baseSelect += "" +
+                    "select * from (\n" +
+                    "   select dc.id, npi.kpp kpp_, npi.oktmo oktmo_, dc.version_end\n" +
                     "   from (" +
                     "       select distinct kpp, oktmo from ndfl_person np\n" +
                     "       join ndfl_person_income npi on npi.ndfl_person_id = np.id" +
                     "       where np.declaration_data_id = :declarationId" +
                     "   ) npi\n" +
-                    "   left join actual_dep_conf dep_conf on dep_conf.kpp = npi.kpp and dep_conf.oktmo = npi.oktmo\n" +
+                    "   left join actual_department_config dc on dc.kpp = npi.kpp and dc.oktmo_code = npi.oktmo\n" +
                     ")";
             params.addValue("declarationId", filter.getDeclarationId());
         } else {
-            baseSelect += "select dep_conf.id, dep_conf.kpp, dep_conf.oktmo, dep_conf.relevance\n" +
-                    "from actual_dep_conf dep_conf ";
+            baseSelect += "select dc.id, dc.kpp kpp_, dc.oktmo_code oktmo_, dc.version_end\n" +
+                    "from actual_department_config dc ";
         }
 
         if (!isEmpty(filter.getName())) {
@@ -159,9 +222,15 @@ public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentCon
                     public ReportFormCreationKppOktmoPair mapRow(ResultSet rs, int rowNum) throws SQLException {
                         ReportFormCreationKppOktmoPair kppOktmoPair = new ReportFormCreationKppOktmoPair();
                         kppOktmoPair.setId(rs.getLong("rn"));
-                        kppOktmoPair.setKpp(rs.getString("kpp"));
-                        kppOktmoPair.setOktmo(rs.getString("oktmo"));
-                        kppOktmoPair.setRelevance(rs.getString("relevance"));
+                        kppOktmoPair.setKpp(rs.getString("kpp_"));
+                        kppOktmoPair.setOktmo(rs.getString("oktmo_"));
+                        Long departmentConfigId = SqlUtils.getLong(rs, "id");
+                        Date versionEnd = rs.getDate("version_end");
+                        if (departmentConfigId == null) {
+                            kppOktmoPair.setRelevance("не относится к ТБ в периоде");
+                        } else if (versionEnd != null && versionEnd.before(new Date())) {
+                            kppOktmoPair.setRelevance("действует до " + FastDateFormat.getInstance("dd.MM.yyyy").format(versionEnd));
+                        }
                         return kppOktmoPair;
                     }
                 });

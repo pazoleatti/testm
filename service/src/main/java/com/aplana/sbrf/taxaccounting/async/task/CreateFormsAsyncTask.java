@@ -2,14 +2,7 @@ package com.aplana.sbrf.taxaccounting.async.task;
 
 import com.aplana.sbrf.taxaccounting.async.AsyncManager;
 import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
-import com.aplana.sbrf.taxaccounting.model.AsyncQueue;
-import com.aplana.sbrf.taxaccounting.model.AsyncTaskData;
-import com.aplana.sbrf.taxaccounting.model.AsyncTaskState;
-import com.aplana.sbrf.taxaccounting.model.AsyncTaskType;
-import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
@@ -58,21 +51,27 @@ public class CreateFormsAsyncTask extends AbstractAsyncTask {
 
     @Override
     protected BusinessLogicResult executeBusinessLogic(final AsyncTaskData taskData, Logger logger) {
-        Map<String, Object> params = taskData.getParams();
-        Integer declarationTypeId = (Integer) params.get("declarationTypeId");
-        Long knfId = (Long) params.get("declarationDataId");
-        Integer departmentReportPeriodId = (Integer) params.get("departmentReportPeriodId");
-        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.fetchOne(departmentReportPeriodId);
-        boolean adjustNegativeValues = (Boolean) params.get("adjustNegativeValues");
+        Map<String, Object> taskParams = taskData.getParams();
+        ReportFormsCreationParams params = (ReportFormsCreationParams) taskParams.get("params");
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(taskData.getUserId()));
 
-        declarationDataService.createReportForms(knfId, departmentReportPeriod, declarationTypeId, adjustNegativeValues, new LockStateLogger() {
-            @Override
-            public void updateState(AsyncTaskState state) {
-                asyncManager.updateState(taskData.getId(), state);
-            }
-        }, logger, userInfo);
+        // TODO 6-НДФЛ сделано по-новому, 2-НДФЛ будет потом
+        if (params.getDeclarationTypeId() == DeclarationType.NDFL_6) {
+            declarationDataService.createReportForms(params, new LockStateLogger() {
+                @Override
+                public void updateState(AsyncTaskState state) {
+                    asyncManager.updateState(taskData.getId(), state);
+                }
+            }, logger, userInfo);
+        } else {
+            declarationDataService.createReportForms2Ndfl(params, new LockStateLogger() {
+                @Override
+                public void updateState(AsyncTaskState state) {
+                    asyncManager.updateState(taskData.getId(), state);
+                }
+            }, logger, userInfo);
+        }
         return new BusinessLogicResult(true, null);
     }
 

@@ -7,8 +7,12 @@ import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.script.service.DeclarationService;
 import com.aplana.sbrf.taxaccounting.service.ConfigurationService;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 public abstract class AbstractScriptClass {
+    protected static final Log LOG = LogFactory.getLog(AbstractScriptClass.class);
+
     public Logger logger;
     protected FormDataEvent formDataEvent;
     protected groovy.lang.Script scriptClass;

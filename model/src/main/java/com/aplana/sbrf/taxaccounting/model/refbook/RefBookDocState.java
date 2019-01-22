@@ -1,29 +1,31 @@
 package com.aplana.sbrf.taxaccounting.model.refbook;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 /**
  * Состояние ЭД
- *
- * @author dloshkarev
  */
+@Getter
+@Setter
+@NoArgsConstructor
 public class RefBookDocState extends RefBookSimple<Long> {
+    public final static RefBookDocState NOT_SENT = new RefBookDocState(1, "Не отправлен в ФНС");
+    public final static RefBookDocState SENT = new RefBookDocState(2, "Отправлен в ФНС");
+    public final static RefBookDocState ACCEPTED = new RefBookDocState(3, "Принят");
+    public final static RefBookDocState REJECTED = new RefBookDocState(4, "Отклонен");
+    public final static RefBookDocState WORKED_OUT = new RefBookDocState(5, "Успешно отработан");
+    public final static RefBookDocState REQUIRES_CLARIFICATION = new RefBookDocState(6, "Требует уточнения");
+    public final static RefBookDocState ERROR = new RefBookDocState(7, "Ошибка");
+
     //Наименование состояния
     private String name;
     //Код формы по КНД
     private String knd;
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
+    public RefBookDocState(long id, String name) {
+        this.id = id;
         this.name = name;
-    }
-
-    public String getKnd() {
-        return knd;
-    }
-
-    public void setKnd(String knd) {
-        this.knd = knd;
     }
 }

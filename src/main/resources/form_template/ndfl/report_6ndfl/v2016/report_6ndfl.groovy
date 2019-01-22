@@ -3,14 +3,15 @@ package form_template.ndfl.report_6ndfl.v2016
 import com.aplana.sbrf.taxaccounting.AbstractScriptClass
 import com.aplana.sbrf.taxaccounting.model.*
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
+import com.aplana.sbrf.taxaccounting.model.log.Logger
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment
+import com.aplana.sbrf.taxaccounting.model.refbook.DepartmentConfig
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookKnfType
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDocState
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
-import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter
 import com.aplana.sbrf.taxaccounting.model.util.Pair
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
@@ -18,12 +19,23 @@ import com.aplana.sbrf.taxaccounting.script.SharedConstants
 import com.aplana.sbrf.taxaccounting.script.dao.BlobDataService
 import com.aplana.sbrf.taxaccounting.script.service.*
 import com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils
+import com.aplana.sbrf.taxaccounting.service.LockDataService
+import com.aplana.sbrf.taxaccounting.service.ReportService
+import com.aplana.sbrf.taxaccounting.service.component.lock.locker.DeclarationLocker
+import com.aplana.sbrf.taxaccounting.service.refbook.DepartmentConfigService
+import com.aplana.sbrf.taxaccounting.utils.ZipUtils
 import groovy.transform.TypeChecked
 import groovy.transform.TypeCheckingMode
 import groovy.xml.MarkupBuilder
+import org.apache.commons.io.FileUtils
+import org.apache.commons.io.IOUtils
 import org.apache.commons.lang3.StringUtils
 import org.apache.poi.ss.usermodel.CellStyle
 import org.apache.poi.xssf.usermodel.*
+
+import java.nio.charset.Charset
+
+import static java.util.Collections.singletonList
 
 new Report6Ndfl(this).run()
 
@@ -31,152 +43,61 @@ new Report6Ndfl(this).run()
 @SuppressWarnings("GrMethodMayBeStatic")
 class Report6Ndfl extends AbstractScriptClass {
 
-    Long knfId
+    ReportFormsCreationParams reportFormsCreationParams
     DeclarationData declarationData
     DeclarationTemplate declarationTemplate
     DepartmentReportPeriod departmentReportPeriod
     ReportPeriod reportPeriod
     Department department
-    TAUserInfo userInfo
     NdflPersonService ndflPersonService
     RefBookFactory refBookFactory
     ReportPeriodService reportPeriodService
     DepartmentService departmentService
-    Boolean needSources
-    Boolean light
-    FormSources sources
+    DeclarationLocker declarationLocker
+    LockDataService lockDataService
     ScriptSpecificDeclarationDataReportHolder scriptSpecificReportHolder
     DepartmentReportPeriodService departmentReportPeriodService
-    Writer xml
+    DepartmentConfigService departmentConfigService
+    SourceService sourceService
+    ReportService reportService
     RefBookService refBookService
-    Map<String, Object> calculateParams
-    BlobDataService blobDataServiceDaoImpl
-    File xmlFile
-    List<Long> ndflPersonKnfId
-    Map<Long, Map<String, Object>> formMap
-    Map<String, Object> scriptParams
-    Boolean excludeIfNotExist
-    State stateRestriction
+    BlobDataService blobDataService
     String applicationVersion
     Map<String, Object> paramMap
-    boolean adjustNegativeValues
-
-    private Report6Ndfl() {
-    }
 
     @TypeChecked(TypeCheckingMode.SKIP)
     Report6Ndfl(scriptClass) {
         super(scriptClass)
-        if (scriptClass.getBinding().hasVariable("departmentReportPeriodService")) {
-            this.departmentReportPeriodService = (DepartmentReportPeriodService) scriptClass.getProperty("departmentReportPeriodService")
-        }
-        if (scriptClass.getBinding().hasVariable("reportPeriodService")) {
-            this.reportPeriodService = (ReportPeriodService) scriptClass.getProperty("reportPeriodService")
-        }
-        if (scriptClass.getBinding().hasVariable("departmentService")) {
-            this.departmentService = (DepartmentService) scriptClass.getProperty("departmentService")
-        }
-        if (scriptClass.getBinding().hasVariable("reportPeriodService")) {
-            this.reportPeriodService = (ReportPeriodService) scriptClass.getProperty("reportPeriodService")
-        }
-        if (scriptClass.getBinding().hasVariable("declarationData")) {
-            this.declarationData = (DeclarationData) scriptClass.getProperty("declarationData")
+        this.departmentReportPeriodService = (DepartmentReportPeriodService) getSafeProperty("departmentReportPeriodService")
+        this.reportPeriodService = (ReportPeriodService) getSafeProperty("reportPeriodService")
+        this.departmentService = (DepartmentService) getSafeProperty("departmentService")
+        this.reportPeriodService = (ReportPeriodService) getSafeProperty("reportPeriodService")
+        this.declarationData = (DeclarationData) getSafeProperty("declarationData")
+        if (this.declarationData) {
             this.declarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId)
             this.departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
             this.department = departmentService.get(departmentReportPeriod.departmentId)
             this.reportPeriod = this.departmentReportPeriod.reportPeriod
         }
-        if (scriptClass.getBinding().hasVariable("userInfo")) {
-            this.userInfo = (TAUserInfo) scriptClass.getProperty("userInfo")
-        }
-        if (scriptClass.getBinding().hasVariable("ndflPersonService")) {
-            this.ndflPersonService = (NdflPersonService) scriptClass.getProperty("ndflPersonService")
-        }
-        if (scriptClass.getBinding().hasVariable("scriptSpecificReportHolder")) {
-            this.scriptSpecificReportHolder = (ScriptSpecificDeclarationDataReportHolder) scriptClass.getProperty("scriptSpecificReportHolder")
-        }
-        if (scriptClass.getBinding().hasVariable("refBookFactory")) {
-            this.refBookFactory = (RefBookFactory) scriptClass.getProperty("refBookFactory")
-        }
-        if (scriptClass.getBinding().hasVariable("needSources")) {
-            this.needSources = (Boolean) scriptClass.getProperty("needSources")
-        }
-        if (scriptClass.getBinding().hasVariable("light")) {
-            this.light = (Boolean) scriptClass.getProperty("light")
-        }
-        if (scriptClass.getBinding().hasVariable("sources")) {
-            this.sources = (FormSources) scriptClass.getProperty("sources")
-        }
-        if (scriptClass.getBinding().hasVariable("xml")) {
-            this.xml = (Writer) scriptClass.getProperty("xml")
-        }
-        if (scriptClass.getBinding().hasVariable("refBookService")) {
-            this.refBookService = (RefBookService) scriptClass.getBinding().getProperty("refBookService")
-        }
-        if (scriptClass.getBinding().hasVariable("calculateParams")) {
-            this.calculateParams = (Map<String, Object>) scriptClass.getProperty("calculateParams")
-        }
-        if (scriptClass.getBinding().hasVariable("blobDataServiceDaoImpl")) {
-            this.blobDataServiceDaoImpl = (BlobDataService) scriptClass.getBinding().getProperty("blobDataServiceDaoImpl")
-        }
-        if (scriptClass.getBinding().hasVariable("xmlFile")) {
-            this.xmlFile = (File) scriptClass.getBinding().getProperty("xmlFile")
-        }
-        if (scriptClass.getBinding().hasVariable("ndflPersonKnfId")) {
-            this.ndflPersonKnfId = (List<Long>) scriptClass.getBinding().getProperty("ndflPersonKnfId")
-        }
-        if (scriptClass.getBinding().hasVariable("formMap")) {
-            this.formMap = (Map<Long, Map<String, Object>>) scriptClass.getBinding().getProperty("formMap")
-        }
-        if (scriptClass.getBinding().hasVariable("scriptParams")) {
-            this.scriptParams = (Map<String, Object>) scriptClass.getBinding().getProperty("scriptParams")
-        }
-        if (scriptClass.getBinding().hasVariable("excludeIfNotExist")) {
-            this.excludeIfNotExist = (Boolean) scriptClass.getBinding().getProperty("excludeIfNotExist")
-        }
-        if (scriptClass.getBinding().hasVariable("stateRestriction")) {
-            this.stateRestriction = (State) scriptClass.getBinding().getProperty("stateRestriction")
-        }
-        if (scriptClass.getBinding().hasVariable("applicationVersion")) {
-            this.applicationVersion = (String) scriptClass.getBinding().getProperty("applicationVersion")
-        }
-        if (scriptClass.getBinding().hasVariable("paramMap")) {
-            this.paramMap = (Map<String, Object>) scriptClass.getBinding().getProperty("paramMap")
-        }
-        if (scriptClass.getBinding().hasVariable("knfId")) {
-            this.knfId = (Long) scriptClass.getBinding().getProperty("knfId")
-        }
-        if (scriptClass.getBinding().hasVariable("adjustNegativeValues")) {
-            this.adjustNegativeValues = (Boolean) scriptClass.getBinding().getProperty("adjustNegativeValues")
-        }
+        this.ndflPersonService = (NdflPersonService) getSafeProperty("ndflPersonService")
+        this.departmentConfigService = (DepartmentConfigService) getSafeProperty("departmentConfigService")
+        this.sourceService = (SourceService) getSafeProperty("sourceService")
+        this.reportService = (ReportService) getSafeProperty("reportService")
+        this.refBookFactory = (RefBookFactory) getSafeProperty("refBookFactory")
+        this.refBookService = (RefBookService) getSafeProperty("refBookService")
+        this.blobDataService = (BlobDataService) getSafeProperty("blobDataServiceDaoImpl")
+        this.declarationLocker = (DeclarationLocker) getSafeProperty("declarationLocker")
+        this.lockDataService = (LockDataService) getSafeProperty("lockDataService")
+
+        this.scriptSpecificReportHolder = (ScriptSpecificDeclarationDataReportHolder) getSafeProperty("scriptSpecificReportHolder")
+        this.applicationVersion = (String) getSafeProperty("applicationVersion")
+        this.paramMap = (Map<String, Object>) getSafeProperty("paramMap")
+        this.reportFormsCreationParams = (ReportFormsCreationParams) getSafeProperty("reportFormsCreationParams")
     }
 
     @Override
     public void run() {
         switch (formDataEvent) {
-            case FormDataEvent.CALCULATE: //формирование xml
-                println "!CALCULATE!"
-                try {
-                    buildXml(xml)
-                } catch (Exception e) {
-                    calculateParams.put("notReplaceXml", true)
-                    calculateParams.put("createForm", false)
-                    String strCorrPeriod = getCorrectionDateExpression(departmentReportPeriod)
-                    String msg = String.format("Не удалось создать форму \"%s\" за период \"%s\", подразделение: \"%s\", КПП: \"%s\", ОКТМО: \"%s\". Ошибка: %s",
-                            declarationTemplate.getName(),
-                            reportPeriod.getTaxPeriod().getYear() + ", " + reportPeriod.getName() + strCorrPeriod,
-                            department.getName(),
-                            declarationData.kpp,
-                            declarationData.oktmo,
-                            e.getMessage())
-                    logger.warn(msg)
-                } finally {
-                    break
-                }
-            case FormDataEvent.GET_SOURCES: //формирование списка источников
-                println "!GET_SOURCES!"
-                getSources()
-                break
             case FormDataEvent.CREATE_SPECIFIC_REPORT: //создание спецефичного отчета
                 println "!CREATE_SPECIFIC_REPORT!"
                 createSpecificReport()
@@ -191,9 +112,6 @@ class Report6Ndfl extends AbstractScriptClass {
         }
     }
 
-    // Альяс для списка идентифокаторов физлиц из КНФ
-    final String NDFL_PERSON_KNF_ID = "ndflPersonKnfId"
-
     // Коды, определяющие налоговый (отчётный) период
     final long REF_BOOK_PERIOD_CODE_ID = RefBook.Id.PERIOD_CODE.id
 
@@ -203,18 +121,14 @@ class Report6Ndfl extends AbstractScriptClass {
     // Признак лица, подписавшего документ
     final long REF_BOOK_MARK_SIGNATORY_CODE_ID = RefBook.Id.MARK_SIGNATORY_CODE.id
 
-    final long REF_BOOK_OKTMO_ID = 96
     final long REPORT_PERIOD_TYPE_ID = 8
 
     final String DATE_FORMAT_UNDERLINE = "yyyyMMdd"
     final String DATE_FORMAT_FULL = "yyyy-MM-dd_HH-mm-ss"
-    int pairKppOktmoSize = 0
     final String OUTCOMING_ATTACH_FILE_TYPE = "Исходящий в ФНС"
 
     // Кэш провайдеров
     Map<Long, RefBookDataProvider> providerCache = [:]
-
-    Map<Integer, List<Map<String, RefBookValue>>> departmentConfigsCache = [:]
 
     // Кэш для справочников
     Map<String, Map<String, RefBookValue>> refBookCache = [:]
@@ -226,29 +140,61 @@ class Report6Ndfl extends AbstractScriptClass {
     Map<Long, NdflPerson> ndflpersonFromRNUPrimary = [:]
 
     /************************************* СОЗДАНИЕ XML *****************************************************************/
-    def buildXml(def writer) {
-        buildXml(writer, false)
+    Xml buildXml(DepartmentConfig departmentConfig) {
+        Xml xml = null
+        File xmlFile = null
+        Writer fileWriter = null
+        try {
+            xmlFile = File.createTempFile("file_for_validate", ".xml")
+            fileWriter = new OutputStreamWriter(new FileOutputStream(xmlFile), Charset.forName("windows-1251"))
+            fileWriter.write("<?xml version=\"1.0\" encoding=\"windows-1251\"?>")
+
+            xml = buildXml(departmentConfig, fileWriter)
+
+            if (xml) {
+                //Архивирование перед сохранением в базу
+                xml.xmlFile = xmlFile
+            }
+            return xml
+        } catch (IOException e) {
+            throw new ServiceException("Ошибка при формировании файла XML", e)
+        } finally {
+            IOUtils.closeQuietly(fileWriter)
+            if (!xml) {
+                deleteTempFile(xmlFile)
+            }
+        }
     }
 
-    def buildXmlForSpecificReport(def writer) {
-        buildXml(writer, true)
+    Xml buildXml(DepartmentConfig departmentConfig, def writer) {
+        try {
+            return buildXml(departmentConfig, writer, false)
+        } catch (Exception e) {
+            logger.warn("Не удалось создать форму \"$declarationTemplate.name\" за период \"${formatPeriod(departmentReportPeriod)}\", " +
+                    "подразделение: \"$department.name\", КПП: \"$declarationData.kpp\", ОКТМО: \"$declarationData.oktmo\". Ошибка: $e.message")
+        }
+        return null
+    }
+
+    Xml buildXmlForSpecificReport(def writer) {
+        def departmentConfig = departmentConfigService.findByKppAndOktmoAndDate(declarationData.kpp, declarationData.oktmo, reportPeriod.endDate)
+        return buildXml(departmentConfig, writer, true)
     }
 
     @TypeChecked(TypeCheckingMode.SKIP)
-    def buildXml(def writer, boolean isForSpecificReport) {
+    Xml buildXml(DepartmentConfig departmentConfig, def writer, boolean isForSpecificReport) {
         ScriptUtils.checkInterrupted()
+        Xml xml = new Xml()
+
         ConfigurationParamModel configurationParamModel = declarationService.getAllConfig(userInfo)
         // Получим ИНН из справочника "Общие параметры"
         def sberbankInnParam = configurationParamModel?.get(ConfigurationParam.SBERBANK_INN)?.get(0)?.get(0)
         // Получим код НО пром из справочника "Общие параметры"
         def kodNoProm = configurationParamModel?.get(ConfigurationParam.NO_CODE)?.get(0)?.get(0)
-        def departmentParamIncomeRow = getDepartmentConfigByKppAndOktmo(declarationData.kpp, declarationData.oktmo)
 
         // Код периода
         def periodCode = getRefBookValue(REF_BOOK_PERIOD_CODE_ID, reportPeriod?.dictTaxPeriodId)?.CODE?.stringValue
 
-        // Коды представления налоговой декларации по месту нахождения (учёта)
-        def poMestuParam = getRefPresentPlace().get(departmentParamIncomeRow?.PRESENT_PLACE?.referenceValue)
         String strCorrPeriod = getCorrectionDateExpression(departmentReportPeriod)
         def errMsg = sprintf("Не удалось создать форму %s, за %s, подразделение: %s, КПП: %s, ОКТМО: %s.",
                 DeclarationType.NDFL_6_NAME,
@@ -256,52 +202,42 @@ class Report6Ndfl extends AbstractScriptClass {
                 department.getName(),
                 declarationData.kpp,
                 declarationData.oktmo)
-        if (poMestuParam == null) {
+        if (!departmentConfig.presentPlace) {
             logger.warn(errMsg + " В \"Настройках подразделений\" не указан \"Код места, по которому представляется документ\".")
-            calculateParams.put("notReplaceXml", true)
-            calculateParams.put("createForm", false)
-            return
-        }
-        def taxPlaceTypeCode = poMestuParam?.CODE?.value
-        if (taxPlaceTypeCode == null) {
-            logger.warn(errMsg + " \"Код места, по которому представляется документ\", не соответствует справочнику \"Коды места представления расчета\" в \"Настройках подразделений\".")
-            calculateParams.put("notReplaceXml", true)
-            calculateParams.put("createForm", false)
-            return
+            return null
         }
 
         // Признак лица, подписавшего документ
-        def signatoryId = getRefBookValue(REF_BOOK_MARK_SIGNATORY_CODE_ID, departmentParamIncomeRow?.SIGNATORY_ID?.referenceValue)?.CODE?.numberValue
+        def signatoryId = departmentConfig.signatoryMark?.getCode()
 
         // Текущая дата
-        def currDate = new Date()
-
-        def fileName = generateXmlFileId(departmentParamIncomeRow, sberbankInnParam, declarationData.kpp, kodNoProm)
+        xml.date = new Date()
+        xml.fileName = generateXmlFileId(departmentConfig, sberbankInnParam, declarationData.kpp, kodNoProm)
         def builder = new MarkupBuilder(writer)
         builder.setDoubleQuotes(true)
         builder.setOmitNullAttributes(true)
         builder.Файл(
-                ИдФайл: fileName,
+                ИдФайл: xml.fileName,
                 ВерсПрог: applicationVersion,
                 ВерсФорм: "5.02"
         ) {
             Документ(
                     КНД: "1151099",
-                    ДатаДок: currDate.format(SharedConstants.DATE_FORMAT),
-                    Период: getPeriod(departmentParamIncomeRow, periodCode),
+                    ДатаДок: xml.date.format(SharedConstants.DATE_FORMAT),
+                    Период: getPeriod(departmentConfig, periodCode),
                     ОтчетГод: reportPeriod.taxPeriod.year,
-                    КодНО: departmentParamIncomeRow?.TAX_ORGAN_CODE?.value,
+                    КодНО: departmentConfig.taxOrganCode,
                     НомКорр: sprintf('%02d', declarationData.correctionNum),
-                    ПоМесту: taxPlaceTypeCode
+                    ПоМесту: departmentConfig.presentPlace.code
             ) {
                 def svNP = ["ОКТМО": declarationData.oktmo]
                 // Атрибут Тлф необязателен
-                if (departmentParamIncomeRow.PHONE && !departmentParamIncomeRow.PHONE.empty) {
-                    svNP.put("Тлф", departmentParamIncomeRow.PHONE)
+                if (departmentConfig.phone) {
+                    svNP.put("Тлф", departmentConfig.phone)
                 }
                 СвНП(svNP) {
                     НПЮЛ(
-                            НаимОрг: departmentParamIncomeRow.NAME,
+                            НаимОрг: departmentConfig.name,
                             ИННЮЛ: sberbankInnParam,
                             КПП: declarationData.kpp
                     )
@@ -310,36 +246,33 @@ class Report6Ndfl extends AbstractScriptClass {
                         ПрПодп: signatoryId
                 ) {
                     // Узел ФИО необязателен
-                    if (departmentParamIncomeRow.SIGNATORY_SURNAME && !departmentParamIncomeRow.SIGNATORY_SURNAME.empty) {
-                        def fio = ["Фамилия": departmentParamIncomeRow.SIGNATORY_SURNAME, "Имя": departmentParamIncomeRow.SIGNATORY_FIRSTNAME]
+                    if (departmentConfig.signatorySurName) {
+                        def fio = ["Фамилия": departmentConfig.signatorySurName, "Имя": departmentConfig.signatoryFirstName]
                         // Атрибут Отчество необязателен
-                        if (departmentParamIncomeRow.SIGNATORY_LASTNAME && !departmentParamIncomeRow.SIGNATORY_LASTNAME.empty) {
-                            fio.put("Отчество", departmentParamIncomeRow.SIGNATORY_LASTNAME)
+                        if (departmentConfig.signatoryLastName) {
+                            fio.put("Отчество", departmentConfig.signatoryLastName)
                         }
                         ФИО(fio) {}
                     }
                     if (signatoryId == 2) {
-                        def svPred = ["НаимДок": departmentParamIncomeRow.APPROVE_DOC_NAME]
-                        if (departmentParamIncomeRow.APPROVE_ORG_NAME && !departmentParamIncomeRow.APPROVE_ORG_NAME.empty) {
-                            svPred.put("НаимОрг", departmentParamIncomeRow.APPROVE_ORG_NAME)
+                        def svPred = ["НаимДок": departmentConfig.approveDocName]
+                        if (departmentConfig.approveOrgName) {
+                            svPred.put("НаимОрг", departmentConfig.approveOrgName)
                         }
                         СвПред(svPred) {}
                     }
                 }
                 НДФЛ6() {
                     //Все доходы
-                    def ndflPersonIncomeList = []
-                    // Группировка id ndflPerson в список по 1000 штук, поскольку Oracle не работает со списком размером более 1000
-                    def ndflPersonidForSearch = ndflPersonKnfId.collate(1000)
-
-                    int personCount = 0
-
-                    // Поиск и добавление доходов
-                    ndflPersonidForSearch.each {
-                        ScriptUtils.checkInterrupted()
-                        ndflPersonIncomeList.addAll(ndflPersonService.findIncomesForPersonByKppOktmo(it, declarationData.kpp, declarationData.oktmo))
-                        personCount += ndflPersonService.findInpCountWithPositiveIncomeByPersonIdsAndAccruedIncomeDatePeriod(it, reportPeriod.startDate, reportPeriod.endDate)
+                    def ndflPersonIncomeList = ndflPersonService.findAllIncomesByDeclarationIdAndKppAndOktmo(sourceKnf.id, departmentConfig.kpp, departmentConfig.oktmo.code)
+                    Set<Long> personIds = []
+                    for (def income : ndflPersonIncomeList) {
+                        if (income.incomeAccruedDate && reportPeriod.startDate <= income.incomeAccruedDate && income.incomeAccruedDate <= reportPeriod.endDate &&
+                                income.incomeAccruedSumm > 0) {
+                            personIds.add(income.ndflPersonId)
+                        }
                     }
+                    int personCount = personIds.size()
                     // Сумма удержанная
                     BigDecimal incomeWithholdingTotal = new BigDecimal(0)
                     // Сумма не удержанная
@@ -538,7 +471,7 @@ class Report6Ndfl extends AbstractScriptClass {
                                 def value = section2Entry.value
 
                                 // Корректировка отрицательных значений
-                                if (adjustNegativeValues) {
+                                if (declarationData.isAdjustNegativeValues()) {
                                     if (value.incomeSum > 0) {
                                         def tmp = value.incomeSum
                                         value.incomeSum += minusIncome
@@ -586,14 +519,12 @@ class Report6Ndfl extends AbstractScriptClass {
                 }
             }
         }
-        ScriptUtils.checkInterrupted()
-        saveFileInfo(currDate, fileName)
 
-        //    println(writer)
+        return xml
     }
 
-    def saveFileInfo(Date currDate, String fileName) {
-        String fileUuid = blobDataServiceDaoImpl.create(xmlFile, fileName + ".xml", new Date())
+    def saveFileInfo(File xmlFile, Date currDate, String fileName) {
+        String fileUuid = blobDataService.create(xmlFile, fileName + ".xml", new Date())
         def createUser = declarationService.getSystemUserInfo().getUser()
 
         def fileTypeProvider = refBookFactory.getDataProvider(RefBook.Id.ATTACH_FILE_TYPE.getId())
@@ -654,10 +585,10 @@ class Report6Ndfl extends AbstractScriptClass {
      * DD - День формирования передаваемого файла
      * N - Идентификационный номер файла должен обеспечивать уникальность файла, длина - от 1 до 36 знаков
      */
-    def generateXmlFileId(Map<String, RefBookValue> departmentParamIncomeRow, String INN, String KPP, String kodNoProm) {
+    def generateXmlFileId(DepartmentConfig departmentConfig, String INN, String KPP, String kodNoProm) {
         String R_T = "NO_NDFL6"
         String A = kodNoProm
-        String K = departmentParamIncomeRow?.TAX_ORGAN_CODE?.stringValue
+        String K = departmentConfig.taxOrganCode
         String O = INN + KPP
         String currDate = new Date().format(DATE_FORMAT_UNDERLINE)
         String N = UUID.randomUUID().toString().toUpperCase()
@@ -668,8 +599,8 @@ class Report6Ndfl extends AbstractScriptClass {
     /**
      * Период
      */
-    String getPeriod(Map<String, RefBookValue> departmentParamIncomeRow, String periodCode) {
-        if (departmentParamIncomeRow.REORG_FORM_CODE && !departmentParamIncomeRow.REORG_FORM_CODE.empty) {
+    String getPeriod(DepartmentConfig departmentConfig, String periodCode) {
+        if (departmentConfig.reorganization) {
             String result
             switch (periodCode) {
                 case "21":
@@ -712,262 +643,181 @@ class Report6Ndfl extends AbstractScriptClass {
     }
 
     /************************************* СОЗДАНИЕ ФОРМЫ *****************************************************************/
-
-    List<Map<String, RefBookValue>> departmentParamTableList = null
-
-    final long REF_BOOK_DOC_STATE = 929
-
-    List<PairKppOktmo> getPairKppOktmoList() {
-        List<PairKppOktmo> pairKppOktmoList = []
-        String depName = department.name
-        def reportPeriod = departmentReportPeriod.reportPeriod
-        def otchetGod = reportPeriod.taxPeriod.year
-        if (departmentReportPeriod.correctionDate != null) {
-            List<DeclarationData> declarations = []
-
-            DepartmentReportPeriodFilter departmentReportPeriodFilter = new com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter()
-            departmentReportPeriodFilter.setDepartmentIdList([departmentReportPeriod.departmentId])
-            departmentReportPeriodFilter.setReportPeriodIdList([departmentReportPeriod.reportPeriod.id])
-            departmentReportPeriodFilter.setTaxTypeList([TaxType.NDFL])
-
-            List<DepartmentReportPeriod> departmentReportPeriodList = departmentReportPeriodService.getListByFilter(departmentReportPeriodFilter)
-            Iterator<DepartmentReportPeriod> it = departmentReportPeriodList.iterator()
-            while (it.hasNext()) {
-                DepartmentReportPeriod depReportPeriod = it.next()
-                if (depReportPeriod.id == declarationData.departmentReportPeriodId) {
-                    it.remove()
-                }
-                if (depReportPeriod.correctionDate != null && depReportPeriod.correctionDate > departmentReportPeriod.correctionDate) {
-                    it.remove()
-                }
-            }
-            departmentReportPeriodList.sort(true, new Comparator<DepartmentReportPeriod>() {
-                @Override
-                int compare(DepartmentReportPeriod o1, DepartmentReportPeriod o2) {
-                    if (o1.correctionDate == null) {
-                        return 1
-                    } else if (o2.correctionDate == null) {
-                        return -1
-                    } else {
-                        return o2.correctionDate.compareTo(o1.correctionDate)
-                    }
-                }
-            })
-
-            for (DepartmentReportPeriod drp in departmentReportPeriodList) {
-                declarations = declarationService.findAllByTypeIdAndPeriodId(declarationTemplate.type.id, drp.id)
-                if (!declarations.isEmpty() || drp.correctionDate == null) {
-                    break
-                }
-            }
-
-            def declarationsForRemove = []
-            declarations.each { DeclarationData declaration ->
-                ScriptUtils.checkInterrupted()
-                Long stateDocReject = (Long) getProvider(REF_BOOK_DOC_STATE).getRecords(null, null, "NAME = 'Отклонен'", null).get(0).id.value
-                Long stateDocNeedClarify = (Long) getProvider(REF_BOOK_DOC_STATE).getRecords(null, null, "NAME = 'Требует уточнения'", null).get(0).id.value
-                Long stateDocError = (Long) getProvider(REF_BOOK_DOC_STATE).getRecords(null, null, "NAME = 'Ошибка'", null).get(0).id.value
-                if (!(declarationTemplate.declarationFormKind == DeclarationFormKind.REPORTS && (declaration.docState == stateDocReject
-                        || declaration.docState == stateDocNeedClarify || declaration.docState == stateDocError))) {
-                    declarationsForRemove << declaration
-                }
-            }
-            declarations.removeAll(declarationsForRemove)
-
-            if (declarations.isEmpty() && formDataEvent == FormDataEvent.CREATE_FORMS) {
-                createCorrPeriodNotFoundMessage(true)
-                return null
-            }
-
-            declarations.each { DeclarationData declaration ->
-                PairKppOktmo pairKppOktmo = new PairKppOktmo(declaration.kpp, declaration.oktmo, declaration.taxOrganCode)
-                if (!pairKppOktmoList.contains(pairKppOktmo)) {
-                    pairKppOktmoList << pairKppOktmo
-                }
-            }
-            // Поиск КПП и ОКТМО для некорр периода
-        } else {
-            // Поиск дочерних подразделений. Поскольку могут существовать пары КПП+ОКТМО в ref_book_ndfl_detail ссылающиеся
-            // только на обособленные подразделения тербанка
-            def referencesOktmoList = []
-            List<Map<String, RefBookValue>> departmentConfigs = getDepartmentConfigs()
-            referencesOktmoList.addAll(departmentConfigs.OKTMO?.value)
-            referencesOktmoList.removeAll([null])
-            if (referencesOktmoList.isEmpty()) {
-                logger.error("Отчетность %s  для %s за период %s не сформирована. Отсутствуют настройки указанного подразделения в справочнике \"Настройки подразделений", DeclarationType.NDFL_6_NAME, depName, "$otchetGod ${reportPeriod.name}")
-                return
-            }
-            Map<Long, Map<String, RefBookValue>> oktmoForDepartment = getOktmoByIdList(referencesOktmoList)
-            departmentConfigs.each { Map<String, RefBookValue> dep ->
-                ScriptUtils.checkInterrupted()
-                if (dep.OKTMO?.value != null) {
-                    Map<String, RefBookValue> oktmo = oktmoForDepartment.get(dep.OKTMO?.value)
-                    if (oktmo != null) {
-                        PairKppOktmo pairKppOktmo = new PairKppOktmo(dep.KPP?.stringValue, oktmo.CODE.stringValue, dep?.TAX_ORGAN_CODE?.stringValue)
-                        if (!pairKppOktmoList.contains(pairKppOktmo)) {
-                            pairKppOktmoList << pairKppOktmo
-                        }
-                    }
-                }
-            }
-            if (pairKppOktmoList.isEmpty()) {
-                logger.error("Отчетность %s  для %s за период %s не сформирована. Отсутствуют настройки указанного подразделения в справочнике \"Настройки подразделений", DeclarationType.NDFL_6_NAME, depName, "$otchetGod ${reportPeriod.name}")
-                return
-            }
-        }
-        pairKppOktmoSize = pairKppOktmoList.size()
-        return pairKppOktmoList
-    }
-
-    /**
-     * Добавляет в логгер сообщение о том что не найдены формы для корректирующего периода
-     * @param departmentReportPeriod
-     * @param forDepartment
-     * @return
-     */
-    def createCorrPeriodNotFoundMessage(boolean forDepartment) {
-        DepartmentReportPeriod prevDrp = getPrevDepartmentReportPeriod(departmentReportPeriod)
-        String correctionDateExpression = getCorrectionDateExpression(departmentReportPeriod)
-        if (forDepartment) {
-            logger.error("Уточненная отчетность $DeclarationType.NDFL_6_NAME для ${department.name} за период ${departmentReportPeriod.reportPeriod.taxPeriod.year}, ${departmentReportPeriod.reportPeriod.name}" + correctionDateExpression + " не сформирована. Для подразделения ${department.name} и периода ${prevDrp.reportPeriod.taxPeriod.year}, ${prevDrp.reportPeriod.name}" + getCorrectionDateExpression(prevDrp) + " не найдены отчетные формы, \"Состояние ЭД\" которых равно \"Отклонен\", \"Требует уточнения\" или \"Ошибка\".")
-        } else {
-            logger.error("Уточненная отчетность $DeclarationType.NDFL_6_NAME для ${department.name} за период ${departmentReportPeriod.reportPeriod.taxPeriod.year}, ${departmentReportPeriod.reportPeriod.name}" + correctionDateExpression + " не сформирована. Для заданного В отчетных формах подразделения ${department.name} и периода ${prevDrp.reportPeriod.taxPeriod.year}, ${prevDrp.reportPeriod.name}" + getCorrectionDateExpression(prevDrp) + " не найдены физические лица, \"Текст ошибки от ФНС\" которых заполнен. Уточненная отчетность формируется только для указанных физических лиц.")
-        }
-    }
-
-    Map<PairKppOktmo, List<NdflPerson>> getNdflPersonsGroupedByKppOktmo() {
-        List<PairKppOktmo> pairKppOktmoList = getPairKppOktmoList()
-        if (pairKppOktmoList == null) {
-            return null
-        }
-
-        def reportPeriod = departmentReportPeriod.reportPeriod
-        def otchetGod = reportPeriod.taxPeriod.year
-        String strCorrPeriod = getCorrectionDateExpression(departmentReportPeriod)
-        String depName = department.name
-        // Список физлиц для каждой пары КПП и ОКТМО
-        Map<PairKppOktmo, List<NdflPerson>> ndflPersonsGroupedByKppOktmo = [:]
-
-        pairKppOktmoList.each { PairKppOktmo pair ->
-            ScriptUtils.checkInterrupted()
-            List<NdflPerson> ndflPersons = ndflPersonService.findNdflPersonByPairKppOktmo([declarationDataConsolidated.id], pair.kpp.toString(), pair.oktmo.toString(), false)
-            if (ndflPersons != null && ndflPersons.size() != 0) {
-                addNdflPersons(ndflPersonsGroupedByKppOktmo, pair, ndflPersons)
-            } else {
-                String depChildName = departmentService.getDepartmentNameByPairKppOktmo(pair.kpp, pair.oktmo, departmentReportPeriod.reportPeriod.endDate)
-                logger.warn("Не удалось создать форму $DeclarationType.NDFL_6_NAME, за период $otchetGod ${reportPeriod.name}$strCorrPeriod, подразделение: ${depChildName ?: ""}, КПП: ${pair.kpp}, ОКТМО: ${pair.oktmo}. " +
-                        "В РНУ НДФЛ (консолидированная) № ${declarationDataConsolidated.id} для подразделения: $depName, за период $otchetGod ${reportPeriod.name} $strCorrPeriod " +
-                        "отсутствуют операции о НДФЛ для указанных КПП и ОКТМО.")
-            }
-        }
-        if (ndflPersonsGroupedByKppOktmo == null || ndflPersonsGroupedByKppOktmo.isEmpty()) {
-            logger.error("Отчетность $DeclarationType.NDFL_6_NAME для $depName за период $otchetGod ${reportPeriod.name}$strCorrPeriod не сформирована. " +
-                    "В РНУ НДФЛ (консолидированная) № ${declarationDataConsolidated.id} для подразделения: $depName за период $otchetGod ${reportPeriod.name} $strCorrPeriod " +
-                    "отсутствуют операции.")
-            checkPresentedPairsKppOktmo()
-        }
-        return ndflPersonsGroupedByKppOktmo
-    }
-
-    /************************************* СОЗДАНИЕ ФОРМЫ *****************************************************************/
     // консолидированная форма рну-ндфл по которой будут создаваться отчетные формы
-    DeclarationData declarationDataConsolidated
+    DeclarationData sourceKnf
 
     def createForm() {
-        try {
-            declarationDataConsolidated = declarationService.getDeclarationData(knfId)
-            scriptParams.put("sourceFormId", declarationDataConsolidated.id)
-            // Список физлиц для каждой пары КПП и ОКТМО
-            Map<PairKppOktmo, List<NdflPerson>> ndflPersonsGroupedByKppOktmo = getNdflPersonsGroupedByKppOktmo()
-            // Удаление ранее созданных отчетных форм
-            List<Pair<String, String>> kppOktmoPairs = null
-            if (knfId != null) {// если создаём отчетность из КНФ, то формы удаляются по найденным парам КПП/ОКТМО
-                kppOktmoPairs = ndflPersonsGroupedByKppOktmo.keySet().collect {
-                    return new Pair<String, String>(it.kpp, it.oktmo)
+        sourceKnf = declarationService.getDeclarationData(reportFormsCreationParams.sourceKnfId)
+        List<DepartmentConfig> departmentConfigs = getDepartmentConfigs()
+        List<DeclarationData> createdForms = []
+        for (def departmentConfig : departmentConfigs) {
+            ScriptUtils.checkInterrupted()
+
+            List<DeclarationData> existingDeclarations = declarationService.findAllByTypeIdAndReportPeriodIdAndKppAndOktmo(
+                    declarationTemplate.type.id, departmentReportPeriod.reportPeriod.id, departmentConfig.kpp, departmentConfig.oktmo.code)
+            def lastSentForm = existingDeclarations.find { it.docStateId != RefBookDocState.NOT_SENT.id }
+            if (reportFormsCreationParams.reportFormCreationMode == ReportFormCreationModeEnum.UNACCEPTED_BY_FNS) {
+                if (lastSentForm && !(lastSentForm.docStateId in [RefBookDocState.REQUIRES_CLARIFICATION.id, RefBookDocState.REJECTED.id, RefBookDocState.ERROR.id])) {
+                    continue
                 }
             }
-            List<Pair<Long, DeclarationDataReportType>> notDeletedDeclarationPair = declarationService.deleteForms(declarationTemplate.type.id, declarationData.departmentReportPeriodId, kppOktmoPairs, logger, userInfo)
-            if (!notDeletedDeclarationPair.isEmpty()) {
-                logger.error("Невозможно выполнить повторное создание отчетных форм. Заблокировано удаление ранее созданных отчетных форм выполнением операций:")
-                notDeletedDeclarationPair.each() {
-                    logger.error("Форма %d, выполняется операция \"%s\"",
-                            it.first, declarationService.getDeclarationFullName(it.first, it.second)
-                    )
-                }
-                logger.error("Дождитесь завершения выполнения операций или выполните отмену операций вручную.")
-                return
-            }
+            declarationData = new DeclarationData()
+            declarationData.declarationTemplateId = declarationTemplate.id
+            declarationData.kpp = departmentConfig.kpp
+            declarationData.oktmo = departmentConfig.oktmo.code
+            declarationData.taxOrganCode = departmentConfig.taxOrganCode
+            declarationData.adjustNegativeValues = reportFormsCreationParams.adjustNegativeValues
+            declarationData.taxRefundReflectionMode = reportFormsCreationParams.taxRefundReflectionMode
+            declarationData.docStateId = RefBookDocState.NOT_SENT.id
+            declarationData.correctionNum = lastSentForm ? (
+                    lastSentForm.docStateId in [RefBookDocState.REJECTED.id, RefBookDocState.ERROR.id] ? lastSentForm.correctionNum : lastSentForm.correctionNum + 1
+            ) : 0
 
-            if (ndflPersonsGroupedByKppOktmo == null || ndflPersonsGroupedByKppOktmo.isEmpty()) {
-                return
-            }
-            checkPresentedPairsKppOktmo()
-
-            ndflPersonsGroupedByKppOktmo.each { Map.Entry<PairKppOktmo, List<NdflPerson>> npGroup ->
-                ScriptUtils.checkInterrupted()
-                Map<String, Object> params
-                String oktmo = npGroup.key.oktmo
-                String kpp = npGroup.key.kpp
-                String taxOrganCode = npGroup.key.taxOrganCode
-                List<Long> npGropSourcesIdList = npGroup.value.id
-                Long ddId
-                params = new HashMap<String, Object>()
-                DeclarationData newDeclaratinoData = new DeclarationData()
-                newDeclaratinoData.declarationTemplateId = declarationData.declarationTemplateId
-                newDeclaratinoData.taxOrganCode = taxOrganCode
-                newDeclaratinoData.kpp = kpp.toString()
-                newDeclaratinoData.oktmo = oktmo.toString()
-                newDeclaratinoData.adjustNegativeValues = adjustNegativeValues
-                ddId = declarationService.create(newDeclaratinoData, departmentReportPeriod, logger, userInfo, false)
-
-                params.put(NDFL_PERSON_KNF_ID, npGropSourcesIdList)
-                formMap.put(ddId, params)
-            }
-        } finally {
-            scriptParams.put("pairKppOktmoTotal", pairKppOktmoSize)
-        }
-    }
-
-    // Пары КПП/ОКТМО отсутствующие в справочнике настройки подразделений
-    def checkPresentedPairsKppOktmo() {
-        List<Pair<String, String>> kppOktmoNotPresentedInRefBookList = declarationService.findNotPresentedPairKppOktmo(declarationDataConsolidated.id)
-        for (Pair<String, String> kppOktmoNotPresentedInRefBook : kppOktmoNotPresentedInRefBookList) {
-            logger.warn("Для подразделения %s отсутствуют настройки подразделений для КПП: %s, ОКТМО: %s в справочнике \"Настройки подразделений\". Данные формы РНУ НДФЛ (консолидированная) № %d по указанным КПП и ОКТМО источника выплаты не включены в отчетность.",
-                    department.getName(), kppOktmoNotPresentedInRefBook.getFirst(), kppOktmoNotPresentedInRefBook.getSecond(), declarationDataConsolidated.id)
-        }
-    }
-
-    Map<Long, Map<String, RefBookValue>> getOktmoByIdList(List<Long> idList) {
-        RefBookDataProvider provider = getProvider(REF_BOOK_OKTMO_ID)
-        return provider.getRecordData(idList)
-    }
-
-    def addNdflPersons(Map<PairKppOktmo, List<NdflPerson>> ndflPersonsGroupedByKppOktmo, PairKppOktmo pairKppOktmoBeingComparing, List<NdflPerson> ndflPersonList) {
-
-        List<NdflPerson> kppOktmoNdflPersons = ndflPersonsGroupedByKppOktmo.get(pairKppOktmoBeingComparing)
-        if (kppOktmoNdflPersons == null) {
-            ndflPersonsGroupedByKppOktmo.put(pairKppOktmoBeingComparing, ndflPersonList)
-        } else {
-            def kppOktmoNdflPersonsEntrySet = ndflPersonsGroupedByKppOktmo.entrySet()
-            kppOktmoNdflPersonsEntrySet.each { Map.Entry<PairKppOktmo, List<NdflPerson>> item ->
-                if (item.getKey().equals(pairKppOktmoBeingComparing)) {
-                    if (item.getKey().taxOrganCode != pairKppOktmoBeingComparing.taxOrganCode) {
-                        logger.warn("Для КПП = ${pairKppOktmoBeingComparing.kpp} ОКТМО = ${pairKppOktmoBeingComparing.oktmo} в справочнике \"Настройки подразделений\" задано несколько значений Кода НО (кон).")
+            File zipFile = null
+            Xml xml = null
+            try {
+                xml = buildXml(departmentConfig)
+                if (xml) {
+                    if (reportFormsCreationParams.reportFormCreationMode == ReportFormCreationModeEnum.BY_NEW_DATA && existingDeclarations) {
+                        if (!hasDifference(xml, existingDeclarations.first())) {
+                            continue
+                        }
                     }
-                    //Если Коды НО совпадают, для всех дублей пар КПП+ОКТМО создается одна ОНФ, в которой указывается совпадающий Код НО.
-                    item.getValue().addAll(ndflPersonList)
+                    def formsToDelete = existingDeclarations.findAll {
+                        it.docStateId == RefBookDocState.NOT_SENT.id && departmentReportPeriodService.get(it.departmentReportPeriodId).isActive()
+                    }
+                    if (deleteForms(formsToDelete)) {
+                        createdForms.add(declarationData)
+                        declarationService.create(declarationData, departmentReportPeriod, logger, userInfo, true)
+                        saveFileInfo(xml.xmlFile, xml.date, xml.fileName)
+                        zipFile = ZipUtils.archive(xml.xmlFile, xml.fileName + ".xml")
+                        xml.uuid = blobDataService.create(zipFile, xml.fileName + ".zip", xml.date)
+                        reportService.attachReportToDeclaration(declarationData.id, xml.uuid, DeclarationDataReportType.XML_DEC)
+                        declarationService.setFileName(declarationData.id, xml.fileName)
+                        // Добавление информации о источнике созданной отчетной формы.
+                        sourceService.deleteDeclarationConsolidateInfo(declarationData.id)
+                        sourceService.addDeclarationConsolidationInfo(declarationData.id, singletonList(sourceKnf.id))
+
+                        String message = declarationService.getDeclarationFullName(declarationData.id, null)
+                        logger.info("Успешно выполнено создание " + message.replace("Налоговая форма", "налоговой формы"))
+                    }
+                }
+            } finally {
+                deleteTempFile(zipFile)
+                deleteTempFile(xml?.xmlFile)
+            }
+        }
+
+        logger.info("Количество успешно созданных форм: %d. Не удалось создать форм: %d.", createdForms.size(), departmentConfigs.size() - createdForms.size())
+    }
+
+    List<DepartmentConfig> getDepartmentConfigs() {
+        if (!ndflPersonService.incomeExistsByDeclarationId(sourceKnf.id)) {
+            logger.error("Отчетность $declarationTemplate.name для $department.name за период ${formatPeriod(departmentReportPeriod)} не сформирована. " +
+                    "В РНУ НДФЛ (консолидированная) № $sourceKnf.id для подразделения: $department.name за период ${formatPeriod(departmentReportPeriod)} отсутствуют операции.")
+        }
+        List<Pair<KppOktmoPair, DepartmentConfig>> kppOktmoPairs = departmentConfigService.findAllByDeclaration(sourceKnf)
+        if (reportFormsCreationParams.kppOktmoPairs) {
+            kppOktmoPairs = kppOktmoPairs.findAll { reportFormsCreationParams.kppOktmoPairs.contains(it.first) }
+        }
+        List<KppOktmoPair> missingDepartmentConfigKppOktmoPairs = kppOktmoPairs.findAll { it.second == null }.collect {
+            it.first
+        }
+        for (def kppOktmoPair : missingDepartmentConfigKppOktmoPairs) {
+            logger.error("Для подразделения $department.name отсутствуют настройки подразделений для КПП: $kppOktmoPair.kpp, " +
+                    "ОКТМО: $kppOktmoPair.oktmo в справочнике \"Настройки подразделений\". " +
+                    "Данные формы РНУ НДФЛ (консолидированная) № $sourceKnf.id по указанным КПП и ОКТМО источника выплаты не включены в отчетность.")
+        }
+        List<DepartmentConfig> departmentConfigs = kppOktmoPairs.findAll { it.second != null }.collect { it.second }
+        if (!departmentConfigs) {
+            logger.error("Отчетность $declarationTemplate.name для $department.name за период ${formatPeriod(departmentReportPeriod)} не сформирована. " +
+                    "Отсутствуют настройки указанного подразделения в справочнике \"Настройки подразделений\"")
+            return null
+        }
+        return departmentConfigs
+    }
+
+    @TypeChecked(value = TypeCheckingMode.SKIP)
+    boolean hasDifference(Xml xml, DeclarationData declarationData) {
+        def xmlOld = declarationService.getXmlData(declarationData.id, userInfo)
+        if (!xmlOld || !xml) {
+            return true
+        }
+        def xmlNew = FileUtils.readFileToString(xml.xmlFile, "windows-1251")
+        def ФайлOld = new XmlParser().parseText(xmlOld)
+        def ФайлNew = new XmlParser().parseText(xmlNew)
+        if (ФайлOld.@ВерсФорм != ФайлNew.@ВерсФорм) {
+            return true
+        }
+        def ДокументOld = ФайлOld.Документ
+        def ДокументNew = ФайлNew.Документ
+        if (ДокументOld.@КодНО != ДокументNew.@КодНО || ДокументOld.@КодНО != ДокументNew.@КодНО) {
+            return true
+        }
+        if (nodesHasDifference(ДокументOld.СвНП?.first(), ДокументNew.СвНП?.first())) {
+            return true
+        }
+        if (nodesHasDifference(ДокументOld.Подписант?.first(), ДокументNew.Подписант?.first())) {
+            return true
+        }
+        if (nodesHasDifference(ДокументOld.НДФЛ6?.first(), ДокументNew.НДФЛ6?.first())) {
+            return true
+        }
+        return false
+    }
+
+    boolean nodesHasDifference(Node a, Node b) {
+        return a.toString() != b.toString()
+    }
+
+    boolean deleteForms(List<DeclarationData> formsToDelete) {
+        if (formsToDelete) {
+            List<LockData> locks = []
+            List<DeclarationData> errorForms = []
+            try {
+                Logger localLogger = new Logger()
+                for (def formToDelete : formsToDelete) {
+                    LockData lockData = declarationLocker.establishLock(formToDelete.id, OperationType.DELETE_DEC, userInfo, localLogger)
+                    if (lockData) {
+                        locks.add(lockData)
+                    } else {
+                        errorForms.add(formToDelete)
+                    }
+                }
+                if (errorForms.isEmpty()) {
+                    for (def formToDelete : formsToDelete) {
+                        declarationService.delete(formToDelete.id, userInfo)
+                    }
+                } else {
+                    logger.error("Невозможно выполнить повторное создание отчетных форм. Заблокировано удаление ранее созданных отчетных форм выполнением операций:")
+                    logger.entries.addAll(localLogger.entries)
+                    logger.error("Дождитесь завершения выполнения операций или выполните отмену операций вручную.")
+                    return false
+                }
+            } finally {
+                // удаляем блокировки
+                for (LockData lockData : locks) {
+                    lockDataService.unlock(lockData.getKey())
                 }
             }
         }
+        return true
     }
 
-    DepartmentReportPeriod getPrevDepartmentReportPeriod(DepartmentReportPeriod departmentReportPeriod) {
-        DepartmentReportPeriod prevDepartmentReportPeriod = departmentReportPeriodService.getPrevLast(declarationData.departmentId, departmentReportPeriod.reportPeriod.id)
-        if (prevDepartmentReportPeriod == null) {
-            prevDepartmentReportPeriod = departmentReportPeriodService.getFirst(departmentReportPeriod.departmentId, departmentReportPeriod.reportPeriod.id)
+    void deleteTempFile(File tempFile) {
+        if (tempFile != null && !tempFile.delete()) {
+            LOG.warn(String.format("Временный файл %s не удален", tempFile.getAbsolutePath()));
         }
-        return prevDepartmentReportPeriod
     }
+
+    class Xml {
+        String fileName
+        Date date
+        String uuid
+        File xmlFile
+    }
+
+    /************************************* Для выгрузки отчетности по ОНФ *******************************************************************/
 
     void preCreateReports() {
         ScriptUtils.checkInterrupted()
@@ -981,27 +831,16 @@ class Report6Ndfl extends AbstractScriptClass {
 
     /************************************* ОБЩИЕ МЕТОДЫ** *****************************************************************/
 
+    String formatPeriod(DepartmentReportPeriod departmentReportPeriod) {
+        String corrStr = getCorrectionDateExpression(departmentReportPeriod)
+        return "$departmentReportPeriod.reportPeriod.taxPeriod.year ${departmentReportPeriod.reportPeriod.name}$corrStr"
+    }
+
     /**
-     * Получить строку о дате корректировки
-     * @param departmentReportPeriod
-     * @return
+     * Форммирует строку с датой корректировки
      */
     String getCorrectionDateExpression(DepartmentReportPeriod departmentReportPeriod) {
         return departmentReportPeriod.correctionDate == null ? "" : " с датой сдачи корректировки ${departmentReportPeriod.correctionDate.format("dd.MM.yyyy")}"
-    }
-
-    // Получить список детали подразделения из справочника для некорректировочного периода
-    List<Map<String, RefBookValue>> getDepartmentConfigs() {
-        def throwIfEmpty = false
-        if (!departmentConfigsCache.containsKey(department.id)) {
-            String filter = "DEPARTMENT_ID = $department.id".toString()
-            departmentParamTableList = getProvider(RefBook.Id.NDFL_DETAIL.id).getRecords(departmentReportPeriod.reportPeriod.endDate, null, filter, null)
-            if ((departmentParamTableList == null || departmentParamTableList.size() == 0 || departmentParamTableList.get(0) == null) && throwIfEmpty) {
-                departmentParamException(department.id, departmentReportPeriod.reportPeriod)
-            }
-            departmentConfigsCache.put(department.id, departmentParamTableList)
-        }
-        return departmentConfigsCache.get(department.id)
     }
 
     /**
@@ -1047,37 +886,6 @@ class Report6Ndfl extends AbstractScriptClass {
             throw new Exception("Ошибка при получении записей справочника " + refBookId)
         }
         return refBookList
-    }
-
-    class PairKppOktmo {
-        String kpp
-        String oktmo
-        String taxOrganCode
-
-        PairKppOktmo(String kpp, String oktmo, String taxOrganCode) {
-            this.kpp = kpp
-            this.oktmo = oktmo
-            this.taxOrganCode = taxOrganCode
-        }
-
-        boolean equals(o) {
-            if (this.is(o)) return true
-            if (getClass() != o.class) return false
-
-            PairKppOktmo that = (PairKppOktmo) o
-
-            if (kpp != that.kpp) return false
-            if (oktmo != that.oktmo) return false
-
-            return true
-        }
-
-        int hashCode() {
-            int result
-            result = (kpp != null ? kpp.hashCode() : 0)
-            result = 31 * result + (oktmo != null ? oktmo.hashCode() : 0)
-            return result
-        }
     }
     /************************************* СПЕЦОТЧЕТ **********************************************************************/
 
@@ -1332,7 +1140,7 @@ class Report6Ndfl extends AbstractScriptClass {
 
     // Находит в базе данных шаблон спецотчета по физическому лицу и возвращает его
     XSSFWorkbook getSpecialReportTemplate() {
-        def blobData = blobDataServiceDaoImpl.get(scriptSpecificReportHolder.getDeclarationSubreport().getBlobDataId())
+        def blobData = blobDataService.get(scriptSpecificReportHolder.getDeclarationSubreport().getBlobDataId())
         new XSSFWorkbook(blobData.getInputStream())
     }
 

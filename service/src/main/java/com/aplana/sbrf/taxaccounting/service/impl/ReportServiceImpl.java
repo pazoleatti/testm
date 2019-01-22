@@ -13,7 +13,7 @@ import java.util.List;
 
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
-@Service
+@Service("reportService")
 @Transactional
 public class ReportServiceImpl implements ReportService {
 
