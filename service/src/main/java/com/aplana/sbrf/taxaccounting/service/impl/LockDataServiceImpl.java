@@ -50,7 +50,7 @@ public class LockDataServiceImpl implements LockDataService {
             public LockData execute() {
                 try {
                     synchronized (LockDataServiceImpl.class) {
-                        LockData lock = dao.get(key, false);
+                        LockData lock = dao.findByKey(key);
                         if (lock != null) {
                             LOG.info(String.format("Lock with key \"%s\" already exists: %s", key, lock));
                             return lock;
@@ -81,7 +81,7 @@ public class LockDataServiceImpl implements LockDataService {
             public LockData execute() {
                 try {
                     synchronized (LockDataServiceImpl.class) {
-                        LockData lock = dao.get(key, false);
+                        LockData lock = dao.findByKey(key);
                         if (lock != null) {
                             LOG.info(String.format("Lock with key \"%s\" already exists: %s", key, lock));
                             return lock;
@@ -100,7 +100,7 @@ public class LockDataServiceImpl implements LockDataService {
     @Override
     public LockData findLock(String key) {
         synchronized (LockDataServiceImpl.class) {
-            return dao.get(key, false);
+            return dao.findByKey(key);
         }
     }
 
@@ -142,7 +142,7 @@ public class LockDataServiceImpl implements LockDataService {
             public Boolean execute() {
                 try {
                     synchronized (LockDataServiceImpl.class) {
-                        LockData lock = dao.get(key, false);
+                        LockData lock = dao.findByKey(key);
                         if (lock != null) {
                             if (!force && lock.getUserId() != userId) {
                                 TAUser blocker = userDao.getUser(lock.getUserId());
@@ -256,7 +256,7 @@ public class LockDataServiceImpl implements LockDataService {
             TAUserInfo systemUserInfo = new TAUserInfo();
             systemUserInfo.setUser(userDao.getUser(0));
             for (String key : keyList) {
-                LockData lockData = dao.get(key, false);
+                LockData lockData = dao.findByKey(key);
                 dao.unlock(key);
                 LOG.info(String.format("Lock was removed by scheduler as outdated: %s", key));
                 auditLockDeletion(systemUserInfo, lockData, cause);
@@ -278,13 +278,13 @@ public class LockDataServiceImpl implements LockDataService {
 
     @Override
     public void unlockAllByTask(long taskId) {
-        dao.unlockAllByTask(taskId);
+        dao.unlockAllByTaskId(taskId);
     }
 
     @Override
-    public boolean lockExists(final String key, boolean like) {
+    public boolean lockExists(final String key) {
         synchronized (LockDataServiceImpl.class) {
-            return dao.get(key, like) != null;
+            return dao.existsByKey(key);
         }
     }
 
@@ -317,6 +317,29 @@ public class LockDataServiceImpl implements LockDataService {
         return lockDataItems;
     }
 
+    @Override
+    public void bindTaskToMultiKeys(final Collection<String> keys, final long taskId) {
+        tx.executeInNewTransaction(new TransactionLogic<Object>() {
+            @Override
+            public Object execute() {
+                dao.bindTaskToMultiKeys(keys, taskId);
+                return null;
+            }
+        });
+    }
+
+    @Override
+    public void unlockMultipleTasks(final Collection<String> keys) {
+        tx.executeInNewTransaction(new TransactionLogic<Object>() {
+            @Override
+            public Object execute() {
+                dao.unlockMultipleTasks(keys);
+                return null;
+            }
+        });
+    }
+
+    //<editor-fold desc="common private methods">
 
     /**
      * Проверка, имеет ли пользователь права на снятие данной блокировки.
@@ -401,28 +424,6 @@ public class LockDataServiceImpl implements LockDataService {
         return null;
     }
 
-    @Override
-    public void bindTaskToMultiKeys(final Collection<String> keys, final long taskId) {
-        tx.executeInNewTransaction(new TransactionLogic<Object>() {
-            @Override
-            public Object execute() {
-                dao.bindTaskToMultiKeys(keys, taskId);
-                return null;
-            }
-        });
-    }
-
-    @Override
-    public void unlockMiltipleTasks(final Collection<String> keys) {
-        tx.executeInNewTransaction(new TransactionLogic<Object>() {
-            @Override
-            public Object execute() {
-                dao.unlockMiltipleTasks(keys);
-                return null;
-            }
-        });
-    }
-
     /**
      * Определение Тербанка пользователя, поставившего блокировку.
      */
@@ -432,4 +433,5 @@ public class LockDataServiceImpl implements LockDataService {
         TAUser taskCreator = userService.getUser(creatorId);
         return departmentService.getParentTBId(taskCreator.getDepartmentId());
     }
+    //</editor-fold>
 }

@@ -13,8 +13,6 @@
             'PermissionChecker',
             function ($scope, $http, $modalInstance, $shareData, $filter, $logPanel, $dialogs, DeclarationDataResource, Upload, APP_CONSTANTS, $q, $modalStack, PermissionChecker) {
 
-                $scope.editMode = false;
-
                 var attachFileType = $shareData.attachFileTypes;
 
                 var defaultFileType = {
@@ -120,13 +118,16 @@
                 function initPage() {
                     $http({
                         method: "POST",
-                        url: "controller/actions/declarationData/" + $shareData.declarationDataId + "/lock"
+                        url: "controller/actions/declarationData/" + $shareData.declarationDataId + "/lockFilesAndComments"
                     }).then(function (response) {
-                        $scope.editMode = response.data.declarationDataLocked;
                         if (response.data.uuid) {
                             $logPanel.open('log-panel-container', response.data.uuid);
                         }
-                        loadFiles();
+                        if (!response.data.success) {
+                            $modalInstance.dismiss('Не можем установить блокировку');
+                        } else {
+                            loadFiles();
+                        }
                     });
                 }
 
@@ -241,33 +242,28 @@
                  * @description Обработчик кнопки "Закрыть"
                  **/
                 $scope.close = function () {
-                    if ($scope.editMode) {
-                        $scope.getData().then(function (data) {
-
-                            if ($scope.commentForm.comment !== data.comment || !equals(data.declarationDataFiles, getFilesInGrid($scope.fileCommentGrid.ctrl.getGrid()))) {
-                                $dialogs.confirmDialog({
-                                    content: $filter('translate')('filesComment.close.saveChange'),
-                                    okBtnCaption: $filter('translate')('common.button.yes'),
-                                    cancelBtnCaption: $filter('translate')('common.button.no'),
-                                    okBtnClick: function () {
-                                        $scope.save().then(function (res) {
-                                            $scope.unlock();
-                                        });
-                                        $modalInstance.close('Saved');
-                                    },
-                                    cancelBtnClick: function () {
+                    $scope.getData().then(function (data) {
+                        if ($scope.commentForm.comment !== data.comment || !equals(data.declarationDataFiles, getFilesInGrid($scope.fileCommentGrid.ctrl.getGrid()))) {
+                            $dialogs.confirmDialog({
+                                content: $filter('translate')('filesComment.close.saveChange'),
+                                okBtnCaption: $filter('translate')('common.button.yes'),
+                                cancelBtnCaption: $filter('translate')('common.button.no'),
+                                okBtnClick: function () {
+                                    $scope.save().then(function () {
                                         $scope.unlock();
-                                        $modalInstance.dismiss("Canceled");
-                                    }
-                                });
-                            } else {
-                                $scope.unlock();
-                                $modalInstance.dismiss("Canceled");
-                            }
-                        });
-                    } else {
-                        $modalInstance.dismiss();
-                    }
+                                    });
+                                    $modalInstance.close('Saved');
+                                },
+                                cancelBtnClick: function () {
+                                    $scope.unlock();
+                                    $modalInstance.dismiss("Canceled");
+                                }
+                            });
+                        } else {
+                            $scope.unlock();
+                            $modalInstance.dismiss("Canceled");
+                        }
+                    });
                 };
 
                 /**
@@ -321,8 +317,11 @@
                 $scope.unlock = function () {
                     $http({
                         method: "POST",
-                        url: "controller/actions/declarationData/" + $shareData.declarationDataId + "/unlock"
+                        url: "controller/actions/declarationData/" + $shareData.declarationDataId + "/unlockFilesAndComments"
                     }).then(function (response) {
+                        if (!response.data.success && response.data.uuid) {
+                            $logPanel.open('log-panel-container', response.data.uuid);
+                        }
                     });
                 };
 

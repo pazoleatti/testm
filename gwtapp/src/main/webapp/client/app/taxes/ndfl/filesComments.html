@@ -46,7 +46,7 @@
 </div>
 <div class="modal-footer" style="margin: 0;position: relative; z-index: 1000;">
     <div class="button_panel" style="float: left; margin: 0;">
-        <div class="btn-toolbar" role="toolbar" data-ng-show="editMode">
+        <div class="btn-toolbar" role="toolbar">
             <span>
                 <button type="file" class="btn btn-default-nonBg iconed-btn" ngf-select="addFileClick($file)">
                      {{::'filesComment.button.add' |translate}}
@@ -64,8 +64,11 @@
         </div>
     </div>
 
-    <button type="button" class="btn btn-default iconed-btn" id="saveButton" data-ng-disabled="commentForm.$invalid"
-            data-ng-click="save()" data-ng-show="editMode">
+    <button type="button"
+            class="btn btn-default iconed-btn"
+            id="saveButton"
+            data-ng-disabled="commentForm.$invalid"
+            data-ng-click="save()">
         <span data-translate-once="button.save"></span>
         <span class="btn-icon-ok"></span>
     </button>

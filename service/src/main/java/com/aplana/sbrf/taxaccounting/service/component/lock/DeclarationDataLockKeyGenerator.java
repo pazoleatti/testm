@@ -9,9 +9,11 @@ public interface DeclarationDataLockKeyGenerator {
 
     /**
      * Сгенерировать ключ блокировки
+     *
      * @param declarationDataId идентификатор налоговой формы
      * @param operationType     тип задачи
-     * @return  строку ключа блокировки
+     * @return строку ключа блокировки
+     * @throws IllegalArgumentException если переданная операция не обработана в реализации
      */
     String generateLockKey(Long declarationDataId, OperationType operationType);
 }

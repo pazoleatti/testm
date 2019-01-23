@@ -680,7 +680,7 @@ class Report2Ndfl extends AbstractScriptClass {
 
     def saveNdflRefences() {
         logger.setTaUserInfo(userInfo)
-        getProvider(RefBook.Id.NDFL_REFERENCES.id).createRecordVersion(logger, new Date(), null, ndflReferencess)
+        getProvider(RefBook.Id.NDFL_REFERENCES.id).createRecordVersionWithoutLock(logger, new Date(), null, ndflReferencess)
     }
 
     /**

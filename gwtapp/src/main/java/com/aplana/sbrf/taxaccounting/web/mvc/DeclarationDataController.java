@@ -61,7 +61,7 @@ import static org.apache.commons.lang3.CharEncoding.UTF_8;
  */
 @RestController
 public class DeclarationDataController {
-    public static final int DEFAULT_IMAGE_RESOLUTION = 150;
+    private static final int DEFAULT_IMAGE_RESOLUTION = 150;
 
     private DeclarationDataService declarationService;
     private SecurityService securityService;
@@ -233,16 +233,14 @@ public class DeclarationDataController {
      * Получить количество страниц в отчете
      *
      * @param declarationDataId идентификатор декларации
-     * @throws IOException IOException
      */
     @GetMapping(value = "/actions/declarationData/{declarationDataId}/pageCount")
-    public Integer getPageImage(@PathVariable int declarationDataId) throws IOException {
+    public Integer getPageImage(@PathVariable int declarationDataId) {
         InputStream pdfData = declarationService.getPdfDataAsStream(declarationDataId, securityService.currentUserInfo());
         Integer result = PDFImageUtils.getPageNumber(pdfData);
         IOUtils.closeQuietly(pdfData);
         return result;
     }
-
 
     /**
      * Формирование отчета для декларации в формате xml
@@ -416,8 +414,6 @@ public class DeclarationDataController {
 
     /**
      * Принять НФ
-     *
-     * @return
      */
     @PostMapping(value = "/rest/declarationData/{declarationDataId}/accept", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ActionResult accept(@PathVariable final long declarationDataId) {
@@ -455,15 +451,14 @@ public class DeclarationDataController {
     /**
      * Сохранение дополнительной информации о файлах декларации с комментариями
      *
-     * @param dataFileComment сохраняемый объект декларации, в котором содержаться
-     *                        данные о файлах и комментарий для текущей декларации.
-     * @return новый объект модели {@link DeclarationDataFileComment}, в котором содержаться данные
+     * @param dataFileComment сохраняемый объект декларации, в котором содержатся данные о файлах и комментарий для текущей декларации.
+     * @return новый объект модели {@link DeclarationDataFileComment}, в котором содержатся данные
      * о файлах и комментарий для текущей декларации.
      */
     @PostMapping(value = "/rest/declarationData", params = "projection=filesComments")
-    public DeclarationDataFileComment saveDeclarationFilesComment(@RequestBody DeclarationDataFileComment dataFileComment) {
+    public DeclarationDataFileComment updateDeclarationFilesAndComments(@RequestBody DeclarationDataFileComment dataFileComment) {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        return declarationService.saveDeclarationFilesComment(userInfo, dataFileComment);
+        return declarationService.updateDeclarationFilesComments(dataFileComment, userInfo);
     }
 
     /**
@@ -574,32 +569,55 @@ public class DeclarationDataController {
      * @return информация о создании отчета
      */
     @PostMapping(value = "/actions/declarationData/{declarationDataId}/reportXsls")
-    public String сreateDeclarationReportXlsx(@PathVariable("declarationDataId") long declarationDataId) {
+    public String createDeclarationReportXlsx(@PathVariable("declarationDataId") long declarationDataId) {
         TAUserInfo userInfo = securityService.currentUserInfo();
         return declarationService.createTaskToCreateReportXlsx(userInfo, declarationDataId);
     }
 
     /**
-     * Установить блокировку на форму
+     * Установить блокировку на раздел "Файлы и комментарии" формы.
      *
-     * @param declarationDataId Идентификатор формы
-     * @return Удалось ли установить блокировку
+     * @param declarationDataId идентификатор декларации
+     * @return результат операции
      */
-    @PostMapping(value = "/actions/declarationData/{declarationDataId}/lock")
-    public DeclarationLockResult createLock(@PathVariable("declarationDataId") long declarationDataId) {
+    @PostMapping(value = "/actions/declarationData/{declarationDataId}/lockFilesAndComments")
+    public ActionResult lockFilesAndComments(@PathVariable("declarationDataId") long declarationDataId) {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        return declarationService.createLock(declarationDataId, userInfo);
+        return declarationService.lock(declarationDataId, OperationType.EDIT_FILE, userInfo);
     }
 
     /**
-     * Снять блокировку с формы
+     * Установить блокировку на редактирование формы.
      *
      * @param declarationDataId идентификатор декларации
+     * @return результат операции
      */
-    @PostMapping(value = "/actions/declarationData/{declarationDataId}/unlock")
-    public void deleteLock(@PathVariable("declarationDataId") long declarationDataId) {
+    @PostMapping(value = "/actions/declarationData/{declarationDataId}/lockEdit")
+    public ActionResult lockEdit(@PathVariable("declarationDataId") long declarationDataId) {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        declarationService.unlock(declarationDataId, userInfo);
+        return declarationService.lock(declarationDataId, OperationType.EDIT, userInfo);
+    }
+
+    /**
+     * Снять блокировку с раздела "Файлы и комментарии" формы.
+     *
+     * @param declarationDataId идентификатор декларации
+     * @return результат операции
+     */
+    @PostMapping(value = "/actions/declarationData/{declarationDataId}/unlockFilesAndComments")
+    public ActionResult unlockFilesAndComments(@PathVariable("declarationDataId") long declarationDataId) {
+        return declarationService.unlock(declarationDataId, OperationType.EDIT_FILE);
+    }
+
+    /**
+     * Снять блокировку с редактирования формы.
+     *
+     * @param declarationDataId идентификатор декларации
+     * @return результат операции
+     */
+    @PostMapping(value = "/actions/declarationData/{declarationDataId}/unlockEdit")
+    public ActionResult unlockEdit(@PathVariable("declarationDataId") long declarationDataId) {
+        return declarationService.unlock(declarationDataId, OperationType.EDIT);
     }
 
     /**
@@ -730,7 +748,7 @@ public class DeclarationDataController {
      * @return строка с uuid уведомлений об обновлении данных ФЛ КНФ
      */
     @GetMapping(value = "/actions/declarationData/{declarationDataId}/updatePersonsData", produces = MediaType.TEXT_HTML_VALUE)
-    public String updatePersonData(@PathVariable long declarationDataId) throws JSONException {
+    public String updatePersonData(@PathVariable long declarationDataId) {
         TAUserInfo userInfo = securityService.currentUserInfo();
         return declarationService.createUpdatePersonsDataTask(declarationDataId, userInfo);
     }
@@ -752,7 +770,6 @@ public class DeclarationDataController {
     /**
      * Загрузка на сервер файла
      *
-     * @return строка с uuid
      * @throws IOException в случае исключения при работе с потоками/файлами
      */
     @GetMapping(value = "/actions/declarationData/{declarationDataId}/download/{uuid}")

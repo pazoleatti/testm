@@ -202,8 +202,7 @@ public interface DeclarationDataService {
      * @return новый объект модели {@link DeclarationDataFileComment}, в котором содержаться данные
      * о файлах и комментарий для текущей декларации.
      */
-    DeclarationDataFileComment saveDeclarationFilesComment(TAUserInfo userInfo, DeclarationDataFileComment dataFileComment);
-
+    DeclarationDataFileComment updateDeclarationFilesComments(DeclarationDataFileComment dataFileComment, TAUserInfo userInfo);
 
     /**
      * Получение источников и приемников декларации
@@ -258,16 +257,6 @@ public interface DeclarationDataService {
      * @return результат с даннымми для представления о доступности отчетов для отчетной НФ
      */
     ReportAvailableReportDDResult checkAvailabilityReportDD(TAUserInfo userInfo, long declarationDataId);
-
-    /**
-     * Метод запускает скрипты с событием предрасчетные проверки
-     *
-     * @param declarationDataId идентификатор декларации
-     * @param userInfo          информация о пользователе, выполняющего действие
-     * @param logger            объект журнала
-     * @throws AccessDeniedException если у пользователя не хватает прав на удаление
-     */
-    void preCalculationCheck(Logger logger, long declarationDataId, TAUserInfo userInfo);
 
     /**
      * Принятие декларации
@@ -375,28 +364,21 @@ public interface DeclarationDataService {
     String generateAsyncTaskKey(long declarationDataId, DeclarationDataReportType type);
 
     /**
-     * Заблокировать DeclarationData.
-     *
-     * @param declarationDataId идентификатор декларации
-     * @param userInfo          информация о пользователе
-     */
-    LockData lock(long declarationDataId, TAUserInfo userInfo);
-
-    /**
      * Заблокировать налоговую форму
      *
      * @param declarationDataId идентификатор формы
+     * @param operationType     тип блокировки
      * @param userInfo          информация о пользователе
      */
-    DeclarationLockResult createLock(long declarationDataId, TAUserInfo userInfo);
+    ActionResult lock(long declarationDataId, OperationType operationType, TAUserInfo userInfo);
 
     /**
      * Снять блокировку с DeclarationData.
      *
      * @param declarationDataId идентификатор декларации
-     * @param userInfo          информация о пользователе
+     * @param operationType     тип блокировки, которую следует снять
      */
-    void unlock(long declarationDataId, TAUserInfo userInfo);
+    ActionResult unlock(long declarationDataId, OperationType operationType);
 
     void findDDIdsByRangeInReportPeriod(int decTemplateId, Date startDate, Date endDate, Logger logger);
 
@@ -420,11 +402,6 @@ public interface DeclarationDataService {
      * @return название
      */
     String getDeclarationFullName(int declarationTypeId, int departmentReportPeriodId, AsyncTaskType taskType);
-
-    /**
-     * Проверяет существование операции, по которым требуется удалить блокировку
-     */
-    boolean checkExistAsyncTask(long declarationDataId, AsyncTaskType reportType, Logger logger);
 
     /**
      * Отмена операции, по которым требуется удалить блокировку(+удаление отчетов)
@@ -484,11 +461,6 @@ public interface DeclarationDataService {
     void exportXLSX(JasperPrint jasperPrint, OutputStream data);
 
     /**
-     * Получение возможности отображения формы предварительного просмотра
-     */
-    boolean isVisiblePDF(DeclarationData declarationData, TAUserInfo userInfo);
-
-    /**
      * Получение данных по файлам для формы "Файлы и комментарии"
      */
     List<DeclarationDataFile> getFiles(long declarationDataId);
@@ -497,11 +469,6 @@ public interface DeclarationDataService {
      * Получения комментария для формы "Файлы и комментарии"
      */
     String getNote(long declarationDataId);
-
-    /**
-     * Сохранение данных формы "Файлы и комментарии"
-     */
-    void saveFilesComments(long declarationDataId, String note, List<DeclarationDataFile> files);
 
     /**
      * Создание экземпляров отчетных форм
