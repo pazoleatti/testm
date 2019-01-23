@@ -119,13 +119,17 @@ public interface LockDataService {
     /**
      * Убрать все блокировки пользователя.
      *
+     * TODO: Метод закомментирован в вызывающем коде controller/LogSystemLogoutHandler#logout()
+     *
      * @param userInfo    пользователь
      * @param ignoreError признак игнорирования ошибок при снятии блокировок. Нужен при разлогинивании
      */
+    @SuppressWarnings("unused")
     void unlockAll(TAUserInfo userInfo, boolean ignoreError);
 
     /**
      * Удаляет все указанные блокировки, но только если к ним не привязаны незавершенные асинхронные задачи.
+     * Если хотя бы по одному ключу есть блокировка, ничего не делает, пишет ошибки в logger результата.
      *
      * @param lockKeys ключи блокировок
      */
