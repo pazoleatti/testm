@@ -399,7 +399,7 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
                 return resultSet.getString("name");
             }
         });
-        if (result != null) {
+        if (result != null && !result.isEmpty()) {
             return result.get(0);
         }
         return "";
