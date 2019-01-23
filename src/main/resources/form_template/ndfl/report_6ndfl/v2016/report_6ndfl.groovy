@@ -291,13 +291,13 @@ class Report6Ndfl extends AbstractScriptClass {
                         incomeNotHoldingTotal = incomeNotHoldingTaxSum.subtract(incomeOverholdingTaxSum)
                     }
 
-                    ОбобщПоказ(
-                            КолФЛДоход: personCount,
-                            УдержНалИт: incomeWithholdingTotal,
-                            НеУдержНалИт: incomeNotHoldingTotal,
-                            ВозврНалИт: refoundTotal
-                    ) {
-
+                    def ОбобщПоказAttrs = [КолФЛДоход  : personCount,
+                                           УдержНалИт  : incomeWithholdingTotal,
+                                           НеУдержНалИт: incomeNotHoldingTotal]
+                    if (declarationData.taxRefundReflectionMode == TaxRefundReflectionMode.NORMAL) {
+                        ОбобщПоказAttrs.put("ВозврНалИт", refoundTotal)
+                    }
+                    ОбобщПоказ(ОбобщПоказAttrs) {
                         // Доходы сгруппированыые по ставке, ключ ставка - значение список операций
                         Map<Integer, List<NdflPersonIncome>> incomesGroupedByRate = groupByTaxRate(ndflPersonIncomeList)
                         Map<Integer, BigDecimal> accruedSumByRate = [:]
@@ -717,14 +717,14 @@ class Report6Ndfl extends AbstractScriptClass {
         }
         List<Pair<KppOktmoPair, DepartmentConfig>> kppOktmoPairs = departmentConfigService.findAllByDeclaration(sourceKnf)
         def missingDepartmentConfigs = kppOktmoPairs.findResults { it.first == null ? it.second : null }
+        if (reportFormsCreationParams.kppOktmoPairs) {
+            kppOktmoPairs = kppOktmoPairs.findAll { reportFormsCreationParams.kppOktmoPairs.contains(it.first) }
+        }
         for (def departmentConfig : missingDepartmentConfigs) {
             logger.error("Не удалось создать форму $declarationTemplate.name, за период ${formatPeriod(departmentReportPeriod)}, " +
                     "подразделение: $department.name, КПП: $departmentConfig.kpp, ОКТМО: $departmentConfig.oktmo.code. " +
                     "В РНУ НДФЛ (консолидированная) № $sourceKnf.id для подразделения: $department.name за период ${formatPeriod(departmentReportPeriod)} " +
                     "отсутствуют операции для указанных КПП и ОКТМО")
-        }
-        if (reportFormsCreationParams.kppOktmoPairs) {
-            kppOktmoPairs = kppOktmoPairs.findAll { reportFormsCreationParams.kppOktmoPairs.contains(it.first) }
         }
         def missingKppOktmoPairs = kppOktmoPairs.findResults { it.second == null ? it.first : null }
         for (def kppOktmoPair : missingKppOktmoPairs) {
