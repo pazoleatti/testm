@@ -5,8 +5,6 @@ import com.aplana.sbrf.taxaccounting.model.LockData;
 import com.aplana.sbrf.taxaccounting.model.LockDataDTO;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.TARole;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.exception.LockException;
 import com.google.common.collect.HashMultiset;
 import org.junit.Assert;
@@ -27,7 +25,6 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.*;
 import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
 
 
 @RunWith(SpringRunner.class)
@@ -103,23 +100,19 @@ public class LockDataDaoTest {
 
     @Test
     public void test_getLocks() {
-        TAUser user = TAUser.builder().id(1).roles(singletonList(
-                TARole.builder().alias(TARole.N_ROLE_OPER).build()
-        )).build();
-        PagingParams paging = PagingParams.getInstance(1, 100);
-        PagingResult<LockDataDTO> data = dao.getLocks("", paging, user);
-        Assert.assertEquals(1, data.size());
-        user.setRoles(singletonList(
-                TARole.builder().alias(TARole.ROLE_ADMIN).build()
-        ));
-        data = dao.getLocks("a", paging, user);
-        Assert.assertEquals(4, data.size());
-        data = dao.getLocks("", paging, user);
-        Assert.assertEquals(5, data.size());
-        data = dao.getLocks(null, paging, user);
-        Assert.assertEquals(5, data.size());
-        data = dao.getLocks("not exists", paging, user);
-        Assert.assertEquals(0, data.size());
+        PagingParams paging = new PagingParams();
+
+        PagingResult<LockDataDTO> data = dao.getLocks("a", paging);
+        assertThat(data).hasSize(4);
+
+        data = dao.getLocks("", paging);
+        assertThat(data).hasSize(5);
+
+        data = dao.getLocks(null, paging);
+        assertThat(data).hasSize(5);
+
+        data = dao.getLocks("not exists", paging);
+        assertThat(data).hasSize(0);
     }
 
     @Test
@@ -135,6 +128,7 @@ public class LockDataDaoTest {
         Assert.assertEquals(1, unlockIfOlderThan(2));
     }
 
+    // Считаем, сколько блокировок старше указанного времени и снимаем их
     private int unlockIfOlderThan(long seconds) {
         List<String> keyList = dao.getLockIfOlderThan(seconds);
         for (String key : keyList) {
@@ -167,11 +161,8 @@ public class LockDataDaoTest {
 
     @Test
     public void test_unlockAllByUserId() {
-        TAUser user = TAUser.builder().id(1).roles(singletonList(
-                TARole.builder().alias(TARole.ROLE_ADMIN).build()
-        )).build();
         dao.unlockAllByUserId(0, false);
-        PagingResult<LockDataDTO> locks = dao.getLocks("", new PagingParams(), user);
+        PagingResult<LockDataDTO> locks = dao.getLocks("", new PagingParams());
         System.out.println(locks);
         Assert.assertEquals(2, locks.size());
 

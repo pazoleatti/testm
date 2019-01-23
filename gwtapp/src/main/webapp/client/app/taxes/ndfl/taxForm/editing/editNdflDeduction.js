@@ -11,8 +11,8 @@
      * @description Контроллер диалогового окна
      */
         .controller('editNdflDeductionFormCtrl', ["$scope", "$rootScope", "$http", '$state', '$stateParams',
-            "$modalInstance", "$filter", "APP_CONSTANTS", '$shareData', '$dialogs', 'ndflDeduction',
-            function ($scope, $rootScope, $http, $state, $stateParams, $modalInstance, $filter, APP_CONSTANTS, $shareData, $dialogs, ndflDeduction) {
+            "$modalInstance", '$logPanel', "$filter", "APP_CONSTANTS", '$shareData', '$dialogs', 'ndflDeduction',
+            function ($scope, $rootScope, $http, $state, $stateParams, $modalInstance, $logPanel, $filter, APP_CONSTANTS, $shareData, $dialogs, ndflDeduction) {
 
                 $scope.row = {};
                 $scope.temp = {};
@@ -20,9 +20,9 @@
                 // Установка блокировки на форму
                 $http({
                     method: "POST",
-                    url: "controller//actions/declarationData/" + $shareData.declarationId + "/lock"
-                }).success(function (lock) {
-                    if (lock && lock.declarationDataLocked) {
+                    url: "controller//actions/declarationData/" + $shareData.declarationId + "/lockEdit"
+                }).success(function (response) {
+                    if (response && response.data.success) {
                         // Получение данных ФЛ из раздела 1
                         $http({
                             method: "GET",
@@ -37,13 +37,8 @@
                                 $scope.temp.docTypeName = docTypeName;
                             });
                         });
-                    } else {
-                        $dialogs.errorDialog({
-                            content: $filter('translate')('incomesAndTax.edit.locked', {
-                                declaration: $shareData.declarationId,
-                                department: $shareData.department
-                            })
-                        });
+                    } else if (response.data.uuid) {
+                        $logPanel.open('log-panel-container', response.data.uuid);
                     }
                 });
 

@@ -20,6 +20,14 @@ import java.util.List;
 public interface DepartmentConfigDao extends PermissionDao {
 
     /**
+     * Возвращяет предыдущую версию настройки подразделений
+     *
+     * @param departmentConfig настройка подразделений
+     * @return настройка подразделений
+     */
+    DepartmentConfig findPrev(DepartmentConfig departmentConfig);
+
+    /**
      * Возвращяет пары КПП и ОКТМО из настроек подразделений по определенным подразделениям
      *
      * @param departmentIds список идентификаторов подразделений

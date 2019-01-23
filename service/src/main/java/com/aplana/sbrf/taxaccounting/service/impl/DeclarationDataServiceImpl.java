@@ -30,6 +30,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDocState;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookKnfType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.result.*;
+import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 import com.aplana.sbrf.taxaccounting.permissions.BasePermissionEvaluator;
 import com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission;
 import com.aplana.sbrf.taxaccounting.permissions.logging.TargetIdAndLogger;
@@ -274,10 +275,14 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         newDeclaration.setDepartmentId(departmentReportPeriod.getDepartmentId());
         newDeclaration.setState(State.CREATED);
 
-        String key = LockData.LockObjects.DECLARATION_CREATE.name() + "_" + newDeclaration.getDeclarationTemplateId() + "_" + departmentReportPeriod.getId() + "_" + newDeclaration.getKpp() + "_" + newDeclaration.getTaxOrganCode() + "_" + newDeclaration.getFileName();
+        Object[] lockKeyParts = {LockData.LockObjects.DECLARATION_CREATE.name(), newDeclaration.getDeclarationTemplateId(), departmentReportPeriod.getId(), newDeclaration.getAsnuId()};
+        String lockKey = StringUtils.joinNotEmpty(lockKeyParts, "_");
+
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(newDeclaration.getDeclarationTemplateId());
         Department department = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
-        if (lockDataService.lock(key, userInfo.getUser().getId(), makeDeclarationLockDescription(newDeclaration, declarationTemplate, departmentReportPeriod, department)) == null) {
+        String lockDescription = makeCreateDeclarationLockDescription(newDeclaration, declarationTemplate, departmentReportPeriod, department);
+
+        if (lockDataService.lock(lockKey, userInfo.getUser().getId(), lockDescription) == null) {
             //Если блокировка успешно установлена
             try {
                 canCreate(userInfo, newDeclaration.getDeclarationTemplateId(), departmentReportPeriod, newDeclaration.getAsnuId(), logger);
@@ -335,38 +340,39 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 }
                 return id;
             } finally {
-                lockDataService.unlock(key, userInfo.getUser().getId());
+                lockDataService.unlock(lockKey);
             }
-        } else {
+        } else { // Не удалось установить блокировку
             throw new ServiceException("Создание налоговой формы с указанными параметрами уже выполняется!");
         }
     }
 
-    private String makeDeclarationLockDescription(DeclarationData declarationData, DeclarationTemplate declarationTemplate, DepartmentReportPeriod departmentReportPeriod, Department department) {
-        RefBookDataProvider asnuProvider = refBookFactory.getDataProvider(RefBook.Id.ASNU.getId());
-        return String.format(DescriptionTemplate.DECLARATION.getText(),
-                "Создание налоговой формы",
-                departmentReportPeriod.getReportPeriod().getName() + " " + departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(),
-                departmentReportPeriod.getCorrectionDate() != null
-                        ? " с датой сдачи корректировки " + sdf.get().format(departmentReportPeriod.getCorrectionDate())
-                        : "",
-                department.getName(),
-                declarationTemplate.getType().getName(),
-                declarationData.getTaxOrganCode() != null
-                        ? ", Налоговый орган: \"" + declarationData.getTaxOrganCode() + "\""
-                        : "",
-                declarationData.getKpp() != null
-                        ? ", КПП: \"" + declarationData.getKpp() + "\""
-                        : "",
-                declarationData.getOktmo() != null
-                        ? ", ОКТМО: \"" + declarationData.getOktmo() + "\""
-                        : "",
-                declarationData.getAsnuId() != null
-                        ? ", Наименование АСНУ: \"" + asnuProvider.getRecordData(declarationData.getAsnuId()).get("NAME").getStringValue() + "\""
-                        : "",
-                declarationData.getFileName() != null
-                        ? ", Имя файла: \"" + declarationData.getFileName() + "\""
-                        : "");
+    private String makeCreateDeclarationLockDescription(DeclarationData declarationData, DeclarationTemplate declarationTemplate, DepartmentReportPeriod departmentReportPeriod, Department department) {
+
+        String periodName = departmentReportPeriod.getReportPeriod().getName();
+        int periodYear = departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear();
+        String correctionDate = departmentReportPeriod.getCorrectionDate() != null
+                ? " с датой сдачи корректировки " + sdf.get().format(departmentReportPeriod.getCorrectionDate())
+                : "";
+        String period = "Период: \"" + periodName + " " + periodYear + correctionDate + "\"";
+
+        String departmentStr = "Подразделение: \"" + department.getName() + "\"";
+        String declarationKind = "Вид: " + declarationTemplate.getDeclarationFormKind().getName();
+        String declarationType = "Тип: " + declarationTemplate.getType().getName();
+
+        String asnu;
+        Long asnuId = declarationData.getAsnuId();
+        if (asnuId != null) {
+            RefBookDataProvider asnuProvider = refBookFactory.getDataProvider(RefBook.Id.ASNU.getId());
+            String asnuName = asnuProvider.getRecordData(asnuId).get("NAME").getStringValue();
+            asnu = "Наименование АСНУ: " + asnuName;
+        } else {
+            asnu = "";
+        }
+
+        String[] parts = {period, departmentStr, declarationKind, declarationType, asnu};
+
+        return "Создание налоговой формы: " + StringUtils.joinNotEmpty(parts, ", ");
     }
 
     /**
@@ -2443,6 +2449,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 } finally {
                     IOUtils.closeQuietly(zipXml);
                 }
+                declarationDataDao.updateDocState(declarationData.getId(), RefBookDocState.SENT.getId());
             }
         } catch (IOException e) {
             throw new ServiceException(e.getLocalizedMessage(), e);

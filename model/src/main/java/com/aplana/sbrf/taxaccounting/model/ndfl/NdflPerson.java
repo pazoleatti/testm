@@ -59,7 +59,7 @@ public class NdflPerson extends NdflData<Long> {
     // Документ удостоверяющий личность.Номер (Графа 11)
     private String idDocNumber;
 
-    // Cтатус (Графа 12)
+    // Cтатус (Код) (Графа 12)
     private String status;
 
     // Адрес регистрации в Российской Федерации.Код субъекта (Графа 13)

@@ -106,7 +106,7 @@ public class LockDataServiceImpl implements LockDataService {
 
     @Override
     public PagingResult<LockDataDTO> findAllByFilter(String filter, PagingParams pagingParams, TAUser user) {
-        PagingResult<LockDataDTO> locks = dao.getLocks(filter, pagingParams, user);
+        PagingResult<LockDataDTO> locks = dao.getLocks(filter, pagingParams);
         for (LockDataDTO lock : locks) {
             if (userHasPrivilegesToUnlock(lock.getKey(), user)) {
                 lock.setAllowedToUnlock(true);

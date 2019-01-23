@@ -11,8 +11,8 @@
      * @description Контроллер диалогового окна
      */
         .controller('editNdflIncomesAndTaxFormCtrl', ["$scope", "$rootScope", "$http", '$state', '$stateParams',
-            "$modalInstance", "$filter", "APP_CONSTANTS", '$shareData', '$dialogs', 'ndflIncomesAndTax',
-            function ($scope, $rootScope, $http, $state, $stateParams, $modalInstance, $filter, APP_CONSTANTS, $shareData, $dialogs, ndflIncomesAndTax) {
+            "$modalInstance", '$logPanel', "$filter", "APP_CONSTANTS", '$shareData', '$dialogs', 'ndflIncomesAndTax',
+            function ($scope, $rootScope, $http, $state, $stateParams, $modalInstance, $logPanel, $filter, APP_CONSTANTS, $shareData, $dialogs, ndflIncomesAndTax) {
 
                 $scope.row = {};
                 $scope.temp = {};
@@ -21,9 +21,9 @@
                 // Установка блокировки на форму
                 $http({
                     method: "POST",
-                    url: "controller//actions/declarationData/" + $shareData.declarationId + "/lock"
-                }).success(function (lock) {
-                    if (lock && lock.declarationDataLocked) {
+                    url: "controller//actions/declarationData/" + $shareData.declarationId + "/lockEdit"
+                }).success(function (response) {
+                    if (response.data.success) {
                         // Получение данных ФЛ из раздела 1
                         $http({
                             method: "GET",
@@ -35,7 +35,7 @@
                                 $scope.row.disableTaxTransferDate = true;
                                 $scope.row.taxTransferDate = null;
                             }
-                            if(person.idDocType) {
+                            if (person.idDocType) {
                                 $http({
                                     method: "GET",
                                     url: "controller//rest/getPersonDocTypeName/" + person.idDocType
@@ -59,13 +59,8 @@
                                 }
                             });
                         });
-                    } else {
-                        $dialogs.errorDialog({
-                            content: $filter('translate')('incomesAndTax.edit.locked', {
-                                declaration: $shareData.declarationId,
-                                department: $shareData.department
-                            })
-                        });
+                    } else if (response.data.uuid) {
+                        $logPanel.open('log-panel-container', response.data.uuid);
                     }
                 });
 

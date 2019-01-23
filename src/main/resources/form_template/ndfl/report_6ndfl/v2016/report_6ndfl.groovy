@@ -291,13 +291,13 @@ class Report6Ndfl extends AbstractScriptClass {
                         incomeNotHoldingTotal = incomeNotHoldingTaxSum.subtract(incomeOverholdingTaxSum)
                     }
 
-                    ОбобщПоказ(
-                            КолФЛДоход: personCount,
-                            УдержНалИт: incomeWithholdingTotal,
-                            НеУдержНалИт: incomeNotHoldingTotal,
-                            ВозврНалИт: refoundTotal
-                    ) {
-
+                    def ОбобщПоказAttrs = [КолФЛДоход  : personCount,
+                                           УдержНалИт  : incomeWithholdingTotal,
+                                           НеУдержНалИт: incomeNotHoldingTotal]
+                    if (declarationData.taxRefundReflectionMode == TaxRefundReflectionMode.NORMAL) {
+                        ОбобщПоказAttrs.put("ВозврНалИт", refoundTotal)
+                    }
+                    ОбобщПоказ(ОбобщПоказAttrs) {
                         // Доходы сгруппированыые по ставке, ключ ставка - значение список операций
                         Map<Integer, List<NdflPersonIncome>> incomesGroupedByRate = groupByTaxRate(ndflPersonIncomeList)
                         Map<Integer, BigDecimal> accruedSumByRate = [:]
@@ -627,6 +627,7 @@ class Report6Ndfl extends AbstractScriptClass {
     /************************************* СОЗДАНИЕ ФОРМЫ *****************************************************************/
     // консолидированная форма рну-ндфл по которой будут создаваться отчетные формы
     DeclarationData sourceKnf
+    int requiredToCreateCount
 
     void createReportForms() {
         sourceKnf = declarationService.getDeclarationData(reportFormsCreationParams.sourceKnfId)
@@ -696,7 +697,7 @@ class Report6Ndfl extends AbstractScriptClass {
                 deleteTempFile(xml?.xmlFile)
             }
         }
-        logger.info("Количество успешно созданных форм: %d. Не удалось создать форм: %d.", createdForms.size(), departmentConfigs.size() - createdForms.size())
+        logger.info("Количество успешно созданных форм: %d. Не удалось создать форм: %d.", createdForms.size(), requiredToCreateCount - createdForms.size())
     }
 
     void create(DeclarationData declaration) {
@@ -716,14 +717,14 @@ class Report6Ndfl extends AbstractScriptClass {
         }
         List<Pair<KppOktmoPair, DepartmentConfig>> kppOktmoPairs = departmentConfigService.findAllByDeclaration(sourceKnf)
         def missingDepartmentConfigs = kppOktmoPairs.findResults { it.first == null ? it.second : null }
+        if (reportFormsCreationParams.kppOktmoPairs) {
+            kppOktmoPairs = kppOktmoPairs.findAll { reportFormsCreationParams.kppOktmoPairs.contains(it.first) }
+        }
         for (def departmentConfig : missingDepartmentConfigs) {
             logger.error("Не удалось создать форму $declarationTemplate.name, за период ${formatPeriod(departmentReportPeriod)}, " +
                     "подразделение: $department.name, КПП: $departmentConfig.kpp, ОКТМО: $departmentConfig.oktmo.code. " +
                     "В РНУ НДФЛ (консолидированная) № $sourceKnf.id для подразделения: $department.name за период ${formatPeriod(departmentReportPeriod)} " +
                     "отсутствуют операции для указанных КПП и ОКТМО")
-        }
-        if (reportFormsCreationParams.kppOktmoPairs) {
-            kppOktmoPairs = kppOktmoPairs.findAll { reportFormsCreationParams.kppOktmoPairs.contains(it.first) }
         }
         def missingKppOktmoPairs = kppOktmoPairs.findResults { it.second == null ? it.first : null }
         for (def kppOktmoPair : missingKppOktmoPairs) {
@@ -731,6 +732,7 @@ class Report6Ndfl extends AbstractScriptClass {
                     "ОКТМО: $kppOktmoPair.oktmo в справочнике \"Настройки подразделений\". " +
                     "Данные формы РНУ НДФЛ (консолидированная) № $sourceKnf.id по указанным КПП и ОКТМО источника выплаты не включены в отчетность.")
         }
+        requiredToCreateCount = kppOktmoPairs.count { it.second }.toInteger()
         List<DepartmentConfig> departmentConfigs = kppOktmoPairs.findAll { it.first && it.second }.collect { it.second }
         if (!departmentConfigs) {
             logger.error("Отчетность $declarationTemplate.name для $department.name за период ${formatPeriod(departmentReportPeriod)} не сформирована. " +
@@ -791,7 +793,8 @@ class Report6Ndfl extends AbstractScriptClass {
                         declarationService.delete(formToDelete.id, userInfo)
                     }
                 } else {
-                    logger.error("Невозможно выполнить повторное создание отчетных форм. Заблокировано удаление ранее созданных отчетных форм выполнением операций:")
+                    logger.error("Не удалось создать форму $declarationTemplate.name, за период ${formatPeriod(departmentReportPeriod)}, " +
+                            "подразделение: $department.name, КПП: $declarationData.kpp, ОКТМО: $declarationData.oktmo. Заблокировано удаление ранее созданных отчетных форм:")
                     logger.entries.addAll(localLogger.entries)
                     logger.error("Дождитесь завершения выполнения операций или выполните отмену операций вручную.")
                     return false
