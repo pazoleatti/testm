@@ -627,6 +627,7 @@ class Report6Ndfl extends AbstractScriptClass {
     /************************************* СОЗДАНИЕ ФОРМЫ *****************************************************************/
     // консолидированная форма рну-ндфл по которой будут создаваться отчетные формы
     DeclarationData sourceKnf
+    int requiredToCreateCount
 
     void createReportForms() {
         sourceKnf = declarationService.getDeclarationData(reportFormsCreationParams.sourceKnfId)
@@ -696,7 +697,7 @@ class Report6Ndfl extends AbstractScriptClass {
                 deleteTempFile(xml?.xmlFile)
             }
         }
-        logger.info("Количество успешно созданных форм: %d. Не удалось создать форм: %d.", createdForms.size(), departmentConfigs.size() - createdForms.size())
+        logger.info("Количество успешно созданных форм: %d. Не удалось создать форм: %d.", createdForms.size(), requiredToCreateCount - createdForms.size())
     }
 
     void create(DeclarationData declaration) {
@@ -731,6 +732,7 @@ class Report6Ndfl extends AbstractScriptClass {
                     "ОКТМО: $kppOktmoPair.oktmo в справочнике \"Настройки подразделений\". " +
                     "Данные формы РНУ НДФЛ (консолидированная) № $sourceKnf.id по указанным КПП и ОКТМО источника выплаты не включены в отчетность.")
         }
+        requiredToCreateCount = kppOktmoPairs.count { it.second }.toInteger()
         List<DepartmentConfig> departmentConfigs = kppOktmoPairs.findAll { it.first && it.second }.collect { it.second }
         if (!departmentConfigs) {
             logger.error("Отчетность $declarationTemplate.name для $department.name за период ${formatPeriod(departmentReportPeriod)} не сформирована. " +
