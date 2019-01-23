@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.model.filter.*;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.result.NdflPersonDeductionDTO;
 import com.aplana.sbrf.taxaccounting.model.result.NdflPersonIncomeDTO;
 import com.aplana.sbrf.taxaccounting.model.result.NdflPersonPrepaymentDTO;
@@ -197,11 +198,10 @@ public class NdflPersonController {
         );
         for (NdflPerson ndflPerson : resultPerson.getRows()) {
             if (ndflPerson.getStatus() != null) {
-                if (refBookFactory.getDataProvider(RefBook.Id.TAXPAYER_STATUS.getId()).
-                        getRecords(null, null, "CODE = '" + ndflPerson.getStatus() + "'", null).get(0) != null) {
-                    ndflPerson.setStatus(refBookFactory.getDataProvider(RefBook.Id.TAXPAYER_STATUS.getId()).
-                            getRecords(null, null, "CODE = '" + ndflPerson.getStatus() + "'", null).get(0).
-                            get("NAME").getStringValue());
+                Map<String, RefBookValue> statusRecord = refBookFactory.getDataProvider(RefBook.Id.TAXPAYER_STATUS.getId()).
+                        getRecords(null, null, "CODE = '" + ndflPerson.getStatus() + "'", null).get(0);
+                if (statusRecord != null) {
+                    ndflPerson.setStatus("(" + ndflPerson.getStatus() + ") " + statusRecord.get("NAME").getStringValue());
                 } else {
                     ndflPerson.setStatus("");
                 }

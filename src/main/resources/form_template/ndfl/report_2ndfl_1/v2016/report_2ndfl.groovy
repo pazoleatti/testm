@@ -1791,7 +1791,7 @@ class Report2Ndfl extends AbstractScriptClass {
     String getPersonStatusName(String statusCode) {
         RefBookDataProvider provider = getProvider(RefBook.Id.TAXPAYER_STATUS.getId())
         PagingResult<Map<String, RefBookValue>> record = provider.getRecords(reportPeriod.endDate, null, "CODE = '$statusCode'".toString(), null)
-        return record.get(0).get("NAME").getValue()
+        return "(" + record.get(0).get("CODE").getValue() + ") " + record.get(0).get("NAME").getValue()
     }
 
     List<Column> createTableColumns() {
