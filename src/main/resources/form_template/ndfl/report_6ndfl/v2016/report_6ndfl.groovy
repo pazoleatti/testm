@@ -791,7 +791,8 @@ class Report6Ndfl extends AbstractScriptClass {
                         declarationService.delete(formToDelete.id, userInfo)
                     }
                 } else {
-                    logger.error("Невозможно выполнить повторное создание отчетных форм. Заблокировано удаление ранее созданных отчетных форм выполнением операций:")
+                    logger.error("Не удалось создать форму $declarationTemplate.name, за период ${formatPeriod(departmentReportPeriod)}, " +
+                            "подразделение: $department.name, КПП: $declarationData.kpp, ОКТМО: $declarationData.oktmo. Заблокировано удаление ранее созданных отчетных форм:")
                     logger.entries.addAll(localLogger.entries)
                     logger.error("Дождитесь завершения выполнения операций или выполните отмену операций вручную.")
                     return false
