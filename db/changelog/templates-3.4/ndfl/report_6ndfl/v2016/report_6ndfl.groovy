@@ -2,7 +2,6 @@ package form_template.ndfl.report_6ndfl.v2016
 
 import com.aplana.sbrf.taxaccounting.AbstractScriptClass
 import com.aplana.sbrf.taxaccounting.model.*
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.Logger
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction
@@ -104,7 +103,7 @@ class Report6Ndfl extends AbstractScriptClass {
                 break
             case FormDataEvent.CREATE_FORMS: // создание экземпляра
                 println "!CREATE_FORMS!"
-                createForm()
+                createReportForms()
                 break
             case FormDataEvent.PRE_CREATE_REPORTS:
                 preCreateReports()
@@ -114,12 +113,6 @@ class Report6Ndfl extends AbstractScriptClass {
 
     // Коды, определяющие налоговый (отчётный) период
     final long REF_BOOK_PERIOD_CODE_ID = RefBook.Id.PERIOD_CODE.id
-
-    // Коды представления налоговой декларации по месту нахождения (учёта)
-    final long REF_BOOK_TAX_PLACE_TYPE_CODE_ID = RefBook.Id.PRESENT_PLACE.id
-
-    // Признак лица, подписавшего документ
-    final long REF_BOOK_MARK_SIGNATORY_CODE_ID = RefBook.Id.MARK_SIGNATORY_CODE.id
 
     final long REPORT_PERIOD_TYPE_ID = 8
 
@@ -132,9 +125,6 @@ class Report6Ndfl extends AbstractScriptClass {
 
     // Кэш для справочников
     Map<String, Map<String, RefBookValue>> refBookCache = [:]
-
-    // Коды мест предоставления документа
-    Map<Long, Map<String, RefBookValue>> presentPlaceCodeCache = [:]
 
     // Мапа где ключ идентификатор NdflPerson, значение NdflPerson соответствующий идентификатору
     Map<Long, NdflPerson> ndflpersonFromRNUPrimary = [:]
@@ -149,29 +139,21 @@ class Report6Ndfl extends AbstractScriptClass {
             fileWriter = new OutputStreamWriter(new FileOutputStream(xmlFile), Charset.forName("windows-1251"))
             fileWriter.write("<?xml version=\"1.0\" encoding=\"windows-1251\"?>")
 
-            xml = buildXml(departmentConfig, fileWriter)
+            xml = buildXml(departmentConfig, fileWriter, false)
 
             if (xml) {
                 //Архивирование перед сохранением в базу
                 xml.xmlFile = xmlFile
             }
             return xml
-        } catch (IOException e) {
-            throw new ServiceException("Ошибка при формировании файла XML", e)
+        } catch (Exception e) {
+            logger.warn("Не удалось создать форму \"$declarationTemplate.name\" за период \"${formatPeriod(departmentReportPeriod)}\", " +
+                    "подразделение: \"$department.name\", КПП: \"$declarationData.kpp\", ОКТМО: \"$declarationData.oktmo\". Ошибка: $e.message")
         } finally {
             IOUtils.closeQuietly(fileWriter)
             if (!xml) {
                 deleteTempFile(xmlFile)
             }
-        }
-    }
-
-    Xml buildXml(DepartmentConfig departmentConfig, def writer) {
-        try {
-            return buildXml(departmentConfig, writer, false)
-        } catch (Exception e) {
-            logger.warn("Не удалось создать форму \"$declarationTemplate.name\" за период \"${formatPeriod(departmentReportPeriod)}\", " +
-                    "подразделение: \"$department.name\", КПП: \"$declarationData.kpp\", ОКТМО: \"$declarationData.oktmo\". Ошибка: $e.message")
         }
         return null
     }
@@ -646,9 +628,12 @@ class Report6Ndfl extends AbstractScriptClass {
     // консолидированная форма рну-ндфл по которой будут создаваться отчетные формы
     DeclarationData sourceKnf
 
-    def createForm() {
+    void createReportForms() {
         sourceKnf = declarationService.getDeclarationData(reportFormsCreationParams.sourceKnfId)
         List<DepartmentConfig> departmentConfigs = getDepartmentConfigs()
+        if (!departmentConfigs) {
+            return
+        }
         List<DeclarationData> createdForms = []
         for (def departmentConfig : departmentConfigs) {
             ScriptUtils.checkInterrupted()
@@ -658,6 +643,7 @@ class Report6Ndfl extends AbstractScriptClass {
             def lastSentForm = existingDeclarations.find { it.docStateId != RefBookDocState.NOT_SENT.id }
             if (reportFormsCreationParams.reportFormCreationMode == ReportFormCreationModeEnum.UNACCEPTED_BY_FNS) {
                 if (lastSentForm && !(lastSentForm.docStateId in [RefBookDocState.REQUIRES_CLARIFICATION.id, RefBookDocState.REJECTED.id, RefBookDocState.ERROR.id])) {
+                    // Формировать не требуется
                     continue
                 }
             }
@@ -680,6 +666,7 @@ class Report6Ndfl extends AbstractScriptClass {
                 if (xml) {
                     if (reportFormsCreationParams.reportFormCreationMode == ReportFormCreationModeEnum.BY_NEW_DATA && existingDeclarations) {
                         if (!hasDifference(xml, existingDeclarations.first())) {
+                            // Формировать не требуется
                             continue
                         }
                     }
@@ -688,18 +675,20 @@ class Report6Ndfl extends AbstractScriptClass {
                     }
                     if (deleteForms(formsToDelete)) {
                         createdForms.add(declarationData)
-                        declarationService.create(declarationData, departmentReportPeriod, logger, userInfo, true)
+                        declarationData.fileName = xml.fileName
+                        create(declarationData)
+                        // Привязывание xml-файла к форме
                         saveFileInfo(xml.xmlFile, xml.date, xml.fileName)
                         zipFile = ZipUtils.archive(xml.xmlFile, xml.fileName + ".xml")
-                        xml.uuid = blobDataService.create(zipFile, xml.fileName + ".zip", xml.date)
-                        reportService.attachReportToDeclaration(declarationData.id, xml.uuid, DeclarationDataReportType.XML_DEC)
-                        declarationService.setFileName(declarationData.id, xml.fileName)
+                        String uuid = blobDataService.create(zipFile, xml.fileName + ".zip", xml.date)
+                        reportService.attachReportToDeclaration(declarationData.id, uuid, DeclarationDataReportType.XML_DEC)
                         // Добавление информации о источнике созданной отчетной формы.
-                        sourceService.deleteDeclarationConsolidateInfo(declarationData.id)
                         sourceService.addDeclarationConsolidationInfo(declarationData.id, singletonList(sourceKnf.id))
 
-                        String message = declarationService.getDeclarationFullName(declarationData.id, null)
-                        logger.info("Успешно выполнено создание " + message.replace("Налоговая форма", "налоговой формы"))
+                        logger.info("Успешно выполнено создание отчетной формы \"$declarationTemplate.name\": " +
+                                "Период: \"${formatPeriod(departmentReportPeriod)}\", Подразделение: \"$department.name\", " +
+                                "Вид: \"$declarationTemplate.name\", № $declarationData.id, Налоговый орган: \"$departmentConfig.taxOrganCode\", " +
+                                "КПП: \"$departmentConfig.kpp\", ОКТМО: \"$departmentConfig.oktmo.code\".")
                     }
                 }
             } finally {
@@ -707,32 +696,45 @@ class Report6Ndfl extends AbstractScriptClass {
                 deleteTempFile(xml?.xmlFile)
             }
         }
-
         logger.info("Количество успешно созданных форм: %d. Не удалось создать форм: %d.", createdForms.size(), departmentConfigs.size() - createdForms.size())
+    }
+
+    void create(DeclarationData declaration) {
+        Logger localLogger = new Logger()
+        try {
+            declarationService.create(declaration, departmentReportPeriod, localLogger, userInfo, true)
+        } finally {
+            logger.entries.addAll(localLogger.entries)
+        }
     }
 
     List<DepartmentConfig> getDepartmentConfigs() {
         if (!ndflPersonService.incomeExistsByDeclarationId(sourceKnf.id)) {
             logger.error("Отчетность $declarationTemplate.name для $department.name за период ${formatPeriod(departmentReportPeriod)} не сформирована. " +
                     "В РНУ НДФЛ (консолидированная) № $sourceKnf.id для подразделения: $department.name за период ${formatPeriod(departmentReportPeriod)} отсутствуют операции.")
+            return null
         }
         List<Pair<KppOktmoPair, DepartmentConfig>> kppOktmoPairs = departmentConfigService.findAllByDeclaration(sourceKnf)
+        def missingDepartmentConfigs = kppOktmoPairs.findResults { it.first == null ? it.second : null }
+        for (def departmentConfig : missingDepartmentConfigs) {
+            logger.error("Не удалось создать форму $declarationTemplate.name, за период ${formatPeriod(departmentReportPeriod)}, " +
+                    "подразделение: $department.name, КПП: $departmentConfig.kpp, ОКТМО: $departmentConfig.oktmo.code. " +
+                    "В РНУ НДФЛ (консолидированная) № $sourceKnf.id для подразделения: $department.name за период ${formatPeriod(departmentReportPeriod)} " +
+                    "отсутствуют операции для указанных КПП и ОКТМО")
+        }
         if (reportFormsCreationParams.kppOktmoPairs) {
             kppOktmoPairs = kppOktmoPairs.findAll { reportFormsCreationParams.kppOktmoPairs.contains(it.first) }
         }
-        List<KppOktmoPair> missingDepartmentConfigKppOktmoPairs = kppOktmoPairs.findAll { it.second == null }.collect {
-            it.first
-        }
-        for (def kppOktmoPair : missingDepartmentConfigKppOktmoPairs) {
+        def missingKppOktmoPairs = kppOktmoPairs.findResults { it.second == null ? it.first : null }
+        for (def kppOktmoPair : missingKppOktmoPairs) {
             logger.error("Для подразделения $department.name отсутствуют настройки подразделений для КПП: $kppOktmoPair.kpp, " +
                     "ОКТМО: $kppOktmoPair.oktmo в справочнике \"Настройки подразделений\". " +
                     "Данные формы РНУ НДФЛ (консолидированная) № $sourceKnf.id по указанным КПП и ОКТМО источника выплаты не включены в отчетность.")
         }
-        List<DepartmentConfig> departmentConfigs = kppOktmoPairs.findAll { it.second != null }.collect { it.second }
+        List<DepartmentConfig> departmentConfigs = kppOktmoPairs.findAll { it.first && it.second }.collect { it.second }
         if (!departmentConfigs) {
             logger.error("Отчетность $declarationTemplate.name для $department.name за период ${formatPeriod(departmentReportPeriod)} не сформирована. " +
                     "Отсутствуют настройки указанного подразделения в справочнике \"Настройки подразделений\"")
-            return null
         }
         return departmentConfigs
     }
@@ -751,7 +753,7 @@ class Report6Ndfl extends AbstractScriptClass {
         }
         def ДокументOld = ФайлOld.Документ
         def ДокументNew = ФайлNew.Документ
-        if (ДокументOld.@КодНО != ДокументNew.@КодНО || ДокументOld.@КодНО != ДокументNew.@КодНО) {
+        if (ДокументOld.@КодНО != ДокументNew.@КодНО || ДокументOld.@ПоМесту != ДокументNew.@ПоМесту) {
             return true
         }
         if (nodesHasDifference(ДокументOld.СвНП?.first(), ДокументNew.СвНП?.first())) {
@@ -813,7 +815,6 @@ class Report6Ndfl extends AbstractScriptClass {
     class Xml {
         String fileName
         Date date
-        String uuid
         File xmlFile
     }
 
@@ -841,37 +842,6 @@ class Report6Ndfl extends AbstractScriptClass {
      */
     String getCorrectionDateExpression(DepartmentReportPeriod departmentReportPeriod) {
         return departmentReportPeriod.correctionDate == null ? "" : " с датой сдачи корректировки ${departmentReportPeriod.correctionDate.format("dd.MM.yyyy")}"
-    }
-
-    /**
-     * Получить детали подразделения из справочника по кпп и октмо формы
-     * @param departmentParamId
-     * @param reportPeriodId
-     * @return
-     */
-    Map<String, RefBookValue> getDepartmentConfigByKppAndOktmo(String kpp, String oktmo) {
-        String filter = "DEPARTMENT_ID = ${department.id} and OKTMO.CODE = '$oktmo' AND KPP = '$kpp'".toString()
-        List<Map<String, RefBookValue>> departmentParamRowList = getProvider(RefBook.Id.NDFL_DETAIL.id).getRecords(reportPeriod.endDate, null, filter, null)
-
-        if (departmentParamRowList == null || departmentParamRowList.isEmpty()) {
-            departmentParamException(declarationData.departmentId, reportPeriod)
-        }
-
-        return departmentParamRowList.get(0)
-    }
-
-    /**
-     * Получить "Коды мест предоставления документа"
-     * @return
-     */
-    Map<Long, Map<String, RefBookValue>> getRefPresentPlace() {
-        if (presentPlaceCodeCache.size() == 0) {
-            List<Map<String, RefBookValue>> refBookMap = getRefBook(REF_BOOK_TAX_PLACE_TYPE_CODE_ID)
-            refBookMap.each { Map<String, RefBookValue> refBook ->
-                presentPlaceCodeCache.put((Long) refBook?.id?.value, refBook)
-            }
-        }
-        return presentPlaceCodeCache
     }
 
     /**
@@ -1177,13 +1147,6 @@ class Report6Ndfl extends AbstractScriptClass {
         style.setBorderLeft(CellStyle.BORDER_THIN)
         style.setBorderRight(CellStyle.BORDER_THIN)
         return style
-    }
-
-    void departmentParamException(int departmentId, ReportPeriod reportPeriod) {
-        throw new ServiceException("Отсутствуют настройки подразделения \"%s\" периода \"%s\". Необходимо выполнить настройку в разделе меню \"Налоги->НДФЛ->Настройки подразделений\"",
-                departmentService.get(departmentId).getName(),
-                reportPeriod.getTaxPeriod().getYear() + ", " + reportPeriod.getName()
-        ) as Throwable
     }
 
     String formatDate(Date date) {

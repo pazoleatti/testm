@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 public class DeclarationLockKeyGeneratorImpl implements DeclarationDataLockKeyGenerator {
 
     @Override
-    public String generateLockKey(Long declarationDataId, OperationType operationType) {
+    public String generateLockKey(Long declarationDataId, OperationType operationType) throws IllegalArgumentException {
         if (operationType.equals(OperationType.LOAD_TRANSPORT_FILE))
             return String.format("DECLARATION_DATA_%s_IMPORT_TF_DECLARATION", declarationDataId);
         else if (operationType.equals(OperationType.IMPORT_DECLARATION_EXCEL))

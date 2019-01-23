@@ -9,7 +9,6 @@ import com.aplana.sbrf.taxaccounting.model.TARole;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.exception.LockException;
 import com.google.common.collect.HashMultiset;
-import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,30 +16,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.*;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 
-/**
- * @author <a href="mailto:Marat.Fayzullin@aplana.com">Файзуллин Марат</a>
- * @since 17.07.14 15:19
- */
 
-@RunWith(SpringJUnit4ClassRunner.class)
+@RunWith(SpringRunner.class)
 @ContextConfiguration({"LockDataDaoTest.xml"})
 @Transactional
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-public class LockDataDaoTest extends Assert {
+public class LockDataDaoTest {
 
     @Autowired
     private LockDataDao dao;
@@ -48,102 +42,105 @@ public class LockDataDaoTest extends Assert {
     private NamedParameterJdbcTemplate jdbc;
 
     @Test
-    public void getTest() {
-        LockData data = dao.get("a", false);
-        Assert.assertEquals(0, data.getUserId());
-        Calendar cal = Calendar.getInstance();
-        cal.clear();
-        cal.set(2013, 0, 1, 0, 5, 0);
-        data = dao.get("a", cal.getTime());
-        Assert.assertNotNull(data);
-        cal.set(Calendar.YEAR, 2014);
-        data = dao.get("a", cal.getTime());
-        Assert.assertNull(data);
+    public void test_get_onExistentLock() {
+        LockData data = dao.findByKey("a");
+        assertThat(data)
+                .isNotNull()
+                .extracting("key", "userId")
+                .containsExactly("a", 0);
+    }
 
-        data = dao.get("FORM_DATA", true);
-        Assert.assertNotNull(data);
-        data = dao.get("FORM_DATA_2", true);
-        Assert.assertNull(data);
+    @Test
+    public void test_get_onNonexistentLock() {
+        LockData data = dao.findByKey("c");
+        assertThat(data).isNull();
+    }
 
-        Assert.assertNull(dao.get("c", false));
+    @Test
+    public void test_existsByKey_forExistentLock() {
+        boolean result = dao.existsByKey("a");
+        assertThat(result).isTrue();
+    }
+
+    @Test
+    public void test_existsByKey_forNonexistentLock() {
+        boolean result = dao.existsByKey("z");
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    public void test_existsByKeyAndUserId_matching() {
+        boolean result = dao.existsByKeyAndUserId("a", 0);
+        assertThat(result).isTrue();
+    }
+
+    @Test
+    public void test_existsByKeyAndUserId_matchingByKeyOnly() {
+        boolean result = dao.existsByKeyAndUserId("a", 1);
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    public void test_existsByKeyAndUserId_forNonexistentKey() {
+        boolean result = dao.existsByKeyAndUserId("z", 0);
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    public void test_lock_nonexistent() {
+        dao.lock("c", 0, "");
+        LockData data = dao.findByKey("c");
+        assertThat(data)
+                .isNotNull()
+                .extracting("key", "userId")
+                .containsExactly("c", 0);
     }
 
     @Test(expected = LockException.class)
-    public void createLockTest() {
+    public void test_lock_existent() {
         dao.lock("a", 0, ""); // дубликат
     }
 
     @Test
-    public void createLockTest2() {
-        dao.lock("c", 0, "");
-        LockData data = dao.get("c", false);
-        Assert.assertEquals("c", data.getKey());
-        Assert.assertEquals(0, data.getUserId());
-
-        dao.lock("abc", 0, "");
-        data = dao.get("abc", false);
-        data = dao.get("abc", data.getDateLock());
-        Assert.assertNotNull(data);
-    }
-
-    @Test
-    public void deleteLockTest() {
-        dao.unlockOld("a");
-        Assert.assertNull(dao.get("a", false));
-    }
-
-    @Test(expected = LockException.class)
-    public void deleteLockTest2() {
-        dao.unlockOld("qwerty");
-    }
-
-    @Test
-    public void getLocks() {
+    public void test_getLocks() {
         TAUser user = TAUser.builder().id(1).roles(singletonList(
                 TARole.builder().alias(TARole.N_ROLE_OPER).build()
         )).build();
-        PagingParams paging = new PagingParams(0, 100);
+        PagingParams paging = PagingParams.getInstance(1, 100);
         PagingResult<LockDataDTO> data = dao.getLocks("", paging, user);
-        assertEquals(1, data.size());
+        Assert.assertEquals(1, data.size());
         user.setRoles(singletonList(
                 TARole.builder().alias(TARole.ROLE_ADMIN).build()
         ));
         data = dao.getLocks("a", paging, user);
-        assertEquals(4, data.size());
+        Assert.assertEquals(4, data.size());
         data = dao.getLocks("", paging, user);
-        assertEquals(5, data.size());
+        Assert.assertEquals(5, data.size());
         data = dao.getLocks(null, paging, user);
-        assertEquals(5, data.size());
+        Assert.assertEquals(5, data.size());
         data = dao.getLocks("not exists", paging, user);
-        assertEquals(0, data.size());
+        Assert.assertEquals(0, data.size());
+    }
+
+    @Test
+    public void test_getLockIfOlderThan() throws InterruptedException {
+        Assert.assertEquals(1, unlockIfOlderThan(1));
+        Thread.sleep(2000);
+        Assert.assertEquals(4, unlockIfOlderThan(1));
+        // создаем новую блокировку
+        dao.lock("test_key", 1, "test_description");
+        Thread.sleep(1000);
+        Assert.assertEquals(0, unlockIfOlderThan(2));
+        Thread.sleep(2000);
+        Assert.assertEquals(1, unlockIfOlderThan(2));
     }
 
     private int unlockIfOlderThan(long seconds) {
         List<String> keyList = dao.getLockIfOlderThan(seconds);
         for (String key : keyList) {
-            dao.unlockOld(key);
+            dao.unlock(key);
         }
         return keyList.size();
-    }
-
-    @Test
-    public void unlockIfOlderThan() throws InterruptedException {
-        assertEquals(1, unlockIfOlderThan(1));
-        Thread.sleep(2000);
-        assertEquals(4, unlockIfOlderThan(1));
-        // создаем новую блокировку
-        dao.lock("test_key", 1, "test_description");
-        Thread.sleep(1000);
-        assertEquals(0, unlockIfOlderThan(2));
-        Thread.sleep(2000);
-        assertEquals(1, unlockIfOlderThan(2));
-    }
-
-    /**
-     * Метод предназначен для проверки обработки исключительных ситуаций
-     */
-    private void dropTable() {
-        jdbc.update("DROP TABLE lock_data", new HashMap());
     }
 
     @Test
@@ -152,75 +149,41 @@ public class LockDataDaoTest extends Assert {
         try {
             unlockIfOlderThan(0);
         } catch (LockException e) {
-            assertTrue(e.getMessage().startsWith("Ошибка при удалении"));
-        }
-        try {
-            dao.get("asd", true);
-        } catch (LockException e) {
-            assertTrue(e.getMessage().startsWith("Ошибка при поиске блокировки"));
-        }
-        try {
-            dao.get("asd", new Date());
-        } catch (LockException e) {
-            assertTrue(e.getMessage().startsWith("Ошибка при поиске блокировки"));
-        }
-        try {
-            dao.unlockOld("asd");
-        } catch (LockException e) {
-            assertTrue(e.getMessage().startsWith("Ошибка при удалении"));
+            Assert.assertTrue(e.getMessage().startsWith("Ошибка при удалении"));
         }
         try {
             dao.unlockAllByUserId(0, false);
         } catch (LockException e) {
-            assertTrue(e.getMessage().startsWith("Ошибка при удалении блокировок для пользователя"));
+            Assert.assertTrue(e.getMessage().startsWith("Ошибка при удалении блокировок для пользователя"));
         }
     }
 
-    @Test
-    public void get() {
-        LockData lock = dao.get("FORM_DATA_1", true);
-        assertEquals("FORM_DATA_1", lock.getKey());
-        assertEquals(2, lock.getUserId());
-
-        lock = dao.get("q", false);
-        assertEquals("q", lock.getKey());
-        assertEquals(0, lock.getUserId());
-
-        lock = dao.get("a", false);
-        assertEquals("a", lock.getKey());
-        Date dateLock = lock.getDateLock();
-
-        lock = dao.get("awdfzf zf", true);
-        assertNull(lock);
-
-        lock = dao.get("a", dateLock);
-        assertEquals("a", lock.getKey());
-        assertEquals(dateLock, lock.getDateLock());
-
-        lock = dao.get("awdfzf zf", dateLock);
-        assertNull(lock);
+    /**
+     * Метод предназначен для проверки обработки исключительных ситуаций
+     */
+    private void dropTable() {
+        jdbc.update("DROP TABLE lock_data", new HashMap<String, Object>());
     }
 
     @Test
-    public void unlockAllByUserId() {
+    public void test_unlockAllByUserId() {
         TAUser user = TAUser.builder().id(1).roles(singletonList(
                 TARole.builder().alias(TARole.ROLE_ADMIN).build()
         )).build();
         dao.unlockAllByUserId(0, false);
-        PagingResult<LockDataDTO> locks = dao.getLocks("", new PagingParams(0, 10), user);
+        PagingResult<LockDataDTO> locks = dao.getLocks("", new PagingParams(), user);
         System.out.println(locks);
-        assertEquals(2, locks.size());
+        Assert.assertEquals(2, locks.size());
 
         dropTable();
         dao.unlockAllByUserId(0, true);
     }
 
     @Test
-    public void fetchAllByKeySet() {
+    public void test_fetchAllByKeySet() {
         List<LockData> locks = dao.fetchAllByKeySet(new HashSet<>(asList("b", "aaa")));
-        assertEquals(2, locks.size());
-        assertTrue(HashMultiset.create(asList(2L, 4L)).equals(
-                HashMultiset.create(asList(locks.get(0).getId(), locks.get(1).getId()))));
+        Assert.assertEquals(2, locks.size());
+        Assert.assertEquals(HashMultiset.create(asList(2L, 4L)), HashMultiset.create(asList(locks.get(0).getId(), locks.get(1).getId())));
     }
 
     @Test
@@ -232,17 +195,17 @@ public class LockDataDaoTest extends Assert {
         dao.lockKeysBatch(locks, 0);
 
         dao.lock("c", 0, "");
-        LockData data = dao.get("lock_key1", false);
-        Assertions.assertThat(data).isNotNull();
-        Assertions.assertThat(data.getKey()).isEqualTo("lock_key1");
-        Assertions.assertThat(data.getUserId()).isEqualTo(0);
-        Assertions.assertThat(data.getDescription()).isEqualTo("description1");
+        LockData data = dao.findByKey("lock_key1");
+        assertThat(data).isNotNull();
+        assertThat(data.getKey()).isEqualTo("lock_key1");
+        assertThat(data.getUserId()).isEqualTo(0);
+        assertThat(data.getDescription()).isEqualTo("description1");
 
-        data = dao.get("lock_key2", false);
-        Assertions.assertThat(data).isNotNull();
-        Assertions.assertThat(data.getKey()).isEqualTo("lock_key2");
-        Assertions.assertThat(data.getUserId()).isEqualTo(0);
-        Assertions.assertThat(data.getDescription()).isEqualTo("description2");
+        data = dao.findByKey("lock_key2");
+        assertThat(data).isNotNull();
+        assertThat(data.getKey()).isEqualTo("lock_key2");
+        assertThat(data.getUserId()).isEqualTo(0);
+        assertThat(data.getDescription()).isEqualTo("description2");
     }
 
     @Test
@@ -251,25 +214,25 @@ public class LockDataDaoTest extends Assert {
 
         dao.bindTaskToMultiKeys(keys, 1L);
 
-        LockData data = dao.get("a", false);
-        Assertions.assertThat(data.getTaskId()).isEqualTo(1L);
-        data = dao.get("b", false);
-        Assertions.assertThat(data.getTaskId()).isEqualTo(1L);
-        data = dao.get("q", false);
-        Assertions.assertThat(data.getTaskId()).isEqualTo(1L);
+        LockData data = dao.findByKey("a");
+        assertThat(data.getTaskId()).isEqualTo(1L);
+        data = dao.findByKey("b");
+        assertThat(data.getTaskId()).isEqualTo(1L);
+        data = dao.findByKey("q");
+        assertThat(data.getTaskId()).isEqualTo(1L);
     }
 
     @Test
-    public void test_unlockMiltipleTasks() {
+    public void test_unlockMultipleTasks() {
         List<String> keys = Arrays.asList("a", "b", "q");
 
-        dao.unlockMiltipleTasks(keys);
+        dao.unlockMultipleTasks(keys);
 
-        LockData data = dao.get("a", false);
-        Assertions.assertThat(data).isNull();
-        data = dao.get("b", false);
-        Assertions.assertThat(data).isNull();
-        data = dao.get("q", false);
-        Assertions.assertThat(data).isNull();
+        LockData data = dao.findByKey("a");
+        assertThat(data).isNull();
+        data = dao.findByKey("b");
+        assertThat(data).isNull();
+        data = dao.findByKey("q");
+        assertThat(data).isNull();
     }
 }

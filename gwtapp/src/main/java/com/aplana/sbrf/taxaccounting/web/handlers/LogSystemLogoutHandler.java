@@ -37,7 +37,9 @@ public class LogSystemLogoutHandler implements LogoutHandler {
             TAUserInfo userInfo = securityService.currentUserInfo();
 
             LOG.info("Exit: " + userInfo);
-            lockDataService.unlockAll(userInfo, true);
+            // TODO: отключено, чтобы не удалять блокировки по асинхронным задачам.
+            // TODO: в 3.5 определимся, что делать по блокировкам синхронных, задача на аналитику: https://jira.aplana.com/browse/SBRFNDFL-6443
+//            lockDataService.unlockAll(userInfo, true);
             auditService.add(FormDataEvent.LOGOUT, userInfo,
                     userInfo.getUser().getDepartmentId(), null, null, null, null, null, null, null);
             LOG.info("Security logout system success.");

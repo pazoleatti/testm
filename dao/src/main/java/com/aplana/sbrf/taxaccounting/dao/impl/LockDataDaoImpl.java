@@ -33,9 +33,6 @@ import java.util.Map;
 
 /**
  * Реализация дао блокировок
- *
- * @author <a href="mailto:Marat.Fayzullin@aplana.com">Файзуллин Марат</a>
- * @since 17.07.14 15:01
  */
 @Repository
 public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
@@ -45,15 +42,15 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
     private static final String USER_LOCK_DATA_DELETE_ERROR = "Ошибка при удалении блокировок для пользователя с id = %d. %s";
 
     @Autowired
-    DBUtils dbUtils;
+    private DBUtils dbUtils;
 
 
     @Override
-    public LockData get(String key, boolean like) {
+    public LockData findByKey(String key) {
         try {
-            String sql = "SELECT id, key, user_id, task_id, date_lock, description FROM lock_data WHERE key " + (like ? "LIKE ?" : "= ?");
+            String sql = "SELECT id, key, user_id, task_id, date_lock, description FROM lock_data WHERE key = ?";
             return getJdbcTemplate().queryForObject(sql,
-                    new Object[]{like ? "%" + key + "%" : key},
+                    new Object[]{key},
                     new int[]{Types.VARCHAR},
                     new LockDataMapper()
             );
@@ -66,20 +63,17 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
     }
 
     @Override
-    public LockData get(String key, Date lockDate) {
-        try {
-            return getJdbcTemplate().queryForObject(
-                    "SELECT id, key, user_id, task_id, date_lock, description FROM lock_data WHERE key = ? and date_lock = ?",
-                    new Object[]{key, lockDate},
-                    new int[]{Types.VARCHAR, Types.TIMESTAMP},
-                    new LockDataMapper()
-            );
-        } catch (EmptyResultDataAccessException e) {
-            return null;
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
-            throw new LockException("Ошибка при поиске блокировки с кодом = %s и датой начала = %s", key, lockDate);
-        }
+    public boolean existsByKey(String key) {
+        String query = "select count(id) from lock_data where key = ?";
+        int count = getJdbcTemplate().queryForObject(query, new Object[]{key}, new int[]{Types.VARCHAR}, Integer.class);
+        return (count > 0);
+    }
+
+    @Override
+    public boolean existsByKeyAndUserId(String key, int userId) {
+        String query = "select count(id) from lock_data where key = ? and user_id = ?";
+        int count = getJdbcTemplate().queryForObject(query, new Object[]{key, userId}, new int[]{Types.VARCHAR, Types.INTEGER}, Integer.class);
+        return (count > 0);
     }
 
     @Override
@@ -87,7 +81,8 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
         try {
             Date lockDate = new Date();
             getJdbcTemplate().update("INSERT INTO lock_data (id, key, user_id, date_lock, description) VALUES (seq_lock_data.nextval, ?, ?, ?, ?)",
-                    new Object[]{key,
+                    new Object[]{
+                            key,
                             userId,
                             lockDate,
                             description
@@ -103,7 +98,8 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
         try {
             Date lockDate = new Date();
             getJdbcTemplate().update("INSERT INTO lock_data (id, key, user_id, date_lock) VALUES (seq_lock_data.nextval, ?, ?, ?)",
-                    new Object[]{key,
+                    new Object[]{
+                            key,
                             userId,
                             lockDate
                     },
@@ -148,7 +144,7 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
     }
 
     @Override
-    public void unlockAllByTask(long taskId) {
+    public void unlockAllByTaskId(long taskId) {
         getJdbcTemplate().update("delete from lock_data where task_id = ?", taskId);
     }
 
@@ -282,7 +278,7 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
     }
 
     @Override
-    public void unlockMiltipleTasks(Collection<String> keys) {
+    public void unlockMultipleTasks(Collection<String> keys) {
         String sql = "delete from lock_data where key = :key";
         List<Map<String, Object>> batchValues = new ArrayList<>(keys.size());
         for (String key : keys) {

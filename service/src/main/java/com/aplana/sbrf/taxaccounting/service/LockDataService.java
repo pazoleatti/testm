@@ -48,8 +48,6 @@ import java.util.Set;
 @ScriptExposed
 public interface LockDataService {
 
-    String LOCK_DATA = "Объект заблокирован для редактирования пользователем \"%s\"(id=%s)";
-
     /**
      * Устанавливает новую блокировку. Если блокировка успешно установилась, то возвращается null.
      * Если блокировка уже существовала, то возвращется информация по этой блокировке в виде объекта LockData
@@ -121,13 +119,17 @@ public interface LockDataService {
     /**
      * Убрать все блокировки пользователя.
      *
+     * TODO: Метод закомментирован в вызывающем коде controller/LogSystemLogoutHandler#logout()
+     *
      * @param userInfo    пользователь
      * @param ignoreError признак игнорирования ошибок при снятии блокировок. Нужен при разлогинивании
      */
+    @SuppressWarnings("unused")
     void unlockAll(TAUserInfo userInfo, boolean ignoreError);
 
     /**
      * Удаляет все указанные блокировки, но только если к ним не привязаны незавершенные асинхронные задачи.
+     * Если хотя бы по одному ключу есть блокировка, ничего не делает, пишет ошибки в logger результата.
      *
      * @param lockKeys ключи блокировок
      */
@@ -153,10 +155,9 @@ public interface LockDataService {
      * Проверяет, установлена ли блокировка на указанном объекте
      *
      * @param key  код блокировки
-     * @param like проверяем неполное совпадение ключа?
      * @return блокировка установлена?
      */
-    boolean lockExists(String key, boolean like);
+    boolean lockExists(String key);
 
     /**
      * Связывает блокировку с асинхронной задачей
@@ -176,14 +177,16 @@ public interface LockDataService {
 
     /**
      * Связывает несколько блокировок с асинхронной задачей
-     * @param keys      ключи блокировок
-     * @param taskId    идентификатор задачи
+     *
+     * @param keys   ключи блокировок
+     * @param taskId идентификатор задачи
      */
     void bindTaskToMultiKeys(Collection<String> keys, long taskId);
 
     /**
      * Снять несколько блокировок
+     *
      * @param keys список ключей блокировок
      */
-    void unlockMiltipleTasks(Collection<String> keys);
+    void unlockMultipleTasks(Collection<String> keys);
 }
