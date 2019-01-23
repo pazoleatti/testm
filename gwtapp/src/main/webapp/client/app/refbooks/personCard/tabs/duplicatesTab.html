@@ -3,8 +3,11 @@
         <div class="tab-block-title" style="margin-top: 20px; margin-bottom: 10px;">{{::'refBook.fl.card.label.original' |
             translate}}
         </div>
-        <div style="padding-left: 20px">
+        <div style="padding-left: 20px" data-ng-if="mode == 'VIEW'">
             <a href="index.html#/personRegistry/personCard/{{person.original.id}}" target="_blank">{{person.original | originalFormatter}}</a>
+        </div>
+        <div style="padding-left: 20px" data-ng-if="mode == 'EDIT'">
+            <a href="index.html#/personRegistry/personCard/{{personParam.original.id}}" target="_blank">{{personParam.original | originalFormatter}}</a>
         </div>
         <div class="row">
             <div class="pull-left">
