@@ -417,14 +417,17 @@
                             scope.close();
                         }
                     }).result.then(
-                        function (result) {
+                        function (response) {
                             $http({
                                 method: "POST",
-                                url: "controller//actions/declarationData/" + $stateParams.declarationDataId + "/unlock"
+                                url: "controller//actions/declarationData/" + $stateParams.declarationDataId + "/unlockEdit"
                             });
-                            if (result) {
+                            if (response) {
                                 $scope.canEditRow = false;
-                                $scope.refreshGrid(1)
+                                $scope.refreshGrid(1);
+                                if (response.data.uuid) {
+                                    $logPanel.open('log-panel-container', response.data.uuid);
+                                }
                             }
                         });
                 };
