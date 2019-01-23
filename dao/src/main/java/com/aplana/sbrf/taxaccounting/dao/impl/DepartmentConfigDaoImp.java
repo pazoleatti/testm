@@ -15,6 +15,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.DepartmentConfig;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDepartment;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import org.apache.commons.lang3.time.FastDateFormat;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Repository;
@@ -45,6 +46,42 @@ public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentCon
     @Override
     public SecuredEntity getSecuredEntity(long id) {
         return getById(id);
+    }
+
+    @Override
+    public DepartmentConfig findPrev(DepartmentConfig departmentConfig) {
+        try {
+            return getJdbcTemplate().queryForObject("" +
+                            "with all_vers as ( \n" +
+                            "  select * from ( \n" +
+                            "    select rbnd.*, lead(version) over(partition by rbnd.record_id order by version) - interval '1' DAY version_end \n" +
+                            "    from ref_book_ndfl_detail rbnd \n" +
+                            "    where status != -1 \n" +
+                            "  ) where status = 0 \n" +
+                            "),\n" +
+                            "all_prev_vers as (\n" +
+                            "  select v.* from all_vers v\n" +
+                            "  where v.kpp = ? and v.oktmo = ? and v.version < ?\n" +
+                            "  order by v.version desc\n" +
+                            ")\n" +
+                            "select " + DepartmentConfigMapper.FIELDS + " from all_prev_vers dc\n" +
+                            "join ref_book_oktmo oktmo on oktmo.id = dc.oktmo \n" +
+                            "left join ref_book_present_place pp on pp.id = dc.present_place\n" +
+                            "left join ref_book_reorganization reorg on reorg.id = dc.reorg_form_code\n" +
+                            "left join ref_book_signatory_mark sign on sign.id = dc.signatory_id\n" +
+                            "where rownum <= 1",
+                    new RowMapper<DepartmentConfig>() {
+                        @Override
+                        public DepartmentConfig mapRow(ResultSet rs, int rowNum) throws SQLException {
+                            DepartmentConfig departmentConfig = new DepartmentConfig();
+                            departmentConfig.setStartDate(rs.getDate("version"));
+                            departmentConfig.setEndDate(rs.getDate("version_end"));
+                            return departmentConfig;
+                        }
+                    }, departmentConfig.getKpp(), departmentConfig.getOktmo().getId(), departmentConfig.getStartDate());
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
     }
 
     @Override

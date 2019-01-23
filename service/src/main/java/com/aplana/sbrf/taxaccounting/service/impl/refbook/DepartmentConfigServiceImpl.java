@@ -278,10 +278,21 @@ public class DepartmentConfigServiceImpl implements DepartmentConfigService {
                 LOG.error("failed");
                 localLogger.error(getDeleteFailedMessage(departmentConfig, ""));
             } else {
-                localLogger.info("В подразделении \"%s\" удалена настройка КПП: \"%s\", ОКТМО: \"%s\", период актуальности с \"%s\" по \"%s\"",
-                        departmentConfig.getDepartment().getName(), departmentConfig.getKpp(), departmentConfig.getOktmo().getCode(),
-                        FastDateFormat.getInstance("dd.MM.yyyy").format(departmentConfig.getStartDate()),
-                        departmentConfig.getEndDate() == null ? "__" : FastDateFormat.getInstance("dd.MM.yyyy").format(departmentConfig.getEndDate()));
+                DepartmentConfig prev = departmentConfigDao.findPrev(departmentConfig);
+                if (prev != null) {
+                    logger.info("При удалении настройки подразделения \"" + departmentConfig.getDepartment().getName() + "\", " +
+                            "КПП: " + departmentConfig.getKpp() + ", ОКТМО: " + departmentConfig.getOktmo().getCode() + ", период актуальности " +
+                            "с \"" + FastDateFormat.getInstance("dd.MM.yyyy").format(departmentConfig.getStartDate()) +
+                            "\" по \"" + (departmentConfig.getEndDate() == null ? "__" : FastDateFormat.getInstance("dd.MM.yyyy").format(departmentConfig.getEndDate())) +
+                            "\" для другой настройки с той же парой КПП/ОКТМО и датой начала действия \"" + FastDateFormat.getInstance("dd.MM.yyyy").format(prev.getStartDate()) +
+                            "\", дата окончания действия установлена в значение \"" +
+                            (prev.getEndDate() == null ? "__" : FastDateFormat.getInstance("dd.MM.yyyy").format(prev.getEndDate())) + "\".");
+                } else {
+                    localLogger.info("В подразделении \"%s\" удалена настройка КПП: \"%s\", ОКТМО: \"%s\", период актуальности с \"%s\" по \"%s\"",
+                            departmentConfig.getDepartment().getName(), departmentConfig.getKpp(), departmentConfig.getOktmo().getCode(),
+                            FastDateFormat.getInstance("dd.MM.yyyy").format(departmentConfig.getStartDate()),
+                            departmentConfig.getEndDate() == null ? "__" : FastDateFormat.getInstance("dd.MM.yyyy").format(departmentConfig.getEndDate()));
+                }
             }
             logger.getEntries().addAll(localLogger.getEntries());
         }
