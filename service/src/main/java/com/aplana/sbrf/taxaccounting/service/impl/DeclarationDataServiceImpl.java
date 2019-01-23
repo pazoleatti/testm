@@ -2443,6 +2443,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 } finally {
                     IOUtils.closeQuietly(zipXml);
                 }
+                declarationDataDao.updateDocState(declarationData.getId(), RefBookDocState.SENT.getId());
             }
         } catch (IOException e) {
             throw new ServiceException(e.getLocalizedMessage(), e);

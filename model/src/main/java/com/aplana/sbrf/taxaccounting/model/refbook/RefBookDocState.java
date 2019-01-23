@@ -12,7 +12,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class RefBookDocState extends RefBookSimple<Long> {
     public final static RefBookDocState NOT_SENT = new RefBookDocState(1, "Не отправлен в ФНС");
-    public final static RefBookDocState SENT = new RefBookDocState(2, "Отправлен в ФНС");
+    public final static RefBookDocState SENT = new RefBookDocState(2, "Выгружен для отправки в ФНС");
     public final static RefBookDocState ACCEPTED = new RefBookDocState(3, "Принят");
     public final static RefBookDocState REJECTED = new RefBookDocState(4, "Отклонен");
     public final static RefBookDocState WORKED_OUT = new RefBookDocState(5, "Успешно отработан");

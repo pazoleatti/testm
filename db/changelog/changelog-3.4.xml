@@ -376,4 +376,11 @@
 		</update>
 	</changeSet>
 
+	<!--https://jira.aplana.com/browse/SBRFNDFL-6475 изменить наименование состояния ЭД"-->
+	<changeSet id="3.4-dnovikov-23" author="dnovikov">
+		<sql>
+			update ref_book_doc_state set name = 'Выгружен для отправки в ФНС' where id = 2;
+		</sql>
+	</changeSet>
+
 </databaseChangeLog>
