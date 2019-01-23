@@ -4,7 +4,6 @@ import com.aplana.sbrf.taxaccounting.model.LockData;
 import com.aplana.sbrf.taxaccounting.model.LockDataDTO;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
 
 import java.util.Collection;
 import java.util.List;
@@ -91,10 +90,9 @@ public interface LockDataDao extends PermissionDao {
      *
      * @param filter       ограничение по имени пользователя или ключу. Необязательный параметр. Может быть null
      * @param pagingParams параметры пэйджинга. Обязательный параметр
-     * @param user         пользователь запрашивающий данные
      * @return все блокировки
      */
-    PagingResult<LockDataDTO> getLocks(String filter, PagingParams pagingParams, TAUser user);
+    PagingResult<LockDataDTO> getLocks(String filter, PagingParams pagingParams);
 
     /**
      * Возвращяет список истекших блокировок

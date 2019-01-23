@@ -8,8 +8,6 @@ import com.aplana.sbrf.taxaccounting.model.LockDataDTO;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.SecuredEntity;
-import com.aplana.sbrf.taxaccounting.model.TARole;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.exception.LockException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -149,19 +147,17 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
     }
 
     @Override
-    public PagingResult<LockDataDTO> getLocks(String filter, PagingParams pagingParams, TAUser user) {
+    public PagingResult<LockDataDTO> getLocks(String filter, PagingParams pagingParams) {
         Map<String, Object> params = new HashMap<>();
         params.put("start", pagingParams.getStartIndex() + 1);
         params.put("count", pagingParams.getStartIndex() + pagingParams.getCount());
-        String whereClause = " where 1=1 ";
-        if (!StringUtils.isEmpty(filter)) {
+
+        String whereClause = "";
+        if (StringUtils.isNotEmpty(filter)) {
             params.put("filter", "%" + filter.toLowerCase() + "%");
-            whereClause += " and (lower(ld.key) like :filter or lower(ld.description) like :filter or lower(u.login) like :filter or lower(u.name) like :filter) ";
+            whereClause = " where (lower(ld.key) like :filter or lower(ld.description) like :filter or lower(u.login) like :filter or lower(u.name) like :filter) ";
         }
-        if (!user.hasRoles(TARole.ROLE_ADMIN)) {
-            params.put("userId", user.getId());
-            whereClause += " and ld.user_id = :userId ";
-        }
+
         String sql = "select ld.id, ld.key, u.name || ' (' || u.login || ')' as user_name, ld.date_lock, ld.description, " +
                 (isSupportOver() ? "row_number() over (order by date_lock)" : "rownum") + " as rn\n" +
                 "from lock_data ld\n" +
