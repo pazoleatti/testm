@@ -414,7 +414,7 @@
                     if ($scope.inpListGrid.ctrl && $scope.inpListGrid.ctrl.refreshGridData && $scope.inpTab.active) $scope.inpListGrid.ctrl.refreshGridData($scope.person.personIdentityList);
                     if ($scope.idDocsGrid.ctrl && $scope.idDocsGrid.ctrl.refreshGridData && $scope.idDocTab.active) $scope.idDocsGrid.ctrl.refreshGridData($scope.person.documents.value);
                     if ($scope.duplicatesGrid.ctrl && $scope.duplicatesGrid.ctrl.refreshGridData && $scope.duplicatesTab.active) $scope.duplicatesGrid.ctrl.refreshGridData($scope.person.duplicates);
-                    if ($scope.tbListGrid.ctrl && $scope.tbListGrid.ctrl.refreshGridData  && $scope.tbListGrid.ctrl.active) $scope.tbListGrid.ctrl.refreshGridData($scope.person.personTbList);
+                    if ($scope.tbListGrid.ctrl && $scope.tbListGrid.ctrl.refreshGridData  && $scope.tbTab.active) $scope.tbListGrid.ctrl.refreshGridData($scope.person.personTbList);
                     $scope.mode = APP_CONSTANTS.MODE.VIEW;
                 };
 
