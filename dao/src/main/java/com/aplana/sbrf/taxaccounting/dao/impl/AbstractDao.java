@@ -121,12 +121,13 @@ public abstract class AbstractDao {
      * @param <E>             тип объекта
      */
     protected <E extends IdentityObject> void saveNewObjects(Collection<E> identityObjects, String table, String seq, String[] columns, String[] fields) {
-        List<Long> ids = dbUtils.getNextIds(seq, identityObjects.size());
         String insert = SqlUtils.createInsert(table, columns, fields);
         BeanPropertySqlParameterSource[] batchArgs = new BeanPropertySqlParameterSource[identityObjects.size()];
         int i = 0;
         for (E identityObject : identityObjects) {
-            identityObject.setId(ids.get(i));
+            if (identityObject.getId() == null) {
+                identityObject.setId(dbUtils.getNextIds(seq, 1).get(0));
+            }
             batchArgs[i] = new BeanPropertySqlParameterSource(identityObject);
             i++;
         }

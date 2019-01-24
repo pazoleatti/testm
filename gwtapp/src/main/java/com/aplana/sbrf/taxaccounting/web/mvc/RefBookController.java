@@ -3,11 +3,22 @@ package com.aplana.sbrf.taxaccounting.web.mvc;
 import com.aplana.sbrf.taxaccounting.model.AsyncTaskType;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
-import com.aplana.sbrf.taxaccounting.model.refbook.*;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAsnu;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookCountry;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDocType;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookShortInfo;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookSimple;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookTaxpayerState;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
-import com.aplana.sbrf.taxaccounting.service.refbook.*;
+import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
+import com.aplana.sbrf.taxaccounting.service.refbook.RefBookAsnuService;
+import com.aplana.sbrf.taxaccounting.service.refbook.RefBookCountryService;
+import com.aplana.sbrf.taxaccounting.service.refbook.RefBookDocTypeService;
+import com.aplana.sbrf.taxaccounting.service.refbook.RefBookTaxpayerStateService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedList;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedResourceAssembler;
@@ -15,7 +26,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.WebDataBinder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.InitBinder;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -271,5 +288,14 @@ public class RefBookController {
     @GetMapping(value = "/rest/refBook/360", params = "projection=findAllActive")
     public List<RefBookDocType> findAllActiveDocType() {
         return refBookDocTypeService.findAllActive();
+    }
+
+    /**
+     * Создать идентификатор версии справочника
+     * @return созданный идентификатор
+     */
+    @GetMapping(value = "/actions/getNextRefBookRecordId")
+    public Long getNextRefBookRecordId() {
+        return commonRefBookService.createNextRefBookRecordId();
     }
 }

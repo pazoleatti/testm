@@ -59,8 +59,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import static com.aplana.sbrf.taxaccounting.model.util.IdentityObjectUtils.*;
-import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+import static com.aplana.sbrf.taxaccounting.model.util.IdentityObjectUtils.findById;
+import static com.aplana.sbrf.taxaccounting.model.util.IdentityObjectUtils.getIds;
+import static com.aplana.sbrf.taxaccounting.model.util.IdentityObjectUtils.removeById;
 
 /**
  * Сервис работы Физическими лицами. Заменяет некоторые операции провайдера справочников для лучшей производительности
@@ -220,14 +221,12 @@ public class PersonServiceImpl implements PersonService {
             List<IdDoc> idDocsToDelete = new ArrayList<>(persistedIdDocs);
 
             for (IdDoc idDoc : personDTO.getDocuments().value()) {
-                if (idDoc.getId() == null) {
-                    idDocsToCreate.add(idDoc);
+                if (findById(persistedIdDocs, idDoc.getId()) != null) {
+                    idDocsToUpdate.add(idDoc);
                 } else {
-                    if (!Objects.equal(idDoc, findById(persistedIdDocs, idDoc.getId()))) {
-                        idDocsToUpdate.add(idDoc);
-                    }
-                    removeById(idDocsToDelete, idDoc.getId());
+                    idDocsToCreate.add(idDoc);
                 }
+                removeById(idDocsToDelete, idDoc.getId());
             }
 
             if (CollectionUtils.isNotEmpty(idDocsToCreate)) {
@@ -377,14 +376,6 @@ public class PersonServiceImpl implements PersonService {
         personToPersist.setSource(personDTO.getSource() != null ? personDTO.getSource() : new RefBookAsnu());
         if (personDTO.getReportDoc().value() != null) {
             IdDoc idDoc = personDTO.getReportDoc().value();
-            if (idDoc.getId() == null) {
-                persistedIdDocs = idDocDaoImpl.getByPerson(personToPersist);
-            }
-            for (IdDoc persistedIdDoc : persistedIdDocs) {
-                if (persistedIdDoc.getDocumentNumber().equals(idDoc.getDocumentNumber()) && persistedIdDoc.getDocType().getCode().equals(idDoc.getDocType().getCode())) {
-                    idDoc.setId(persistedIdDoc.getId());
-                }
-            }
             personToPersist.setReportDoc(idDoc);
         } else {
             personToPersist.setReportDoc(new IdDoc());

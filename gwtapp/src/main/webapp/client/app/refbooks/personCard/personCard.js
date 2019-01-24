@@ -389,7 +389,6 @@
                  * @description Сохранить изменения
                  */
                 $scope.save = function () {
-                    eraseTempId($scope.personParam.documents.value);
                     eraseTempId($scope.personParam.personIdentityList);
                     eraseTempId($scope.personParam.personTbList);
                     $scope.personParam.vip = $scope.personParam.vipSelect.value;
@@ -425,35 +424,39 @@
                 var editIdDoc = function (mode) {
                     var title;
                     var idDoc;
-                    switch (mode) {
-                        case APP_CONSTANTS.MODE.CREATE:
-                            title = $filter('translate')('refBook.fl.card.tabs.idDoc.modal.title.create');
-                            idDoc = {
-                                id: new Date().getTime(),
-                                docType: null,
-                                person: {id: $scope.personParam.id},
-                                tempId: true
-                            };
-
-                            break;
-                        case APP_CONSTANTS.MODE.EDIT:
-                            title = $filter('translate')('refBook.fl.card.tabs.idDoc.modal.title.edit');
-                            idDoc = $scope.idDocsGrid.value[0];
-                            break;
-                    }
-                    $aplanaModal.open({
-                        title: title,
-                        templateUrl: 'client/app/refbooks/personCard/modal/idDocModal.html',
-                        controller: 'idDocRecordModalCtrl',
-                        windowClass: 'modal600',
-                        resolve: {
-                            $shareData: function () {
-                                return {
-                                    idDoc: idDoc,
-                                    mode: mode
+                    $http({
+                        method: "GET",
+                        url: "controller/actions/getNextRefBookRecordId"
+                    }).success(function (response) {
+                        switch (mode) {
+                            case APP_CONSTANTS.MODE.CREATE:
+                                title = $filter('translate')('refBook.fl.card.tabs.idDoc.modal.title.create');
+                                idDoc = {
+                                    id: response,
+                                    docType: null,
+                                    person: {id: $scope.personParam.id}
                                 };
-                            }
+
+                                break;
+                            case APP_CONSTANTS.MODE.EDIT:
+                                title = $filter('translate')('refBook.fl.card.tabs.idDoc.modal.title.edit');
+                                idDoc = $scope.idDocsGrid.value[0];
+                                break;
                         }
+                        $aplanaModal.open({
+                            title: title,
+                            templateUrl: 'client/app/refbooks/personCard/modal/idDocModal.html',
+                            controller: 'idDocRecordModalCtrl',
+                            windowClass: 'modal600',
+                            resolve: {
+                                $shareData: function () {
+                                    return {
+                                        idDoc: idDoc,
+                                        mode: mode
+                                    };
+                                }
+                            }
+                        });
                     });
                 };
 

@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.async.AsyncManager;
 import com.aplana.sbrf.taxaccounting.async.AsyncTask;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookSimpleDao;
+import com.aplana.sbrf.taxaccounting.dao.util.DBUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
@@ -51,6 +52,8 @@ public class CommonRefBookServiceImpl implements CommonRefBookService {
     private RefBookScriptingService refBookScriptingService;
     @Autowired
     private TAUserService userService;
+    @Autowired
+    DBUtils dbUtils;
 
     private static final ThreadLocal<SimpleDateFormat> SDF_DD_MM_YYYY = new ThreadLocal<SimpleDateFormat>() {
         @Override
@@ -512,6 +515,7 @@ public class CommonRefBookServiceImpl implements CommonRefBookService {
         return provider.getRecordsCount(version, filter);
     }
 
+    @Override
     public PagingResult<Map<String, RefBookValue>> dereference(RefBook refBook, PagingResult<Map<String, RefBookValue>> records) {
         // Алиас атрибута - id справочника
         Map<String, RefBookDataProvider> attributeProviders = new HashMap<>();
@@ -569,6 +573,11 @@ public class CommonRefBookServiceImpl implements CommonRefBookService {
             }
         }
         return records;
+    }
+
+    @Override
+    public Long createNextRefBookRecordId() {
+        return dbUtils.getNextRefBookRecordIds(1).get(0);
     }
 
     private String createSearchFilter(Long refBookId, Map<String, String> extraParams, String searchPattern, Boolean exactSearch) {

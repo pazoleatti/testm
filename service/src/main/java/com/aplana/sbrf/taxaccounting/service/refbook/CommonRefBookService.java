@@ -232,4 +232,10 @@ public interface CommonRefBookService {
      * @param records список записей, для которых выполняется разыменование
      */
     PagingResult<Map<String, RefBookValue>> dereference(RefBook refBook, PagingResult<Map<String, RefBookValue>> records);
+
+    /**
+     * Создать идентификатор версии справочника
+     * @return созданный идентификатор
+     */
+    Long createNextRefBookRecordId();
 }
