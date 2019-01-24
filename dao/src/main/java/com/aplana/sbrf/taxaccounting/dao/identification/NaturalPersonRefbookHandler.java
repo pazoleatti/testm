@@ -240,7 +240,7 @@ public class NaturalPersonRefbookHandler extends NaturalPersonHandler {
         address.setHouse(rs.getString("house"));
         address.setBuild(rs.getString("build"));
         address.setAppartment(rs.getString("appartment"));
-        address.setAddressIno(rs.getString("address"));
+        address.setAddressIno(rs.getString("address_foreign"));
         return address;
     }
 
