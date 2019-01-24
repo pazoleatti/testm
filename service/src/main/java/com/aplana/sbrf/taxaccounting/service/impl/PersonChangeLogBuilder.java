@@ -38,15 +38,15 @@ class PersonChangeLogBuilder {
     }
 
     public void inpCreated(PersonIdentifier identifier) {
-        changes.add("[ Добавлен ИНП: \"" + format(identifier.getInp()) + "\", АСНУ: \"" + format(identifier.getAsnu().getCode()) + "\" ]");
+        changes.add("[ Добавлен ИНП. ИНП: \"" + format(identifier.getInp()) + "\", АСНУ: \"" + format(identifier.getAsnu().getCode()) + "\" ]");
     }
 
     public void inpDeleted(PersonIdentifier identifier) {
-        changes.add("[ Удалён ИНП: \"" + format(identifier.getInp()) + ", АСНУ: \"" + format(identifier.getAsnu().getCode()) + "\" ]");
+        changes.add("[ Удалён ИНП. ИНП: \"" + format(identifier.getInp()) + "\", АСНУ: \"" + format(identifier.getAsnu().getCode()) + "\" ]");
     }
 
     public void inpUpdated(PersonIdentifier identifier) {
-        changes.add("[ Изменён ИНП: \"" + format(identifier.getInp()) + ", АСНУ: \"" + format(identifier.getAsnu().getCode()) + "\" ]");
+        changes.add("[ Изменён ИНП. ИНП: \"" + format(identifier.getInp()) + "\", АСНУ: \"" + format(identifier.getAsnu().getCode()) + "\" ]");
     }
 
     public void tbAdded(PersonTb tb) {
@@ -73,28 +73,40 @@ class PersonChangeLogBuilder {
         changes.add("[ Изменён ДУЛ. \"Код ДУЛ\": \"" + format(doc.getDocType().getCode()) + "\", \"Серия и номер ДУЛ\": \"" + format(doc.getDocumentNumber()) + "\" ]");
     }
 
-    public void originalSet(RegistryPersonDTO original) {
+    public PersonChangeLogBuilder originalSet(RegistryPersonDTO original) {
         changes.add("[ Назначен ФЛ-оригинал. Идентификатор ФЛ: \"" + original.getOldId().toString() +
                 "\", ФИО: \"" + original.getLastName() + " " + original.getFirstName() + (isNotEmpty(original.getMiddleName()) ? " " + original.getMiddleName() : "") + "\" ]");
+        return this;
     }
 
-    public void originalDeleted(RegistryPerson original) {
+    public PersonChangeLogBuilder originalDeleted(RegistryPerson original) {
         changes.add("[ Откреплён ФЛ-оригинал. Идентификатор ФЛ: \"" + original.getOldId().toString() +
                 "\", ФИО: \"" + original.getLastName() + " " + original.getFirstName() + (isNotEmpty(original.getMiddleName()) ? " " + original.getMiddleName() : "") + "\" ]");
+        return this;
     }
 
     public void duplicatesSet(List<RegistryPerson> duplicates) {
         for (RegistryPerson duplicate : duplicates) {
-            changes.add("[ Прикреплен Дубликат ФЛ. Идентификатор ФЛ: \"" + duplicate.getOldId().toString() +
-                    "\", ФИО: \"" + duplicate.getLastName() + " " + duplicate.getFirstName() + (isNotEmpty(duplicate.getMiddleName()) ? " " + duplicate.getMiddleName() : "") + "\" ]");
+            duplicateSet(duplicate);
         }
+    }
+
+    public PersonChangeLogBuilder duplicateSet(RegistryPerson duplicate) {
+        changes.add("[ Прикреплен Дубликат ФЛ. Идентификатор ФЛ: \"" + duplicate.getOldId().toString() +
+                "\", ФИО: \"" + duplicate.getLastName() + " " + duplicate.getFirstName() + (isNotEmpty(duplicate.getMiddleName()) ? " " + duplicate.getMiddleName() : "") + "\" ]");
+        return this;
     }
 
     public void duplicatesDeleted(List<RegistryPerson> duplicates) {
         for (RegistryPerson duplicate : duplicates) {
-            changes.add("[ Откреплён Дубликат ФЛ. Идентификатор ФЛ: \"" + duplicate.getOldId().toString() +
-                    "\", ФИО: \"" + duplicate.getLastName() + " " + duplicate.getFirstName() + (isNotEmpty(duplicate.getMiddleName()) ? " " + duplicate.getMiddleName() : "") + "\" ]");
+            duplicateDeleted(duplicate);
         }
+    }
+
+    public PersonChangeLogBuilder duplicateDeleted(RegistryPerson duplicate) {
+        changes.add("[ Откреплён Дубликат ФЛ. Идентификатор ФЛ: \"" + duplicate.getOldId().toString() +
+                "\", ФИО: \"" + duplicate.getLastName() + " " + duplicate.getFirstName() + (isNotEmpty(duplicate.getMiddleName()) ? " " + duplicate.getMiddleName() : "") + "\" ]");
+        return this;
     }
 
     /**
