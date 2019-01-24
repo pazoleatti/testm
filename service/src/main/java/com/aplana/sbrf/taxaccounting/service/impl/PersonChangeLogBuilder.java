@@ -42,11 +42,11 @@ class PersonChangeLogBuilder {
     }
 
     public void inpDeleted(PersonIdentifier identifier) {
-        changes.add("[ Удалён ИНП. ИНП: \"" + format(identifier.getInp()) + ", АСНУ: \"" + format(identifier.getAsnu().getCode()) + "\" ]");
+        changes.add("[ Удалён ИНП. ИНП: \"" + format(identifier.getInp()) + "\", АСНУ: \"" + format(identifier.getAsnu().getCode()) + "\" ]");
     }
 
     public void inpUpdated(PersonIdentifier identifier) {
-        changes.add("[ Изменён ИНП. ИНП: \"" + format(identifier.getInp()) + ", АСНУ: \"" + format(identifier.getAsnu().getCode()) + "\" ]");
+        changes.add("[ Изменён ИНП. ИНП: \"" + format(identifier.getInp()) + "\", АСНУ: \"" + format(identifier.getAsnu().getCode()) + "\" ]");
     }
 
     public void tbAdded(PersonTb tb) {
