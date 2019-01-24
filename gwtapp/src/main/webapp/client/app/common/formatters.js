@@ -594,15 +594,19 @@
         .filter('vipOptionsFormatter', ['APP_CONSTANTS', function (APP_CONSTANTS) {
             return function (vipOptionIds) {
                 if (!vipOptionIds) return null;
-                var hasVip = vipOptionIds.indexOf(APP_CONSTANTS.PERSON_IMPORTANCE.VIP) !== -1;
-                var hasNotVip = vipOptionIds.indexOf(APP_CONSTANTS.PERSON_IMPORTANCE.NOT_VIP) !== -1;
+                var hasVip = !!_.find(vipOptionIds, function (el) {
+                    return el.id === APP_CONSTANTS.PERSON_IMPORTANCE.VIP.id;
+                });
+                var hasNotVip = !!_.find(vipOptionIds, function (el) {
+                    return el.id === APP_CONSTANTS.PERSON_IMPORTANCE.NOT_VIP.id;
+                });
                 // Если выбраны обе опции или ни одна, фильтрация по ним не нужна
                 if (hasVip === hasNotVip) {
                     return null;
                 } else {
                     return hasVip;
                 }
-            }
+            };
         }])
 
         .filter('departmentActivityFormatter', ['$filter', function ($filter) {
