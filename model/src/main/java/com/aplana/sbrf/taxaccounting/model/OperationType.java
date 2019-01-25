@@ -24,7 +24,7 @@ public enum OperationType {
     DECLARATION_2NDFL1(28L, "Формирование ОНФ 2НДФЛ 1"),
     DECLARATION_2NDFL2(28L, "Формирование ОНФ 2НДФЛ 2"),
     DECLARATION_6NDFL(28L, "Формирование ОНФ 6НДФЛ"),
-    PDF_DEC(7L, "Выгрузка данных из формы в PDF формате"),
+    PDF_DEC(7L, "Предварительный просмотр формы"),
     DEPT_NOTICE_DEC(35L, "Формирование уведомления о задолженности"),
     EXPORT_REPORTS(41L, "Выгрузка отчетности"),
     RETURN_DECLARATION(null, "Возврат формы из подготовлена/принята в создана"),
