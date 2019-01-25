@@ -242,25 +242,27 @@ public class AsyncManagerImpl implements AsyncManager {
         return tx.executeInNewTransaction(new TransactionLogic<Boolean>() {
             @Override
             public Boolean execute() {
-                AsyncTask task = getAsyncTaskBean(operationType.getAsyncTaskTypeId());
-                if (task instanceof AsyncTaskExecutePossibilityVerifier) {
-                    AsyncTaskExecutePossibilityVerifier verifier = (AsyncTaskExecutePossibilityVerifier) task;
-                    if (!verifier.canExecuteByLimit()) {
-                        logger.error(verifier.createExecuteByLimitErrorMessage());
-                        return false;
+                List<LockData> lockDataList = null;
+                AsyncTask task = null;
+                AsyncTaskData taskData = null;
+                List<String> keys = new ArrayList<>();
+                try {
+                    task = getAsyncTaskBean(operationType.getAsyncTaskTypeId());
+                    if (task instanceof AsyncTaskExecutePossibilityVerifier) {
+                        AsyncTaskExecutePossibilityVerifier verifier = (AsyncTaskExecutePossibilityVerifier) task;
+                        if (!verifier.canExecuteByLimit()) {
+                            logger.error(verifier.createExecuteByLimitErrorMessage());
+                            return false;
+                        }
                     }
-                }
-                if (!MapUtils.isEmpty(params)) {
-                    checkParams(params);
-                }
-                List<LockData> lockDataList = checkAndCreateLocks(operationType, params, logger, user);
-                if (lockDataList != null && !lockDataList.isEmpty()) {
-                    List<String> keys = new ArrayList<>();
-                    for (LockData lockData : lockDataList) {
-                        keys.add(lockData.getKey());
+                    if (!MapUtils.isEmpty(params)) {
+                        checkParams(params);
                     }
-                    AsyncTaskData taskData = null;
-                    try {
+                    lockDataList = checkAndCreateLocks(operationType, params, logger, user);
+                    if (lockDataList != null && !lockDataList.isEmpty()) {
+                        for (LockData lockData : lockDataList) {
+                            keys.add(lockData.getKey());
+                        }
                         //Постановка новой задачи в очередь
                         String description = asyncTaskDescriptor.createDescription(params, operationType);
                         AsyncQueue queue = task.defineTaskLimit(description, user, params);
@@ -275,18 +277,17 @@ public class AsyncManagerImpl implements AsyncManager {
                         LOG.info(String.format("Task with id %s was put in queue %s. Task type: %s, priority node: %s",
                                 taskData.getId(), queue.name(), asyncTaskType.getId(), priorityNode));
                         return true;
-                    } catch (Exception e) {
-                        LOG.error("Async task creation has been failed!", e);
-
-                        logger.error("Выполнение операции %s невозможно по техническим причинам. Не удалось сформировать задачу для %s.",
-                                operationObjectDescription,
-                                operationType.getName());
-                        if (taskData != null) {
-                            asyncTaskDao.delete(taskData.getId());
-                            lockDataService.unlockAllByTask(taskData.getId());
-                        } else {
-                            lockDataService.unlockMultipleTasks(keys);
-                        }
+                    }
+                } catch (Exception e) {
+                    LOG.error("Async task creation has been failed!", e);
+                    logger.error("Выполнение операции %s невозможно по техническим причинам. Не удалось сформировать задачу для %s.",
+                            operationObjectDescription,
+                            operationType.getName());
+                    if (taskData != null && !keys.isEmpty()) {
+                        asyncTaskDao.delete(taskData.getId());
+                        lockDataService.unlockAllByTask(taskData.getId());
+                    } else {
+                        lockDataService.unlockMultipleTasks(keys);
                     }
                 }
                 return false;

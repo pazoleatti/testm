@@ -25,7 +25,12 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Component("declarationLocker")
 public class DeclarationLockerImpl implements DeclarationLocker {
@@ -140,75 +145,68 @@ public class DeclarationLockerImpl implements DeclarationLocker {
 
     @Override
     public List<LockData> establishLock(List<Long> declarationDataIdList, OperationType operationType, TAUserInfo userInfo, Logger logger) {
-        try {
-            if (operationType.equals(OperationType.LOAD_TRANSPORT_FILE))
-                return doCheckAndLock(declarationDataIdList, operationType, SET_IMPORT_TF__IMPORT_EXCEL__IDENTIFY, userInfo, logger);
-            else if (operationType.equals(OperationType.IMPORT_DECLARATION_EXCEL))
-                return doCheckAndLock(declarationDataIdList, operationType, SET_IMPORT_TF__IMPORT_EXCEL__IDENTIFY, userInfo, logger);
-            else if (operationType.equals(OperationType.IDENTIFY_PERSON))
-                return doCheckAndLock(declarationDataIdList, operationType, SET_IMPORT_TF__IMPORT_EXCEL__IDENTIFY, userInfo, logger);
-            else if (operationType.equals(OperationType.UPDATE_PERSONS_DATA))
-                return doCheckAndLock(declarationDataIdList, operationType, SET_UPDATE_PERSONS_DATA, userInfo, logger);
-            else if (operationType.equals(OperationType.CHECK_DEC))
-                return doCheckAndLock(declarationDataIdList, operationType, SET_CHECK__ACCEPT__TOCREATE, userInfo, logger);
-            else if (operationType.equals(OperationType.ACCEPT_DEC))
-                return doCheckAndLock(declarationDataIdList, operationType, SET_CHECK__ACCEPT__TOCREATE, userInfo, logger);
-            else if (operationType.equals(OperationType.DELETE_DEC))
-                return doCheckAndLock(declarationDataIdList, operationType, SET_DELETE, userInfo, logger);
-            else if (operationType.equals(OperationType.CONSOLIDATE))
-                return doCheckAndLock(declarationDataIdList, operationType, SET_CONSOLIDATE__REPORT_KPP_OKTMO__2NDFL1__2NDFL2__6NDFL, userInfo, logger);
-            else if (operationType.equals(OperationType.EXCEL_DEC))
-                return doCheckAndLock(declarationDataIdList, operationType, SET_XLSX, userInfo, logger);
-            else if (operationType.equals(OperationType.EXCEL_TEMPLATE_DEC))
-                return doCheckAndLock(declarationDataIdList, operationType, SET_EXCEL_TEMPLATE, userInfo, logger);
-            else if (operationType.equals(OperationType.PDF_DEC))
-                return doCheckAndLock(declarationDataIdList, operationType, SET_EDIT_FILE__PDF__EXPORT_REPORTS__REPORT_2NDFL1__REPORT_2NDFL2__DEPT_NOTICE, userInfo, logger);
-            else if (operationType.equals(OperationType.DEPT_NOTICE_DEC))
-                return doCheckAndLock(declarationDataIdList, operationType, SET_EDIT_FILE__PDF__EXPORT_REPORTS__REPORT_2NDFL1__REPORT_2NDFL2__DEPT_NOTICE, userInfo, logger);
-            else if (operationType.equals(OperationType.RETURN_DECLARATION))
-                return doCheckAndLock(declarationDataIdList, operationType, SET_CHECK__ACCEPT__TOCREATE, userInfo, logger);
-            else if (operationType.equals(OperationType.EDIT))
-                return doCheckAndLock(declarationDataIdList, operationType, SET_EDIT, userInfo, logger);
-            else if (operationType.equals(OperationType.EDIT_FILE))
-                return doCheckAndLock(declarationDataIdList, operationType, SET_EDIT_FILE__PDF__EXPORT_REPORTS__REPORT_2NDFL1__REPORT_2NDFL2__DEPT_NOTICE, userInfo, logger);
-            else if (operationType.equals(OperationType.RNU_NDFL_PERSON_DB))
-                return doCheckAndLock(declarationDataIdList, operationType, SET_SPEC_REPORT, userInfo, logger);
-            else if (operationType.equals(OperationType.RNU_NDFL_PERSON_ALL_DB))
-                return doCheckAndLock(declarationDataIdList, operationType, SET_SPEC_REPORT, userInfo, logger);
-            else if (operationType.equals(OperationType.REPORT_KPP_OKTMO))
-                return doCheckAndLock(declarationDataIdList, operationType, SET_CONSOLIDATE__REPORT_KPP_OKTMO__2NDFL1__2NDFL2__6NDFL, userInfo, logger);
-            else if (operationType.equals(OperationType.RNU_RATE_REPORT))
-                return doCheckAndLock(declarationDataIdList, operationType, SET_SPEC_REPORT, userInfo, logger);
-            else if (operationType.equals(OperationType.RNU_PAYMENT_REPORT))
-                return doCheckAndLock(declarationDataIdList, operationType, SET_SPEC_REPORT, userInfo, logger);
-            else if (operationType.equals(OperationType.RNU_NDFL_DETAIL_REPORT))
-                return doCheckAndLock(declarationDataIdList, operationType, SET_SPEC_REPORT, userInfo, logger);
-            else if (operationType.equals(OperationType.RNU_NDFL_2_6_DATA_XLSX_REPORT))
-                return doCheckAndLock(declarationDataIdList, operationType, SET_SPEC_REPORT, userInfo, logger);
-            else if (operationType.equals(OperationType.RNU_NDFL_2_6_DATA_TXT_REPORT))
-                return doCheckAndLock(declarationDataIdList, operationType, SET_SPEC_REPORT, userInfo, logger);
-            else if (operationType.equals(OperationType.REPORT_2NDFL1))
-                return doCheckAndLock(declarationDataIdList, operationType, SET_EDIT_FILE__PDF__EXPORT_REPORTS__REPORT_2NDFL1__REPORT_2NDFL2__DEPT_NOTICE, userInfo, logger);
-            else if (operationType.equals(OperationType.REPORT_2NDFL2))
-                return doCheckAndLock(declarationDataIdList, operationType, SET_EDIT_FILE__PDF__EXPORT_REPORTS__REPORT_2NDFL1__REPORT_2NDFL2__DEPT_NOTICE, userInfo, logger);
-            else if (operationType.equals(OperationType.DECLARATION_2NDFL1)) {
-                return doCheckAndLock(declarationDataIdList, operationType, SET_CONSOLIDATE__REPORT_KPP_OKTMO__2NDFL1__2NDFL2__6NDFL, userInfo, logger);
-            } else if (operationType.equals(OperationType.DECLARATION_2NDFL2)) {
-                return doCheckAndLock(declarationDataIdList, operationType, SET_CONSOLIDATE__REPORT_KPP_OKTMO__2NDFL1__2NDFL2__6NDFL, userInfo, logger);
-            } else if (operationType.equals(OperationType.DECLARATION_6NDFL)) {
-                return doCheckAndLock(declarationDataIdList, operationType, SET_CONSOLIDATE__REPORT_KPP_OKTMO__2NDFL1__2NDFL2__6NDFL, userInfo, logger);
-            } else if (operationType.equals(OperationType.EXPORT_REPORTS)) {
-                return doCheckAndLock(declarationDataIdList, operationType, SET_EDIT_FILE__PDF__EXPORT_REPORTS__REPORT_2NDFL1__REPORT_2NDFL2__DEPT_NOTICE, userInfo, logger);
-            } else if (operationType.equals(OperationType.UPDATE_DOC_STATE)) {
-                return doCheckAndLock(declarationDataIdList, operationType, SET_UPDATE_DOC_STATE, userInfo, logger);
-            } else
-                throw new IllegalArgumentException("Unknown operationType type!");
-        } catch (Exception e) {
-            LOG.error(String.format("Выполнение операции невозможно по техническим причинам. Не удалось установить блокировку для выполнения операции \"%s\"", operationType.getName()), e);
-            logger.error("Выполнение операции невозможно по техническим причинам. Не удалось установить блокировку для выполнения операции \"%s\"",
-                    operationType.getName());
-            return null;
-        }
+        if (operationType.equals(OperationType.LOAD_TRANSPORT_FILE))
+            return doCheckAndLock(declarationDataIdList, operationType, SET_IMPORT_TF__IMPORT_EXCEL__IDENTIFY, userInfo, logger);
+        else if (operationType.equals(OperationType.IMPORT_DECLARATION_EXCEL))
+            return doCheckAndLock(declarationDataIdList, operationType, SET_IMPORT_TF__IMPORT_EXCEL__IDENTIFY, userInfo, logger);
+        else if (operationType.equals(OperationType.IDENTIFY_PERSON))
+            return doCheckAndLock(declarationDataIdList, operationType, SET_IMPORT_TF__IMPORT_EXCEL__IDENTIFY, userInfo, logger);
+        else if (operationType.equals(OperationType.UPDATE_PERSONS_DATA))
+            return doCheckAndLock(declarationDataIdList, operationType, SET_UPDATE_PERSONS_DATA, userInfo, logger);
+        else if (operationType.equals(OperationType.CHECK_DEC))
+            return doCheckAndLock(declarationDataIdList, operationType, SET_CHECK__ACCEPT__TOCREATE, userInfo, logger);
+        else if (operationType.equals(OperationType.ACCEPT_DEC))
+            return doCheckAndLock(declarationDataIdList, operationType, SET_CHECK__ACCEPT__TOCREATE, userInfo, logger);
+        else if (operationType.equals(OperationType.DELETE_DEC))
+            return doCheckAndLock(declarationDataIdList, operationType, SET_DELETE, userInfo, logger);
+        else if (operationType.equals(OperationType.CONSOLIDATE))
+            return doCheckAndLock(declarationDataIdList, operationType, SET_CONSOLIDATE__REPORT_KPP_OKTMO__2NDFL1__2NDFL2__6NDFL, userInfo, logger);
+        else if (operationType.equals(OperationType.EXCEL_DEC))
+            return doCheckAndLock(declarationDataIdList, operationType, SET_XLSX, userInfo, logger);
+        else if (operationType.equals(OperationType.EXCEL_TEMPLATE_DEC))
+            return doCheckAndLock(declarationDataIdList, operationType, SET_EXCEL_TEMPLATE, userInfo, logger);
+        else if (operationType.equals(OperationType.PDF_DEC))
+            return doCheckAndLock(declarationDataIdList, operationType, SET_EDIT_FILE__PDF__EXPORT_REPORTS__REPORT_2NDFL1__REPORT_2NDFL2__DEPT_NOTICE, userInfo, logger);
+        else if (operationType.equals(OperationType.DEPT_NOTICE_DEC))
+            return doCheckAndLock(declarationDataIdList, operationType, SET_EDIT_FILE__PDF__EXPORT_REPORTS__REPORT_2NDFL1__REPORT_2NDFL2__DEPT_NOTICE, userInfo, logger);
+        else if (operationType.equals(OperationType.RETURN_DECLARATION))
+            return doCheckAndLock(declarationDataIdList, operationType, SET_CHECK__ACCEPT__TOCREATE, userInfo, logger);
+        else if (operationType.equals(OperationType.EDIT))
+            return doCheckAndLock(declarationDataIdList, operationType, SET_EDIT, userInfo, logger);
+        else if (operationType.equals(OperationType.EDIT_FILE))
+            return doCheckAndLock(declarationDataIdList, operationType, SET_EDIT_FILE__PDF__EXPORT_REPORTS__REPORT_2NDFL1__REPORT_2NDFL2__DEPT_NOTICE, userInfo, logger);
+        else if (operationType.equals(OperationType.RNU_NDFL_PERSON_DB))
+            return doCheckAndLock(declarationDataIdList, operationType, SET_SPEC_REPORT, userInfo, logger);
+        else if (operationType.equals(OperationType.RNU_NDFL_PERSON_ALL_DB))
+            return doCheckAndLock(declarationDataIdList, operationType, SET_SPEC_REPORT, userInfo, logger);
+        else if (operationType.equals(OperationType.REPORT_KPP_OKTMO))
+            return doCheckAndLock(declarationDataIdList, operationType, SET_CONSOLIDATE__REPORT_KPP_OKTMO__2NDFL1__2NDFL2__6NDFL, userInfo, logger);
+        else if (operationType.equals(OperationType.RNU_RATE_REPORT))
+            return doCheckAndLock(declarationDataIdList, operationType, SET_SPEC_REPORT, userInfo, logger);
+        else if (operationType.equals(OperationType.RNU_PAYMENT_REPORT))
+            return doCheckAndLock(declarationDataIdList, operationType, SET_SPEC_REPORT, userInfo, logger);
+        else if (operationType.equals(OperationType.RNU_NDFL_DETAIL_REPORT))
+            return doCheckAndLock(declarationDataIdList, operationType, SET_SPEC_REPORT, userInfo, logger);
+        else if (operationType.equals(OperationType.RNU_NDFL_2_6_DATA_XLSX_REPORT))
+            return doCheckAndLock(declarationDataIdList, operationType, SET_SPEC_REPORT, userInfo, logger);
+        else if (operationType.equals(OperationType.RNU_NDFL_2_6_DATA_TXT_REPORT))
+            return doCheckAndLock(declarationDataIdList, operationType, SET_SPEC_REPORT, userInfo, logger);
+        else if (operationType.equals(OperationType.REPORT_2NDFL1))
+            return doCheckAndLock(declarationDataIdList, operationType, SET_EDIT_FILE__PDF__EXPORT_REPORTS__REPORT_2NDFL1__REPORT_2NDFL2__DEPT_NOTICE, userInfo, logger);
+        else if (operationType.equals(OperationType.REPORT_2NDFL2))
+            return doCheckAndLock(declarationDataIdList, operationType, SET_EDIT_FILE__PDF__EXPORT_REPORTS__REPORT_2NDFL1__REPORT_2NDFL2__DEPT_NOTICE, userInfo, logger);
+        else if (operationType.equals(OperationType.DECLARATION_2NDFL1)) {
+            return doCheckAndLock(declarationDataIdList, operationType, SET_CONSOLIDATE__REPORT_KPP_OKTMO__2NDFL1__2NDFL2__6NDFL, userInfo, logger);
+        } else if (operationType.equals(OperationType.DECLARATION_2NDFL2)) {
+            return doCheckAndLock(declarationDataIdList, operationType, SET_CONSOLIDATE__REPORT_KPP_OKTMO__2NDFL1__2NDFL2__6NDFL, userInfo, logger);
+        } else if (operationType.equals(OperationType.DECLARATION_6NDFL)) {
+            return doCheckAndLock(declarationDataIdList, operationType, SET_CONSOLIDATE__REPORT_KPP_OKTMO__2NDFL1__2NDFL2__6NDFL, userInfo, logger);
+        } else if (operationType.equals(OperationType.EXPORT_REPORTS)) {
+            return doCheckAndLock(declarationDataIdList, operationType, SET_EDIT_FILE__PDF__EXPORT_REPORTS__REPORT_2NDFL1__REPORT_2NDFL2__DEPT_NOTICE, userInfo, logger);
+        } else if (operationType.equals(OperationType.UPDATE_DOC_STATE)) {
+            return doCheckAndLock(declarationDataIdList, operationType, SET_UPDATE_DOC_STATE, userInfo, logger);
+        } else
+            throw new IllegalArgumentException("Unknown operationType type!");
     }
 
     private List<LockData> doCheckAndLock(final List<Long> declarationDataIdList, final OperationType currentTask, Set<OperationType> lockingTasks, final TAUserInfo userinfo, final Logger logger) {
@@ -220,11 +218,18 @@ public class DeclarationLockerImpl implements DeclarationLocker {
         lockingTasksWithCurrent.add(currentTask);
 
         for (Long declarationDataId : declarationDataIdList) {
-            String currLockKey = simpleDeclarationDataLockKeyGenerator.generateLockKey(declarationDataId, currentTask);
-            declarationDataByCurrentLockKeys.put(currLockKey, declarationDataId);
-            currentLockKeysWithDescription.put(currLockKey, declarationDataKeyLockDescriptor.createKeyLockDescription(declarationDataId, currentTask));
-            for (OperationType lockingTask : lockingTasksWithCurrent) {
-                declarationDataByLockKeys.put(simpleDeclarationDataLockKeyGenerator.generateLockKey(declarationDataId, lockingTask), declarationDataId);
+            try {
+                String currLockKey = simpleDeclarationDataLockKeyGenerator.generateLockKey(declarationDataId, currentTask);
+                declarationDataByCurrentLockKeys.put(currLockKey, declarationDataId);
+                currentLockKeysWithDescription.put(currLockKey, declarationDataKeyLockDescriptor.createKeyLockDescription(declarationDataId, currentTask));
+                for (OperationType lockingTask : lockingTasksWithCurrent) {
+                    declarationDataByLockKeys.put(simpleDeclarationDataLockKeyGenerator.generateLockKey(declarationDataId, lockingTask), declarationDataId);
+                }
+            } catch (Exception e) {
+                LOG.error(String.format("Выполнение операции невозможно по техническим причинам. Не удалось установить блокировку для выполнения операции \"%s\"", currentTask.getName()), e);
+                logger.error("Выполнение операции невозможно по техническим причинам. Не удалось установить блокировку для выполнения операции \"%s\"",
+                        currentTask.getName());
+                return null;
             }
         }
 
@@ -234,37 +239,43 @@ public class DeclarationLockerImpl implements DeclarationLocker {
                 List<LockData> locks = lockDataDao.fetchAllByKeySet(declarationDataByLockKeys.keySet());
                 if (!locks.isEmpty()) {
                     for (LockData lock : locks) {
-                        DeclarationData declarationData = declarationDataService.get(Collections.singletonList(declarationDataByLockKeys.get(lock.getKey()))).get(0);
-                        DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
-                        final DeclarationType declarationType = declarationTemplate.getType();
-                        final DeclarationFormKind declarationFormKind = declarationTemplate.getDeclarationFormKind();
-                        if (declarationDataByCurrentLockKeys.keySet().contains(lock.getKey())) {
-                            if (lock.getUserId() == userinfo.getUser().getId()) {
+                        try {
+                            DeclarationData declarationData = declarationDataService.get(Collections.singletonList(declarationDataByLockKeys.get(lock.getKey()))).get(0);
+                            DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
+                            final DeclarationType declarationType = declarationTemplate.getType();
+                            final DeclarationFormKind declarationFormKind = declarationTemplate.getDeclarationFormKind();
+                            if (declarationDataByCurrentLockKeys.keySet().contains(lock.getKey())) {
+                                if (lock.getUserId() == userinfo.getUser().getId()) {
 
-                                logger.error("Данная форма заблокирована. Налоговая форма Вид: \"%s\", Тип: \"%s\" номер формы %s вами уже запущена операция %s",
-                                        declarationType.getName(),
-                                        declarationFormKind.getName(),
-                                        declarationData.getId(),
-                                        currentTask.getName());
+                                    logger.error("Данная форма заблокирована. Налоговая форма Вид: \"%s\", Тип: \"%s\" номер формы %s вами уже запущена операция %s",
+                                            declarationType.getName(),
+                                            declarationFormKind.getName(),
+                                            declarationData.getId(),
+                                            currentTask.getName());
+                                } else {
+                                    TAUser user = taUserService.getUser(lock.getUserId());
+                                    logger.error("Данная форма заблокирована. Налоговая форма  Вид: \"%s\", Тип: \"%s\" номер формы %s пользователем: %s (%s)  уже запущена операция %s",
+                                            declarationType.getName(),
+                                            declarationFormKind.getName(),
+                                            declarationData.getId(),
+                                            user.getName(),
+                                            user.getLogin(),
+                                            currentTask.getName());
+                                }
                             } else {
-                                TAUser user = taUserService.getUser(lock.getUserId());
-                                logger.error("Данная форма заблокирована. Налоговая форма  Вид: \"%s\", Тип: \"%s\" номер формы %s пользователем: %s (%s)  уже запущена операция %s",
+                                logger.error("Данная форма заблокирована. Налоговая форма Вид:\"%s\", Тип: \"%s\" номер формы %s уже запущены операции, блокирующие запуск операции %s",
                                         declarationType.getName(),
                                         declarationFormKind.getName(),
                                         declarationData.getId(),
-                                        user.getName(),
-                                        user.getLogin(),
                                         currentTask.getName());
                             }
-                        } else {
-                            logger.error("Данная форма заблокирована. Налоговая форма Вид:\"%s\", Тип: \"%s\" номер формы %s уже запущены операции, блокирующие запуск операции %s",
-                                    declarationType.getName(),
-                                    declarationFormKind.getName(),
-                                    declarationData.getId(),
+                        } catch (Exception e) {
+                            LOG.error(String.format("Выполнение операции невозможно по техническим причинам. Не удалось установить блокировку для выполнения операции \"%s\"", currentTask.getName()), e);
+                            logger.error("Выполнение операции невозможно по техническим причинам. Не удалось установить блокировку для выполнения операции \"%s\"",
                                     currentTask.getName());
+                            return null;
                         }
                     }
-                    return null;
                 } else {
                     lockDataDao.lockKeysBatch(currentLockKeysWithDescription, userinfo.getUser().getId());
                     List<LockData> result = lockDataDao.fetchAllByKeySet(declarationDataByLockKeys.keySet());
@@ -273,6 +284,7 @@ public class DeclarationLockerImpl implements DeclarationLocker {
                     }
                     return result;
                 }
+                return null;
             }
         });
     }
