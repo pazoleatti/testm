@@ -37,35 +37,20 @@ public class DeclarationLockerImpl implements DeclarationLocker {
 
     private static final Log LOG = LogFactory.getLog(DeclarationLockerImpl.class);
 
-    @Autowired
-    private DeclarationDataLockKeyGenerator simpleDeclarationDataLockKeyGenerator;
-    @Autowired
-    private DeclarationDataKeyLockDescriptor declarationDataKeyLockDescriptor;
-    @Autowired
-    private LockDataDao lockDataDao;
-    @Autowired
-    private DeclarationDataService declarationDataService;
-    @Autowired
-    private DeclarationTemplateService declarationTemplateService;
-    @Autowired
-    private TAUserService taUserService;
-    @Autowired
-    private TransactionHelper tx;
+    private static final Set<OperationType> SET_IMPORT_TF__IMPORT_EXCEL__IDENTIFY = new HashSet<>();
+    private static final Set<OperationType> SET_UPDATE_PERSONS_DATA = new HashSet<>();
+    private static final Set<OperationType> SET_CHECK__ACCEPT__TOCREATE = new HashSet<>();
+    private static final Set<OperationType> SET_EDIT = new HashSet<>();
+    private static final Set<OperationType> SET_CONSOLIDATE__REPORT_KPP_OKTMO__2NDFL1__2NDFL2__6NDFL = new HashSet<>();
+    private static final Set<OperationType> SET_EDIT_FILE__PDF__EXPORT_REPORTS__REPORT_2NDFL1__REPORT_2NDFL2__DEPT_NOTICE = new HashSet<>();
+    private static final Set<OperationType> SET_DELETE = new HashSet<>();
+    private static final Set<OperationType> SET_XLSX = new HashSet<>();
+    private static final Set<OperationType> SET_SPEC_REPORT = new HashSet<>();
+    private static final Set<OperationType> SET_EXCEL_TEMPLATE = new HashSet<>();
+    private static final Set<OperationType> SET_REPORT_KPP_OKTMO = new HashSet<>();
+    private static final Set<OperationType> SET_UPDATE_DOC_STATE = new HashSet<>();
 
-    private final Set<OperationType> SET_IMPORT_TF__IMPORT_EXCEL__IDENTIFY = new HashSet<>();
-    private final Set<OperationType> SET_UPDATE_PERSONS_DATA = new HashSet<>();
-    private final Set<OperationType> SET_CHECK__ACCEPT__TOCREATE = new HashSet<>();
-    private final Set<OperationType> SET_EDIT = new HashSet<>();
-    private final Set<OperationType> SET_CONSOLIDATE__REPORT_KPP_OKTMO__2NDFL1__2NDFL2__6NDFL = new HashSet<>();
-    private final Set<OperationType> SET_EDIT_FILE__PDF__EXPORT_REPORTS__REPORT_2NDFL1__REPORT_2NDFL2__DEPT_NOTICE = new HashSet<>();
-    private final Set<OperationType> SET_DELETE = new HashSet<>();
-    private final Set<OperationType> SET_XLSX = new HashSet<>();
-    private final Set<OperationType> SET_SPEC_REPORT = new HashSet<>();
-    private final Set<OperationType> SET_EXCEL_TEMPLATE = new HashSet<>();
-    private final Set<OperationType> SET_REPORT_KPP_OKTMO = new HashSet<>();
-    private final Set<OperationType> SET_UPDATE_DOC_STATE = new HashSet<>();
-
-    public DeclarationLockerImpl() {
+    static {
         SET_IMPORT_TF__IMPORT_EXCEL__IDENTIFY.addAll(Arrays.asList(OperationType.UPDATE_PERSONS_DATA,
                 OperationType.CHECK_DEC, OperationType.ACCEPT_DEC, OperationType.RETURN_DECLARATION,
                 OperationType.DELETE_DEC, OperationType.EXCEL_DEC, OperationType.RNU_NDFL_PERSON_DB,
@@ -115,7 +100,32 @@ public class DeclarationLockerImpl implements DeclarationLocker {
                 OperationType.LOAD_TRANSPORT_FILE, OperationType.UPDATE_PERSONS_DATA, OperationType.IMPORT_DECLARATION_EXCEL));
         SET_UPDATE_DOC_STATE.addAll(Arrays.asList(OperationType.ACCEPT_DEC, OperationType.CHECK_DEC,
                 OperationType.DELETE_DEC, OperationType.RETURN_DECLARATION));
+    }
 
+    // Зависимости
+    private final DeclarationDataLockKeyGenerator simpleDeclarationDataLockKeyGenerator;
+    private final DeclarationDataKeyLockDescriptor declarationDataKeyLockDescriptor;
+    private final LockDataDao lockDataDao;
+    private final DeclarationDataService declarationDataService;
+    private final DeclarationTemplateService declarationTemplateService;
+    private final TAUserService taUserService;
+    private final TransactionHelper tx;
+
+    @Autowired
+    public DeclarationLockerImpl(DeclarationDataLockKeyGenerator simpleDeclarationDataLockKeyGenerator,
+                                 DeclarationDataKeyLockDescriptor declarationDataKeyLockDescriptor,
+                                 LockDataDao lockDataDao,
+                                 DeclarationDataService declarationDataService,
+                                 DeclarationTemplateService declarationTemplateService,
+                                 TAUserService taUserService,
+                                 TransactionHelper tx) {
+        this.simpleDeclarationDataLockKeyGenerator = simpleDeclarationDataLockKeyGenerator;
+        this.declarationDataKeyLockDescriptor = declarationDataKeyLockDescriptor;
+        this.lockDataDao = lockDataDao;
+        this.declarationDataService = declarationDataService;
+        this.declarationTemplateService = declarationTemplateService;
+        this.taUserService = taUserService;
+        this.tx = tx;
     }
 
     @Override
@@ -193,7 +203,7 @@ public class DeclarationLockerImpl implements DeclarationLocker {
             } else
                 throw new IllegalArgumentException("Unknown operationType type!");
         } catch (Exception e) {
-            LOG.error("Выполнение операции невозможно по техническим причинам. Не удалось установить блокировку для выполнения операции \"%s\"", e);
+            LOG.error(String.format("Выполнение операции невозможно по техническим причинам. Не удалось установить блокировку для выполнения операции \"%s\"", operationType.getName()), e);
             logger.error("Выполнение операции невозможно по техническим причинам. Не удалось установить блокировку для выполнения операции \"%s\"",
                     operationType.getName());
             return null;

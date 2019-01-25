@@ -339,7 +339,7 @@ public class LockDataServiceImpl implements LockDataService {
         });
     }
 
-    //<editor-fold desc="common private methods">
+    //<editor-fold defaultstate="collapsed" desc="common private methods">
 
     /**
      * Проверка, имеет ли пользователь права на снятие данной блокировки.
