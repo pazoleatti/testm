@@ -18,104 +18,115 @@ import com.aplana.sbrf.taxaccounting.service.TransactionLogic;
 import com.aplana.sbrf.taxaccounting.service.component.lock.DeclarationDataLockKeyGenerator;
 import com.aplana.sbrf.taxaccounting.service.component.lock.descriptor.DeclarationDataKeyLockDescriptor;
 import com.aplana.sbrf.taxaccounting.service.component.lock.locker.DeclarationLocker;
+import com.google.common.collect.ImmutableSet;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @Component("declarationLocker")
 public class DeclarationLockerImpl implements DeclarationLocker {
 
     private static final Log LOG = LogFactory.getLog(DeclarationLockerImpl.class);
 
-    @Autowired
-    private DeclarationDataLockKeyGenerator simpleDeclarationDataLockKeyGenerator;
-    @Autowired
-    private DeclarationDataKeyLockDescriptor declarationDataKeyLockDescriptor;
-    @Autowired
-    private LockDataDao lockDataDao;
-    @Autowired
-    private DeclarationDataService declarationDataService;
-    @Autowired
-    private DeclarationTemplateService declarationTemplateService;
-    @Autowired
-    private TAUserService taUserService;
-    @Autowired
-    private TransactionHelper tx;
+    private static final Set<OperationType> SET_IMPORT_TF__IMPORT_EXCEL__IDENTIFY = ImmutableSet.of(
+            OperationType.UPDATE_PERSONS_DATA,
+            OperationType.CHECK_DEC, OperationType.ACCEPT_DEC, OperationType.RETURN_DECLARATION,
+            OperationType.DELETE_DEC, OperationType.EXCEL_DEC, OperationType.RNU_NDFL_PERSON_DB,
+            OperationType.RNU_NDFL_PERSON_ALL_DB, OperationType.EXCEL_TEMPLATE_DEC,
+            OperationType.RNU_PAYMENT_REPORT, OperationType.RNU_RATE_REPORT, OperationType.RNU_NDFL_DETAIL_REPORT,
+            OperationType.RNU_NDFL_2_6_DATA_XLSX_REPORT, OperationType.RNU_NDFL_2_6_DATA_TXT_REPORT,
+            OperationType.LOAD_TRANSPORT_FILE, OperationType.IMPORT_DECLARATION_EXCEL, OperationType.IDENTIFY_PERSON);
 
-    private final Set<OperationType> SET_IMPORT_TF__IMPORT_EXCEL__IDENTIFY = new HashSet<>();
-    private final Set<OperationType> SET_UPDATE_PERSONS_DATA = new HashSet<>();
-    private final Set<OperationType> SET_CHECK__ACCEPT__TOCREATE = new HashSet<>();
-    private final Set<OperationType> SET_EDIT = new HashSet<>();
-    private final Set<OperationType> SET_CONSOLIDATE__REPORT_KPP_OKTMO__2NDFL1__2NDFL2__6NDFL = new HashSet<>();
-    private final Set<OperationType> SET_EDIT_FILE__PDF__EXPORT_REPORTS__REPORT_2NDFL1__REPORT_2NDFL2__DEPT_NOTICE = new HashSet<>();
-    private final Set<OperationType> SET_DELETE = new HashSet<>();
-    private final Set<OperationType> SET_XLSX = new HashSet<>();
-    private final Set<OperationType> SET_SPEC_REPORT = new HashSet<>();
-    private final Set<OperationType> SET_EXCEL_TEMPLATE = new HashSet<>();
-    private final Set<OperationType> SET_REPORT_KPP_OKTMO = new HashSet<>();
-    private final Set<OperationType> SET_UPDATE_DOC_STATE = new HashSet<>();
+    private static final Set<OperationType> SET_UPDATE_PERSONS_DATA = ImmutableSet.of(
+            OperationType.ACCEPT_DEC, OperationType.CHECK_DEC, OperationType.CONSOLIDATE,
+            OperationType.DELETE_DEC, OperationType.EDIT, OperationType.IDENTIFY_PERSON,
+            OperationType.LOAD_TRANSPORT_FILE, OperationType.REPORT_KPP_OKTMO, OperationType.RETURN_DECLARATION,
+            OperationType.RNU_NDFL_2_6_DATA_XLSX_REPORT, OperationType.RNU_NDFL_2_6_DATA_TXT_REPORT,
+            OperationType.RNU_NDFL_DETAIL_REPORT, OperationType.RNU_NDFL_PERSON_DB,
+            OperationType.RNU_NDFL_PERSON_ALL_DB, OperationType.RNU_PAYMENT_REPORT, OperationType.RNU_RATE_REPORT,
+            OperationType.EXCEL_DEC, OperationType.EXCEL_TEMPLATE_DEC, OperationType.DECLARATION_2NDFL1, OperationType.DECLARATION_2NDFL2,
+            OperationType.DECLARATION_6NDFL, OperationType.IMPORT_DECLARATION_EXCEL);
 
-    public DeclarationLockerImpl() {
-        SET_IMPORT_TF__IMPORT_EXCEL__IDENTIFY.addAll(Arrays.asList(OperationType.UPDATE_PERSONS_DATA,
-                OperationType.CHECK_DEC, OperationType.ACCEPT_DEC, OperationType.RETURN_DECLARATION,
-                OperationType.DELETE_DEC, OperationType.EXCEL_DEC, OperationType.RNU_NDFL_PERSON_DB,
-                OperationType.RNU_NDFL_PERSON_ALL_DB, OperationType.EXCEL_TEMPLATE_DEC,
-                OperationType.RNU_PAYMENT_REPORT, OperationType.RNU_RATE_REPORT, OperationType.RNU_NDFL_DETAIL_REPORT,
-                OperationType.RNU_NDFL_2_6_DATA_XLSX_REPORT, OperationType.RNU_NDFL_2_6_DATA_TXT_REPORT));
+    private static final Set<OperationType> SET_CHECK__ACCEPT__TOCREATE = ImmutableSet.of(
+            OperationType.ACCEPT_DEC, OperationType.CHECK_DEC,
+            OperationType.CONSOLIDATE, OperationType.DELETE_DEC, OperationType.EDIT, OperationType.IDENTIFY_PERSON,
+            OperationType.LOAD_TRANSPORT_FILE, OperationType.RETURN_DECLARATION,
+            OperationType.UPDATE_PERSONS_DATA, OperationType.IMPORT_DECLARATION_EXCEL, OperationType.UPDATE_DOC_STATE);
 
-        SET_UPDATE_PERSONS_DATA.addAll(Arrays.asList(OperationType.ACCEPT_DEC, OperationType.CHECK_DEC, OperationType.CONSOLIDATE,
-                OperationType.DELETE_DEC, OperationType.EDIT, OperationType.IDENTIFY_PERSON,
-                OperationType.LOAD_TRANSPORT_FILE, OperationType.REPORT_KPP_OKTMO, OperationType.RETURN_DECLARATION,
-                OperationType.RNU_NDFL_2_6_DATA_XLSX_REPORT, OperationType.RNU_NDFL_2_6_DATA_TXT_REPORT,
-                OperationType.RNU_NDFL_DETAIL_REPORT, OperationType.RNU_NDFL_PERSON_DB,
-                OperationType.RNU_NDFL_PERSON_ALL_DB, OperationType.RNU_PAYMENT_REPORT, OperationType.RNU_RATE_REPORT,
-                OperationType.EXCEL_DEC, OperationType.EXCEL_TEMPLATE_DEC, OperationType.DECLARATION_2NDFL1, OperationType.DECLARATION_2NDFL2,
-                OperationType.DECLARATION_6NDFL, OperationType.IMPORT_DECLARATION_EXCEL));
 
-        SET_CHECK__ACCEPT__TOCREATE.addAll(Arrays.asList(OperationType.ACCEPT_DEC, OperationType.CHECK_DEC,
-                OperationType.CONSOLIDATE, OperationType.DELETE_DEC, OperationType.EDIT, OperationType.IDENTIFY_PERSON,
-                OperationType.LOAD_TRANSPORT_FILE, OperationType.RETURN_DECLARATION,
-                OperationType.UPDATE_PERSONS_DATA, OperationType.IMPORT_DECLARATION_EXCEL, OperationType.UPDATE_DOC_STATE));
+    private static final Set<OperationType> SET_EDIT = ImmutableSet.of(
+            OperationType.ACCEPT_DEC, OperationType.CHECK_DEC, OperationType.CONSOLIDATE,
+            OperationType.DELETE_DEC, OperationType.REPORT_KPP_OKTMO, OperationType.RETURN_DECLARATION,
+            OperationType.RNU_NDFL_2_6_DATA_XLSX_REPORT, OperationType.RNU_NDFL_2_6_DATA_TXT_REPORT, OperationType.RNU_NDFL_DETAIL_REPORT,
+            OperationType.RNU_NDFL_PERSON_DB, OperationType.RNU_NDFL_PERSON_ALL_DB,
+            OperationType.RNU_PAYMENT_REPORT, OperationType.RNU_RATE_REPORT, OperationType.UPDATE_PERSONS_DATA,
+            OperationType.EXCEL_DEC, OperationType.DECLARATION_2NDFL1, OperationType.DECLARATION_2NDFL2,
+            OperationType.DECLARATION_6NDFL);
 
-        SET_EDIT.addAll(Arrays.asList(OperationType.ACCEPT_DEC, OperationType.CHECK_DEC, OperationType.CONSOLIDATE,
-                OperationType.DELETE_DEC, OperationType.REPORT_KPP_OKTMO, OperationType.RETURN_DECLARATION,
-                OperationType.RNU_NDFL_2_6_DATA_XLSX_REPORT, OperationType.RNU_NDFL_2_6_DATA_TXT_REPORT, OperationType.RNU_NDFL_DETAIL_REPORT,
-                OperationType.RNU_NDFL_PERSON_DB, OperationType.RNU_NDFL_PERSON_ALL_DB,
-                OperationType.RNU_PAYMENT_REPORT, OperationType.RNU_RATE_REPORT, OperationType.UPDATE_PERSONS_DATA,
-                OperationType.EXCEL_DEC, OperationType.DECLARATION_2NDFL1, OperationType.DECLARATION_2NDFL2,
-                OperationType.DECLARATION_6NDFL));
-        SET_CONSOLIDATE__REPORT_KPP_OKTMO__2NDFL1__2NDFL2__6NDFL.addAll(Arrays.asList(OperationType.CONSOLIDATE, OperationType.DELETE_DEC, OperationType.EDIT, OperationType.UPDATE_PERSONS_DATA));
-        SET_EDIT_FILE__PDF__EXPORT_REPORTS__REPORT_2NDFL1__REPORT_2NDFL2__DEPT_NOTICE.addAll(Arrays.asList(OperationType.DELETE_DEC));
-        SET_DELETE.addAll(Arrays.asList(OperationType.ACCEPT_DEC, OperationType.CHECK_DEC, OperationType.CONSOLIDATE,
-                OperationType.DELETE_DEC, OperationType.DEPT_NOTICE_DEC, OperationType.EDIT, OperationType.EDIT_FILE,
-                OperationType.IDENTIFY_PERSON, OperationType.LOAD_TRANSPORT_FILE, OperationType.PDF_DEC,
-                OperationType.REPORT_2NDFL1, OperationType.REPORT_2NDFL2, OperationType.REPORT_KPP_OKTMO,
-                OperationType.RETURN_DECLARATION, OperationType.RNU_NDFL_2_6_DATA_XLSX_REPORT,
-                OperationType.RNU_NDFL_2_6_DATA_TXT_REPORT, OperationType.RNU_NDFL_DETAIL_REPORT,
-                OperationType.RNU_NDFL_PERSON_DB, OperationType.RNU_NDFL_PERSON_ALL_DB,
-                OperationType.RNU_PAYMENT_REPORT, OperationType.RNU_RATE_REPORT, OperationType.UPDATE_PERSONS_DATA,
-                OperationType.EXCEL_DEC, OperationType.DECLARATION_2NDFL1, OperationType.DECLARATION_2NDFL2,
-                OperationType.DECLARATION_6NDFL, OperationType.EXCEL_TEMPLATE_DEC, OperationType.EXPORT_REPORTS,
-                OperationType.IMPORT_DECLARATION_EXCEL, OperationType.UPDATE_DOC_STATE));
-        SET_XLSX.addAll(Arrays.asList(OperationType.IDENTIFY_PERSON, OperationType.LOAD_TRANSPORT_FILE, OperationType.IMPORT_DECLARATION_EXCEL));
-        SET_SPEC_REPORT.addAll(Arrays.asList(OperationType.CONSOLIDATE, OperationType.DELETE_DEC,
-                OperationType.EDIT, OperationType.IDENTIFY_PERSON, OperationType.LOAD_TRANSPORT_FILE,
-                OperationType.UPDATE_PERSONS_DATA, OperationType.IMPORT_DECLARATION_EXCEL));
-        SET_EXCEL_TEMPLATE.addAll(Arrays.asList(OperationType.DELETE_DEC, OperationType.IDENTIFY_PERSON,
-                OperationType.LOAD_TRANSPORT_FILE, OperationType.UPDATE_PERSONS_DATA, OperationType.IMPORT_DECLARATION_EXCEL));
-        SET_UPDATE_DOC_STATE.addAll(Arrays.asList(OperationType.ACCEPT_DEC, OperationType.CHECK_DEC,
-                OperationType.DELETE_DEC, OperationType.RETURN_DECLARATION));
 
+    private static final Set<OperationType> SET_CONSOLIDATE__REPORT_KPP_OKTMO__2NDFL1__2NDFL2__6NDFL = ImmutableSet.of(
+            OperationType.CONSOLIDATE, OperationType.DELETE_DEC, OperationType.EDIT, OperationType.UPDATE_PERSONS_DATA);
+
+    private static final Set<OperationType> SET_EDIT_FILE__PDF__EXPORT_REPORTS__REPORT_2NDFL1__REPORT_2NDFL2__DEPT_NOTICE = ImmutableSet.of(OperationType.DELETE_DEC);
+
+    private static final Set<OperationType> SET_DELETE = ImmutableSet.of(
+            OperationType.ACCEPT_DEC, OperationType.CHECK_DEC, OperationType.CONSOLIDATE,
+            OperationType.DELETE_DEC, OperationType.DEPT_NOTICE_DEC, OperationType.EDIT, OperationType.EDIT_FILE,
+            OperationType.IDENTIFY_PERSON, OperationType.LOAD_TRANSPORT_FILE, OperationType.PDF_DEC,
+            OperationType.REPORT_2NDFL1, OperationType.REPORT_2NDFL2, OperationType.REPORT_KPP_OKTMO,
+            OperationType.RETURN_DECLARATION, OperationType.RNU_NDFL_2_6_DATA_XLSX_REPORT,
+            OperationType.RNU_NDFL_2_6_DATA_TXT_REPORT, OperationType.RNU_NDFL_DETAIL_REPORT,
+            OperationType.RNU_NDFL_PERSON_DB, OperationType.RNU_NDFL_PERSON_ALL_DB,
+            OperationType.RNU_PAYMENT_REPORT, OperationType.RNU_RATE_REPORT, OperationType.UPDATE_PERSONS_DATA,
+            OperationType.EXCEL_DEC, OperationType.DECLARATION_2NDFL1, OperationType.DECLARATION_2NDFL2,
+            OperationType.DECLARATION_6NDFL, OperationType.EXCEL_TEMPLATE_DEC, OperationType.EXPORT_REPORTS,
+            OperationType.IMPORT_DECLARATION_EXCEL, OperationType.UPDATE_DOC_STATE
+    );
+
+    private static final Set<OperationType> SET_XLSX = ImmutableSet.of(
+            OperationType.IDENTIFY_PERSON, OperationType.LOAD_TRANSPORT_FILE, OperationType.IMPORT_DECLARATION_EXCEL);
+
+    private static final Set<OperationType> SET_SPEC_REPORT = ImmutableSet.of(
+            OperationType.CONSOLIDATE, OperationType.DELETE_DEC,
+            OperationType.EDIT, OperationType.IDENTIFY_PERSON, OperationType.LOAD_TRANSPORT_FILE,
+            OperationType.UPDATE_PERSONS_DATA, OperationType.IMPORT_DECLARATION_EXCEL);
+
+    private static final Set<OperationType> SET_EXCEL_TEMPLATE = ImmutableSet.of(
+            OperationType.DELETE_DEC, OperationType.IDENTIFY_PERSON,
+            OperationType.LOAD_TRANSPORT_FILE, OperationType.UPDATE_PERSONS_DATA, OperationType.IMPORT_DECLARATION_EXCEL);
+
+    private static final Set<OperationType> SET_UPDATE_DOC_STATE = ImmutableSet.of(
+            OperationType.ACCEPT_DEC, OperationType.CHECK_DEC,
+            OperationType.DELETE_DEC, OperationType.RETURN_DECLARATION);
+
+    // Зависимости
+    private final DeclarationDataLockKeyGenerator simpleDeclarationDataLockKeyGenerator;
+    private final DeclarationDataKeyLockDescriptor declarationDataKeyLockDescriptor;
+    private final LockDataDao lockDataDao;
+    private final DeclarationDataService declarationDataService;
+    private final DeclarationTemplateService declarationTemplateService;
+    private final TAUserService taUserService;
+    private final TransactionHelper tx;
+
+    @Autowired
+    public DeclarationLockerImpl(DeclarationDataLockKeyGenerator simpleDeclarationDataLockKeyGenerator,
+                                 DeclarationDataKeyLockDescriptor declarationDataKeyLockDescriptor,
+                                 LockDataDao lockDataDao,
+                                 DeclarationDataService declarationDataService,
+                                 DeclarationTemplateService declarationTemplateService,
+                                 TAUserService taUserService,
+                                 TransactionHelper tx) {
+        this.simpleDeclarationDataLockKeyGenerator = simpleDeclarationDataLockKeyGenerator;
+        this.declarationDataKeyLockDescriptor = declarationDataKeyLockDescriptor;
+        this.lockDataDao = lockDataDao;
+        this.declarationDataService = declarationDataService;
+        this.declarationTemplateService = declarationTemplateService;
+        this.taUserService = taUserService;
+        this.tx = tx;
     }
 
     @Override
@@ -165,7 +176,7 @@ public class DeclarationLockerImpl implements DeclarationLocker {
             else if (operationType.equals(OperationType.RNU_NDFL_PERSON_ALL_DB))
                 return doCheckAndLock(declarationDataIdList, operationType, SET_SPEC_REPORT, userInfo, logger);
             else if (operationType.equals(OperationType.REPORT_KPP_OKTMO))
-                return doCheckAndLock(declarationDataIdList, operationType, SET_REPORT_KPP_OKTMO, userInfo, logger);
+                return doCheckAndLock(declarationDataIdList, operationType, SET_CONSOLIDATE__REPORT_KPP_OKTMO__2NDFL1__2NDFL2__6NDFL, userInfo, logger);
             else if (operationType.equals(OperationType.RNU_RATE_REPORT))
                 return doCheckAndLock(declarationDataIdList, operationType, SET_SPEC_REPORT, userInfo, logger);
             else if (operationType.equals(OperationType.RNU_PAYMENT_REPORT))
@@ -177,9 +188,9 @@ public class DeclarationLockerImpl implements DeclarationLocker {
             else if (operationType.equals(OperationType.RNU_NDFL_2_6_DATA_TXT_REPORT))
                 return doCheckAndLock(declarationDataIdList, operationType, SET_SPEC_REPORT, userInfo, logger);
             else if (operationType.equals(OperationType.REPORT_2NDFL1))
-                return doCheckAndLock(declarationDataIdList, operationType, SET_SPEC_REPORT, userInfo, logger);
+                return doCheckAndLock(declarationDataIdList, operationType, SET_EDIT_FILE__PDF__EXPORT_REPORTS__REPORT_2NDFL1__REPORT_2NDFL2__DEPT_NOTICE, userInfo, logger);
             else if (operationType.equals(OperationType.REPORT_2NDFL2))
-                return doCheckAndLock(declarationDataIdList, operationType, SET_SPEC_REPORT, userInfo, logger);
+                return doCheckAndLock(declarationDataIdList, operationType, SET_EDIT_FILE__PDF__EXPORT_REPORTS__REPORT_2NDFL1__REPORT_2NDFL2__DEPT_NOTICE, userInfo, logger);
             else if (operationType.equals(OperationType.DECLARATION_2NDFL1)) {
                 return doCheckAndLock(declarationDataIdList, operationType, SET_CONSOLIDATE__REPORT_KPP_OKTMO__2NDFL1__2NDFL2__6NDFL, userInfo, logger);
             } else if (operationType.equals(OperationType.DECLARATION_2NDFL2)) {
@@ -193,7 +204,7 @@ public class DeclarationLockerImpl implements DeclarationLocker {
             } else
                 throw new IllegalArgumentException("Unknown operationType type!");
         } catch (Exception e) {
-            LOG.error("Выполнение операции невозможно по техническим причинам. Не удалось установить блокировку для выполнения операции \"%s\"", e);
+            LOG.error(String.format("Выполнение операции невозможно по техническим причинам. Не удалось установить блокировку для выполнения операции \"%s\"", operationType.getName()), e);
             logger.error("Выполнение операции невозможно по техническим причинам. Не удалось установить блокировку для выполнения операции \"%s\"",
                     operationType.getName());
             return null;
@@ -205,16 +216,17 @@ public class DeclarationLockerImpl implements DeclarationLocker {
         final Map<String, Long> declarationDataByCurrentLockKeys = new HashMap<>();
         final Map<String, String> currentLockKeysWithDescription = new HashMap<>();
 
-        lockingTasks.add(currentTask);
+        Set<OperationType> lockingTasksWithCurrent = new HashSet<>(lockingTasks);
+        lockingTasksWithCurrent.add(currentTask);
+
         for (Long declarationDataId : declarationDataIdList) {
             String currLockKey = simpleDeclarationDataLockKeyGenerator.generateLockKey(declarationDataId, currentTask);
             declarationDataByCurrentLockKeys.put(currLockKey, declarationDataId);
             currentLockKeysWithDescription.put(currLockKey, declarationDataKeyLockDescriptor.createKeyLockDescription(declarationDataId, currentTask));
-            for (OperationType lockingTask : lockingTasks) {
+            for (OperationType lockingTask : lockingTasksWithCurrent) {
                 declarationDataByLockKeys.put(simpleDeclarationDataLockKeyGenerator.generateLockKey(declarationDataId, lockingTask), declarationDataId);
             }
         }
-        lockingTasks.remove(currentTask);
 
         return tx.executeInNewTransaction(new TransactionLogic<List<LockData>>() {
             @Override
