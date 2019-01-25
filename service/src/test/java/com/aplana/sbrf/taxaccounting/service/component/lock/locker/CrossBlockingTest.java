@@ -114,7 +114,6 @@ public class CrossBlockingTest {
 
     @Test
     public void locksCrossTest() {
-        System.out.println("Ставим блокировку: " + lockToSet + ", в базе блокировка: " + lockWasInDB);
 
         // Выдаем нужные результаты при запросах блокировок из базы.
         // Аргументом передается коллекция коллекция ключей, которые нужно вытащить,
@@ -123,6 +122,7 @@ public class CrossBlockingTest {
         when(lockDataDao.fetchAllByKeySet((Collection<String>) argThat(hasItem(lockWasInDB))))
                 .thenReturn(Collections.singletonList(new LockData(lockWasInDB, USER_ID)))
                 .thenReturn(Collections.singletonList(new LockData(lockToSet, USER_ID)));
+
         // Если нашей блокировки среди запрашиваемых нет, возвращаем пустой лист
         when(lockDataDao.fetchAllByKeySet((Collection<String>) argThat(not(hasItem(lockWasInDB)))))
                 .thenReturn(Collections.<LockData>emptyList())
@@ -149,8 +149,6 @@ public class CrossBlockingTest {
                 .isNull();
         assertThat(logger.getEntries()).hasSize(1);
         assertThat(logger.getEntries().get(0).getMessage()).startsWith("Данная форма заблокирована.");
-
-        System.out.println(logger.getEntries().get(0).getMessage() + "\n");
     }
 
     private void assertNoConflict(LockData result) {
@@ -158,8 +156,6 @@ public class CrossBlockingTest {
                 .as("Установленная блокировка %s не должна мешать поставить блокировку %s", lockWasInDB, lockToSet)
                 .isNotNull();
         assertThat(logger.getEntries()).isEmpty();
-
-        System.out.println("Поставлена блокировка " + result.getKey() + "\n");
     }
 
     // <editor-fold defaultstate="collapsed" desc="Private initialization methods">
