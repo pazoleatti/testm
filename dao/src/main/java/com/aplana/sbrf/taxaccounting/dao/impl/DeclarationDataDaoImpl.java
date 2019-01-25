@@ -89,7 +89,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                     new DeclarationDataRowMapper()
             );
         } catch (EmptyResultDataAccessException e) {
-            throw new DaoException("Не удалось удалить налоговые формы");
+            throw new DaoException("Не найдено ни одной налоговой формы с номерами %s", StringUtils.join(declarationDataIds, ", "));
         }
     }
 
