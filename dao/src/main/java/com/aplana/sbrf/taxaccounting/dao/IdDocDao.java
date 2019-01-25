@@ -23,6 +23,12 @@ public interface IdDocDao {
     void createBatch(final Collection<IdDoc> idDocs);
 
     /**
+     * Создать группу ДУЛ у которых могут быть определены идентификаторы. Тогда для таких записей идентификаторы не будут генерироваться.
+     * @param idDocs коллекция ДУЛ
+     */
+    void createBatchWithDefinedIds(final Collection<IdDoc> idDocs);
+
+    /**
      * Массовое обновление ДУЛ
      * @param idDocs коллекция ДУЛ
      */

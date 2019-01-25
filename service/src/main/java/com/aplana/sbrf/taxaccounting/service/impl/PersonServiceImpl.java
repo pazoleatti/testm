@@ -230,7 +230,7 @@ public class PersonServiceImpl implements PersonService {
             }
 
             if (CollectionUtils.isNotEmpty(idDocsToCreate)) {
-                idDocDaoImpl.createBatch(idDocsToCreate);
+                idDocDaoImpl.createBatchWithDefinedIds(idDocsToCreate);
                 for (IdDoc idDoc : idDocsToCreate) {
                     changeLogBuilder.dulCreated(idDoc);
                 }

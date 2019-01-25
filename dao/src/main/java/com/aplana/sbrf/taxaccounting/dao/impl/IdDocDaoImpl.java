@@ -37,6 +37,11 @@ public class IdDocDaoImpl extends AbstractDao implements IdDocDao {
     }
 
     @Override
+    public void createBatchWithDefinedIds(Collection<IdDoc> idDocs) {
+        saveNewObjectsWithDefinedIds(idDocs, IdDoc.TABLE_NAME, DBUtils.Sequence.REF_BOOK_RECORD.getName(), IdDoc.COLUMNS, IdDoc.FIELDS);
+    }
+
+    @Override
     public void updateBatch(Collection<IdDoc> idDocs) {
         updateObjects(idDocs, IdDoc.TABLE_NAME, IdDoc.COLUMNS, IdDoc.FIELDS);
     }

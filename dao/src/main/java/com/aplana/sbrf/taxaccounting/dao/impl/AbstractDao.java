@@ -121,6 +121,31 @@ public abstract class AbstractDao {
      * @param <E>             тип объекта
      */
     protected <E extends IdentityObject> void saveNewObjects(Collection<E> identityObjects, String table, String seq, String[] columns, String[] fields) {
+        List<Long> ids = dbUtils.getNextIds(seq, identityObjects.size());
+        String insert = SqlUtils.createInsert(table, columns, fields);
+        BeanPropertySqlParameterSource[] batchArgs = new BeanPropertySqlParameterSource[identityObjects.size()];
+        int i = 0;
+        for (E identityObject : identityObjects) {
+            identityObject.setId(ids.get(i));
+            batchArgs[i] = new BeanPropertySqlParameterSource(identityObject);
+            i++;
+        }
+        getNamedParameterJdbcTemplate().batchUpdate(insert, batchArgs);
+    }
+
+    /**
+     * Метод сохраняет новые объекты в БД у которых могут быть уже определены идентификаторы. Тогда для таких записей идентификаторы не будут генерироваться.
+     *
+     * @param identityObjects объекты обладающий суррогатным ключом
+     * @param table           наименование таблицы используемой для хранения данных объекта
+     * @param seq             наименование последовательностт используемой для генерации ключей
+     * @param columns         массив, содержащий наименование столбцов таблицы для вставки в insert
+     * @param fields          массив, содержащий пути в объекте до полей, соответствующих столбцам
+     *                        !!! Не допускаются null во вложенных объектах,
+     *                        например, для "country.id" country не должен быть равен null, так что используем пустой объект вместо null
+     * @param <E>             тип объекта
+     */
+    protected <E extends IdentityObject> void saveNewObjectsWithDefinedIds(Collection<E> identityObjects, String table, String seq, String[] columns, String[] fields) {
         String insert = SqlUtils.createInsert(table, columns, fields);
         BeanPropertySqlParameterSource[] batchArgs = new BeanPropertySqlParameterSource[identityObjects.size()];
         int i = 0;
