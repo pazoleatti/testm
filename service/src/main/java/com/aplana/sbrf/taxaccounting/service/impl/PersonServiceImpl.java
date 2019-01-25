@@ -52,16 +52,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import static com.aplana.sbrf.taxaccounting.model.util.IdentityObjectUtils.findById;
-import static com.aplana.sbrf.taxaccounting.model.util.IdentityObjectUtils.getIds;
-import static com.aplana.sbrf.taxaccounting.model.util.IdentityObjectUtils.removeById;
+import static com.aplana.sbrf.taxaccounting.model.util.IdentityObjectUtils.*;
+import static java.util.Collections.singletonList;
 
 /**
  * Сервис работы Физическими лицами. Заменяет некоторые операции провайдера справочников для лучшей производительности
@@ -155,15 +153,15 @@ public class PersonServiceImpl implements PersonService {
         person.setDocuments(idDocDaoImpl.getByPerson(person));
         person.setPersonIdentityList(idTaxPayerDaoImpl.getByPerson(person));
         person.setPersonTbList(personTbDaoImpl.getByPerson(person));
-        List<RegistryPersonDTO> resultData = convertPersonToDTO(Collections.singletonList(person), 1);
+        List<RegistryPersonDTO> resultData = convertPersonToDTO(singletonList(person), 1);
         forbidVipsDataByUserPermissions(resultData);
         RegistryPersonDTO result = resultData.get(0);
 
         RegistryPerson original = findOriginal(id);
         RegistryPersonDTO originalData = null;
         if (original != null) {
-            originalData = convertPersonToDTO(Collections.singletonList(original), 1).get(0);
-            forbidVipsDataByUserPermissions(Collections.singletonList(originalData));
+            originalData = convertPersonToDTO(singletonList(original), 1).get(0);
+            forbidVipsDataByUserPermissions(singletonList(originalData));
         }
         result.setOriginal(originalData);
 
@@ -221,10 +219,11 @@ public class PersonServiceImpl implements PersonService {
             List<IdDoc> idDocsToDelete = new ArrayList<>(persistedIdDocs);
 
             for (IdDoc idDoc : personDTO.getDocuments().value()) {
-                if (findById(persistedIdDocs, idDoc.getId()) != null) {
-                    idDocsToUpdate.add(idDoc);
-                } else {
+                IdDoc persistedIdDoc = findById(persistedIdDocs, idDoc.getId());
+                if (persistedIdDoc == null) {
                     idDocsToCreate.add(idDoc);
+                } else if (!Objects.equal(persistedIdDoc, idDoc)) {
+                    idDocsToUpdate.add(idDoc);
                 }
                 removeById(idDocsToDelete, idDoc.getId());
             }
@@ -255,7 +254,7 @@ public class PersonServiceImpl implements PersonService {
                 (persistedOriginal != null && persistedOriginal.getOldId().equals(personDTO.getOriginal() != null ? personDTO.getOriginal().getOldId() : null)))) {
             if (personDTO.getOriginal() != null) { // Установлен оригинал
                 personToPersist.setRecordId(personDTO.getOriginal().getOldId());
-                refBookPersonDao.setOriginal(personDTO.getOriginal().getOldId(), personDTO.getRecordId());
+                refBookPersonDao.setOriginal(personDTO.getOriginal().getRecordId(), personDTO.getOldId());
                 changeLogBuilder.originalSet(personDTO.getOriginal());
             } else { // Удален оригинал
                 personToPersist.setRecordId(personDTO.getOldId());

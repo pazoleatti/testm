@@ -85,10 +85,11 @@ class PersonChangeLogBuilder {
         return this;
     }
 
-    public void duplicatesSet(List<RegistryPerson> duplicates) {
+    public PersonChangeLogBuilder duplicatesSet(List<RegistryPerson> duplicates) {
         for (RegistryPerson duplicate : duplicates) {
             duplicateSet(duplicate);
         }
+        return this;
     }
 
     public PersonChangeLogBuilder duplicateSet(RegistryPerson duplicate) {
