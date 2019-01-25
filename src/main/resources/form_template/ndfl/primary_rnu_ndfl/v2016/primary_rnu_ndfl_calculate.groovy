@@ -753,6 +753,7 @@ class Calculate extends AbstractScriptClass {
                         refBookPerson.getPersonIdentityList().clear()
                         refBookPerson.getPersonIdentityList().add(primaryPersonIdentifier)
                         infoMsgBuilder.append(String.format("[Добавлен новый \"ИНП\": \"%s\", \"АСНУ\": \"%s\"]", primaryPersonIdentifier?.inp, primaryPersonIdentifier?.getAsnu()?.getCode()))
+                        changed = true
                     } else {
                         refBookPerson.getPersonIdentityList().clear()
                     }
@@ -770,6 +771,7 @@ class Calculate extends AbstractScriptClass {
                     refBookPerson.getPersonTbList().clear()
                     refBookPerson.getPersonTbList().add(personTb)
                     infoMsgBuilder.append(String.format("[Добавлен новый Тербанк: \"%s\"]", department.getShortName()))
+                    changed = true
                 } else {
                     refBookPerson.getPersonTbList().clear()
                 }
