@@ -60,10 +60,10 @@ public interface RefBookPersonDao {
     /**
      * Установить оригинал
      *
-     * @param originalRecordId  идентификатор оригинала
-     * @param duplicateRecordId идентификатор дубликата
+     * @param originalRecordId идентификатор оригинала
+     * @param personOldId      исходный идентификатор изменяемого ФЛ
      */
-    void setOriginal(Long originalRecordId, Long duplicateRecordId);
+    void setOriginal(Long originalRecordId, Long personOldId);
 
 
     /**

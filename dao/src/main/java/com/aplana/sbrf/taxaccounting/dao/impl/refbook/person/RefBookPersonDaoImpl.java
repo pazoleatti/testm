@@ -106,8 +106,15 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
     }
 
     @Override
-    public void setOriginal(Long originalRecordId, Long duplicateRecordId) {
-        setDuplicates(Collections.singletonList(duplicateRecordId), originalRecordId);
+    public void setOriginal(Long originalRecordId, Long personOldId) {
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("originalRecordId", originalRecordId);
+        params.addValue("personOldId", personOldId);
+        getNamedParameterJdbcTemplate().update("update ref_book_person set record_id = :originalRecordId\n" +
+                "where id in (\n" +
+                "   select p.id from ref_book_person p, (select old_id, record_id from ref_book_person where old_id = :personOldId and rownum <= 1) cur_p\n" +
+                "   WHERE p.record_id = cur_p.record_id and (cur_p.record_id = cur_p.old_id or p.old_id = cur_p.old_id)\n" +
+                ")", params);
     }
 
     @Override
@@ -244,10 +251,10 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
     public List<RegistryPerson> fetchNonDuplicatesVersions(long recordId) {
         Date actualDate = new Date();
         String query = SelectPersonQueryGenerator.SELECT_FULL_PERSON + "\n" +
-                        "where person.record_id = :recordId\n" +
-                        "and person.old_id = person.record_id";
+                "where person.record_id = :recordId\n" +
+                "and person.old_id = person.record_id";
         MapSqlParameterSource params = new MapSqlParameterSource("recordId", recordId);
-        params.addValue("actualDate" , actualDate);
+        params.addValue("actualDate", actualDate);
         return getNamedParameterJdbcTemplate().query(query, params, new RegistryPersonMapper());
     }
 
@@ -302,7 +309,7 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
                 "where declaration_data_id = :declarationDataId)\n" +
                 "and person.start_date <= :actualDate and (person.end_date >= :actualDate or person.end_date is null)";
         MapSqlParameterSource params = new MapSqlParameterSource("declarationDataId", declarationDataId);
-        params.addValue("actualDate" , actualDate);
+        params.addValue("actualDate", actualDate);
         return getNamedParameterJdbcTemplate().query(query, params, new RegistryPersonMapper());
     }
 }

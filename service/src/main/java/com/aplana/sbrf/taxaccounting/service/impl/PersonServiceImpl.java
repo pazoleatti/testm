@@ -254,7 +254,7 @@ public class PersonServiceImpl implements PersonService {
                 (persistedOriginal != null && persistedOriginal.getOldId().equals(personDTO.getOriginal() != null ? personDTO.getOriginal().getOldId() : null)))) {
             if (personDTO.getOriginal() != null) { // Установлен оригинал
                 personToPersist.setRecordId(personDTO.getOriginal().getOldId());
-                refBookPersonDao.setOriginal(personDTO.getOriginal().getOldId(), personDTO.getRecordId());
+                refBookPersonDao.setOriginal(personDTO.getOriginal().getRecordId(), personDTO.getOldId());
                 changeLogBuilder.originalSet(personDTO.getOriginal());
             } else { // Удален оригинал
                 personToPersist.setRecordId(personDTO.getOldId());
