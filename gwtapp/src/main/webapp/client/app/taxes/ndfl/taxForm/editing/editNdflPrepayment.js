@@ -21,8 +21,13 @@
                 $http({
                     method: "POST",
                     url: "controller//actions/declarationData/" + $shareData.declarationId + "/lockEdit"
-                }).success(function (response) {
-                    if (response && response.data.success) {
+                }).success(function (lock) {
+                    if (lock.uuid) {
+                        $logPanel.open('log-panel-container', lock.uuid);
+                    }
+                    if (!lock.success) {
+                        $modalInstance.dismiss('Не можем установить блокировку');
+                    } else {
                         // Получение данных ФЛ из раздела 1
                         $http({
                             method: "GET",
@@ -37,8 +42,6 @@
                                 $scope.temp.docTypeName = docTypeName;
                             });
                         });
-                    } else if (response.data.uuid) {
-                        $logPanel.open('log-panel-container', response.data.uuid);
                     }
                 });
 

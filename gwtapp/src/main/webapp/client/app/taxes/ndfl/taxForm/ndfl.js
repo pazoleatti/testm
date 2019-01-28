@@ -263,7 +263,7 @@
                  */
                 $scope.searchFilter.isClearByFilterParams = function () {
                     $scope.searchFilter.isClear = !(isEmpty($scope.ndflFilter.person) && isEmpty($scope.ndflFilter.income)
-                    && isEmpty($scope.ndflFilter.deduction) && isEmpty($scope.ndflFilter.prepayment));
+                        && isEmpty($scope.ndflFilter.deduction) && isEmpty($scope.ndflFilter.prepayment));
                 };
 
                 function isEmpty(object) {
@@ -421,13 +421,14 @@
                             $http({
                                 method: "POST",
                                 url: "controller//actions/declarationData/" + $stateParams.declarationDataId + "/unlockEdit"
+                            }).success(function (unlock) {
+                                if (unlock.uuid) {
+                                    $logPanel.open('log-panel-container', unlock.uuid);
+                                }
                             });
                             if (response) {
                                 $scope.canEditRow = false;
                                 $scope.refreshGrid(1);
-                                if (response.data.uuid) {
-                                    $logPanel.open('log-panel-container', response.data.uuid);
-                                }
                             }
                         });
                 };
