@@ -61,18 +61,19 @@ public abstract class NaturalPersonPrimaryRowMapper implements RowMapper<Natural
 
             if (countryCodeMap == null) {
                 logger.warn("Не проинициализирован кэш справочника 'ОК 025-2001 (Общероссийский классификатор стран мира)'!");
-                return null;
+                return new RefBookCountry();
             }
 
             RefBookCountry result = countryCodeMap.get(code);
 
             if (result == null) {
                 logger.warn("В справочнике 'ОК 025-2001 (Общероссийский классификатор стран мира)' не найдена страна с кодом: " + code);
+                result = new RefBookCountry();
             }
 
             return result;
         } else {
-            return null;
+            return new RefBookCountry();
         }
     }
 
@@ -82,17 +83,18 @@ public abstract class NaturalPersonPrimaryRowMapper implements RowMapper<Natural
 
             if (taxpayerStatusCodeMap == null) {
                 logger.warn("Не проинициализирован кэш справочника 'Статусы налогоплательщика'!");
-                return null;
+                return new RefBookTaxpayerState();
             }
 
             RefBookTaxpayerState result = taxpayerStatusCodeMap.get(code);
             if (result == null) {
                 logger.warn("В справочнике 'Статусы налогоплательщика' не найден статус с кодом: " + code);
+                result = new RefBookTaxpayerState();
             }
             return result;
 
         } else {
-            return null;
+            return new RefBookTaxpayerState();
         }
     }
 

@@ -280,7 +280,7 @@ public class NaturalPersonRefbookHandler extends NaturalPersonHandler {
         if (taxpayerStatusId != null) {
             return taxpayerStatusMap != null ? taxpayerStatusMap.get(taxpayerStatusId) : new RefBookTaxpayerState(taxpayerStatusId, null);
         } else {
-            return null;
+            return new RefBookTaxpayerState();
         }
     }
 
@@ -288,7 +288,7 @@ public class NaturalPersonRefbookHandler extends NaturalPersonHandler {
         if (countryId != null) {
             return countryMap != null ? countryMap.get(countryId) : new RefBookCountry(countryId, null);
         } else {
-            return null;
+            return new RefBookCountry();
         }
     }
 
