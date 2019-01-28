@@ -161,8 +161,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Autowired
     private LockDataService lockDataService;
     @Autowired
-    private TAUserService taUserService;
-    @Autowired
     private ReportService reportService;
     @Autowired
     private DepartmentReportPeriodService departmentReportPeriodService;
@@ -282,8 +280,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         Department department = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
         String lockDescription = makeCreateDeclarationLockDescription(newDeclaration, declarationTemplate, departmentReportPeriod, department);
 
-        if (lockDataService.lock(lockKey, userInfo.getUser().getId(), lockDescription) == null) {
-            //Если блокировка успешно установлена
+        LockData lockData = lockDataService.lock(lockKey, userInfo.getUser().getId(), lockDescription);
+
+        //Если блокировка успешно установлена
+        if (lockData == null) {
             try {
                 canCreate(userInfo, newDeclaration.getDeclarationTemplateId(), departmentReportPeriod, newDeclaration.getAsnuId(), logger);
                 if (logger.containsLevel(LogLevel.ERROR)) {
@@ -343,12 +343,24 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 lockDataService.unlock(lockKey);
             }
         } else { // Не удалось установить блокировку
-            throw new ServiceException("Создание налоговой формы с указанными параметрами уже выполняется!");
+            String errorMessage;
+            int blockerUserId = lockData.getUserId();
+            if (blockerUserId == userInfo.getUser().getId()) {
+                errorMessage = String.format("Данная форма заблокирована. Вами уже запущена операция \"%s\"", lockDescription);
+            } else {
+                TAUser user = userService.getUser(blockerUserId);
+                errorMessage = String.format("Данная форма заблокирована. Пользователем %s (%s) уже запущена операция \"%s\"", user.getName(), user.getLogin(), lockDescription);
+            }
+            logger.error(errorMessage);
+            return null;
         }
     }
 
-    private String makeCreateDeclarationLockDescription(DeclarationData declarationData, DeclarationTemplate declarationTemplate, DepartmentReportPeriod departmentReportPeriod, Department department) {
-
+    // Генерация текста описания задачи "Создание налоговой формы"
+    private String makeCreateDeclarationLockDescription(DeclarationData declarationData,
+                                                        DeclarationTemplate declarationTemplate,
+                                                        DepartmentReportPeriod departmentReportPeriod,
+                                                        Department department) {
         String periodName = departmentReportPeriod.getReportPeriod().getName();
         int periodYear = departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear();
         String correctionDate = departmentReportPeriod.getCorrectionDate() != null
@@ -981,7 +993,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 lockData = lockDataDelete;
             }
             Logger logger = new Logger();
-            TAUser blocker = taUserService.getUser(lockData.getUserId());
+            TAUser blocker = userService.getUser(lockData.getUserId());
             String description = lockData.getDescription();
             if (lockData.getTaskId() != null) {
                 AsyncTaskData taskData = asyncManager.getLightTaskData(lockData.getTaskId());
@@ -2358,7 +2370,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         if (declarationDataIds.isEmpty()) {
             logger.error("По заданым параметрам не найдено ни одной формы");
         } else {
-            String taskKey = AsyncTaskType.EXPORT_REPORTS.name() + System.currentTimeMillis();
             Map<String, Object> params = new HashMap<>();
             params.put("declarationDataIds", declarationDataIds);
             asyncManager.createTask(OperationType.EXPORT_REPORTS, "Выгрузка отчетности", userInfo, params, logger);
