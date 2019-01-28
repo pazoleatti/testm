@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.refbook;
 
+import com.aplana.sbrf.taxaccounting.dao.PermissionDao;
 import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonRefbookHandler;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
@@ -17,7 +18,7 @@ import java.util.Set;
 /**
  * Интерфейс DAO для работы со справочником физлиц
  */
-public interface RefBookPersonDao {
+public interface RefBookPersonDao extends PermissionDao {
     /**
      * Очищает в NDFL_PERSON столбец PERSON_ID по declarationDataId
      */

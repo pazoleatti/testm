@@ -12,6 +12,7 @@ import com.aplana.sbrf.taxaccounting.model.dto.LogBusinessDTO;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.LogBusinessService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -59,6 +60,7 @@ public class LogBusinessServiceImpl implements LogBusinessService {
     }
 
     @Override
+    @PreAuthorize("hasPermission(#personId, 'com.aplana.sbrf.taxaccounting.model.refbook.RegistryPerson', T(com.aplana.sbrf.taxaccounting.permissions.PersonPermission).VIEW_VIP_DATA)")
     public PagingResult<LogBusinessDTO> findAllByPersonId(long personId, PagingParams pagingParams) {
         return logBusinessDao.findAllByPersonId(personId, pagingParams);
     }
