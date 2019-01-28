@@ -245,36 +245,35 @@ public class DeclarationLockerImpl implements DeclarationLocker {
             public List<LockData> execute() {
                 List<LockData> locks = lockDataDao.fetchAllByKeySet(declarationDataByLockKeys.keySet());
                 if (!locks.isEmpty()) {
-                    for (LockData lock : locks) {
-                        DeclarationData declarationData = declarationDataService.get(Collections.singletonList(declarationDataByLockKeys.get(lock.getKey()))).get(0);
-                        DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
-                        DeclarationType declarationType = declarationTemplate.getType();
-                        DeclarationFormKind declarationFormKind = declarationTemplate.getDeclarationFormKind();
-                        if (declarationDataByCurrentLockKeys.keySet().contains(lock.getKey())) {
-                            if (lock.getUserId() == userinfo.getUser().getId()) {
-                                logger.error("Форма № %s, Вид: \"%s\", Тип: \"%s\" заблокирована вами в рамках операции %s",
-                                        declarationData.getId(),
-                                        declarationType.getName(),
-                                        declarationFormKind.getName(),
-                                        currentTask.getName());
-                            } else {
-                                TAUser user = taUserService.getUser(lock.getUserId());
-                                logger.error("Форма № %s, Вид: \"%s\", Тип: \"%s\" заблокирована пользователем: %s (%s) в рамках операции %s",
-                                        declarationData.getId(),
-                                        declarationType.getName(),
-                                        declarationFormKind.getName(),
-                                        user.getName(),
-                                        user.getLogin(),
-                                        currentTask.getName());
-                            }
-                            return null;
-                        } else {
-                            logger.error("Форма № %s, Вид: \"%s\", Тип: \"%s\" заблокирована в рамках уже запущенных операций.",
+                    LockData lock = locks.get(0);
+                    DeclarationData declarationData = declarationDataService.get(Collections.singletonList(declarationDataByLockKeys.get(lock.getKey()))).get(0);
+                    DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
+                    DeclarationType declarationType = declarationTemplate.getType();
+                    DeclarationFormKind declarationFormKind = declarationTemplate.getDeclarationFormKind();
+                    if (declarationDataByCurrentLockKeys.keySet().contains(lock.getKey())) {
+                        if (lock.getUserId() == userinfo.getUser().getId()) {
+                            logger.error("Форма № %s, Вид: \"%s\", Тип: \"%s\" заблокирована вами в рамках операции %s",
                                     declarationData.getId(),
                                     declarationType.getName(),
-                                    declarationFormKind.getName());
-                            return null;
+                                    declarationFormKind.getName(),
+                                    currentTask.getName());
+                        } else {
+                            TAUser user = taUserService.getUser(lock.getUserId());
+                            logger.error("Форма № %s, Вид: \"%s\", Тип: \"%s\" заблокирована пользователем: %s (%s) в рамках операции %s",
+                                    declarationData.getId(),
+                                    declarationType.getName(),
+                                    declarationFormKind.getName(),
+                                    user.getName(),
+                                    user.getLogin(),
+                                    currentTask.getName());
                         }
+                        return null;
+                    } else {
+                        logger.error("Форма № %s, Вид: \"%s\", Тип: \"%s\" заблокирована в рамках уже запущенных операций.",
+                                declarationData.getId(),
+                                declarationType.getName(),
+                                declarationFormKind.getName());
+                        return null;
                     }
                 } else {
                     lockDataDao.lockKeysBatch(currentLockKeysWithDescription, userinfo.getUser().getId());
@@ -284,7 +283,6 @@ public class DeclarationLockerImpl implements DeclarationLocker {
                     }
                     return result;
                 }
-                return null;
             }
         });
     }
