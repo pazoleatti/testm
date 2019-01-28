@@ -248,40 +248,81 @@ public class PersonServiceImpl implements PersonService {
             }
         }
 
-        RegistryPerson persistedOriginal = findOriginal(personDTO.getId());
+        RegistryPerson originalOld = findOriginal(personDTO.getId());
+        RegistryPersonDTO originalNew = personDTO.getOriginal();
+        List<RegistryPerson> duplicatesOld = originalOld == null ? findAllDuplicates(personDTO.getId()) : new ArrayList<RegistryPerson>();
+        List<RegistryPerson> duplicatesNew = new ArrayList<>();
         // Если оригинал изменился, то обновляем его
-        if (!(persistedOriginal == null && personDTO.getOriginal() == null ||
-                (persistedOriginal != null && persistedOriginal.getOldId().equals(personDTO.getOriginal() != null ? personDTO.getOriginal().getOldId() : null)))) {
-            if (personDTO.getOriginal() != null) { // Установлен оригинал
-                personToPersist.setRecordId(personDTO.getOriginal().getOldId());
-                refBookPersonDao.setOriginal(personDTO.getOriginal().getRecordId(), personDTO.getOldId());
-                changeLogBuilder.originalSet(personDTO.getOriginal());
+        if (!(originalOld == null && originalNew == null ||
+                (originalOld != null && originalOld.getOldId().equals(originalNew != null ? originalNew.getOldId() : null)))) {
+            if (originalNew != null) { // Установлен оригинал
+                // У нового оригинала логируем добавление дубликатов в виде текущего ФЛ и всех его дубликатов
+                List<RegistryPerson> actualAddedDuplicates = new ArrayList<>();
+                actualAddedDuplicates.add(persistedPerson);
+                actualAddedDuplicates.addAll(duplicatesOld);
+                String log = new PersonChangeLogBuilder().duplicatesSet(actualAddedDuplicates).build();
+                logBusinessService.logPersonEvent(originalNew.getId(), FormDataEvent.UPDATE_PERSON, log, userInfo);
+                // Соответственно у всех дубликатов текущего ФЛ изменится оригинал
+                for (RegistryPerson duplicateOld : duplicatesOld) {
+                    log = new PersonChangeLogBuilder().originalSet(originalNew).build();
+                    logBusinessService.logPersonEvent(duplicateOld.getId(), FormDataEvent.UPDATE_PERSON, log, userInfo);
+                }
+                personToPersist.setRecordId(originalNew.getOldId());
+                refBookPersonDao.setOriginal(originalNew.getRecordId(), personDTO.getOldId());
+                changeLogBuilder.originalSet(originalNew);
+                // при установке оригинала удаляются все дубликаты
+                changeLogBuilder.duplicatesDeleted(duplicatesOld);
             } else { // Удален оригинал
                 personToPersist.setRecordId(personDTO.getOldId());
-                changeLogBuilder.originalDeleted(persistedOriginal);
+                changeLogBuilder.originalDeleted(originalOld);
+            }
+            if (originalOld != null) {
+                // у старого оригинала логируем удаление дубликата
+                PersonChangeLogBuilder anotherChangeLogBuilder = new PersonChangeLogBuilder().duplicateDeleted(persistedPerson);
+                logBusinessService.logPersonEvent(originalOld.getId(), FormDataEvent.UPDATE_PERSON, anotherChangeLogBuilder.build(), userInfo);
             }
         }
 
         // Обновляем дубликаты (только если не назначен оригинал, в противном случае дубликаты сотрутся)
-        if (personDTO.getOriginal() == null) {
-            List<RegistryPerson> persistedDuplicates = persistedOriginal == null ? findAllDuplicates(personDTO.getId()) : new ArrayList<RegistryPerson>();
-            List<RegistryPerson> duplicatesToPersist = new ArrayList<>();
+        if (originalNew == null) {
             for (RegistryPersonDTO duplicate : personDTO.getDuplicates()) {
-                duplicatesToPersist.add(refBookPersonDao.fetchPersonVersion(duplicate.getId()));
+                duplicatesNew.add(refBookPersonDao.fetchPersonVersion(duplicate.getId()));
             }
-            List<RegistryPerson> deletedDuplicates = new ArrayList<>(persistedDuplicates);
+            List<RegistryPerson> deletedDuplicates = new ArrayList<>(duplicatesOld);
             List<RegistryPerson> addedDuplicates = new ArrayList<>();
-            for (RegistryPerson duplicate : duplicatesToPersist) {
-                if (findByOldId(persistedDuplicates, duplicate.getOldId()) == null) {
+            for (RegistryPerson duplicate : duplicatesNew) {
+                if (findByOldId(duplicatesOld, duplicate.getOldId()) == null) {
                     addedDuplicates.add(duplicate);
                 }
                 removeByOldId(deletedDuplicates, duplicate.getOldId());
             }
             if (CollectionUtils.isNotEmpty(addedDuplicates)) {
+                // На деле добавятся не только указанные дубликаты, но и дубликаты дубликатов
+                List<RegistryPerson> actualAddedDuplicates = new ArrayList<>(addedDuplicates);
+                // Логируем изменения других ФЛ
+                for (RegistryPerson addedDuplicate : addedDuplicates) {
+                    List<RegistryPerson> duplicatesOfAddedDuplicate = findAllDuplicates(addedDuplicate.getId());
+                    // У новых дубликатов логируем установку оригинала и удаление всех дубликатов
+                    PersonChangeLogBuilder logBuilder = new PersonChangeLogBuilder().originalSet(personDTO);
+                    logBuilder.duplicatesDeleted(duplicatesOfAddedDuplicate);
+                    for (RegistryPerson duplicateOfAddedDuplicate : duplicatesOfAddedDuplicate) {
+                        // У дубликатов новых дубликатов так же логируем установку оригинала
+                        String log = new PersonChangeLogBuilder().originalSet(personDTO).build();
+                        logBusinessService.logPersonEvent(duplicateOfAddedDuplicate.getId(), FormDataEvent.UPDATE_PERSON, log, userInfo);
+                    }
+                    logBusinessService.logPersonEvent(addedDuplicate.getId(), FormDataEvent.UPDATE_PERSON, logBuilder.build(), userInfo);
+                    actualAddedDuplicates.addAll(duplicatesOfAddedDuplicate);
+                }
                 refBookPersonDao.setDuplicates(getOldIds(addedDuplicates), personDTO.getRecordId());
-                changeLogBuilder.duplicatesSet(addedDuplicates);
+                changeLogBuilder.duplicatesSet(actualAddedDuplicates);
             }
             if (CollectionUtils.isNotEmpty(deletedDuplicates)) {
+                // Логируем изменения других ФЛ
+                for (RegistryPerson duplicate : deletedDuplicates) {
+                    // У старых дубликатов логируем удаление оригинала
+                    String log = new PersonChangeLogBuilder().originalDeleted(persistedPerson).build();
+                    logBusinessService.logPersonEvent(duplicate.getId(), FormDataEvent.UPDATE_PERSON, log, userInfo);
+                }
                 refBookPersonDao.deleteDuplicates(getOldIds(deletedDuplicates));
                 changeLogBuilder.duplicatesDeleted(deletedDuplicates);
             }

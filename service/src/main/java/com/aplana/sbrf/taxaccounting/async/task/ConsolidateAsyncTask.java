@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.async.task;
 
+import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
+import com.aplana.sbrf.taxaccounting.model.AsyncQueue;
 import com.aplana.sbrf.taxaccounting.model.AsyncTaskData;
 import com.aplana.sbrf.taxaccounting.model.AsyncTaskState;
 import com.aplana.sbrf.taxaccounting.model.AsyncTaskType;
@@ -34,6 +36,11 @@ public class ConsolidateAsyncTask extends XmlGeneratorAsyncTask {
     @Override
     protected AsyncTaskType getAsyncTaskType() {
         return AsyncTaskType.CONSOLIDATE;
+    }
+
+    @Override
+    public AsyncQueue checkTaskLimit(String taskDescription, TAUserInfo userInfo, Map<String, Object> params, Logger logger) throws AsyncTaskException {
+        return AsyncQueue.LONG;
     }
 
     @Override

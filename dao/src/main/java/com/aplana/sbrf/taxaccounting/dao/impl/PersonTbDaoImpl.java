@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 import com.aplana.sbrf.taxaccounting.dao.PersonTbDao;
 import com.aplana.sbrf.taxaccounting.dao.util.DBUtils;
 import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.DepartmentType;
 import com.aplana.sbrf.taxaccounting.model.refbook.PersonTb;
 import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPerson;
 import org.apache.commons.collections4.CollectionUtils;
@@ -61,6 +62,7 @@ public class PersonTbDaoImpl extends AbstractDao implements PersonTbDao {
             department.setId(rs.getInt("dep_id"));
             department.setName(rs.getString("dep_name"));
             department.setShortName(rs.getString("shortname"));
+            department.setType(DepartmentType.TERR_BANK);
 
             PersonTb result = new PersonTb();
 
