@@ -39,8 +39,12 @@
                         // Права на редактирование карточки.
                         $scope.userHasEditPermission = PermissionChecker.check($scope.person, APP_CONSTANTS.PERSON_PERMISSION.EDIT);
                         if (PermissionChecker.check($scope.person, APP_CONSTANTS.PERSON_PERMISSION.VIEW_VIP_DATA)) {
-                            $scope.personRegTabs.splice(1, 0, $scope.idDocTab);
-                            $scope.personRegTabs.push($scope.changelogTab);
+                            if ($scope.personRegTabs.indexOf($scope.idDocTab) === -1) {
+                                $scope.personRegTabs.splice(1, 0, $scope.idDocTab);
+                            }
+                            if ($scope.personRegTabs.indexOf($scope.changelogTab) === -1) {
+                                $scope.personRegTabs.push($scope.changelogTab);
+                            }
                         }
                         return value;
                     });
