@@ -148,7 +148,7 @@ public class CrossBlockingTest {
                 .as("Уже установленная блокировка %s должна не давать поставить блокировку %s", lockWasInDB, lockToSet)
                 .isNull();
         assertThat(logger.getEntries()).hasSize(1);
-        assertThat(logger.getEntries().get(0).getMessage()).startsWith("Данная форма заблокирована.");
+        assertThat(logger.getEntries().get(0).getMessage()).contains("заблокирована");
     }
 
     private void assertNoConflict(LockData result) {

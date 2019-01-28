@@ -226,9 +226,16 @@ public class DeclarationLockerImpl implements DeclarationLocker {
                     declarationDataByLockKeys.put(simpleDeclarationDataLockKeyGenerator.generateLockKey(declarationDataId, lockingTask), declarationDataId);
                 }
             } catch (Exception e) {
-                LOG.error(String.format("Выполнение операции невозможно по техническим причинам. Не удалось установить блокировку для выполнения операции \"%s\"", currentTask.getName()), e);
-                logger.error("Выполнение операции невозможно по техническим причинам. Не удалось установить блокировку для выполнения операции \"%s\"",
-                        currentTask.getName());
+                DeclarationData declarationData = declarationDataService.get(Collections.singletonList(declarationDataId)).get(0);
+                DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
+                final DeclarationType declarationType = declarationTemplate.getType();
+                final DeclarationFormKind declarationFormKind = declarationTemplate.getDeclarationFormKind();
+                e.printStackTrace();
+                logger.error("Не удалось установить блокировку на форму № %s, Вид: \"%s\", Тип: \"%s\". Причина: %s",
+                        declarationDataId,
+                        declarationType.getName(),
+                        declarationFormKind.getName(),
+                        e.toString());
                 return null;
             }
         }
@@ -239,40 +246,33 @@ public class DeclarationLockerImpl implements DeclarationLocker {
                 List<LockData> locks = lockDataDao.fetchAllByKeySet(declarationDataByLockKeys.keySet());
                 if (!locks.isEmpty()) {
                     for (LockData lock : locks) {
-                        try {
-                            DeclarationData declarationData = declarationDataService.get(Collections.singletonList(declarationDataByLockKeys.get(lock.getKey()))).get(0);
-                            DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
-                            final DeclarationType declarationType = declarationTemplate.getType();
-                            final DeclarationFormKind declarationFormKind = declarationTemplate.getDeclarationFormKind();
-                            if (declarationDataByCurrentLockKeys.keySet().contains(lock.getKey())) {
-                                if (lock.getUserId() == userinfo.getUser().getId()) {
-
-                                    logger.error("Данная форма заблокирована. Налоговая форма Вид: \"%s\", Тип: \"%s\" номер формы %s вами уже запущена операция %s",
-                                            declarationType.getName(),
-                                            declarationFormKind.getName(),
-                                            declarationData.getId(),
-                                            currentTask.getName());
-                                } else {
-                                    TAUser user = taUserService.getUser(lock.getUserId());
-                                    logger.error("Данная форма заблокирована. Налоговая форма  Вид: \"%s\", Тип: \"%s\" номер формы %s пользователем: %s (%s)  уже запущена операция %s",
-                                            declarationType.getName(),
-                                            declarationFormKind.getName(),
-                                            declarationData.getId(),
-                                            user.getName(),
-                                            user.getLogin(),
-                                            currentTask.getName());
-                                }
-                            } else {
-                                logger.error("Данная форма заблокирована. Налоговая форма Вид:\"%s\", Тип: \"%s\" номер формы %s уже запущены операции, блокирующие запуск операции %s",
+                        DeclarationData declarationData = declarationDataService.get(Collections.singletonList(declarationDataByLockKeys.get(lock.getKey()))).get(0);
+                        DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
+                        DeclarationType declarationType = declarationTemplate.getType();
+                        DeclarationFormKind declarationFormKind = declarationTemplate.getDeclarationFormKind();
+                        if (declarationDataByCurrentLockKeys.keySet().contains(lock.getKey())) {
+                            if (lock.getUserId() == userinfo.getUser().getId()) {
+                                logger.error("Форма № %s, Вид: \"%s\", Тип: \"%s\" заблокирована вами в рамках операции %s",
+                                        declarationData.getId(),
                                         declarationType.getName(),
                                         declarationFormKind.getName(),
+                                        currentTask.getName());
+                            } else {
+                                TAUser user = taUserService.getUser(lock.getUserId());
+                                logger.error("Форма № %s, Вид: \"%s\", Тип: \"%s\" заблокирована пользователем: %s (%s) в рамках операции %s",
                                         declarationData.getId(),
+                                        declarationType.getName(),
+                                        declarationFormKind.getName(),
+                                        user.getName(),
+                                        user.getLogin(),
                                         currentTask.getName());
                             }
-                        } catch (Exception e) {
-                            LOG.error(String.format("Выполнение операции невозможно по техническим причинам. Не удалось установить блокировку для выполнения операции \"%s\"", currentTask.getName()), e);
-                            logger.error("Выполнение операции невозможно по техническим причинам. Не удалось установить блокировку для выполнения операции \"%s\"",
-                                    currentTask.getName());
+                            return null;
+                        } else {
+                            logger.error("Форма № %s, Вид: \"%s\", Тип: \"%s\" заблокирована в рамках уже запущенных операций.",
+                                    declarationData.getId(),
+                                    declarationType.getName(),
+                                    declarationFormKind.getName());
                             return null;
                         }
                     }
