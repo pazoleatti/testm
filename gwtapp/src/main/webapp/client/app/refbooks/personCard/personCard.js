@@ -38,6 +38,10 @@
                     data.$promise.then(function (value) {
                         // Права на редактирование карточки.
                         $scope.userHasEditPermission = PermissionChecker.check($scope.person, APP_CONSTANTS.PERSON_PERMISSION.EDIT);
+                        if (PermissionChecker.check($scope.person, APP_CONSTANTS.PERSON_PERMISSION.VIEW_VIP_DATA)) {
+                            $scope.personRegTabs.splice(1, 0, $scope.idDocTab);
+                            $scope.personRegTabs.push($scope.changelogTab);
+                        }
                         return value;
                     });
                     return data;
@@ -332,7 +336,7 @@
                     active: false
                 };
 
-                $scope.personRegTabs = [$scope.personTab, $scope.idDocTab, $scope.inpTab, $scope.duplicatesTab, $scope.tbTab, $scope.changelogTab];
+                $scope.personRegTabs = [$scope.personTab, $scope.inpTab, $scope.duplicatesTab, $scope.tbTab];
 
                 /**
                  * @description Получение списка ДУЛ для ФЛ

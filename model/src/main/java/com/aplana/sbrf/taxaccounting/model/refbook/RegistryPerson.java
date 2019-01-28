@@ -13,7 +13,7 @@ import java.util.List;
  */
 @Getter
 @Setter
-public class RegistryPerson extends IdentityObject<Long> {
+public class RegistryPerson extends IdentityObject<Long> implements PermissivePerson {
 
     /**
      * Общий ид всех версий ФЛ. Не изменяется.
@@ -115,6 +115,10 @@ public class RegistryPerson extends IdentityObject<Long> {
      * Источник (АСНУ)
      */
     private RefBookAsnu source;
+    /**
+     * Права
+     */
+    private long permissions;
 
     private boolean vip;
 

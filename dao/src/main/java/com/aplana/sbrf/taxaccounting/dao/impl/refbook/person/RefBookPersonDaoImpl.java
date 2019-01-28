@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookPersonDao;
 import com.aplana.sbrf.taxaccounting.dao.util.DBUtils;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.SecuredEntity;
 import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
@@ -25,7 +26,14 @@ import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.stereotype.Repository;
 
 import java.sql.Types;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
@@ -37,6 +45,11 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
     RefBookDao refBookDao;
     @Autowired
     RefBookMapperFactory refBookMapperFactory;
+
+    @Override
+    public SecuredEntity getSecuredEntity(final long id) {
+        return fetchPersonVersion(id);
+    }
 
     @Override
     public void clearRnuNdflPerson(Long declarationDataId) {
