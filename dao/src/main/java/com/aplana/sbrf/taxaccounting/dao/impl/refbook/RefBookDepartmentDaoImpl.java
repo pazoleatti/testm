@@ -198,7 +198,7 @@ public class RefBookDepartmentDaoImpl extends AbstractDao implements RefBookDepa
     @Override
     public List<RefBookDepartment> findActiveByTypeExcludingPresented(DepartmentType type, List<Integer> presentedTbIdList) {
         String excludeClause = presentedTbIdList != null ? "and dep.id not in (:presentedTbList)" :"";
-        String query = REF_BOOK_DEPARTMENT_SELECT + " WHERE dep.type = :type AND dep.is_active = 1 " + excludeClause + " order by full_name";
+        String query = REF_BOOK_DEPARTMENT_SELECT + " WHERE dep.type = :type AND dep.is_active = 1 " + excludeClause + " order by dep.name";
 
         MapSqlParameterSource params = new MapSqlParameterSource("type", type.getCode());
         params.addValue("presentedTbList", presentedTbIdList);
