@@ -19,12 +19,10 @@ public class DeclarationDataReportingMultiModeAsyncTaskDescriptorImpl implements
 
     private DeclarationDataService declarationDataService;
     private DeclarationTemplateService declarationTemplateService;
-    private TAUserService taUserService;
 
     public DeclarationDataReportingMultiModeAsyncTaskDescriptorImpl(DeclarationDataService declarationDataService, DeclarationTemplateService declarationTemplateService, TAUserService taUserService) {
         this.declarationDataService = declarationDataService;
         this.declarationTemplateService = declarationTemplateService;
-        this.taUserService = taUserService;
     }
 
     @Override
@@ -35,9 +33,8 @@ public class DeclarationDataReportingMultiModeAsyncTaskDescriptorImpl implements
             DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
             declarationDataTypes.add(declarationTemplate.getType().getName());
         }
-        return String.format("%s Виды форм: %s  запущена пользователем %s",
+        return String.format("%s Виды форм: %s",
                 name,
-                StringUtils.join(declarationDataTypes, ", "),
-                taUserService.getCurrentUser().getName());
+                StringUtils.join(declarationDataTypes, ", "));
     }
 }

@@ -5,7 +5,6 @@ import com.aplana.sbrf.taxaccounting.service.component.operation.AsyncTaskDescri
 import com.aplana.sbrf.taxaccounting.service.component.operation.CreateReportsAsyncTaskDescriptor;
 import com.aplana.sbrf.taxaccounting.service.component.operation.DeclarationDataAsyncTaskDescriptor;
 import com.aplana.sbrf.taxaccounting.service.component.operation.DeclarationDataReportingMultiModeAsyncTaskDescriptor;
-import com.aplana.sbrf.taxaccounting.service.component.operation.DeclarationDataReportingSingleModeAsyncTaskDescriptor;
 import com.aplana.sbrf.taxaccounting.service.component.operation.ExportReportDescriptor;
 import com.aplana.sbrf.taxaccounting.service.component.operation.SpecReportByPersonDescriptor;
 import com.aplana.sbrf.taxaccounting.service.component.operation.TransportFileAsyncTaskDescriptor;
@@ -25,16 +24,14 @@ public class AsyncTaskDescriptorImpl implements AsyncTaskDescriptor {
     private ExportReportDescriptor exportReportDescriptor;
     private SpecReportByPersonDescriptor specReportByPersonDescriptor;
     private TransportFileAsyncTaskDescriptor transportFileAsyncTaskDescriptor;
-    private DeclarationDataReportingSingleModeAsyncTaskDescriptor declarationDataReportingSingleModeAsyncTaskDescriptor;
     private DeclarationDataReportingMultiModeAsyncTaskDescriptor declarationDataReportingMultiModeAsyncTaskDescriptor;
 
-    public AsyncTaskDescriptorImpl(DeclarationDataAsyncTaskDescriptor declarationDataAsyncTaskDescriptor, CreateReportsAsyncTaskDescriptor createReportsAsyncTaskDescriptor, ExportReportDescriptor exportReportDescriptor, SpecReportByPersonDescriptor specReportByPersonDescriptor, TransportFileAsyncTaskDescriptor transportFileAsyncTaskDescriptor, DeclarationDataReportingSingleModeAsyncTaskDescriptor declarationDataReportingSingleModeAsyncTaskDescriptor, DeclarationDataReportingMultiModeAsyncTaskDescriptor declarationDataReportingMultiModeAsyncTaskDescriptor) {
+    public AsyncTaskDescriptorImpl(DeclarationDataAsyncTaskDescriptor declarationDataAsyncTaskDescriptor, CreateReportsAsyncTaskDescriptor createReportsAsyncTaskDescriptor, ExportReportDescriptor exportReportDescriptor, SpecReportByPersonDescriptor specReportByPersonDescriptor, TransportFileAsyncTaskDescriptor transportFileAsyncTaskDescriptor, DeclarationDataReportingMultiModeAsyncTaskDescriptor declarationDataReportingMultiModeAsyncTaskDescriptor) {
         this.declarationDataAsyncTaskDescriptor = declarationDataAsyncTaskDescriptor;
         this.createReportsAsyncTaskDescriptor = createReportsAsyncTaskDescriptor;
         this.exportReportDescriptor = exportReportDescriptor;
         this.specReportByPersonDescriptor = specReportByPersonDescriptor;
         this.transportFileAsyncTaskDescriptor = transportFileAsyncTaskDescriptor;
-        this.declarationDataReportingSingleModeAsyncTaskDescriptor = declarationDataReportingSingleModeAsyncTaskDescriptor;
         this.declarationDataReportingMultiModeAsyncTaskDescriptor = declarationDataReportingMultiModeAsyncTaskDescriptor;
     }
 
@@ -113,17 +110,13 @@ public class AsyncTaskDescriptorImpl implements AsyncTaskDescriptor {
         else if (operationType.equals(OperationType.DECLARATION_2NDFL1) || operationType.equals(OperationType.DECLARATION_2NDFL2) || operationType.equals(OperationType.DECLARATION_6NDFL))
             return createReportsAsyncTaskDescriptor.createDescription(departmentReportPeriodId, declarationTypeId);
         else if (operationType.equals(OperationType.EXPORT_REPORTS))
-            return exportReportDescriptor.createDescription();
+            return declarationDataReportingMultiModeAsyncTaskDescriptor.createDescription(declarationDataIds, "Выгрузка отчетности");
         else if (operationType.equals(OperationType.DEPT_NOTICE_DEC))
             return specReportByPersonDescriptor.createDescription(declarationDataId, subreportParamValues, "Уведомление о задолженности");
         else if (operationType.equals(OperationType.LOAD_TRANSPORT_FILE))
             return transportFileAsyncTaskDescriptor.createDescription(fileName);
         else if (operationType.equals(OperationType.UPDATE_DOC_STATE))
-            if (declarationDataIds.size() == 1) {
-                return declarationDataReportingSingleModeAsyncTaskDescriptor.createDescription(declarationDataIds.get(0), "Изменение состояния ЭД");
-            } else {
-                return declarationDataReportingMultiModeAsyncTaskDescriptor.createDescription(declarationDataIds, "Изменение состояния ЭД");
-            }
+            return declarationDataReportingMultiModeAsyncTaskDescriptor.createDescription(declarationDataIds, "Изменение состояния ЭД");
         else {
             throw new IllegalArgumentException("Unknown operationType type!");
         }

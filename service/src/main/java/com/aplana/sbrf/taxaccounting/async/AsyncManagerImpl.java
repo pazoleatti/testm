@@ -248,6 +248,7 @@ public class AsyncManagerImpl implements AsyncManager {
                 AsyncTask task = null;
                 AsyncTaskData taskData = null;
                 List<String> keys = new ArrayList<>();
+                String description = asyncTaskDescriptor.createDescription(params, operationType);
                 try {
                     task = getAsyncTaskBean(operationType.getAsyncTaskTypeId());
                     if (task instanceof AsyncTaskExecutePossibilityVerifier) {
@@ -266,7 +267,6 @@ public class AsyncManagerImpl implements AsyncManager {
                             keys.add(lockData.getKey());
                         }
                         //Постановка новой задачи в очередь
-                        String description = asyncTaskDescriptor.createDescription(params, operationType);
                         AsyncQueue queue = task.defineTaskLimit(description, user, params);
 
                         // Сохранение в очереди асинхронных задач - запись в БД
@@ -285,9 +285,8 @@ public class AsyncManagerImpl implements AsyncManager {
                     if (e instanceof ServiceException && !isEmpty(e.getMessage())) {
                         logger.error(e.getMessage());
                     } else {
-                        logger.error("Выполнение операции %s невозможно по техническим причинам. Не удалось сформировать задачу для %s.",
-                                operationObjectDescription,
-                                operationType.getName());
+                        logger.error("Системная ошибка, невозможно создание асинхронной задачи %s",
+                                description);
                     }
                     if (taskData != null && !keys.isEmpty()) {
                         asyncTaskDao.delete(taskData.getId());

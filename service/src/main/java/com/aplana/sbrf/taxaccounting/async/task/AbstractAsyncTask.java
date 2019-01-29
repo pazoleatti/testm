@@ -139,8 +139,7 @@ public abstract class AbstractAsyncTask implements AsyncTask {
         }
         if (taskTypeData.getTaskLimit() != null && taskTypeData.getTaskLimit() != 0 && taskTypeData.getTaskLimit() < value) {
             throw new ServiceException(AsyncTask.CHECK_TASK,
-                    taskName,
-                    String.format(msg, taskTypeData.getTaskLimit()));
+                    taskName);
         } else if (taskTypeData.getShortQueueLimit() == null || taskTypeData.getShortQueueLimit() == 0 || taskTypeData.getShortQueueLimit() >= value) {
             return AsyncQueue.SHORT;
         }
@@ -267,13 +266,7 @@ public abstract class AbstractAsyncTask implements AsyncTask {
     @Override
     public AsyncQueue defineTaskLimit(String taskDescription, TAUserInfo userInfo, Map<String, Object> params) throws AsyncTaskException {
         Logger logger = new Logger();
-        AsyncQueue result = checkTaskLimit(taskDescription, userInfo, params, logger);
-        if (logger.containsLevel(LogLevel.ERROR)) {
-            throw new ServiceLoggerException(
-                    "Произошла ошибка при проверке ограничений асинхронной задачи \"" + taskDescription + "\"",
-                    logEntryService.save(logger.getEntries()));
-        }
-        return result;
+        return checkTaskLimit(taskDescription, userInfo, params, logger);
     }
 
     /**
