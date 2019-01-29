@@ -796,7 +796,7 @@ class Report6Ndfl extends AbstractScriptClass {
                     logger.error("Не удалось создать форму $declarationTemplate.name, за период ${formatPeriod(departmentReportPeriod)}, " +
                             "подразделение: $department.name, КПП: $declarationData.kpp, ОКТМО: $declarationData.oktmo. Заблокировано удаление ранее созданных отчетных форм:")
                     logger.entries.addAll(localLogger.entries)
-                    logger.error("Дождитесь завершения выполнения операций или выполните отмену операций вручную.")
+                    logger.error("Дождитесь завершения выполнения операций, заблокировавших формы или выполните их отмену вручную.")
                     return false
                 }
             } finally {
