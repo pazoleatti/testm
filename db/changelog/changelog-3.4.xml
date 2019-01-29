@@ -400,4 +400,11 @@
         </sql>
     </changeSet>
 
+	<!--https://jira.aplana.com/browse/SBRFNDFL-6393 - описание ограничения поправил-->
+	<changeSet id="3.4-dnovikov-24" author="dnovikov">
+		<sql>
+			update async_task_type set limit_kind = 'Количество ФЛ в НФ' where id = 32;
+		</sql>
+	</changeSet>
+
 </databaseChangeLog>
