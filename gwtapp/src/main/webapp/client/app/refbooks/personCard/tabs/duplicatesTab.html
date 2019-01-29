@@ -37,7 +37,7 @@
                         <span>{{::'refBook.fl.card.button.add' | translate}}</span>
                     </button>
                     <button type="button" class="btn btn-default"
-                            data-ng-disabled="mode !== 'EDIT'"
+                            data-ng-disabled="mode !== 'EDIT' || duplicatesGrid.value.length === 0"
                             data-ng-click="deleteDuplicate()">
                         <span>{{::'refBook.fl.card.button.delete' | translate}}</span>
                     </button>
