@@ -27,7 +27,7 @@
                 /**
                  * Создание отчета
                  */
-                $scope.create = function (force) {
+                $scope.create = function () {
                     if (!$scope.isDatesValid($scope.form.dateFrom, $scope.form.dateTo)) {
                         $scope.createNdfl2_6DataReportFrom["form_datefrom"].$setValidity('versionDate', false);
                     } else {
@@ -43,31 +43,10 @@
                                 kppList: $scope.form.kppSelectList ? $scope.form.kppSelectList.map(function (a) {
                                     return a.kpp;
                                 }) : undefined
-                            },
-                            params: {
-                                force: !!force
                             }
                         }).success(function (response) {
-                            if (response.uuid && response.uuid !== null) {
-                                // задача запустилась
-                                $logPanel.open('log-panel-container', response.uuid);
-                                $modalInstance.close(true);
-                            } else {
-                                if (response.status === APP_CONSTANTS.CREATE_ASYNC_TASK_STATUS.NOT_EXIST_XML) {
-                                    $dialogs.messageDialog({
-                                        content: $filter('translate')('title.noCalculationPerformed')
-                                    });
-                                } else if (response.status === APP_CONSTANTS.CREATE_ASYNC_TASK_STATUS.LOCKED) {
-                                    $dialogs.confirmDialog({
-                                        title: $filter('translate')('title.confirm'),
-                                        content: response.restartMsg,
-                                        okBtnCaption: $filter('translate')('common.button.yes'),
-                                        cancelBtnCaption: $filter('translate')('common.button.no'),
-                                        okBtnClick: function () {
-                                            $scope.create(true);
-                                        }
-                                    });
-                                }
+                            if (response) {
+                                $logPanel.open('log-panel-container', response);
                             }
                         });
                     }
