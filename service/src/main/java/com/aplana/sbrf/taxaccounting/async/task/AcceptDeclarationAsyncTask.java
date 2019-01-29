@@ -59,6 +59,11 @@ public class AcceptDeclarationAsyncTask extends AbstractDeclarationAsyncTask {
     }
 
     @Override
+    protected String getTaskLimitMsg(Long value, Map<String, Object> params) {
+        return "форма содержит больше ФЛ, чем допустимо. Обратитесь к администратору системы.";
+    }
+
+    @Override
     protected String getErrorMsg(AsyncTaskData taskData, boolean unexpected) {
         String message = getMessage(taskData, false);
         Exception e = (Exception) taskData.getParams().get("exceptionThrown");

@@ -23,9 +23,6 @@ public class CreateExcelTemplateAsyncTask extends AbstractDeclarationAsyncTask {
     private DeclarationDataService declarationDataService;
 
     @Autowired
-    private ReportService reportService;
-
-    @Autowired
     private AsyncManager asyncManager;
 
     @Override
@@ -59,6 +56,11 @@ public class CreateExcelTemplateAsyncTask extends AbstractDeclarationAsyncTask {
         }
 
         return new BusinessLogicResult(true, null);
+    }
+
+    @Override
+    protected String getTaskLimitMsg(Long value, Map<String, Object> params) {
+        return "форма содержит больше ФЛ, чем допустимо. Обратитесь к администратору системы.";
     }
 
     @Override

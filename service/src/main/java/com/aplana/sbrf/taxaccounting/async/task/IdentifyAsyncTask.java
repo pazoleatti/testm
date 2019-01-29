@@ -57,6 +57,11 @@ public class IdentifyAsyncTask extends XmlGeneratorAsyncTask {
     }
 
     @Override
+    protected String getTaskLimitMsg(Long value, Map<String, Object> params) {
+        return "форма содержит больше ФЛ, чем допустимо. Обратитесь к администратору системы.";
+    }
+
+    @Override
     protected String getNotificationMsg(AsyncTaskData taskData) {
         long declarationDataId = (Long) taskData.getParams().get("declarationDataId");
         return String.format("Операция \"Идентификация ФЛ\" выполнена %s.",

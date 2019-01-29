@@ -62,6 +62,11 @@ public class ConsolidateAsyncTask extends XmlGeneratorAsyncTask {
     }
 
     @Override
+    protected String getTaskLimitMsg(Long value, Map<String, Object> params) {
+        return "форма содержит больше ФЛ, чем допустимо. Обратитесь к администратору системы.";
+    }
+
+    @Override
     protected String getErrorMsg(AsyncTaskData taskData, boolean unexpected) {
         long declarationDataId = (Long) taskData.getParams().get("declarationDataId");
         TAUserInfo userInfo = new TAUserInfo();

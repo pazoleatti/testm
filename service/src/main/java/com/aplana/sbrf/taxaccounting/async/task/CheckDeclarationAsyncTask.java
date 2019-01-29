@@ -30,11 +30,6 @@ public class CheckDeclarationAsyncTask extends AbstractDeclarationAsyncTask {
     @Autowired
     private AsyncManager asyncManager;
 
-    @Autowired
-    private LockDataService lockDataService;
-
-
-
     @Override
     protected AsyncTaskType getAsyncTaskType() {
         return AsyncTaskType.CHECK_DEC;
@@ -60,6 +55,11 @@ public class CheckDeclarationAsyncTask extends AbstractDeclarationAsyncTask {
             return new BusinessLogicResult(false, null);
         }
         return new BusinessLogicResult(true, null);
+    }
+
+    @Override
+    protected String getTaskLimitMsg(Long value, Map<String, Object> params) {
+        return "форма содержит больше ФЛ, чем допустимо. Обратитесь к администратору системы.";
     }
 
     @Override
