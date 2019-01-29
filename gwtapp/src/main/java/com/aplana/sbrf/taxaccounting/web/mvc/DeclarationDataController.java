@@ -312,7 +312,7 @@ public class DeclarationDataController {
         }
         TAUserInfo userInfo = securityService.currentUserInfo();
         try (InputStream inputStream = file.getInputStream()) {
-            return declarationService.createTaskToImportExcel(declarationDataId, file.getOriginalFilename(), inputStream, userInfo);
+            return declarationService.createTaskToImportExcel(declarationDataId, file.getOriginalFilename(), inputStream, file.getSize(), userInfo);
         }
     }
 

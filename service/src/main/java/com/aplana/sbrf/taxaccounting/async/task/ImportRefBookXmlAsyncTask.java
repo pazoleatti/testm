@@ -69,7 +69,7 @@ public class ImportRefBookXmlAsyncTask extends AbstractAsyncTask {
 
     @Override
     protected AsyncQueue checkTaskLimit(String taskDescription, TAUserInfo user, Map<String, Object> params, Logger logger) throws AsyncTaskException {
-        long blobLength = blobDataService.getLength((String) params.get("blobDataId"));
+        long blobLength = params.containsKey("fileSize") ? (Long) params.get("fileSize") : 0;
         long fileSize = (long) Math.ceil(blobLength / 1024.);
         String msg = String.format("размер файла (%s Кбайт) превышает максимально допустимый (%s Кбайт).", fileSize, "%s");
         return checkTask(fileSize, taskDescription, msg);

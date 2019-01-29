@@ -61,7 +61,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
 
     @Override
     @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).VIEW_TAXES_SERVICE)")
-    public ActionResult uploadFile(TAUserInfo userInfo, String fileName, InputStream inputStream) {
+    public ActionResult uploadFile(TAUserInfo userInfo, String fileName, InputStream inputStream, long fileSize) {
         LOG.info(String.format("UploadTransportDataServiceImpl.uploadFile. fileName: %s", fileName));
         Logger logger = new Logger();
 
@@ -92,7 +92,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
                             ByteArrayOutputStream baos = new ByteArrayOutputStream();
                             IOUtils.copy(zis, baos);
                             String uuid = blobDataService.create(new ByteArrayInputStream(baos.toByteArray()), entry.getName().substring(entry.getName().lastIndexOf("/") + 1));
-                            processFileByFormat(userInfo, fileName, entry.getName().substring(entry.getName().lastIndexOf("/") + 1 ), uuid, logger);
+                            processFileByFormat(userInfo, fileName, entry.getName().substring(entry.getName().lastIndexOf("/") + 1), uuid, fileSize, logger);
                         }
                     }
                 }
@@ -106,7 +106,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
         } else {
             // Если не архив - обрабатываем файл в зависимости от формата
             String uuid = blobDataService.create(inputStream, fileName);
-            processFileByFormat(userInfo, null, fileName, uuid, logger);
+            processFileByFormat(userInfo, null, fileName, uuid, fileSize, logger);
         }
 
         // Сохраняем и выводим результат обработки всех файлов
@@ -142,17 +142,18 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
      * @param archiveName  название входящего архива с файлами (может быть null)
      * @param fileName     название файла
      * @param fileBlobUuid идентификатор временного блоба, в который сохранен файл
+     * @param fileSize     размер файла (байт)
      * @param logger       логгер
      */
-    private void processFileByFormat(TAUserInfo userInfo, String archiveName, String fileName, String fileBlobUuid, Logger logger) {
+    private void processFileByFormat(TAUserInfo userInfo, String archiveName, String fileName, String fileBlobUuid, long fileSize, Logger logger) {
         if (fileName.startsWith("FL") && "xml".equals(FilenameUtils.getExtension(fileName))) {
             // Файл первичной загрузки ФЛ
-            createTaskToImportXmlFL(userInfo, archiveName, fileName, fileBlobUuid, logger);
+            createTaskToImportXmlFL(userInfo, archiveName, fileName, fileBlobUuid, fileSize, logger);
         } else {
             // ТФ РНУ НДФЛ, файла ответа 6-НДФЛ, файла ответа 2-НДФЛ
             TransportFileType fileType = getFileType(fileName);
             if (fileType != null) {
-                createTaskToImportTF(userInfo, fileType, archiveName, fileName, fileBlobUuid, logger);
+                createTaskToImportTF(userInfo, fileType, archiveName, fileName, fileBlobUuid, fileSize, logger);
             } else {
                 logger.error("Некорректное имя или формат файла \"%s\"", fileName);
             }
@@ -166,10 +167,11 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
      * @param archiveName  название входящего архива с файлами (может быть null)
      * @param fileName     название файла
      * @param fileBlobUuid идентификатор временного блоба, в который сохранен файл
+     * @param fileSize     размер файла (байт)
      * @param logger       логгер
      */
     @PreAuthorize("hasRole('N_ROLE_CONTROL_UNP')")
-    private void createTaskToImportXmlFL(TAUserInfo userInfo, String archiveName, String fileName, String fileBlobUuid, Logger logger) {
+    private void createTaskToImportXmlFL(TAUserInfo userInfo, String archiveName, String fileName, String fileBlobUuid, long fileSize, Logger logger) {
         LOG.info(String.format("UploadTransportDataServiceImpl.createTaskToImportXmlFL. userInfo: %s; fileName: %s; fileBlobUuid: %s; ",
                 userInfo, fileName, fileBlobUuid));
         long refBookId = RefBook.Id.PERSON.getId();
@@ -195,6 +197,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
                         params.put("refBookId", refBookId);
                         params.put("blobDataId", fileBlobUuid);
                         params.put("refBookName", refBook.getName());
+                        params.put("fileSize", fileSize);
                         asyncManager.executeTask(asyncLockKey, AsyncTaskType.IMPORT_REF_BOOK_XML, userInfo, params);
                         logger.info(String.format(CREATE_TASK, fileName, archiveName != null ? String.format(ARCHIVE_INFO, archiveName) : ""));
                     } catch (Exception e) {
@@ -216,10 +219,11 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
      * @param archiveName  название входящего архива с файлами (может быть null)
      * @param fileName     название файла
      * @param fileBlobUuid идентификатор временного блоба, в который сохранен файл
+     * @param fileSize
      * @param logger       логгер
      */
     @PreAuthorize("hasAnyRole('N_ROLE_OPER', 'N_ROLE_CONTROL_NS', 'N_ROLE_CONTROL_UNP')")
-    private void createTaskToImportTF(TAUserInfo userInfo, TransportFileType fileType, String archiveName, String fileName, String fileBlobUuid, Logger logger) {
+    private void createTaskToImportTF(TAUserInfo userInfo, TransportFileType fileType, String archiveName, String fileName, String fileBlobUuid, long fileSize, Logger logger) {
         LOG.info(String.format("UploadTransportDataServiceImpl.createTaskToImportTF. fileName: %s; fileBlobUuid: %s", fileName, fileBlobUuid));
         int userId = userInfo.getUser().getId();
         String key = LockData.LockObjects.LOAD_TRANSPORT_DATA.name() + "_" + UUID.randomUUID().toString().toLowerCase();
@@ -229,6 +233,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
                 Map<String, Object> params = new HashMap<String, Object>();
                 params.put("blobDataId", fileBlobUuid);
                 params.put("fileType", fileType);
+                params.put("fileSize", fileSize);
                 try {
                     asyncManager.executeTask(key, AsyncTaskType.LOAD_TRANSPORT_FILE, userInfo, params);
                     logger.info(String.format(CREATE_TASK, fileName, archiveName != null ? String.format(ARCHIVE_INFO, archiveName) : ""));
