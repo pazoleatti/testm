@@ -38,6 +38,11 @@ public class UpdatePersonsDataAsyncTask extends AbstractDeclarationAsyncTask {
     }
 
     @Override
+    protected String getTaskLimitMsg(Long value, Map<String, Object> params) {
+        return "форма содержит больше ФЛ, чем допустимо. Обратитесь к администратору системы.";
+    }
+
+    @Override
     public String createDescription(TAUserInfo userInfo, Map<String, Object> params) {
         long declarationDataId = (Long) params.get("declarationDataId");
         return declarationDataService.getDeclarationFullName(declarationDataId, getDeclarationDataReportType(userInfo, params));

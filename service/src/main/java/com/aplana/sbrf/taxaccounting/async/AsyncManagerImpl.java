@@ -56,6 +56,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import static com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils.isEmpty;
+
 /**
  * Реализация менеджера асинхронных задач на Spring
  * При добавлении асинхронной задачи, сохраняет ее параметры в БД в сериализованном виде, а выполнением задач занимается специализированный класс {@link AsyncTaskThreadContainer}
@@ -280,9 +282,13 @@ public class AsyncManagerImpl implements AsyncManager {
                     }
                 } catch (Exception e) {
                     LOG.error("Async task creation has been failed!", e);
-                    logger.error("Выполнение операции %s невозможно по техническим причинам. Не удалось сформировать задачу для %s.",
-                            operationObjectDescription,
-                            operationType.getName());
+                    if (e instanceof ServiceException && !isEmpty(e.getMessage())) {
+                        logger.error(e.getMessage());
+                    } else {
+                        logger.error("Выполнение операции %s невозможно по техническим причинам. Не удалось сформировать задачу для %s.",
+                                operationObjectDescription,
+                                operationType.getName());
+                    }
                     if (taskData != null && !keys.isEmpty()) {
                         asyncTaskDao.delete(taskData.getId());
                         lockDataService.unlockAllByTask(taskData.getId());

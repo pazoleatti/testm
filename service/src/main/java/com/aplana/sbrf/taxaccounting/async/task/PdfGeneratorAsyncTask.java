@@ -51,6 +51,11 @@ public class PdfGeneratorAsyncTask extends AbstractDeclarationAsyncTask {
     }
 
     @Override
+    protected String getTaskLimitMsg(Long value, Map<String, Object> params) {
+        return "форма содержит больше ФЛ, чем допустимо. Обратитесь к администратору системы.";
+    }
+
+    @Override
     protected String getErrorMsg(AsyncTaskData taskData, boolean unexpected) {
         return getMessage(taskData, false);
     }
