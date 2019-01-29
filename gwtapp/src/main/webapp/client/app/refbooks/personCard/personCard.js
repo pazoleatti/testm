@@ -71,17 +71,18 @@
                         ],
                         colModel: [
                             {name: 'id', width: 100, key: true, hidden: true},
-                            {name: 'docType', width: 380, formatter: $filter('codeNameFormatter')},
                             {
-                                name: 'documentNumber',
-                                width: 240,
-                                sortable: false
-                            }
+                                name: 'docType',
+                                index: 'docType.code',
+                                width: 380,
+                                formatter: $filter('codeNameFormatter')
+                            },
+                            {name: 'documentNumber', width: 240}
                         ],
                         rowNum: APP_CONSTANTS.COMMON.PAGINATION[0],
                         rowList: APP_CONSTANTS.COMMON.PAGINATION,
                         viewrecords: true,
-                        sortname: 'id',
+                        sortname: 'docType.code',
                         sortorder: "asc",
                         hidegrid: false,
                         multiselect: false
@@ -103,17 +104,13 @@
                         ],
                         colModel: [
                             {name: 'id', width: 100, key: true, hidden: true},
-                            {name: 'asnu', width: 380, formatter: $filter('codeNameFormatter')},
-                            {
-                                name: 'inp',
-                                width: 240,
-                                sortable: false
-                            }
+                            {name: 'asnu', index: 'asnu.code', width: 380, formatter: $filter('codeNameFormatter')},
+                            {name: 'inp', width: 240}
                         ],
                         rowNum: APP_CONSTANTS.COMMON.PAGINATION[0],
                         rowList: APP_CONSTANTS.COMMON.PAGINATION,
                         viewrecords: true,
-                        sortname: 'id',
+                        sortname: 'asnu.code',
                         sortorder: "asc",
                         hidegrid: false,
                         multiselect: false
@@ -142,44 +139,35 @@
                         ],
                         colModel: [
                             {name: 'id', index: 'id', width: 100, key: true, hidden: true},
-                            {name: 'oldId', index: 'oldId', width: 100, sortable: true},
+                            {name: 'oldId', index: 'oldId', width: 100},
+                            {name: 'lastName', index: 'lastName', width: 120, formatter: personLinkFormatter},
+                            {name: 'firstName', index: 'firstName', width: 120},
+                            {name: 'middleName', index: 'middleName', width: 120},
+                            {name: 'birthDate', index: 'birthDate', width: 80, formatter: $filter('dateFormatter')},
                             {
-                                name: 'lastName',
-                                index: 'lastName',
+                                name: 'reportDoc',
+                                index: 'reportDoc.value.docType.code',
+                                width: 300,
+                                formatter: $filter('docTypeFormatter')
+                            },
+                            {
+                                name: 'reportDoc',
+                                index: 'reportDoc.value.documentNumber',
                                 width: 120,
-                                sortable: true,
-                                formatter: personLinkFormatter
+                                formatter: $filter('docNumberFormatter')
                             },
-                            {name: 'firstName', index: 'firstName', width: 120, sortable: true},
-                            {name: 'middleName', index: 'middleName', width: 120, sortable: true},
-                            {
-                                name: 'birthDate',
-                                index: 'birthDate',
-                                width: 80,
-                                formatter: $filter('dateFormatter'),
-                                sortable: true
-                            },
-                            {name: 'reportDoc', width: 300, sortable: true, formatter: $filter('docTypeFormatter')},
-                            {name: 'reportDoc', width: 120, sortable: true, formatter: $filter('docNumberFormatter')},
                             {
                                 name: 'inn',
-                                index: 'inn',
+                                index: 'inn.value',
                                 width: 120,
-                                sortable: true,
                                 formatter: $filter('simplePermissiveFormatter')
                             },
-                            {
-                                name: 'snils',
-                                index: 'snils',
-                                width: 120,
-                                sortable: true,
-                                formatter: $filter('simplePermissiveFormatter')
-                            }
+                            {name: 'snils', index: 'snils.value', width: 120, formatter: $filter('simplePermissiveFormatter')}
                         ],
                         rowNum: APP_CONSTANTS.COMMON.PAGINATION[0],
                         rowList: APP_CONSTANTS.COMMON.PAGINATION,
                         viewrecords: true,
-                        sortname: 'id',
+                        sortname: 'lastName',
                         sortorder: "asc",
                         hidegrid: false
                     }
@@ -209,17 +197,12 @@
                         colModel: [
                             {name: 'id', width: 100, key: true, hidden: true},
                             {name: 'tbDepartment.name', width: 471},
-                            {
-                                name: 'importDate',
-                                width: 150,
-                                formatter: $filter('dateFormatter'),
-                                sortable: false
-                            }
+                            {name: 'importDate', width: 150, formatter: $filter('dateFormatter')}
                         ],
                         rowNum: APP_CONSTANTS.COMMON.PAGINATION[0],
                         rowList: APP_CONSTANTS.COMMON.PAGINATION,
                         viewrecords: true,
-                        sortname: 'id',
+                        sortname: 'tbDepartment.name',
                         sortorder: "asc",
                         hidegrid: false,
                         multiselect: false
@@ -263,7 +246,7 @@
                                 classes: 'grid-cell-white-space'
                             }
                         ],
-                        rowNum: APP_CONSTANTS.COMMON.PAGINATION[0],
+                        rowNum: 20,
                         rowList: APP_CONSTANTS.COMMON.PAGINATION,
                         viewrecords: true,
                         sortname: 'log_date',
@@ -421,7 +404,7 @@
                     if ($scope.inpListGrid.ctrl && $scope.inpListGrid.ctrl.refreshGridData && $scope.inpTab.active) $scope.inpListGrid.ctrl.refreshGridData($scope.person.personIdentityList);
                     if ($scope.idDocsGrid.ctrl && $scope.idDocsGrid.ctrl.refreshGridData && $scope.idDocTab.active) $scope.idDocsGrid.ctrl.refreshGridData($scope.person.documents.value);
                     if ($scope.duplicatesGrid.ctrl && $scope.duplicatesGrid.ctrl.refreshGridData && $scope.duplicatesTab.active) $scope.duplicatesGrid.ctrl.refreshGridData($scope.person.duplicates);
-                    if ($scope.tbListGrid.ctrl && $scope.tbListGrid.ctrl.refreshGridData  && $scope.tbTab.active) $scope.tbListGrid.ctrl.refreshGridData($scope.person.personTbList);
+                    if ($scope.tbListGrid.ctrl && $scope.tbListGrid.ctrl.refreshGridData && $scope.tbTab.active) $scope.tbListGrid.ctrl.refreshGridData($scope.person.personTbList);
                     $scope.mode = APP_CONSTANTS.MODE.VIEW;
                 };
 
