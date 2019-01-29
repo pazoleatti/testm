@@ -2669,7 +2669,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     @Transactional
     @PreAuthorize("hasPermission(#declarationDataId, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).IMPORT_EXCEL)")
-    public ActionResult createTaskToImportExcel(final long declarationDataId, String fileName, InputStream inputStream, TAUserInfo userInfo) {
+    public ActionResult createTaskToImportExcel(final long declarationDataId, String fileName, InputStream inputStream, long fileSize, TAUserInfo userInfo) {
         LOG.info(String.format("DeclarationDataServiceImpl.createTaskToImportExcel by %s. declarationDataId: %s; fileName: %s",
                 userInfo, declarationDataId, fileName));
         final ActionResult result = new ActionResult();
@@ -2680,6 +2680,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         params.put("declarationDataId", declarationDataId);
         params.put("blobDataId", uuid);
         params.put("fileName", fileName);
+        params.put("fileSize", fileSize);
         asyncManager.createTask(OperationType.IMPORT_DECLARATION_EXCEL, getStandardDeclarationDescription(declarationDataId), userInfo, params, logger);
         result.setUuid(logEntryService.save(logger.getEntries()));
         return result;

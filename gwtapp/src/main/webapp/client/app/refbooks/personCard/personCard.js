@@ -147,7 +147,7 @@
                             {
                                 name: 'reportDoc',
                                 index: 'reportDoc.value.docType.code',
-                                width: 300,
+                                width: 250,
                                 formatter: $filter('docTypeFormatter')
                             },
                             {
@@ -162,10 +162,16 @@
                                 width: 120,
                                 formatter: $filter('simplePermissiveFormatter')
                             },
-                            {name: 'snils', index: 'snils.value', width: 120, formatter: $filter('simplePermissiveFormatter')}
+                            {
+                                name: 'snils',
+                                index: 'snils.value',
+                                width: 120,
+                                formatter: $filter('simplePermissiveFormatter')
+                            }
                         ],
                         rowNum: APP_CONSTANTS.COMMON.PAGINATION[0],
                         rowList: APP_CONSTANTS.COMMON.PAGINATION,
+                        multiselect: true,
                         viewrecords: true,
                         sortname: 'lastName',
                         sortorder: "asc",
@@ -616,15 +622,18 @@
                         okBtnCaption: $filter('translate')('common.button.yes'),
                         cancelBtnCaption: $filter('translate')('common.button.no'),
                         okBtnClick: function () {
-                            var indexOfDeleting = -1;
-                            for (var i = 0; i < $scope.personParam.duplicates.length; i++) {
-                                if ($scope.personParam.duplicates[i].id === $scope.duplicatesGrid.value[0].id) {
-                                    indexOfDeleting = i;
-                                    break;
+                            for (var vi = 0; vi < $scope.duplicatesGrid.value.length; vi++) {
+                                var indexOfDeleting = -1;
+                                var selectedDuplicate = $scope.duplicatesGrid.value[vi];
+                                for (var i = 0; i < $scope.personParam.duplicates.length; i++) {
+                                    if ($scope.personParam.duplicates[i].id === selectedDuplicate.id) {
+                                        indexOfDeleting = i;
+                                        break;
+                                    }
                                 }
-                            }
-                            if (indexOfDeleting > -1) {
-                                $scope.personParam.duplicates.splice(indexOfDeleting, 1);
+                                if (indexOfDeleting > -1) {
+                                    $scope.personParam.duplicates.splice(indexOfDeleting, 1);
+                                }
                             }
                             $scope.duplicatesGrid.ctrl.refreshGridData($scope.personParam.duplicates);
                         }

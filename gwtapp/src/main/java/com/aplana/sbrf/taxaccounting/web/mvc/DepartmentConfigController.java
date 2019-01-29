@@ -177,6 +177,7 @@ public class DepartmentConfigController {
         try (InputStream inputStream = file.getInputStream()) {
             action.setInputStream(inputStream);
             action.setFileName(file.getOriginalFilename());
+            action.setFileSize(file.getSize());
             return departmentConfigService.createTaskToImportExcel(action, userInfo);
         }
     }

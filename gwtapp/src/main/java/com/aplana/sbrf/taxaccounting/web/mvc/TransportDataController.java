@@ -41,7 +41,7 @@ public class TransportDataController {
             throw new ServiceException("Не указан файл для загрузки!");
         }
         return uploadTransportDataService.uploadFile(securityService.currentUserInfo(),
-                file.getOriginalFilename(), file.getInputStream());
+                file.getOriginalFilename(), file.getInputStream(), file.getSize());
     }
 
     /**

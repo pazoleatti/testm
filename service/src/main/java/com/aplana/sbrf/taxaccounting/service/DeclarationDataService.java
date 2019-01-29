@@ -620,10 +620,11 @@ public interface DeclarationDataService {
      * @param declarationDataId ид формы
      * @param fileName          имя загружаемого файла
      * @param inputStream       данные файла
+     * @param fileSize          размер файла
      * @param userInfo          информация о пользователе
      * @return результат создания задачи
      */
-    ActionResult createTaskToImportExcel(long declarationDataId, String fileName, InputStream inputStream, TAUserInfo userInfo);
+    ActionResult createTaskToImportExcel(long declarationDataId, String fileName, InputStream inputStream, long fileSize, TAUserInfo userInfo);
 
     /**
      * Выполняет загрузку данных из Excel-файла в форму

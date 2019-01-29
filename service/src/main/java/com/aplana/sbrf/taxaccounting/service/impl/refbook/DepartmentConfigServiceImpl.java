@@ -381,6 +381,7 @@ public class DepartmentConfigServiceImpl implements DepartmentConfigService {
             params.put("departmentId", fileNameDepartmentId);
             params.put("blobDataId", uuid);
             params.put("fileName", action.getFileName());
+            params.put("fileSize", action.getFileSize());
 
             String keyTask = "IMPORT_DEPARTMENT_CONFIGS_" + fileNameDepartmentId;
             asyncManager.executeTask(keyTask, taskType, userInfo, params, logger, false, new AbstractStartupAsyncTaskHandler() {

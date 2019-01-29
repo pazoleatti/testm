@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.TransportFileType;
-import com.aplana.sbrf.taxaccounting.model.UploadResult;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 
@@ -29,8 +28,9 @@ public interface UploadTransportDataService {
      * @param userInfo    пользователь
      * @param fileName    имя файла
      * @param inputStream содержимое файла
+     * @param fileSize    размер файла (байт)
      */
-    ActionResult uploadFile(TAUserInfo userInfo, String fileName, InputStream inputStream) throws IOException;
+    ActionResult uploadFile(TAUserInfo userInfo, String fileName, InputStream inputStream, long fileSize) throws IOException;
 
     /**
      * Загрузка всех файлов из каталога загрузки
