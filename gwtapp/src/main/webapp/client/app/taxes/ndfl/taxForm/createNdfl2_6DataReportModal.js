@@ -48,6 +48,7 @@
                             if (response) {
                                 $logPanel.open('log-panel-container', response);
                             }
+                            $modalInstance.dismiss();
                         });
                     }
                 };

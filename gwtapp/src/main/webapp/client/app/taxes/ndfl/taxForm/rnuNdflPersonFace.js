@@ -108,7 +108,6 @@
                             ndflPersonId: $scope.rnuNdflGrid.value[0].id
                         }
                     }).then(function (response) {
-                        console.log(response)
                         if (response.data) {
                             $logPanel.open('log-panel-container', response.data);
                         }
