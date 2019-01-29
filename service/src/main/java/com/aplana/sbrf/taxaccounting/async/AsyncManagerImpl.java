@@ -336,8 +336,9 @@ public class AsyncManagerImpl implements AsyncManager {
     @Override
     public void interruptTask(final long taskId, final TAUserInfo userInfo, final TaskInterruptCause cause) {
         final AsyncTaskData task = asyncTaskDao.findById(taskId);
-        TAUser currentUser = userInfo.getUser();
+        if (task == null) return;
 
+        TAUser currentUser = userInfo.getUser();
         if (userHasPrivilegesToInterruptTask(currentUser, task)) {
             interruptTask(task, userInfo, cause);
         } else {
@@ -476,7 +477,7 @@ public class AsyncManagerImpl implements AsyncManager {
                                     asyncTaskDao.delete(taskData.getId());
                                 }
                             } catch (Exception e) {
-                                throw new ServiceException("Не удалось прервать задачу", e);
+                                throw new ServiceException("Удаление асинхронной задачи не может быть выполнено. Причина: \"" + e.getMessage() + "\"", e);
                             }
                             return null;
                         }
