@@ -299,3 +299,22 @@ EXCEPTION
 end;
 /
 COMMIT;
+
+--https://jira.aplana.com/browse/SBRFNDFL-6393 - описание ограничения поправил
+declare
+	v_task_name varchar2(128):='insert_update_delete block #15 - update async_task_type';  
+begin	
+	
+	update async_task_type set limit_kind = 'Количество ФЛ в НФ' where id = 32;
+
+	CASE SQL%ROWCOUNT 
+	WHEN 0 THEN dbms_output.put_line(v_task_name||'[WARNING]:'||' No changes was done');
+	ELSE dbms_output.put_line(v_task_name||'[INFO]:'||' Success');
+	END CASE; 
+EXCEPTION
+  when OTHERS then
+    dbms_output.put_line(v_task_name||'[FATAL]: '||sqlerrm);
+        ROLLBACK;
+end;
+/
+COMMIT;

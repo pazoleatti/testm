@@ -434,3 +434,28 @@ EXCEPTION
 END;
 /
 COMMIT;
+
+--https://jira.aplana.com/browse/SBRFNDFL-5489 изменения истории изменений
+DECLARE
+	v_run_condition number(1);
+	v_task_name varchar2(128):='alter_tables block #21 - log_business modify event_id';  
+BEGIN
+	select count(*) into v_run_condition from user_tab_columns where lower(table_name)='log_business' and lower(column_name)='event_id';
+	IF v_run_condition=1 THEN
+		select count(*) into v_run_condition from user_tab_columns where lower(table_name)='log_business' and lower(column_name)='event_id' and data_type = 'NUMBER' and data_precision = 3;
+		IF v_run_condition=1 THEN
+			EXECUTE IMMEDIATE 'alter table log_business modify event_id NUMBER(9,0)';
+			dbms_output.put_line(v_task_name||'[INFO]:'||' Success');
+		ELSE
+			dbms_output.put_line(v_task_name||'[WARNING]:'||' changes had already been implemented');
+		END IF;
+	ELSE
+		dbms_output.put_line(v_task_name||'[WARNING]:'||' column not found');
+	END IF;
+	
+EXCEPTION
+	when OTHERS then
+		dbms_output.put_line(v_task_name||'[FATAL]:'||sqlerrm);	
+END;
+/
+COMMIT;
