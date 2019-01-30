@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+	<changeSet id="3.5-dnovikov-1" author="dnovikov" runAlways="true">
+		<update tableName="DECLARATION_TEMPLATE">
+			<column name="CREATE_SCRIPT" valueClobFile="templates-3.5/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl.groovy"/>
+			<where>declaration_type_id = 100</where>
+		</update>
+		<update tableName="DECLARATION_TEMPLATE">
+			<column name="CREATE_SCRIPT" valueClobFile="templates-3.5/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl.groovy"/>
+			<where>declaration_type_id = 101</where>
+		</update>
+	</changeSet>
+
+</databaseChangeLog>
