@@ -275,11 +275,13 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
 
     @Override
     public void unlockMultipleTasks(Collection<String> keys) {
-        String sql = "delete from lock_data where key = :key";
-        List<Map<String, Object>> batchValues = new ArrayList<>(keys.size());
-        for (String key : keys) {
-            batchValues.add(new MapSqlParameterSource("key", key).getValues());
+        if (keys != null) {
+            String sql = "delete from lock_data where key = :key";
+            List<Map<String, Object>> batchValues = new ArrayList<>(keys.size());
+            for (String key : keys) {
+                batchValues.add(new MapSqlParameterSource("key", key).getValues());
+            }
+            getNamedParameterJdbcTemplate().batchUpdate(sql, batchValues.toArray(new Map[keys.size()]));
         }
-        getNamedParameterJdbcTemplate().batchUpdate(sql, batchValues.toArray(new Map[keys.size()]));
     }
 }

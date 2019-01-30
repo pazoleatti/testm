@@ -181,7 +181,8 @@ class LocksRelations {
                         DECLARATION_DATA_ID_RNU_PAYMENT_REPORT,
                         DECLARATION_DATA_ID_RNU_RATE_REPORT,
                         DECLARATION_DATA_ID_UPDATE_PERSONS_DATA,
-                        DECLARATION_DATA_ID_XLSX
+                        DECLARATION_DATA_ID_XLSX,
+                        DECLARATION_DATA_ID_CONSOLIDATE
                 )
         );
 
@@ -203,7 +204,8 @@ class LocksRelations {
                         DECLARATION_DATA_ID_UPDATE_PERSONS_DATA,
                         DECLARATION_DATA_ID_XLSX,
                         EXCEL_TEMPLATE_DECLARATION_ID,
-                        IMPORT_DECLARATION_EXCEL_ID
+                        IMPORT_DECLARATION_EXCEL_ID,
+                        DECLARATION_DATA_ID_CONSOLIDATE
                 )
         );
 
@@ -312,7 +314,11 @@ class LocksRelations {
                 Arrays.asList(
                         DECLARATION_DATA_ID_DELETE_DECLARATION,
                         DECLARATION_DATA_ID_EDIT,
-                        DECLARATION_DATA_ID_UPDATE_PERSONS_DATA
+                        DECLARATION_DATA_ID_UPDATE_PERSONS_DATA,
+                        DECLARATION_DATA_ID_IDENTIFY_PERSON,
+                        DECLARATION_DATA_ID_ACCEPT_DECLARATION,
+                        IMPORT_DECLARATION_EXCEL_ID,
+                        DECLARATION_DATA_ID_RETURN_DECLARATION
                 )
         );
 
