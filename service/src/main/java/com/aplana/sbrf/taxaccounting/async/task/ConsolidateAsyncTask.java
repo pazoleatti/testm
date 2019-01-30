@@ -16,11 +16,14 @@ import com.aplana.sbrf.taxaccounting.permissions.logging.TargetIdAndLogger;
 import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.LockStateLogger;
+import org.apache.commons.lang3.time.FastDateFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.Map;
+
+import static com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils.isEmpty;
 
 /**
  * Консолидация налоговой формы
@@ -69,11 +72,14 @@ public class ConsolidateAsyncTask extends XmlGeneratorAsyncTask {
         DeclarationData declarationData = declarationDataService.get(declarationDataId, userInfo);
         DepartmentReportPeriod reportPeriod = departmentReportPeriodService.fetchOne(declarationData.getDepartmentReportPeriodId());
         Department department = departmentService.getDepartment(declarationData.getDepartmentId());
-        return String.format("Не выполнена консолидация данных в налоговую форму: №: %d, Период: \"%s, %s\", Подразделение: \"%s\", Вид: \"РНУ НДФЛ (консолидированная)",
+        Throwable throwable = (Throwable) taskData.getParams().get("exceptionThrown");
+        return String.format("Операция \"Консолидация\" не выполнена для формы №: %d, Период: \"%s, %s%s\", Подразделение: \"%s\".%s",
                 declarationDataId,
                 reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
                 reportPeriod.getReportPeriod().getName(),
-                department.getShortName());
+                reportPeriod.getCorrectionDate() != null ? " (корр. " + FastDateFormat.getInstance("dd.MM.yyyy").format(reportPeriod.getCorrectionDate()) + ")" : "",
+                department.getShortName(),
+                throwable != null && !isEmpty(throwable.getMessage())? " Причина: " + throwable.getMessage() : "");
     }
 
     @Override
@@ -84,10 +90,11 @@ public class ConsolidateAsyncTask extends XmlGeneratorAsyncTask {
         DeclarationData declarationData = declarationDataService.get(declarationDataId, userInfo);
         DepartmentReportPeriod reportPeriod = departmentReportPeriodService.fetchOne(declarationData.getDepartmentReportPeriodId());
         Department department = departmentService.getDepartment(declarationData.getDepartmentId());
-        return String.format("Выполнена консолидация данных в налоговую форму: №: %d, Период: \"%s, %s\", Подразделение: \"%s\", Вид: \"РНУ НДФЛ (консолидированная)",
+        return String.format("Операция \"Консолидация\" завершена для формы №: %d, Период: \"%s, %s%s\", Подразделение: \"%s\"",
                 declarationDataId,
                 reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
                 reportPeriod.getReportPeriod().getName(),
+                reportPeriod.getCorrectionDate() != null ? " (корр. " + FastDateFormat.getInstance("dd.MM.yyyy").format(reportPeriod.getCorrectionDate()) + ")" : "",
                 department.getShortName());
     }
 
@@ -97,27 +104,28 @@ public class ConsolidateAsyncTask extends XmlGeneratorAsyncTask {
         DeclarationData declarationData = declarationDataService.get(declarationDataId, userInfo);
         DepartmentReportPeriod reportPeriod = departmentReportPeriodService.fetchOne(declarationData.getDepartmentReportPeriodId());
         Department department = departmentService.getDepartment(declarationData.getDepartmentId());
-        return String.format("\"Консолидация\" для формы №:%d, Период: \"%s, %s\", Подразделение: \"%s\"",
+        return String.format("\"Консолидация\" для формы №: %d, Период: \"%s, %s%s\", Подразделение: \"%s\"",
                 declarationDataId,
                 reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
                 reportPeriod.getReportPeriod().getName(),
+                reportPeriod.getCorrectionDate() != null ? " (корр. " + FastDateFormat.getInstance("dd.MM.yyyy").format(reportPeriod.getCorrectionDate()) + ")" : "",
                 department.getName());
     }
 
     @Override
     protected void sendNotifications(AsyncTaskData taskData, String msg, String uuid, NotificationType notificationType, String reportId) {
-        Long declarationDataId = (Long) taskData.getParams().get("declarationDataId");
-        TAUserInfo userInfo = new TAUserInfo();
-        userInfo.setUser(userService.getUser(taskData.getUserId()));
-        DeclarationData declarationData = declarationDataService.get(declarationDataId, userInfo);
-        DepartmentReportPeriod reportPeriod = departmentReportPeriodService.fetchOne(declarationData.getDepartmentReportPeriodId());
-        Department department = departmentService.getDepartment(declarationData.getDepartmentId());
-        msg = String.format("Операция \"Консолидация\" завершена для формы №: %d, Период: \"%s, %s\", Подразделение: \"%s\"",
-                declarationDataId,
-                reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
-                reportPeriod.getReportPeriod().getName(),
-                department.getName());
+        msg = isSuccess(taskData) ? getNotificationMsg(taskData) : getErrorMsg(taskData, true);
         super.sendNotifications(taskData, msg, uuid, notificationType, reportId);
+    }
+
+    /**
+     * Проверка успешности выполнения асинка
+     *
+     * @param taskData проверяемая задача
+     * @return признак успеха выполнения задачи
+     */
+    private boolean isSuccess(AsyncTaskData taskData) {
+        return taskData.getParams().get("errorsText") == null;
     }
 
 }
