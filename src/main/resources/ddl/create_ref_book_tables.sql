@@ -619,6 +619,12 @@ comment on column ref_book_fond_detail.signatory_firstname is 'Имя подпи
 comment on column ref_book_fond_detail.signatory_lastname is 'Отчество подписанта';
 comment on column ref_book_fond_detail.approve_doc_name is 'Наименование документа, подтверждающего полномочия';
 comment on column ref_book_fond_detail.approve_org_name is 'Наименование организации-представителя налогоплательщика';
+------------------------------------------------------------------------------------
+create view department_config as
+  select * from (
+    select rbnd.*, (SELECT min(version) - interval '1' day FROM ref_book_ndfl_detail WHERE status != -1 and record_id = rbnd.record_id and version > rbnd.version) version_end
+    from ref_book_ndfl_detail rbnd
+  ) where status = 0;
 
 --Признак возложения обязанности по уплате налога на обособленное подразделение
 create table ref_book_detach_tax_pay

@@ -1031,14 +1031,14 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
             if (urmList.size() == 1 && urmList.contains(URM.CURRENT_TB) ||
                     urmList.size() == 2 && urmList.containsAll(asList(URM.OTHERS_TB, URM.NONE_TB))) {
-                return departmentConfigDao.fetchKppOktmoPairs(singletonList(currentTB), new Date());
+                return departmentConfigDao.findKppOktmoPairs(singletonList(currentTB), new Date());
             } else if (urmList.size() == 1 && urmList.contains(URM.OTHERS_TB) ||
                     urmList.size() == 2 && urmList.containsAll(asList(URM.CURRENT_TB, URM.NONE_TB))) {
                 List<Integer> allTbExceptCurrent = new ArrayList<>(allTB);
                 allTbExceptCurrent.remove(currentTB);
-                return departmentConfigDao.fetchKppOktmoPairs(allTbExceptCurrent, new Date());
+                return departmentConfigDao.findKppOktmoPairs(allTbExceptCurrent, new Date());
             } else {
-                return departmentConfigDao.fetchKppOktmoPairs(allTB, new Date());
+                return departmentConfigDao.findKppOktmoPairs(allTB, new Date());
             }
         }
         return new ArrayList<>();
@@ -2273,18 +2273,16 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     @Override
     public List<ConsolidationIncome> fetchIncomeSourcesConsolidation(ConsolidationSourceDataSearchFilter searchData) {
         String insertSql = "insert into tmp_cons_data(operation_id, asnu_id)\n" +
-                "with temp as\n" +
-                "(select max(version) version, record_id\n" +
-                "from ref_book_ndfl_detail r\n" +
-                "where status = 0 and version <= :currentDate and not exists\n" +
-                "(select 1\n" +
-                "from ref_book_ndfl_detail r2\n" +
-                "where r2.record_id=r.record_id and r2.status = 2 and r2.version between r.version + interval '1' day and :currentDate ) \n" +
-                "group by record_id),\n" +
-                "kpp_oktmo as\n" +
-                "(select rnd.status, rnd.version, rnd.kpp, ro.code as oktmo\n" +
-                "from temp, ref_book_ndfl_detail rnd left join ref_book_oktmo ro on ro.id = rnd.oktmo\n" +
-                "where rnd.version = temp.version and rnd.record_id = temp.record_id and rnd.status = 0 and rnd.department_id = :departmentId )\n" +
+                "with kpp_oktmo as (\n" +
+                "  select dc.kpp, oktmo.code oktmo, max(dc.version) version \n" +
+                "  from department_config dc\n" +
+                "  join ref_book_oktmo oktmo on oktmo.id = dc.oktmo\n" +
+                "  where department_id = :departmentId and (\n" +
+                "    dc.version <= :currentDate and (dc.version_end is null or :currentDate <= dc.version_end) or\n" +
+                "    dc.version <= :periodEndDate and (dc.version_end is null or dc.version_end >= :periodStartDate)\n" +
+                "  )\n" +
+                "  group by dc.kpp, oktmo.code\n" +
+                ")\n" +
                 "select /*+ NO_INDEX(npi NDFL_PERS_INC_KPP_OKTMO) */ distinct npi.operation_id, dd.asnu_id\n" +
                 "from ndfl_person_income npi \n" +
                 "join kpp_oktmo on kpp_oktmo.kpp = npi.kpp and kpp_oktmo.oktmo = npi.oktmo\n" +

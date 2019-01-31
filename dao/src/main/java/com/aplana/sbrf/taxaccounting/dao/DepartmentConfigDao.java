@@ -20,6 +20,14 @@ import java.util.List;
 public interface DepartmentConfigDao extends PermissionDao {
 
     /**
+     * Возвращяет настройку подразделений по идентификатору
+     *
+     * @param id идентификатор версии настройки подразделений
+     * @return настройка подразделений
+     */
+    DepartmentConfig getById(long id);
+
+    /**
      * Возвращяет предыдущую версию настройки подразделений
      *
      * @param departmentConfig настройка подразделений
@@ -34,7 +42,7 @@ public interface DepartmentConfigDao extends PermissionDao {
      * @param relevanceDate дата актуальности настройки
      * @return список пар КПП и ОКТМО
      */
-    List<Pair<String, String>> fetchKppOktmoPairs(List<Integer> departmentIds, Date relevanceDate);
+    List<Pair<String, String>> findKppOktmoPairs(List<Integer> departmentIds, Date relevanceDate);
 
     /**
      * Возвращяет страницу из значений КПП тербанка по фильтру
@@ -49,24 +57,27 @@ public interface DepartmentConfigDao extends PermissionDao {
     /**
      * Возвращяет настройку подразделений по КПП/ОКТМО и актуальную на дату
      *
-     * @param kpp       КПП
-     * @param oktmoCode ОКТМО
-     * @param date      дата актуальности
+     * @param kpp           КПП
+     * @param oktmoCode     ОКТМО
+     * @param relevanceDate дата актуальности
      * @return найстройка подразделений
      */
-    DepartmentConfig findByKppAndOktmoAndDate(String kpp, String oktmoCode, Date date);
+    DepartmentConfig findByKppAndOktmoAndDate(String kpp, String oktmoCode, Date relevanceDate);
 
     /**
-     * Возвращяет все пары КПП/ОКТМО из формы и все настройки подразделений, которые актуальны на текущую дату или пересекаются с периодом формы,
+     * Возвращяет все пары КПП/ОКТМО из формы и все настройки подразделений, которые актуальны на определенную дату или пересекаются с периодом формы,
      * соединеннные по КПП и ОКТМО через full join
      *
-     * @param declaration НФ
+     * @param declaration   НФ
+     * @param relevanceDate дата актуальности
      * @return список пар КПП/ОКТМО из формы и связанные с ними настройки подразделений
      */
-    List<Pair<KppOktmoPair, DepartmentConfig>> findAllByDeclaration(DeclarationData declaration);
+    List<Pair<KppOktmoPair, DepartmentConfig>> findAllByDeclaration(DeclarationData declaration, Date relevanceDate);
 
     /**
-     * Возвращяет пары КПП/ОКТМО для формы создания отчетности
+     * Если форма задана, то возвращяет все пары КПП/ОКТМО из раздела 2 формы с дополнительной информацией о связанных настройках подразделений,
+     * которые актуальны на определенную дату или пересекаются с заданным периодом.
+     * Иначе возвращяет только пары КПП/ОКТМО из настроек подразделений
      *
      * @param filter       фильтр
      * @param pagingParams параметры пагинации и сортировки

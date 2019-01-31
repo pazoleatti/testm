@@ -8,5 +8,6 @@
     <jdbc:initialize-database>
         <jdbc:script location="classpath:data/Department.sql" encoding="UTF-8"/>
         <jdbc:script location="classpath:data/DepartmentConfig.sql" encoding="UTF-8"/>
+        <jdbc:script location="classpath:data/DepartmentConfigDaoTest.sql" encoding="UTF-8"/>
     </jdbc:initialize-database>
 </beans>

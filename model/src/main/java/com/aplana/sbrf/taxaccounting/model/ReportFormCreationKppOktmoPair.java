@@ -1,20 +1,33 @@
 package com.aplana.sbrf.taxaccounting.model;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 /**
  * Пара КПП/ОКТМО, используемая в форме создания отчетности
  */
-@Getter
 @Setter
+@Getter
+@EqualsAndHashCode(callSuper = true)
+@NoArgsConstructor
+@ToString(callSuper = true)
 public class ReportFormCreationKppOktmoPair extends KppOktmoPair {
     /**
      * Ид элемента для select2
      */
-    Long id;
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
+    private Long id;
     /**
      * Обозначение актуальности
      */
-    String relevance;
+    private String relevance;
+
+    public ReportFormCreationKppOktmoPair(String kpp, String oktmo, String relevance) {
+        super(kpp, oktmo);
+        this.relevance = relevance;
+    }
 }

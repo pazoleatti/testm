@@ -23,7 +23,10 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.Equator;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.junit.*;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,13 +45,12 @@ import java.util.*;
 import static com.google.common.collect.Iterables.concat;
 import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Arrays.asList;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Andrey Drunk
@@ -1162,21 +1164,20 @@ public class NdflPersonDaoTest {
 
     @Test
     public void testFetchIncomeSourcesConsolidation() {
-        ConsolidationSourceDataSearchFilter.Builder filterBuilder = new ConsolidationSourceDataSearchFilter.Builder();
         Calendar currentDate = Calendar.getInstance();
         currentDate.set(2018, 4, 25);
         Calendar startDate = Calendar.getInstance();
         startDate.set(2018, 0, 1);
         Calendar endDate = Calendar.getInstance();
         endDate.set(2018, 2, 31);
-        filterBuilder.currentDate(currentDate.getTime())
+        ConsolidationSourceDataSearchFilter filter = ConsolidationSourceDataSearchFilter.builder()
+                .currentDate(currentDate.getTime())
                 .periodStartDate(startDate.getTime())
                 .periodEndDate(endDate.getTime())
                 .consolidateDeclarationDataYear(2018)
                 .dataSelectionDepth(2)
                 .declarationType(100)
-                .departmentId(7);
-        ConsolidationSourceDataSearchFilter filter = filterBuilder.createConsolidationSourceDataSearchFilter();
+                .departmentId(7).build();
         List<ConsolidationIncome> incomes = ndflPersonDao.fetchIncomeSourcesConsolidation(filter);
         Assert.assertEquals(15, incomes.size());
         List<Long> incomesIds = new ArrayList<>();
@@ -1221,7 +1222,7 @@ public class NdflPersonDaoTest {
     }
 
     @Test
-    public void testFetchNdflPersonIncomeByPeriodNdflPersonId()  {
+    public void testFetchNdflPersonIncomeByPeriodNdflPersonId() {
         Calendar startDate = new GregorianCalendar();
         startDate.set(2005, Calendar.JANUARY, 1);
         Calendar endDate = new GregorianCalendar();
@@ -1231,7 +1232,7 @@ public class NdflPersonDaoTest {
     }
 
     @Test
-    public void testFetchNdflPersonIncomeByPeriodNdflPersonIdTemp()  {
+    public void testFetchNdflPersonIncomeByPeriodNdflPersonIdTemp() {
         Calendar startDate = new GregorianCalendar();
         startDate.set(2005, Calendar.JANUARY, 1);
         Calendar endDate = new GregorianCalendar();
@@ -1241,7 +1242,7 @@ public class NdflPersonDaoTest {
     }
 
     @Test
-    public void testFetchNdflPersonIncomeByPeriodNdflPersonIdTaxDate()  {
+    public void testFetchNdflPersonIncomeByPeriodNdflPersonIdTaxDate() {
         Calendar startDate = new GregorianCalendar();
         startDate.set(2010, Calendar.JANUARY, 1);
         Calendar endDate = new GregorianCalendar();
@@ -1251,7 +1252,7 @@ public class NdflPersonDaoTest {
     }
 
     @Test
-    public void testFetchNdflPersonIncomeByPayoutDate()  {
+    public void testFetchNdflPersonIncomeByPayoutDate() {
         Calendar startDate = new GregorianCalendar();
         startDate.set(2005, Calendar.JANUARY, 1);
         Calendar endDate = new GregorianCalendar();

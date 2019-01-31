@@ -122,22 +122,22 @@ class Calculate extends AbstractScriptClass {
         Integer dataSelectionDepth = Integer.valueOf(configurationParamModel?.get(ConfigurationParam?.CONSOLIDATION_DATA_SELECTION_DEPTH)?.get(0)?.get(0))
         ReportPeriod reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
 
-        ConsolidationSourceDataSearchFilter.Builder filterBuilder = new ConsolidationSourceDataSearchFilter.Builder()
-        filterBuilder.currentDate(new Date())
+        ConsolidationSourceDataSearchFilter filter = ConsolidationSourceDataSearchFilter.builder()
+                .currentDate(new Date())
                 .periodStartDate(reportPeriod.startDate)
                 .periodEndDate(reportPeriod.endDate)
                 .dataSelectionDepth(reportPeriod.taxPeriod.year - dataSelectionDepth)
                 .departmentId(parentTB.id)
                 .declarationType(DeclarationType.NDFL_PRIMARY)
                 .consolidateDeclarationDataYear(reportPeriod.taxPeriod.year)
-
+                .build()
         //noinspection GroovyAssignabilityCheck
         logForDebug("Инициализация данных для поиска источников, (" + ScriptUtils.calcTimeMillis(time))
         ScriptUtils.checkInterrupted()
 
         time = System.currentTimeMillis()
 
-        List<ConsolidationIncome> operationsForConsolidationList = ndflPersonService.fetchIncomeSourcesConsolidation(filterBuilder.createConsolidationSourceDataSearchFilter())
+        List<ConsolidationIncome> operationsForConsolidationList = ndflPersonService.fetchIncomeSourcesConsolidation(filter)
 
         logForDebug("Определение списка операций, которые нужно включить в КНФ. Отобрано ${operationsForConsolidationList.size()} строк, (" + ScriptUtils.calcTimeMillis(time))
         ScriptUtils.checkInterrupted()

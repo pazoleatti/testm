@@ -106,7 +106,7 @@ public class DepartmentConfigServiceImpl implements DepartmentConfigService {
 
     @Override
     public List<Pair<KppOktmoPair, DepartmentConfig>> findAllByDeclaration(DeclarationData declaration) {
-        return departmentConfigDao.findAllByDeclaration(declaration);
+        return departmentConfigDao.findAllByDeclaration(declaration, new Date());
     }
 
     @Override

@@ -22,4 +22,15 @@
 		</update>
 	</changeSet>
 
+	<changeSet id="3.5-dnovikov-2" author="dnovikov">
+		<sql>
+			create view department_config as
+			select * from (
+			    select rbnd.*, lead(version) over(partition by rbnd.record_id order by version) - interval '1' DAY version_end
+			    from ref_book_ndfl_detail rbnd
+			    where status != -1
+			) where status = 0;
+		</sql>
+	</changeSet>
+
 </databaseChangeLog>
