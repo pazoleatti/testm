@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.filter.DepartmentFilter;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import org.junit.Assert;
@@ -373,11 +372,6 @@ public class DepartmentServiceImplTest {
             taUser.setDepartmentId(aDepartmentID);
             Assert.assertEquals(0, departmentService.getDestinationDepartments(TaxType.NDFL, taUser).size());
         }
-    }
-
-    @Test
-    public void getPrintFormDepartmentsTest() {
-        // TODO Дописать тест после реализации getExecutorsDepartments http://jira.aplana.com/browse/SBRFACCTAX-5397
     }
 
     @Test

@@ -14,6 +14,7 @@ import com.aplana.sbrf.taxaccounting.model.SecuredEntity;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.intellij.lang.annotations.Language;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -72,7 +73,7 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
                     new DepartmentJdbcMapper()
             );
         } catch (EmptyResultDataAccessException e) {
-            return new ArrayList<Department>(0);
+            return new ArrayList<>(0);
         }
     }
 
@@ -111,6 +112,7 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
     }
 
     private String sqlParentHierarchy(String columnName) {
+        //language=sql
         return "SELECT LTRIM(SYS_CONNECT_BY_PATH(CASE WHEN " + columnName + " is not null THEN " + columnName + " ELSE name END, '/'), '/') as path \n" +
                 "FROM department\n" +
                 "WHERE id = ? \n" +
@@ -151,7 +153,7 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
                     new DepartmentJdbcMapper()
             );
         } catch (EmptyResultDataAccessException e) {
-            return new ArrayList<Department>(0);
+            return new ArrayList<>(0);
         }
     }
 
@@ -165,13 +167,10 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
         public Department mapRow(ResultSet rs, int rowNum) throws SQLException {
             try {
                 Department department = new Department();
-                department.setId(SqlUtils.getInteger(rs, "id"));
+                department.setId(rs.getInt("id"));
                 department.setName(rs.getString("name"));
-                Integer parentId = SqlUtils.getInteger(rs, "parent_id");
-                // В ResultSet есть особенность что если пришло значение нул то вернет значение по умолчанию - то есть для Integer'a вернет 0
-                // а так как у нас в базе 0 используется в качестве идентификатора то нужно null нужно првоерять через .wasNull()
-                department.setParentId(rs.wasNull() ? null : parentId);
-                department.setType(DepartmentType.fromCode(SqlUtils.getInteger(rs, "type")));
+                department.setParentId(SqlUtils.getInteger(rs, "parent_id"));
+                department.setType(DepartmentType.fromCode(rs.getInt("type")));
                 department.setShortName(rs.getString("shortname"));
                 department.setTbIndex(rs.getString("tb_index"));
                 department.setSbrfCode(rs.getString("sbrf_code"));
@@ -217,7 +216,7 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
                     new DepartmentJdbcMapper()
             );
         } catch (EmptyResultDataAccessException e) {
-            return new ArrayList<Department>(0);
+            return new ArrayList<>(0);
         }
     }
 
@@ -230,18 +229,26 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
                     Integer.class
             );
         } catch (EmptyResultDataAccessException e) {
-            return new ArrayList<Integer>(0);
+            return new ArrayList<>(0);
         }
     }
 
     @Override
     public Department getDepartmentTB(int departmentId) {
-        return getParentDepartmentByType(departmentId, 2);
-    }
-
-    @Override
-    public Department getParentDepartmentByType(int departmentId, DepartmentType type) {
-        return getParentDepartmentByType(departmentId, type.getCode());
+        int typeIdTerbank = DepartmentType.TERR_BANK.getCode();
+        try {
+            String recursive = isWithRecursive() ? "recursive" : "";
+            return getJdbcTemplate().queryForObject("with " + recursive + " tree (id, parent_id, type) as " +
+                            "(select id, parent_id, type from department where id = ? " +
+                            "union all select d.id, d.parent_id, d.type from department d " +
+                            "inner join tree t on d.id = t.parent_id) " +
+                            "select d.* from department d, tree where d.id = tree.id and tree.type = ?",
+                    new Object[]{departmentId, typeIdTerbank},
+                    new DepartmentJdbcMapper()
+            );
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
     }
 
     @Override
@@ -267,26 +274,7 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
                             "select distinct d.* from tree t, department d where d.id = t.id",
                     new DepartmentJdbcMapper());
         } catch (EmptyResultDataAccessException e) {
-            return new ArrayList<Department>(0);
-        }
-    }
-
-    /**
-     * Получение родительского узла заданного типа (указанное подразделение м.б. результатом, если его тип соответствует искомому)
-     */
-    private Department getParentDepartmentByType(int departmentId, int typeId) {
-        try {
-            String recursive = isWithRecursive() ? "recursive" : "";
-            return getJdbcTemplate().queryForObject("with " + recursive + " tree (id, parent_id, type) as " +
-                            "(select id, parent_id, type from department where id = ? " +
-                            "union all select d.id, d.parent_id, d.type from department d " +
-                            "inner join tree t on d.id = t.parent_id) " +
-                            "select d.* from department d, tree where d.id = tree.id and tree.type = ?",
-                    new Object[]{departmentId, typeId},
-                    new DepartmentJdbcMapper()
-            );
-        } catch (EmptyResultDataAccessException e) {
-            return null;
+            return new ArrayList<>(0);
         }
     }
 
@@ -301,7 +289,7 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
                     new DepartmentJdbcMapper()
             );
         } catch (EmptyResultDataAccessException e) {
-            return new ArrayList<Department>(0);
+            return new ArrayList<>(0);
         }
     }
 
@@ -316,7 +304,7 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
                     Integer.class
             );
         } catch (EmptyResultDataAccessException e) {
-            return new ArrayList<Integer>(0);
+            return new ArrayList<>(0);
         }
     }
 
@@ -330,6 +318,8 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
      */
     private String createQueryParentDepartmentChildByType(boolean idOnly) {
         String recursive = isWithRecursive() ? "recursive" : "";
+
+        @Language("sql")
         String rez = "with " + recursive + " tree1 (id, parent_id, type) as " +
                 "(select id, parent_id, type from department where id = ? " +
                 "union all " +

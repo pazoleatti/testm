@@ -6,7 +6,6 @@ import com.aplana.sbrf.taxaccounting.model.DepartmentName;
 import com.aplana.sbrf.taxaccounting.model.DepartmentType;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,8 +18,7 @@ import java.util.*;
 
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"DepartmentDaoTest.xml"})
@@ -37,7 +35,7 @@ public class DepartmentDaoTest {
         assertEquals(1, d.getId());
         assertEquals(DepartmentType.ROOT_BANK, d.getType());
         assertEquals("Банк", d.getName());
-        Assert.assertNull(d.getParentId());
+        assertNull(d.getParentId());
 
         d = departmentDao.getDepartment(2);
         assertEquals(2, d.getId());
@@ -66,7 +64,7 @@ public class DepartmentDaoTest {
     public void getSbrfCode() {
         Department department;
         department = departmentDao.getDepartmentBySbrfCode("tB3", true);
-        Assert.assertNotNull(department);
+        assertNotNull(department);
         assertTrue(true);
     }
 
@@ -98,9 +96,9 @@ public class DepartmentDaoTest {
     public void getDepartmentTBTest() {
         Department result;
         result = departmentDao.getDepartmentTB(0);
-        Assert.assertNull(result);
+        assertNull(result);
         result = departmentDao.getDepartmentTB(1);
-        Assert.assertNull(result);
+        assertNull(result);
         result = departmentDao.getDepartmentTB(2);
         assertEquals(result.getId(), 2);
         result = departmentDao.getDepartmentTB(3);

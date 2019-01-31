@@ -377,7 +377,7 @@ public final class SqlUtils extends AbstractDao {
      * @throws SQLException
      */
     public static Integer getInteger(ResultSet resultSet, String columnLabel) throws SQLException {
-        Integer ret = resultSet.getInt(columnLabel);
+        int ret = resultSet.getInt(columnLabel);
         return resultSet.wasNull() ? null : ret;
     }
 
@@ -390,7 +390,7 @@ public final class SqlUtils extends AbstractDao {
      * @throws SQLException
      */
     public static Integer getInteger(ResultSet resultSet, int columnIndex) throws SQLException {
-        Integer ret = resultSet.getInt(columnIndex);
+        int ret = resultSet.getInt(columnIndex);
         return resultSet.wasNull() ? null : ret;
     }
 

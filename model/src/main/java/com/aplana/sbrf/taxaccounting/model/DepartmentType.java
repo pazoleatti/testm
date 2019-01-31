@@ -45,7 +45,7 @@ public enum DepartmentType implements Serializable {
     private final String label;
     private final int code;
 
-    private DepartmentType(String label, int code) {
+    DepartmentType(String label, int code) {
         this.label = label;
         this.code = code;
     }

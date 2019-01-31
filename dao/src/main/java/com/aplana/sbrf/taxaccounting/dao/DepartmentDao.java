@@ -154,15 +154,6 @@ public interface DepartmentDao extends PermissionDao {
     Department getDepartmentTB(int departmentId);
 
     /**
-     * Получение родительского узла заданного типа (указанное подразделение м.б. результатом, если его тип соответствует искомому)
-     *
-     * @param departmentId
-     * @param type
-     * @return
-     */
-    Department getParentDepartmentByType(int departmentId, DepartmentType type);
-
-    /**
      * Получение ТБ для подразделения (тип = 2) + все дочерние подразделения
      *
      * @param departmentId Подразделение пользователя
@@ -180,9 +171,6 @@ public interface DepartmentDao extends PermissionDao {
 
     /**
      * Получение списка подразделений, необходимых для построения неразрывного дерева подразделений
-     *
-     * @param availableDepartments
-     * @return
      */
     List<Department> getRequiredForTreeDepartments(List<Integer> availableDepartments);
 
