@@ -115,7 +115,6 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
                           Map<String, Object> exchangeParams) {
 		// Биндим параметры для выполнения скрипта
 		Bindings b = getScriptEngine().createBindings();
-		Binding binding = new Binding();
 
 		Map<String, ?> scriptComponents = getScriptExposedBeans(TaxType.NDFL, event);
 		for (Object component : scriptComponents.values()) {

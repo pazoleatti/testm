@@ -138,8 +138,7 @@ public abstract class AbstractAsyncTask implements AsyncTask {
             throw new AsyncTaskException(String.format("Cannot find task parameters for \"%s\"", taskName));
         }
         if (taskTypeData.getTaskLimit() != null && taskTypeData.getTaskLimit() != 0 && taskTypeData.getTaskLimit() < value) {
-            throw new ServiceException(AsyncTask.CHECK_TASK,
-                    taskName);
+            throw new ServiceException(AsyncTask.CHECK_TASK, taskName);
         } else if (taskTypeData.getShortQueueLimit() == null || taskTypeData.getShortQueueLimit() == 0 || taskTypeData.getShortQueueLimit() >= value) {
             return AsyncQueue.SHORT;
         }

@@ -61,7 +61,7 @@ public abstract class AbstractStartupAsyncTaskHandler {
         // в будущем все сообщения будут соответствовать одному шаблону
         String template;
         if (taskData.getType() == AsyncTaskType.IDENTIFY_PERSON) {
-            template = AsyncTask.CREATE_IDETNTIFY_TASK;
+            template = AsyncTask.CREATE_IDENTIFY_TASK;
         } else {
             template = AsyncTask.CREATE_TASK;
         }
