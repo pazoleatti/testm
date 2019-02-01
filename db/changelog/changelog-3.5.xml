@@ -40,4 +40,18 @@
 		</update>
 	</changeSet>
 
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-5767 Поле "Адрес" справки о доходах ФЛ заполняется значением "null" -->
+    <changeSet id="3.5-snazin-1" author="snazin">
+        <update tableName="blob_data">
+            <column name="data" valueBlobFile="templates-3.5/ndfl/report_2ndfl_1/v2016/report_2ndfl.jrxml"/>
+            <where>
+                id in (
+                    select blob_data_id
+                    from declaration_subreport
+                    where declaration_template_id = 102 and alias = 'report_2ndfl1'
+                )
+            </where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>
