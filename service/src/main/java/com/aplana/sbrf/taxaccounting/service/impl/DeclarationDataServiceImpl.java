@@ -1937,7 +1937,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.fetchOne(departmentReportPeriodId);
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationTemplateService.getActiveDeclarationTemplateId(declarationTypeId, departmentReportPeriod.getReportPeriod().getId()));
         switch (taskType) {
-            case CREATE_REPORTS_DEC:
             case CREATE_FORMS_DEC:
                 return String.format(taskType.getDescription(),
                         declarationTemplate.getType().getName(),
@@ -1979,7 +1978,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                             : "");
 
         switch (ddReportType.getReportType()) {
-            case CREATE_REPORTS_DEC:
             case CREATE_FORMS_DEC:
                 return String.format(ddReportType.getReportType().getDescription(),
                         declarationTemplate.getType().getName(),

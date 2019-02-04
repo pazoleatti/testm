@@ -9,7 +9,6 @@ import lombok.Getter;
 public enum AsyncTaskType {
     //Асинхронные задачи
     XML_DEC(1, "XML", "Расчет НФ. %s", 6L),
-    CREATE_REPORTS_DEC(4, "CREATE_REPORTS_DEC", "Выгрузка отчетности: Вид отчетности: \"%s\", Период: \"%s%s\", Подразделение: \"%s\"", 29L),
     CREATE_FORMS_DEC(3, "CREATE_FORMS_DEC", "Создание отчетных форм: Вид отчетности: \"%s\", Период: \"%s%s\", Подразделение: \"%s\"", 28L),
     CHECK_DEC(0, "CHECK_DECLARATION", "Проверка формы", "Проверка налоговой формы. %s", 14L),
     ACCEPT_DEC(1, "ACCEPT_DECLARATION", "Принятие формы", "Принятие налоговой формы. %s", 15L),

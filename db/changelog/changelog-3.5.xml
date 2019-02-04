@@ -54,4 +54,11 @@
         </update>
     </changeSet>
 
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-6376 Два одинаковых типа задания "Выгрузка отчетности" во вкладке "Параметры асинхронных заданий" -->
+	<changeSet id="3.5-ishevchuk-1" author="ishevchuk">
+		<delete tableName="async_task_type">
+            <where>id = 29</where>
+		</delete>
+	</changeSet>
+
 </databaseChangeLog>
