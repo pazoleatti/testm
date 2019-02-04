@@ -113,10 +113,11 @@ public class CrossBlockingTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void locksCrossTest() {
 
         // Выдаем нужные результаты при запросах блокировок из базы.
-        // Аргументом передается коллекция коллекция ключей, которые нужно вытащить,
+        // Аргументом передается коллекция ключей, которые нужно вытащить,
         // если среди них есть наша lockWasInDB, возвращаем LockData с ней.
         // Второй запрос будет только в случае успешной блокировки, там возвращаем новую блокировку
         when(lockDataDao.fetchAllByKeySet((Collection<String>) argThat(hasItem(lockWasInDB))))

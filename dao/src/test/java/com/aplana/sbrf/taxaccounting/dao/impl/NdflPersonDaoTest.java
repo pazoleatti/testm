@@ -23,14 +23,13 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.Equator;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -46,15 +45,11 @@ import static com.google.common.collect.Iterables.concat;
 import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-/**
- * @author Andrey Drunk
- */
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"NdflPersonDaoTest.xml"})
@@ -67,9 +62,6 @@ public class NdflPersonDaoTest {
 
     @Autowired
     private NdflPersonDao ndflPersonDao;
-
-    @Autowired
-    private NamedParameterJdbcTemplate jdbcTemplate;
 
     @Before
     public void init() {
@@ -84,43 +76,33 @@ public class NdflPersonDaoTest {
 
     @Test
     public void buildQueryTest() {
-        Map<String, Object> parameters = new HashMap<String, Object>();
+        Map<String, Object> parameters = new HashMap<>();
         parameters.put("lastName", "Иванов");
         parameters.put("firstName", "Федор");
         parameters.put("middleName", "Иванович");
         String sql = NdflPersonDaoImpl.buildQuery(parameters, null);
-        Assert.assertTrue(sql.contains("lower(np.last_name) like lower(:lastName)"));
-        Assert.assertFalse(sql.contains("np.inp = :inp"));
-        //test...
+        assertTrue(sql.contains("lower(np.last_name) like lower(:lastName)"));
+        assertFalse(sql.contains("np.inp = :inp"));
     }
 
     @Test
     public void findNdflPersonByParametersTest() {
-
-        Map<String, Object> parameters = new HashMap<String, Object>();
+        Map<String, Object> parameters = new HashMap<>();
 
         parameters.put(SubreportAliasConstants.LAST_NAME, "Иванов");
         parameters.put(SubreportAliasConstants.FIRST_NAME, "Федор");
-        //parameters.put("middleName", "Иванович");
-        //parameters.put("snils", "foo");
-        //parameters.put("inn", "foo");
-        //parameters.put("inp", "foo");
-        //parameters.put("fromBirthDay", "foo");
         parameters.put(SubreportAliasConstants.TO_BIRTHDAY, new Date());
-        //parameters.put("idDocNumber", "foo");
 
         PagingResult<NdflPerson> result = ndflPersonDao.fetchNdflPersonByParameters(1L, parameters, new PagingParams());
         assertEquals(1, result.size());
         assertEquals(1, result.getTotalCount());
-        //добавить тестовых данных
-
     }
 
     @Test
     public void testGet() {
         NdflPerson person = ndflPersonDao.fetchOne(101);
         assertNotNull(person);
-        Assert.assertEquals(2, person.getIncomes().size());
+        assertEquals(2, person.getIncomes().size());
     }
 
     @Test
@@ -128,19 +110,19 @@ public class NdflPersonDaoTest {
         List<NdflPerson> result = ndflPersonDao.fetchByDeclarationData(1);
 
         for (NdflPerson person : result) {
-            Assert.assertNotNull(person.getIncomes());
-            Assert.assertNotNull(person.getDeductions());
-            Assert.assertNotNull(person.getPrepayments());
+            assertNotNull(person.getIncomes());
+            assertNotNull(person.getDeductions());
+            assertNotNull(person.getPrepayments());
 
-            Assert.assertEquals(0, person.getIncomes().size());
-            Assert.assertEquals(0, person.getDeductions().size());
-            Assert.assertEquals(0, person.getPrepayments().size());
+            assertEquals(0, person.getIncomes().size());
+            assertEquals(0, person.getDeductions().size());
+            assertEquals(0, person.getPrepayments().size());
         }
 
         List<NdflPerson> result2 = ndflPersonDao.fetchByDeclarationData(2);
-        Assert.assertNotNull(result2);
-        Assert.assertEquals(10, result2.size());
-        Assert.assertEquals(3, result.size());
+        assertNotNull(result2);
+        assertEquals(10, result2.size());
+        assertEquals(3, result.size());
     }
 
     private PagingParams pagingParams(int page, int count, String direction, String property) {
@@ -232,7 +214,7 @@ public class NdflPersonDaoTest {
         assertEquals(asList(1, 3, 3, 1), asList(result.persons.size(), result.incomes.size(), result.deductions.size(), result.prepayments.size()));
     }
 
-    Map<List<URM>, Iterable<Long>> searchByURMCases = new HashMap<List<URM>, Iterable<Long>>() {{
+    private Map<List<URM>, Iterable<Long>> searchByURMCases = new HashMap<List<URM>, Iterable<Long>>() {{
         List<Long> ofCurrentTB = asList(50001L, 50002L, 50003L);
         List<Long> ofOthersTB = asList(50004L, 50005L, 50006L);
         List<Long> ofNoneTB = asList(50007L, 50008L, 50009L);
@@ -967,111 +949,112 @@ public class NdflPersonDaoTest {
         NdflPerson goodNdflPerson = createGoodNdflPerson();
         Long id = ndflPersonDao.save(goodNdflPerson);
 
-        Assert.assertNotNull(id);
+        assertNotNull(id);
 
         NdflPerson ndflPerson = ndflPersonDao.fetchOne(id);
 
-        Assert.assertTrue(EqualsBuilder.reflectionEquals(goodNdflPerson, ndflPerson, "incomes", "deductions", "prepayments"));
+        assertTrue(EqualsBuilder.reflectionEquals(goodNdflPerson, ndflPerson, "incomes", "deductions", "prepayments"));
 
         boolean incomesEquals = CollectionUtils.isEqualCollection(goodNdflPerson.getIncomes(), ndflPerson.getIncomes(), new NdflPersonIncomeEquator());
-        Assert.assertTrue(incomesEquals);
+        assertTrue(incomesEquals);
 
         boolean deductionsEquals = CollectionUtils.isEqualCollection(goodNdflPerson.getDeductions(), ndflPerson.getDeductions(), new NdflPersonDeductionEquator());
-        Assert.assertTrue(deductionsEquals);
+        assertTrue(deductionsEquals);
 
         boolean prepaymentEquals = CollectionUtils.isEqualCollection(goodNdflPerson.getPrepayments(), ndflPerson.getPrepayments(), new NdflPersonPrepaymentEquator());
-        Assert.assertTrue(prepaymentEquals);
+        assertTrue(prepaymentEquals);
     }
 
     @Test(expected = DaoException.class)
     public void testBadSave() {
         NdflPerson person = createGoodNdflPerson();
         person.setDeclarationDataId(null);
-        Long id = ndflPersonDao.save(person);
+        ndflPersonDao.save(person);
     }
 
     @Test
     public void testFetchOneNdflPersonIncome() {
-        Assert.assertNotNull(ndflPersonDao.fetchOneNdflPersonIncome(1036));
+        assertNotNull(ndflPersonDao.fetchOneNdflPersonIncome(1036));
     }
 
+    @Test
     public void testFetchOneNdflPersonDeduction() {
-        Assert.assertNotNull(ndflPersonDao.fetchOneNdflPersonDeduction(1));
+        assertNotNull(ndflPersonDao.fetchOneNdflPersonDeduction(1));
     }
 
     @Test
     public void testFetchOneNdflPersonPrepayment() {
-        Assert.assertNotNull(ndflPersonDao.fetchOneNdflPersonPrepayment(1));
+        assertNotNull(ndflPersonDao.fetchOneNdflPersonPrepayment(1));
     }
 
     @Test
     public void testFindIncomeOperationId() {
         List<String> result = ndflPersonDao.findIncomeOperationId(asList("a", "b", "3"));
-        Assert.assertEquals(1, result.size());
-        Assert.assertEquals("3", result.get(0));
+        assertEquals(1, result.size());
+        assertEquals("3", result.get(0));
     }
 
     @Test
     public void testFetchIncomeByNdflPersonId() {
         List<Long> result = ndflPersonDao.fetchIncomeIdByNdflPerson(101);
-        Assert.assertEquals(2, result.size());
+        assertEquals(2, result.size());
     }
 
     @Test
     public void testFetchDeductionByNdflPersonId() {
         List<Long> result = ndflPersonDao.fetchIncomeIdByNdflPerson(101);
-        Assert.assertEquals(2, result.size());
+        assertEquals(2, result.size());
     }
 
     @Test
     public void testFetchPrepaymentByNdflPersonId() {
         List<Long> result = ndflPersonDao.fetchIncomeIdByNdflPerson(101);
-        Assert.assertEquals(2, result.size());
+        assertEquals(2, result.size());
     }
 
     @Test
     public void testDeleteNdflPersonIncomeBatch() {
         ndflPersonDao.deleteNdflPersonIncomeBatch(asList(1036L, 1037L));
-        Assert.assertNull(ndflPersonDao.fetchOneNdflPersonIncome(1036L));
-        Assert.assertNull(ndflPersonDao.fetchOneNdflPersonIncome(1037L));
+        assertNull(ndflPersonDao.fetchOneNdflPersonIncome(1036L));
+        assertNull(ndflPersonDao.fetchOneNdflPersonIncome(1037L));
     }
 
     @Test
     public void testDeleteNdflPersonDeductionBatch() {
         ndflPersonDao.deleteNdflPersonDeductionBatch(asList(1L, 2L));
-        Assert.assertNull(ndflPersonDao.fetchOneNdflPersonDeduction(1L));
-        Assert.assertNull(ndflPersonDao.fetchOneNdflPersonDeduction(2L));
+        assertNull(ndflPersonDao.fetchOneNdflPersonDeduction(1L));
+        assertNull(ndflPersonDao.fetchOneNdflPersonDeduction(2L));
     }
 
     @Test
     public void testDeleteNdflPersonPrepaymentBatch() {
         ndflPersonDao.deleteNdflPersonPrepaymentBatch(asList(1L, 2L));
-        Assert.assertNull(ndflPersonDao.fetchOneNdflPersonPrepayment(1L));
-        Assert.assertNull(ndflPersonDao.fetchOneNdflPersonPrepayment(2L));
+        assertNull(ndflPersonDao.fetchOneNdflPersonPrepayment(1L));
+        assertNull(ndflPersonDao.fetchOneNdflPersonPrepayment(2L));
     }
 
     @Test
     public void testCheckIncomeExists() {
-        Assert.assertTrue(ndflPersonDao.checkIncomeExists(1036, 1));
-        Assert.assertFalse(ndflPersonDao.checkIncomeExists(1036, 2));
+        assertTrue(ndflPersonDao.checkIncomeExists(1036, 1));
+        assertFalse(ndflPersonDao.checkIncomeExists(1036, 2));
     }
 
     @Test
     public void ndflPersonExistsByDeclarationId() {
-        Assert.assertTrue(ndflPersonDao.ndflPersonExistsByDeclarationId(1));
-        Assert.assertFalse(ndflPersonDao.ndflPersonExistsByDeclarationId(111999555));
+        assertTrue(ndflPersonDao.ndflPersonExistsByDeclarationId(1));
+        assertFalse(ndflPersonDao.ndflPersonExistsByDeclarationId(111999555));
     }
 
     @Test
     public void testCheckDeductionsExists() {
-        Assert.assertTrue(ndflPersonDao.checkDeductionExists(1, 1));
-        Assert.assertFalse(ndflPersonDao.checkDeductionExists(1, 2));
+        assertTrue(ndflPersonDao.checkDeductionExists(1, 1));
+        assertFalse(ndflPersonDao.checkDeductionExists(1, 2));
     }
 
     @Test
     public void testCheckPrepaymentExists() {
-        Assert.assertTrue(ndflPersonDao.checkPrepaymentExists(1, 1));
-        Assert.assertFalse(ndflPersonDao.checkPrepaymentExists(1, 2));
+        assertTrue(ndflPersonDao.checkPrepaymentExists(1, 1));
+        assertFalse(ndflPersonDao.checkPrepaymentExists(1, 2));
     }
 
     @Test
@@ -1083,12 +1066,12 @@ public class NdflPersonDaoTest {
         ndflPersonList.get(1).setModifiedBy("me");
         ndflPersonDao.updateNdflPersons(ndflPersonList);
         List<NdflPerson> ndflPersonListResult = ndflPersonDao.fetchNdflPersonByIdList(asList(201L, 202L, 203L));
-        Assert.assertEquals("me", ndflPersonListResult.get(0).getModifiedBy());
-        Assert.assertEquals("Петров", ndflPersonListResult.get(0).getLastName());
-        Assert.assertEquals("me", ndflPersonListResult.get(1).getModifiedBy());
-        Assert.assertEquals("Смит", ndflPersonListResult.get(1).getLastName());
-        Assert.assertNull(ndflPersonListResult.get(2).getModifiedBy());
-        Assert.assertEquals("Иванов", ndflPersonListResult.get(2).getLastName());
+        assertEquals("me", ndflPersonListResult.get(0).getModifiedBy());
+        assertEquals("Петров", ndflPersonListResult.get(0).getLastName());
+        assertEquals("me", ndflPersonListResult.get(1).getModifiedBy());
+        assertEquals("Смит", ndflPersonListResult.get(1).getLastName());
+        assertNull(ndflPersonListResult.get(2).getModifiedBy());
+        assertEquals("Иванов", ndflPersonListResult.get(2).getLastName());
     }
 
     @Test
@@ -1098,7 +1081,7 @@ public class NdflPersonDaoTest {
         ndflPersonIncomeList.get(1).setModifiedBy("me");
         ndflPersonDao.updateIncomes(ndflPersonIncomeList);
         List<NdflPersonIncome> ndflPersonIncomeListResult = ndflPersonDao.fetchNdflPersonIncomeByNdflPerson(101L);
-        Assert.assertEquals("me", ndflPersonIncomeListResult.get(0).getModifiedBy());
+        assertEquals("me", ndflPersonIncomeListResult.get(0).getModifiedBy());
     }
 
     @Test
@@ -1108,7 +1091,7 @@ public class NdflPersonDaoTest {
         ndflPersonDeductionList.get(1).setModifiedBy("me");
         ndflPersonDao.updateDeductions(ndflPersonDeductionList);
         List<NdflPersonDeduction> ndflPersonDeductionListResult = ndflPersonDao.fetchNdflPersonDeductionByNdflPerson(101L);
-        Assert.assertEquals("me", ndflPersonDeductionListResult.get(0).getModifiedBy());
+        assertEquals("me", ndflPersonDeductionListResult.get(0).getModifiedBy());
     }
 
     @Test
@@ -1118,7 +1101,7 @@ public class NdflPersonDaoTest {
         ndflPersonPrepaymentList.get(1).setModifiedBy("me");
         ndflPersonDao.updatePrepayments(ndflPersonPrepaymentList);
         List<NdflPersonPrepayment> ndflPersonPrepaymentListResult = ndflPersonDao.fetchNdflPersonPrepaymentByNdflPerson(101L);
-        Assert.assertEquals("me", ndflPersonPrepaymentListResult.get(0).getModifiedBy());
+        assertEquals("me", ndflPersonPrepaymentListResult.get(0).getModifiedBy());
     }
 
     @Test
@@ -1129,18 +1112,18 @@ public class NdflPersonDaoTest {
         }
         ndflPersonDao.updateNdflPersonsRowNum(ndflPersonList);
         List<NdflPerson> ndflPersonListResult = ndflPersonDao.fetchNdflPersonByIdList(asList(201L, 202L));
-        Assert.assertEquals(new Long(0), ndflPersonListResult.get(0).getRowNum());
-        Assert.assertEquals(new Long(1), ndflPersonListResult.get(1).getRowNum());
+        assertEquals(new Long(0), ndflPersonListResult.get(0).getRowNum());
+        assertEquals(new Long(1), ndflPersonListResult.get(1).getRowNum());
     }
 
     @Test
     public void testFindInpCountForPersonsAndIncomeAccruedDatePeriod() {
         Calendar startDate = Calendar.getInstance();
-        startDate.set(2005, 0, 1);
+        startDate.set(2005, Calendar.JANUARY, 1);
         Calendar endDate = Calendar.getInstance();
-        endDate.set(2005, 11, 31);
+        endDate.set(2005, Calendar.DECEMBER, 31);
         int result = ndflPersonDao.findInpCountWithPositiveIncomeByPersonIdsAndAccruedIncomeDatePeriod(asList(101L, 102L), startDate.getTime(), endDate.getTime());
-        Assert.assertEquals(2, result);
+        assertEquals(2, result);
     }
 
     @Test
@@ -1150,7 +1133,7 @@ public class NdflPersonDaoTest {
         Calendar endDate = Calendar.getInstance();
         endDate.set(2005, Calendar.OCTOBER, 10, 0, 0, 0);
         List<NdflPersonPrepayment> result = ndflPersonDao.fetchPrepaymentByIncomesIdAndAccruedDate(asList(1001L, 1002L, 1003L, 1004L), startDate.getTime(), endDate.getTime());
-        Assert.assertEquals(3, result.size());
+        assertEquals(3, result.size());
     }
 
     @Test
@@ -1158,18 +1141,18 @@ public class NdflPersonDaoTest {
         Calendar calendar = new GregorianCalendar();
         calendar.set(2018, Calendar.JANUARY, 1);
         List<NdflPerson> resultByDeclarationData = ndflPersonDao.fetchRefBookPersonsAsNdflPerson(1L, calendar.getTime());
-        Assert.assertEquals(1, resultByDeclarationData.size());
-        Assert.assertEquals("Федор", resultByDeclarationData.get(0).getFirstName());
+        assertEquals(1, resultByDeclarationData.size());
+        assertEquals("Федор", resultByDeclarationData.get(0).getFirstName());
     }
 
     @Test
     public void testFetchIncomeSourcesConsolidation() {
         Calendar currentDate = Calendar.getInstance();
-        currentDate.set(2018, 4, 25);
+        currentDate.set(2018, Calendar.MAY, 25);
         Calendar startDate = Calendar.getInstance();
-        startDate.set(2018, 0, 1);
+        startDate.set(2018, Calendar.JANUARY, 1);
         Calendar endDate = Calendar.getInstance();
-        endDate.set(2018, 2, 31);
+        endDate.set(2018, Calendar.MARCH, 31);
         ConsolidationSourceDataSearchFilter filter = ConsolidationSourceDataSearchFilter.builder()
                 .currentDate(currentDate.getTime())
                 .periodStartDate(startDate.getTime())
@@ -1179,7 +1162,7 @@ public class NdflPersonDaoTest {
                 .declarationType(100)
                 .departmentId(7).build();
         List<ConsolidationIncome> incomes = ndflPersonDao.fetchIncomeSourcesConsolidation(filter);
-        Assert.assertEquals(15, incomes.size());
+        assertEquals(15, incomes.size());
         List<Long> incomesIds = new ArrayList<>();
         for (ConsolidationIncome income : incomes) {
             incomesIds.add(income.getId());
@@ -1190,35 +1173,35 @@ public class NdflPersonDaoTest {
                 return o1.getId().compareTo(o2.getId());
             }
         });
-        Assert.assertTrue(incomesIds.contains(3070L));
-        Assert.assertTrue(incomesIds.contains(3080L));
-        Assert.assertTrue(incomesIds.contains(3090L));
-        Assert.assertTrue(incomesIds.contains(3100L));
-        Assert.assertTrue(incomesIds.contains(3110L));
-        Assert.assertTrue(incomesIds.contains(3120L));
-        Assert.assertTrue(incomesIds.contains(3130L));
-        Assert.assertTrue(incomesIds.contains(3140L));
-        Assert.assertTrue(incomesIds.contains(3150L));
-        Assert.assertTrue(incomesIds.contains(3220L));
-        Assert.assertTrue(incomesIds.contains(3230L));
-        Assert.assertTrue(incomesIds.contains(3240L));
-        Assert.assertTrue(incomesIds.contains(3250L));
-        Assert.assertTrue(incomesIds.contains(3260L));
-        Assert.assertTrue(incomesIds.contains(3270L));
+        assertTrue(incomesIds.contains(3070L));
+        assertTrue(incomesIds.contains(3080L));
+        assertTrue(incomesIds.contains(3090L));
+        assertTrue(incomesIds.contains(3100L));
+        assertTrue(incomesIds.contains(3110L));
+        assertTrue(incomesIds.contains(3120L));
+        assertTrue(incomesIds.contains(3130L));
+        assertTrue(incomesIds.contains(3140L));
+        assertTrue(incomesIds.contains(3150L));
+        assertTrue(incomesIds.contains(3220L));
+        assertTrue(incomesIds.contains(3230L));
+        assertTrue(incomesIds.contains(3240L));
+        assertTrue(incomesIds.contains(3250L));
+        assertTrue(incomesIds.contains(3260L));
+        assertTrue(incomesIds.contains(3270L));
     }
 
     @Test
     public void testFetchDeductionsForConsolidation() {
         List<NdflPersonDeduction> result = ndflPersonDao.fetchDeductionsForConsolidation(Collections.singletonList(1036L));
-        Assert.assertEquals(1, result.size());
-        Assert.assertEquals(Long.valueOf("1"), result.get(0).getId());
+        assertEquals(1, result.size());
+        assertEquals(Long.valueOf("1"), result.get(0).getId());
     }
 
     @Test
     public void testFetchPrepaymentsForConsolidation() {
         List<NdflPersonPrepayment> result = ndflPersonDao.fetchPrepaymentsForConsolidation((Collections.singletonList(1036L)));
-        Assert.assertEquals(1, result.size());
-        Assert.assertEquals(Long.valueOf("1"), result.get(0).getId());
+        assertEquals(1, result.size());
+        assertEquals(Long.valueOf("1"), result.get(0).getId());
     }
 
     @Test
@@ -1286,6 +1269,9 @@ public class NdflPersonDaoTest {
         assertThat(result).hasSize(1);
     }
 
+    @Test
+    @Ignore
+    // TODO: Почему третье условие валится?
     public void testFindAllKppByDeclarationDataId() {
         List<KppSelect> kppList = ndflPersonDao.findAllKppByDeclarationDataId(100L, null, PagingParams.getInstance(0, 100));
         assertThat(kppList).hasSize(4);
@@ -1295,7 +1281,8 @@ public class NdflPersonDaoTest {
         assertThat(kppList).hasSize(3);
     }
 
-    public static Date toDate(String dateStr) {
+
+    private static Date toDate(String dateStr) {
         try {
             return new SimpleDateFormat("dd.MM.yyyy").parse(dateStr);
         } catch (ParseException e) {
@@ -1337,18 +1324,18 @@ public class NdflPersonDaoTest {
         person.setAsnuId(1L);
 
 
-        List<NdflPersonIncome> ndflPersonIncomes = new ArrayList<NdflPersonIncome>();
+        List<NdflPersonIncome> ndflPersonIncomes = new ArrayList<>();
         ndflPersonIncomes.add(createNdflPersonIncomes(1));
         ndflPersonIncomes.add(createNdflPersonIncomes(2));
         ndflPersonIncomes.add(createNdflPersonIncomes(3));
         person.setIncomes(ndflPersonIncomes);
 
-        List<NdflPersonDeduction> ndflPersonDeductions = new ArrayList<NdflPersonDeduction>();
+        List<NdflPersonDeduction> ndflPersonDeductions = new ArrayList<>();
         ndflPersonDeductions.add(createNdflPersonDeduction(1));
         ndflPersonDeductions.add(createNdflPersonDeduction(2));
         person.setDeductions(ndflPersonDeductions);
 
-        List<NdflPersonPrepayment> ndflPersonPrepayments = new ArrayList<NdflPersonPrepayment>();
+        List<NdflPersonPrepayment> ndflPersonPrepayments = new ArrayList<>();
         ndflPersonPrepayments.add(createNdflPersonPrepayment(1));
         ndflPersonPrepayments.add(createNdflPersonPrepayment(2));
         ndflPersonPrepayments.add(createNdflPersonPrepayment(3));
