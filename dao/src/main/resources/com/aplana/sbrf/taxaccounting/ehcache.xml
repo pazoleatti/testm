@@ -6,12 +6,12 @@
 
     <!-- Кэш по умолчанию не используем -->
 
-    <cache name="DeclarationTemplate" timeToIdleSeconds="180" timeToLiveSeconds="300" maxElementsInMemory="100" overflowToDisk="false"/>
-    <cache name="DeclarationTemplateEventScript" timeToIdleSeconds="180" timeToLiveSeconds="300" maxElementsInMemory="100" overflowToDisk="false"/>
-    <cache name="DeclarationType" timeToIdleSeconds="180" timeToLiveSeconds="300" maxElementsInMemory="100" overflowToDisk="false"/>
-    <cache name="DepartmentReportPeriod" timeToIdleSeconds="180" timeToLiveSeconds="300" maxElementsInMemory="2000" overflowToDisk="false"/>
-    <cache name="User" timeToIdleSeconds="180" timeToLiveSeconds="300" maxElementsInMemory="2000" overflowToDisk="false"/>
-    <cache name="Department" timeToIdleSeconds="180" timeToLiveSeconds="300" maxElementsInMemory="2000" overflowToDisk="false"/>
-    <cache name="RefBook" timeToIdleSeconds="180" timeToLiveSeconds="300" maxElementsInMemory="100" overflowToDisk="false"/>
-    <cache name="RefBookAttribute" timeToIdleSeconds="180" timeToLiveSeconds="300" maxElementsInMemory="300" overflowToDisk="false"/>
+    <cache name="DeclarationTemplate" timeToLiveSeconds="60" maxElementsInMemory="100" overflowToDisk="false"/>
+    <cache name="DeclarationTemplateEventScript" timeToLiveSeconds="60" maxElementsInMemory="100" overflowToDisk="false"/>
+    <cache name="DeclarationType" timeToLiveSeconds="60" maxElementsInMemory="100" overflowToDisk="false"/>
+    <cache name="DepartmentReportPeriod" timeToLiveSeconds="60" maxElementsInMemory="2000" overflowToDisk="false"/>
+    <cache name="User" timeToLiveSeconds="60" maxElementsInMemory="2000" overflowToDisk="false"/>
+    <cache name="Department" timeToLiveSeconds="60" maxElementsInMemory="2000" overflowToDisk="false"/>
+    <cache name="RefBook" timeToLiveSeconds="60" maxElementsInMemory="100" overflowToDisk="false"/>
+    <cache name="RefBookAttribute" timeToLiveSeconds="60" maxElementsInMemory="300" overflowToDisk="false"/>
 </ehcache>
