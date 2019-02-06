@@ -194,56 +194,62 @@
                             }
                         });
                     } else if ($scope.asyncParamTabActive) {
-                        // проверка на числовое значение "Ограничение на выполнение задания", отличное от 0
-                        if ($scope.asyncParam.taskLimit !== "" && (isNaN(Number($scope.asyncParam.taskLimit)) || Number($scope.asyncParam.taskLimit) === 0)) {
-                            $dialogs.errorDialog({
-                                content: $filter('translate')('asyncParam.validate.checkNumber', {
-                                    taskTitle: $scope.asyncParam.param.name,
-                                    limitName: $filter('translate')('asyncParam.grid.columnName.taskLimit'),
-                                    limitValue: $scope.asyncParam.taskLimit
-                                })
-                            });
-                            checkAccessQDefer.resolve(false);
-                            return checkAccessQDefer.promise;
+                        if ($scope.asyncParam.taskLimit) {
+                            // проверка на числовое значение "Ограничение на выполнение задания", отличное от 0
+                            if ((isNaN(Number($scope.asyncParam.taskLimit)) || Number($scope.asyncParam.taskLimit) === 0)) {
+                                $dialogs.errorDialog({
+                                    content: $filter('translate')('asyncParam.validate.checkNumber', {
+                                        taskTitle: $scope.asyncParam.param.name,
+                                        limitName: $filter('translate')('asyncParam.grid.columnName.taskLimit'),
+                                        limitValue: $scope.asyncParam.taskLimit
+                                    })
+                                });
+                                checkAccessQDefer.resolve(false);
+                                return checkAccessQDefer.promise;
+                            }
+                            // проверка введеного значения на количество цифр до разделителя
+                            if (truncate($scope.asyncParam.taskLimit, 18) !== Number($scope.asyncParam.taskLimit)) {
+                                $dialogs.errorDialog({
+                                    content: $filter('translate')('asyncParam.validate.tooLargeNumber', {
+                                        taskTitle: $scope.asyncParam.param.name,
+                                        limitName: $filter('translate')('asyncParam.grid.columnName.taskLimit'),
+                                        limitValue: $scope.asyncParam.taskLimit,
+                                        precision: 18
+                                    })
+                                });
+                                checkAccessQDefer.resolve(false);
+                                return checkAccessQDefer.promise;
+                            }
                         }
-                        // проверка введеного значения на количество цифр до разделителя
-                        if (truncate($scope.asyncParam.taskLimit, 18) !== Number($scope.asyncParam.taskLimit)) {
-                            $dialogs.errorDialog({
-                                content: $filter('translate')('asyncParam.validate.tooLargeNumber', {
-                                    taskTitle: $scope.asyncParam.param.name,
-                                    limitName: $filter('translate')('asyncParam.grid.columnName.taskLimit'),
-                                    limitValue: $scope.asyncParam.taskLimit,
-                                    precision: 18
-                                })
-                            });
-                            checkAccessQDefer.resolve(false);
-                            return checkAccessQDefer.promise;
+
+                        if ($scope.asyncParam.shortQueueLimit) {
+                            // проверка на числовое значение "Ограничение на выполнение задания в очереди быстрых заданий", отличное от 0
+                            if ((isNaN(Number($scope.asyncParam.shortQueueLimit)) || Number($scope.asyncParam.shortQueueLimit) === 0)) {
+                                $dialogs.errorDialog({
+                                    content: $filter('translate')('asyncParam.validate.checkNumber', {
+                                        taskTitle: $scope.asyncParam.param.name,
+                                        limitName: $filter('translate')('asyncParam.grid.columnName.shortQueueLimit'),
+                                        limitValue: $scope.asyncParam.shortQueueLimit
+                                    })
+                                });
+                                checkAccessQDefer.resolve(false);
+                                return checkAccessQDefer.promise;
+                            }
+                            // проверка введеного значения на количество цифр до разделителя
+                            if (truncate($scope.asyncParam.shortQueueLimit, 18) !== Number($scope.asyncParam.shortQueueLimit)) {
+                                $dialogs.errorDialog({
+                                    content: $filter('translate')('asyncParam.validate.tooLargeNumber', {
+                                        taskTitle: $scope.asyncParam.param.name,
+                                        limitName: $filter('translate')('asyncParam.grid.columnName.shortQueueLimit'),
+                                        limitValue: $scope.asyncParam.shortQueueLimit,
+                                        precision: 18
+                                    })
+                                });
+                                checkAccessQDefer.resolve(false);
+                                return checkAccessQDefer.promise;
+                            }
                         }
-                        // проверка на числовое значение "Ограничение на выполнение задания в очереди быстрых заданий", отличное от 0
-                        if ($scope.asyncParam.shortQueueLimit !== "" && (isNaN(Number($scope.asyncParam.shortQueueLimit)) || Number($scope.asyncParam.shortQueueLimit) === 0)) {
-                            $dialogs.errorDialog({
-                                content: $filter('translate')('asyncParam.validate.checkNumber', {
-                                    taskTitle: $scope.asyncParam.param.name,
-                                    limitName: $filter('translate')('asyncParam.grid.columnName.shortQueueLimit'),
-                                    limitValue: $scope.asyncParam.shortQueueLimit
-                                })
-                            });
-                            checkAccessQDefer.resolve(false);
-                            return checkAccessQDefer.promise;
-                        }
-                        // проверка введеного значения на количество цифр до разделителя
-                        if (truncate($scope.asyncParam.shortQueueLimit, 18) !== Number($scope.asyncParam.shortQueueLimit)) {
-                            $dialogs.errorDialog({
-                                content: $filter('translate')('asyncParam.validate.tooLargeNumber', {
-                                    taskTitle: $scope.asyncParam.param.name,
-                                    limitName: $filter('translate')('asyncParam.grid.columnName.shortQueueLimit'),
-                                    limitValue: $scope.asyncParam.shortQueueLimit,
-                                    precision: 18
-                                })
-                            });
-                            checkAccessQDefer.resolve(false);
-                            return checkAccessQDefer.promise;
-                        }
+
                         // проверка, что значения параметра "Загрузка данных из файла в справочник" меньше, чем 1500000
                         if ($scope.asyncParam.param.handlerBean === APP_CONSTANTS.ASYNC_HANDLER_CLASS_NAME.UPLOAD_REFBOOK_ASYNC_TASK && (Number($scope.asyncParam.taskLimit) > 1500000 || Number($scope.asyncParam.shortQueueLimit) > 1500000)) {
                             $dialogs.errorDialog({
@@ -256,19 +262,23 @@
                             checkAccessQDefer.resolve(false);
                             return checkAccessQDefer.promise;
                         }
+
                         // проверка, что "Ограничение на выполнение задания" больше, чем
                         // "Ограничение на выполнение задания в очереди быстрых заданий"
-                        if ($scope.asyncParam.taskLimit !== "" && $scope.asyncParam.shortQueueLimit !== "" && Number($scope.asyncParam.taskLimit) <= Number($scope.asyncParam.shortQueueLimit)) {
-                            $dialogs.errorDialog({
-                                content: $filter('translate')('asyncParam.validate.checkLimit', {
-                                    taskTitle: $scope.asyncParam.param.name,
-                                    taskLimit: $scope.asyncParam.taskLimit,
-                                    shortQueueLimit: $scope.asyncParam.shortQueueLimit
-                                })
-                            });
-                            checkAccessQDefer.resolve(false);
-                            return checkAccessQDefer.promise;
+                        if ($scope.asyncParam.taskLimit && $scope.asyncParam.shortQueueLimit) {
+                            if (Number($scope.asyncParam.taskLimit) <= Number($scope.asyncParam.shortQueueLimit)) {
+                                $dialogs.errorDialog({
+                                    content: $filter('translate')('asyncParam.validate.checkLimit', {
+                                        taskTitle: $scope.asyncParam.param.name,
+                                        taskLimit: $scope.asyncParam.taskLimit,
+                                        shortQueueLimit: $scope.asyncParam.shortQueueLimit
+                                    })
+                                });
+                                checkAccessQDefer.resolve(false);
+                                return checkAccessQDefer.promise;
+                            }
                         }
+
                         checkAccessQDefer.resolve(true);
                     } else if ($scope.emailParamTabActive) {
                         checkAccessQDefer.resolve(true);
