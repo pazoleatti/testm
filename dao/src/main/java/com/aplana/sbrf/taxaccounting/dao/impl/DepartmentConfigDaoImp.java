@@ -199,23 +199,21 @@ public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentCon
         String baseSelect = WITH_DEPARTMENT_CONFIG_BY_TB_AND_PERIOD_SQL;
         if (filter.getDeclarationId() != null) {
             baseSelect += "" +
-                    "select * from (\n" +
-                    "   select dc.id, npi.kpp kpp_, npi.oktmo oktmo_, dc.version_end\n" +
-                    "   from (" +
-                    "       select distinct kpp, oktmo from ndfl_person np\n" +
-                    "       join ndfl_person_income npi on npi.ndfl_person_id = np.id" +
-                    "       where np.declaration_data_id = :declarationId" +
-                    "   ) npi\n" +
-                    "   left join actual_department_config dc on dc.kpp = npi.kpp and dc.oktmo_code = npi.oktmo\n" +
-                    ")";
+                    "select dc.id, npi.kpp, npi.oktmo, dc.version_end\n" +
+                    "from (" +
+                    "   select distinct kpp, oktmo from ndfl_person np\n" +
+                    "   join ndfl_person_income npi on npi.ndfl_person_id = np.id" +
+                    "   where np.declaration_data_id = :declarationId" +
+                    ") npi\n" +
+                    "left join actual_department_config dc on dc.kpp = npi.kpp and dc.oktmo_code = npi.oktmo\n";
             params.addValue("declarationId", filter.getDeclarationId());
         } else {
-            baseSelect += "select dc.id, dc.kpp kpp_, dc.oktmo_code oktmo_, dc.version_end\n" +
+            baseSelect += "select dc.id, dc.kpp, dc.oktmo_code oktmo, dc.version_end\n" +
                     "from actual_department_config dc ";
         }
 
         if (!isEmpty(filter.getName())) {
-            baseSelect += " where (kpp || ' / ' || oktmo) like '%' || :name || '%'";
+            baseSelect = "select * from (" + baseSelect + ") where (kpp || ' / ' || oktmo) like '%' || :name || '%'";
             params.addValue("name", filter.getName());
         }
 
@@ -226,8 +224,8 @@ public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentCon
                     public ReportFormCreationKppOktmoPair mapRow(ResultSet rs, int rowNum) throws SQLException {
                         ReportFormCreationKppOktmoPair kppOktmoPair = new ReportFormCreationKppOktmoPair();
                         kppOktmoPair.setId(rs.getLong("rn"));
-                        kppOktmoPair.setKpp(rs.getString("kpp_"));
-                        kppOktmoPair.setOktmo(rs.getString("oktmo_"));
+                        kppOktmoPair.setKpp(rs.getString("kpp"));
+                        kppOktmoPair.setOktmo(rs.getString("oktmo"));
                         Long departmentConfigId = SqlUtils.getLong(rs, "id");
                         Date versionEnd = rs.getDate("version_end");
                         if (departmentConfigId == null) {

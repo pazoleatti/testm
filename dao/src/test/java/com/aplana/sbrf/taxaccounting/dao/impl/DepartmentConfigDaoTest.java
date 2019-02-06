@@ -27,8 +27,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 
@@ -131,6 +130,32 @@ public class DepartmentConfigDaoTest {
                 new ReportFormCreationKppOktmoPair("000000003", "111", null),
                 new ReportFormCreationKppOktmoPair("000000004", "111", null),
                 new ReportFormCreationKppOktmoPair("000000006", "111", "не относится к ТБ в периоде")));
+    }
+
+    @Test
+    public void findAllKppOktmoPairsByFilterTestPaging() {
+        PagingParams paging = PagingParams.getInstance(2, 2);
+        paging.setProperty("kpp desc, oktmo");
+        paging.setDirection("desc");
+        List<ReportFormCreationKppOktmoPair> kppOktmoPairs = departmentConfigDao.findAllKppOktmoPairsByFilter(ReportFormCreationKppOktmoPairFilter.builder()
+                        .name("000").reportPeriodId(2).departmentId(2).relevanceDate(new LocalDate(2018, 1, 1).toDate()).build(),
+                paging);
+        assertThat(kppOktmoPairs, contains(
+                new ReportFormCreationKppOktmoPair("000000003", "111", null),
+                new ReportFormCreationKppOktmoPair("000000002", "111", "действует до 31.12.2017")));
+    }
+
+    @Test
+    public void findAllKppOktmoPairsByFilterTestPaging2() {
+        PagingParams paging = PagingParams.getInstance(2, 2);
+        paging.setProperty("kpp desc, oktmo");
+        paging.setDirection("desc");
+        List<ReportFormCreationKppOktmoPair> kppOktmoPairs = departmentConfigDao.findAllKppOktmoPairsByFilter(ReportFormCreationKppOktmoPairFilter.builder()
+                        .name("000").declarationId(1L).reportPeriodId(2).departmentId(2).relevanceDate(new LocalDate(2018, 1, 1).toDate()).build(),
+                paging);
+        assertThat(kppOktmoPairs, contains(
+                new ReportFormCreationKppOktmoPair("000000003", "111", null),
+                new ReportFormCreationKppOktmoPair("000000002", "111", "действует до 31.12.2017")));
     }
 
     private DeclarationData declarationData(long id, int reportPeriodId, int departmentId) {
