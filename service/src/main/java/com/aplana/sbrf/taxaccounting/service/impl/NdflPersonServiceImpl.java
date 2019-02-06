@@ -13,14 +13,19 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.result.NdflPersonDeductionDTO;
 import com.aplana.sbrf.taxaccounting.model.result.NdflPersonIncomeDTO;
 import com.aplana.sbrf.taxaccounting.model.result.NdflPersonPrepaymentDTO;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.NdflPersonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -98,5 +103,71 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     @Override
     public PagingResult<KppSelect> findAllKppByDeclarationDataId(long declarationDataId, String kpp, PagingParams pagingParams) {
         return ndflPersonDao.findAllKppByDeclarationDataId(declarationDataId, kpp, pagingParams);
+    }
+
+    @Override
+    @Transactional
+    public void fillNdflPersonIncomeSortFields(List<NdflPerson> ndflPersonList) {
+        Map<Pair<String, String>, List<NdflPersonIncome>> incomesGroupedByOperationAndInp = new HashMap<>();
+        for (NdflPerson person : ndflPersonList) {
+            for (NdflPersonIncome income : person.getIncomes()) {
+                Pair operationAndInpKey = new Pair(income.getOperationId(), person.getInp());
+                List<NdflPersonIncome> operationAndInpGroup = incomesGroupedByOperationAndInp.get(operationAndInpKey);
+                if (operationAndInpGroup == null) {
+                    operationAndInpGroup = new ArrayList<>();
+                }
+                operationAndInpGroup.add(income);
+                incomesGroupedByOperationAndInp.put(operationAndInpKey, operationAndInpGroup);
+
+                if (income.getTaxDate() != null) {
+                    income.setActionDate(income.getTaxDate());
+                } else {
+                    income.setActionDate(income.getPaymentDate());
+                }
+
+                if (income.getIncomeAccruedDate() != null) {
+                    income.setRowType(NdflPersonIncome.ACCRUED_ROW_TYPE);
+                } else if (income.getIncomePayoutDate() != null) {
+                    income.setRowType(NdflPersonIncome.PAYOUT_ROW_TYPE);
+                } else {
+                    income.setRowType(NdflPersonIncome.OTHER_ROW_TYPE);
+                }
+            }
+        }
+
+        for (Map.Entry<Pair<String, String>, List<NdflPersonIncome>> entry : incomesGroupedByOperationAndInp.entrySet()) {
+            List<NdflPersonIncome> group = entry.getValue();
+            List<Date> incomeAccruedDates = new ArrayList<>();
+            List<Date> incomePayoutDates = new ArrayList<>();
+            List<Date> paymentDates = new ArrayList<>();
+
+            for (NdflPersonIncome item : group) {
+                if (item.getIncomeAccruedDate() != null) {
+                    incomeAccruedDates.add(item.getIncomeAccruedDate());
+                }
+                if (item.getIncomePayoutDate() != null) {
+                    incomePayoutDates.add(item.getIncomePayoutDate());
+                }
+                if (item.getPaymentDate() != null) {
+                    paymentDates.add(item.getPaymentDate());
+                }
+            }
+
+            for (NdflPersonIncome item : group) {
+                if (!incomeAccruedDates.isEmpty()) {
+                    Collections.sort(incomeAccruedDates);
+                    item.setOperationDate(incomeAccruedDates.get(0));
+                } else if (!incomePayoutDates.isEmpty()) {
+                    Collections.sort(incomePayoutDates);
+                    item.setOperationDate(incomePayoutDates.get(0));
+                } else  if (!paymentDates.isEmpty()) {
+                    Collections.sort(incomeAccruedDates);
+                    item.setOperationDate(paymentDates.get(0));
+                } else {
+                    item.setOperationDate(null);
+                }
+            }
+        }
+
     }
 }

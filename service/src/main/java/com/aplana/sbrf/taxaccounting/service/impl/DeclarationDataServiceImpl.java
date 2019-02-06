@@ -2756,8 +2756,37 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         reportService.deleteDec(singletonList(declarationDataId),
                 Arrays.asList(DeclarationDataReportType.SPECIFIC_REPORT_DEC, DeclarationDataReportType.EXCEL_DEC));
         NdflPerson ndflPerson = ndflPersonDao.fetchOne(personIncome.getNdflPersonId());
-        Collections.sort(ndflPerson.getIncomes(), NdflPersonIncome.getComparator(ndflPerson));
-        ndflPersonDao.updateIncomes(updateRowNum(ndflPerson.getIncomes()));
+        List<NdflPerson> operationDatePersons = ndflPersonDao.findDeclarartionDataPersonWithSameOperationIdAndInp(ndflPerson.getDeclarationDataId(), ndflPerson.getInp(), personIncome.getOperationId());
+        List<NdflPersonIncome> operationDateIncomes = ndflPersonDao.findDeclarartionDataIncomesWithSameOperationIdAndInp(ndflPerson.getDeclarationDataId(), ndflPerson.getInp(), personIncome.getOperationId());
+        Date operationDate = ndflPersonDao.findOperationDate(ndflPerson.getDeclarationDataId(), ndflPerson.getInp(), personIncome.getOperationId());
+        for (NdflPersonIncome income : operationDateIncomes) {
+            income.setOperationDate(operationDate);
+            if (income.getTaxDate() != null) {
+                income.setActionDate(income.getTaxDate());
+            } else {
+                income.setActionDate(income.getIncomePayoutDate());
+            }
+            if (income.getIncomeAccruedDate() != null) {
+                income.setRowType(NdflPersonIncome.ACCRUED_ROW_TYPE);
+            } else if (income.getIncomePayoutDate() != null) {
+                income.setRowType(NdflPersonIncome.PAYOUT_ROW_TYPE);
+            } else {
+                income.setRowType(NdflPersonIncome.OTHER_ROW_TYPE);
+            }
+        }
+
+        ndflPersonDao.updateIncomes(operationDateIncomes);
+        for (NdflPerson person : operationDatePersons) {
+            List<NdflPersonIncome> incomes = ndflPersonDao.fetchNdflPersonIncomeByNdflPerson(person.getId());
+            List<NdflPersonDeduction> deductions = ndflPersonDao.fetchNdflPersonDeductionByNdflPerson(person.getId());
+            List<NdflPersonPrepayment> prepayments = ndflPersonDao.fetchNdflPersonPrepaymentByNdflPerson(person.getId());
+            Collections.sort(incomes, NdflPersonIncome.getComparator());
+            Collections.sort(deductions, NdflPersonDeduction.getComparator(person));
+            Collections.sort(prepayments, NdflPersonPrepayment.getComparator(person));
+            ndflPersonDao.updateIncomes(updateRowNum(incomes));
+            ndflPersonDao.updateDeductions(updateRowNum(deductions));
+            ndflPersonDao.updatePrepayments(updateRowNum(prepayments));
+        }
     }
 
     @Override

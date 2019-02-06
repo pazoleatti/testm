@@ -63,6 +63,11 @@
     </bean>
 
     <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.service.NdflPersonService"/>
+    </bean>
+
+
+    <bean class="org.mockito.Mockito" factory-method="mock">
         <constructor-arg value="com.aplana.sbrf.taxaccounting.permissions.BasePermissionEvaluator"/>
         <property name="permissionFactoryRegistry">
             <map />

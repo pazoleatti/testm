@@ -670,5 +670,11 @@ public interface NdflPersonService {
      * @return список объектов физических лиц состояние которых идентично состоянию соответствующих полей в справочнике "Физические лица"
      */
     List<NdflPerson> fetchRefBookPersonsAsNdflPerson(List<Long> ndflPersonIdList, Date actualDate);
+
+    /**
+     * Заполнить поля раздела 2 используемые для сортировки
+     * @param ndflPersonList  список записей раздела 1 которым нужно заполнить поля раздела 2
+     */
+    void fillNdflPersonIncomeSortFields(List<NdflPerson> ndflPersonList);
 }
 

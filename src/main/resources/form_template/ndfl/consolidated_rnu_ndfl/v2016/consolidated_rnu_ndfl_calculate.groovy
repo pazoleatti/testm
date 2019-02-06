@@ -93,6 +93,7 @@ class Calculate extends AbstractScriptClass {
             }
         } catch (Throwable e) {
             logger.error(e.toString())
+            e.printStackTrace()
         } finally {
             lockDataService.unlockMultipleTasks(locks?.key)
         }
@@ -524,6 +525,8 @@ class Calculate extends AbstractScriptClass {
 
         Collections.sort(ndflPersonsToPersistList, NdflPerson.getComparator())
 
+        ndflPersonService.fillNdflPersonIncomeSortFields(ndflPersonsToPersistList)
+
         //noinspection GroovyAssignabilityCheck
         logForDebug("Сортировка данных раздела 1, (" + ScriptUtils.calcTimeMillis(time))
 
@@ -532,7 +535,7 @@ class Calculate extends AbstractScriptClass {
         BigDecimal deductionRowNum = new BigDecimal("0")
         BigDecimal prepaymentRowNum = new BigDecimal("0")
         for (NdflPerson ndflPerson : ndflPersonsToPersistList) {
-            Collections.sort(ndflPerson.incomes, NdflPersonIncome.getComparator(ndflPerson))
+            Collections.sort(ndflPerson.incomes, NdflPersonIncome.getComparator())
 
             Collections.sort(ndflPerson.deductions, NdflPersonDeduction.getComparator(ndflPerson))
 

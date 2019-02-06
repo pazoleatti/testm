@@ -240,8 +240,9 @@ class Import extends AbstractScriptClass {
         }
 
         Collections.sort(ndflPersons, NdflPerson.getComparator())
+        ndflPersonService.fillNdflPersonIncomeSortFields(ndflPersons)
         for (NdflPerson ndflPerson : ndflPersons) {
-            Collections.sort(ndflPerson.incomes, NdflPersonIncome.getComparator(ndflPerson))
+            Collections.sort(ndflPerson.incomes, NdflPersonIncome.getComparator())
             Collections.sort(ndflPerson.deductions, NdflPersonDeduction.getComparator(ndflPerson))
             Collections.sort(ndflPerson.prepayments, NdflPersonPrepayment.getComparator(ndflPerson))
         }

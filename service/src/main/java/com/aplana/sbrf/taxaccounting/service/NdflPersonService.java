@@ -103,4 +103,10 @@ public interface NdflPersonService {
      * @return страница из значений КПП, полученных из строк раздела 2 формы РНУ
      */
     PagingResult<KppSelect> findAllKppByDeclarationDataId(long declarationDataId, String kpp, PagingParams pagingParams);
+
+    /**
+     * Заполнить поля раздела 2 используемые для сортировки
+     * @param ndflPersonList  список записей раздела 1 которым нужно заполнить поля раздела 2
+     */
+    void fillNdflPersonIncomeSortFields(List<NdflPerson> ndflPersonList);
 }

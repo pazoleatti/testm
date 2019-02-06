@@ -1,15 +1,24 @@
 package com.aplana.sbrf.taxaccounting.model.ndfl;
 
 import com.aplana.sbrf.taxaccounting.model.util.NdflComparator;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Стандартные, социальные и имущественные налоговые вычеты (Раздел 3)
  *
  * @author Andrey Drunk
  */
+@Getter @Setter @ToString
 public class NdflPersonDeduction extends NdflPersonOperation {
 
     // Код вычета (Графа 3)
@@ -89,145 +98,6 @@ public class NdflPersonDeduction extends NdflPersonOperation {
     @Override
     public String[] getFields() {
         return FIELDS;
-    }
-
-    public String getTypeCode() {
-        return typeCode;
-    }
-
-    public void setTypeCode(String typeCode) {
-        this.typeCode = typeCode;
-    }
-
-    public String getNotifType() {
-        return notifType;
-    }
-
-    public void setNotifType(String notifType) {
-        this.notifType = notifType;
-    }
-
-    public Date getNotifDate() {
-        return notifDate;
-    }
-
-    public void setNotifDate(Date notifDate) {
-        this.notifDate = notifDate;
-    }
-
-    public String getNotifNum() {
-        return notifNum;
-    }
-
-    public void setNotifNum(String notifNum) {
-        this.notifNum = notifNum;
-    }
-
-    public String getNotifSource() {
-        return notifSource;
-    }
-
-    public void setNotifSource(String notifSource) {
-        this.notifSource = notifSource;
-    }
-
-    public BigDecimal getNotifSumm() {
-        return notifSumm;
-    }
-
-    public void setNotifSumm(BigDecimal notifSumm) {
-        this.notifSumm = notifSumm;
-    }
-
-    public Date getIncomeAccrued() {
-        return incomeAccrued;
-    }
-
-    public void setIncomeAccrued(Date incomeAccrued) {
-        this.incomeAccrued = incomeAccrued;
-    }
-
-    public String getIncomeCode() {
-        return incomeCode;
-    }
-
-    public void setIncomeCode(String incomeCode) {
-        this.incomeCode = incomeCode;
-    }
-
-    public BigDecimal getIncomeSumm() {
-        return incomeSumm;
-    }
-
-    public void setIncomeSumm(BigDecimal incomeSumm) {
-        this.incomeSumm = incomeSumm;
-    }
-
-    public Date getPeriodPrevDate() {
-        return periodPrevDate;
-    }
-
-    public void setPeriodPrevDate(Date periodPrevDate) {
-        this.periodPrevDate = periodPrevDate;
-    }
-
-    public BigDecimal getPeriodPrevSumm() {
-        return periodPrevSumm;
-    }
-
-    public void setPeriodPrevSumm(BigDecimal periodPrevSumm) {
-        this.periodPrevSumm = periodPrevSumm;
-    }
-
-    public Date getPeriodCurrDate() {
-        return periodCurrDate;
-    }
-
-    public void setPeriodCurrDate(Date periodCurrDate) {
-        this.periodCurrDate = periodCurrDate;
-    }
-
-    public BigDecimal getPeriodCurrSumm() {
-        return periodCurrSumm;
-    }
-
-    public void setPeriodCurrSumm(BigDecimal periodCurrSumm) {
-        this.periodCurrSumm = periodCurrSumm;
-    }
-
-    public Date getModifiedDate() {
-        return modifiedDate;
-    }
-
-    public void setModifiedDate(Date modifiedDate) {
-        this.modifiedDate = modifiedDate;
-    }
-
-    public String getModifiedBy() {
-        return modifiedBy;
-    }
-
-    public void setModifiedBy(String modifiedBy) {
-        this.modifiedBy = modifiedBy;
-    }
-
-    @Override
-    public String toString() {
-        return "NdflPersonDeduction{" +
-                ", typeCode='" + typeCode + '\'' +
-                ", notifType='" + notifType + '\'' +
-                ", notifDate=" + notifDate +
-                ", notifNum='" + notifNum + '\'' +
-                ", notifSource='" + notifSource + '\'' +
-                ", notifSumm=" + notifSumm +
-                ", incomeAccrued=" + incomeAccrued +
-                ", incomeCode='" + incomeCode + '\'' +
-                ", incomeSumm=" + incomeSumm +
-                ", periodPrevDate=" + periodPrevDate +
-                ", periodPrevSumm=" + periodPrevSumm +
-                ", periodCurrDate=" + periodCurrDate +
-                ", periodCurrSumm=" + periodCurrSumm +
-                '}';
     }
 
     /**

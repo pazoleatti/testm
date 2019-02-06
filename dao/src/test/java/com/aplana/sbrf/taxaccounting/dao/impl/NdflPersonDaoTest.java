@@ -1285,6 +1285,18 @@ public class NdflPersonDaoTest {
         assertThat(result).hasSize(1);
     }
 
+    @Test
+    public void test_findDeclarartionDataIncomesWithSameOperationIdAndInp() {
+        List<NdflPersonIncome> result = ndflPersonDao.findDeclarartionDataIncomesWithSameOperationIdAndInp(100L, "100500", "2");
+        assertThat(result).hasSize(2);
+    }
+
+    @Test
+    public void findOperationDate() {
+        Date result = ndflPersonDao.findOperationDate(100L, "100500", "2");
+        assertThat(result).isInSameDayAs("2005-10-02");
+    }
+
     public void testFindAllKppByDeclarationDataId() {
         List<KppSelect> kppList = ndflPersonDao.findAllKppByDeclarationDataId(100L, null, PagingParams.getInstance(0, 100));
         assertThat(kppList).hasSize(4);
