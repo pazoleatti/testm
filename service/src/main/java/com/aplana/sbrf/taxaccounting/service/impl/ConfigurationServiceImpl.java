@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.AsyncTaskTypeDao;
-import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
@@ -27,22 +26,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 
-import static com.aplana.sbrf.taxaccounting.model.ConfigurationParam.*;
-import static java.util.Arrays.asList;
+import com.aplana.sbrf.taxaccounting.model.ConfigurationParam;
+
 
 @Service("configurationService")
 @Transactional
 public class ConfigurationServiceImpl implements ConfigurationService {
     private static final int INN_JUR_LENGTH = 10;
     private static final int COMMON_PARAM_DEPARTMENT_ID = 0;
-    private static final int MAX_LENGTH = 500;
-    private static final int EMAIL_MAX_LENGTH = 200;
     private static final int UPLOAD_REFBOOK_ASYNC_TASK_LIMIT = 1500000;
     private static final String SBERBANK_INN_DEFAULT = "7707083893";
     private static final String NO_CODE_DEFAULT = "9979";
@@ -52,16 +47,11 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     private static final String CONSOLIDATION_DATA_SELECTION_DEPTH_DEFAULT = "3";
     private static final String REPORT_PERIOD_YEAR_MIN = "2003";
     private static final String REPORT_PERIOD_YEAR_MAX = "2100";
-    private static final String NOT_SET_ERROR = "Не задано значение поля «%s»!";
-    private static final String DUPLICATE_SET_ERROR = "Значение «%s» уже задано!";
+    private static final String DECLARATION_ROWS_BULK_EDIT_MAX_COUNT_DEFAULT = "200";
     private static final String READ_ERROR = "«%s»: Отсутствует доступ на чтение!";
     private static final String WRITE_ERROR = "«%s»: Отсутствует доступ на запись!";
-    private static final String LOAD_WRITE_ERROR = "«%s» для «%s»: отсутствует доступ на запись!";
     private static final String READ_INFO = "«%s»: Присутствует доступ на чтение!";
     private static final String WRITE_INFO = "«%s»: Присутствует доступ на запись!";
-    private static final String UNIQUE_PATH_ERROR = "«%s»: Значение параметра «%s» не может быть равно значению параметра «%s» для «%s»!";
-    private static final String MAX_LENGTH_ERROR = "«%s»: Длина значения превышает максимально допустимую (%d)!";
-    private static final String SIGN_CHECK_ERROR = "«%s»: значение не соответствует допустимому (0,1)!";
     private static final String NO_CODE_ERROR = "Код НО (пром.) (\"%s\") не найден в справочнике \"Налоговые инспекции\"";
     private static final String INN_JUR_ERROR = "Введен некорректный номер ИНН «%s»";
     private static final String TASK_LIMIT_FIELD = "Ограничение на выполнение задачи";
@@ -75,20 +65,18 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     private static final String UPLOAD_REFBOOK_ASYNC_TASK = "UploadRefBookAsyncTask";
     private static final String ASYNC_PARAM_TASK_LIMIT = "Ограничение на выполнение задания";
     private static final String ASYNC_PARAM_SHORT_QUEUE_LIMIT = "Ограничение на выполнение задания в очереди быстрых заданий";
-    private static final String SEARCH_WITOUT_ERROR_MESSAGE = "Проверка выполнена, ошибок не найдено";
+    private static final String SEARCH_WITHOUT_ERROR_MESSAGE = "Проверка выполнена, ошибок не найдено";
     private static final String EDIT_ASYNC_PARAM_MESSAGE = "%s. Изменён параметр \"%s\" для задания \"%s\": %s.";
-    private static final List SMTP_CONNECTION_PARAMS = Arrays.asList("mail.smtp.user", "mail.smtp.password", "mail.smtp.host", "mail.smtp.port");
     private static final String CONSOLIDATION_DATA_SELECTION_DEPTH_ERROR_MESSAGE = "Для параметра \"Горизонт отбора данных для консолидации, годы\" должно быть указано целое количество лет от 1 до 99";
     private static final String REPORT_PERIOD_YEAR_ERROR = "Для параметра \"%s\" должно быть указано значение от 0001 до 9999";
-    private static final String NEGATIVE_INTEGER_ERROR = "Для параметра \"%s\" должно быть указано целое число ≥ 0";
+    private static final String NEGATIVE_INTEGER_ERROR = "Для параметра \"%s\" должно быть указано целое число ≥ 0"; // >= 0
+    private static final String NOT_POSITIVE_INTEGER_ERROR = "Значение параметра \"%s\" должно быть целым числом, большим нуля"; // > 0
     private static final String REPORT_PERIOD_YEAR_MIN_HIGHER_MAX_ERROR = "Минимальное значение отчетного года\" должно быть не больше \"Максимального значения отчетного года";
     private static final String REPORT_PERIOD_YEAR_MAX_LOWER_MIN_ERROR = "Максимальное значение отчетного года\" должно быть не меньше \"Минимального значения отчетного года";
 
 
     @Autowired
     private ConfigurationDao configurationDao;
-    @Autowired
-    private DepartmentDao departmentDao;
     @Autowired
     private RefBookFactory refBookFactory;
     @Autowired
@@ -109,6 +97,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         defaultCommonConfig.add(new Configuration(ConfigurationParam.CONSOLIDATION_DATA_SELECTION_DEPTH.getCaption(), COMMON_PARAM_DEPARTMENT_ID, CONSOLIDATION_DATA_SELECTION_DEPTH_DEFAULT));
         defaultCommonConfig.add(new Configuration(ConfigurationParam.REPORT_PERIOD_YEAR_MIN.getCaption(), COMMON_PARAM_DEPARTMENT_ID, REPORT_PERIOD_YEAR_MIN));
         defaultCommonConfig.add(new Configuration(ConfigurationParam.REPORT_PERIOD_YEAR_MAX.getCaption(), COMMON_PARAM_DEPARTMENT_ID, REPORT_PERIOD_YEAR_MAX));
+        defaultCommonConfig.add(new Configuration(ConfigurationParam.DECLARATION_ROWS_BULK_EDIT_MAX_COUNT.getCaption(), COMMON_PARAM_DEPARTMENT_ID, DECLARATION_ROWS_BULK_EDIT_MAX_COUNT_DEFAULT));
         // Веса идентификации
         defaultCommonConfig.add(new Configuration(ConfigurationParam.WEIGHT_LAST_NAME.getCaption(), COMMON_PARAM_DEPARTMENT_ID, "5"));
         defaultCommonConfig.add(new Configuration(ConfigurationParam.WEIGHT_FIRST_NAME.getCaption(), COMMON_PARAM_DEPARTMENT_ID, "10"));
@@ -125,11 +114,6 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         defaultCommonConfig.add(new Configuration(ConfigurationParam.WEIGHT_ADDRESS_INO.getCaption(), COMMON_PARAM_DEPARTMENT_ID, "1"));
 
         return defaultCommonConfig;
-    }
-
-    @Override
-    public ConfigurationParamModel fetchAllConfig(TAUserInfo userInfo) {
-        return configurationDao.fetchAllAsModel();
     }
 
     @Override
@@ -162,7 +146,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
             return logEntryService.save(logger.getEntries());
         } else {
             logger.clear();
-            logger.info(SEARCH_WITOUT_ERROR_MESSAGE);
+            logger.info(SEARCH_WITHOUT_ERROR_MESSAGE);
             return logEntryService.save(logger.getEntries());
         }
     }
@@ -178,117 +162,6 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     public String checkFileSystemAccess(Configuration param, TAUserInfo userInfo) {
         Logger logger = checkConfigurationParam(param);
         return logEntryService.save(logger.getEntries());
-    }
-
-    @Override
-    public void checkFileSystemAccess(TAUserInfo userInfo, ConfigurationParamModel model, Logger logger) {
-        if (model == null) {
-            return;
-        }
-
-        // Проверки общих параметров
-        for (ConfigurationParam configurationParam : ConfigurationParam.values()) {
-            if (configurationParam.getGroup().equals(ConfigurationParamGroup.COMMON)) {
-                List<String> valuesList = model.get(configurationParam, 0);
-                if (valuesList != null)
-                    for (String value : valuesList) {
-                        Boolean isFolder = configurationParam.isFolder();
-                        // у папок smb в конце должен быть слеш (иначе возникенет ошибка при configurationParam.isFolder() == true и configurationParam.hasReadCheck() == true)
-                        if (isFolder == null) {
-                            FileWrapper keyResourceFolder = ResourceUtils.getSharedResource(value, false);
-                            if (keyResourceFolder.isFile()) {
-                                isFolder = false;
-                            } else if (keyResourceFolder.isDirectory()) {
-                                isFolder = true;
-                                value = value + "/";
-                            } else {
-                                isFolder = false;
-                            }
-                        } else if (isFolder) {
-                            value = value + "/";
-                        }
-                        // Проверка значения параметра "Проверять ЭП"
-                        if (configurationParam.equals(ConfigurationParam.SIGN_CHECK)) {
-                            signCheck(value, logger);
-                        }
-                        if (configurationParam.hasReadCheck() && (isFolder
-                                && !FileWrapper.canReadFolder(value) || !isFolder
-                                && !FileWrapper.canReadFile(value))) {
-                            // Доступ на чтение
-                            logger.error(READ_ERROR, value);
-                        } else if (configurationParam.hasWriteCheck() && (isFolder
-                                && !FileWrapper.canWriteFolder(value) || !isFolder
-                                && !FileWrapper.canWriteFile(value))) {
-                            // Доступ на запись
-                            logger.error(WRITE_ERROR, value);
-                        } else {
-                            if (configurationParam.hasReadCheck()) {
-                                logger.info(READ_INFO, value);
-                            } else if (configurationParam.hasWriteCheck()) {
-                                logger.info(WRITE_INFO, value);
-                            }
-                        }
-                    }
-            }
-        }
-
-        // Уникальность ТБ для параметров загрузки НФ (дубли могут проверяться только на клиенте)
-        Set<Integer> departmentIdSet = new HashSet<Integer>();
-        for (Map.Entry<ConfigurationParam, Map<Integer, List<String>>> entry : model.entrySet()) {
-            if (entry.getKey().getGroup().equals(ConfigurationParamGroup.FORM)) {
-                for (int departmentId : entry.getValue().keySet()) {
-                    departmentIdSet.add(departmentId);
-                }
-            }
-        }
-
-        // Пути к каталогам для параметров загрузки НФ
-        Set<ConfigurationParam> configurationParamSet = new HashSet<ConfigurationParam>(asList(
-                ConfigurationParam.FORM_UPLOAD_DIRECTORY,
-                ConfigurationParam.FORM_ARCHIVE_DIRECTORY,
-                ConfigurationParam.FORM_ERROR_DIRECTORY));
-
-        for (ConfigurationParam param : configurationParamSet) {
-            for (int departmentId : departmentIdSet) {
-                List<String> list = model.get(param, departmentId);
-                if (list != null && !list.isEmpty()) {
-                    String value = list.get(0);
-                    // Проверка доступности
-                    if (!FileWrapper.canWriteFolder(value)) {
-                        Department department = departmentDao.getDepartment(departmentId);
-                        logger.error(LOAD_WRITE_ERROR, value, department.getName());
-                    } else {
-                        logger.info(WRITE_INFO, value);
-                    }
-                }
-            }
-        }
-    }
-
-    @Override
-    public List<ConfigurationParam> checkCommonConfigurationParams(Map<ConfigurationParam, String> configurationParamMap, Logger logger) {
-        List<ConfigurationParam> result = new ArrayList<ConfigurationParam>();
-
-        String inn = configurationParamMap.get(ConfigurationParam.SBERBANK_INN);
-        if (inn.length() != INN_JUR_LENGTH || !RefBookUtils.checkControlSumInn(inn)) {
-            logger.error(INN_JUR_ERROR, inn);
-            result.add(ConfigurationParam.SBERBANK_INN);
-        }
-
-        String noCode = configurationParamMap.get(ConfigurationParam.NO_CODE);
-        RefBookDataProvider taxInspectionDataProvider = refBookFactory.getDataProvider(RefBook.Id.TAX_INSPECTION.getId());
-
-        if (taxInspectionDataProvider.getRecordsCount(new Date(), "code = '" + noCode + "'") == 0) {
-            logger.error(NO_CODE_ERROR, noCode);
-            result.add(ConfigurationParam.NO_CODE);
-        }
-
-        return result;
-    }
-
-    @Override
-    public void saveCommonConfigurationParams(Map<ConfigurationParam, String> configurationParamMap, TAUserInfo userInfo) {
-        configurationDao.update(configurationParamMap, COMMON_PARAM_DEPARTMENT_ID);
     }
 
     @Override
@@ -322,6 +195,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         return fetchAllByEnums(params);
     }
 
+    @Override
     public Map<String, Configuration> fetchAllByEnums(List<ConfigurationParam> params) {
         List<Configuration> configurations = configurationDao.fetchAllByEnums(params);
         return Maps.uniqueIndex(configurations, new Function<Configuration, String>() {
@@ -338,14 +212,11 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         Logger logger = new Logger();
         if (commonParam != null) {
             ConfigurationParam param = ConfigurationParam.valueOf(commonParam.getCode());
-            if (param != null) {
-                configurationDao.createCommonParam(commonParam);
-                String message = ConfigurationParamGroup.COMMON.getCaption() + ". Добавлен параметр \"" + param.getCaption() + "\": " + commonParam.getValue();
-                auditService.add(FormDataEvent.EDIT_CONFIG_PARAMS, userInfo, userInfo.getUser().getDepartmentId(), null, null, null,
-                        null, null, message, null);
-                logger.info(message);
-            }
-
+            configurationDao.createCommonParam(commonParam);
+            String message = ConfigurationParamGroup.COMMON.getCaption() + ". Добавлен параметр \"" + param.getCaption() + "\": " + commonParam.getValue();
+            auditService.add(FormDataEvent.EDIT_CONFIG_PARAMS, userInfo, userInfo.getUser().getDepartmentId(), null, null, null,
+                    null, null, message, null);
+            logger.info(message);
         }
         return logEntryService.save(logger.getEntries());
     }
@@ -388,7 +259,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
             "hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).EDIT_GENERAL_PARAMS)")
     public String updateCommonParam(Configuration commonParam, TAUserInfo userInfo) {
         Logger logger = new Logger();
-        checkConfig(commonParam, logger);
+        checkCommonParam(commonParam, logger);
         if (!logger.containsLevel(LogLevel.ERROR)) {
             configurationDao.update(commonParam);
             String message = ConfigurationParamGroup.COMMON.getCaption() + ". Изменён параметр \"" + commonParam.getDescription() + "\": " + commonParam.getValue();
@@ -490,7 +361,6 @@ public class ConfigurationServiceImpl implements ConfigurationService {
                 logger.error("Количество выгружаемых в файл Excel строк не может быть более 1 000 000");
             }
         }
-
     }
 
     /**
@@ -499,7 +369,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
      * @param config проверяемый параметр
      * @param logger логгер
      */
-    private void checkConfig(Configuration config, Logger logger) {
+    private void checkCommonParam(Configuration config, Logger logger) {
         if (config.getCode().equals(ConfigurationParam.SBERBANK_INN.name())) {
             checkSberbankInn(config.getValue(), logger);
         } else if (config.getCode().equals(ConfigurationParam.NO_CODE.name())) {
@@ -516,12 +386,19 @@ public class ConfigurationServiceImpl implements ConfigurationService {
             checkReportPeriodYear(config, logger);
         } else if (isIdentificationWeightParam(config)) {
             checkIdentificationWeightParam(config, logger);
+        } else if (config.getCode().equals(ConfigurationParam.DECLARATION_ROWS_BULK_EDIT_MAX_COUNT.name())) {
+            checkPositiveIntParam(config, logger);
         }
     }
 
     private boolean isIdentificationWeightParam(Configuration config) {
-        List<ConfigurationParam> params = Arrays.asList(WEIGHT_LAST_NAME, WEIGHT_FIRST_NAME, WEIGHT_MIDDLE_NAME, WEIGHT_BIRTHDAY, WEIGHT_CITIZENSHIP, WEIGHT_INP,
-                WEIGHT_INN, WEIGHT_INN_FOREIGN, WEIGHT_SNILS, WEIGHT_TAX_PAYER_STATUS, WEIGHT_DUL, WEIGHT_ADDRESS, WEIGHT_ADDRESS_INO);
+        List<ConfigurationParam> params = Arrays.asList(
+                ConfigurationParam.WEIGHT_LAST_NAME, ConfigurationParam.WEIGHT_FIRST_NAME, ConfigurationParam.WEIGHT_MIDDLE_NAME,
+                ConfigurationParam.WEIGHT_BIRTHDAY, ConfigurationParam.WEIGHT_CITIZENSHIP, ConfigurationParam.WEIGHT_INP,
+                ConfigurationParam.WEIGHT_INN, ConfigurationParam.WEIGHT_INN_FOREIGN, ConfigurationParam.WEIGHT_SNILS,
+                ConfigurationParam.WEIGHT_TAX_PAYER_STATUS, ConfigurationParam.WEIGHT_DUL, ConfigurationParam.WEIGHT_ADDRESS,
+                ConfigurationParam.WEIGHT_ADDRESS_INO
+        );
         for (ConfigurationParam param : params) {
             if (config.getCode().equalsIgnoreCase(param.name())) {
                 return true;
@@ -537,15 +414,37 @@ public class ConfigurationServiceImpl implements ConfigurationService {
      * @param logger        логгер
      */
     private void checkIdentificationWeightParam(Configuration configuration, Logger logger) {
-        boolean formatError = false;
-        Integer intValue = null;
-        try {
-            intValue = Integer.valueOf(configuration.getValue());
-        } catch (NumberFormatException e) {
-            formatError = true;
-        }
-        if (formatError || intValue < 0) {
+        String value = configuration.getValue();
+        boolean valid = isNotNegativeInt(value);
+        if (!valid) {
             logger.error(NEGATIVE_INTEGER_ERROR, configuration.getDescription());
+        }
+    }
+
+    private boolean isNotNegativeInt(String value) {
+        try {
+            return (Integer.valueOf(value) >= 0);
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Проверка параметра - целого положительного числа.
+     */
+    private void checkPositiveIntParam(Configuration configuration, Logger logger) {
+        String value = configuration.getValue();
+        boolean valid = isPositiveInt(value);
+        if (!valid) {
+            logger.error(NOT_POSITIVE_INTEGER_ERROR, configuration.getDescription());
+        }
+    }
+
+    private boolean isPositiveInt(String value) {
+        try {
+            return (Integer.valueOf(value) > 0);
+        } catch (NumberFormatException e) {
+            return false;
         }
     }
 
@@ -686,61 +585,5 @@ public class ConfigurationServiceImpl implements ConfigurationService {
             }
         }
         return logger;
-    }
-
-    /**
-     * Формирует строку изменения конфигурационного параматра для сообщения в формате <старое значение> -> <новое значение>
-     *
-     * @param config    новые параметры конфигурации
-     * @param oldConfig старые параметры конфигурации
-     * @param key       название параметра конфигурации, для которого осуществляется проверка на изменение
-     * @return строка, если параметр изменен, null в противном случае
-     */
-    private String checkConfig(Map<String, String> config, Map<String, String> oldConfig, String key) {
-        String value = config.get(key);
-        String oldValue = oldConfig.get(key);
-        if (value == null) value = "";
-        if (oldValue == null) oldValue = "";
-        if (!value.equals(oldValue)) {
-            return "\"" + oldValue + "\" -> \"" + value + "\"";
-        }
-        return null;
-    }
-
-    /**
-     * Проверка значения параметра "Проверять ЭП"
-     *
-     * @param value  значение параметра
-     * @param logger логгер
-     */
-    private void signCheck(String value, Logger logger) {
-        if (!"0".equals(value) && !"1".equals(value)) {
-            logger.error(SIGN_CHECK_ERROR, value);
-        }
-    }
-
-    /**
-     * Изменился ли путь настроики
-     *
-     * @param oldModel модель со старыми данными
-     * @param newModel модель с новыми данными
-     * @return если изменился параметр, то возвращает и старый и новый значения
-     */
-    private String checkParams(ConfigurationParamModel oldModel, ConfigurationParamModel newModel, ConfigurationParam param, Integer departmentId) {
-        String oldModelFullStringValue = oldModel.getFullStringValue(param, departmentId);
-        String newModelFullStringValue = newModel.getFullStringValue(param, departmentId);
-        if (oldModelFullStringValue != null && newModelFullStringValue != null) {
-            if (!oldModelFullStringValue.equals(newModelFullStringValue)) {
-                return "\"" + oldModelFullStringValue + "\" -> \"" + newModelFullStringValue + "\"";
-            } else {
-                return null;
-            }
-        } else if (oldModelFullStringValue == null && newModelFullStringValue == null) {
-            return null;
-        } else if (oldModelFullStringValue != null) {
-            return "\"" + oldModelFullStringValue + "\" -> \"\"";
-        } else {
-            return "\"\" -> \"" + newModelFullStringValue + "\"";
-        }
     }
 }

@@ -103,4 +103,13 @@
 		</update>
 	</changeSet>
 
+	<!-- https://jira.aplana.com/browse/SBRFNDFL-6483 Реализовать возможность массового редактирования данных ПНФ (для коррекции проблем SAP) -->
+	<changeSet id="3.5-snazin-2" author="snazin">
+        <comment>Добавлен Общий параметр с ограничением числа редактируемых строк НФ</comment>
+		<insert tableName="configuration">
+            <column name="code" value="DECLARATION_ROWS_BULK_EDIT_MAX_COUNT"/>
+            <column name="department_id" value="0"/>
+            <column name="value" value="200"/>
+        </insert>
+	</changeSet>
 </databaseChangeLog>

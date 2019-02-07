@@ -1,19 +1,12 @@
 package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.log.Logger;
 
 import java.util.List;
 import java.util.Map;
 
 @ScriptExposed
 public interface ConfigurationService {
-
-    /**
-     * Получение конфигурационных параметров (табл. CONFIGURATION)
-     */
-    @Deprecated
-    ConfigurationParamModel fetchAllConfig(TAUserInfo userInfo);
 
     /**
      * Получение модели конфигурационных параметров, на просмотр которых пользователь имеет права
@@ -56,26 +49,6 @@ public interface ConfigurationService {
     String checkFileSystemAccess(Configuration param, TAUserInfo userInfo);
 
     /**
-     * Проверка доступности путей в указанных конфигурационных параметрах (табл. CONFIGURATION)
-     */
-    @Deprecated
-    void checkFileSystemAccess(TAUserInfo userInfo, ConfigurationParamModel model, Logger logger);
-
-    /**
-     * Проверка общих параметров {@link ConfigurationParamGroup#COMMON_PARAM}
-     *
-     * @return список параметров с ошибками
-     */
-    @Deprecated
-    List<ConfigurationParam> checkCommonConfigurationParams(Map<ConfigurationParam, String> configurationParamMap, Logger logger);
-
-    /**
-     * Сохранение общих параметров {@link ConfigurationParamGroup#COMMON_PARAM}
-     */
-    @Deprecated
-    void saveCommonConfigurationParams(Map<ConfigurationParam, String> configurationParamMap, TAUserInfo userInfo);
-
-    /**
      * Установка значений общих конфигурационных параметров по умолчанию
      *
      * @param userInfo информация о пользователе
@@ -112,7 +85,7 @@ public interface ConfigurationService {
     /**
      * Возвращяет map вида код-параметр для определенного списка кодов
      *
-     * @param params список параметров
+     * @param params   список параметров
      * @param userInfo пользователь
      * @return map в виде код-параметр
      */
