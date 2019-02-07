@@ -4,6 +4,7 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
 
+	<!--https://jira.aplana.com/browse/SBRFNDFL-6265 Реализовать изменения порядка сортировки в отчете "Детализация..."-->
 	<changeSet id="3.5-dnovikov-1" author="dnovikov" runAlways="true">
 		<update tableName="DECLARATION_TEMPLATE">
 			<column name="CREATE_SCRIPT" valueClobFile="templates-3.5/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl.groovy"/>
@@ -15,6 +16,7 @@
 		</update>
 	</changeSet>
 
+	<!--https://jira.aplana.com/browse/SBRFNDFL-6451 Реализовать установку блокировок на формы источники в процессе выполнения консолидации-->
 	<changeSet id="3.5-ytrofimov-1" author="ytrofimov" runAlways="true">
 		<update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
 			<column name="script" valueClobFile="templates-3.5/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl_calculate.groovy"/>
@@ -22,6 +24,7 @@
 		</update>
 	</changeSet>
 
+	<!--https://jira.aplana.com/browse/SBRFNDFL-6452 Реализовать изменение определения настроек подразделений ТБ при консолидации-->
 	<changeSet id="3.5-dnovikov-2" author="dnovikov">
 		<sql>
 			create view department_config as
@@ -33,6 +36,7 @@
 		</sql>
 	</changeSet>
 
+	<!--https://jira.aplana.com/browse/SBRFNDFL-6368 "null - (null) null" в сообщении на событие изменения ДУЛ в отчётности через Идентификацию-->
 	<changeSet id="3.5-dnovikov-3" author="dnovikov" runAlways="true">
 		<update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
 			<column name="script" valueClobFile="templates-3.5/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_calculate.groovy"/>
@@ -67,6 +71,28 @@
 			<column name="script" valueClobFile="templates-3.5/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_import.groovy"/>
 			<where>DECLARATION_TEMPLATE_ID = 100 and EVENT_ID = 7</where>
 		</update>
+	</changeSet>
+
+	<!--https://jira.aplana.com/browse/SBRFNDFL-6552 Сортировка РНУ реализована не по постановке-->
+	<changeSet id="3.5-ytrofimov-2" author="ytrofimov">
+		<addColumn tableName="ndfl_person_income">
+			<column name="operation_date" type="date"/>
+			<column name="action_date" type="date" />
+			<column name="row_type" type="number(3,0)">
+				<constraints checkConstraint="row_type in (100, 200, 300)" />
+			</column>
+		</addColumn>
+	</changeSet>
+
+	<!--https://jira.aplana.com/browse/SBRFNDFL-6552 Сортировка РНУ реализована не по постановке-->
+	<changeSet id="3.5-ytrofimov-3" author="ytrofimov">
+		<sql splitStatements="false">
+			begin
+			execute immediate 'comment on column ndfl_person_income.operation_date is ''Поле, используемое для сортировки Раздела 2  Хранит дату первого начисления в рамках этой операции (набора строк формы с одинаковым ID операции)''';
+			execute immediate 'comment on column ndfl_person_income.action_date is ''Поле, используемое для сортировки Раздела 2  Показывает дату действия, отражаемого в этой строке.''';
+			execute immediate 'comment on column ndfl_person_income.row_type is ''Поле, используемое для сортировки Раздела 2''';
+			end;
+		</sql>
 	</changeSet>
 
 </databaseChangeLog>
