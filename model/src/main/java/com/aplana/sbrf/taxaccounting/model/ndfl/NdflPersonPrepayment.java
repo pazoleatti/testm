@@ -1,14 +1,25 @@
 package com.aplana.sbrf.taxaccounting.model.ndfl;
 
 import com.aplana.sbrf.taxaccounting.model.util.NdflComparator;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author Andrey Drunk
  * Cведения о доходах в виде авансовых платежей
  */
+@Getter
+@Setter
+@ToString
 public class NdflPersonPrepayment extends NdflPersonOperation {
 
     // Сумма фиксированного авансового платежа (Графа 4)
@@ -54,64 +65,6 @@ public class NdflPersonPrepayment extends NdflPersonOperation {
     @Override
     public String[] getFields() {
         return FIELDS;
-    }
-
-    public BigDecimal getSumm() {
-        return summ;
-    }
-
-    public void setSumm(BigDecimal summ) {
-        this.summ = summ;
-    }
-
-    public String getNotifNum() {
-        return notifNum;
-    }
-
-    public void setNotifNum(String notifNum) {
-        this.notifNum = notifNum;
-    }
-
-    public Date getNotifDate() {
-        return notifDate;
-    }
-
-    public void setNotifDate(Date notifDate) {
-        this.notifDate = notifDate;
-    }
-
-    public String getNotifSource() {
-        return notifSource;
-    }
-
-    public void setNotifSource(String notifSource) {
-        this.notifSource = notifSource;
-    }
-
-    public Date getModifiedDate() {
-        return modifiedDate;
-    }
-
-    public void setModifiedDate(Date modifiedDate) {
-        this.modifiedDate = modifiedDate;
-    }
-
-    public String getModifiedBy() {
-        return modifiedBy;
-    }
-
-    public void setModifiedBy(String modifiedBy) {
-        this.modifiedBy = modifiedBy;
-    }
-
-    @Override
-    public String toString() {
-        return "NdflPersonPrepayment{" +
-                "summ=" + summ +
-                ", notifNum='" + notifNum + '\'' +
-                ", notifDate=" + notifDate +
-                ", notifSource='" + notifSource + '\'' +
-                '}';
     }
 
     /**

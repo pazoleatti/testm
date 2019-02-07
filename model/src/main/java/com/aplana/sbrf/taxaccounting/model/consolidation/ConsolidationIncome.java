@@ -1,12 +1,15 @@
 package com.aplana.sbrf.taxaccounting.model.consolidation;
 
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.Date;
 
 /**
  * Класс используемый для получения источников консолидированной формы на основе доходов
  */
+@Getter @Setter
 public class ConsolidationIncome extends NdflPersonIncome {
     /**
      * ИНП физлица к которому относится доход
@@ -74,61 +77,8 @@ public class ConsolidationIncome extends NdflPersonIncome {
         this.paymentDate = income.getPaymentDate();
         this.taxSumm = income.getTaxSumm();
         this.modifiedDate = income.getModifiedDate();
-    }
-
-    public String getInp() {
-        return inp;
-    }
-
-    public void setInp(String inp) {
-        this.inp = inp;
-    }
-
-    public Long getAsnuId() {
-        return asnuId;
-    }
-
-    public void setAsnuId(Long asnuId) {
-        this.asnuId = asnuId;
-    }
-
-    public Long getDeclarationDataId() {
-        return declarationDataId;
-    }
-
-    public void setDeclarationDataId(Long declarationDataId) {
-        this.declarationDataId = declarationDataId;
-    }
-
-    public Boolean getAccepted() {
-        return accepted;
-    }
-
-    public void setAccepted(Boolean accepted) {
-        this.accepted = accepted;
-    }
-
-    public Integer getYear() {
-        return year;
-    }
-
-    public void setYear(Integer year) {
-        this.year = year;
-    }
-
-    public String getPeriodCode() {
-        return periodCode;
-    }
-
-    public void setPeriodCode(String periodCode) {
-        this.periodCode = periodCode;
-    }
-
-    public Date getCorrectionDate() {
-        return correctionDate;
-    }
-
-    public void setCorrectionDate(Date correctionDate) {
-        this.correctionDate = correctionDate;
+        this.operationDate = income.getOperationDate();
+        this.actionDate = income.getActionDate();
+        this.rowType = income.getRowType();
     }
 }

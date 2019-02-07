@@ -1270,6 +1270,18 @@ public class NdflPersonDaoTest {
     }
 
     @Test
+    public void test_findDeclarartionDataIncomesWithSameOperationIdAndInp() {
+        List<NdflPersonIncome> result = ndflPersonDao.findDeclarartionDataIncomesWithSameOperationIdAndInp(100L, "100500", "2");
+        assertThat(result).hasSize(2);
+    }
+
+    @Test
+    public void findOperationDate() {
+        Date result = ndflPersonDao.findOperationDate(100L, "100500", "2");
+        assertThat(result).isInSameDayAs("2005-10-02");
+    }
+
+    @Test
     @Ignore
     // TODO: Почему третье условие валится?
     public void testFindAllKppByDeclarationDataId() {

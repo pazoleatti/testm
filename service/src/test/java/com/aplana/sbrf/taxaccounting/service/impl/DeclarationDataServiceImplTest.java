@@ -525,12 +525,14 @@ public class DeclarationDataServiceImplTest {
         income1.setOperationId("1");
         income1.setPaymentDate(instance.getTime());
         income1.setRowNum(new BigDecimal("1"));
+        income1.setOperationDate(income1.getPaymentDate());
 
         NdflPersonIncome income2 = new NdflPersonIncome();
         instance.set(2010, Calendar.JANUARY, 3);
         income2.setOperationId("2");
         income2.setIncomeAccruedDate(instance.getTime());
         income2.setRowNum(new BigDecimal("2"));
+        income2.setOperationDate(income2.getIncomeAccruedDate());
 
         NdflPersonIncome income3 = new NdflPersonIncome();
         instance.set(2010, Calendar.JANUARY, 2);
@@ -543,12 +545,14 @@ public class DeclarationDataServiceImplTest {
         income4.setOperationId("3");
         income4.setIncomeAccruedDate(instance.getTime());
         income4.setRowNum(new BigDecimal("4"));
+        income3.setOperationDate(income4.getIncomeAccruedDate());
+        income4.setOperationDate(income4.getIncomeAccruedDate());
 
         NdflPerson ndflPerson = new NdflPerson();
         ndflPerson.setInp("qqq");
         ndflPerson.setIncomes(new ArrayList<>(Arrays.asList(income1, income2, income3, income4)));
 
-        Collections.sort(ndflPerson.getIncomes(), NdflPersonIncome.getComparator(ndflPerson));
+        Collections.sort(ndflPerson.getIncomes(), NdflPersonIncome.getComparator());
         ndflPerson.setIncomes(declarationDataService.updateRowNum(ndflPerson.getIncomes()));
 
         assertEquals("1", ndflPerson.getIncomes().get(0).getOperationId());
@@ -571,12 +575,14 @@ public class DeclarationDataServiceImplTest {
         income1.setOperationId("1");
         income1.setPaymentDate(instance.getTime());
         income1.setRowNum(new BigDecimal("5"));
+        income1.setOperationDate(income1.getPaymentDate());
 
         NdflPersonIncome income2 = new NdflPersonIncome();
         instance.set(2010, Calendar.JANUARY, 3);
         income2.setOperationId("2");
         income2.setIncomeAccruedDate(instance.getTime());
         income2.setRowNum(new BigDecimal("6"));
+        income2.setOperationDate(income2.getIncomeAccruedDate());
 
         NdflPersonIncome income3 = new NdflPersonIncome();
         instance.set(2010, Calendar.JANUARY, 2);
@@ -589,12 +595,14 @@ public class DeclarationDataServiceImplTest {
         income4.setOperationId("3");
         income4.setIncomeAccruedDate(instance.getTime());
         income4.setRowNum(new BigDecimal("8"));
+        income3.setOperationDate(income4.getIncomeAccruedDate());
+        income4.setOperationDate(income4.getIncomeAccruedDate());
 
         NdflPerson ndflPerson = new NdflPerson();
         ndflPerson.setInp("qqq");
         ndflPerson.setIncomes(new ArrayList<>(Arrays.asList(income1, income3, income2, income4)));
 
-        Collections.sort(ndflPerson.getIncomes(), NdflPersonIncome.getComparator(ndflPerson));
+        Collections.sort(ndflPerson.getIncomes(), NdflPersonIncome.getComparator());
         ndflPerson.setIncomes(declarationDataService.updateRowNum(ndflPerson.getIncomes()));
 
         assertEquals("1", ndflPerson.getIncomes().get(0).getOperationId());

@@ -31,6 +31,9 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     @Autowired
     NdflPersonDao ndflPersonDao;
 
+    @Autowired
+    com.aplana.sbrf.taxaccounting.service.NdflPersonService ndflPersonService;
+
     @Override
     public List<NdflPersonIncome> findIncomesByPeriodAndNdflPersonId(long ndflPersonId, Date startDate, Date endDate, boolean prFequals1) {
         return ndflPersonDao.fetchNdflPersonIncomeByPeriodNdflPersonId(ndflPersonId, startDate, endDate, prFequals1);
@@ -463,5 +466,10 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     @Override
     public List<NdflPerson> fetchRefBookPersonsAsNdflPerson(List<Long> ndflPersonIdList, Date actualDate) {
         return ndflPersonDao.fetchRefBookPersonsAsNdflPerson(ndflPersonIdList, actualDate);
+    }
+
+    @Override
+    public void fillNdflPersonIncomeSortFields(List<NdflPerson> ndflPersonList) {
+        ndflPersonService.fillNdflPersonIncomeSortFields(ndflPersonList);
     }
 }
