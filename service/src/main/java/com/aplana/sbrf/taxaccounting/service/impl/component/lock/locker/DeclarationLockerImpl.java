@@ -289,9 +289,6 @@ public class DeclarationLockerImpl implements DeclarationLocker {
                 } else {
                     lockDataDao.lockKeysBatch(currentLockKeysWithDescription, userinfo.getUser().getId());
                     List<LockData> result = lockDataDao.fetchAllByKeySet(declarationDataByLockKeys.keySet());
-                    if (result == null || result.isEmpty()) {
-                        throw new IllegalStateException();
-                    }
                     return result;
                 }
             }

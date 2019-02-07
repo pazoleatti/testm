@@ -230,6 +230,9 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
             }
             return result;
         }
+        if (keysBlocker.size() == 0) {
+            return new ArrayList<>();
+        }
         try {
             return getJdbcTemplate().query(
                     "select id, key, user_id, task_id, date_lock, description from lock_data " +
