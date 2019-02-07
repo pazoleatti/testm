@@ -4,13 +4,16 @@ import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
 import com.aplana.sbrf.taxaccounting.model.refbook.IdDoc;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookCountry;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDocType;
+import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 /**
  * @author Andrey Drunk
@@ -58,5 +61,21 @@ public class SelectPersonDocumentCalcTest {
         personDocumentList.addAll(Arrays.asList(doc1, doc2, doc3));
         IdDoc result = SelectPersonDocumentCalc.selectIncludeReportDocument(person, personDocumentList);
         Assert.assertEquals("60 56 283620", result.getDocumentNumber());
+    }
+
+    @Test
+    public void testSeriesComparator() {
+        SelectPersonDocumentCalc.SeriesComparator comparator = new SelectPersonDocumentCalc.SeriesComparator();
+        List<Integer> fixture = new ArrayList<>(100);
+        for (int i = 0; i < 100; i++) {
+            fixture.add(i);
+        }
+        Collections.shuffle(fixture, new Random(0L));
+        Collections.sort(fixture, comparator);
+        Assertions.assertThat(fixture.get(0)).isEqualTo(97);
+        Assertions.assertThat(fixture.get(fixture.size() - 1)).isEqualTo(96);
+        Assertions.assertThat(fixture).containsSequence(97, 98, 99, 0, 1, 2);
+        Assertions.assertThat(fixture).containsSequence(94, 95, 96);
+
     }
 }

@@ -267,7 +267,7 @@ public class SelectPersonDocumentCalc {
                 } else if (o1Series == null) {
                     return -1;
                 }
-                return o2Series.compareTo(o1Series);
+                return new SeriesComparator().compare(o2Series, o1Series);
             }
         });
         Integer maxSeriesNumber = extractSeriesDigits(personDocumentList.get(0).getDocumentNumber());
@@ -448,6 +448,25 @@ public class SelectPersonDocumentCalc {
             return docNumberBody.replaceAll(NON_DIGITS_REGEXP, "");
         } else {
             return null;
+        }
+    }
+
+    public static class SeriesComparator implements Comparator<Integer> {
+        @Override
+        public int compare(Integer o1, Integer o2) {
+            return Integer.compare(offset(o1), offset(o2));
+        }
+
+        private Integer offset(Integer i) {
+            if (i == 97) {
+                return 0;
+            } else if (i == 98) {
+                return 1;
+            } else if (i == 99) {
+                return 2;
+            } else {
+                return i + 3;
+            }
         }
     }
 

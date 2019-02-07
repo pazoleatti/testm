@@ -741,10 +741,10 @@ class Calculate extends AbstractScriptClass {
                             changed = true
                             infoMsgBuilder.append(String.format("[Добавлена запись о новом ДУЛ:  \"Код ДУЛ\" = \"%s\", \"Серия и номер ДУЛ\": \"%s\"]", primaryPersonDocument?.docType?.code, primaryPersonDocument?.getDocumentNumber()))
                         }
-                        if (checkIncReportFlag(refBookPerson, infoMsgBuilder)) {
-                            changed = true
-                        }
                     }
+                }
+                if (checkIncReportFlag(refBookPerson, infoMsgBuilder)) {
+                    changed = true
                 }
 
                 //identifiers
