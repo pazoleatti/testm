@@ -1879,7 +1879,8 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                 "row_num = :rowNum, operation_id = :operationId, oktmo = :oktmo, kpp = :kpp, income_code = :incomeCode, income_type = :incomeType, " +
                 "income_accrued_date = :incomeAccruedDate, income_payout_date = :incomePayoutDate, income_accrued_summ = :incomeAccruedSumm, income_payout_summ = :incomePayoutSumm, total_deductions_summ = :totalDeductionsSumm, " +
                 "tax_base = :taxBase, tax_rate = :taxRate, tax_date = :taxDate, calculated_tax = :calculatedTax, withholding_tax = :withholdingTax, not_holding_tax = :notHoldingTax, overholding_tax = :overholdingTax, " +
-                "refound_tax = :refoundTax, tax_transfer_date = :taxTransferDate, payment_date = :paymentDate, payment_number = :paymentNumber, tax_summ = :taxSumm, modified_date = :modifiedDate, modified_by = :modifiedBy " +
+                "refound_tax = :refoundTax, tax_transfer_date = :taxTransferDate, payment_date = :paymentDate, payment_number = :paymentNumber, tax_summ = :taxSumm, modified_date = :modifiedDate, modified_by = :modifiedBy, " +
+                "operation_date = :operationDate, action_date = :actionDate, row_type = :rowType " +
                 "WHERE id = :id";
 
         SqlParameterSource[] batch = SqlParameterSourceUtils.createBatch(incomes.toArray());
@@ -2005,7 +2006,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
             person.setModifiedDate(rs.getTimestamp("modified_date"));
             person.setModifiedBy(rs.getString("modified_by"));
-            person.setAsnuName(rs.getString("asnu_name"));
+            //person.setAsnuName(rs.getString("asnu_name"));
             return person;
         }
     }
@@ -2052,6 +2053,9 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             personIncome.setModifiedBy(rs.getString("modified_by"));
             personIncome.setAsnuId(SqlUtils.getLong(rs, "asnu_id"));
             personIncome.setAsnu(rs.getString("asnu_name"));
+            personIncome.setOperationDate(rs.getDate("operation_date"));
+            personIncome.setActionDate(rs.getDate("action_date"));
+            personIncome.setRowType(rs.getInt("row_type"));
             return personIncome;
         }
     }
@@ -2520,5 +2524,55 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
         int count = getNamedParameterJdbcTemplate().queryForObject("select count(*) from (" + baseSelect + ")", params, Integer.class);
         return new PagingResult<>(kppSelects, count);
+    }
+
+    @Override
+    public List<NdflPersonIncome> findDeclarartionDataIncomesWithSameOperationIdAndInp(Long declarationDataId, String inp, String operationId) {
+        String sql = "select rba.name asnu_name, " + createColumns(NdflPersonIncome.COLUMNS, "npi") + " from ndfl_person_income npi\n" +
+                "left join ndfl_person np on npi.ndfl_person_id = np.id\n" +
+                "left join declaration_data dd on dd.id = np.declaration_data_id\n" +
+                "left join ref_book_asnu rba on npi.asnu_id = rba.id\n" +
+                "where dd.id = :declarationDataId\n" +
+                "and np.inp = :inp\n" +
+                "and npi.operation_id = :operationId";
+        MapSqlParameterSource params = new MapSqlParameterSource("declarationDataId", declarationDataId)
+                .addValue("inp", inp)
+                .addValue("operationId", operationId);
+        return getNamedParameterJdbcTemplate().query(sql, params, new NdflPersonIncomeRowMapper());
+    }
+
+    @Override
+    public List<NdflPerson> findDeclarartionDataPersonWithSameOperationIdAndInp(Long declarationDataId, String inp, String operationId) {
+        String sql = "select distinct " + createColumns(NdflPerson.COLUMNS, "np") + " from ndfl_person np\n" +
+                "left join ndfl_person_income npi on npi.ndfl_person_id = np.id\n" +
+                "left join declaration_data dd on dd.id = np.declaration_data_id\n" +
+                "where dd.id = :declarationDataId\n" +
+                "and np.inp = :inp\n" +
+                "and npi.operation_id = :operationId";
+        MapSqlParameterSource params = new MapSqlParameterSource("declarationDataId", declarationDataId)
+                .addValue("inp", inp)
+                .addValue("operationId", operationId);
+        return getNamedParameterJdbcTemplate().query(sql, params, new NdflPersonRowMapper());
+    }
+
+    @Override
+    public Date findOperationDate(Long declarationDataId, String inp, String operationId) {
+        String sql = "select\n" +
+                "min(case\n" +
+                "when npi.income_accrued_date is not null then npi.income_accrued_date\n" +
+                "when npi.income_payout_date is not null then npi.income_payout_date\n" +
+                "when npi.payment_date is not null then npi.payment_date\n" +
+                "else null\n" +
+                "end) as operation\n" +
+                "from ndfl_person_income npi\n" +
+                "left join ndfl_person np on npi.ndfl_person_id = np.id\n" +
+                "left join declaration_data dd on dd.id = np.declaration_data_id\n" +
+                "where dd.id = :declarationDataId\n" +
+                "and np.inp = :inp\n" +
+                "and npi.operation_id = :operationId";
+        MapSqlParameterSource params = new MapSqlParameterSource("declarationDataId", declarationDataId)
+                .addValue("inp", inp)
+                .addValue("operationId", operationId);
+        return getNamedParameterJdbcTemplate().queryForObject(sql, params, Date.class);
     }
 }

@@ -1079,7 +1079,10 @@ create table ndfl_person_income
   tax_summ              number(10),
   modified_date          date,
   modified_by            varchar2(255 char),
-  asnu_id               number(18)
+  asnu_id               number(18),
+  operation_date        date,
+  action_date           date,
+  row_type              number(3,0)
 );
 
 
