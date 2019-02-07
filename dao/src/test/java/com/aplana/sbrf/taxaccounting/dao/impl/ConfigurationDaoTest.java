@@ -15,17 +15,12 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static java.util.Arrays.asList;
 import static org.junit.Assert.*;
 
-/**
- * @author <a href="mailto:Marat.Fayzullin@aplana.com">Файзуллин Марат</a>
- * @since 10.10.13 12:37
- */
+
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"ConfigurationDaoTest.xml"})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
@@ -66,39 +61,9 @@ public class ConfigurationDaoTest {
     }
 
     @Test
-    public void save1Test() {
-        ConfigurationParamModel model = dao.fetchAllAsModel();
-        model.put(ConfigurationParam.REGION_UPLOAD_DIRECTORY, 1, asList("testSaveRegion"));
-        model.put(ConfigurationParam.FORM_UPLOAD_DIRECTORY, 1, asList("testSaveRegion2"));
-        dao.save(model);
-        model = dao.fetchAllAsModel();
-        assertTrue(model.containsKey(ConfigurationParam.FORM_UPLOAD_DIRECTORY));
-    }
-
-    // Попытка сохраннить запись с ссылкой на несуществующий depatment_id
-    @Test(expected = RuntimeException.class)
-    public void save2Test() {
-        ConfigurationParamModel model = dao.fetchAllAsModel();
-        model.put(ConfigurationParam.REGION_UPLOAD_DIRECTORY, -99, asList("testSaveRegion"));
-        dao.save(model);
-    }
-
-    @Test
     public void fetchAllByDepartment() {
         ConfigurationParamModel model = dao.fetchAllByDepartment(0);
         Assert.assertNotNull(model);
-    }
-
-    // Удаление
-    @Test
-    public void save3Test() {
-        ConfigurationParamModel model = dao.fetchAllAsModel();
-        model.remove(ConfigurationParam.KEY_FILE);
-        model.get(ConfigurationParam.FORM_UPLOAD_DIRECTORY).remove(1);
-        dao.save(model);
-        model = dao.fetchAllAsModel();
-        Assert.assertNull(model.get(ConfigurationParam.KEY_FILE));
-        Assert.assertNull(model.get(ConfigurationParam.FORM_UPLOAD_DIRECTORY).get(1));
     }
 
     @Test
@@ -111,18 +76,6 @@ public class ConfigurationDaoTest {
     public void updateTest2() {
         dao.update(new Configuration(ConfigurationParam.KEY_FILE.name(), 1, "keyValueUpdated"));
         assertEquals("keyValueUpdated", dao.fetchByEnum(ConfigurationParam.KEY_FILE).getValue());
-    }
-
-    @Test
-    public void updateTest3() {
-        Map<ConfigurationParam, String> updateData = new HashMap<ConfigurationParam, String>();
-        updateData.put(ConfigurationParam.NO_CODE, "33333");
-        updateData.put(ConfigurationParam.SBERBANK_INN, "44444");
-        dao.update(updateData, 1);
-
-        ConfigurationParamModel updateModel = dao.fetchAllAsModel();
-        assertEquals("33333", updateModel.getFullStringValue(ConfigurationParam.NO_CODE, 1));
-        assertEquals("44444", updateModel.getFullStringValue(ConfigurationParam.SBERBANK_INN, 1));
     }
 
     @Test

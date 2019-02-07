@@ -5,9 +5,6 @@ import java.util.List;
 
 /**
  * Перечисление типов параметров приложения
- *
- * @author <a href="mailto:Marat.Fayzullin@aplana.com">Файзуллин Марат</a>
- * @since 10.10.13 11:24
  */
 public enum ConfigurationParam {
     /**
@@ -67,7 +64,8 @@ public enum ConfigurationParam {
     WEIGHT_TAX_PAYER_STATUS("Вес для идентификации поля Статус налогоплательщика", ConfigurationParamGroup.COMMON_PARAM, true, null, 0),
     WEIGHT_DUL("Вес для идентификации поля ДУЛ", ConfigurationParamGroup.COMMON_PARAM, true, null, 0),
     WEIGHT_ADDRESS("Вес для идентификации поля Адрес в РФ", ConfigurationParamGroup.COMMON_PARAM, true, null, 0),
-    WEIGHT_ADDRESS_INO("Вес для идентификации поля Адрес в стране регистрации", ConfigurationParamGroup.COMMON_PARAM, true, null, 0);
+    WEIGHT_ADDRESS_INO("Вес для идентификации поля Адрес в стране регистрации", ConfigurationParamGroup.COMMON_PARAM, true, null, 0),
+    DECLARATION_ROWS_BULK_EDIT_MAX_COUNT("Максимальное количество строк РНУ для массового изменения", ConfigurationParamGroup.COMMON_PARAM, true, null, 0);
 
     private String caption;
     private ConfigurationParamGroup group;
@@ -84,7 +82,7 @@ public enum ConfigurationParam {
      * @param folder      Признак директории: false - файл, true - каталог, null - нет ограничения
      * @param checkAccess Признак проверки доступа на: 0 — нет проверки, 1 — чтение, 2 — запись.
      */
-    private ConfigurationParam(String caption, ConfigurationParamGroup group, boolean unique, Boolean folder, int checkAccess) {
+    ConfigurationParam(String caption, ConfigurationParamGroup group, boolean unique, Boolean folder, int checkAccess) {
         this.caption = caption;
         this.group = group;
         this.unique = unique;
@@ -114,7 +112,7 @@ public enum ConfigurationParam {
      * @return список {@link ConfigurationParam} или пустой список
      */
     public static List<ConfigurationParam> getParamsByGroup(ConfigurationParamGroup group) {
-        List<ConfigurationParam> params = new ArrayList<ConfigurationParam>();
+        List<ConfigurationParam> params = new ArrayList<>();
         for (ConfigurationParam configurationParam : ConfigurationParam.values()) {
             if (configurationParam.group.equals(group)) {
                 params.add(configurationParam);

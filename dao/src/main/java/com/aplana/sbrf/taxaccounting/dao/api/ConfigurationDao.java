@@ -4,15 +4,10 @@ import com.aplana.sbrf.taxaccounting.model.*;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 /**
  * ДАО для работы с параметрами приложения
- *
- * @author <a href="mailto:Marat.Fayzullin@aplana.com">Файзуллин Марат</a>
- * @since 10.10.13 11:34
  */
-
 public interface ConfigurationDao {
 
     /**
@@ -61,24 +56,6 @@ public interface ConfigurationDao {
      * @return все параметры по подразделению в виде {@link ConfigurationParamModel}
      */
     ConfigurationParamModel fetchAllByDepartment(Integer departmentId);
-
-    /**
-     * Сохраняет значения параметров в БД. Если параметр в БД отсутствует, то он создается.
-     * Если в модели нет какого-либо параметра, но он есть в БД, то параметр удаляется из БД.
-     *
-     * @param model модель-хранилище мапы конфигурационных параметров
-     */
-    @Deprecated
-    void save(ConfigurationParamModel model);
-
-    /**
-     * Обновляет параметр в БД у конкретных параметров
-     *
-     * @param configurationParamMap мапа обновляемых парметров (параметр - значение)
-     * @param departmentId          идентификатор подразделения
-     */
-    @Deprecated
-    void update(Map<ConfigurationParam, String> configurationParamMap, long departmentId);
 
     /**
      * Обновляет значение конфигурационного параметра
