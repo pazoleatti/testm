@@ -1974,13 +1974,15 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
             ndflPersonNum++
         }
 
+        ndflPersonService.fillNdflPersonIncomeSortFields(ndflPersonCache)
+
         Collections.sort(ndflPersonCache, NdflPerson.getComparator())
         Long personRowNum = 0L
         BigDecimal incomeRowNum = new BigDecimal("0")
         BigDecimal deductionRowNum = new BigDecimal("0")
         BigDecimal prepaymentRowNum = new BigDecimal("0")
         for (NdflPerson ndflPerson : ndflPersonCache) {
-            Collections.sort(ndflPerson.incomes, NdflPersonIncome.getComparator(ndflPerson))
+            Collections.sort(ndflPerson.incomes, NdflPersonIncome.getComparator())
 
             Collections.sort(ndflPerson.deductions, NdflPersonDeduction.getComparator(ndflPerson))
 
