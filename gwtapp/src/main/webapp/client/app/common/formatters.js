@@ -659,5 +659,14 @@
                 return kppOktmoPair.kpp + ' / ' + kppOktmoPair.oktmo + (kppOktmoPair.relevance ? ' (' + kppOktmoPair.relevance + ')' : '');
             };
         })
+
+        /**
+         * @description Форматтер для пары КПП/ОКТМО с указанием актуальности
+         */
+        .filter('negativeSumsSignFormatter', ['APP_CONSTANTS', function (APP_CONSTANTS) {
+            return function (negativeSumsSign) {
+                return APP_CONSTANTS.NEGATIVE_SUMS_SIGN[negativeSumsSign].name;
+            };
+        }])
     ;
 }());

@@ -332,6 +332,17 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 if (declarationTemplate.getDeclarationFormKind() == DeclarationFormKind.REPORTS && newDeclaration.getCorrectionNum() == null) {
                     newDeclaration.setCorrectionNum(0);
                 }
+                if (declarationTemplate.getType().getId() == DeclarationType.NDFL_6) {
+                    if (newDeclaration.getNegativeIncome() == null) {
+                        newDeclaration.setNegativeIncome(new BigDecimal(0));
+                    }
+                    if (newDeclaration.getNegativeTax() == null) {
+                        newDeclaration.setNegativeTax(new BigDecimal(0));
+                    }
+                    if (newDeclaration.getNegativeSumsSign() == null) {
+                        newDeclaration.setNegativeSumsSign(NegativeSumsSign.FROM_CURRENT_FORM);
+                    }
+                }
                 long id = declarationDataDao.create(newDeclaration);
 
                 logBusinessService.logFormEvent(id, FormDataEvent.CREATE, null, userInfo);
@@ -692,6 +703,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             result.setOktmo(declaration.getOktmo());
             result.setTaxOrganCode(declaration.getTaxOrganCode());
             result.setCorrectionNum(declaration.getCorrectionNum());
+            result.setNegativeIncome(declaration.getNegativeIncome());
+            result.setNegativeTax(declaration.getNegativeTax());
+            result.setNegativeSumsSign(declaration.getNegativeSumsSign());
             if (declaration.getDocStateId() != null) {
                 RefBookDataProvider stateEDProvider = refBookFactory.getDataProvider(RefBook.Id.DOC_STATE.getId());
                 result.setDocState(stateEDProvider.getRecordData(declaration.getDocStateId()).get("NAME").getStringValue());

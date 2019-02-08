@@ -102,6 +102,14 @@
                                            data-ng-bind-html="declarationData | ndflPeriodFormatter"></label>
                                 </div>
                             </div>
+                            <div class="row-fluid">
+                                <div class="span5">
+                                    <label class="control-label">{{::'title.negativeIncome' | translate}}:</label>
+                                </div>
+                                <div class="span7">
+                                    <label class="font-normal info-text">{{declarationData.negativeIncome}}</label>
+                                </div>
+                            </div>
                         </div>
                         <div class="span3" style="margin: 0;">
                             <div class="row-fluid">
@@ -128,6 +136,14 @@
                                     <label class="font-normal info-text">{{declarationData.correctionNum}}</label>
                                 </div>
                             </div>
+                            <div class="row-fluid">
+                                <div class="span6">
+                                    <label class="control-label">{{::'title.negativeTax' | translate}}:</label>
+                                </div>
+                                <div class="span6">
+                                    <label class="font-normal info-text">{{declarationData.negativeTax}}</label>
+                                </div>
+                            </div>
                         </div>
                         <div class="span3" style="margin: 0;">
                             <div class="row-fluid">
@@ -152,6 +168,15 @@
                                 </div>
                                 <div class="span6">
                                     <label class="font-normal info-text">{{declarationData.taxOrganCode}}</label>
+                                </div>
+                            </div>
+                            <div class="row-fluid">
+                                <div class="span6">
+                                    <label class="control-label">{{::'title.negativeSumsSign' | translate}}:</label>
+                                </div>
+                                <div class="span6">
+                                    <label class="font-normal info-text"
+                                           data-ng-bind-html="declarationData.negativeSumsSign | negativeSumsSignFormatter"></label>
                                 </div>
                             </div>
                         </div>

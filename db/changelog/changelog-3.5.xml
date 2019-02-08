@@ -112,4 +112,26 @@
             <column name="value" value="200"/>
         </insert>
 	</changeSet>
+	<changeSet id="3.5-dnovikov-4" author="dnovikov">
+		<sql>
+			alter table declaration_data add negative_income number(20,2);
+			comment on column declaration_data.negative_income is 'Нераспределенный отрицательный Доход';
+		</sql>
+	</changeSet>
+
+	<changeSet id="3.5-dnovikov-5" author="dnovikov">
+		<sql>
+			alter table declaration_data add negative_tax number(20,2);
+			comment on column declaration_data.negative_tax is 'Нераспределенный отрицательный Налог';
+		</sql>
+	</changeSet>
+
+	<!--https://jira.aplana.com/browse/SBRFNDFL-6513 новые атрибуты формы для нераспределенных отрицательных сумм-->
+	<changeSet id="3.5-dnovikov-6" author="dnovikov">
+		<sql>
+			alter table declaration_data add negative_sums_sign number(1);
+			comment on column declaration_data.negative_sums_sign is 'Признак нераспределенных сумм (0 - из текущей формы, 1 - из предыдущей формы)';
+		</sql>
+	</changeSet>
+
 </databaseChangeLog>

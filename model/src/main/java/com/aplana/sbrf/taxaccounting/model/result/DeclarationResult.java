@@ -1,9 +1,11 @@
 package com.aplana.sbrf.taxaccounting.model.result;
 
+import com.aplana.sbrf.taxaccounting.model.NegativeSumsSign;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookKnfType;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
@@ -133,5 +135,17 @@ public class DeclarationResult {
      * Номер корректировки
      */
     private Integer correctionNum;
+    /**
+     * Нераспределенный отрицательный Доход
+     */
+    private BigDecimal negativeIncome;
+    /**
+     * Нераспределенный отрицательный Налог
+     */
+    private BigDecimal negativeTax;
+    /**
+     * Признак нераспределенных сумм
+     */
+    private NegativeSumsSign negativeSumsSign;
 
 }

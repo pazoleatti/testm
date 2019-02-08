@@ -325,6 +325,10 @@
                 BY_ALL_DATA: {id: 1, name: "По всем данным", enumName: "BY_ALL_DATA"},
                 BY_NEW_DATA: {id: 2, name: "По новым данным", enumName: "BY_NEW_DATA"},
                 UNACCEPTED_BY_FNS: {id: 3, name: "Для отчетных форм, не принятых ФНС", enumName: "UNACCEPTED_BY_FNS"}
+            },
+            NEGATIVE_SUMS_SIGN: {
+                FROM_CURRENT_FORM: {id: 0, name: "из текущей формы", enumName: "FROM_CURRENT_FORM"},
+                FROM_PREV_FORM: {id: 1, name: "из предыдущей формы", enumName: "FROM_PREV_FORM"}
             }
         });
 }());

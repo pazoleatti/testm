@@ -418,14 +418,17 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         params.addValue("adjust_negative_values", declarationData.isAdjustNegativeValues());
         params.addValue("correction_num", declarationData.getCorrectionNum());
         params.addValue("tax_refund_reflection_mode", declarationData.getTaxRefundReflectionMode() != null ? declarationData.getTaxRefundReflectionMode().getId() : null);
+        params.addValue("negative_income", declarationData.getNegativeIncome());
+        params.addValue("negative_tax", declarationData.getNegativeTax());
+        params.addValue("negative_sums_sign", declarationData.getNegativeSumsSign() != null ? declarationData.getNegativeSumsSign().ordinal() : null);
 
         getNamedParameterJdbcTemplate().update("" +
                         "insert into declaration_data (id, declaration_template_id, department_report_period_id, state, tax_organ_code, kpp, " +
                         "   oktmo, asnu_id, knf_type_id, note, file_name, doc_state_id, manually_created, last_data_modified, adjust_negative_values, " +
-                        "   correction_num, tax_refund_reflection_mode) " +
+                        "   correction_num, tax_refund_reflection_mode, negative_income, negative_tax, negative_sums_sign) " +
                         "values (:id, :declaration_template_id, :department_report_period_id, :state, :tax_organ_code, :kpp, " +
                         "   :oktmo, :asnu_id, :knf_type_id, :note, :file_name, :doc_state_id, :manually_created, :last_data_modified, :adjust_negative_values, " +
-                        "   :correction_num, :tax_refund_reflection_mode)",
+                        "   :correction_num, :tax_refund_reflection_mode, :negative_income, :negative_tax, :negative_sums_sign)",
                 params);
 
         if (declarationData.getKnfType() != null && declarationData.getKnfType().equals(RefBookKnfType.BY_KPP)) {
@@ -904,7 +907,8 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         final static String FIELDS = " dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.oktmo, dd.state, " +
                 "dd.department_report_period_id, dd.asnu_id, dd.file_name, dd.doc_state_id, dd.manually_created, " +
                 "dd.adjust_negative_values, drp.report_period_id, drp.department_id, dd.note, knf_type.id as knf_type_id, " +
-                "knf_type.name as knf_type_name, dd.last_data_modified, dd.correction_num, dd.tax_refund_reflection_mode ";
+                "knf_type.name as knf_type_name, dd.last_data_modified, dd.correction_num, dd.tax_refund_reflection_mode, " +
+                "dd.negative_income, dd.negative_tax, dd.negative_sums_sign ";
 
         @Override
         public DeclarationData mapRow(ResultSet rs, int index) throws SQLException {
@@ -937,6 +941,9 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             if (taxRefundReflectModeId != null) {
                 d.setTaxRefundReflectionMode(TaxRefundReflectionMode.valueOf(taxRefundReflectModeId));
             }
+            d.setNegativeIncome(rs.getBigDecimal("negative_income"));
+            d.setNegativeTax(rs.getBigDecimal("negative_tax"));
+            d.setNegativeSumsSign(NegativeSumsSign.valueOf(SqlUtils.getInteger(rs, "negative_sums_sign")));
             return d;
         }
     }

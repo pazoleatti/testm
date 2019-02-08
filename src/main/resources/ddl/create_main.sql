@@ -378,7 +378,10 @@ create table declaration_data (
   last_data_modified          date,
   adjust_negative_values      number(1) default 0 not null,
   correction_num              number(3),
-  tax_refund_reflection_mode number(1)
+  tax_refund_reflection_mode  number(1),
+  negative_income             number(20,2),
+  negative_tax                number(20,2),
+  negative_sums_sign          number(1)
 );
 
 comment on table declaration_data is 'Налоговые формы';
@@ -396,6 +399,9 @@ comment on column declaration_data.file_name is 'Имя файла';
 comment on column declaration_data.doc_state_id is 'Состояние ЭД';
 comment on column declaration_data.manually_created is 'Создана вручную (0-нет, 1-да)';
 comment on column declaration_data.tax_refund_reflection_mode is 'Показывать возвращенный налог (1 - "Показывать в строке 090 Раздела 1", 2 - "Учитывать возврат как отрицательное удержание в Разделе 2", 3 - Не учитывать)';
+comment on column declaration_data.negative_income is 'Нераспределенный отрицательный Доход';
+comment on column declaration_data.negative_tax is 'Нераспределенный отрицательный Налог';
+comment on column declaration_data.negative_sums_sign is 'Признак нераспределенных сумм (0 - из текущей формы, 1 - из предыдущей формы)';
 
 create sequence seq_declaration_data start with 10000;
 ------------------------------------------------------------------------------------------------------------------------------------------

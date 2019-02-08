@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.Set;
 
@@ -96,6 +97,18 @@ public class DeclarationData extends IdentityObject<Long> implements SecuredEnti
      * Номер корректировки
      */
     private Integer correctionNum;
+    /**
+     * Нераспределенный отрицательный Доход
+     */
+    private BigDecimal negativeIncome;
+    /**
+     * Нераспределенный отрицательный Налог
+     */
+    private BigDecimal negativeTax;
+    /**
+     * Признак нераспределенных сумм
+     */
+    private NegativeSumsSign negativeSumsSign;
     /**
      * Проверка статуса формы.
      */

@@ -68,11 +68,7 @@ public class CalendarDaoImpl extends AbstractDao implements CalendarDao {
                     "where ctype = 0 and year = ?\n" +
                     "group by year", Date.class, year);
         } catch (EmptyResultDataAccessException e) {
-            Calendar cal = Calendar.getInstance();
-            cal.set(Calendar.YEAR, year);
-            cal.set(Calendar.MONTH, Calendar.DECEMBER);
-            cal.set(Calendar.DAY_OF_MONTH, 31);
-            return cal.getTime();
+            return new LocalDate(year, 12, 31).toDate();
         }
     }
 
