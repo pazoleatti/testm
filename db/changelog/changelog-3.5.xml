@@ -112,4 +112,15 @@
             <column name="value" value="200"/>
         </insert>
 	</changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-6593 - Скрипт для заполнения полей сортировки-->
+    <changeSet id="3.5-amandzyak-1" author="amandzyak">
+        <sqlFile dbms="oracle"
+                 encoding="utf8"
+                 endDelimiter=""
+                 path="/scripts/update-ndfl_person_income.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
+
 </databaseChangeLog>
