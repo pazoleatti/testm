@@ -737,9 +737,8 @@ class Calculate extends AbstractScriptClass {
                         if (primaryPersonDocument.docType != null) {
                             primaryPersonDocument.documentNumber = performDocNumber(primaryPersonDocument)
                             refBookPerson.getDocuments().add(primaryPersonDocument)
-                            refBookPerson.reportDoc = primaryPersonDocument
                             changed = true
-                            infoMsgBuilder.append(String.format("[Добавлена запись о новом ДУЛ:  \"Код ДУЛ\" = \"%s\", \"Серия и номер ДУЛ\": \"%s\"]", primaryPersonDocument?.docType?.code, primaryPersonDocument?.getDocumentNumber()))
+                            infoMsgBuilder.append(String.format("[Добавлена запись о новом ДУЛ: \"Код ДУЛ\" = \"%s\", \"Серия и номер ДУЛ\": \"%s\"]", primaryPersonDocument?.docType?.code, primaryPersonDocument?.getDocumentNumber()))
                         }
                     }
                 }
@@ -865,12 +864,18 @@ class Calculate extends AbstractScriptClass {
 
                 if (i == incRepIndex) {
                     if (naturalPerson.reportDoc?.getId() != personDocument?.getId() ) {
-                        String oldValue = String.format("%s - (%s) %s", naturalPerson?.reportDoc?.getDocumentNumber(), naturalPerson?.reportDoc?.getDocType()?.getCode(), naturalPerson?.reportDoc?.getDocType()?.getName())
-                        String newValue = String.format("%s - (%s) %s", personDocument?.getDocumentNumber(), personDocument?.getDocType()?.getCode(), personDocument?.getDocType()?.getName())
+                        String oldValue = null
+                        if (naturalPerson?.reportDoc?.getDocumentNumber()) {
+                            oldValue = String.format("%s - (%s) %s", naturalPerson?.reportDoc?.getDocumentNumber(), naturalPerson?.reportDoc?.getDocType()?.getCode(), naturalPerson?.reportDoc?.getDocType()?.getName())
+                        }
+                        String newValue = null
+                        if (personDocument?.getDocumentNumber()) {
+                            newValue = String.format("%s - (%s) %s", personDocument?.getDocumentNumber(), personDocument?.getDocType()?.getCode(), personDocument?.getDocType()?.getName())
+                        }
                         toReturn = true
                         naturalPerson.setReportDoc(personDocument)
 
-                        messageBuilder.append(String.format("[ДУЛ, включаемый в отчетность: %s  ->  %s]", oldValue, newValue))
+                        messageBuilder.append(makeUpdateMessage("ДУЛ, включаемый в отчетность", oldValue, newValue))
                     }
                     if (naturalPerson.reportDoc?.getId() == null) {
                         toReturn = true
