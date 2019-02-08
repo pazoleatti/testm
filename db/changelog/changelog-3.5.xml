@@ -145,4 +145,18 @@
 		</sql>
 	</changeSet>
 
+	<!--https://jira.aplana.com/browse/SBRFNDFL-6452 вьюха настроек подразделений-->
+	<changeSet id="3.5-dnovikov-7" author="dnovikov">
+		<sql>
+			RENAME department_config TO vw_department_config;
+		</sql>
+	</changeSet>
+
+	<!--https://jira.aplana.com/browse/SBRFNDFL-6452 вьюха настроек подразделений-->
+	<changeSet id="3.5-dnovikov-8" author="dnovikov">
+		<sql>
+			CREATE SYNONYM department_config FOR vw_department_config;
+		</sql>
+	</changeSet>
+
 </databaseChangeLog>

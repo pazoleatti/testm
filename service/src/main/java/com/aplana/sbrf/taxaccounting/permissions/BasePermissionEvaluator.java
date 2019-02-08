@@ -133,7 +133,7 @@ public class BasePermissionEvaluator implements PermissionEvaluator {
         if (targetClass.equals(TargetIdAndLogger.class)) {
             logger = ((TargetIdAndLogger) target).getLogger();
             PermissionDao permissionDao = permissionDaoFactory.getPermissionDao(DeclarationData.class);
-            SecuredEntity targetDomainObject = permissionDao.getSecuredEntity(((TargetIdAndLogger) target).getId());
+            SecuredEntity targetDomainObject = permissionDao.findSecuredEntityById(((TargetIdAndLogger) target).getId());
             return hasPermissionSingle(authentication, targetDomainObject, permission, logger);
         } else {
             return hasPermissionSingleId(authentication, target, targetType, permission, logger);
@@ -155,7 +155,7 @@ public class BasePermissionEvaluator implements PermissionEvaluator {
         }
 
         PermissionDao permissionDao = permissionDaoFactory.getPermissionDao(targetClass);
-        SecuredEntity targetDomainObject = permissionDao.getSecuredEntity(((Number) targetId).longValue());
+        SecuredEntity targetDomainObject = permissionDao.findSecuredEntityById(((Number) targetId).longValue());
 
         if (targetDomainObject == null) {
             throw new RuntimeException("Object of type '" + targetType +

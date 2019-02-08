@@ -29,22 +29,30 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 @Repository
 public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentConfigDao {
+    public final static String ALL_FIELDS = " dc.id, dc.record_id, dc.kpp, oktmo.id oktmo_id, oktmo.code oktmo_code, oktmo.name oktmo_name, dc.version, dc.version_end," +
+            " dc.department_id, dc.tax_organ_code, pp.id present_place_id, pp.code present_place_code, pp.name present_place_name, dc.name, dc.phone," +
+            " reorg.id reorg_id, reorg.code reorg_code, reorg.name reorg_name, dc.reorg_inn, reorg_kpp, sign.id signatory_id, sign.code signatory_code, sign.name signatory_name, " +
+            " dc.signatory_surname, dc.signatory_firstname, dc.signatory_lastname, dc.approve_doc_name, dc.approve_org_name ";
+    public final static String ALL_FIELDS_JOINS = "join ref_book_oktmo oktmo on oktmo.id = dc.oktmo \n" +
+            "left join ref_book_present_place pp on pp.id = dc.present_place\n" +
+            "left join ref_book_reorganization reorg on reorg.id = dc.reorg_form_code\n" +
+            "left join ref_book_signatory_mark sign on sign.id = dc.signatory_id\n";
 
     @Override
-    public DepartmentConfig getById(long id) {
+    public DepartmentConfig findById(long id) {
         try {
             return getJdbcTemplate().queryForObject("" +
-                    "select " + DepartmentConfigRowMapper.FIELDS + " from department_config dc\n" +
-                    DepartmentConfigRowMapper.JOINS +
+                    "select " + ALL_FIELDS + " from department_config dc\n" +
+                    ALL_FIELDS_JOINS +
                     "where id = ?", new DepartmentConfigRowMapper(), id);
         } catch (EmptyResultDataAccessException e) {
-            throw new DaoException("Не найдена настройка подразделений по ид = " + id);
+            return null;
         }
     }
 
     @Override
-    public SecuredEntity getSecuredEntity(long id) {
-        return getById(id);
+    public SecuredEntity findSecuredEntityById(long id) {
+        return findById(id);
     }
 
     @Override
@@ -56,8 +64,8 @@ public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentCon
                             "  where kpp = ? and oktmo = ? and version < ?\n" +
                             "  order by version desc\n" +
                             ")\n" +
-                            "select " + DepartmentConfigRowMapper.FIELDS + " from all_prev_vers dc\n" +
-                            DepartmentConfigRowMapper.JOINS +
+                            "select " + ALL_FIELDS + " from all_prev_vers dc\n" +
+                            ALL_FIELDS_JOINS +
                             "where rownum <= 1",
                     new DepartmentConfigRowMapper(), departmentConfig.getKpp(), departmentConfig.getOktmo().getId(), departmentConfig.getStartDate());
         } catch (EmptyResultDataAccessException e) {
@@ -122,8 +130,8 @@ public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentCon
         params.addValue("relevanceDate", relevanceDate);
         try {
             return getNamedParameterJdbcTemplate().queryForObject("" +
-                            "select " + DepartmentConfigRowMapper.FIELDS + " \n" +
-                            "from department_config dc\n" + DepartmentConfigRowMapper.JOINS +
+                            "select " + ALL_FIELDS + " \n" +
+                            "from department_config dc\n" + ALL_FIELDS_JOINS +
                             "where kpp = :kpp and oktmo.code = :oktmoCode and (dc.version <= :relevanceDate \n" +
                             " and (version_end is null or :relevanceDate <= version_end)) ",
                     params, new DepartmentConfigRowMapper());
@@ -149,10 +157,10 @@ public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentCon
             "  group by dc.kpp, dc.oktmo\n" +
             "),\n" +
             "actual_department_config as (\n" +
-            "  select " + DepartmentConfigRowMapper.FIELDS +
+            "  select " + ALL_FIELDS +
             "  from department_config dc\n" +
             "  join actual_vers av on av.kpp = dc.kpp and av.oktmo = dc.oktmo and av.version = dc.version\n" +
-            DepartmentConfigRowMapper.JOINS +
+            ALL_FIELDS_JOINS +
             ")\n";
 
     @Override

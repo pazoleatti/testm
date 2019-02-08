@@ -369,7 +369,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
     }
 
     @Override
-    public SecuredEntity getSecuredEntity(long id) {
+    public SecuredEntity findSecuredEntityById(long id) {
         return getUser((int) id);
     }
 }

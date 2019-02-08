@@ -28,7 +28,7 @@ import java.util.*;
 public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao {
 
     @Override
-    public SecuredEntity getSecuredEntity(long id) {
+    public SecuredEntity findSecuredEntityById(long id) {
         return fetchOne((int) id);
     }
 

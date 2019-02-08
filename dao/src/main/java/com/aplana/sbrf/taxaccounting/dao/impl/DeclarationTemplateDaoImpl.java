@@ -150,7 +150,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 	}
 
     @Override
-    public SecuredEntity getSecuredEntity(long id) {
+    public SecuredEntity findSecuredEntityById(long id) {
         return get((int) id);
     }
 

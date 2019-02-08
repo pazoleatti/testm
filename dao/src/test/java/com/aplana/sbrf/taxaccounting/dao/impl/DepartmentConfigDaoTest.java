@@ -41,7 +41,7 @@ public class DepartmentConfigDaoTest {
 
     @Test
     public void getTest() {
-        assertNotNull(departmentConfigDao.getById(10));
+        assertNotNull(departmentConfigDao.findById(10));
     }
 
     @Test

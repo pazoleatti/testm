@@ -12,15 +12,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class DepartmentConfigRowMapper implements RowMapper<DepartmentConfig> {
-    public final static String FIELDS = " dc.id, dc.record_id, dc.kpp, oktmo.id oktmo_id, oktmo.code oktmo_code, oktmo.name oktmo_name, dc.version, dc.version_end," +
-            " dc.department_id, dc.tax_organ_code, pp.id present_place_id, pp.code present_place_code, pp.name present_place_name, dc.name, dc.phone," +
-            " reorg.id reorg_id, reorg.code reorg_code, reorg.name reorg_name, dc.reorg_inn, reorg_kpp, sign.id signatory_id, sign.code signatory_code, sign.name signatory_name, " +
-            " dc.signatory_surname, dc.signatory_firstname, dc.signatory_lastname, dc.approve_doc_name, dc.approve_org_name ";
-    public final static String JOINS = "join ref_book_oktmo oktmo on oktmo.id = dc.oktmo \n" +
-            "left join ref_book_present_place pp on pp.id = dc.present_place\n" +
-            "left join ref_book_reorganization reorg on reorg.id = dc.reorg_form_code\n" +
-            "left join ref_book_signatory_mark sign on sign.id = dc.signatory_id\n";
-
     @Override
     public DepartmentConfig mapRow(ResultSet rs, int rowNum) throws SQLException {
         DepartmentConfig departmentConfig = new DepartmentConfig();

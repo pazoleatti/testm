@@ -56,7 +56,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                     "    OR rp.END_DATE NOT BETWEEN :startDate AND :endDate)";
 
     @Override
-    public SecuredEntity getSecuredEntity(long id) {
+    public SecuredEntity findSecuredEntityById(long id) {
         return get(id);
     }
 

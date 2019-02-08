@@ -47,7 +47,7 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
     RefBookMapperFactory refBookMapperFactory;
 
     @Override
-    public SecuredEntity getSecuredEntity(final long id) {
+    public SecuredEntity findSecuredEntityById(final long id) {
         return fetchPersonVersion(id);
     }
 

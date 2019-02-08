@@ -20,12 +20,12 @@ import java.util.List;
 public interface DepartmentConfigDao extends PermissionDao {
 
     /**
-     * Возвращяет настройку подразделений по идентификатору
+     * Возвращяет настройку подразделений по идентификатору, null если не найдена
      *
      * @param id идентификатор версии настройки подразделений
      * @return настройка подразделений
      */
-    DepartmentConfig getById(long id);
+    DepartmentConfig findById(long id);
 
     /**
      * Возвращяет предыдущую версию настройки подразделений

@@ -40,7 +40,7 @@ public class DeclarationDataFileDaoImpl extends AbstractDao implements Declarati
     }
 
     @Override
-    public SecuredEntity getSecuredEntity(long id) {
+    public SecuredEntity findSecuredEntityById(long id) {
         throw new UnsupportedOperationException("Not implemented yet");
     }
 

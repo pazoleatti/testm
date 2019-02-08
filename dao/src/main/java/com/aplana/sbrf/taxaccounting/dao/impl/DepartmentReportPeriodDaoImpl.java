@@ -445,7 +445,7 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
     }
 
     @Override
-    public SecuredEntity getSecuredEntity(long id) {
+    public SecuredEntity findSecuredEntityById(long id) {
         return fetchOne((int) id);
     }
 }
