@@ -123,6 +123,7 @@
                  splitStatements="false"/>
     </changeSet>
 
+	<!--https://jira.aplana.com/browse/SBRFNDFL-6513 новые атрибуты формы для нераспределенных отрицательных сумм-->
 	<changeSet id="3.5-dnovikov-4" author="dnovikov">
 		<sql>
 			alter table declaration_data add negative_income number(20,2);
@@ -130,6 +131,7 @@
 		</sql>
 	</changeSet>
 
+	<!--https://jira.aplana.com/browse/SBRFNDFL-6513 новые атрибуты формы для нераспределенных отрицательных сумм-->
 	<changeSet id="3.5-dnovikov-5" author="dnovikov">
 		<sql>
 			alter table declaration_data add negative_tax number(20,2);
