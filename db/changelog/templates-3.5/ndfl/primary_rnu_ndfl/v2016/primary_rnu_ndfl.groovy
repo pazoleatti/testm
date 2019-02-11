@@ -2504,7 +2504,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
     PagingResult<Map<String, RefBookValue>> getRefBook(long refBookId) {
         // Передаем как аргумент только срок действия версии справочника
         PagingResult<Map<String, RefBookValue>> refBookList = getProvider(refBookId).getRecordsVersion(getReportPeriodStartDate(), getReportPeriodEndDate(), null, null)
-        if (refBookList == null || refBookList.size() == 0) {
+        if (refBookList == null) {
             throw new Exception("Ошибка при получении записей справочника " + refBookId)
         }
         return refBookList
