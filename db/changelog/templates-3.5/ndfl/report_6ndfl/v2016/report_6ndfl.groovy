@@ -1099,9 +1099,9 @@ class Report6Ndfl extends AbstractScriptClass {
     class Section2Block implements Iterable<Section2Row> {
         Map<Section2Key, Section2Row> rowsByKey = [:]
         // Отрицательная сумма дохода, оставшаяся после корректировки отрицательных значений
-        def negativeIncome = 0 as BigDecimal
+        BigDecimal negativeIncome = 0
         // Отрицательная сумма налога, оставшаяся после корректировки отрицательных значений
-        def negativeWithholding = 0 as BigDecimal
+        BigDecimal negativeWithholding = 0
 
         Collection<Section2Row> getRows() {
             return rowsByKey.values()
