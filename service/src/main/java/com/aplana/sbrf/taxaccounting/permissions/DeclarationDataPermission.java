@@ -613,16 +613,21 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
         @Override
         protected boolean isGrantedInternal(User user, DeclarationData targetDomainObject, Logger logger) {
             TAUser taUser = taUserService.getUser(user.getUsername());
+
+            boolean userHasViewAccess = VIEW.isGranted(user, targetDomainObject, logger);
+
+            int templateId = targetDomainObject.getDeclarationTemplateId();
+            DeclarationTemplate template = declarationTemplateDao.get(templateId);
+            DeclarationFormKind formKind = template.getDeclarationFormKind();
+            boolean userHasEditAccess = taUser.hasRoles(TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS)
+                    || (taUser.hasRole(TARole.N_ROLE_OPER) && formKind == DeclarationFormKind.PRIMARY);
+
+            boolean formIsCreated = targetDomainObject.getState() == State.CREATED;
+
             DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.fetchOne(targetDomainObject.getDepartmentReportPeriodId());
+            boolean formPeriodIsActive = departmentReportPeriod.isActive();
 
-            boolean canView = VIEW.isGranted(user, targetDomainObject, logger);
-            boolean hasRoles = taUser.hasRoles(TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER);
-
-            if (targetDomainObject.getState() == State.CREATED && canView && hasRoles) {
-                if (!departmentReportPeriod.isActive()) {
-                    logCredentialsError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, logger);
-                    return false;
-                }
+            if (userHasViewAccess && userHasEditAccess && formIsCreated && formPeriodIsActive) {
                 return true;
             } else {
                 logCredentialsError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, logger);
