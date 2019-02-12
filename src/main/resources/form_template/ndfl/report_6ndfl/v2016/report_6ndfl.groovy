@@ -287,8 +287,8 @@ class Report6Ndfl extends AbstractScriptClass {
                     if (!section2Block.isEmpty()) {
                         if (declarationData.isAdjustNegativeValues()) {
                             section2Block.adjustNegativeValues()
-                            declarationData.negativeIncome = section2Block.negativeIncome
-                            declarationData.negativeTax = section2Block.negativeWithholding
+                            declarationData.negativeIncome = section2Block.negativeIncome.abs()
+                            declarationData.negativeTax = section2Block.negativeWithholding.abs()
                             declarationData.negativeSumsSign = NegativeSumsSign.FROM_CURRENT_FORM
                         }
                         ДохНал() {
@@ -1099,9 +1099,9 @@ class Report6Ndfl extends AbstractScriptClass {
     class Section2Block implements Iterable<Section2Row> {
         Map<Section2Key, Section2Row> rowsByKey = [:]
         // Отрицательная сумма дохода, оставшаяся после корректировки отрицательных значений
-        BigDecimal negativeIncome = 0
+        BigDecimal negativeIncome = new BigDecimal(0)
         // Отрицательная сумма налога, оставшаяся после корректировки отрицательных значений
-        BigDecimal negativeWithholding = 0
+        BigDecimal negativeWithholding = new BigDecimal(0)
 
         Collection<Section2Row> getRows() {
             return rowsByKey.values()
