@@ -177,4 +177,12 @@
 		</update>
 	</changeSet>
 
+	<!--https://jira.aplana.com/browse/SBRFNDFL-6513 6-НДФЛ, новые атрибуты, значения по-умолчанию-->
+	<changeSet id="3.5-dnovikov-9" author="dnovikov">
+		<sql>
+			update declaration_data dd set negative_income = 0, negative_tax = 0, negative_sums_sign = 0
+			where 103 = (select declaration_type_id from declaration_template where id = dd.declaration_template_id)
+		</sql>
+	</changeSet>
+
 </databaseChangeLog>
