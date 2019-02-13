@@ -185,4 +185,11 @@
 		</sql>
 	</changeSet>
 
+	<changeSet id="3.5-ishevchuk-5" author="ishevchuk" runAlways="true">
+		<update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+			<column name="script" valueClobFile="templates-3.5/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl_check.groovy"/>
+			<where>DECLARATION_TEMPLATE_ID = 101 and EVENT_ID = 5</where>
+		</update>
+	</changeSet>
+
 </databaseChangeLog>
