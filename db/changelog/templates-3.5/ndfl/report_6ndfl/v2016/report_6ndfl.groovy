@@ -449,6 +449,10 @@ class Report6Ndfl extends AbstractScriptClass {
             declarationData.correctionNum = lastSentForm ? (
                     lastSentForm.docStateId in [RefBookDocState.REJECTED.id, RefBookDocState.ERROR.id] ? lastSentForm.correctionNum : lastSentForm.correctionNum + 1
             ) : 0
+            declarationData.departmentReportPeriodId = departmentReportPeriod.id
+            declarationData.reportPeriodId = departmentReportPeriod.reportPeriod.id
+            declarationData.departmentId = departmentReportPeriod.departmentId
+            declarationData.state = State.CREATED
 
             File zipFile = null
             Xml xml = null
@@ -493,7 +497,7 @@ class Report6Ndfl extends AbstractScriptClass {
     void create(DeclarationData declaration) {
         Logger localLogger = new Logger()
         try {
-            declarationService.create(declaration, departmentReportPeriod, localLogger, userInfo, true)
+            declarationService.createWithoutChecks(declaration, localLogger, userInfo, true)
         } finally {
             logger.entries.addAll(localLogger.entries)
         }
