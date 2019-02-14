@@ -1,14 +1,15 @@
 package com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.server;
 
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPageTree;
+import org.apache.pdfbox.rendering.ImageType;
+import org.apache.pdfbox.rendering.PDFRenderer;
+import org.apache.pdfbox.tools.imageio.ImageIOUtil;
+
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.List;
-
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.PDPage;
-import org.apache.pdfbox.util.ImageIOUtil;
 
 /**
  * Вспомогательная утилита для реализации серверной части компонента PDFViewer
@@ -37,11 +38,12 @@ public final class PDFImageUtils {
 		try {
 			pdDocument = PDDocument.load(pdf);
 
-			List<?> pages = pdDocument.getDocumentCatalog().getAllPages();
-			PDPage page = (PDPage) pages.get(pageIndex);
+			PDPageTree pages = pdDocument.getDocumentCatalog().getPages();
 
-			BufferedImage bufferedImage = page.convertToImage(
-					BufferedImage.TYPE_BYTE_GRAY, imageResolution);
+			PDFRenderer pdfRenderer = new PDFRenderer(pdDocument);
+
+			BufferedImage bufferedImage = pdfRenderer.renderImageWithDPI(
+					pageIndex, imageResolution, ImageType.GRAY);
 			if (!ImageIOUtil.writeImage(bufferedImage, imageFormat, image)) {
 				throw new RuntimeException(
 						"Не удалось сформировать изображение для страницы "
@@ -72,7 +74,7 @@ public final class PDFImageUtils {
 		PDDocument pdDocument = null;
 		try {
 			pdDocument = PDDocument.load(pdf);
-			return pdDocument.getDocumentCatalog().getAllPages().size();
+			return pdDocument.getDocumentCatalog().getPages().getCount();
 		} catch (Exception e) {
 			throw new RuntimeException("Не удалось получить количество страниц",
 					e);

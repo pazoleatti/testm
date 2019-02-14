@@ -325,4 +325,12 @@ public interface DeclarationService {
      * @return ID блоба содержащего XSD файл макета
      */
     String findXsdIdByTemplateId(Integer declarationTemplateId);
+
+    /**
+     * Получает файл из макета по его имени
+     * @param declarationTemplateId идентификатор макета
+     * @param fileName название файла, приложенного к макету
+     * @return содержимое файла
+     */
+    InputStream getTemplateFileContent(int declarationTemplateId, String fileName);
 }

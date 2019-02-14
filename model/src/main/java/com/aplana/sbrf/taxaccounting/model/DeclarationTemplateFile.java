@@ -39,6 +39,16 @@ public class DeclarationTemplateFile implements Serializable {
      */
     public static final String APPLICATION14_NDFL_DEBT_TEMPLATE = "app14_ndfl_debt.docx";
 
+    /**
+     * Отчет 2НДФЛ по ФЛ. Основная страница
+     */
+    public static final String NDFL_2_REPORT_BY_PERSON_PAGE_BASE = "ndfl_2_report_by_person_page_base.pdf";
+
+    /**
+     * Отчет 2НДФЛ по ФЛ. Страница приложения.
+     */
+    public static final String NDFL_2_REPORT_BY_PERSON_PAGE_APPLICATION = "ndfl_2_report_by_person_page_application.pdf";
+
     private String fileName;
     private String blobDataId;
 

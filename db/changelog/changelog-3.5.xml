@@ -185,4 +185,36 @@
 		</sql>
 	</changeSet>
 
+	<!--https://jira.aplana.com/browse/SBRFNDFL-6610 Реализовать "дизайн" печатного представления 2-НДФЛ-->
+	<changeSet id="3.5-ytrofimov-4" author="ytrofimov">
+		<insert tableName="BLOB_DATA">
+			<column name="id" value="79c363f8-52f7-4fa0-94bd-27c693f5cfd9"/>
+			<column name="name" value="ndfl_2_report_by_person_page_base.pdf"/>
+			<column name="data" valueBlobFile="templates-3.5/ndfl/report_2ndfl_1/v2016/ndfl_2_report_by_person_page_base.pdf"/>
+			<column name="CREATION_DATE" valueDate="2019-02-13"/>
+		</insert>
+	</changeSet>
+
+	<!--https://jira.aplana.com/browse/SBRFNDFL-6610 Реализовать "дизайн" печатного представления 2-НДФЛ-->
+	<changeSet id="3.5-ytrofimov-5" author="ytrofimov">
+		<insert tableName="BLOB_DATA">
+			<column name="id" value="3a8afe75-a882-4ecb-9bd2-46920d12803d"/>
+			<column name="name" value="ndfl_2_report_by_person_page_application.pdf"/>
+			<column name="data" valueBlobFile="templates-3.5/ndfl/report_2ndfl_1/v2016/ndfl_2_report_by_person_page_application.pdf"/>
+			<column name="CREATION_DATE" valueDate="2019-02-13"/>
+		</insert>
+	</changeSet>
+
+	<!--https://jira.aplana.com/browse/SBRFNDFL-6610 Реализовать "дизайн" печатного представления 2-НДФЛ-->
+	<changeSet id="3.5-ytrofimov-6" author="ytrofimov">
+	    <sql splitStatements="false">
+            begin
+                insert into declaration_template_file(declaration_template_id, blob_data_id) values (102, '79c363f8-52f7-4fa0-94bd-27c693f5cfd9');
+				insert into declaration_template_file(declaration_template_id, blob_data_id) values (104, '79c363f8-52f7-4fa0-94bd-27c693f5cfd9');
+				insert into declaration_template_file(declaration_template_id, blob_data_id) values (102, '3a8afe75-a882-4ecb-9bd2-46920d12803d');
+				insert into declaration_template_file(declaration_template_id, blob_data_id) values (104, '3a8afe75-a882-4ecb-9bd2-46920d12803d');
+            end;
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>
