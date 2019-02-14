@@ -1258,19 +1258,19 @@ public class NdflPersonDaoTest {
     }
 
     @Test
-    public void testfindIncomesForPersonByKppOktmo() {
+    public void testFindIncomesForPersonByKppOktmo() {
         List<NdflPersonIncome> result = ndflPersonDao.fetchNdflPersonIncomeByNdflPersonKppOktmo(Arrays.asList(1001L, 1002L), "99222", "111222333");
         assertThat(result).hasSize(2);
     }
 
     @Test
-    public void testfetchNdflPersonByPairKppOktmo() {
+    public void testFetchNdflPersonByPairKppOktmo() {
         List<NdflPerson> result = ndflPersonDao.fetchNdflPersonByPairKppOktmo(100L, "99222", "111222333", false);
         assertThat(result).hasSize(1);
     }
 
     @Test
-    public void test_findDeclarartionDataIncomesWithSameOperationIdAndInp() {
+    public void test_findDeclarationDataIncomesWithSameOperationIdAndInp() {
         List<NdflPersonIncome> result = ndflPersonDao.findDeclarartionDataIncomesWithSameOperationIdAndInp(100L, "100500", "2");
         assertThat(result).hasSize(2);
     }
@@ -1487,6 +1487,4 @@ public class NdflPersonDaoTest {
         }
         return ids;
     }
-
-
 }

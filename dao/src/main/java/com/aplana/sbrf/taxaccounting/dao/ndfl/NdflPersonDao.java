@@ -774,28 +774,31 @@ public interface NdflPersonDao {
 
     /**
      * Найти строки дохода с определенными ИНП и ИдОперации
+     *
      * @param declarationDataId идентификатор налоговой формы к которой относится строка операции
      * @param inp               идентификатор налогоплательщика у строки операции
      * @param operationId       идентификатор операции
-     * @return  список строк операций дохода соответствующие требуемым критериям
+     * @return список строк операций дохода соответствующие требуемым критериям
      */
     List<NdflPersonIncome> findDeclarartionDataIncomesWithSameOperationIdAndInp(Long declarationDataId, String inp, String operationId);
 
     /**
      * Найти записи раздела 1 для операций с определенными ИНП и ИдОперации
+     *
      * @param declarationDataId идентификатор налоговой формы к которой относится строка операции
      * @param inp               идентификатор налогоплательщика у строки операции
      * @param operationId       идентификатор операции
-     * @return  список найденных записей раздела 1
+     * @return список найденных записей раздела 1
      */
     List<NdflPerson> findDeclarartionDataPersonWithSameOperationIdAndInp(Long declarationDataId, String inp, String operationId);
 
     /**
      * Найти значение для заполнения графы "Дата операции"
+     *
      * @param declarationDataId идентификатор налоговой формы к которой относится строка операции
      * @param inp               идентификатор налогоплательщика у строки операции
      * @param operationId       идентификатор операции
-     * @return  полученное значение
+     * @return полученное значение
      */
     Date findOperationDate(Long declarationDataId, String inp, String operationId);
 }

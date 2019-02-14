@@ -819,10 +819,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             //Контролерам доступны все АСНУ, поэтому фильтрации по АСНУ нет, поэтому список для них пустой
             //Операторам доступны только некоторые АСНУ. Если такие есть, добавить их в список. Если доступных АСНУ нет, то
             //список будет состоять из 1 элемента (-1), который не может быть id существующего АСНУ, чтобы не нашлась ни одна форма
-            List<Long> asnuIds = new ArrayList<Long>();
+            List<Long> asnuIds = new ArrayList<>();
             if (!currentUser.hasRoles(TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP) && currentUser.hasRole(TARole.N_ROLE_OPER)) {
-                List<RefBookAsnu> avaliableAsnuList = refBookAsnuService.fetchAvailableAsnu(userInfo);
-                if (!avaliableAsnuList.isEmpty()) {
+                List<RefBookAsnu> availableAsnuList = refBookAsnuService.fetchAvailableAsnu(userInfo);
+                if (!availableAsnuList.isEmpty()) {
                     for (RefBookAsnu asnu : refBookAsnuService.fetchAvailableAsnu(userInfo)) {
                         asnuIds.add(asnu.getId());
                     }
@@ -1019,6 +1019,33 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
         }
     }
+
+    /**
+     * Удаление отчетов и блокировок на задачи формирования отчетов, связанных с декларациями
+     */
+    private void deleteReport(long declarationDataId, TAUserInfo userInfo, boolean isCalc, TaskInterruptCause cause) {
+        DeclarationDataReportType[] ddReportTypes = {DeclarationDataReportType.XML_DEC, DeclarationDataReportType.PDF_DEC, DeclarationDataReportType.EXCEL_DEC, DeclarationDataReportType.CHECK_DEC, DeclarationDataReportType.ACCEPT_DEC};
+        for (DeclarationDataReportType ddReportType : ddReportTypes) {
+            if (ddReportType.isSubreport()) {
+                DeclarationData declarationData = declarationDataDao.get(declarationDataId);
+                List<DeclarationSubreport> subreports = declarationTemplateService.get(declarationData.getDeclarationTemplateId()).getSubreports();
+                for (DeclarationSubreport subreport : subreports) {
+                    ddReportType.setSubreport(subreport);
+                    LockData lock = lockDataService.findLock(generateAsyncTaskKey(declarationDataId, ddReportType));
+                    if (lock != null) {
+                        asyncManager.interruptTask(lock.getTaskId(), userInfo, cause);
+                    }
+                }
+            } else if (!isCalc || !DeclarationDataReportType.XML_DEC.equals(ddReportType)) {
+                LockData lock = lockDataService.findLock(generateAsyncTaskKey(declarationDataId, ddReportType));
+                if (lock != null) {
+                    asyncManager.interruptTask(lock.getTaskId(), userInfo, cause);
+                }
+            }
+        }
+        reportService.deleteAllByDeclarationId(declarationDataId);
+    }
+
 
     @Override
     @Transactional
@@ -2673,8 +2700,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         } catch (IOException e) {
             throw new ServiceException(e.getLocalizedMessage(), e);
         } finally {
-            if (reportFile != null)
-                reportFile.delete();
+            reportFile.delete();
         }
     }
 
@@ -2825,49 +2851,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         ndflPersonDao.updatePrepayments(updateRowNum(ndflPerson.getPrepayments()));
     }
 
-
-    private String getCorrectionDateString(DepartmentReportPeriod reportPeriod) {
-        return reportPeriod.getCorrectionDate() != null ?
-                String.format(" корр. %s", sdf.get().format(reportPeriod.getCorrectionDate())) :
-                "";
-    }
-
-    private String getAdditionalString(DeclarationData declarationData) {
-        if (declarationData.getAsnuId() != null) {
-            RefBookDataProvider asnuProvider = refBookFactory.getDataProvider(RefBook.Id.ASNU.getId());
-            String asnuName = asnuProvider.getRecordData(declarationData.getAsnuId()).get("NAME").getStringValue();
-
-            return String.format(", АСНУ: \"%s\"", asnuName);
-        }
-        return "";
-    }
-
-    /**
-     * Удаление отчетов и блокировок на задачи формирования отчетов связанных с декларациями
-     */
-    private void deleteReport(long declarationDataId, TAUserInfo userInfo, boolean isCalc, TaskInterruptCause cause) {
-        DeclarationDataReportType[] ddReportTypes = {DeclarationDataReportType.XML_DEC, DeclarationDataReportType.PDF_DEC, DeclarationDataReportType.EXCEL_DEC, DeclarationDataReportType.CHECK_DEC, DeclarationDataReportType.ACCEPT_DEC};
-        for (DeclarationDataReportType ddReportType : ddReportTypes) {
-            if (ddReportType.isSubreport()) {
-                DeclarationData declarationData = declarationDataDao.get(declarationDataId);
-                List<DeclarationSubreport> subreports = declarationTemplateService.get(declarationData.getDeclarationTemplateId()).getSubreports();
-                for (DeclarationSubreport subreport : subreports) {
-                    ddReportType.setSubreport(subreport);
-                    LockData lock = lockDataService.findLock(generateAsyncTaskKey(declarationDataId, ddReportType));
-                    if (lock != null) {
-                        asyncManager.interruptTask(lock.getTaskId(), userInfo, cause);
-                    }
-                }
-            } else if (!isCalc || !DeclarationDataReportType.XML_DEC.equals(ddReportType)) {
-                LockData lock = lockDataService.findLock(generateAsyncTaskKey(declarationDataId, ddReportType));
-                if (lock != null) {
-                    asyncManager.interruptTask(lock.getTaskId(), userInfo, cause);
-                }
-            }
-        }
-        reportService.deleteAllByDeclarationId(declarationDataId);
-    }
-
+    @Override
     public String createPdfFileName(Long declarationDataId, TAUserInfo userInfo) {
         DeclarationData declarationData = get(declarationDataId, userInfo);
         DeclarationTemplate dt = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
@@ -2903,6 +2887,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         logger.getEntries().addAll(scriptLogger.getEntries());
     }
 
+    @Override
     public String createDocReportByPerson(DeclarationData declarationData, DataRow<Cell> selectedPerson, TAUserInfo userInfo, Logger logger) {
         try (InputStream inputStream = declarationTemplateDao.getTemplateFileContent(declarationData.getDeclarationTemplateId(), DeclarationTemplateFile.DEPT_NOTICE_DOC_TEMPLATE)) {
             Map<String, Object> params = new HashMap<>();
@@ -2981,6 +2966,12 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             rowNum = rowNum != null ? rowNum.add(new BigDecimal("1")) : null;
         }
         return operations;
+    }
+
+    private String getCorrectionDateString(DepartmentReportPeriod reportPeriod) {
+        return reportPeriod.getCorrectionDate() != null ?
+                String.format(" корр. %s", sdf.get().format(reportPeriod.getCorrectionDate())) :
+                "";
     }
 
     private void makeNotificationForAccessDenied(Logger logger) {
