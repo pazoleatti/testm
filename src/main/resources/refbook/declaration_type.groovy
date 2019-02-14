@@ -1152,7 +1152,9 @@ class DeclarationType extends AbstractScriptClass {
             newDeclarationData.departmentId = departmentReportPeriod.departmentId
             newDeclarationData.state = State.CREATED
             declarationDataId = declarationService.createWithoutChecks(newDeclarationData, logger, userInfo, true)
-
+            if (logger.containsLevel(LogLevel.ERROR)) {
+                return
+            }
             // Запуск события скрипта для разбора полученного файла
             DeclarationData createdDeclarationData = declarationService.getDeclarationData(declarationDataId)
             declarationService.importXmlTransportFile(dataFile, UploadFileName, createdDeclarationData, userInfo, logger)
