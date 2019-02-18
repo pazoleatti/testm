@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.action.CreateReportAction;
 import com.aplana.sbrf.taxaccounting.model.action.CreateReportFormsAction;
 import com.aplana.sbrf.taxaccounting.model.action.PrepareSubreportAction;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.filter.NdflFilter;
 import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookKnfType;
@@ -100,6 +101,7 @@ public class DeclarationDataController {
         binder.registerCustomEditor(Cell.class, new RequestParamEditor(Cell.class));
         binder.registerCustomEditor(RefBookKnfType.class, new RequestParamEditor(RefBookKnfType.class));
         binder.registerCustomEditor(Ndfl2_6DataReportParams.class, new RequestParamEditor(Ndfl2_6DataReportParams.class));
+        binder.registerCustomEditor(NdflFilter.class, new RequestParamEditor(NdflFilter.class));
     }
 
     /**
@@ -739,6 +741,24 @@ public class DeclarationDataController {
     @PostMapping(value = "/rest/declarationData/{declarationDataId}/editNdflPrepayment", consumes = MediaType.APPLICATION_JSON_VALUE)
     public void editNdflPrepayment(@PathVariable Long declarationDataId, @RequestBody NdflPersonPrepaymentDTO personPrepayment) {
         declarationService.updateNdflPrepayment(declarationDataId, securityService.currentUserInfo(), personPrepayment);
+    }
+
+    /**
+     * Массовое редактирование дат в строках раздела 2.
+     */
+    @PostMapping("/rest/declarationData/{declarationDataId}/editNdflIncomeDates")
+    public ActionResult editNdflIncomeDates(@PathVariable Long declarationDataId, @RequestBody NdflPersonIncomeDatesDTO incomeDates) {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        return declarationService.updateNdflIncomeDates(declarationDataId, userInfo, incomeDates);
+    }
+
+    /**
+     * Массовое редактирование дат в строках раздела 2, подходящих под переданный фильтр.
+     */
+    @PostMapping("/rest/declarationData/{declarationDataId}/editNdflIncomeDatesByFilter")
+    public ActionResult editNdflIncomeDatesByFilter(@PathVariable Long declarationDataId, @RequestBody NdflPersonIncomeDatesDTO incomeDates, @RequestParam NdflFilter filter) {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        return declarationService.updateNdflIncomeDatesByFilter(declarationDataId, userInfo, incomeDates, filter);
     }
 
     /**

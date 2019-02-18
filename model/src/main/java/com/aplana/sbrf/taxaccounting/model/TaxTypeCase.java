@@ -47,17 +47,17 @@ public enum TaxTypeCase {
     /* Винительный падеж */
     private final String accusative;
     /* Творительный падеж */
-    private final String ablative;
+    private final String instrumental;
     /* Предложный падеж */
     private final String prepositional;
 
-    TaxTypeCase(char code, String nominative, String genitive, String dative, String accusative, String ablative, String prepositional) {
+    TaxTypeCase(char code, String nominative, String genitive, String dative, String accusative, String instrumental, String prepositional) {
         this.code = code;
         this.nominative = nominative;
         this.genitive = genitive;
         this.dative = dative;
         this.accusative = accusative;
-        this.ablative = ablative;
+        this.instrumental = instrumental;
         this.prepositional = prepositional;
     }
 
@@ -81,8 +81,8 @@ public enum TaxTypeCase {
         return accusative;
     }
 
-    public String getAblative() {
-        return ablative;
+    public String getInstrumental() {
+        return instrumental;
     }
 
     public String getPrepositional() {

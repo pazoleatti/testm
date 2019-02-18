@@ -38,7 +38,11 @@
 
                 // Получение строк выбранных в таблице внутри вкладки
                 tab.getRows = function () {
-                    return $scope.incomesAndTaxGrid.value
+                    return $scope.incomesAndTaxGrid.value;
+                };
+                // Полное число строк в таблице вкладки
+                tab.getRowsCount = function () {
+                    return $scope.incomesAndTaxGrid.ctrl.getCountRecords();
                 };
 
                 $scope.incomesAndTaxGrid = {
@@ -150,11 +154,19 @@
                         onSelectRow: function (rowId, status) {
                             if (status) {
                                 $rootScope.$emit("selectedRowCountChanged", $scope.incomesAndTaxGrid.value.length + 1)
-                            } else $rootScope.$emit("selectedRowCountChanged", $scope.incomesAndTaxGrid.value.length - 1)
-
+                            } else {
+                                $rootScope.$emit("selectedRowCountChanged", $scope.incomesAndTaxGrid.value.length - 1)
+                            }
+                        },
+                        onSelectAll: function (rowIds, status) {
+                            if (status) {
+                                $rootScope.$emit('selectedRowCountChanged', rowIds.length);
+                            } else {
+                                $rootScope.$emit('selectedRowCountChanged', 0);
+                            }
                         }
                     }
                 };
-            }]);
-
+            }
+        ]);
 }());

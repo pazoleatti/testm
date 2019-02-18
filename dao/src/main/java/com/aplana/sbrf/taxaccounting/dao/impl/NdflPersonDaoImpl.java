@@ -120,6 +120,17 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     @Override
+    public List<NdflPersonIncome> findAllIncomesByIdIn(List<Long> incomeIds) {
+        String sql = "" +
+                "select " + createColumns(NdflPersonIncome.COLUMNS, "income") + ", asnu.name as asnu_name, null inp " +
+                "from ndfl_person_income income " +
+                "   left join ref_book_asnu asnu on income.asnu_id = asnu.id " +
+                "where income.id in (:ids)";
+        MapSqlParameterSource params = new MapSqlParameterSource("ids", incomeIds);
+        return getNamedParameterJdbcTemplate().query(sql, params, new NdflPersonDaoImpl.NdflPersonIncomeRowMapper());
+    }
+
+    @Override
     public List<NdflPersonIncome> findAllIncomesByDeclarationId(long declarationDataId) {
         return getJdbcTemplate().query("select " + createColumns(NdflPersonIncome.COLUMNS, "npi") + ", np.inp, rba.NAME as asnu_name " +
                 "from ndfl_person_income npi " +

@@ -84,7 +84,12 @@ public interface NdflPersonDao {
     List<NdflPerson> findAllNdflPersonsByDeclarationIds(List<Long> declarationDataIds);
 
     /**
-     * Найти все "Сведения о доходах физического лица" привязанные к налоговой форме
+     * Найти строки раздела 2 "Сведения о доходах и НДФЛ" по списку идентификаторов.
+     */
+    List<NdflPersonIncome> findAllIncomesByIdIn(List<Long> incomeIds);
+
+    /**
+     * Найти все "Сведения о доходах физического лица", привязанные к налоговой форме
      *
      * @param declarationDataId идентификатор налоговой формы
      * @return список объектов доходов физического лица

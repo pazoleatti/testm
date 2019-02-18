@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.action.CreateReportAction;
 import com.aplana.sbrf.taxaccounting.model.action.CreateReportFormsAction;
 import com.aplana.sbrf.taxaccounting.model.action.PrepareSubreportAction;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
+import com.aplana.sbrf.taxaccounting.model.filter.NdflFilter;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.result.*;
@@ -643,6 +644,16 @@ public interface DeclarationDataService {
      * @param personIncome      данные строки раздела 2
      */
     void updateNdflIncomesAndTax(Long declarationDataId, TAUserInfo taUserInfo, NdflPersonIncomeDTO personIncome);
+
+    /**
+     * Обновляет даты в строках раздела 2
+     */
+    ActionResult updateNdflIncomeDates(Long declarationDataId, TAUserInfo userInfo, NdflPersonIncomeDatesDTO incomeDates);
+
+    /**
+     * Обновляет даты в строках раздела 2, подходящих под переданный фильтр.
+     */
+    ActionResult updateNdflIncomeDatesByFilter(Long declarationDataId, TAUserInfo userInfo, NdflPersonIncomeDatesDTO incomeDates, NdflFilter ndflFilter);
 
     /**
      * Обновляет данные строки для раздела 3 (Сведения о вычетах) и производит пересортировку данных

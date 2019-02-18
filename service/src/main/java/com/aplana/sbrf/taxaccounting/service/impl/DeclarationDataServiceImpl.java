@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.async.AsyncManager;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataFileDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
+import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.ndfl.NdflPersonDao;
 import com.aplana.sbrf.taxaccounting.dao.util.DBUtils;
@@ -16,6 +17,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
+import com.aplana.sbrf.taxaccounting.model.filter.NdflFilter;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -30,6 +32,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDocState;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookKnfType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.result.*;
+import com.aplana.sbrf.taxaccounting.model.util.DateUtils;
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 import com.aplana.sbrf.taxaccounting.permissions.BasePermissionEvaluator;
 import com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission;
@@ -39,10 +42,12 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.component.MoveToCreateFacade;
 import com.aplana.sbrf.taxaccounting.service.component.lock.locker.DeclarationLocker;
+import com.aplana.sbrf.taxaccounting.service.impl.declaration.edit.incomedate.*;
 import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import com.aplana.sbrf.taxaccounting.service.refbook.RefBookAsnuService;
 import com.aplana.sbrf.taxaccounting.utils.DepartmentReportPeriodFormatter;
 import com.aplana.sbrf.taxaccounting.utils.ZipUtils;
+import com.google.common.collect.Lists;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRParameter;
 import net.sf.jasperreports.engine.JasperCompileManager;
@@ -61,6 +66,7 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -89,7 +95,7 @@ import java.util.regex.Pattern;
 import java.util.zip.ZipInputStream;
 
 import static java.util.Collections.singletonList;
-import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
+import static org.apache.commons.collections4.CollectionUtils.*;
 
 /**
  * Сервис для работы с декларациями
@@ -204,6 +210,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     private DeclarationTypeDao declarationTypeDao;
     @Autowired
     private DeclarationLocker declarationLocker;
+    @Autowired
+    private ConfigurationDao configurationDao;
 
     private class SAXHandler extends DefaultHandler {
         private Map<String, String> values;
@@ -2793,10 +2801,142 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         ndflPersonDao.updateOneNdflIncome(personIncome, taUserInfo);
         reportService.deleteDec(singletonList(declarationDataId),
                 Arrays.asList(DeclarationDataReportType.SPECIFIC_REPORT_DEC, DeclarationDataReportType.EXCEL_DEC));
-        NdflPerson ndflPerson = ndflPersonDao.fetchOne(personIncome.getNdflPersonId());
-        List<NdflPerson> operationDatePersons = ndflPersonDao.findDeclarartionDataPersonWithSameOperationIdAndInp(ndflPerson.getDeclarationDataId(), ndflPerson.getInp(), personIncome.getOperationId());
-        List<NdflPersonIncome> operationDateIncomes = ndflPersonDao.findDeclarartionDataIncomesWithSameOperationIdAndInp(ndflPerson.getDeclarationDataId(), ndflPerson.getInp(), personIncome.getOperationId());
-        Date operationDate = ndflPersonDao.findOperationDate(ndflPerson.getDeclarationDataId(), ndflPerson.getInp(), personIncome.getOperationId());
+        List<Long> changedPersonIds = updateAdditionalSortParams(personIncome.getNdflPersonId(), personIncome.getOperationId());
+        sortPersonRows(changedPersonIds);
+    }
+
+    @Override
+    @Transactional
+    @PreAuthorize("hasPermission(#declarationDataId, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).EDIT)")
+    public ActionResult updateNdflIncomeDates(Long declarationDataId, TAUserInfo userInfo, NdflPersonIncomeDatesDTO incomeDates) {
+        LOG.info(String.format("Update NdflIncomes dates: %s", incomeDates));
+
+        Logger logger = new Logger();
+        Notification notification = new Notification();
+
+        try {
+            // Достаем из базы строки для редактирования
+            List<Long> incomeIds = incomeDates.getIncomeIds();
+            List<NdflPersonIncome> incomes = ndflPersonDao.findAllIncomesByIdIn(incomeIds);
+
+            // Записываем ФЛ и операции, которые затронул алгоритм
+            Set<Pair<Long, String>> personAndOperationAffected = new HashSet<>();
+
+            // Заменяем значения в строках
+            for (NdflPersonIncome income : incomes) {
+                // ФЛ, к которому относится строка дохода
+                NdflPerson person = ndflPersonDao.fetchOne(income.getNdflPersonId());
+
+                // Редактируем все требуемые поля по очереди.
+                for (EditableDateField dateField : EditableDateField.values()) {
+                    try {
+                        // Для каждого вида даты своя реализация DateEditor
+                        DateEditor dateEditor = DateEditorFactory.getEditor(dateField);
+                        boolean edited = dateEditor.editIncomeDateField(income, incomeDates, person, logger);
+
+                        if (edited) {
+                            personAndOperationAffected.add(Pair.of(income.getNdflPersonId(), income.getOperationId()));
+                            TAUser user = userInfo.getUser();
+                            income.setModifiedDate(new Date());
+                            income.setModifiedBy(user.getName() + "(" + user.getLogin() + ")");
+                        }
+                    } catch (Exception e) {
+                        logger.errorExp(
+                                "Раздел 2. Строка %s. %s не была заменена. %s",
+                                "Ошибка замены",
+                                String.format("%s, ИНП: %s, ID операции: %s", person.getFullName(), person.getInp(), income.getOperationId()),
+                                income.getRowNum(), dateField.getTitle(), e.getMessage()
+                        );
+                    }
+                }
+            }
+
+            // Сохраняем изменения
+            ndflPersonDao.updateIncomes(incomes);
+
+            // Складываем сюда id NdflPerson, которые нужно пересортировать
+            Set<Long> personIdsToResort = new HashSet<>();
+
+            // Обновляем "Дополнительные параметры сортировки" измененных записей
+            for (Pair<Long, String> personAndOperation : personAndOperationAffected) {
+                Long personId = personAndOperation.getLeft();
+                String operationId = personAndOperation.getRight();
+                List<Long> updatedPersonIds = updateAdditionalSortParams(personId, operationId);
+                personIdsToResort.addAll(updatedPersonIds);
+            }
+
+            // Пересортируем затронутые записи
+            if (isNotEmpty(personIdsToResort)) {
+                sortPersonRows(Lists.newArrayList(personIdsToResort));
+            }
+
+            // Удаляем имеющиеся у формы спецотчеты, если хотя бы одна дата была изменена
+            boolean isAnyDateChanged = logger.containsLevel(LogLevel.INFO);
+            reportService.deleteDec(
+                    singletonList(declarationDataId),
+                    Arrays.asList(DeclarationDataReportType.SPECIFIC_REPORT_DEC, DeclarationDataReportType.EXCEL_DEC)
+            );
+
+            boolean notAllDatesAreChanged = isAnyDateChanged &&
+                    (logger.containsLevel(LogLevel.WARNING) || logger.containsLevel(LogLevel.ERROR));
+
+            // Не будь, как я, вынеси это в отдельный метод.
+            String onEmpty = " __ ";
+            if (notAllDatesAreChanged) {
+                logger.error("Выполнено частичное изменение дат, указанных пользователем. Дата начисления дохода = \"%s\", Дата выплаты дохода = \"%s\", Дата НДФЛ = \"%s\", Срок перечисления = \"%s\".",
+                        DateUtils.commonDateFormat(incomeDates.getAccruedDate(), onEmpty),
+                        DateUtils.commonDateFormat(incomeDates.getPayoutDate(), onEmpty),
+                        DateUtils.commonDateFormat(incomeDates.getTaxDate(), onEmpty),
+                        DateUtils.commonDateFormat(incomeDates.getTransferDate(), onEmpty)
+                );
+                notification.setText(String.format("Для формы №%s выполнено частичное изменение дат раздела 2", declarationDataId));
+            } else if (isAnyDateChanged) {
+                logger.info("Выполнено изменение дат, указанных пользователем. Дата начисления дохода = \"%s\", Дата выплаты дохода = \"%s\", Дата НДФЛ = \"%s\", Срок перечисления = \"%s\".",
+                        DateUtils.commonDateFormat(incomeDates.getAccruedDate(), onEmpty),
+                        DateUtils.commonDateFormat(incomeDates.getPayoutDate(), onEmpty),
+                        DateUtils.commonDateFormat(incomeDates.getTaxDate(), onEmpty),
+                        DateUtils.commonDateFormat(incomeDates.getTransferDate(), onEmpty)
+                );
+                notification.setText(String.format("Для формы №%s выполнено изменение дат раздела 2", declarationDataId));
+            } else {
+                logger.error("Не выполнено изменение дат, указанных пользователем. Дата начисления дохода = \"%s\", Дата выплаты дохода = \"%s\", Дата НДФЛ = \"%s\", Срок перечисления = \"%s\".",
+                        DateUtils.commonDateFormat(incomeDates.getAccruedDate(), onEmpty),
+                        DateUtils.commonDateFormat(incomeDates.getPayoutDate(), onEmpty),
+                        DateUtils.commonDateFormat(incomeDates.getTaxDate(), onEmpty),
+                        DateUtils.commonDateFormat(incomeDates.getTransferDate(), onEmpty)
+                );
+                notification.setText(String.format("Для формы №%s не выполнено изменение дат раздела 2", declarationDataId));
+            }
+        } catch (Exception e) {
+            logger.error("Ошибка редактирования формы. %s", e.getMessage());
+            notification.setText(String.format("Для формы №%s не выполнено изменение дат раздела 2", declarationDataId));
+        }
+
+        String logsUuid = logEntryService.save(logger.getEntries());
+
+        notification.setLogId(logsUuid);
+        notification.setUserId(userInfo.getUser().getId());
+        notification.setCreateDate(new Date());
+        notificationService.create(Collections.singletonList(notification));
+
+        ActionResult result = new ActionResult();
+        result.setUuid(logsUuid);
+        return result;
+    }
+
+    /**
+     * Расчет дополнительных параметров сортировки строк.
+     *
+     * @param personId    идентификатор NdflPerson
+     * @param operationId ID операции (Гр. 3)
+     * @return идентификаторы NdflPerson, чьи записи были затронуты.
+     */
+    private List<Long> updateAdditionalSortParams(Long personId, String operationId) {
+        LOG.info(String.format("Calculate additional sort params for personId = %s, operationId = %s", personId, operationId));
+        NdflPerson ndflPerson = ndflPersonDao.fetchOne(personId);
+        List<NdflPerson> operationDatePersons = ndflPersonDao.findDeclarartionDataPersonWithSameOperationIdAndInp(ndflPerson.getDeclarationDataId(), ndflPerson.getInp(), operationId);
+        List<NdflPersonIncome> operationDateIncomes = ndflPersonDao.findDeclarartionDataIncomesWithSameOperationIdAndInp(ndflPerson.getDeclarationDataId(), ndflPerson.getInp(), operationId);
+        Date operationDate = ndflPersonDao.findOperationDate(ndflPerson.getDeclarationDataId(), ndflPerson.getInp(), operationId);
         for (NdflPersonIncome income : operationDateIncomes) {
             income.setOperationDate(operationDate);
             if (income.getTaxDate() != null) {
@@ -2812,9 +2952,27 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 income.setRowType(NdflPersonIncome.OTHER_ROW_TYPE);
             }
         }
-
         ndflPersonDao.updateIncomes(operationDateIncomes);
-        for (NdflPerson person : operationDatePersons) {
+
+        List<Long> changedPersonIds = new ArrayList<>();
+        for (NdflPerson operationPerson : operationDatePersons) {
+            changedPersonIds.add(operationPerson.getId());
+        }
+        return changedPersonIds;
+    }
+
+    /**
+     * Сортировка строк переданных NdflPerson
+     *
+     * @param personIds идентификаторы NdflPerson
+     */
+    private void sortPersonRows(List<Long> personIds) {
+        if (isEmpty(personIds)) return;
+        LOG.info(String.format("Resorting NdflPersons data: ids = %s", personIds));
+
+        List<NdflPerson> persons = ndflPersonDao.fetchNdflPersonByIdList(personIds);
+
+        for (NdflPerson person : persons) {
             List<NdflPersonIncome> incomes = ndflPersonDao.fetchNdflPersonIncomeByNdflPerson(person.getId());
             List<NdflPersonDeduction> deductions = ndflPersonDao.fetchNdflPersonDeductionByNdflPerson(person.getId());
             List<NdflPersonPrepayment> prepayments = ndflPersonDao.fetchNdflPersonPrepaymentByNdflPerson(person.getId());
@@ -2825,6 +2983,25 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             ndflPersonDao.updateDeductions(updateRowNum(deductions));
             ndflPersonDao.updatePrepayments(updateRowNum(prepayments));
         }
+    }
+
+
+    @Override
+    @Transactional
+    @PreAuthorize("hasPermission(#declarationDataId, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).EDIT)")
+    public ActionResult updateNdflIncomeDatesByFilter(Long declarationDataId, TAUserInfo userInfo, NdflPersonIncomeDatesDTO incomeDates, NdflFilter ndflFilter) {
+
+        Configuration maxCount = configurationDao.fetchByEnum(ConfigurationParam.DECLARATION_ROWS_BULK_EDIT_MAX_COUNT);
+        int count = maxCount.getValue() != null ? Integer.getInteger(maxCount.getValue()) : 200;
+        PagingResult<NdflPersonIncomeDTO> incomeDtos = ndflPersonService.findPersonIncomeByFilter(ndflFilter, PagingParams.getInstance(1, count));
+
+        List<Long> incomeIds = new ArrayList<>();
+        for (NdflPersonIncomeDTO incomeDto : incomeDtos) {
+            incomeIds.add(incomeDto.getId());
+        }
+        incomeDates.setIncomeIds(incomeIds);
+
+        return updateNdflIncomeDates(declarationDataId, userInfo, incomeDates);
     }
 
     @Override
@@ -2858,7 +3035,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         switch (dt.getType().getId()) {
             case DeclarationType.NDFL_2_1:
             case DeclarationType.NDFL_2_2:
-                return new StringBuilder("Реестр_справок_").append(declarationData.getId()).append("_").append(SDF_DD_MM_YYYY_HH_MM_SS.get().format(new Date())).append(".pdf").toString();
+                return "Реестр_справок_" + declarationData.getId() + "_" + SDF_DD_MM_YYYY_HH_MM_SS.get().format(new Date()) + ".pdf";
             case DeclarationType.NDFL_6:
                 return getXmlDataFileName(declarationData.getId(), userInfo).replace("zip", "pdf");
             default:
@@ -2871,7 +3048,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     public String createUpdatePersonsDataTask(Long declarationDataId, TAUserInfo userInfo) {
         Logger logger = new Logger();
         if (ndflPersonService.getNdflPersonCount(declarationDataId) > 0) {
-            Map<String, Object> params = new HashMap<String, Object>();
+            Map<String, Object> params = new HashMap<>();
             params.put("declarationDataId", declarationDataId);
             asyncManager.createTask(OperationType.UPDATE_PERSONS_DATA, getStandardDeclarationDescription(declarationDataId), userInfo, params, logger);
         }

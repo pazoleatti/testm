@@ -33,7 +33,6 @@ import java.util.Map;
 /**
  * Контроллер для работы с ФЛ в ПНФ
  */
-
 @RestController
 public class NdflPersonController {
 

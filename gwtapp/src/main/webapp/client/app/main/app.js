@@ -51,6 +51,7 @@
         "common.select.formatNoMatches": "По вашему запросу ничего не найдено",
         "common.select.formatLoadMore": "Подождите, идет загрузка данных...",
         "common.placeholder.notSelected": "Не выбрано",
+        "common.placeholder.date": "дд.мм.гггг",
         "common.validation.required": "Необходимо заполнить поле",
 
         "common.undefined": "Не задано",
@@ -71,7 +72,9 @@
         "common.button.upload": "Загрузить файл",
         "button.create": "Создать",
         "button.check": "Проверить",
-        "button.edit.row": "Редактировать строку",
+        "button.edit.row": "Редактировать одну строку",
+        "button.edit.datesSelected": "Редактировать даты выбранных строк",
+        "button.edit.datesFound": "Редактировать даты найденных строк",
         "button.identifyPersons": "Идентифицировать ФЛ",
         "button.consolidate": "Консолидировать",
         "button.delete": "Удалить",
@@ -688,6 +691,14 @@
         "incomesAndTax.title.modifiedBy": "Обновил\n Гр. 27",
         "incomesAndTax.title.asnu": "АСНУ\n Гр. 28",
 
+        "incomesAndTax.editDates.title": "Массовая замена дат для выбранных строк Раздела 2",
+        "incomesAndTax.editDates.title.dateCalcIncome": "Дата начисления дохода",
+        "incomesAndTax.editDates.title.datePaymentIncome": "Дата выплаты дохода",
+        "incomesAndTax.editDates.title.taxDate": "Дата расчета НДФЛ",
+        "incomesAndTax.editDates.title.taxTransferDate": "Срок перечисления в бюджет",
+        "incomesAndTax.editDates.submit.confirm.text": "Вы действительно хотите изменить данные для всех выбранных строк раздела 2?",
+        "incomesAndTax.editDates.emptyData.message.text": "Сохранение невозможно. Необходимо указать значение для хотя бы одной даты.",
+        "incomesAndTax.editDates.confirm.cancel.text": "Вы уверены, что хотите отменить редактирование?",
 
         "incomesAndTax.edit.title": "Редактирование сведений о доходах и НДФЛ, №строки= {{rowNum}}, ID операции = {{operationId}}",
         "incomesAndTax.edit.cancel.header": "Отмена редактирования строки",

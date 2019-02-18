@@ -4,8 +4,6 @@ import java.io.Serializable;
 
 /**
  * Модельный класс для работы с отчетами декларации
- * @author lhaziev
- *
  */
 public class DeclarationDataReportType implements Serializable {
     private static final long serialVersionUID = -1156464397165684964L;
@@ -28,7 +26,6 @@ public class DeclarationDataReportType implements Serializable {
     //TODO: (dloshkarev) судя по всему это уже не используется, т.к для импорта ставится блокировка с LockData.LockObjects.LOAD_TRANSPORT_DATA
     public static final DeclarationDataReportType IMPORT_TF_DEC = new DeclarationDataReportType(AsyncTaskType.IMPORT_TF_DEC, null);
     public static final DeclarationDataReportType EDIT_FILE_COMMENT_DEC = new DeclarationDataReportType(AsyncTaskType.EDIT_FILE_COMMENT_DEC, null);
-    public static final DeclarationDataReportType TO_CREATE_DEC = new DeclarationDataReportType(AsyncTaskType.TO_CREATE_DEC, null);
     public static final DeclarationDataReportType SPECIFIC_REPORT_DEC = new DeclarationDataReportType(AsyncTaskType.SPECIFIC_REPORT_DEC, null);
 
     /**

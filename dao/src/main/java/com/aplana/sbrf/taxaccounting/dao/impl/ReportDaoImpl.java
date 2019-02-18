@@ -140,14 +140,14 @@ public class ReportDaoImpl extends AbstractDao implements ReportDao {
     @Override
     public void deleteDec(Collection<Long> declarationDataIds, List<DeclarationDataReportType> ddReportTypes) {
         try {
-            List<Integer> types = new ArrayList<Integer>();
+            List<Integer> types = new ArrayList<>();
             for (DeclarationDataReportType type : ddReportTypes) {
                 types.add(type.getReportType().getId());
             }
             String sql = String.format("DELETE FROM DECLARATION_REPORT WHERE %s and %s",
                     SqlUtils.transformToSqlInStatement("DECLARATION_DATA_ID", declarationDataIds),
                     SqlUtils.transformToSqlInStatement("TYPE", types));
-            Map<String, Object> params = new HashMap<String, Object>();
+            Map<String, Object> params = new HashMap<>();
             getNamedParameterJdbcTemplate().update(sql, params);
         } catch (DataAccessException e) {
             throw new DaoException("Не удалось удалить записи", e);
