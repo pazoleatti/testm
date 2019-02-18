@@ -3041,11 +3041,13 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     public ActionResult updateNdflIncomeDatesByFilter(Long declarationDataId, TAUserInfo userInfo, NdflPersonIncomeDatesDTO incomeDates, NdflFilter ndflFilter) {
 
         Configuration maxCount = configurationDao.fetchByEnum(ConfigurationParam.DECLARATION_ROWS_BULK_EDIT_MAX_COUNT);
-        int count = maxCount.getValue() != null ? Integer.getInteger(maxCount.getValue()) : 200;
-        PagingResult<NdflPersonIncomeDTO> incomeDtos = ndflPersonService.findPersonIncomeByFilter(ndflFilter, PagingParams.getInstance(1, count));
+        int count = maxCount.getValue() != null ? Integer.valueOf(maxCount.getValue()) : 200;
+        PagingParams pagingParams = PagingParams.getInstance(1, count);
+        pagingParams.setProperty("id");
+        PagingResult<NdflPersonIncomeDTO> incomeDTOs = ndflPersonService.findPersonIncomeByFilter(ndflFilter, pagingParams);
 
         List<Long> incomeIds = new ArrayList<>();
-        for (NdflPersonIncomeDTO incomeDto : incomeDtos) {
+        for (NdflPersonIncomeDTO incomeDto : incomeDTOs) {
             incomeIds.add(incomeDto.getId());
         }
         incomeDates.setIncomeIds(incomeIds);

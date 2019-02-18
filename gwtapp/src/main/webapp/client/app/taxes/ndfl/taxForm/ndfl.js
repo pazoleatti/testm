@@ -434,23 +434,26 @@
                         closeCallback: function (scope) {
                             scope.close();
                         }
-                    }).result.then(
-                        function (response) {
-                            $http({
-                                method: "POST",
-                                url: "controller//actions/declarationData/" + $stateParams.declarationDataId + "/unlockEdit"
-                            }).success(function (unlock) {
-                                if (unlock.uuid) {
-                                    $logPanel.open('log-panel-container', unlock.uuid);
-                                }
-                            });
-                            if (response) {
-                                $scope.canEditRow = false;
-                                $scope.refreshGrid(1);
+                    }).result.then(function (response) {
+                        $http({
+                            method: "POST",
+                            url: "controller//actions/declarationData/" + $stateParams.declarationDataId + "/unlockEdit"
+                        }).then(function (unlock) {
+                            if (unlock.data.uuid) {
+                                $logPanel.open('log-panel-container', unlock.data.uuid);
                             }
                         });
+                        if (response) {
+                            $scope.canEditRow = false;
+                            $scope.canEditSelectedRows = false;
+                            $scope.refreshGrid(1);
+                        }
+                    });
                 };
 
+                /**
+                 * Событие по пунктам меню "Редактировать даты строк".
+                 */
                 $scope.showEditRowsDatesModal = function (byFilter) {
                     var selectedRows = $scope.ndflTabsCtrl.getActiveTab().getRows();
 
@@ -473,21 +476,21 @@
                             closeCallback: function (scope) {
                                 scope.close();
                             }
-                        }).result.then(
-                            function (response) {
-                                $http({
-                                    method: "POST",
-                                    url: "controller//actions/declarationData/" + $stateParams.declarationDataId + "/unlockEdit"
-                                }).success(function (unlock) {
-                                    if (unlock.uuid) {
-                                        $logPanel.open('log-panel-container', unlock.uuid);
-                                    }
-                                });
-                                if (response) {
-                                    $scope.canEditRow = false;
-                                    $scope.refreshGrid(1);
+                        }).result.then(function (response) {
+                            $http({
+                                method: "POST",
+                                url: "controller//actions/declarationData/" + $stateParams.declarationDataId + "/unlockEdit"
+                            }).then(function (unlock) {
+                                if (unlock.data.uuid) {
+                                    $logPanel.open('log-panel-container', unlock.data.uuid);
                                 }
                             });
+                            if (response) {
+                                $scope.canEditRow = false;
+                                $scope.canEditSelectedRows = false;
+                                $scope.refreshGrid(1);
+                            }
+                        });
                     }
                 };
 

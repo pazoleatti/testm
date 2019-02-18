@@ -11,13 +11,15 @@
                 $http({
                     method: "POST",
                     url: "controller//actions/declarationData/" + $shareData.declarationId + "/lockEdit"
-                }).success(function (lock) {
-                    if (lock.uuid) {
-                        $logPanel.open('log-panel-container', lock.uuid);
+                }).then(function (response) {
+                    if (response.data.uuid) {
+                        $logPanel.open('log-panel-container', response.data.uuid);
                     }
-                    if (!lock.success) {
+                    if (!response.data.success) {
                         $modalInstance.dismiss('Не можем установить блокировку');
                     }
+                }).catch(function () {
+                    $modalInstance.dismiss('Не можем установить блокировку');
                 });
 
                 $scope.byFilter = $shareData.byFilter;
@@ -55,11 +57,14 @@
                         cancelBtnCaption: $filter('translate')('common.button.no'),
                         okBtnClick: function () {
                             $scope.postData()
-                                .success(function (response) {
-                                    if (response && response.uuid) {
-                                        $logPanel.open('log-panel-container', response.uuid);
+                                .then(function (response) {
+                                    if (response.data && response.data.uuid) {
+                                        $logPanel.open('log-panel-container', response.data.uuid);
                                     }
                                     $modalInstance.close(true);
+                                })
+                                .catch(function (reason) {
+                                    $modalInstance.dismiss(reason);
                                 });
                         }
                     });
@@ -67,14 +72,20 @@
 
                 /**
                  * @description Отправка данных формы на сервер.
-                 * @returns HttpPromise
+                 * @returns HttpPromise сервиса $http
                  */
                 $scope.postData = function () {
                     var transferDate = $scope.params.zeroTransferChecked ? APP_CONSTANTS.DATE_ZERO.AS_DATE : $scope.params.transfer;
                     var url = $shareData.byFilter ?
-                        'controller/rest/declarationData/' + $shareData.declarationId + '/editNdflIncomeDates' :
-                        'controller/rest/declarationData/' + $shareData.declarationId + '/editNdflIncomeDatesByFilter';
-                    var requestParams = $shareData.byFilter ? {filter: $shareData.filter} : null;
+                        'controller/rest/declarationData/' + $shareData.declarationId + '/editNdflIncomeDatesByFilter' :
+                        'controller/rest/declarationData/' + $shareData.declarationId + '/editNdflIncomeDates';
+
+                    var requestParams = null;
+                    if ($shareData.byFilter) {
+                        requestParams = {filter: $shareData.filter};
+                        requestParams.filter.declarationDataId = $shareData.declarationId;
+                    }
+
                     return $http({
                         method: 'POST',
                         url: url,

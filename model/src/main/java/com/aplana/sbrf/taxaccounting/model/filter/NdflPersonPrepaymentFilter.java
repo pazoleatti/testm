@@ -20,6 +20,7 @@ public class NdflPersonPrepaymentFilter {
     /**
      * Общий фильтр
      */
+    @ToString.Exclude
     private NdflFilter ndflFilter;
     /**
      * id операции

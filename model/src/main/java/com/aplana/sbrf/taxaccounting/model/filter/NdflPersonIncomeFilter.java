@@ -22,6 +22,7 @@ public class NdflPersonIncomeFilter {
     /**
      * Общий фильтр
      */
+    @ToString.Exclude
     private NdflFilter ndflFilter;
     /**
      * id операции
