@@ -8,7 +8,53 @@ import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.ndfl.NdflPersonDao;
 import com.aplana.sbrf.taxaccounting.dao.util.DBUtils;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.AsyncTaskData;
+import com.aplana.sbrf.taxaccounting.model.AsyncTaskState;
+import com.aplana.sbrf.taxaccounting.model.AsyncTaskType;
+import com.aplana.sbrf.taxaccounting.model.AttachFileType;
+import com.aplana.sbrf.taxaccounting.model.BlobData;
+import com.aplana.sbrf.taxaccounting.model.Cell;
+import com.aplana.sbrf.taxaccounting.model.Column;
+import com.aplana.sbrf.taxaccounting.model.DataRow;
+import com.aplana.sbrf.taxaccounting.model.DeclarationData;
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataFile;
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataFileComment;
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataFilter;
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataJournalItem;
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataReportType;
+import com.aplana.sbrf.taxaccounting.model.DeclarationFormKind;
+import com.aplana.sbrf.taxaccounting.model.DeclarationSubreport;
+import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
+import com.aplana.sbrf.taxaccounting.model.DeclarationTemplateFile;
+import com.aplana.sbrf.taxaccounting.model.DeclarationType;
+import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
+import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.DescriptionTemplate;
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
+import com.aplana.sbrf.taxaccounting.model.FormStyle;
+import com.aplana.sbrf.taxaccounting.model.LockData;
+import com.aplana.sbrf.taxaccounting.model.NegativeSumsSign;
+import com.aplana.sbrf.taxaccounting.model.Notification;
+import com.aplana.sbrf.taxaccounting.model.NotificationType;
+import com.aplana.sbrf.taxaccounting.model.OperationType;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.PrepareSpecificReportResult;
+import com.aplana.sbrf.taxaccounting.model.Relation;
+import com.aplana.sbrf.taxaccounting.model.ReportFormsCreationParams;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriodType;
+import com.aplana.sbrf.taxaccounting.model.ScriptSpecificDeclarationDataReportHolder;
+import com.aplana.sbrf.taxaccounting.model.ScriptTaskComplexityHolder;
+import com.aplana.sbrf.taxaccounting.model.State;
+import com.aplana.sbrf.taxaccounting.model.StringColumn;
+import com.aplana.sbrf.taxaccounting.model.SubreportAliasConstants;
+import com.aplana.sbrf.taxaccounting.model.TARole;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.TaskInterruptCause;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.action.CreateDeclarationDataAction;
 import com.aplana.sbrf.taxaccounting.model.action.CreateReportAction;
 import com.aplana.sbrf.taxaccounting.model.action.CreateReportFormsAction;
@@ -39,7 +85,26 @@ import com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission;
 import com.aplana.sbrf.taxaccounting.permissions.logging.TargetIdAndLogger;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
-import com.aplana.sbrf.taxaccounting.service.*;
+import com.aplana.sbrf.taxaccounting.service.AuditService;
+import com.aplana.sbrf.taxaccounting.service.BlobDataService;
+import com.aplana.sbrf.taxaccounting.service.DeclarationDataScriptingService;
+import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
+import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
+import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
+import com.aplana.sbrf.taxaccounting.service.DepartmentService;
+import com.aplana.sbrf.taxaccounting.service.LockDataService;
+import com.aplana.sbrf.taxaccounting.service.LockStateLogger;
+import com.aplana.sbrf.taxaccounting.service.LogBusinessService;
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
+import com.aplana.sbrf.taxaccounting.service.NdflPersonService;
+import com.aplana.sbrf.taxaccounting.service.NotificationService;
+import com.aplana.sbrf.taxaccounting.service.PeriodService;
+import com.aplana.sbrf.taxaccounting.service.ReportService;
+import com.aplana.sbrf.taxaccounting.service.SourceService;
+import com.aplana.sbrf.taxaccounting.service.TAUserService;
+import com.aplana.sbrf.taxaccounting.service.TransactionHelper;
+import com.aplana.sbrf.taxaccounting.service.TransactionLogic;
+import com.aplana.sbrf.taxaccounting.service.ValidateXMLService;
 import com.aplana.sbrf.taxaccounting.service.component.MoveToCreateFacade;
 import com.aplana.sbrf.taxaccounting.service.component.lock.locker.DeclarationLocker;
 import com.aplana.sbrf.taxaccounting.service.impl.declaration.edit.incomedate.*;
@@ -83,13 +148,39 @@ import org.xml.sax.helpers.DefaultHandler;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
-import java.io.*;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
+import java.io.Writer;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipInputStream;
@@ -320,44 +411,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     }
                     logger.error(message);
                 }
-
-                // Вызываем событие скрипта CREATE
-                declarationDataScriptingService.executeScript(userInfo, newDeclaration, FormDataEvent.CREATE, logger, null);
-                if (logger.containsLevel(LogLevel.ERROR)) {
-                    throw new ServiceLoggerException(
-                            "Произошли ошибки в скрипте создания налоговой формы",
-                            logEntryService.save(logger.getEntries()));
-                }
-
-                // Вызываем событие скрипта AFTER_CREATE
-                declarationDataScriptingService.executeScript(userInfo, newDeclaration, FormDataEvent.AFTER_CREATE, logger, null);
-                if (logger.containsLevel(LogLevel.ERROR)) {
-                    throw new ServiceLoggerException(
-                            "Произошли ошибки в скрипте после создания налоговой формы",
-                            logEntryService.save(logger.getEntries()));
-                }
-
-                if (declarationTemplate.getDeclarationFormKind() == DeclarationFormKind.REPORTS && newDeclaration.getCorrectionNum() == null) {
-                    newDeclaration.setCorrectionNum(0);
-                }
-                if (declarationTemplate.getType().getId() == DeclarationType.NDFL_6) {
-                    if (newDeclaration.getNegativeIncome() == null) {
-                        newDeclaration.setNegativeIncome(new BigDecimal(0));
-                    }
-                    if (newDeclaration.getNegativeTax() == null) {
-                        newDeclaration.setNegativeTax(new BigDecimal(0));
-                    }
-                    if (newDeclaration.getNegativeSumsSign() == null) {
-                        newDeclaration.setNegativeSumsSign(NegativeSumsSign.FROM_CURRENT_FORM);
-                    }
-                }
-                long id = declarationDataDao.create(newDeclaration);
-
-                logBusinessService.logFormEvent(id, FormDataEvent.CREATE, null, userInfo);
-                if (writeAudit) {
-                    auditService.add(FormDataEvent.CREATE, userInfo, newDeclaration, "Налоговая форма создана", null);
-                }
-                return id;
+                return doCreateWithoutChecks(newDeclaration, declarationTemplate, logger, userInfo, writeAudit);
             } finally {
                 lockDataService.unlock(lockKey);
             }
@@ -373,6 +427,46 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             logger.error(errorMessage);
             return null;
         }
+    }
+
+    private Long doCreateWithoutChecks(DeclarationData newDeclaration, DeclarationTemplate declarationTemplate, Logger logger, TAUserInfo userInfo, boolean writeAudit) {
+        // Вызываем событие скрипта CREATE
+        declarationDataScriptingService.executeScript(userInfo, newDeclaration, FormDataEvent.CREATE, logger, null);
+        if (logger.containsLevel(LogLevel.ERROR)) {
+            throw new ServiceLoggerException(
+                    "Произошли ошибки в скрипте создания налоговой формы",
+                    logEntryService.save(logger.getEntries()));
+        }
+
+        // Вызываем событие скрипта AFTER_CREATE
+        declarationDataScriptingService.executeScript(userInfo, newDeclaration, FormDataEvent.AFTER_CREATE, logger, null);
+        if (logger.containsLevel(LogLevel.ERROR)) {
+            throw new ServiceLoggerException(
+                    "Произошли ошибки в скрипте после создания налоговой формы",
+                    logEntryService.save(logger.getEntries()));
+        }
+
+        if (declarationTemplate.getDeclarationFormKind() == DeclarationFormKind.REPORTS && newDeclaration.getCorrectionNum() == null) {
+            newDeclaration.setCorrectionNum(0);
+        }
+        if (declarationTemplate.getType().getId() == DeclarationType.NDFL_6) {
+            if (newDeclaration.getNegativeIncome() == null) {
+                newDeclaration.setNegativeIncome(new BigDecimal(0));
+            }
+            if (newDeclaration.getNegativeTax() == null) {
+                newDeclaration.setNegativeTax(new BigDecimal(0));
+            }
+            if (newDeclaration.getNegativeSumsSign() == null) {
+                newDeclaration.setNegativeSumsSign(NegativeSumsSign.FROM_CURRENT_FORM);
+            }
+        }
+        long id = declarationDataDao.create(newDeclaration);
+
+        logBusinessService.logFormEvent(id, FormDataEvent.CREATE, null, userInfo);
+        if (writeAudit) {
+            auditService.add(FormDataEvent.CREATE, userInfo, newDeclaration, "Налоговая форма создана", null);
+        }
+        return id;
     }
 
     // Генерация текста описания задачи "Создание налоговой формы"
@@ -515,8 +609,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     @Transactional
-    public Long create(DeclarationData newDeclaration, DepartmentReportPeriod departmentReportPeriod, Logger logger, TAUserInfo userInfo, boolean writeAudit) {
-        return doCreate(newDeclaration, departmentReportPeriod, logger, userInfo, writeAudit);
+    public Long createWithotChecks(DeclarationData newDeclaration, Logger logger, TAUserInfo userInfo, boolean writeAudit) {
+        DeclarationTemplate declarationTemplate = declarationTemplateService.get(newDeclaration.getDeclarationTemplateId());
+        return doCreateWithoutChecks(newDeclaration, declarationTemplate, logger, userInfo, writeAudit);
     }
 
     @Override

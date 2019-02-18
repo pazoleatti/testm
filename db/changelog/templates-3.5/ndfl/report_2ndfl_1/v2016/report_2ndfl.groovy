@@ -1335,7 +1335,11 @@ class Report2Ndfl extends AbstractScriptClass {
                     newDeclaratinoData.kpp = kpp.toString()
                     newDeclaratinoData.oktmo = oktmo.toString()
                     newDeclaratinoData.note = note.toString()
-                    ddId = declarationService.create(newDeclaratinoData, departmentReportPeriod, logger, userInfo, false)
+                    newDeclaratinoData.departmentReportPeriodId = departmentReportPeriod.id
+                    newDeclaratinoData.reportPeriodId = departmentReportPeriod.reportPeriod.id
+                    newDeclaratinoData.departmentId = departmentReportPeriod.departmentId
+                    newDeclaratinoData.state = State.CREATED
+                    ddId = declarationService.createWithoutChecks(newDeclaratinoData, logger, userInfo, false)
 
                     params.put(PART_NUMBER, indexFrom1)
                     params.put(PART_TOTAL, partTotal)

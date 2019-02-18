@@ -193,8 +193,8 @@ public class DeclarationServiceImpl implements DeclarationService {
     }
 
     @Override
-    public Long create(DeclarationData newDeclaration, DepartmentReportPeriod departmentReportPeriod, Logger logger, TAUserInfo userInfo, boolean writeAudit) {
-        return declarationDataService.create(newDeclaration, departmentReportPeriod, logger, userInfo, writeAudit);
+    public Long createWithoutChecks(DeclarationData newDeclaration, Logger logger, TAUserInfo userInfo, boolean writeAudit) {
+        return declarationDataService.createWithotChecks(newDeclaration, logger, userInfo, writeAudit);
     }
 
     @Override

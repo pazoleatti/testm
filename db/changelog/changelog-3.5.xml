@@ -224,4 +224,13 @@
         </sql>
     </changeSet>
 
+	<!--https://jira.aplana.com/browse/SBRFNDFL-6640 Ошибка исполнения [39]: No signature of method при загрузке ТФ-->
+	<changeSet id="3.5-ytrofimov-7" author="ytrofimov" runAlways="true">
+		<update tableName="BLOB_DATA">
+			<column name="data"
+					valueBlobFile="templates-3.5/refbook/declaration_type.groovy"/>
+			<where>id in (select script_id from ref_book r where r.id = 207)</where>
+		</update>
+	</changeSet>
+
 </databaseChangeLog>
