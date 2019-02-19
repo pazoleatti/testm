@@ -346,13 +346,13 @@
                                     </li>
                                     <li role="menuitem">
                                         <a data-ng-class="{disabled: !canEditSelectedRows}"
-                                           data-ng-click="showEditRowsDatesModal(false)">
+                                           data-ng-click="checkRowsAndShowModal(false)">
                                             {{::'button.edit.datesSelected' | translate}}
                                         </a>
                                     </li>
                                     <li role="menuitem">
                                         <a data-ng-class="{disabled: !canEditAllRows()}"
-                                           data-ng-click="showEditRowsDatesModal(true)">
+                                           data-ng-click="checkRowsAndShowModal(true)">
                                             {{::'button.edit.datesFound' | translate}}
                                         </a>
                                     </li>

@@ -4,7 +4,6 @@ import com.aplana.sbrf.taxaccounting.async.AsyncManager;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataFileDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
-import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.ndfl.NdflPersonDao;
 import com.aplana.sbrf.taxaccounting.dao.util.DBUtils;
@@ -39,26 +38,7 @@ import com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission;
 import com.aplana.sbrf.taxaccounting.permissions.logging.TargetIdAndLogger;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
-import com.aplana.sbrf.taxaccounting.service.AuditService;
-import com.aplana.sbrf.taxaccounting.service.BlobDataService;
-import com.aplana.sbrf.taxaccounting.service.DeclarationDataScriptingService;
-import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
-import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
-import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
-import com.aplana.sbrf.taxaccounting.service.DepartmentService;
-import com.aplana.sbrf.taxaccounting.service.LockDataService;
-import com.aplana.sbrf.taxaccounting.service.LockStateLogger;
-import com.aplana.sbrf.taxaccounting.service.LogBusinessService;
-import com.aplana.sbrf.taxaccounting.service.LogEntryService;
-import com.aplana.sbrf.taxaccounting.service.NdflPersonService;
-import com.aplana.sbrf.taxaccounting.service.NotificationService;
-import com.aplana.sbrf.taxaccounting.service.PeriodService;
-import com.aplana.sbrf.taxaccounting.service.ReportService;
-import com.aplana.sbrf.taxaccounting.service.SourceService;
-import com.aplana.sbrf.taxaccounting.service.TAUserService;
-import com.aplana.sbrf.taxaccounting.service.TransactionHelper;
-import com.aplana.sbrf.taxaccounting.service.TransactionLogic;
-import com.aplana.sbrf.taxaccounting.service.ValidateXMLService;
+import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.component.MoveToCreateFacade;
 import com.aplana.sbrf.taxaccounting.service.component.lock.locker.DeclarationLocker;
 import com.aplana.sbrf.taxaccounting.service.impl.declaration.edit.incomedate.*;
@@ -232,6 +212,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Autowired
     private TAUserService userService;
     @Autowired
+    private ConfigurationService configurationService;
+    @Autowired
     private RefBookFactory refBookFactory;
     @Autowired
     private DBUtils bdUtils;
@@ -255,8 +237,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     private DeclarationTypeDao declarationTypeDao;
     @Autowired
     private DeclarationLocker declarationLocker;
-    @Autowired
-    private ConfigurationDao configurationDao;
 
     private class SAXHandler extends DefaultHandler {
         private Map<String, String> values;
@@ -3040,8 +3020,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @PreAuthorize("hasPermission(#declarationDataId, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).EDIT)")
     public ActionResult updateNdflIncomeDatesByFilter(Long declarationDataId, TAUserInfo userInfo, NdflPersonIncomeDatesDTO incomeDates, NdflFilter ndflFilter) {
 
-        Configuration maxCount = configurationDao.fetchByEnum(ConfigurationParam.DECLARATION_ROWS_BULK_EDIT_MAX_COUNT);
-        int count = maxCount.getValue() != null ? Integer.valueOf(maxCount.getValue()) : 200;
+        Integer maxCount = configurationService.getParamIntValue(ConfigurationParam.DECLARATION_ROWS_BULK_EDIT_MAX_COUNT);
+        int count = maxCount != null ? maxCount : 200;
+
         PagingParams pagingParams = PagingParams.getInstance(1, count);
         pagingParams.setProperty("id");
         PagingResult<NdflPersonIncomeDTO> incomeDTOs = ndflPersonService.findPersonIncomeByFilter(ndflFilter, pagingParams);

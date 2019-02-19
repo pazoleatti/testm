@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
@@ -16,6 +17,7 @@ import com.aplana.sbrf.taxaccounting.utils.FileWrapper;
 import com.aplana.sbrf.taxaccounting.utils.ResourceUtils;
 import com.google.common.base.Function;
 import com.google.common.collect.Maps;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -189,6 +191,17 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     }
 
     @Override
+    public Integer getParamIntValue(ConfigurationParam param) {
+        Configuration configuration = configurationDao.fetchByEnum(param);
+        if (configuration == null) return null;
+        try {
+            return NumberUtils.createInteger(configuration.getValue());
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    @Override
     @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).VIEW_ADMINISTRATION_CONFIG) || " +
             "hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).VIEW_TAXES_GENERAL)")
     public Map<String, Configuration> fetchAllByEnums(List<ConfigurationParam> params, TAUserInfo userInfo) {
@@ -328,6 +341,29 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         for (Configuration configuration : configurations) {
             result.put(configuration.getCode(), configuration.getValue());
         }
+        return result;
+    }
+
+    @Override
+    public ActionResult checkRowsEditCountParam(int count) {
+        ActionResult result = new ActionResult();
+        Logger logger = new Logger();
+
+        ConfigurationParam checkedParam = ConfigurationParam.DECLARATION_ROWS_BULK_EDIT_MAX_COUNT;
+
+        Integer maxCount = getParamIntValue(checkedParam);
+        if (maxCount == null) {
+            result.setSuccess(false);
+            logger.error("В системе не установлен конфигурационный параметр \"%s\". Обратитесь к администратору.", checkedParam.getCaption());
+        } else if (count > maxCount) {
+            result.setSuccess(false);
+            logger.error("Сохранение невозможно. Найдено или выбрано для изменения строк больше, чем разрешенное значение %d.", maxCount);
+        } else {
+            result.setSuccess(true);
+        }
+
+        String logsUuid = logEntryService.save(logger.getEntries());
+        result.setUuid(logsUuid);
         return result;
     }
 

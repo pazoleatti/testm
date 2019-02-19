@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 
 import java.util.List;
 import java.util.Map;
@@ -81,6 +82,13 @@ public interface ConfigurationService {
      * @return параметр {@link Configuration} или null, если не найден
      */
     Configuration fetchByEnum(ConfigurationParam param);
+
+    /**
+     * Возвращает целочисленное значение параметра.
+     *
+     * @return целочисленное значение параметра, либо null в остальных случаях.
+     */
+    Integer getParamIntValue(ConfigurationParam param);
 
     /**
      * Возвращяет map вида код-параметр для определенного списка кодов
@@ -175,4 +183,11 @@ public interface ConfigurationService {
      * @return мапа <название, значение> с данными {@link Configuration}
      */
     Map<String, String> fetchAuthEmailParamsMap();
+
+    /**
+     * Проверка числа на соответствие параметру "Максимальное количество строк РНУ для массового изменения"
+     * @param count проверяемое число
+     * @return ActionResult со статусом и логами проверки
+     */
+    ActionResult checkRowsEditCountParam(int count);
 }

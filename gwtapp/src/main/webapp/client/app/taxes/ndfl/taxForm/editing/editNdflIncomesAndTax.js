@@ -21,7 +21,7 @@
                 // Установка блокировки на форму
                 $http({
                     method: "POST",
-                    url: "controller//actions/declarationData/" + $shareData.declarationId + "/lockEdit"
+                    url: "controller/actions/declarationData/" + $shareData.declarationId + "/lockEdit"
                 }).success(function (lock) {
                     if (lock.uuid) {
                         $logPanel.open('log-panel-container', lock.uuid);
@@ -32,7 +32,7 @@
                         // Получение данных ФЛ из раздела 1
                         $http({
                             method: "GET",
-                            url: "controller//rest/ndflPerson/" + $shareData.row.ndflPersonId
+                            url: "controller/rest/ndflPerson/" + $shareData.row.ndflPersonId
                         }).success(function (person) {
                             $scope.row = $shareData.row;
                             $scope.temp.person = person;
@@ -43,7 +43,7 @@
                             if (person.idDocType) {
                                 $http({
                                     method: "GET",
-                                    url: "controller//rest/getPersonDocTypeName/" + person.idDocType
+                                    url: "controller/rest/getPersonDocTypeName/" + person.idDocType
                                 }).success(function (docTypeName) {
                                     $scope.temp.docTypeName = docTypeName;
                                 });
@@ -51,7 +51,7 @@
                             // Получение данных ОКТМО для установки значения в выпадашку
                             $http({
                                 method: "GET",
-                                url: "controller//rest/refBookValues/oktmoByCode",
+                                url: "controller/rest/refBookValues/oktmoByCode",
                                 params: {
                                     code: $scope.row.oktmo
                                 }

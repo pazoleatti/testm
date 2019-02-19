@@ -691,12 +691,14 @@
         "incomesAndTax.title.modifiedBy": "Обновил\n Гр. 27",
         "incomesAndTax.title.asnu": "АСНУ\n Гр. 28",
 
-        "incomesAndTax.editDates.title": "Массовая замена дат для выбранных строк Раздела 2",
+        "incomesAndTax.editDates.selected.title": "Массовая замена дат для выбранных строк Раздела 2",
+        "incomesAndTax.editDates.byFilter.title": "Массовая замена дат для найденных строк раздела 2",
         "incomesAndTax.editDates.title.dateCalcIncome": "Дата начисления дохода",
         "incomesAndTax.editDates.title.datePaymentIncome": "Дата выплаты дохода",
         "incomesAndTax.editDates.title.taxDate": "Дата расчета НДФЛ",
         "incomesAndTax.editDates.title.taxTransferDate": "Срок перечисления в бюджет",
-        "incomesAndTax.editDates.submit.confirm.text": "Вы действительно хотите изменить данные для всех выбранных строк раздела 2?",
+        "incomesAndTax.editDates.selected.submit.confirm.text": "Вы действительно хотите изменить данные для всех выбранных строк раздела 2?",
+        "incomesAndTax.editDates.byFilter.submit.confirm.text": "Вы действительно хотите изменить данные для всех найденных строк раздела 2?",
         "incomesAndTax.editDates.emptyData.message.text": "Сохранение невозможно. Необходимо указать значение для хотя бы одной даты.",
         "incomesAndTax.editDates.confirm.cancel.text": "Вы уверены, что хотите отменить редактирование?",
 

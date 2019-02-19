@@ -10,7 +10,7 @@
                 // Установка блокировки на форму
                 $http({
                     method: "POST",
-                    url: "controller//actions/declarationData/" + $shareData.declarationId + "/lockEdit"
+                    url: "controller/actions/declarationData/" + $shareData.declarationId + "/lockEdit"
                 }).then(function (response) {
                     if (response.data.uuid) {
                         $logPanel.open('log-panel-container', response.data.uuid);
@@ -51,8 +51,12 @@
 
                 // Сохранение данных с подтверждением
                 $scope.confirmAndSaveChanges = function () {
+                    var dialogContent = $shareData.byFilter ?
+                        $filter('translate')('incomesAndTax.editDates.byFilter.submit.confirm.text') :
+                        $filter('translate')('incomesAndTax.editDates.selected.submit.confirm.text');
+
                     $dialogs.confirmDialog({
-                        content: $filter('translate')('incomesAndTax.editDates.submit.confirm.text'),
+                        content: dialogContent,
                         okBtnCaption: $filter('translate')('common.button.yes'),
                         cancelBtnCaption: $filter('translate')('common.button.no'),
                         okBtnClick: function () {
@@ -80,7 +84,7 @@
                         'controller/rest/declarationData/' + $shareData.declarationId + '/editNdflIncomeDatesByFilter' :
                         'controller/rest/declarationData/' + $shareData.declarationId + '/editNdflIncomeDates';
 
-                    var requestParams = null;
+                    var requestParams = {};
                     if ($shareData.byFilter) {
                         requestParams = {filter: $shareData.filter};
                         requestParams.filter.declarationDataId = $shareData.declarationId;

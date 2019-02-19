@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
+import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 import com.aplana.sbrf.taxaccounting.permissions.ConfigurationPermissionSetter;
 import com.aplana.sbrf.taxaccounting.permissions.Permission;
 import com.aplana.sbrf.taxaccounting.service.ConfigurationService;
@@ -211,9 +212,9 @@ public class ConfigurationController {
     }
 
     /**
-     * Сохранение конфигурационного параметра ассинхронных заданий
+     * Сохранение конфигурационного параметра асинхронных задач
      *
-     * @param asyncParam конфигурационный параметр ассинхронных заданий
+     * @param asyncParam конфигурационный параметр асинхронных задач
      * @return uuid идентификатор логгера с результатом сохранения параметра
      */
     @PostMapping(value = "/rest/asyncParam/update")
@@ -239,6 +240,17 @@ public class ConfigurationController {
     public void resetCommonParams() {
         TAUserInfo userInfo = securityService.currentUserInfo();
         configurationService.resetCommonParams(userInfo);
+    }
+
+    /**
+     * Адрес для проверки параметра "Максимальное число строк формы РНУ для редактирования дат"
+     *
+     * @param count проверяемое число
+     * @return ActionResult с результатом проверки и логами
+     */
+    @GetMapping("/actions/checkRowsEditCountParam")
+    public ActionResult checkRowsEditCountParam(@RequestParam int count) {
+        return configurationService.checkRowsEditCountParam(count);
     }
 
     /**

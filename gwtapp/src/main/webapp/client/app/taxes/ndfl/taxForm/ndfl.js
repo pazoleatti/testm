@@ -437,7 +437,7 @@
                     }).result.then(function (response) {
                         $http({
                             method: "POST",
-                            url: "controller//actions/declarationData/" + $stateParams.declarationDataId + "/unlockEdit"
+                            url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/unlockEdit"
                         }).then(function (unlock) {
                             if (unlock.data.uuid) {
                                 $logPanel.open('log-panel-container', unlock.data.uuid);
@@ -453,45 +453,79 @@
 
                 /**
                  * Событие по пунктам меню "Редактировать даты строк".
+                 * @param byFilter boolean режим запуска, по фильтру или по выбранным строкам
                  */
-                $scope.showEditRowsDatesModal = function (byFilter) {
+                $scope.checkRowsAndShowModal = function (byFilter) {
                     var selectedRows = $scope.ndflTabsCtrl.getActiveTab().getRows();
+                    var rowsCount = byFilter ? $scope.ndflTabsCtrl.getActiveTab().getRowsCount() : selectedRows.length;
 
-                    if (byFilter && $scope.canEditAllRows() || (!byFilter && selectedRows.length > 0)) {
-                        $aplanaModal.open({
-                            title: $filter('translate')('incomesAndTax.editDates.title'),
-                            templateUrl: 'client/app/taxes/ndfl/taxForm/editing/editNdflDates.html',
-                            controller: "editNdflDatesFormCtrl",
-                            windowClass: 'modal500',
-                            resolve: {
-                                $shareData: function () {
-                                    return {
-                                        byFilter: byFilter,
-                                        declarationId: $stateParams.declarationDataId,
-                                        filter: $scope.searchFilter.params,
-                                        rowIds: $filter('idExtractor')(selectedRows)
-                                    };
-                                }
-                            },
-                            closeCallback: function (scope) {
-                                scope.close();
+                    if (rowsCount > 0) {
+                        $http({
+                            method: 'GET',
+                            url: 'controller/actions/checkRowsEditCountParam',
+                            params: {
+                                count: rowsCount
                             }
-                        }).result.then(function (response) {
+                        }).then(function (response) {
+                            if (response.data.uuid) {
+                                $logPanel.open('log-panel-container', response.data.uuid);
+                            }
+                            if (response.data.success === true) {
+                                $scope.showBulkEditDatesModal(byFilter);
+                            }
+                        })
+                    }
+                };
+
+                /**
+                 * Показ окна "Массовое редактирование дат".
+                 * @param byFilter режим показа окна, по фильтру или по выбранным строкам
+                 */
+                $scope.showBulkEditDatesModal = function (byFilter) {
+                    var selectedRows = $scope.ndflTabsCtrl.getActiveTab().getRows();
+                    var title = byFilter ?
+                        $filter('translate')('incomesAndTax.editDates.byFilter.title') :
+                        $filter('translate')('incomesAndTax.editDates.selected.title');
+
+                    $aplanaModal.open({
+                        title: title,
+                        templateUrl: 'client/app/taxes/ndfl/taxForm/editing/editNdflDates.html',
+                        controller: "editNdflDatesFormCtrl",
+                        windowClass: 'modal500',
+                        resolve: {
+                            $shareData: function () {
+                                return {
+                                    byFilter: byFilter,
+                                    declarationId: $stateParams.declarationDataId,
+                                    filter: $scope.searchFilter.params,
+                                    rowIds: $filter('idExtractor')(selectedRows)
+                                };
+                            }
+                        },
+                        closeCallback: function (scope) {
+                            scope.close();
+                        }
+                    }).result
+                        .then(function () {
+                            $scope.canEditRow = false;
+                            $scope.canEditSelectedRows = false;
+                            $scope.refreshGrid(1);
+                        })
+                        .catch(function (reason) {
+                            $dialogs.errorDialog({
+                                content: 'Ошибка редактирования формы. ' + reason
+                            })
+                        })
+                        .finally(function () {
                             $http({
-                                method: "POST",
-                                url: "controller//actions/declarationData/" + $stateParams.declarationDataId + "/unlockEdit"
+                                method: 'POST',
+                                url: 'controller/actions/declarationData/' + $stateParams.declarationDataId + '/unlockEdit'
                             }).then(function (unlock) {
                                 if (unlock.data.uuid) {
                                     $logPanel.open('log-panel-container', unlock.data.uuid);
                                 }
                             });
-                            if (response) {
-                                $scope.canEditRow = false;
-                                $scope.canEditSelectedRows = false;
-                                $scope.refreshGrid(1);
-                            }
                         });
-                    }
                 };
 
                 /**

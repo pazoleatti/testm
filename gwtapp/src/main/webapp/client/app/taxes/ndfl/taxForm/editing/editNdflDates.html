@@ -3,53 +3,54 @@
         <!-- Дата начисления дохода -->
         <div class="row-fluid form-group">
             <div class="span6">
-                <label class="control-label">{{::'incomesAndTax.editDates.title.dateCalcIncome' | translate}}:</label>
+                <label class="control-label">
+                    {{::'incomesAndTax.editDates.title.dateCalcIncome' | translate}}:
+                </label>
             </div>
             <div class="span4 field-wrapper">
                 <div data-aplana-field>
-                    <input data-ng-model="params.accrued"
-                           placeholder="{{'common.placeholder.date' | translate}}"
-                           type="date"/>
+                    <div data-aplana-datepicker data-ng-model="params.accrued"></div>
                 </div>
             </div>
         </div>
         <!-- Дата выплаты дохода -->
         <div class="row-fluid form-group">
             <div class="span6">
-                <label class="control-label">{{::'incomesAndTax.editDates.title.datePaymentIncome' | translate}}:</label>
+                <label class="control-label">
+                    {{::'incomesAndTax.editDates.title.datePaymentIncome' | translate}}:
+                </label>
             </div>
             <div class="span4 field-wrapper">
                 <div data-aplana-field>
-                    <input data-ng-model="params.payout"
-                           placeholder="{{'common.placeholder.date' | translate}}"
-                           type="date"/>
+                    <div data-aplana-datepicker data-ng-model="params.payout"></div>
                 </div>
             </div>
         </div>
         <!-- Дата расчета НДФЛ -->
         <div class="row-fluid form-group">
             <div class="span6">
-                <label class="control-label">{{::'incomesAndTax.editDates.title.taxDate' | translate}}:</label>
+                <label class="control-label">
+                    {{::'incomesAndTax.editDates.title.taxDate' | translate}}:
+                </label>
             </div>
             <div class="span4 field-wrapper">
                 <div data-aplana-field>
-                    <input data-ng-model="params.tax"
-                           placeholder="{{'common.placeholder.date' | translate}}"
-                           type="date"/>
+                    <div data-aplana-datepicker data-ng-model="params.tax"></div>
                 </div>
             </div>
         </div>
         <!-- Срок перечисления в бюджет -->
         <div class="row-fluid form-group">
             <div class="span6">
-                <label class="control-label">{{::'incomesAndTax.editDates.title.taxTransferDate' | translate}}:</label>
+                <label class="control-label">
+                    {{::'incomesAndTax.editDates.title.taxTransferDate' | translate}}:
+                </label>
             </div>
             <div class="span4 field-wrapper">
                 <div data-aplana-field>
-                    <input data-ng-model="params.transfer"
-                           placeholder="{{'common.placeholder.date' | translate}}"
-                           type="date"
-                           data-ng-disabled="params.zeroTransferChecked"/>
+                    <div data-aplana-datepicker
+                         data-ng-model="params.transfer"
+                         data-ng-disabled="params.zeroTransferChecked"></div>
                 </div>
             </div>
         </div>
