@@ -14,26 +14,12 @@ import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson
 import com.aplana.sbrf.taxaccounting.model.identification.PersonalData
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.log.Logger
-import com.aplana.sbrf.taxaccounting.model.refbook.IdDoc
-import com.aplana.sbrf.taxaccounting.model.refbook.PersonIdentifier
-import com.aplana.sbrf.taxaccounting.model.refbook.PersonTb
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAsnu
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookCountry
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDocType
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookTaxpayerState
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
-import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPerson
+import com.aplana.sbrf.taxaccounting.model.refbook.*
 import com.aplana.sbrf.taxaccounting.model.util.BaseWeightCalculator
 import com.aplana.sbrf.taxaccounting.model.util.impl.PersonDataWeightCalculator
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
-import com.aplana.sbrf.taxaccounting.script.service.DepartmentService
-import com.aplana.sbrf.taxaccounting.script.service.NdflPersonService
-import com.aplana.sbrf.taxaccounting.script.service.PersonService
-import com.aplana.sbrf.taxaccounting.script.service.RefBookPersonService
-import com.aplana.sbrf.taxaccounting.script.service.RefBookService
-import com.aplana.sbrf.taxaccounting.script.service.ReportPeriodService
+import com.aplana.sbrf.taxaccounting.script.service.*
 import com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils
 import com.aplana.sbrf.taxaccounting.service.LogBusinessService
 import com.aplana.sbrf.taxaccounting.service.TAUserService
@@ -120,7 +106,7 @@ class Calculate extends AbstractScriptClass {
      * Ключем здесь выступает физлицо, которе будет оригиналом и для которого будет создана запись в справочнике ФЛ,
      * а значением является список физлиц которые будут ссылаться на запись в справочнике ФЛ созданную для оригинала.
      */
-    Map<NaturalPerson, List<NaturalPerson>> primaryPersonOriginalDuplicates = new HashMap<>()
+    Map<Long, List<NaturalPerson>> primaryPersonOriginalDuplicates = new HashMap<>()
 
     /**
      * Список физлиц для вставки
@@ -128,15 +114,24 @@ class Calculate extends AbstractScriptClass {
     List<NaturalPerson> insertPersonList = []
 
     /**
-     * Список физлиц дубликатов
+     * Список идентификаторов физлиц дубликатов
      */
-    List<NaturalPerson> duplicatePersonList = []
+    List<Long> duplicatePersonList = []
 
     List<NaturalPerson> primaryPersonDataList = []
 
     Date declarationDataCreationDate
 
     Map<Integer, Department> departmentCache = [:]
+
+    /**
+     *  ИНП дубликатов в разделе 1 сгруппированные по идентификатору версии ФЛ из Реестра ФЛ
+     */
+    Map<Long, List<PersonIdentifier>> duplicatedPersonIdentifiers = [:]
+    /**
+     *  Тербанки дубликатов в разделе 1 сгруппированные по идентификатору версии ФЛ из Реестра ФЛ
+     */
+    Map<Long, List<PersonTb>> duplicatedPersonTbs = [:]
 
     @TypeChecked(TypeCheckingMode.SKIP)
     Calculate(scriptClass) {
@@ -440,23 +435,52 @@ class Calculate extends AbstractScriptClass {
             addToReduceMap(personalData, personalDataMatchedMap, personalDataReducedMatchedMap, person)
         }
 
-        List<NaturalPerson> pickedForWeightComparePersons = []
         sendToMapDuplicates(inpReducedMatchedMap)
         sendToMapDuplicates(snilsReducedMatchedMap)
         sendToMapDuplicates(innReducedMatchedMap)
         sendToMapDuplicates(innForeignReducedMatchedMap)
         sendToMapDuplicates(idDocReducedMatchedMap)
         sendToMapDuplicates(personalDataReducedMatchedMap)
+        Iterator<NaturalPerson> iterator = insertPersonList.iterator()
+
+        while (iterator.hasNext()) {
+            NaturalPerson person = iterator.next()
+            if (duplicatePersonList.contains(person.primaryPersonId)) {
+                iterator.remove()
+            }
+        }
+
+        for (Map.Entry<Long, List<NaturalPerson>> entry : primaryPersonOriginalDuplicates.entrySet()) {
+            NaturalPerson original = insertPersonList.find { NaturalPerson insertPerson ->
+                entry.getKey() == insertPerson?.primaryPersonId
+            }
+            if (entry.getKey() != null) {
+                for (NaturalPerson duplicate : entry.getValue()) {
+                    if (!containsPersonIdentifier(original, duplicate.getPersonIdentifier().getAsnu().getId(), duplicate.getPersonIdentifier().getInp())) {
+                        duplicate.getPersonIdentifier().setPerson(original)
+                        original.getPersonIdentityList().add(duplicate.getPersonIdentifier())
+                    }
+                    IdDoc newDocument = BaseWeightCalculator.findDocument(original, duplicate.getDocuments().get(0).getDocType().getId(), duplicate.getDocuments().get(0).getDocumentNumber())
+                    if (newDocument == null) {
+                        if (duplicate.getDocuments().get(0).docType != null) {
+                            duplicate.getDocuments().get(0).setPerson(original)
+                            duplicate.getDocuments().get(0).documentNumber = performDocNumber(duplicate.getDocuments().get(0))
+                            original.getDocuments().add(duplicate.getDocuments().get(0))
+                        }
+                    }
+                }
+            }
+        }
     }
 
     /**
-     * Разделяет <code>processingPersonList</code> на отдельные списки, каждый список передается
+     * Разделяет <code>similarAttributePersonList</code> на отдельные списки, каждый список передается
      * в {@link #mapDuplicates(List < NaturalPerson >)} для дальнейшей обработки
-     * @param processingPersonList списки обрабатываемых Физлиц, сгруппированные по ключевому параметру.
+     * @param similarAttributePersonList списки обрабатываемых Физлиц, сгруппированные по ключевому параметру.
      */
-    void sendToMapDuplicates(Map<?, List<NaturalPerson>> processingPersonList) {
-        if (!processingPersonList.isEmpty()) {
-            for (List<NaturalPerson> personList : processingPersonList.values()) {
+    void sendToMapDuplicates(Map<?, List<NaturalPerson>> similarAttributePersonList) {
+        if (!similarAttributePersonList.isEmpty()) {
+            for (List<NaturalPerson> personList : similarAttributePersonList.values()) {
                 mapDuplicates(personList)
             }
         }
@@ -486,10 +510,10 @@ class Calculate extends AbstractScriptClass {
 
     /**
      * Отвечает за распределение физлиц на оригиналы и дубликаты, на основе расчета по весам
-     * @param processingPersonList список обрабатываемых Физлиц.
+     * @param similarAttributePersonList список обрабатываемых Физлиц.
      */
-    void mapDuplicates(List<NaturalPerson> processingPersonList) {
-        Collections.sort(processingPersonList, new Comparator<NaturalPerson>() {
+    void mapDuplicates(List<NaturalPerson> similarAttributePersonList) {
+        Collections.sort(similarAttributePersonList, new Comparator<NaturalPerson>() {
             @Override
             int compare(NaturalPerson o1, NaturalPerson o2) {
                 return o1.primaryPersonId.compareTo(o2.primaryPersonId)
@@ -498,70 +522,60 @@ class Calculate extends AbstractScriptClass {
         Double similarityLine = similarityThreshold.doubleValue() / 1000
         // Список физлиц которые были выбраны в качестве оригинала
         NaturalPerson originalPerson = null
-        List<NaturalPerson> originalPrimaryPersonList = new ArrayList<>(primaryPersonOriginalDuplicates.keySet())
+        List<Long> originalPrimaryPersonList = new ArrayList<>(primaryPersonOriginalDuplicates.keySet())
 
         // Выбираем физлицо, которое будет оригиналом.
         // Проверяем было ли физлицо выбрано оригиналом раннее. Если да, то вы выбираем его снова.
-        for (NaturalPerson person : processingPersonList) {
-            if (originalPrimaryPersonList.contains(person)) {
-                originalPerson = person
-                processingPersonList.remove(person)
+        for (NaturalPerson person : similarAttributePersonList) {
+            if (originalPrimaryPersonList.contains(person.primaryPersonId)) {
+                originalPerson = insertPersonList.find { NaturalPerson insertPerson ->
+                    person.primaryPersonId == insertPerson?.primaryPersonId
+                }
+                similarAttributePersonList.removeAll { NaturalPerson processingPerson ->
+                    person.primaryPersonId == processingPerson.primaryPersonId
+                }
                 break
             }
         }
 
         /* Если физлицо не было раннее выбрано в качестве оригинала, тогда берем первое физлицо, но проверяем чтобы оно
          не содержалось в списке дубликатов и чтобы оно не было дубликатом имеющихся оригиналов*/
-        if (originalPerson == null && !processingPersonList.isEmpty()) {
+        if (originalPerson == null) {
             outer:
-            for (NaturalPerson person : processingPersonList) {
-                if (duplicatePersonList.contains(person)) {
-                    continue
-                } else {
-                    for (NaturalPerson original : originalPrimaryPersonList) {
-                        refBookPersonService.calculateWeight(original, [person], new PersonDataWeightCalculator(refBookPersonService.getBaseCalculateList()))
+            for (NaturalPerson person : similarAttributePersonList) {
+                if (!duplicatePersonList.contains(person.primaryPersonId)) {
+                    for (Long original : originalPrimaryPersonList) {
+                        NaturalPerson originalItem = insertPersonList.find { NaturalPerson insertPerson ->
+                            insertPerson.primaryPersonId == original
+                        }
+                        refBookPersonService.calculateWeight(originalItem, [person], new PersonDataWeightCalculator(refBookPersonService.getBaseCalculateList()))
                         if (person.weight > similarityLine) {
-                            duplicatePersonList.add(person)
-                            insertPersonList.remove(person)
+                            duplicatePersonList.add(person.primaryPersonId)
                             primaryPersonOriginalDuplicates.get(original).add(person)
                             continue outer
                         }
                     }
                     originalPerson = person
-                    processingPersonList.remove(person)
+                    similarAttributePersonList.removeAll { NaturalPerson processingPerson ->
+                        originalPerson.primaryPersonId == processingPerson.primaryPersonId
+                    }
                     break
                 }
             }
         }
-
-        // Это список ид физлиц-дубликатов для конкретного оригинала
-        List<Long> duplicatePersons = []
-
         if (originalPerson != null) {
-            for (int i = 0; i < processingPersonList.size(); i++) {
-                if (primaryPersonOriginalDuplicates.get(originalPerson) != null) {
-                    duplicatePersons.addAll(primaryPersonOriginalDuplicates.get(originalPerson).primaryPersonId)
-                }
-                if (duplicatePersons.isEmpty() || !duplicatePersonList?.primaryPersonId?.contains(processingPersonList.get(i).primaryPersonId)) {
-                    refBookPersonService.calculateWeight(originalPerson, [processingPersonList.get(i)], new PersonDataWeightCalculator(refBookPersonService.getBaseCalculateList()))
-                    if (processingPersonList.get(i).weight > similarityLine) {
-                        duplicatePersonList.add(processingPersonList.get(i))
-                        if (!duplicatePersons.isEmpty()) {
-                            duplicatePersons.add(processingPersonList.get(i).primaryPersonId)
+            for (int i = 0; i < similarAttributePersonList.size(); i++) {
+                if (!duplicatePersonList?.contains(similarAttributePersonList.get(i).primaryPersonId)) {
+                    refBookPersonService.calculateWeight(originalPerson, [similarAttributePersonList.get(i)], new PersonDataWeightCalculator(refBookPersonService.getBaseCalculateList()))
+                    if (similarAttributePersonList.get(i).weight > similarityLine && !originalPrimaryPersonList.contains(similarAttributePersonList.get(i).primaryPersonId)) {
+                        duplicatePersonList.add(similarAttributePersonList.get(i).primaryPersonId)
+                        if (primaryPersonOriginalDuplicates.get(originalPerson.primaryPersonId) == null) {
+                            primaryPersonOriginalDuplicates.put(originalPerson.primaryPersonId, [similarAttributePersonList.get(i)])
                         } else {
-                            primaryPersonOriginalDuplicates.put(originalPerson, [processingPersonList.get(i)])
+                            primaryPersonOriginalDuplicates.get(originalPerson.primaryPersonId).add(similarAttributePersonList.get(i))
                         }
                     }
                 }
-            }
-        }
-
-        Iterator<NaturalPerson> iterator = insertPersonList.iterator()
-
-        while(iterator.hasNext()) {
-            NaturalPerson person = iterator.next()
-            if (duplicatePersons.contains(person.primaryPersonId)) {
-                iterator.remove()
             }
         }
     }
@@ -625,9 +639,12 @@ class Calculate extends AbstractScriptClass {
             //update reference to ref book
             updatePrimaryToRefBookPersonReferences(insertPersonList)
 
-            for (Map.Entry<NaturalPerson, List<NaturalPerson>> entry : primaryPersonOriginalDuplicates.entrySet()) {
+            for (Map.Entry<Long, List<NaturalPerson>> entry : primaryPersonOriginalDuplicates.entrySet()) {
                 for (NaturalPerson duplicatePerson : entry.getValue()) {
-                    duplicatePerson.id = entry.getKey().id
+                    NaturalPerson original = insertPersonList.find { NaturalPerson insertPerson ->
+                        entry.getKey() == insertPerson?.primaryPersonId
+                    }
+                    duplicatePerson.id = original.id
                 }
                 updatePrimaryToRefBookPersonReferences(entry.getValue())
             }
@@ -676,7 +693,7 @@ class Calculate extends AbstractScriptClass {
 
         long time = System.currentTimeMillis()
 
-        List<NaturalPerson> updatePersonList = new ArrayList<NaturalPerson>()
+        Set<NaturalPerson> updatePersonList = new LinkedHashSet()
         List<NaturalPerson> updatePersonReferenceList = new ArrayList<NaturalPerson>()
 
         //primaryId - RefBookPerson
@@ -750,32 +767,37 @@ class Calculate extends AbstractScriptClass {
                 PersonIdentifier primaryPersonIdentifier = primaryPerson.getPersonIdentifier()
                 if (primaryPersonIdentifier != null) {
                     if (!containsPersonIdentifier(refBookPerson, primaryPersonIdentifier.getAsnu().getId(), primaryPersonIdentifier.getInp())) {
-                        refBookPerson.getPersonIdentityList().clear()
                         refBookPerson.getPersonIdentityList().add(primaryPersonIdentifier)
                         infoMsgBuilder.append(String.format("[Добавлен новый \"ИНП\": \"%s\", \"АСНУ\": \"%s\"]", primaryPersonIdentifier?.inp, primaryPersonIdentifier?.getAsnu()?.getCode()))
                         changed = true
                     } else {
-                        refBookPerson.getPersonIdentityList().clear()
+                        if (duplicatedPersonIdentifiers.get(refBookPerson.id) == null) {
+                            duplicatedPersonIdentifiers.put(refBookPerson.id, [primaryPersonIdentifier])
+                        } else {
+                            duplicatedPersonIdentifiers.get(refBookPerson.id).add(primaryPersonIdentifier)
+                        }
                     }
-                } else {
-                    refBookPerson.getPersonIdentityList().clear()
                 }
 
                 Integer parentTbId = departmentService.getParentTBId(declarationData.departmentId)
+                PersonTb personTb = new PersonTb()
                 if (!refBookPerson.personTbList.tbDepartment.id.contains(parentTbId)) {
-                    PersonTb personTb = new PersonTb()
                     personTb.person = refBookPerson
                     Department department = getDepartment(parentTbId)
                     personTb.tbDepartment = department
                     personTb.importDate = getDeclarationDataCreationDate()
-                    refBookPerson.getPersonTbList().clear()
                     refBookPerson.getPersonTbList().add(personTb)
                     infoMsgBuilder.append(String.format("[Добавлен новый Тербанк: \"%s\"]", department.getShortName()))
                     changed = true
                 } else {
-                    refBookPerson.getPersonTbList().clear()
+                    Department department = getDepartment(parentTbId)
+                    personTb.tbDepartment = department
+                    if (duplicatedPersonTbs.get(refBookPerson.id) == null) {
+                        duplicatedPersonTbs.put(refBookPerson.id, [personTb])
+                    } else {
+                        duplicatedPersonTbs.get(refBookPerson.id).add(personTb)
+                    }
                 }
-
 
                 if (changed) {
                     updatePersonList.add(refBookPerson)
@@ -792,6 +814,19 @@ class Calculate extends AbstractScriptClass {
             }
         }
 
+        for (NaturalPerson updatePerson : updatePersonList) {
+            for (PersonIdentifier duplicatePersonIdentidfier : duplicatedPersonIdentifiers?.get(updatePerson?.id)) {
+                updatePerson.getPersonIdentityList().removeAll { PersonIdentifier inp ->
+                    inp?.asnu?.getId() == duplicatePersonIdentidfier?.asnu?.getId() && inp?.getInp()?.equalsIgnoreCase(duplicatePersonIdentidfier?.getInp())
+                }
+            }
+            for (Integer duplicatePersonTb : duplicatedPersonTbs.get(updatePerson?.id)?.tbDepartment?.id) {
+                updatePerson.getPersonTbList().removeAll { PersonTb existingTb ->
+                    duplicatedPersonTbs.get(updatePerson?.id)?.tbDepartment?.id?.contains(existingTb?.tbDepartment?.id)
+                }
+            }
+        }
+
         //noinspection GroovyAssignabilityCheck
         logForDebug("Обновление атрибутов Физлиц (" + ScriptUtils.calcTimeMillis(time))
         time = System.currentTimeMillis()
@@ -803,7 +838,7 @@ class Calculate extends AbstractScriptClass {
         }
 
         if (!updatePersonList.isEmpty()) {
-            personService.updatePersons(updatePersonList)
+            personService.updatePersons(new ArrayList<NaturalPerson>(updatePersonList))
         }
         logForDebug("Идентификация и обновление (" + ScriptUtils.calcTimeMillis(time))
 
