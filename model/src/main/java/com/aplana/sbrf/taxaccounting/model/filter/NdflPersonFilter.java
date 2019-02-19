@@ -18,6 +18,7 @@ public class NdflPersonFilter {
     /**
      * Общий фильтр
      */
+    @ToString.Exclude
     private NdflFilter ndflFilter;
     /**
      * ИНП

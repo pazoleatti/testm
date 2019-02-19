@@ -175,7 +175,9 @@
                             <span data-translate-once="link.ndfl.sources"></span>
                         </button>
                     </div>
-                    <div data-aplana-collapse data-is-collapsed="false" data-label="'infoPanelLabel' | translate"
+                    <div data-aplana-collapse
+                         data-is-collapsed="false"
+                         data-label="'infoPanelLabel' | translate"
                          style="padding: 0 12px 0 12px;">
                         <!--Основная информация-->
                         <div class="header-details">
@@ -324,13 +326,37 @@
                     <!--Панель кнопок -->
                     <div class="button_panel" style="padding: 10px 12px 0;">
                         <div class="btn-toolbar" role="toolbar">
-                            <!--Редактировать строку -->
+                            <!--Меню "Редактировать" -->
                             <span>
-                                <button type="button" class="btn btn-default"
-                                        data-ng-disabled="!permissionChecker.check(declarationData, APP_CONSTANTS.DECLARATION_PERMISSION.EDIT) || !canEditRow"
-                                        data-ng-click="showEditRowModal()">
-                                    <span data-translate-once="button.edit.row"></span>
+                                <button type="button"
+                                        class="btn btn-default"
+                                        data-bs-dropdown
+                                        data-ng-disabled="!permissionChecker.check(declarationData, APP_CONSTANTS.DECLARATION_PERMISSION.EDIT)">
+                                    <span data-translate-once="button.edit"></span>
                                 </button>
+                                <!-- Подменю -->
+                                <ul role="menu"
+                                    class="dropdown-menu dropdown-menu-block"
+                                    aria-labelledby="download-reports-button">
+                                    <li role="menuitem">
+                                        <a data-ng-class="{disabled: !canEditRow}"
+                                           data-ng-click="showEditRowModal()">
+                                            {{::'button.edit.row' | translate}}
+                                        </a>
+                                    </li>
+                                    <li role="menuitem">
+                                        <a data-ng-class="{disabled: !canEditSelectedRows}"
+                                           data-ng-click="showEditRowsDatesModal(false)">
+                                            {{::'button.edit.datesSelected' | translate}}
+                                        </a>
+                                    </li>
+                                    <li role="menuitem">
+                                        <a data-ng-class="{disabled: !canEditAllRows()}"
+                                           data-ng-click="showEditRowsDatesModal(true)">
+                                            {{::'button.edit.datesFound' | translate}}
+                                        </a>
+                                    </li>
+                                </ul>
                             </span>
                             <!--Идентифицировать ФЛ -->
                             <span>

@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.model.ndfl;
 
 import com.aplana.sbrf.taxaccounting.model.util.NdflComparator;
 import com.aplana.sbrf.taxaccounting.model.util.RnuNdflStringComparator;
+import com.google.common.base.Joiner;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -9,8 +10,6 @@ import java.util.*;
 
 /**
  * Данные о физическом лице - получателе дохода
- *
- * @author Andrey Drunk
  */
 public class NdflPerson extends NdflData<Long> {
 
@@ -422,6 +421,10 @@ public class NdflPerson extends NdflData<Long> {
 
     public void setAsnuId(Long asnuId) {
         this.asnuId = asnuId;
+    }
+
+    public String getFullName() {
+        return Joiner.on(" ").skipNulls().join(Arrays.asList(lastName, firstName, middleName));
     }
 
     @Override

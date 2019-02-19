@@ -10,6 +10,7 @@
             'app.editNdflIncomesAndTax',
             'app.editNdflDeduction',
             'app.editNdflPrepayment',
+            'app.editNdflDates',
             'app.ndflFL',
             'app.incomesAndTax',
             'app.deduction',
@@ -369,9 +370,26 @@
                  * Зависит от выделенных строк на вкладках, поэтому реализовано через события
                  */
                 $scope.canEditRow = false;
+                /**
+                 * Флаг, может ли текущий пользователь выполнить массовое редактирование выбранных строк.
+                 */
+                $scope.canEditSelectedRows = false;
+                /**
+                 * Обработка события смены состояния чекбоксов в таблице.
+                 */
                 $rootScope.$on("selectedRowCountChanged", function (event, count) {
-                    $scope.canEditRow = count === 1
+                    // Выбрана ровно одна строка.
+                    $scope.canEditRow = count === 1;
+
+                    // Выбрана хотя бы 1 строка на вкладке 2
+                    $scope.canEditSelectedRows = ($scope.ndflTabsCtrl.getActiveTab().getSection() === 2) && (count > 0);
                 });
+                /**
+                 * Все записи можно редактировать, если выбрана 2 вкладка, и там есть хотя бы 1 строка.
+                 */
+                $scope.canEditAllRows = function () {
+                    return ($scope.ndflTabsCtrl.getActiveTab().getSection() === 2) && ($scope.ndflTabsCtrl.getActiveTab().getRowsCount() > 0)
+                };
 
                 /**
                  * Событие, которое возникает по нажатию на кнопку "Редактировать строку"
@@ -416,21 +434,64 @@
                         closeCallback: function (scope) {
                             scope.close();
                         }
-                    }).result.then(
-                        function (response) {
+                    }).result.then(function (response) {
+                        $http({
+                            method: "POST",
+                            url: "controller//actions/declarationData/" + $stateParams.declarationDataId + "/unlockEdit"
+                        }).then(function (unlock) {
+                            if (unlock.data.uuid) {
+                                $logPanel.open('log-panel-container', unlock.data.uuid);
+                            }
+                        });
+                        if (response) {
+                            $scope.canEditRow = false;
+                            $scope.canEditSelectedRows = false;
+                            $scope.refreshGrid(1);
+                        }
+                    });
+                };
+
+                /**
+                 * Событие по пунктам меню "Редактировать даты строк".
+                 */
+                $scope.showEditRowsDatesModal = function (byFilter) {
+                    var selectedRows = $scope.ndflTabsCtrl.getActiveTab().getRows();
+
+                    if (byFilter && $scope.canEditAllRows() || (!byFilter && selectedRows.length > 0)) {
+                        $aplanaModal.open({
+                            title: $filter('translate')('incomesAndTax.editDates.title'),
+                            templateUrl: 'client/app/taxes/ndfl/taxForm/editing/editNdflDates.html',
+                            controller: "editNdflDatesFormCtrl",
+                            windowClass: 'modal500',
+                            resolve: {
+                                $shareData: function () {
+                                    return {
+                                        byFilter: byFilter,
+                                        declarationId: $stateParams.declarationDataId,
+                                        filter: $scope.searchFilter.params,
+                                        rowIds: $filter('idExtractor')(selectedRows)
+                                    };
+                                }
+                            },
+                            closeCallback: function (scope) {
+                                scope.close();
+                            }
+                        }).result.then(function (response) {
                             $http({
                                 method: "POST",
                                 url: "controller//actions/declarationData/" + $stateParams.declarationDataId + "/unlockEdit"
-                            }).success(function (unlock) {
-                                if (unlock.uuid) {
-                                    $logPanel.open('log-panel-container', unlock.uuid);
+                            }).then(function (unlock) {
+                                if (unlock.data.uuid) {
+                                    $logPanel.open('log-panel-container', unlock.data.uuid);
                                 }
                             });
                             if (response) {
                                 $scope.canEditRow = false;
+                                $scope.canEditSelectedRows = false;
                                 $scope.refreshGrid(1);
                             }
                         });
+                    }
                 };
 
                 /**

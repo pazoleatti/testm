@@ -1268,6 +1268,9 @@
                                 if (scope.gridCtrl.onSelectAll) {
                                     scope.gridCtrl.onSelectAll(aRowids, status);
                                 }
+                                if (scope.gridOptions.onSelectAll) {
+                                    scope.gridOptions.onSelectAll(aRowids, status);
+                                }
 
                                 // выставляем значения у чекбоксов в группировках
                                 scope.grid.find("input.groupHeader").prop('checked', status);
