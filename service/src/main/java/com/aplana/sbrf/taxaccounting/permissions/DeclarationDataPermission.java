@@ -399,8 +399,8 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
                 // Пользователь имеет права на просмотр формы
                 if (VIEW.isGranted(currentUser, targetDomainObject, logger)) {
 
-                    // Форма.Состояние = "Принята", "Подготовлена"
-                    if (targetDomainObject.getState() == State.PREPARED || targetDomainObject.getState() == State.ACCEPTED) {
+                    // Форма.Состояние = "Принята"
+                    if (targetDomainObject.getState() == State.ACCEPTED) {
 
                         // Пользователю назначена роль "Контролёр УНП (НДФЛ)" либо "Контролер НС (НДФЛ)"
                         if (PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS)) {
@@ -408,7 +408,18 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
                         } else {
                             logError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, ROLE_ERROR, logger);
                         }
-                    } else {
+                    }
+                    // Форма.Состояние = "Подготовлена"
+                    else if (targetDomainObject.getState() == State.PREPARED) {
+
+                        // Пользователю назначена роль "Контролёр УНП (НДФЛ)" либо "Контролер НС (НДФЛ)" либо "Оператор (НДФЛ)"
+                        if (PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER)) {
+                            return true;
+                        } else {
+                            logError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, ROLE_ERROR, logger);
+                        }
+                    }
+                    else {
                         logError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, String.format(STATE_ERROR, OPERATION_NAME, targetDomainObject.getState().getTitle()), logger);
                     }
                 } else {
