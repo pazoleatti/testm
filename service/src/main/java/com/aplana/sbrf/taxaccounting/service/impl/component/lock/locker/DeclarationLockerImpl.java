@@ -41,7 +41,7 @@ public class DeclarationLockerImpl implements DeclarationLocker {
             OperationType.RNU_PAYMENT_REPORT, OperationType.RNU_RATE_REPORT, OperationType.RNU_NDFL_DETAIL_REPORT,
             OperationType.RNU_NDFL_2_6_DATA_XLSX_REPORT, OperationType.RNU_NDFL_2_6_DATA_TXT_REPORT,
             OperationType.LOAD_TRANSPORT_FILE, OperationType.IMPORT_DECLARATION_EXCEL, OperationType.IDENTIFY_PERSON,
-            OperationType.CONSOLIDATE);
+            OperationType.CONSOLIDATE, OperationType.EDIT);
 
     private static final Set<OperationType> SET_IMPORT_TF = ImmutableSet.of(
             OperationType.UPDATE_PERSONS_DATA,
@@ -76,7 +76,8 @@ public class DeclarationLockerImpl implements DeclarationLocker {
             OperationType.RNU_NDFL_PERSON_DB, OperationType.RNU_NDFL_PERSON_ALL_DB,
             OperationType.RNU_PAYMENT_REPORT, OperationType.RNU_RATE_REPORT, OperationType.UPDATE_PERSONS_DATA,
             OperationType.EXCEL_DEC, OperationType.DECLARATION_2NDFL1, OperationType.DECLARATION_2NDFL2,
-            OperationType.DECLARATION_6NDFL);
+            OperationType.DECLARATION_6NDFL, OperationType.EXCEL_TEMPLATE_DEC, OperationType.IDENTIFY_PERSON,
+            OperationType.IMPORT_DECLARATION_EXCEL);
 
 
     private static final Set<OperationType> SET_REPORT_KPP_OKTMO__2NDFL1__2NDFL2__6NDFL = ImmutableSet.of(
@@ -113,7 +114,8 @@ public class DeclarationLockerImpl implements DeclarationLocker {
 
     private static final Set<OperationType> SET_EXCEL_TEMPLATE = ImmutableSet.of(
             OperationType.DELETE_DEC, OperationType.IDENTIFY_PERSON,
-            OperationType.LOAD_TRANSPORT_FILE, OperationType.UPDATE_PERSONS_DATA, OperationType.IMPORT_DECLARATION_EXCEL);
+            OperationType.LOAD_TRANSPORT_FILE, OperationType.UPDATE_PERSONS_DATA, OperationType.IMPORT_DECLARATION_EXCEL,
+            OperationType.EDIT);
 
     private static final Set<OperationType> SET_UPDATE_DOC_STATE = ImmutableSet.of(
             OperationType.ACCEPT_DEC, OperationType.CHECK_DEC,

@@ -2827,11 +2827,16 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Transactional
     @PreAuthorize("hasPermission(#declarationDataId, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).EDIT)")
     public void updateNdflIncomesAndTax(Long declarationDataId, TAUserInfo taUserInfo, NdflPersonIncomeDTO personIncome) {
-        ndflPersonDao.updateOneNdflIncome(personIncome, taUserInfo);
-        reportService.deleteDec(singletonList(declarationDataId),
-                Arrays.asList(DeclarationDataReportType.SPECIFIC_REPORT_DEC, DeclarationDataReportType.EXCEL_DEC));
-        List<Long> changedPersonIds = updateAdditionalSortParams(personIncome.getNdflPersonId(), personIncome.getOperationId());
-        sortPersonRows(changedPersonIds);
+        try {
+            ndflPersonDao.updateOneNdflIncome(personIncome, taUserInfo);
+            reportService.deleteDec(singletonList(declarationDataId),
+                    Arrays.asList(DeclarationDataReportType.SPECIFIC_REPORT_DEC, DeclarationDataReportType.EXCEL_DEC));
+            List<Long> changedPersonIds = updateAdditionalSortParams(personIncome.getNdflPersonId(), personIncome.getOperationId());
+            sortPersonRows(changedPersonIds);
+        } catch (Exception e) {
+            String errorMessage = generateDeclarationEditErrorMsg(declarationDataId, e.getMessage());
+            throw new ServiceException(errorMessage, e);
+        }
     }
 
     @Override
@@ -3040,24 +3045,34 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Transactional
     @PreAuthorize("hasPermission(#declarationDataId, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).EDIT)")
     public void updateNdflDeduction(Long declarationDataId, TAUserInfo taUserInfo, NdflPersonDeductionDTO personDeduction) {
-        ndflPersonDao.updateOneNdflDeduction(personDeduction, taUserInfo);
-        reportService.deleteDec(singletonList(declarationDataId),
-                Arrays.asList(DeclarationDataReportType.SPECIFIC_REPORT_DEC, DeclarationDataReportType.EXCEL_DEC));
-        NdflPerson ndflPerson = ndflPersonDao.fetchOne(personDeduction.getNdflPersonId());
-        Collections.sort(ndflPerson.getDeductions(), NdflPersonDeduction.getComparator(ndflPerson));
-        ndflPersonDao.updateDeductions(updateRowNum(ndflPerson.getDeductions()));
+        try {
+            ndflPersonDao.updateOneNdflDeduction(personDeduction, taUserInfo);
+            reportService.deleteDec(singletonList(declarationDataId),
+                    Arrays.asList(DeclarationDataReportType.SPECIFIC_REPORT_DEC, DeclarationDataReportType.EXCEL_DEC));
+            NdflPerson ndflPerson = ndflPersonDao.fetchOne(personDeduction.getNdflPersonId());
+            Collections.sort(ndflPerson.getDeductions(), NdflPersonDeduction.getComparator(ndflPerson));
+            ndflPersonDao.updateDeductions(updateRowNum(ndflPerson.getDeductions()));
+        } catch (Exception e) {
+            String errorMessage = generateDeclarationEditErrorMsg(declarationDataId, e.getMessage());
+            throw new ServiceException(errorMessage, e);
+        }
     }
 
     @Override
     @Transactional
     @PreAuthorize("hasPermission(#declarationDataId, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).EDIT)")
     public void updateNdflPrepayment(Long declarationDataId, TAUserInfo taUserInfo, NdflPersonPrepaymentDTO personPrepayment) {
-        ndflPersonDao.updateOneNdflPrepayment(personPrepayment, taUserInfo);
-        reportService.deleteDec(singletonList(declarationDataId),
-                Arrays.asList(DeclarationDataReportType.SPECIFIC_REPORT_DEC, DeclarationDataReportType.EXCEL_DEC));
-        NdflPerson ndflPerson = ndflPersonDao.fetchOne(personPrepayment.getNdflPersonId());
-        Collections.sort(ndflPerson.getPrepayments(), NdflPersonPrepayment.getComparator(ndflPerson));
-        ndflPersonDao.updatePrepayments(updateRowNum(ndflPerson.getPrepayments()));
+        try {
+            ndflPersonDao.updateOneNdflPrepayment(personPrepayment, taUserInfo);
+            reportService.deleteDec(singletonList(declarationDataId),
+                    Arrays.asList(DeclarationDataReportType.SPECIFIC_REPORT_DEC, DeclarationDataReportType.EXCEL_DEC));
+            NdflPerson ndflPerson = ndflPersonDao.fetchOne(personPrepayment.getNdflPersonId());
+            Collections.sort(ndflPerson.getPrepayments(), NdflPersonPrepayment.getComparator(ndflPerson));
+            ndflPersonDao.updatePrepayments(updateRowNum(ndflPerson.getPrepayments()));
+        } catch (Exception e) {
+            String errorMessage = generateDeclarationEditErrorMsg(declarationDataId, e.getMessage());
+            throw new ServiceException(errorMessage, e);
+        }
     }
 
     @Override
@@ -3220,5 +3235,25 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 declarationData.getTaxOrganCode(),
                 declarationData.getKpp(),
                 declarationData.getOktmo());
+    }
+
+    /**
+     * Текст сообщения об ошибке редактирования формы.
+     */
+    private String generateDeclarationEditErrorMsg(Long declarationId, String cause) {
+
+        DeclarationData declarationData = declarationDataDao.get(declarationId);
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.fetchOne(declarationData.getDepartmentReportPeriodId());
+        ReportPeriodType reportPeriodType = reportPeriodService.getPeriodTypeById(departmentReportPeriod.getReportPeriod().getDictTaxPeriodId());
+        Department department = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
+
+        return String.format("Не выполнена операция \"Редактирование\" для налоговой формы: № %d, Период: \"%s, %s%s\", Подразделение: \"%s\". Причина: %s",
+                declarationId,
+                departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(),
+                reportPeriodType.getName(),
+                formatCorrectionDate(departmentReportPeriod.getCorrectionDate()),
+                department.getName(),
+                cause
+        );
     }
 }
