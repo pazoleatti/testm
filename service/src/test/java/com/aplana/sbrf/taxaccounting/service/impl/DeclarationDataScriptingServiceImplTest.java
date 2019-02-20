@@ -112,9 +112,8 @@ public class DeclarationDataScriptingServiceImplTest {
 		//String xml = service.create(logger, declarationData, new Date());
 
 		Map<String, Object> exchangeParams = new HashMap<String, Object>();
-		exchangeParams.put(DeclarationDataScriptParams.DOC_DATE, new Date());
 		StringWriter writer = new StringWriter();
-		exchangeParams.put(DeclarationDataScriptParams.XML, writer);
+		exchangeParams.put("xml", writer);
 
 		service.executeScript(null, declarationData, FormDataEvent.CREATE, logger, exchangeParams);
 
@@ -133,16 +132,15 @@ public class DeclarationDataScriptingServiceImplTest {
 		assertFalse(logger.getEntries().isEmpty());
 		assertFalse(logger.containsLevel(LogLevel.ERROR));
 	}
-	
+
 	@Test (expected = RuntimeException.class)
 	public void executeScriptError() {
 		Logger logger = new Logger();
 		DeclarationData declarationData = mockDeclarationData(1l, DEPARTMENT_ID, State.CREATED, REPORT_TEMPLATE_ID2, REPORT_PERIOD_ID);
-		
+
 		Map<String, Object> exchangeParams = new HashMap<String, Object>();
-		exchangeParams.put(DeclarationDataScriptParams.DOC_DATE, new Date());
 		StringWriter writer = new StringWriter();
-		exchangeParams.put(DeclarationDataScriptParams.XML, writer);
+		exchangeParams.put("xml", writer);
 
 		service.executeScript(null, declarationData, FormDataEvent.CREATE, logger, exchangeParams);
 	}

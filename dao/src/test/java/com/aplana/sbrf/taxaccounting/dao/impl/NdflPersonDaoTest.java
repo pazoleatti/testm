@@ -23,6 +23,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.Equator;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.joda.time.LocalDate;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Rule;
@@ -1117,16 +1118,6 @@ public class NdflPersonDaoTest {
     }
 
     @Test
-    public void testFindInpCountForPersonsAndIncomeAccruedDatePeriod() {
-        Calendar startDate = Calendar.getInstance();
-        startDate.set(2005, Calendar.JANUARY, 1);
-        Calendar endDate = Calendar.getInstance();
-        endDate.set(2005, Calendar.DECEMBER, 31);
-        int result = ndflPersonDao.findInpCountWithPositiveIncomeByPersonIdsAndAccruedIncomeDatePeriod(asList(101L, 102L), startDate.getTime(), endDate.getTime());
-        assertEquals(2, result);
-    }
-
-    @Test
     public void testFetchPrepaymentByIncomesIdAndAccruedDate() {
         Calendar startDate = Calendar.getInstance();
         startDate.set(2005, Calendar.OCTOBER, 1, 0, 0, 0);
@@ -1205,46 +1196,6 @@ public class NdflPersonDaoTest {
     }
 
     @Test
-    public void testFetchNdflPersonIncomeByPeriodNdflPersonId() {
-        Calendar startDate = new GregorianCalendar();
-        startDate.set(2005, Calendar.JANUARY, 1);
-        Calendar endDate = new GregorianCalendar();
-        endDate.set(2005, Calendar.DECEMBER, 31);
-        List<NdflPersonIncome> result = ndflPersonDao.fetchNdflPersonIncomeByPeriodNdflPersonId(1001L, startDate.getTime(), endDate.getTime(), true);
-        assertThat(result).hasSize(3);
-    }
-
-    @Test
-    public void testFetchNdflPersonIncomeByPeriodNdflPersonIdTemp() {
-        Calendar startDate = new GregorianCalendar();
-        startDate.set(2005, Calendar.JANUARY, 1);
-        Calendar endDate = new GregorianCalendar();
-        endDate.set(2005, Calendar.DECEMBER, 31);
-        List<NdflPersonIncome> result = ndflPersonDao.fetchNdflPersonIncomeByPeriodNdflPersonIdTemp(1001L, startDate.getTime(), endDate.getTime(), true);
-        assertThat(result).hasSize(3);
-    }
-
-    @Test
-    public void testFetchNdflPersonIncomeByPeriodNdflPersonIdTaxDate() {
-        Calendar startDate = new GregorianCalendar();
-        startDate.set(2010, Calendar.JANUARY, 1);
-        Calendar endDate = new GregorianCalendar();
-        endDate.set(2010, Calendar.DECEMBER, 31);
-        List<NdflPersonIncome> result = ndflPersonDao.fetchNdflPersonIncomeByPeriodNdflPersonIdTaxDate(1001L, 13, startDate.getTime(), endDate.getTime());
-        assertThat(result).hasSize(3);
-    }
-
-    @Test
-    public void testFetchNdflPersonIncomeByPayoutDate() {
-        Calendar startDate = new GregorianCalendar();
-        startDate.set(2005, Calendar.JANUARY, 1);
-        Calendar endDate = new GregorianCalendar();
-        endDate.set(2005, Calendar.DECEMBER, 31);
-        List<NdflPersonIncome> result = ndflPersonDao.fetchNdflPersonIncomeByPayoutDate(1001L, 13, startDate.getTime(), endDate.getTime());
-        assertThat(result).hasSize(3);
-    }
-
-    @Test
     public void testFetchNdflPersonDeductionByNdflPersonAndOperation() {
 
         List<NdflPersonDeduction> result = ndflPersonDao.fetchNdflPersonDeductionByNdflPersonAndOperation(50001, "1");
@@ -1260,13 +1211,7 @@ public class NdflPersonDaoTest {
     @Test
     public void testFindIncomesForPersonByKppOktmo() {
         List<NdflPersonIncome> result = ndflPersonDao.fetchNdflPersonIncomeByNdflPersonKppOktmo(Arrays.asList(1001L, 1002L), "99222", "111222333");
-        assertThat(result).hasSize(2);
-    }
-
-    @Test
-    public void testFetchNdflPersonByPairKppOktmo() {
-        List<NdflPerson> result = ndflPersonDao.fetchNdflPersonByPairKppOktmo(100L, "99222", "111222333", false);
-        assertThat(result).hasSize(1);
+        assertThat(result).hasSize(3);
     }
 
     @Test
@@ -1282,15 +1227,23 @@ public class NdflPersonDaoTest {
     }
 
     @Test
-    @Ignore
-    // TODO: Почему третье условие валится?
     public void testFindAllKppByDeclarationDataId() {
         List<KppSelect> kppList = ndflPersonDao.findAllKppByDeclarationDataId(100L, null, PagingParams.getInstance(0, 100));
-        assertThat(kppList).hasSize(4);
+        assertThat(kppList).hasSize(3);
         kppList = ndflPersonDao.findAllKppByDeclarationDataId(100L, null, PagingParams.getInstance(0, 3));
         assertThat(kppList).hasSize(3);
         kppList = ndflPersonDao.findAllKppByDeclarationDataId(100L, "99", PagingParams.getInstance(0, 100));
-        assertThat(kppList).hasSize(3);
+        assertThat(kppList).hasSize(2);
+    }
+
+    @Test
+    public void findAllFor2Ndfl() {
+        List<NdflPerson> persons = ndflPersonDao.findAllFor2Ndfl(100L, "99222", "111222333",
+                new LocalDate(2005, 1, 1).toDate(), new LocalDate(2005, 10, 20).toDate());
+        assertThat(persons).hasSize(1);
+        assertThat(persons.get(0).getIncomes()).hasSize(3);
+        assertThat(persons.get(0).getDeductions()).hasSize(2);
+        assertThat(persons.get(0).getPrepayments()).hasSize(3);
     }
 
 

@@ -478,16 +478,6 @@ public interface DeclarationDataService {
      * @param logger      логгер с результатами выполнения
      * @param userInfo    пользователь, запустивший задачу
      */
-    void createReportForms2Ndfl(ReportFormsCreationParams params, LockStateLogger stateLogger, Logger logger, TAUserInfo userInfo);
-
-    /**
-     * Создание экземпляров отчетных форм
-     *
-     * @param params      параметры создания отчетности
-     * @param stateLogger логгер состояния асинхронной задачи
-     * @param logger      логгер с результатами выполнения
-     * @param userInfo    пользователь, запустивший задачу
-     */
     void createReportForms(ReportFormsCreationParams params, LockStateLogger stateLogger, Logger logger, TAUserInfo userInfo);
 
     /**

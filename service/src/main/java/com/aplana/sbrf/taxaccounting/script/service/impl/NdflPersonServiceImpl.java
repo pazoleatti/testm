@@ -35,33 +35,8 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     com.aplana.sbrf.taxaccounting.service.NdflPersonService ndflPersonService;
 
     @Override
-    public List<NdflPersonIncome> findIncomesByPeriodAndNdflPersonId(long ndflPersonId, Date startDate, Date endDate, boolean prFequals1) {
-        return ndflPersonDao.fetchNdflPersonIncomeByPeriodNdflPersonId(ndflPersonId, startDate, endDate, prFequals1);
-    }
-
-    @Override
-    public List<NdflPersonIncome> findIncomesByPeriodAndNdflPersonIdTemp(long ndflPersonId, Date startDate, Date endDate, boolean prFequals1) {
-        return ndflPersonDao.fetchNdflPersonIncomeByPeriodNdflPersonIdTemp(ndflPersonId, startDate, endDate, prFequals1);
-    }
-
-    @Override
-    public List<NdflPersonIncome> findIncomesByPeriodAndNdflPersonIdAndTaxDate(long ndflPersonId, int taxRate, Date startDate, Date endDate) {
-        return ndflPersonDao.fetchNdflPersonIncomeByPeriodNdflPersonIdTaxDate(ndflPersonId, taxRate, startDate, endDate);
-    }
-
-    @Override
-    public List<NdflPersonIncome> findIncomesByPayoutDate(long ndflPersonId, int taxRate, Date startDate, Date endDate) {
-        return ndflPersonDao.fetchNdflPersonIncomeByPayoutDate(ndflPersonId, taxRate, startDate, endDate);
-    }
-
-    @Override
-    public List<NdflPersonDeduction> findDeductionsWithDeductionsMarkOstalnie(long ndflPersonId, Date startDate, Date endDate) {
-        return ndflPersonDao.fetchNdflPersonDeductionWithDeductionsMarkOstalnie(ndflPersonId, startDate, endDate);
-    }
-
-    @Override
-    public List<NdflPersonDeduction> findDeductionsWithDeductionsMarkNotOstalnie(long ndflPersonId, Date startDate, Date endDate, boolean prFequals1) {
-        return ndflPersonDao.fetchNdflpersonDeductionWithDeductionsMarkNotOstalnie(ndflPersonId, startDate, endDate, prFequals1);
+    public List<NdflPerson> findAllFor2Ndfl(long declarationId, String kpp, String oktmo, Date startDate, Date endDate) {
+        return ndflPersonDao.findAllFor2Ndfl(declarationId, kpp, oktmo, startDate, endDate);
     }
 
     @Override
@@ -70,16 +45,6 @@ public class NdflPersonServiceImpl implements NdflPersonService {
         Map<String, Object> parameters = new HashMap<String, Object>();
         parameters.put("declarationDataId", declarationDataId);
         return ndflPersonDao.getCount(query, parameters);
-    }
-
-    @Override
-    public List<NdflPerson> findNdflPersonByPairKppOktmo(long declarationDataId, String kpp, String oktmo, boolean is2Ndfl2) {
-        return ndflPersonDao.fetchNdflPersonByPairKppOktmo(declarationDataId, kpp, oktmo, is2Ndfl2);
-    }
-
-    @Override
-    public List<NdflPersonPrepayment> findPrepaymentsByPeriodAndNdflPersonId(long ndflPersonId, int taxRate, Date startDate, Date endDate, boolean prFequals1) {
-        return ndflPersonDao.fetchNdflPersonPrepaymentByPeriodNdflPersonId(ndflPersonId, taxRate, startDate, endDate, prFequals1);
     }
 
     @Override
@@ -165,11 +130,6 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     }
 
     @Override
-    public List<NdflPersonIncome> findIncomesForPersonByKppOktmoAndPeriod(List<Long> ndflPersonId, String kpp, String oktmo, Date startDate, Date endDate) {
-        return ndflPersonDao.fetchNdflPersonIncomeByNdflPersonKppOktmoPeriod(ndflPersonId, kpp, oktmo, startDate, endDate);
-    }
-
-    @Override
     public List<NdflPersonDeduction> findNdflPersonDeduction(long declarationDataId) {
         return ndflPersonDao.findAllDeductionsByDeclarationId(declarationDataId);
     }
@@ -215,16 +175,6 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     @Override
     public int findNdflPersonCountByParameters(long declarationDataId, Map<String, Object> parameters) {
         return ndflPersonDao.getNdflPersonCountByParameters(declarationDataId, parameters);
-    }
-
-    @Override
-    public List<NdflPersonPrepayment> findPrepaymentsByNdflPersonIdList(List<Long> ndflPersonIdList) {
-        return ndflPersonDao.fetchNdlPersonPrepaymentByNdflPersonIdList(ndflPersonIdList);
-    }
-
-    @Override
-    public List<NdflPersonIncome> findIncomesByPeriodAndNdflPersonIdList(List<Long> ndflPersonIdList, Date startDate, Date endDate) {
-        return ndflPersonDao.fetchIncomesByPeriodAndNdflPersonIdList(ndflPersonIdList, startDate, endDate);
     }
 
     @Override
@@ -431,11 +381,6 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     @Override
     public void updatePrepaymentsRowNum(List<NdflPersonPrepayment> prepayments) {
         ndflPersonDao.updatePrepaymentsRowNum(prepayments);
-    }
-
-    @Override
-    public int findInpCountWithPositiveIncomeByPersonIdsAndAccruedIncomeDatePeriod(List<Long> ndflPersonIdList, Date periodStartDate, Date periodEndDate) {
-        return ndflPersonDao.findInpCountWithPositiveIncomeByPersonIdsAndAccruedIncomeDatePeriod(ndflPersonIdList, periodStartDate, periodEndDate);
     }
 
     @Override

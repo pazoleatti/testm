@@ -30,11 +30,6 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
     }
 
     @Override
-    public List<DepartmentReportPeriod> getListByFilter(DepartmentReportPeriodFilter departmentReportPeriodFilter) {
-        return departmentReportPeriodDao.fetchAllByFilter(departmentReportPeriodFilter);
-    }
-
-    @Override
     public DepartmentReportPeriod getFirst(int departmentId, int reportPeriodId) {
         return departmentReportPeriodDao.fetchFirst(departmentId, reportPeriodId);
     }

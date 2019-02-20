@@ -1,29 +1,22 @@
 package com.aplana.sbrf.taxaccounting.model.refbook;
 
+import lombok.Getter;
+import lombok.Setter;
+
 /**
  * Справочник "Признак кода вычета"
- *
- * @author dloshkarev
  */
+@Getter
+@Setter
 public class RefBookDeductionMark extends RefBookSimple<Long> {
+    public final static Integer STANDARD_CODE = 1;
+    public final static Integer SOCIAL_CODE = 2;
+    public final static Integer INVESTMENT_CODE = 3;
+    public final static Integer PROPERTY_CODE = 4;
+    public final static Integer OTHERS_CODE = 5;
+
     //Код
-    private String code;
+    private Integer code;
     //Наименование дохода
     private String name;
-
-    public String getCode() {
-        return code;
-    }
-
-    public void setCode(String code) {
-        this.code = code;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
 }

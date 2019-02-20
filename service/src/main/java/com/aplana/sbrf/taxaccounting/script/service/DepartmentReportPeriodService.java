@@ -26,14 +26,6 @@ public interface DepartmentReportPeriodService {
     DepartmentReportPeriod get(int id);
 
     /**
-     * Получение списка отчетных периодов для подразделений по фильтру
-     *
-     * @param departmentReportPeriodFilter фильтр
-     * @return список {@link DepartmentReportPeriod} или пустой список
-     */
-    List<DepartmentReportPeriod> getListByFilter(DepartmentReportPeriodFilter departmentReportPeriodFilter);
-
-    /**
      * Получение первого некорректирующего отчетного периода подразделения по идентификатору подразделения
      * и идентификатору отчетного периода
      *

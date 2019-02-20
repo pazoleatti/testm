@@ -238,12 +238,15 @@ insert into NDFL_PERSON (id, declaration_data_id, inp, FIRST_NAME, LAST_NAME, BI
 
 Insert into NDFL_PERSON_INCOME (ID,NDFL_PERSON_ID,SOURCE_ID,ROW_NUM,OPERATION_ID,INCOME_CODE,INCOME_TYPE,OKTMO,KPP,INCOME_ACCRUED_DATE,INCOME_PAYOUT_DATE,INCOME_ACCRUED_SUMM,INCOME_PAYOUT_SUMM,TOTAL_DEDUCTIONS_SUMM,TAX_BASE,TAX_RATE,TAX_DATE,CALCULATED_TAX,WITHHOLDING_TAX,NOT_HOLDING_TAX,OVERHOLDING_TAX,REFOUND_TAX,TAX_TRANSFER_DATE,PAYMENT_DATE,PAYMENT_NUMBER,TAX_SUMM, ASNU_ID) values
 (1001,1001,null,null,'1','0000','00','111222333','99222',to_date('02-10-2005','DD-MM-YYYY'),to_date('01-10-2005','DD-MM-YYYY'),'100','200','2','0','13',to_date('01-11-2010','DD-MM-YYYY'),'1','10','20','0','30',to_date('01-10-2005','DD-MM-YYYY'),to_date('01-11-2010','DD-MM-YYYY'),'0','0', 8),
-(1002,1001,null,null,'2','1010','00','111222333','88333',to_date('02-10-2005','DD-MM-YYYY'),to_date('01-10-2005','DD-MM-YYYY'),'100','200','2','0','13',to_date('01-11-2010','DD-MM-YYYY'),'1','10','20','0','30',to_date('01-10-2005','DD-MM-YYYY'),to_date('01-11-2010','DD-MM-YYYY'),'0','0', 8),
+(1002,1001,null,null,'2','1010','00','111222333','99222',to_date('02-10-2005','DD-MM-YYYY'),to_date('01-10-2005','DD-MM-YYYY'),'100','200','2','0','13',to_date('01-11-2010','DD-MM-YYYY'),'1','10','20','0','30',to_date('01-10-2005','DD-MM-YYYY'),to_date('01-11-2010','DD-MM-YYYY'),'0','0', 8),
 (1003,1001,null,null,'2','1010','00','111222333','99222',to_date('30-10-2005','DD-MM-YYYY'),to_date('01-10-2005','DD-MM-YYYY'),'100','200','2','0','13',to_date('01-11-2010','DD-MM-YYYY'),'1','10','20','0','30',to_date('01-10-2005','DD-MM-YYYY'),to_date('01-11-2010','DD-MM-YYYY'),'0','0', 8),
 (1004,1002,null,null,'3','1010','00','111222333','88444',to_date('30-10-2005','DD-MM-YYYY'),to_date('01-10-2005','DD-MM-YYYY'),'100','200','2','0','13',to_date('01-11-2010','DD-MM-YYYY'),'1','10','20','0','30',to_date('01-10-2005','DD-MM-YYYY'),to_date('01-11-2010','DD-MM-YYYY'),'0','0', 8),
 (1005,1002,null,null,'4','1010','00','111222333','99333',to_date('02-10-2005','DD-MM-YYYY'),to_date('01-10-2005','DD-MM-YYYY'),'100','200','2','0','13',to_date('01-11-2010','DD-MM-YYYY'),'1','10','20','0','30',to_date('01-10-2005','DD-MM-YYYY'),to_date('01-11-2010','DD-MM-YYYY'),'0','0', 8);
 
---insert INTO ndfl_person_deduction
+insert INTO ndfl_person_deduction (id, ndfl_person_id, source_id, row_num, operation_id, type_code, notif_type, notif_date, notif_num, notif_source, notif_summ, income_accrued, income_code, income_summ, period_prev_date, period_prev_summ, period_curr_date, period_curr_summ, ASNU_ID) VALUES
+(1001, 1001, NULL, 1, '1', '111', '11', to_date('30-10-2005','DD-MM-YYYY'), '11111', '110001', 2, to_date('01-10-2005','DD-MM-YYYY'), '0000', 100, to_date('30-10-2005','DD-MM-YYYY'), null, to_date('31-10-2005','DD-MM-YYYY'), null, 8),
+(1002, 1001, NULL, 2, '1', '222', '11', to_date('30-10-2005','DD-MM-YYYY'), '22222', '110001', 2, to_date('01-10-2005','DD-MM-YYYY'), '0000', 100, to_date('30-10-2005','DD-MM-YYYY'), null, to_date('31-10-2005','DD-MM-YYYY'), null, 8),
+(1003, 1002, NULL, 3, '3', '333', '11', to_date('30-10-2005','DD-MM-YYYY'), '33333', '110001', 2, to_date('01-10-2005','DD-MM-YYYY'), '0000', 100, to_date('30-10-2005','DD-MM-YYYY'), null, to_date('31-10-2005','DD-MM-YYYY'), null, 8)
 
 insert into ndfl_person_prepayment (id, ndfl_person_id, source_id, row_num, operation_id, summ, notif_num, notif_date, notif_source, ASNU_ID) VALUES
 (1001, 1001, null, null, '1', 100, '1', to_date('01-10-2005','DD-MM-YYYY'), '01', 8),

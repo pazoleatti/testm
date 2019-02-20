@@ -23,7 +23,6 @@ import com.aplana.sbrf.taxaccounting.script.service.*
 import com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils
 import com.aplana.sbrf.taxaccounting.service.LogBusinessService
 import com.aplana.sbrf.taxaccounting.service.TAUserService
-import com.aplana.sbrf.taxaccounting.service.impl.DeclarationDataScriptParams
 import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService
 import groovy.transform.TypeChecked
 import groovy.transform.TypeCheckingMode
@@ -190,9 +189,6 @@ class Calculate extends AbstractScriptClass {
                         //noinspection GroovyAssignabilityCheck
                         throw new ServiceException("Для " + declarationData.id + ", " + declarationData.fileName + " не указан код АСНУ загрузившей данные!")
                     }
-
-                    //выставляем параметр что скрипт не формирует новый xml-файл
-                    calculateParams.put(DeclarationDataScriptParams.NOT_REPLACE_XML, Boolean.TRUE)
 
                     refBookPersonService.clearRnuNdflPerson(declarationData.id)
 

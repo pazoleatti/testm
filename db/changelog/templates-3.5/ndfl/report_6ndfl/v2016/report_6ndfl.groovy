@@ -142,9 +142,7 @@ class Report6Ndfl extends AbstractScriptClass {
             fileWriter.write("<?xml version=\"1.0\" encoding=\"windows-1251\"?>")
 
             xml = buildXml(departmentConfig, fileWriter, false)
-
             if (xml) {
-                //Архивирование перед сохранением в базу
                 xml.xmlFile = xmlFile
             }
             return xml
@@ -609,9 +607,15 @@ class Report6Ndfl extends AbstractScriptClass {
         }
     }
 
+    /**
+     * Структура для хранения информации по xml-файлу с данными 6-НДФЛ
+     */
     class Xml {
+        // Наименование файла
         String fileName
+        // Дата создания файла
         Date date
+        // Сам файл
         File xmlFile
     }
 
@@ -1181,7 +1185,8 @@ class Report6Ndfl extends AbstractScriptClass {
          */
         void adjustNegativeValues() {
             def rows = rows.sort(false) { Section2Row a, Section2Row b ->
-                a.taxDate <=> b.taxDate ?: a.incomeSum <=> b.incomeSum
+                a.taxDate <=> b.taxDate ?: a.incomeSum <=> b.incomeSum ?: a.key.taxTransferDate <=> b.key.taxTransferDate ?:
+                        a.key.incomeDate <=> b.key.incomeDate
             }
             for (def row : rows) {
                 if (row.incomeSum > 0) {

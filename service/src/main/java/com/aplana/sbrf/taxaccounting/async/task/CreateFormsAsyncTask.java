@@ -56,22 +56,12 @@ public class CreateFormsAsyncTask extends AbstractAsyncTask {
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(taskData.getUserId()));
 
-        // TODO 6-НДФЛ сделано по-новому, 2-НДФЛ будет потом
-        if (params.getDeclarationTypeId() == DeclarationType.NDFL_6) {
-            declarationDataService.createReportForms(params, new LockStateLogger() {
-                @Override
-                public void updateState(AsyncTaskState state) {
-                    asyncManager.updateState(taskData.getId(), state);
-                }
-            }, logger, userInfo);
-        } else {
-            declarationDataService.createReportForms2Ndfl(params, new LockStateLogger() {
-                @Override
-                public void updateState(AsyncTaskState state) {
-                    asyncManager.updateState(taskData.getId(), state);
-                }
-            }, logger, userInfo);
-        }
+        declarationDataService.createReportForms(params, new LockStateLogger() {
+            @Override
+            public void updateState(AsyncTaskState state) {
+                asyncManager.updateState(taskData.getId(), state);
+            }
+        }, logger, userInfo);
         return new BusinessLogicResult(true, null);
     }
 

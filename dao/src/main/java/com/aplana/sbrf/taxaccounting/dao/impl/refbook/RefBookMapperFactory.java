@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.refbook;
 
+import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDepartmentDao;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -112,6 +113,18 @@ public class RefBookMapperFactory {
         }
     }
 
+    public class DeductionTypeMapper implements RowMapper<RefBookDeductionType> {
+
+        @Override
+        public RefBookDeductionType mapRow(ResultSet rs, int rowNum) throws SQLException {
+            RefBookDeductionType result = new RefBookDeductionType();
+            result.setId(rs.getLong("id"));
+            result.setName(rs.getString("name"));
+            result.setCode(rs.getString("code"));
+            return result;
+        }
+    }
+
     public class DeductionMarkMapper<T> implements RowMapper<RefBookDeductionMark> {
 
         @Override
@@ -119,7 +132,7 @@ public class RefBookMapperFactory {
             RefBookDeductionMark result = new RefBookDeductionMark();
             result.setId(rs.getLong("id"));
             result.setName(rs.getString("name"));
-            result.setCode(rs.getString("code"));
+            result.setCode(SqlUtils.getInteger(rs, "code"));
             return result;
         }
     }

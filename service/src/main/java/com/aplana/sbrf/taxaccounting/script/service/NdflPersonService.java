@@ -110,18 +110,6 @@ public interface NdflPersonService {
     List<NdflPersonIncome> findAllIncomesByDeclarationIdAndKppAndOktmo(long declarationId, String kpp, String oktmo);
 
     /**
-     * Найти данные о доходах по КПП и ОКТМО для Физлица
-     *
-     * @param ndflPersonId
-     * @param kpp
-     * @param oktmo
-     * @param startDate
-     * @param endDate
-     * @return
-     */
-    List<NdflPersonIncome> findIncomesForPersonByKppOktmoAndPeriod(List<Long> ndflPersonId, String kpp, String oktmo, Date startDate, Date endDate);
-
-    /**
      * Найти все "Стандартные, социальные и имущественные налоговые вычеты" привязанные к декларации
      *
      * @param declarationDataId идентификатор декларации
@@ -229,79 +217,18 @@ public interface NdflPersonService {
     long deleteAll(long declarationDataId);
 
     /**
-     * Найти данные о доходах ФЛ по идентификатору интервалу. Отбор происходит по дате начиления дохода
+     * Возвращяет строки раздела 1 формы, у которых есть операции, относящиеся к заданной паре КПП/ОКТМО и
+     * у которых хотя бы у одной строки дата начиления дохода принадлежит отчетному периоду,
+     * вместе со всеми этими операциями.
      *
-     * @param ndflPersonId
-     * @param startDate    - начало периода для "Дата удержания налога" и "Дата платежного поручения"
-     * @param endDate      - окончание периода для "Дата удержания налога" и "Дата платежного поручения"
-     * @param prFequals1   = true для НДФЛ(1) prFequals1 = false для НДФЛ(2)
-     * @return
+     * @param declarationId идентификатор формы
+     * @param kpp           КПП
+     * @param oktmo         ОКТМО
+     * @param startDate     начало периода
+     * @param endDate       окончание периода
+     * @return список строк раздела2
      */
-    List<NdflPersonIncome> findIncomesByPeriodAndNdflPersonId(long ndflPersonId, Date startDate, Date endDate, boolean prFequals1);
-
-    /**
-     * Метод делает то же что и fetchNdflPersonIncomeByPeriodNdflPersonId, только в рамках временного решения для https://conf.aplana.com/pages/viewpage.action?pageId=27176125 п.24.3
-     * нет обора по условию .Раздел 2.Графа 10 ≠ 0
-     *
-     * @param ndflPersonId
-     * @param startDate    - начало периода для "Дата удержания налога" и "Дата платежного поручения"
-     * @param endDate      - окончание периода для "Дата удержания налога" и "Дата платежного поручения"
-     * @param prFequals1   = true для НДФЛ(1) prFequals1 = false для НДФЛ(2)
-     * @return
-     */
-    List<NdflPersonIncome> findIncomesByPeriodAndNdflPersonIdTemp(long ndflPersonId, Date startDate, Date endDate, boolean prFequals1);
-
-    /**
-     * Найти данные о доходах ФЛ по идентификатору и интервалу. Отбор происходит по дате НДФЛ
-     *
-     * @param ndflPersonId
-     * @param startDate    - начало периода для "Дата удержания налога" и "Дата платежного поручения"
-     * @param endDate      - окончание периода для "Дата удержания налога" и "Дата платежного поручения"
-     * @return
-     */
-    List<NdflPersonIncome> findIncomesByPeriodAndNdflPersonIdAndTaxDate(long ndflPersonId, int taxRate, Date startDate, Date endDate);
-
-    /**
-     * Найти данные о доходах ФЛ по идентификатору ФЛ и интервалу. Отбор происходит по дате выплаты дохода
-     *
-     * @param ndflPersonId
-     * @param startDate
-     * @param endDate
-     * @return
-     */
-    List<NdflPersonIncome> findIncomesByPayoutDate(long ndflPersonId, int taxRate, Date startDate, Date endDate);
-
-    /**
-     * Найти данные о вычетах ФЛ с признаком вычета "Остальные"
-     *
-     * @param ndflPersonId
-     * @param startDate    - начало периода для "Дата удержания налога" и "Дата платежного поручения"
-     * @param endDate      - окончание периода для "Дата удержания налога" и "Дата платежного поручения"
-     * @return
-     */
-    List<NdflPersonDeduction> findDeductionsWithDeductionsMarkOstalnie(long ndflPersonId, Date startDate, Date endDate);
-
-    /**
-     * Найти данные о вычетах ФЛ с признаком вычета Социльный;Стандартный;Имущественный;Инвестиционный
-     *
-     * @param ndflPersonId
-     * @param startDate    - начало периода для "Дата удержания налога" и "Дата платежного поручения"
-     * @param endDate      - окончание периода для "Дата удержания налога" и "Дата платежного поручения"
-     * @param prFequals1   - является ли признакФ равным 1, для формы 2-НДФЛ
-     * @return
-     */
-    List<NdflPersonDeduction> findDeductionsWithDeductionsMarkNotOstalnie(long ndflPersonId, Date startDate, Date endDate, boolean prFequals1);
-
-    /**
-     * Найти данные о авансах ФЛ по идентификатору ФЛ
-     *
-     * @param ndflPersonId
-     * @param startDate    - начало периода для "Дата удержания налога" и "Дата платежного поручения"
-     * @param endDate      - окончание периода для "Дата удержания налога" и "Дата платежного поручения"
-     * @param prFequals1   - является ли признакФ равным 1, для формы 2-НДФЛ
-     * @return
-     */
-    List<NdflPersonPrepayment> findPrepaymentsByPeriodAndNdflPersonId(long ndflPersonId, int taxRate, Date startDate, Date endDate, boolean prFequals1);
+    List<NdflPerson> findAllFor2Ndfl(long declarationId, String kpp, String oktmo, Date startDate, Date endDate);
 
     /**
      * Возвращает количество Физлиц для декларации
@@ -309,35 +236,7 @@ public interface NdflPersonService {
      * @param declarationDataId
      * @return
      */
-    public int getCountNdflPerson(long declarationDataId);
-
-    /**
-     * Найти NdflPerson строки данных о доходах которых соответствуют паре кпп и октмо
-     *
-     * @param declarationDataId
-     * @param kpp
-     * @param oktmo
-     * @return
-     */
-    List<NdflPerson> findNdflPersonByPairKppOktmo(long declarationDataId, String kpp, String oktmo, boolean is2Ndfl2);
-
-    /**
-     * Данные об авансах Физлиц
-     *
-     * @param ndflPersonIdList
-     * @return
-     */
-    List<NdflPersonPrepayment> findPrepaymentsByNdflPersonIdList(List<Long> ndflPersonIdList);
-
-    /**
-     * Найти данные о доходах Физлиц
-     *
-     * @param ndflPersonIdList
-     * @param startDate        - начало периода для "Дата удержания налога" и "Дата платежного поручения"
-     * @param endDate          - окончание периода для "Дата удержания налога" и "Дата платежного поручения"
-     * @return
-     */
-    List<NdflPersonIncome> findIncomesByPeriodAndNdflPersonIdList(List<Long> ndflPersonIdList, Date startDate, Date endDate);
+    int getCountNdflPerson(long declarationDataId);
 
     /**
      * Найти доходы из КНФ которая является источником для ОНФ 2-НДФЛ
@@ -611,16 +510,6 @@ public interface NdflPersonService {
     void updatePrepaymentsRowNum(List<NdflPersonPrepayment> prepayments);
 
     /**
-     * Найти количество ИНП по физлицам, операции которых попадают в период и сумма их доходов > 0
-     *
-     * @param ndflPersonIdList список идентификаторов физлиц
-     * @param periodStartDate  дата начала периода
-     * @param periodEndDate    дата конца периода
-     * @return количество найденных ИНП
-     */
-    int findInpCountWithPositiveIncomeByPersonIdsAndAccruedIncomeDatePeriod(List<Long> ndflPersonIdList, Date periodStartDate, Date periodEndDate);
-
-    /**
      * Находит авансы имеющие ИНП, ИдОперации такие же как и доходы передаваемые в {@code ndflPersonIncomeIdList} и
      * если дата начисления дохода входит в период ограниченный параметрами {@code periodStartDate} и {@code periodEndDate}
      *
@@ -673,7 +562,8 @@ public interface NdflPersonService {
 
     /**
      * Заполнить поля раздела 2 используемые для сортировки
-     * @param ndflPersonList  список записей раздела 1 которым нужно заполнить поля раздела 2
+     *
+     * @param ndflPersonList список записей раздела 1 которым нужно заполнить поля раздела 2
      */
     void fillNdflPersonIncomeSortFields(List<NdflPerson> ndflPersonList);
 }
