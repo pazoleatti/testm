@@ -2,20 +2,20 @@
     <div class="modal-body" style="min-height: 155px">
         <div class="row-fluid">
             <label class="control-label" style="text-align: left"
-                   ng-bind-html="'ndlfPrepayment.edit.title.person' | translate:
+                   ng-bind-html="'ndflPrepayment.edit.title.person' | translate:
                    {lastName: temp.person.lastName, firstName: temp.person.firstName, middleName: temp.person.middleName, birthDay: temp.person.birthDay, inp: row.inp}">
             </label>
             <label class="control-label" style="text-align: left"
-                   ng-bind-html="'ndlfPrepayment.edit.title.doc' | translate: {docTypeName: temp.docTypeName, idDocNumber: temp.person.idDocNumber}">
+                   ng-bind-html="'ndflPrepayment.edit.title.doc' | translate: {docTypeName: temp.docTypeName, idDocNumber: temp.person.idDocNumber}">
             </label>
             <label class="control-label" style="text-align: left"
-                   ng-bind-html="'ndlfPrepayment.edit.title.citizenship' | translate: {citizenship: temp.person.citizenship,  innNp: temp.person.innNp}">
+                   ng-bind-html="'ndflPrepayment.edit.title.citizenship' | translate: {citizenship: temp.person.citizenship,  innNp: temp.person.innNp}">
             </label>
         </div>
 
         <div style="height: 400px; overflow-y: scroll">
             <!-- Информация об авансовом платеже -->
-            <legend style="margin-top: 20px; margin-bottom: 10px;">{{::'ndlfPrepayment.edit.title.prepaymentInfo' |
+            <legend style="margin-top: 20px; margin-bottom: 10px;">{{::'ndflPrepayment.edit.title.prepaymentInfo' |
                 translate}}
             </legend>
 
@@ -23,7 +23,7 @@
                 <div class="filter-col w400">
                     <div class="row-fluid form-group">
                         <div class="span4">
-                            <label class="control-label">{{::'ndlfPrepayment.edit.summ' | translate}}:</label>
+                            <label class="control-label">{{::'ndflPrepayment.edit.summ' | translate}}:</label>
                         </div>
                         <div class="span8 field-wrapper">
                             <div data-aplana-field>
@@ -32,7 +32,7 @@
                                        type="text"
                                        data-ng-pattern="patterns.number"
                                        data-required
-                                       title="{{ndlfPrepayment.edit.summ}}"/>
+                                       title="{{ndflPrepayment.edit.summ}}"/>
                                 <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.error' |
                                     translate}}
                                 </div>
@@ -43,7 +43,7 @@
             </div>
 
             <!-- Уведомление, подтверждающее право на уменьшение налога на фиксированные авансовые платежи -->
-            <legend>{{::'ndlfPrepayment.edit.title.notification' | translate}}
+            <legend>{{::'ndflPrepayment.edit.title.notification' | translate}}
             </legend>
 
             <div class="row">
@@ -61,7 +61,7 @@
                                        data-required
                                        title="{{title.prepayment.notifNum}}"/>
                                 <div data-aplana-validator data-key="maxlength">
-                                    {{::'ndlfPrepayment.edit.validation.notifNum' |
+                                    {{::'ndflPrepayment.edit.validation.notifNum' |
                                     translate}}
                                 </div>
                                 <div data-aplana-validator data-key='required'>{{::'common.validation.required' |

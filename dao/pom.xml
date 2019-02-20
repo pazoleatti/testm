@@ -205,7 +205,7 @@
                 <configuration>
                     <outxml>true</outxml>
                     <showWeaveInfo>false</showWeaveInfo>
-                    <Xlint>warning</Xlint>
+                    <Xlint>ignore</Xlint>
                     <verbose>true</verbose>
                     <aspectLibraries>
                         <aspectLibrary>

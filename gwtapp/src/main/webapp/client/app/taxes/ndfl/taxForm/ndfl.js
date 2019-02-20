@@ -409,7 +409,7 @@
                         controller = "editNdflDeductionFormCtrl";
                     } else if ($scope.ndflTabsCtrl.getActiveTab().getSection() === 4) {
                         //Раздел 4 (Сведения о доходах в виде авансовых платежей)
-                        title = "ndlfPrepayment.edit.title";
+                        title = "ndflPrepayment.edit.title";
                         templateUrl = "client/app/taxes/ndfl/taxForm/editing/editNdflPrepayment.html";
                         controller = "editNdflPrepaymentFormCtrl";
                     }
@@ -434,21 +434,27 @@
                         closeCallback: function (scope) {
                             scope.close();
                         }
-                    }).result.then(function (response) {
-                        $http({
-                            method: "POST",
-                            url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/unlockEdit"
-                        }).then(function (unlock) {
-                            if (unlock.data.uuid) {
-                                $logPanel.open('log-panel-container', unlock.data.uuid);
-                            }
-                        });
-                        if (response) {
+                    }).result
+                        .then(function () {
                             $scope.canEditRow = false;
                             $scope.canEditSelectedRows = false;
                             $scope.refreshGrid(1);
-                        }
-                    });
+                        })
+                        .catch(function (reason) {
+                            $dialogs.errorDialog({
+                                content: 'Ошибка редактирования формы. ' + reason
+                            })
+                        })
+                        .finally(function () {
+                            $http({
+                                method: 'POST',
+                                url: 'controller/actions/declarationData/' + $stateParams.declarationDataId + '/unlockEdit'
+                            }).then(function (unlock) {
+                                if (unlock.data.uuid) {
+                                    $logPanel.open('log-panel-container', unlock.data.uuid);
+                                }
+                            });
+                        });
                 };
 
                 /**

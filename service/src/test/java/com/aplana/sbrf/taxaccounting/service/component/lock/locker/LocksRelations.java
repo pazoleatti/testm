@@ -94,7 +94,8 @@ class LocksRelations {
 
     /**
      * Соответствие блокировок операциям, используемым в алгоритме блокировки.
-     * Смотри {@link DeclarationLockKeyGeneratorImpl#generateLockKey(Long, OperationType)}
+     *
+     * @see DeclarationLockKeyGeneratorImpl#generateLockKey(Long, OperationType)
      */
     static final Map<String, OperationType> OPERATION_BY_LOCK = new HashMap<>();
 
@@ -182,7 +183,8 @@ class LocksRelations {
                         DECLARATION_DATA_ID_RNU_RATE_REPORT,
                         DECLARATION_DATA_ID_UPDATE_PERSONS_DATA,
                         DECLARATION_DATA_ID_XLSX,
-                        DECLARATION_DATA_ID_CONSOLIDATE
+                        DECLARATION_DATA_ID_CONSOLIDATE,
+                        DECLARATION_DATA_ID_EDIT
                 )
         );
 
@@ -205,7 +207,8 @@ class LocksRelations {
                         DECLARATION_DATA_ID_XLSX,
                         EXCEL_TEMPLATE_DECLARATION_ID,
                         IMPORT_DECLARATION_EXCEL_ID,
-                        DECLARATION_DATA_ID_CONSOLIDATE
+                        DECLARATION_DATA_ID_CONSOLIDATE,
+                        DECLARATION_DATA_ID_EDIT
                 )
         );
 
@@ -273,7 +276,10 @@ class LocksRelations {
                         DECLARATION_DATA_ID_XLSX,
                         DECLARATION_TEMPLATE_ID_2NDFL1,
                         DECLARATION_TEMPLATE_ID_2NDFL2,
-                        DECLARATION_TEMPLATE_ID_6NDFL
+                        DECLARATION_TEMPLATE_ID_6NDFL,
+                        EXCEL_TEMPLATE_DECLARATION_ID,
+                        DECLARATION_DATA_ID_IDENTIFY_PERSON,
+                        IMPORT_DECLARATION_EXCEL_ID
                 )
         );
 
@@ -406,7 +412,8 @@ class LocksRelations {
                         DECLARATION_DATA_ID_IDENTIFY_PERSON,
                         DECLARATION_DATA_ID_IMPORT_TF_DECLARATION,
                         DECLARATION_DATA_ID_UPDATE_PERSONS_DATA,
-                        IMPORT_DECLARATION_EXCEL_ID
+                        IMPORT_DECLARATION_EXCEL_ID,
+                        DECLARATION_DATA_ID_EDIT
                 )
         );
 
