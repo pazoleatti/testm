@@ -7,27 +7,12 @@ import com.aplana.sbrf.taxaccounting.dao.impl.IdTaxPayerDaoImpl;
 import com.aplana.sbrf.taxaccounting.dao.impl.PersonTbDaoImpl;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookPersonDao;
 import com.aplana.sbrf.taxaccounting.dao.util.DBUtils;
-import com.aplana.sbrf.taxaccounting.model.AsyncTaskType;
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
-import com.aplana.sbrf.taxaccounting.model.LockData;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.Permissive;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.refbook.Address;
-import com.aplana.sbrf.taxaccounting.model.refbook.IdDoc;
-import com.aplana.sbrf.taxaccounting.model.refbook.PersonIdentifier;
-import com.aplana.sbrf.taxaccounting.model.refbook.PersonTb;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAsnu;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookCountry;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookTaxpayerState;
-import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPerson;
-import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPersonDTO;
+import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 import com.aplana.sbrf.taxaccounting.model.result.CheckDulResult;
 import com.aplana.sbrf.taxaccounting.permissions.BasePermissionEvaluator;
@@ -40,6 +25,7 @@ import com.aplana.sbrf.taxaccounting.service.PersonService;
 import com.aplana.sbrf.taxaccounting.utils.SimpleDateUtils;
 import com.google.common.base.Joiner;
 import com.google.common.base.Objects;
+import com.google.common.base.Strings;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
@@ -50,13 +36,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.aplana.sbrf.taxaccounting.model.util.IdentityObjectUtils.*;
 import static java.util.Collections.singletonList;
@@ -401,8 +381,6 @@ public class PersonServiceImpl implements PersonService {
             }
         }
 
-
-
         personToPersist.setId(personDTO.getId());
         personToPersist.setOldId(personDTO.getOldId());
         personToPersist.setStartDate(SimpleDateUtils.toStartOfDay(personDTO.getStartDate()));
@@ -586,7 +564,11 @@ public class PersonServiceImpl implements PersonService {
             person.setOldId(recordId);
 
             idDocs.addAll(person.getDocuments());
-            idTaxPayers.addAll(person.getPersonIdentityList());
+            for (PersonIdentifier personIdentifier : person.getPersonIdentityList()) {
+                if (!Strings.isNullOrEmpty(personIdentifier.getInp())) {
+                    idTaxPayers.add(personIdentifier);
+                }
+            }
             personTbs.addAll(person.getPersonTbList());
         }
         refBookPersonDao.saveBatch(personList);
