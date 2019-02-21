@@ -363,7 +363,7 @@
                                 <button type="button" class="btn btn-default"
                                         data-ng-click="identify()"
                                         data-ng-show="declarationData.declarationType === APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_PRIMARY.id"
-                                        data-ng-disabled="!permissionChecker.check(declarationData, APP_CONSTANTS.DECLARATION_PERMISSION.IDENTIFY)">
+                                        data-ng-disabled="!permissionChecker.check(declarationData, APP_CONSTANTS.DECLARATION_PERMISSION.IDENTIFY) || !declarationData.hasNdflPersons">
                                     <span data-translate-once="button.identifyPersons"></span>
                                 </button>
                             </span>
@@ -421,7 +421,7 @@
                             <span>
                                 <button type="button" class="btn btn-default"
                                         data-ng-click="updatePersonsData()"
-                                        data-ng-disabled="!permissionChecker.check(declarationData, APP_CONSTANTS.DECLARATION_PERMISSION.UPDATE_PERSONS_DATA)">
+                                        data-ng-disabled="!permissionChecker.check(declarationData, APP_CONSTANTS.DECLARATION_PERMISSION.UPDATE_PERSONS_DATA) || !declarationData.hasNdflPersons">
                                     <span data-translate-once="button.updatePersonsData"></span>
                                 </button>
                             </span>
