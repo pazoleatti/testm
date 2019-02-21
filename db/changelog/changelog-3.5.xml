@@ -241,4 +241,13 @@
 		</update>
 	</changeSet>
 
+	<!--https://jira.aplana.com/browse/SBRFNDFL-6621 Зарегистрировать в системе новую xsd-схему 2-НДФЛ-->
+	<changeSet id="3.5-dnovikov-10" author="dnovikov">
+		<update tableName="BLOB_DATA">
+			<column name="data" valueBlobFile="templates-3.5/ndfl/report_2ndfl_1/v2016/NO_NDFL2_1_399_00_05_06_01.xsd"/>
+			<column name="name" value="NO_NDFL2_1_399_00_05_06_01.xsd"/>
+			<where>id in (select dt.xsd from declaration_template dt where dt.id in (102, 104))</where>
+		</update>
+	</changeSet>
+
 </databaseChangeLog>
