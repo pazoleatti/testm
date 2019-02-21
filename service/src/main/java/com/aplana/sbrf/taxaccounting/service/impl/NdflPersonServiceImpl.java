@@ -42,7 +42,7 @@ public class NdflPersonServiceImpl implements NdflPersonService {
 
     @Override
     public NdflPerson findOne(long id) {
-        return ndflPersonDao.fetchOne(id);
+        return ndflPersonDao.findById(id);
     }
 
     @Override
@@ -58,7 +58,7 @@ public class NdflPersonServiceImpl implements NdflPersonService {
 
     @Override
     public List<NdflPerson> findAllByDeclarationId(long declarationDataId) {
-        return ndflPersonDao.fetchByDeclarationData(declarationDataId);
+        return ndflPersonDao.findAllByDeclarationId(declarationDataId);
     }
 
     @Override

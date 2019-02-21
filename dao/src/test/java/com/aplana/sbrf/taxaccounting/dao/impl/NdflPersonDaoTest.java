@@ -101,29 +101,29 @@ public class NdflPersonDaoTest {
 
     @Test
     public void testGet() {
-        NdflPerson person = ndflPersonDao.fetchOne(101);
+        NdflPerson person = ndflPersonDao.findById(101);
         assertNotNull(person);
         assertEquals(2, person.getIncomes().size());
     }
 
     @Test
-    public void testFindNdflPerson() {
-        List<NdflPerson> result = ndflPersonDao.fetchByDeclarationData(1);
+    public void test_findAllByDeclarationId() {
+        List<NdflPerson> result = ndflPersonDao.findAllByDeclarationId(1);
+        assertThat(result).hasSize(3);
 
         for (NdflPerson person : result) {
-            assertNotNull(person.getIncomes());
-            assertNotNull(person.getDeductions());
-            assertNotNull(person.getPrepayments());
+            assertThat(person.getIncomes()).isNotNull();
+            assertThat(person.getDeductions()).isNotNull();
+            assertThat(person.getPrepayments()).isNotNull();
 
-            assertEquals(0, person.getIncomes().size());
-            assertEquals(0, person.getDeductions().size());
-            assertEquals(0, person.getPrepayments().size());
+            assertThat(person.getIncomes()).isEmpty();
+            assertThat(person.getDeductions()).isEmpty();
+            assertThat(person.getPrepayments()).isEmpty();
         }
 
-        List<NdflPerson> result2 = ndflPersonDao.fetchByDeclarationData(2);
-        assertNotNull(result2);
-        assertEquals(10, result2.size());
-        assertEquals(3, result.size());
+        List<NdflPerson> result2 = ndflPersonDao.findAllByDeclarationId(2);
+        assertThat(result2).isNotNull();
+        assertThat(result2).hasSize(10);
     }
 
     private PagingParams pagingParams(int page, int count, String direction, String property) {
@@ -944,7 +944,9 @@ public class NdflPersonDaoTest {
         assertEquals("3", result.get(0).getFlat());
     }
 
-    //@Test
+    // TODO: Оба теста не работают, т.к. ID при попытке сохранения объекта не генерируется.
+    @Test
+    @Ignore
     public void testGoodSave() {
 
         NdflPerson goodNdflPerson = createGoodNdflPerson();
@@ -952,7 +954,7 @@ public class NdflPersonDaoTest {
 
         assertNotNull(id);
 
-        NdflPerson ndflPerson = ndflPersonDao.fetchOne(id);
+        NdflPerson ndflPerson = ndflPersonDao.findById(id);
 
         assertTrue(EqualsBuilder.reflectionEquals(goodNdflPerson, ndflPerson, "incomes", "deductions", "prepayments"));
 
@@ -966,7 +968,9 @@ public class NdflPersonDaoTest {
         assertTrue(prepaymentEquals);
     }
 
+    // TODO: Исключение прилетает, но по причине, что ID записи не генерируется.
     @Test(expected = DaoException.class)
+    @Ignore
     public void testBadSave() {
         NdflPerson person = createGoodNdflPerson();
         person.setDeclarationDataId(null);
@@ -1060,13 +1064,13 @@ public class NdflPersonDaoTest {
 
     @Test
     public void testUpdateNdflPersons() {
-        List<NdflPerson> ndflPersonList = ndflPersonDao.fetchNdflPersonByIdList(asList(201L, 202L));
+        List<NdflPerson> ndflPersonList = ndflPersonDao.findByIdIn(asList(201L, 202L));
         ndflPersonList.get(0).setLastName("Петров");
         ndflPersonList.get(0).setModifiedBy("me");
         ndflPersonList.get(1).setLastName("Смит");
         ndflPersonList.get(1).setModifiedBy("me");
         ndflPersonDao.updateNdflPersons(ndflPersonList);
-        List<NdflPerson> ndflPersonListResult = ndflPersonDao.fetchNdflPersonByIdList(asList(201L, 202L, 203L));
+        List<NdflPerson> ndflPersonListResult = ndflPersonDao.findByIdIn(asList(201L, 202L, 203L));
         assertEquals("me", ndflPersonListResult.get(0).getModifiedBy());
         assertEquals("Петров", ndflPersonListResult.get(0).getLastName());
         assertEquals("me", ndflPersonListResult.get(1).getModifiedBy());
@@ -1107,12 +1111,12 @@ public class NdflPersonDaoTest {
 
     @Test
     public void testUpdateNdflPersonsRowNum() {
-        List<NdflPerson> ndflPersonList = ndflPersonDao.fetchNdflPersonByIdList(asList(201L, 202L));
+        List<NdflPerson> ndflPersonList = ndflPersonDao.findByIdIn(asList(201L, 202L));
         for (long i = 0; i < ndflPersonList.size(); i++) {
             ndflPersonList.get((int) i).setRowNum(i);
         }
         ndflPersonDao.updateNdflPersonsRowNum(ndflPersonList);
-        List<NdflPerson> ndflPersonListResult = ndflPersonDao.fetchNdflPersonByIdList(asList(201L, 202L));
+        List<NdflPerson> ndflPersonListResult = ndflPersonDao.findByIdIn(asList(201L, 202L));
         assertEquals(new Long(0), ndflPersonListResult.get(0).getRowNum());
         assertEquals(new Long(1), ndflPersonListResult.get(1).getRowNum());
     }
@@ -1164,40 +1168,28 @@ public class NdflPersonDaoTest {
                 return o1.getId().compareTo(o2.getId());
             }
         });
-        assertTrue(incomesIds.contains(3070L));
-        assertTrue(incomesIds.contains(3080L));
-        assertTrue(incomesIds.contains(3090L));
-        assertTrue(incomesIds.contains(3100L));
-        assertTrue(incomesIds.contains(3110L));
-        assertTrue(incomesIds.contains(3120L));
-        assertTrue(incomesIds.contains(3130L));
-        assertTrue(incomesIds.contains(3140L));
-        assertTrue(incomesIds.contains(3150L));
-        assertTrue(incomesIds.contains(3220L));
-        assertTrue(incomesIds.contains(3230L));
-        assertTrue(incomesIds.contains(3240L));
-        assertTrue(incomesIds.contains(3250L));
-        assertTrue(incomesIds.contains(3260L));
-        assertTrue(incomesIds.contains(3270L));
+
+        assertThat(incomesIds).containsSequence(
+                3070L, 3080L, 3090L, 3100L, 3110L, 3120L, 3130L, 3140L, 3150L, 3220L, 3230L, 3240L, 3250L, 3260L, 3270L
+        );
     }
 
     @Test
     public void testFetchDeductionsForConsolidation() {
         List<NdflPersonDeduction> result = ndflPersonDao.fetchDeductionsForConsolidation(Collections.singletonList(1036L));
-        assertEquals(1, result.size());
-        assertEquals(Long.valueOf("1"), result.get(0).getId());
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getId()).isEqualTo(1);
     }
 
     @Test
     public void testFetchPrepaymentsForConsolidation() {
         List<NdflPersonPrepayment> result = ndflPersonDao.fetchPrepaymentsForConsolidation((Collections.singletonList(1036L)));
-        assertEquals(1, result.size());
-        assertEquals(Long.valueOf("1"), result.get(0).getId());
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getId()).isEqualTo(1);
     }
 
     @Test
     public void testFetchNdflPersonDeductionByNdflPersonAndOperation() {
-
         List<NdflPersonDeduction> result = ndflPersonDao.fetchNdflPersonDeductionByNdflPersonAndOperation(50001, "1");
         assertThat(result).hasSize(3);
     }
@@ -1244,6 +1236,42 @@ public class NdflPersonDaoTest {
         assertThat(persons.get(0).getIncomes()).hasSize(3);
         assertThat(persons.get(0).getDeductions()).hasSize(2);
         assertThat(persons.get(0).getPrepayments()).hasSize(3);
+    }
+
+    @Test
+    public void test_findAllByDeclarationIdIn() {
+        List<NdflPerson> result = ndflPersonDao.findAllByDeclarationIdIn(Collections.singletonList(1L));
+        assertThat(result).isNotEmpty();
+    }
+
+    @Test
+    public void test_findAllIncomesByDeclarationIds() {
+        List<NdflPersonIncome> result = ndflPersonDao.findAllIncomesByDeclarationIds(Collections.singletonList(1L));
+        assertThat(result).isNotEmpty();
+    }
+
+    @Test
+    public void test_findAllDeductionsByDeclarationIds() {
+        List<NdflPersonDeduction> result = ndflPersonDao.findAllDeductionsByDeclarationIds(Collections.singletonList(1L));
+        assertThat(result).isNotEmpty();
+    }
+
+    @Test
+    public void test_findAllIncomesByIdIn_forExisting() {
+        List<NdflPersonIncome> incomes = ndflPersonDao.findAllIncomesByIdIn(asList(10000L, 3010L, 3020L, 3030L));
+        assertThat(incomes)
+                .isNotNull()
+                .hasSize(3)
+                .extracting("id")
+                .containsOnly(3010L, 3020L, 3030L);
+    }
+
+    @Test
+    public void test_findAllIncomesByIdIn_forNonexistent() {
+        List<NdflPersonIncome> incomes = ndflPersonDao.findAllIncomesByIdIn(asList(10000L, 10001L));
+        assertThat(incomes)
+                .isNotNull()
+                .isEmpty();
     }
 
 

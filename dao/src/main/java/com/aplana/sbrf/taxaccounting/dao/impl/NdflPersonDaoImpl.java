@@ -73,7 +73,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     DepartmentReportPeriodDao departmentReportPeriodDao;
 
     @Override
-    public NdflPerson fetchOne(long ndflPersonId) {
+    public NdflPerson findById(long ndflPersonId) {
         try {
             NdflPerson ndflPerson = getJdbcTemplate().queryForObject("select " + createColumns(NdflPerson.COLUMNS, "np") + ", r.record_id, rba.NAME as asnu_name " +
                             " from ndfl_person np " +
@@ -98,7 +98,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     @Override
-    public List<NdflPerson> fetchByDeclarationData(long declarationDataId) {
+    public List<NdflPerson> findAllByDeclarationId(long declarationDataId) {
         return getJdbcTemplate().query("select " + createColumns(NdflPerson.COLUMNS, "np") + ", r.record_id, rba.NAME as asnu_name " +
                         " from ndfl_person np " +
                         " left join REF_BOOK_PERSON r on np.person_id = r.id " +
@@ -109,15 +109,16 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     @Override
-    public List<NdflPerson> findAllNdflPersonsByDeclarationIds(List<Long> declarationDataIds) {
-        MapSqlParameterSource params = new MapSqlParameterSource();
-        params.addValue("declarationDataIds", declarationDataIds);
-        return getNamedParameterJdbcTemplate().query("select " + createColumns(NdflPerson.COLUMNS, "np") + ", r.record_id, rba.NAME as asnu_name " +
+    public List<NdflPerson> findAllByDeclarationIdIn(List<Long> declarationDataIds) {
+        return selectIn("select " + createColumns(NdflPerson.COLUMNS, "np") + ", r.record_id, rba.NAME as asnu_name " +
                         " from ndfl_person np " +
                         " left join REF_BOOK_PERSON r on np.person_id = r.id " +
                         " left join ref_book_asnu rba on np.asnu_id = rba.id" +
                         " where np.declaration_data_id in (:declarationDataIds)",
-                params, new NdflPersonDaoImpl.NdflPersonRowMapper());
+                declarationDataIds,
+                "declarationDataIds",
+                new NdflPersonDaoImpl.NdflPersonRowMapper()
+        );
     }
 
     @Override
@@ -127,8 +128,8 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                 "from ndfl_person_income income " +
                 "   left join ref_book_asnu asnu on income.asnu_id = asnu.id " +
                 "where income.id in (:ids)";
-        MapSqlParameterSource params = new MapSqlParameterSource("ids", incomeIds);
-        return getNamedParameterJdbcTemplate().query(sql, params, new NdflPersonDaoImpl.NdflPersonIncomeRowMapper());
+
+        return selectIn(sql, incomeIds, "ids", new NdflPersonDaoImpl.NdflPersonIncomeRowMapper());
     }
 
     @Override
@@ -152,13 +153,14 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
     @Override
     public List<NdflPersonIncome> findAllIncomesByDeclarationIds(List<Long> declarationDataIds) {
-        MapSqlParameterSource params = new MapSqlParameterSource();
-        params.addValue("declarationDataIds", declarationDataIds);
-        return getNamedParameterJdbcTemplate().query("select " + createColumns(NdflPersonIncome.COLUMNS, "npi") + ", np.inp, rba.NAME as asnu_name " +
-                "from ndfl_person_income npi "
-                + " inner join ndfl_person np on npi.ndfl_person_id = np.id"
-                + " left join ref_book_asnu rba on npi.asnu_id = rba.id"
-                + " where np.declaration_data_id in (:declarationDataIds)", params, new NdflPersonDaoImpl.NdflPersonIncomeRowMapper());
+        return selectIn("select " + createColumns(NdflPersonIncome.COLUMNS, "npi") + ", np.inp, rba.NAME as asnu_name " +
+                        "from ndfl_person_income npi "
+                        + " inner join ndfl_person np on npi.ndfl_person_id = np.id"
+                        + " left join ref_book_asnu rba on npi.asnu_id = rba.id"
+                        + " where np.declaration_data_id in (:declarationDataIds)",
+                declarationDataIds,
+                "declarationDataIds",
+                new NdflPersonDaoImpl.NdflPersonIncomeRowMapper());
     }
 
     @Override
@@ -288,13 +290,15 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
     @Override
     public List<NdflPersonDeduction> findAllDeductionsByDeclarationIds(List<Long> declarationDataIds) {
-        MapSqlParameterSource params = new MapSqlParameterSource();
-        params.addValue("declarationDataIds", declarationDataIds);
-        return getNamedParameterJdbcTemplate().query("select " + createColumns(NdflPersonDeduction.COLUMNS, "npd") + ", np.inp, rba.NAME as asnu_name " +
-                "from ndfl_person_deduction npd "
-                + " inner join ndfl_person np on npd.ndfl_person_id = np.id"
-                + " left join ref_book_asnu rba on npd.asnu_id = rba.id"
-                + " where np.declaration_data_id in (:declarationDataIds)", params, new NdflPersonDaoImpl.NdflPersonDeductionRowMapper());
+        return selectIn("select " + createColumns(NdflPersonDeduction.COLUMNS, "npd") + ", np.inp, rba.NAME as asnu_name " +
+                        "from ndfl_person_deduction npd "
+                        + " inner join ndfl_person np on npd.ndfl_person_id = np.id"
+                        + " left join ref_book_asnu rba on npd.asnu_id = rba.id"
+                        + " where np.declaration_data_id in (:declarationDataIds)",
+                declarationDataIds,
+                "declarationDataIds",
+                new NdflPersonDaoImpl.NdflPersonDeductionRowMapper()
+        );
     }
 
     @Override
@@ -1063,6 +1067,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
 
+    // TODO: Метод нерабочий, т.к. в нём не генерируется ID.
     @Override
     public Long save(final NdflPerson ndflPerson) {
 
@@ -1099,7 +1104,9 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
      * @param columns        массив содержащий наименование столбцов таблицы для вставки в insert
      * @param fields         массив содержащий наименования параметров соответствующих столбцам
      * @param <E>            тип объекта
+     * @deprecated TODO: Не генерирует ID объекта, в итоге не работает
      */
+    @Deprecated
     private <E extends IdentityObject> void saveNewObject(E identityObject, String table, String seq, String[] columns, String[] fields) {
 
         if (identityObject.getId() != null) {
@@ -1119,7 +1126,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     @Override
-    public void save(final Collection<NdflPerson> ndflPersons) {
+    public void saveAll(final Collection<NdflPerson> ndflPersons) {
         saveNewObjects(ndflPersons, NdflPerson.TABLE_NAME, NdflPerson.SEQ, NdflPerson.COLUMNS, NdflPerson.FIELDS);
 
         saveIncomes(ndflPersons);
@@ -1307,24 +1314,13 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     @Override
-    public List<NdflPerson> fetchNdflPersonByIdList(List<Long> ndflPersonIdList) {
-        if (ndflPersonIdList.size() > IN_CLAUSE_LIMIT) {
-            List<NdflPerson> result = new ArrayList<>();
-            int n = (ndflPersonIdList.size() - 1) / IN_CLAUSE_LIMIT + 1;
-            for (int i = 0; i < n; i++) {
-                List<Long> subList = getSubList(ndflPersonIdList, i);
-                List<NdflPerson> subResult = fetchNdflPersonByIdList(subList);
-                result.addAll(subResult);
-            }
-            return result;
-        }
+    public List<NdflPerson> findByIdIn(List<Long> ndflPersonIdList) {
         String query = "SELECT rba.NAME as asnu_name, " + createColumns(NdflPerson.COLUMNS, "np") + ", r.record_id " +
                 " FROM NDFL_PERSON np" +
                 " LEFT JOIN REF_BOOK_PERSON r ON np.person_id = r.id " +
                 " left join ref_book_asnu rba on np.asnu_id = rba.id" +
                 " WHERE NP.ID IN (:ndflPersonIdList)";
-        MapSqlParameterSource params = new MapSqlParameterSource("ndflPersonIdList", ndflPersonIdList);
-        return getNamedParameterJdbcTemplate().query(query, params, new NdflPersonDaoImpl.NdflPersonRowMapper());
+        return selectIn(query, ndflPersonIdList, "ndflPersonIdList", new NdflPersonDaoImpl.NdflPersonRowMapper());
     }
 
     private <E> MapSqlParameterSource prepareParameters(E entity, String[] fields) {
@@ -1461,6 +1457,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         return getNamedParameterJdbcTemplate().queryForList(query, params, String.class);
     }
 
+    //TODO: если вызвать с аргументом длиной больше 1000, метод отработает неверно
     @Override
     public List<String> findIncomeOperationId(List<String> operationIdList) {
         return getNamedParameterJdbcTemplate().queryForList("SELECT DISTINCT operation_id FROM ndfl_person_income WHERE operation_id IN (:operationIdList)",
@@ -2015,6 +2012,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
     }
 
+    //TODO: если вызвать с аргументом длиной больше 1000, метод отработает неверно
     @Override
     public List<NdflPersonPrepayment> fetchPrepaymentByIncomesIdAndAccruedDate(List<Long> ndflPersonIncomeIdList, Date periodStartDate, Date periodEndDate) {
         String sql = "select DISTINCT rba.NAME as asnu_name, " + createColumns(NdflPersonPrepayment.COLUMNS, "npp") +
@@ -2130,22 +2128,6 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
     @Override
     public List<NdflPersonDeduction> fetchDeductionsForConsolidation(List<Long> incomeIds) {
-        if (incomeIds.size() > IN_CLAUSE_LIMIT) {
-            List<NdflPersonDeduction> result = new ArrayList<>();
-            int n = (incomeIds.size() - 1) / IN_CLAUSE_LIMIT + 1;
-            for (int i = 0; i < n; i++) {
-                List<Long> subList = getSubList(incomeIds, i);
-                List<NdflPersonDeduction> subResult = fetchDeductionsForConsolidation(subList);
-                if (subResult != null) {
-                    result.addAll(subResult);
-                }
-            }
-            if (result.isEmpty()) {
-                return null;
-            } else {
-                return result;
-            }
-        }
         String sql = "with person_operation as \n" +
                 "(select distinct npi.operation_id, npi.ndfl_person_id from ndfl_person_income npi where npi.id in (:incomeIds))\n" +
                 "select rba.NAME as asnu_name, " + createColumns(NdflPersonDeduction.COLUMNS, "npd") + " \n" +
@@ -2153,28 +2135,14 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                 "left join person_operation po on npd.operation_id = po.operation_id \n" +
                 " left join ref_book_asnu rba on npd.asnu_id = rba.id " +
                 "where npd.operation_id = po.operation_id and npd.ndfl_person_id = po.ndfl_person_id";
-        MapSqlParameterSource params = new MapSqlParameterSource("incomeIds", incomeIds);
-        return getNamedParameterJdbcTemplate().query(sql, params, new NdflPersonDeductionRowMapper());
+        List<NdflPersonDeduction> result = selectIn(sql, incomeIds, "incomeIds", new NdflPersonDeductionRowMapper());
+
+        if (result.isEmpty()) return null;
+        return result;
     }
 
     @Override
     public List<NdflPersonPrepayment> fetchPrepaymentsForConsolidation(List<Long> incomeIds) {
-        if (incomeIds.size() > IN_CLAUSE_LIMIT) {
-            List<NdflPersonPrepayment> result = new ArrayList<>();
-            int n = (incomeIds.size() - 1) / IN_CLAUSE_LIMIT + 1;
-            for (int i = 0; i < n; i++) {
-                List<Long> subList = getSubList(incomeIds, i);
-                List<NdflPersonPrepayment> subResult = fetchPrepaymentsForConsolidation(subList);
-                if (subResult != null) {
-                    result.addAll(subResult);
-                }
-            }
-            if (result.isEmpty()) {
-                return null;
-            } else {
-                return result;
-            }
-        }
         String sql = "with person_operation as \n" +
                 "(select distinct npi.operation_id, npi.ndfl_person_id from ndfl_person_income npi where npi.id in (:incomeIds))\n" +
                 "select rba.NAME as asnu_name, " + createColumns(NdflPersonPrepayment.COLUMNS, "npp") + " \n" +
@@ -2182,8 +2150,10 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                 "left join person_operation po on npp.operation_id = po.operation_id \n" +
                 " left join ref_book_asnu rba on npp.asnu_id = rba.id " +
                 "where npp.operation_id = po.operation_id and npp.ndfl_person_id = po.ndfl_person_id";
-        MapSqlParameterSource params = new MapSqlParameterSource("incomeIds", incomeIds);
-        return getNamedParameterJdbcTemplate().query(sql, params, new NdflPersonPrepaymentRowMapper());
+        List<NdflPersonPrepayment> result = selectIn(sql, incomeIds, "incomeIds", new NdflPersonPrepaymentRowMapper());
+
+        if (result.isEmpty()) return null;
+        return result;
     }
 
     @Override

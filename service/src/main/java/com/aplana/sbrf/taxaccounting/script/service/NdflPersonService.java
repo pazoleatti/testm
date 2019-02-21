@@ -30,17 +30,18 @@ public interface NdflPersonService {
      * Создает новую запись о доходах ФЛ привязанную к ПНФ
      *
      * @param ndflPerson фл
-     * @return
+     * @deprecated реализация на уровне DAO содержит ошибку, использование метода требует сначала починки
      */
+    @Deprecated
     Long save(NdflPerson ndflPerson);
 
+    /**
+     * Создание многих записей ФЛ с доходами, привязанных к НФ.
+     */
     void save(Collection<NdflPerson> ndflPersons);
 
     /**
      * Получить запись с данными о доходах
-     *
-     * @param ndflPersonId
-     * @return
      */
     NdflPerson get(Long ndflPersonId);
 

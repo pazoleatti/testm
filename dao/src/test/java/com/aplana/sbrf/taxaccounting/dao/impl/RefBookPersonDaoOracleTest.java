@@ -118,7 +118,7 @@ public class RefBookPersonDaoOracleTest {
     @Test
     public void testFindNdflPeron() {
         long time = System.currentTimeMillis();
-        List<NdflPerson> result = ndflPersonDao.fetchByDeclarationData(14730L);
+        List<NdflPerson> result = ndflPersonDao.findAllByDeclarationId(14730L);
         printResult(time, result.size());
     }
 

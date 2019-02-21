@@ -2711,7 +2711,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             // Заменяем значения в строках
             for (NdflPersonIncome income : incomes) {
                 // ФЛ, к которому относится строка дохода
-                NdflPerson person = ndflPersonDao.fetchOne(income.getNdflPersonId());
+                NdflPerson person = ndflPersonDao.findById(income.getNdflPersonId());
 
                 // Редактируем все требуемые поля по очереди.
                 for (EditableDateField dateField : EditableDateField.values()) {
@@ -2819,7 +2819,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
      */
     private List<Long> updateAdditionalSortParams(Long personId, String operationId) {
         LOG.info(String.format("Calculate additional sort params for personId = %s, operationId = %s", personId, operationId));
-        NdflPerson ndflPerson = ndflPersonDao.fetchOne(personId);
+        NdflPerson ndflPerson = ndflPersonDao.findById(personId);
         List<NdflPerson> operationDatePersons = ndflPersonDao.findDeclarartionDataPersonWithSameOperationIdAndInp(ndflPerson.getDeclarationDataId(), ndflPerson.getInp(), operationId);
         List<NdflPersonIncome> operationDateIncomes = ndflPersonDao.findDeclarartionDataIncomesWithSameOperationIdAndInp(ndflPerson.getDeclarationDataId(), ndflPerson.getInp(), operationId);
         Date operationDate = ndflPersonDao.findOperationDate(ndflPerson.getDeclarationDataId(), ndflPerson.getInp(), operationId);
@@ -2856,7 +2856,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         if (isEmpty(personIds)) return;
         LOG.info(String.format("Resorting NdflPersons data: ids = %s", personIds));
 
-        List<NdflPerson> persons = ndflPersonDao.fetchNdflPersonByIdList(personIds);
+        List<NdflPerson> persons = ndflPersonDao.findByIdIn(personIds);
 
         for (NdflPerson person : persons) {
             List<NdflPersonIncome> incomes = ndflPersonDao.fetchNdflPersonIncomeByNdflPerson(person.getId());
@@ -2901,7 +2901,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             ndflPersonDao.updateOneNdflDeduction(personDeduction, taUserInfo);
             reportService.deleteDec(singletonList(declarationDataId),
                     Arrays.asList(DeclarationDataReportType.SPECIFIC_REPORT_DEC, DeclarationDataReportType.EXCEL_DEC));
-            NdflPerson ndflPerson = ndflPersonDao.fetchOne(personDeduction.getNdflPersonId());
+            NdflPerson ndflPerson = ndflPersonDao.findById(personDeduction.getNdflPersonId());
             Collections.sort(ndflPerson.getDeductions(), NdflPersonDeduction.getComparator(ndflPerson));
             ndflPersonDao.updateDeductions(updateRowNum(ndflPerson.getDeductions()));
         } catch (Exception e) {
@@ -2918,7 +2918,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             ndflPersonDao.updateOneNdflPrepayment(personPrepayment, taUserInfo);
             reportService.deleteDec(singletonList(declarationDataId),
                     Arrays.asList(DeclarationDataReportType.SPECIFIC_REPORT_DEC, DeclarationDataReportType.EXCEL_DEC));
-            NdflPerson ndflPerson = ndflPersonDao.fetchOne(personPrepayment.getNdflPersonId());
+            NdflPerson ndflPerson = ndflPersonDao.findById(personPrepayment.getNdflPersonId());
             Collections.sort(ndflPerson.getPrepayments(), NdflPersonPrepayment.getComparator(ndflPerson));
             ndflPersonDao.updatePrepayments(updateRowNum(ndflPerson.getPrepayments()));
         } catch (Exception e) {

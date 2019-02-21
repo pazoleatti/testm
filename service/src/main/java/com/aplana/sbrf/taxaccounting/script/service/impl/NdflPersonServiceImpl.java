@@ -59,27 +59,27 @@ public class NdflPersonServiceImpl implements NdflPersonService {
 
     @Override
     public void save(Collection<NdflPerson> ndflPersons) {
-        ndflPersonDao.save(ndflPersons);
+        ndflPersonDao.saveAll(ndflPersons);
     }
 
     @Override
     public NdflPerson get(Long ndflPersonId) {
-        return ndflPersonDao.fetchOne(ndflPersonId);
+        return ndflPersonDao.findById(ndflPersonId);
     }
 
     @Override
     public List<NdflPerson> findNdflPerson(long declarationDataId) {
-        return ndflPersonDao.fetchByDeclarationData(declarationDataId);
+        return ndflPersonDao.findAllByDeclarationId(declarationDataId);
     }
 
     @Override
     public List<NdflPerson> findAllNdflPersonsByDeclarationIds(List<Long> declarationDataIds) {
-        return ndflPersonDao.findAllNdflPersonsByDeclarationIds(declarationDataIds);
+        return ndflPersonDao.findAllByDeclarationIdIn(declarationDataIds);
     }
 
     @Override
     public List<NdflPerson> findNdflPersonWithOperations(long declarationDataId) {
-        List<NdflPerson> persons = ndflPersonDao.fetchByDeclarationData(declarationDataId);
+        List<NdflPerson> persons = ndflPersonDao.findAllByDeclarationId(declarationDataId);
         Map<Long, List<NdflPersonIncome>> incomesByPersonId = groupByPersonId(ndflPersonDao.findAllIncomesByDeclarationId(declarationDataId));
         Map<Long, List<NdflPersonDeduction>> deductionsByPersonId = groupByPersonId(ndflPersonDao.findAllDeductionsByDeclarationId(declarationDataId));
         Map<Long, List<NdflPersonPrepayment>> prepaymentsByPersonId = groupByPersonId(ndflPersonDao.fetchNdflPersonPrepaymentByDeclarationData(declarationDataId));
@@ -219,7 +219,7 @@ public class NdflPersonServiceImpl implements NdflPersonService {
 
     @Override
     public List<NdflPerson> findByIdList(List<Long> ndflPersonIdList) {
-        return ndflPersonDao.fetchNdflPersonByIdList(ndflPersonIdList);
+        return ndflPersonDao.findByIdIn(ndflPersonIdList);
     }
 
     @Override

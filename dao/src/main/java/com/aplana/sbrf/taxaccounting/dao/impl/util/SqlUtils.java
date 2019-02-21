@@ -486,10 +486,10 @@ public final class SqlUtils extends AbstractDao {
         }
     }
 
-    public static String toSqlParameters(String[] fields) {
-        List<String> result = new ArrayList<String>();
-        for (int i = 0; i < fields.length; i++) {
-            result.add(":" + fields[i]);
+    private static String toSqlParameters(String[] fields) {
+        List<String> result = new ArrayList<>();
+        for (String field : fields) {
+            result.add(":" + field);
         }
         return toSqlString(result.toArray());
     }

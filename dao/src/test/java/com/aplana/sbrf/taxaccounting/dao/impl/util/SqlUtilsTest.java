@@ -7,12 +7,9 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
-/**
- * @author <a href="mailto:Marat.Fayzullin@aplana.com">Файзуллин Марат</a>
- * @since 07.02.14 11:50
- */
 
 public class SqlUtilsTest {
 
@@ -23,17 +20,17 @@ public class SqlUtilsTest {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void checkListSize2() {
-		SqlUtils.checkListSize(Arrays.asList(new Integer[] {}));
+		SqlUtils.checkListSize(Collections.emptyList());
 	}
 
     @Test
     public void transformToSqlInStatementTest1() {
-        Assert.assertEquals("(abc IN (1,2,3) OR abc IN (4,5,6))", SqlUtils.transformToSqlInStatement("abc", Arrays.asList(new Integer[]{1, 2, 3, 4, 5, 6}), 3));
+        Assert.assertEquals("(abc IN (1,2,3) OR abc IN (4,5,6))", SqlUtils.transformToSqlInStatement("abc", Arrays.asList(1, 2, 3, 4, 5, 6), 3));
     }
 
     @Test
     public void splitCollectionTest(){
-        List<List<Integer>> lists = new ArrayList<List<Integer>>(SqlUtils.splitCollection(Arrays.asList(new Integer[]{1, 2, 3, 4, 5, 6}), 2));
+        List<List<Integer>> lists = new ArrayList<>(SqlUtils.splitCollection(Arrays.asList(1, 2, 3, 4, 5, 6), 2));
         Assert.assertTrue(lists.get(0).get(0).equals(1));
         Assert.assertTrue(lists.get(0).get(1).equals(2));
 
@@ -46,7 +43,7 @@ public class SqlUtilsTest {
 
     @Test
     public void splitCollectionTest2(){
-        List<List<Integer>> lists = new ArrayList<List<Integer>>(SqlUtils.splitCollection(Arrays.asList(new Integer[]{1, 2, 3, 4, 5}), 3));
+        List<List<Integer>> lists = new ArrayList<>(SqlUtils.splitCollection(Arrays.asList(1, 2, 3, 4, 5), 3));
         Assert.assertTrue(lists.get(0).get(0).equals(1));
         Assert.assertTrue(lists.get(0).get(1).equals(2));
         Assert.assertTrue(lists.get(0).get(2).equals(3));
@@ -58,13 +55,13 @@ public class SqlUtilsTest {
 	@Test
 	public void transformTaxTypeToSqlInStatementTest() {
 		Assert.assertEquals(String.format("('%s','%s')", TaxType.INCOME.getCode(), TaxType.DEAL.getCode()),
-				SqlUtils.transformTaxTypeToSqlInStatement(Arrays.asList(new TaxType[] {TaxType.INCOME, TaxType.DEAL})));
+				SqlUtils.transformTaxTypeToSqlInStatement(Arrays.asList(TaxType.INCOME, TaxType.DEAL)));
 	}
 
 	@Test
 	public void transformFormKindsToSqlInStatementTest() {
 		Assert.assertEquals(String.format("(%s,%s)", FormDataKind.ADDITIONAL.getId(), FormDataKind.UNP.getId()),
-				SqlUtils.transformFormKindsToSqlInStatement(Arrays.asList(new FormDataKind[] {FormDataKind.ADDITIONAL, FormDataKind.UNP})));
+				SqlUtils.transformFormKindsToSqlInStatement(Arrays.asList(FormDataKind.ADDITIONAL, FormDataKind.UNP)));
 	}
 
 	@Test

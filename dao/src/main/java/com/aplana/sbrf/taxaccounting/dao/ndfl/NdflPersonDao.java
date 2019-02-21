@@ -32,7 +32,7 @@ public interface NdflPersonDao {
      * @param ndflPersonId идентификатор физлица
      * @return объект физлица с заполненными данными о доходах
      */
-    NdflPerson fetchOne(long ndflPersonId);
+    NdflPerson findById(long ndflPersonId);
 
     /**
      * Пакетное обновление ссылок NdflPerson.personId на справочник физлиц
@@ -47,10 +47,15 @@ public interface NdflPersonDao {
      *
      * @param ndflPerson физлицо
      * @return идентификатор созданной записи
+     * @deprecated метод нерабочий, требуется починка реализации
      */
+    @Deprecated
     Long save(NdflPerson ndflPerson);
 
-    void save(final Collection<NdflPerson> ndflPersons);
+    /**
+     * Сохранение списка записей ФЛ с доходами, привязанных к НФ.
+     */
+    void saveAll(final Collection<NdflPerson> ndflPersons);
 
     /**
      * Удалить данные по указанному ФЛ из декларации, каскадное удаление
@@ -73,7 +78,7 @@ public interface NdflPersonDao {
      * @param declarationDataId идентификатор декларации
      * @return список объектов физлиц, incomes, deductions и prepayments в этом методе не заполняются
      */
-    List<NdflPerson> fetchByDeclarationData(long declarationDataId);
+    List<NdflPerson> findAllByDeclarationId(long declarationDataId);
 
     /**
      * Возвращяет список строк из раздела 1 по списку ид форм
@@ -81,7 +86,7 @@ public interface NdflPersonDao {
      * @param declarationDataIds список ид форм
      * @return список строк раздела 1
      */
-    List<NdflPerson> findAllNdflPersonsByDeclarationIds(List<Long> declarationDataIds);
+    List<NdflPerson> findAllByDeclarationIdIn(List<Long> declarationDataIds);
 
     /**
      * Найти строки раздела 2 "Сведения о доходах и НДФЛ" по списку идентификаторов.
@@ -326,7 +331,7 @@ public interface NdflPersonDao {
      * @param ndflPersonIdList список идентификаторов физического лица
      * @return список физических лиц
      */
-    List<NdflPerson> fetchNdflPersonByIdList(List<Long> ndflPersonIdList);
+    List<NdflPerson> findByIdIn(List<Long> ndflPersonIdList);
 
     /**
      * Поиск дублей по полю rownum

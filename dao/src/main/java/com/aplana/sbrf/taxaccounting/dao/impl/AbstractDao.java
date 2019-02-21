@@ -2,9 +2,12 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.IdentityObject;
+import com.google.common.collect.Iterables;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 import java.util.ArrayList;
@@ -18,7 +21,7 @@ import java.util.List;
 public abstract class AbstractDao {
 
     /**
-     * Указатель на строку в результерующем наборе данных
+     * Указатель на строку в результирующем наборе данных
      */
     public static final int CURSOR = -10;
 
@@ -179,5 +182,35 @@ public abstract class AbstractDao {
             i++;
         }
         getNamedParameterJdbcTemplate().batchUpdate(update, batchArgs);
+    }
+
+    /**
+     * Метод для выполнения select-запростов, включающих в себя условие WHERE FIELD IN ( ... ).
+     * На уровне базы имеется ограничение по кол-ву элементов, которые могут быть включены в условие IN ( ... ).
+     * Метод осуществляет запрос порциями.
+     *
+     * @param sql       sql-запрос
+     * @param values    коллекция значений, по которым надо искать
+     * @param paramName название параметра в sql-запросе
+     * @param rowMapper маппер результатов
+     * @param <E>       тип результатов в списке
+     * @param <T>       тип значений, по которым ищем
+     * @return список результатов
+     */
+    protected <E, T> List<E> selectIn(String sql, Collection<T> values, String paramName, RowMapper<E> rowMapper) {
+
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        List<E> result = new ArrayList<>();
+
+        Iterable<List<T>> valuesParts = Iterables.partition(values, IN_CLAUSE_LIMIT);
+
+        for (List<T> valuesPart : valuesParts) {
+            params.addValue(paramName, valuesPart);
+
+            List<E> resultPart = getNamedParameterJdbcTemplate().query(sql, params, rowMapper);
+            result.addAll(resultPart);
+        }
+
+        return result;
     }
 }
