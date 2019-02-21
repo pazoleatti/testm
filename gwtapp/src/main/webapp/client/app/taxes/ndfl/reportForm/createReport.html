@@ -133,7 +133,7 @@
                 </td>
             </tr>
             <!--КПП/ОКТМО-->
-            <tr data-ng-if="reportData.declarationType && reportData.declarationType.id === APP_CONSTANTS.DECLARATION_TYPE.REPORT_6_NDFL.id">
+            <tr data-ng-if="reportData.declarationType">
                 <td>
                     <label class="control-label" style="white-space: normal">
                         {{::'createReport.kppOktmo' | translate}}:

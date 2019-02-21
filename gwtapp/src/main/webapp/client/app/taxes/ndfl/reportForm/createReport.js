@@ -54,15 +54,15 @@
                         departmentId: $scope.knf ? undefined : $scope.reportData.department.id,
                         periodId: $scope.knf ? undefined : $scope.reportData.period.id
                     };
+                    if ($scope.reportData.kppOktmoPairs) {
+                        params.kppOktmoPairs = $scope.reportData.kppOktmoPairs.map(function (kppOktmoPair) {
+                            return {kpp: kppOktmoPair.kpp, oktmo: kppOktmoPair.oktmo};
+                        });
+                    }
                     if ($scope.reportData.declarationType.id === APP_CONSTANTS.DECLARATION_TYPE.REPORT_6_NDFL.id) {
                         params.adjustNegativeValues = $scope.reportData.negativeValuesAdjustment === APP_CONSTANTS.NEGATIVE_VALUE_ADJUSTMENT.CORRECT;
                         params.taxRefundReflectionMode = $scope.reportData.taxRefundReflectionMode.enumName;
                         params.reportFormCreationMode = $scope.reportData.reportFormCreationMode.enumName;
-                        if ($scope.reportData.kppOktmoPairs) {
-                            params.kppOktmoPairs = $scope.reportData.kppOktmoPairs.map(function (kppOktmoPair) {
-                                return {kpp: kppOktmoPair.kpp, oktmo: kppOktmoPair.oktmo};
-                            });
-                        }
                     }
                     $http({
                         method: "POST",

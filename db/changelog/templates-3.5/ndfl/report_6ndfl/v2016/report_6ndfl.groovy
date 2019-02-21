@@ -508,10 +508,10 @@ class Report6Ndfl extends AbstractScriptClass {
             return null
         }
         List<Pair<KppOktmoPair, DepartmentConfig>> kppOktmoPairs = departmentConfigService.findAllByDeclaration(sourceKnf)
-        def missingDepartmentConfigs = kppOktmoPairs.findResults { it.first == null ? it.second : null }
         if (reportFormsCreationParams.kppOktmoPairs) {
             kppOktmoPairs = kppOktmoPairs.findAll { reportFormsCreationParams.kppOktmoPairs.contains(it.first) }
         }
+        def missingDepartmentConfigs = kppOktmoPairs.findResults { it.first == null ? it.second : null }
         for (def departmentConfig : missingDepartmentConfigs) {
             logger.error("Не удалось создать форму $declarationTemplate.name, за период ${formatPeriod(departmentReportPeriod)}, " +
                     "подразделение: $department.name, КПП: $departmentConfig.kpp, ОКТМО: $departmentConfig.oktmo.code. " +
