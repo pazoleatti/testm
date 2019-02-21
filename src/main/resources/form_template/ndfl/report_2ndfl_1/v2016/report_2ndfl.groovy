@@ -253,7 +253,7 @@ class Report2Ndfl extends AbstractScriptClass {
                                     Имя: person.firstName,
                                     Отчество: person.middleName)
                             УдЛичнФЛ(КодУдЛичн: person.idDocType,
-                                    СерНомДок: person.idDocNumber)//TODO
+                                    СерНомДок: formatDocNumber(person.idDocType, person.idDocNumber))
                         }
                         def incomesByRate = person.incomes.groupBy { it.taxRate }.sort { it.key }
                         incomesByRate.remove(null)
@@ -421,6 +421,16 @@ class Report2Ndfl extends AbstractScriptClass {
             }
         }
         return (List<NdflPersonDeduction>) deductionGroups.values().flatten()
+    }
+
+    String formatDocNumber(String idDocType, String idDocNumber) {
+        if (idDocType && idDocNumber) {
+            idDocNumber = idDocNumber.replaceAll("[^А-Яа-я\\w]", "").toUpperCase()
+            if (ScriptUtils.checkDulSymbols(idDocType, idDocNumber)) {
+                return ScriptUtils.formatDocNumber(idDocType, idDocNumber)
+            }
+        }
+        return idDocNumber
     }
 
     BigDecimal СумДох(List<NdflPersonIncome> incomes, List<NdflPersonDeduction> deductions) {
