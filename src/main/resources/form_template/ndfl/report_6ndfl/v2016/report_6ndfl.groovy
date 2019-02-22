@@ -36,6 +36,7 @@ import org.apache.poi.xssf.usermodel.*
 
 import java.nio.charset.Charset
 
+import static com.aplana.sbrf.taxaccounting.script.SharedConstants.DATE_ZERO_AS_STRING
 import static java.util.Collections.singletonList
 
 new Report6Ndfl(this).run()
@@ -294,10 +295,14 @@ class Report6Ndfl extends AbstractScriptClass {
                                 // Исключение из списка строки, для которых СуммаФактическогоДохода =0 И СуммаУдержанногоНалога =0
                                 // ИЛИ СрокПеречисленияНалога НЕ принадлежит последним 3 месяцам отчетного периода
                                 if (row.incomeSum || row.withholdingTaxSum) {
+                                    if (isZeroDate(row.taxTransferDate)) {
+                                        logger.warn("В блоке Раздела 2 с параметрами: \"ДатаУдержанияНалога\": ${formatDate(row.taxDate)}; \"СрокПеречисленияНалога: 00.00.0000; " +
+                                                "\"ДатаДохода\": ${formatDate(row.incomeDate)}; исходное значение \"ДатаУдержанияНалога\": ${formatDate(row.taxDate)} заменено на \"00.00.0000\".")
+                                    }
                                     СумДата(
                                             ДатаФактДох: formatDate(row.incomeDate),
-                                            ДатаУдержНал: formatDate(row.taxDate),
-                                            СрокПрчслНал: isZeroDate(row.taxTransferDate) ? SharedConstants.DATE_ZERO_AS_STRING : formatDate(row.taxTransferDate),
+                                            ДатаУдержНал: isZeroDate(row.taxTransferDate) ? DATE_ZERO_AS_STRING : formatDate(row.taxDate),
+                                            СрокПрчслНал: isZeroDate(row.taxTransferDate) ? DATE_ZERO_AS_STRING : formatDate(row.taxTransferDate),
                                             ФактДоход: row.incomeSum,
                                             УдержНал: row.withholdingTaxSum
                                     ) {}
@@ -1185,8 +1190,8 @@ class Report6Ndfl extends AbstractScriptClass {
          */
         void adjustNegativeValues() {
             def rows = rows.sort(false) { Section2Row a, Section2Row b ->
-                a.taxDate <=> b.taxDate ?: a.incomeSum <=> b.incomeSum ?: a.key.taxTransferDate <=> b.key.taxTransferDate ?:
-                        a.key.incomeDate <=> b.key.incomeDate
+                a.taxDate <=> b.taxDate ?: (sign(a.incomeSum) != sign(b.incomeSum) ? a.incomeSum <=> b.incomeSum : b.incomeSum <=> a.incomeSum) ?:
+                        a.key.taxTransferDate <=> b.key.taxTransferDate ?: a.key.incomeDate <=> b.key.incomeDate
             }
             for (def row : rows) {
                 if (row.incomeSum > 0) {
@@ -1205,7 +1210,8 @@ class Report6Ndfl extends AbstractScriptClass {
                 }
             }
             rows = rows.sort(false) { Section2Row a, Section2Row b ->
-                a.taxDate <=> b.taxDate ?: a.withholdingTaxSum <=> b.withholdingTaxSum
+                a.taxDate <=> b.taxDate ?: (sign(a.withholdingTaxSum) != sign(b.withholdingTaxSum) ? a.withholdingTaxSum <=> b.withholdingTaxSum : b.withholdingTaxSum <=> a.withholdingTaxSum) ?:
+                        a.key.taxTransferDate <=> b.key.taxTransferDate ?: a.key.incomeDate <=> b.key.incomeDate
             }
             for (def row : rows) {
                 if (row.withholdingTaxSum > 0) {
@@ -1223,6 +1229,10 @@ class Report6Ndfl extends AbstractScriptClass {
                     row.withholdingTaxSum = 0
                 }
             }
+        }
+
+        int sign(BigDecimal d) {
+            return d < 0 ? -1 : 1
         }
 
         @Override
