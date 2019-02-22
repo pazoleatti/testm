@@ -1273,7 +1273,7 @@ class Check extends AbstractScriptClass {
                         }
                         if (!checkNdflPersonIncomingTaxRateTotal && !ndflPersonIncomingTaxRates.isEmpty()) {
                             // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
-                            String errMsg = String.format(LOG_TYPE_2_14_MSG, "Процентная ставка (%)", ndflPersonIncome.taxRate ?: "",
+                            String errMsg = String.format(LOG_TYPE_2_14_MSG, "Процентная ставка (%)", ndflPersonIncome.taxRate,
                                     ndflPersonIncome.incomeCode, ndflPerson.status,
                                     ndflPersonIncomingTaxRates.join(", ")
                             )
