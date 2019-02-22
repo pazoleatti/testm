@@ -11,6 +11,7 @@ import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 import com.aplana.sbrf.taxaccounting.permissions.BasePermissionEvaluator;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
@@ -38,6 +39,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyString;
@@ -81,6 +83,8 @@ public class DeclarationDataServiceImplTest {
     BasePermissionEvaluator basePermissionEvaluator;
     @Autowired
     DeclarationLocker declarationLocker;
+    @Autowired
+    ConfigurationService configurationService;
 
     private static final SimpleDateFormat SDF = new SimpleDateFormat("dd.MM.yyyy");
 
@@ -614,5 +618,27 @@ public class DeclarationDataServiceImplTest {
         assertEquals(new BigDecimal("6"), ndflPerson.getIncomes().get(1).getRowNum());
         assertEquals(new BigDecimal("7"), ndflPerson.getIncomes().get(2).getRowNum());
         assertEquals(new BigDecimal("8"), ndflPerson.getIncomes().get(3).getRowNum());
+    }
+
+
+    @Test
+    public void test_checkRowsEditCountParam_forValueLessThanParam_isSuccessful() {
+        when(configurationService.getParamIntValue(ConfigurationParam.DECLARATION_ROWS_BULK_EDIT_MAX_COUNT)).thenReturn(10);
+        ActionResult result = declarationDataService.checkRowsEditCountParam(9);
+        assertThat(result.isSuccess()).isTrue();
+    }
+
+    @Test
+    public void test_checkRowsEditCountParam_forTheSameValueAsParam_isSuccessful() {
+        when(configurationService.getParamIntValue(ConfigurationParam.DECLARATION_ROWS_BULK_EDIT_MAX_COUNT)).thenReturn(10);
+        ActionResult result = declarationDataService.checkRowsEditCountParam(10);
+        assertThat(result.isSuccess()).isTrue();
+    }
+
+    @Test
+    public void test_checkRowsEditCountParam_forValueMoreThanParam_isUnsuccessful() {
+        when(configurationService.getParamIntValue(ConfigurationParam.DECLARATION_ROWS_BULK_EDIT_MAX_COUNT)).thenReturn(10);
+        ActionResult result = declarationDataService.checkRowsEditCountParam(11);
+        assertThat(result.isSuccess()).isFalse();
     }
 }

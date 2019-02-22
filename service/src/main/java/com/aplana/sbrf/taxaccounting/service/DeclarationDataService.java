@@ -734,4 +734,11 @@ public interface DeclarationDataService {
      * @return итоговый uuid
      */
     String createPdfTask(TAUserInfo userInfo, long declarationDataId);
+
+    /**
+     * Проверка числа на соответствие параметру "Максимальное количество строк РНУ для массового изменения"
+     * @param count проверяемое число
+     * @return ActionResult со статусом и логами проверки
+     */
+    ActionResult checkRowsEditCountParam(int count);
 }

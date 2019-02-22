@@ -434,27 +434,27 @@
                         closeCallback: function (scope) {
                             scope.close();
                         }
-                    }).result
-                        .then(function () {
-                            $scope.canEditRow = false;
-                            $scope.canEditSelectedRows = false;
-                            $scope.refreshGrid(1);
-                        })
-                        .catch(function (reason) {
-                            $dialogs.errorDialog({
-                                content: 'Ошибка редактирования формы. ' + reason
-                            })
-                        })
-                        .finally(function () {
-                            $http({
-                                method: 'POST',
-                                url: 'controller/actions/declarationData/' + $stateParams.declarationDataId + '/unlockEdit'
-                            }).then(function (unlock) {
-                                if (unlock.data.uuid) {
-                                    $logPanel.open('log-panel-container', unlock.data.uuid);
-                                }
-                            });
+                    }).result.then(function (edited) {
+                            $scope.unlockEdit();
+
+                            if (edited) {
+                                $scope.canEditRow = false;
+                                $scope.canEditSelectedRows = false;
+                                $scope.refreshGrid(1);
+                            }
                         });
+                };
+
+                // Метод снятия блокировки с редактирования формы.
+                $scope.unlockEdit = function () {
+                    $http({
+                        method: 'POST',
+                        url: 'controller/actions/declarationData/' + $stateParams.declarationDataId + '/unlockEdit'
+                    }).then(function (unlock) {
+                        if (unlock.data.uuid) {
+                            $logPanel.open('log-panel-container', unlock.data.uuid);
+                        }
+                    });
                 };
 
                 /**
@@ -511,27 +511,15 @@
                         closeCallback: function (scope) {
                             scope.close();
                         }
-                    }).result
-                        .then(function () {
+                    }).result.then(function (edited) {
+                        $scope.unlockEdit();
+
+                        if (edited) {
                             $scope.canEditRow = false;
                             $scope.canEditSelectedRows = false;
                             $scope.refreshGrid(1);
-                        })
-                        .catch(function (reason) {
-                            $dialogs.errorDialog({
-                                content: 'Ошибка редактирования формы. ' + reason
-                            })
-                        })
-                        .finally(function () {
-                            $http({
-                                method: 'POST',
-                                url: 'controller/actions/declarationData/' + $stateParams.declarationDataId + '/unlockEdit'
-                            }).then(function (unlock) {
-                                if (unlock.data.uuid) {
-                                    $logPanel.open('log-panel-container', unlock.data.uuid);
-                                }
-                            });
-                        });
+                        }
+                    });
                 };
 
                 /**

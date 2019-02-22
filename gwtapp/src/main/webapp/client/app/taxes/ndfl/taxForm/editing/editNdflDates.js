@@ -16,10 +16,10 @@
                         $logPanel.open('log-panel-container', response.data.uuid);
                     }
                     if (!response.data.success) {
-                        $modalInstance.dismiss('Не можем установить блокировку');
+                        $modalInstance.dismiss();
                     }
-                }).catch(function () {
-                    $modalInstance.dismiss('Не можем установить блокировку');
+                }).catch(function (reason) {
+                    $modalInstance.dismiss('Не можем установить блокировку на форму. Причина: ' + reason);
                 });
 
                 $scope.byFilter = $shareData.byFilter;
@@ -67,8 +67,8 @@
                                     }
                                     $modalInstance.close(true);
                                 })
-                                .catch(function (reason) {
-                                    $modalInstance.dismiss(reason);
+                                .catch(function () {
+                                    $modalInstance.close();
                                 });
                         }
                     });

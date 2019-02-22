@@ -59,35 +59,4 @@ public class ConfigurationServiceTest {
 
         assertThat(intValue).isNull();
     }
-
-
-    @Test
-    public void test_checkRowsEditCountParam_forValueLessThanParam_isSuccessful() {
-        ConfigurationService serviceMock = spy(service);
-        doReturn(10).when(serviceMock).getParamIntValue(ConfigurationParam.DECLARATION_ROWS_BULK_EDIT_MAX_COUNT);
-
-        ActionResult result = serviceMock.checkRowsEditCountParam(9);
-
-        assertThat(result.isSuccess()).isTrue();
-    }
-
-    @Test
-    public void test_checkRowsEditCountParam_forTheSameValueAsParam_isSuccessful() {
-        ConfigurationService serviceMock = spy(service);
-        doReturn(10).when(serviceMock).getParamIntValue(ConfigurationParam.DECLARATION_ROWS_BULK_EDIT_MAX_COUNT);
-
-        ActionResult result = serviceMock.checkRowsEditCountParam(10);
-
-        assertThat(result.isSuccess()).isTrue();
-    }
-
-    @Test
-    public void test_checkRowsEditCountParam_forValueMoreThanParam_isUnsuccessful() {
-        ConfigurationService serviceMock = spy(service);
-        doReturn(10).when(serviceMock).getParamIntValue(ConfigurationParam.DECLARATION_ROWS_BULK_EDIT_MAX_COUNT);
-
-        ActionResult result = serviceMock.checkRowsEditCountParam(11);
-
-        assertThat(result.isSuccess()).isFalse();
-    }
 }

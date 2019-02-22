@@ -76,12 +76,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.xml.sax.Attributes;
-import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -93,11 +89,8 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
-import java.io.Writer;
 import java.math.BigDecimal;
-import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -2707,6 +2700,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
             // Записываем ФЛ и операции, которые затронул алгоритм
             Set<Pair<Long, String>> personAndOperationAffected = new HashSet<>();
+            // Записываем информацию о том, были ли вообще затронуты строки.
+            boolean isAnyDateChanged = false;
+            boolean isAnyDateNotChanged = false;
 
             // Заменяем значения в строках
             for (NdflPersonIncome income : incomes) {
@@ -2718,9 +2714,12 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     try {
                         // Для каждого вида даты своя реализация DateEditor
                         DateEditor dateEditor = DateEditorFactory.getEditor(dateField);
-                        boolean edited = dateEditor.editIncomeDateField(income, incomeDates, person, logger);
+                        boolean dateChanged = dateEditor.editIncomeDateField(income, incomeDates, person, logger);
 
-                        if (edited) {
+                        isAnyDateChanged = isAnyDateChanged || dateChanged;
+                        isAnyDateNotChanged = isAnyDateNotChanged || (!dateChanged);
+
+                        if (dateChanged) {
                             personAndOperationAffected.add(Pair.of(income.getNdflPersonId(), income.getOperationId()));
                             TAUser user = userInfo.getUser();
                             income.setModifiedDate(new Date());
@@ -2757,14 +2756,14 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             }
 
             // Удаляем имеющиеся у формы спецотчеты, если хотя бы одна дата была изменена
-            boolean isAnyDateChanged = logger.containsLevel(LogLevel.INFO);
-            reportService.deleteDec(
-                    singletonList(declarationDataId),
-                    Arrays.asList(DeclarationDataReportType.SPECIFIC_REPORT_DEC, DeclarationDataReportType.EXCEL_DEC)
-            );
+            if (isAnyDateChanged) {
+                reportService.deleteDec(
+                        singletonList(declarationDataId),
+                        Arrays.asList(DeclarationDataReportType.SPECIFIC_REPORT_DEC, DeclarationDataReportType.EXCEL_DEC)
+                );
+            }
 
-            boolean notAllDatesAreChanged = isAnyDateChanged &&
-                    (logger.containsLevel(LogLevel.WARNING) || logger.containsLevel(LogLevel.ERROR));
+            boolean notAllDatesAreChanged = isAnyDateChanged && isAnyDateNotChanged;
 
             // Не будь, как я, вынеси это в отдельный метод.
             String onEmpty = " __ ";
@@ -3024,6 +3023,29 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         asyncManager.createTask(OperationType.PDF_DEC, getStandardDeclarationDescription(declarationDataId), userInfo, params, logger);
 
         return logEntryService.save(logger.getEntries());
+    }
+
+    @Override
+    public ActionResult checkRowsEditCountParam(int count) {
+        ActionResult result = new ActionResult();
+        Logger logger = new Logger();
+
+        ConfigurationParam checkedParam = ConfigurationParam.DECLARATION_ROWS_BULK_EDIT_MAX_COUNT;
+
+        Integer maxCount = configurationService.getParamIntValue(checkedParam);
+        if (maxCount == null) {
+            result.setSuccess(false);
+            logger.error("В системе не установлен конфигурационный параметр \"%s\". Обратитесь к администратору.", checkedParam.getCaption());
+        } else if (count > maxCount) {
+            result.setSuccess(false);
+            logger.error("Сохранение невозможно. Найдено или выбрано для изменения строк больше, чем разрешенное значение %d.", maxCount);
+        } else {
+            result.setSuccess(true);
+        }
+
+        String logsUuid = logEntryService.save(logger.getEntries());
+        result.setUuid(logsUuid);
+        return result;
     }
 
 

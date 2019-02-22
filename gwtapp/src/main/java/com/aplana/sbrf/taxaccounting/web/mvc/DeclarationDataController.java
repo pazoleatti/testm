@@ -805,6 +805,18 @@ public class DeclarationDataController {
         }
     }
 
+    /**
+     * Адрес для проверки параметра "Максимальное число строк формы РНУ для редактирования дат"
+     *
+     * @param count проверяемое число
+     * @return ActionResult с результатом проверки и логами
+     */
+    @GetMapping("/actions/checkRowsEditCountParam")
+    public ActionResult checkRowsEditCountParam(@RequestParam int count) {
+        return declarationService.checkRowsEditCountParam(count);
+    }
+
+
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity handleAccessDeniedException() {
         return new ResponseEntity<>(HttpStatus.FORBIDDEN);

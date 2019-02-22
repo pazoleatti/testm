@@ -344,28 +344,6 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         return result;
     }
 
-    @Override
-    public ActionResult checkRowsEditCountParam(int count) {
-        ActionResult result = new ActionResult();
-        Logger logger = new Logger();
-
-        ConfigurationParam checkedParam = ConfigurationParam.DECLARATION_ROWS_BULK_EDIT_MAX_COUNT;
-
-        Integer maxCount = getParamIntValue(checkedParam);
-        if (maxCount == null) {
-            result.setSuccess(false);
-            logger.error("В системе не установлен конфигурационный параметр \"%s\". Обратитесь к администратору.", checkedParam.getCaption());
-        } else if (count > maxCount) {
-            result.setSuccess(false);
-            logger.error("Сохранение невозможно. Найдено или выбрано для изменения строк больше, чем разрешенное значение %d.", maxCount);
-        } else {
-            result.setSuccess(true);
-        }
-
-        String logsUuid = logEntryService.save(logger.getEntries());
-        result.setUuid(logsUuid);
-        return result;
-    }
 
     /**
      * Проверка параметров асинхронных задач на валидность. Если одна из проверок не пройдена, ошибка записывается в logger

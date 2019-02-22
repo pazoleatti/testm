@@ -183,11 +183,4 @@ public interface ConfigurationService {
      * @return мапа <название, значение> с данными {@link Configuration}
      */
     Map<String, String> fetchAuthEmailParamsMap();
-
-    /**
-     * Проверка числа на соответствие параметру "Максимальное количество строк РНУ для массового изменения"
-     * @param count проверяемое число
-     * @return ActionResult со статусом и логами проверки
-     */
-    ActionResult checkRowsEditCountParam(int count);
 }

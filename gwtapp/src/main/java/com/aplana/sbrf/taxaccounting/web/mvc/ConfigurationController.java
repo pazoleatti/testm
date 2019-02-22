@@ -243,17 +243,6 @@ public class ConfigurationController {
     }
 
     /**
-     * Адрес для проверки параметра "Максимальное число строк формы РНУ для редактирования дат"
-     *
-     * @param count проверяемое число
-     * @return ActionResult с результатом проверки и логами
-     */
-    @GetMapping("/actions/checkRowsEditCountParam")
-    public ActionResult checkRowsEditCountParam(@RequestParam int count) {
-        return configurationService.checkRowsEditCountParam(count);
-    }
-
-    /**
      * Устанавливаются права доступа для конфигураций "Общие параметры" через {@link Permission}
      *
      * @param params список параметров
