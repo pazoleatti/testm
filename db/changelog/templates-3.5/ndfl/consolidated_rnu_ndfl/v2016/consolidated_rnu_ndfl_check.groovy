@@ -1332,8 +1332,9 @@ class Check extends AbstractScriptClass {
                             // «Графа 15 Раздел 2» = «Графа 6 Раздел 2»
                             if (ndflPersonIncome.taxDate != ndflPersonIncome.incomeAccruedDate) {
                                 logTypeMessagePairList.add(new CheckData("\"Дата исчисленного налога\" указана некорректно",
-                                        ("Значение гр. \"${C_TAX_DATE}\" (\"${formatDate(ndflPersonIncome.taxDate)}\") должно быть равно " +
-                                                "значению гр. \"${C_INCOME_ACCRUED_DATE}\" (\"${formatDate(ndflPersonIncome.incomeAccruedDate)}\")").toString(),
+                                        ("Значение гр. \"${C_TAX_DATE}\" (\"${formatDate(ndflPersonIncome.taxDate)}\") не равно значению гр. " +
+                                                "\"${C_INCOME_ACCRUED_DATE}\" (\"${formatDate(ndflPersonIncome.incomeAccruedDate)}\"). " +
+                                                "Даты могут не совпадать, если это строка корректировки начисления!").toString(),
                                         section_2_15_fatal))
                             }
                         }
@@ -1485,10 +1486,10 @@ class Check extends AbstractScriptClass {
                             BigDecimal var3 = (BigDecimal) allPrepaymentsOfOperation?.sum { NdflPersonPrepayment prepayment -> prepayment.summ ?: 0 } ?: 0
                             BigDecimal ВычисленноеЗначениеНалога = var2 - var3
                             if (!((var1 - ВычисленноеЗначениеНалога).abs() < 1)) {
-                                String errMsg = String.format("Значение налога исчисленного в гр. 16 (%s р) не совпадает с расчетным (%s р)",
-                                        var1, ВычисленноеЗначениеНалога
+                                String errMsg = String.format("Для строк операции с \"ID операции\"=\"%s\" значение налога исчисленного в гр. 16 (%s р) не совпадает с расчетным (%s р)",
+                                        operationId, var1, ВычисленноеЗначениеНалога
                                 )
-                                String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
+                                String pathError = String.format(SECTION_LINES_MSG, T_PERSON_INCOME, rowNums)
                                 logger.logCheck("%s. %s.",
                                         declarationService.isCheckFatal(DeclarationCheckCode.RNU_SECTION_2_16, declarationData.declarationTemplateId),
                                         LOG_TYPE_2_16, fioAndInpAndOperId, pathError, errMsg)
@@ -2528,7 +2529,8 @@ class Check extends AbstractScriptClass {
             if (calendar21.equals(calendar7)) {
                 return null
             }
-            return String.format("Значение гр. \"Срок перечисления в бюджет\" (%s) должно быть равно последнему календарному дню месяца, указанного в гр.\"Дата выплаты дохода\" (%s). Корректное значение срока перечисления в бюджет: %s",
+            return String.format("Значение гр. \"Срок перечисления в бюджет\" (%s) должно быть равно последнему календарному дню месяца, указанного в гр.\"Дата выплаты дохода\" (%s). " +
+                    "Если дата попадает на выходной день, то дата переносится на следующий рабочий день. Корректное значение срока перечисления в бюджет: %s",
                     ScriptUtils.formatDate(checkedIncome.taxTransferDate),
                     ScriptUtils.formatDate(checkedIncome.incomePayoutDate),
                     ScriptUtils.formatDate(calendar7.getTime()))
@@ -2567,7 +2569,7 @@ class Check extends AbstractScriptClass {
                 if (checkedIncome.getTaxTransferDate() == matchedIncomes.get(0).getTaxTransferDate()) {
                     return null
                 } else {
-                    return String.format("Значение гр. \"Срок перечисления в бюджет\" (%s) должен быть равен значению гр. \"Срок перечисления в бюджет\" (%s) строки выплаты, у которой \"Признак дохода\" не равен 02 или 14",
+                    return String.format("Значение гр. \"Срок перечисления в бюджет\" (%s) должно быть равно значению гр. \"Срок перечисления в бюджет\" (%s) строки выплаты, у которой \"Признак дохода\" не равен 02 или 14",
                             ScriptUtils.formatDate(checkedIncome.taxTransferDate),
                             ScriptUtils.formatDate(matchedIncomes.get(0).taxTransferDate))
                 }
@@ -2588,7 +2590,7 @@ class Check extends AbstractScriptClass {
             if (referenceValue == SimpleDateUtils.toStartOfDay(checkedIncome.taxTransferDate)) {
                 return null
             }
-            return String.format("Значение гр. \"Срок перечисления в бюджет\" (%s) должен быть равен последнему календарному дню месяца, следующим за годом указанным в гр. \"Дата выплаты дохода\" (%s). Если дата попадает на выходной день, то она переносится на следующий рабочий день. Корректное значение срока перечисления в бюджет: %s",
+            return String.format("Значение гр. \"Срок перечисления в бюджет\" (%s) должно быть равно последнему календарному дню месяца, следующего за годом указанным в гр. \"Дата выплаты дохода\" (%s). Если дата попадает на выходной день, то она переносится на следующий рабочий день. Корректное значение срока перечисления в бюджет: %s",
                     ScriptUtils.formatDate(checkedIncome.taxTransferDate),
                     ScriptUtils.formatDate(checkedIncome.incomePayoutDate),
                     ScriptUtils.formatDate(referenceValue))
