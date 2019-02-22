@@ -1049,21 +1049,21 @@ class Report2Ndfl extends AbstractScriptClass {
         def xmlStr = declarationService.getXmlData(declarationData.id, userInfo)
         def Файл = new XmlSlurper().parseText(xmlStr)
         def docs = []
-        Файл.Документ.each { doc ->
+        Файл.Документ."НДФЛ-2".each { ndfl2Node ->
             boolean passed = true
             String idDoc = null
             if (params[SubreportAliasConstants.ID_DOC_NUMBER] != null) {
                 idDoc = params[SubreportAliasConstants.ID_DOC_NUMBER].replaceAll("[\\s-]", "")
             }
-            if (params[SubreportAliasConstants.P_NUM_SPRAVKA] != null && !StringUtils.containsIgnoreCase(doc.@НомСпр.text(), params[SubreportAliasConstants.P_NUM_SPRAVKA])) passed = false
-            if (params[SubreportAliasConstants.LAST_NAME] != null && !StringUtils.containsIgnoreCase(doc.ПолучДох.ФИО.@Фамилия.text(), params[SubreportAliasConstants.LAST_NAME])) passed = false
-            if (params[SubreportAliasConstants.FIRST_NAME] != null && !StringUtils.containsIgnoreCase(doc.ПолучДох.ФИО.@Имя.text(), params[SubreportAliasConstants.FIRST_NAME])) passed = false
-            if (params[SubreportAliasConstants.MIDDLE_NAME] != null && !StringUtils.containsIgnoreCase(doc.ПолучДох.ФИО.@Отчество.text(), params[SubreportAliasConstants.MIDDLE_NAME])) passed = false
-            if (params[SubreportAliasConstants.INN] != null && !StringUtils.containsIgnoreCase(doc.ПолучДох.@ИННФЛ.text(), params[SubreportAliasConstants.INN])) passed = false
-            if ((params[SubreportAliasConstants.FROM_BIRTHDAY] != null || params[SubreportAliasConstants.TO_BIRTHDAY] != null) && searchBirthDay(params, doc.ПолучДох.@ДатаРожд.text())) passed = false
-            if (params[SubreportAliasConstants.ID_DOC_NUMBER] != null && !((StringUtils.containsIgnoreCase(doc.ПолучДох.УдЛичнФЛ.@СерНомДок.text(), idDoc) ||
-                    StringUtils.containsIgnoreCase(doc.ПолучДох.УдЛичнФЛ.@СерНомДок.text().replaceAll("[\\s-]", ""), idDoc)))) passed = false
-            if (passed) docs << doc
+            if (params[SubreportAliasConstants.P_NUM_SPRAVKA] != null && !StringUtils.containsIgnoreCase(ndfl2Node.@НомСпр.text(), params[SubreportAliasConstants.P_NUM_SPRAVKA])) passed = false
+            if (params[SubreportAliasConstants.LAST_NAME] != null && !StringUtils.containsIgnoreCase(ndfl2Node.ПолучДох.ФИО.@Фамилия.text(), params[SubreportAliasConstants.LAST_NAME])) passed = false
+            if (params[SubreportAliasConstants.FIRST_NAME] != null && !StringUtils.containsIgnoreCase(ndfl2Node.ПолучДох.ФИО.@Имя.text(), params[SubreportAliasConstants.FIRST_NAME])) passed = false
+            if (params[SubreportAliasConstants.MIDDLE_NAME] != null && !StringUtils.containsIgnoreCase(ndfl2Node.ПолучДох.ФИО.@Отчество.text(), params[SubreportAliasConstants.MIDDLE_NAME])) passed = false
+            if (params[SubreportAliasConstants.INN] != null && !StringUtils.containsIgnoreCase(ndfl2Node.ПолучДох.@ИННФЛ.text(), params[SubreportAliasConstants.INN])) passed = false
+            if ((params[SubreportAliasConstants.FROM_BIRTHDAY] != null || params[SubreportAliasConstants.TO_BIRTHDAY] != null) && searchBirthDay(params, ndfl2Node.ПолучДох.@ДатаРожд.text())) passed = false
+            if (params[SubreportAliasConstants.ID_DOC_NUMBER] != null && !((StringUtils.containsIgnoreCase(ndfl2Node.ПолучДох.УдЛичнФЛ.@СерНомДок.text(), idDoc) ||
+                    StringUtils.containsIgnoreCase(ndfl2Node.ПолучДох.УдЛичнФЛ.@СерНомДок.text().replaceAll("[\\s-]", ""), idDoc)))) passed = false
+            if (passed) docs << ndfl2Node
         }
         prepareSpecificReportResult.countAvailableDataRows = docs.size()
         // ограничиваем размер выборки
