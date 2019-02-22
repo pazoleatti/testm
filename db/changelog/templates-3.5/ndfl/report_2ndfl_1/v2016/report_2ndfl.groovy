@@ -204,7 +204,7 @@ class Report2Ndfl extends AbstractScriptClass {
         def kodNoProm = configurationParamModel?.get(ConfigurationParam.NO_CODE)?.get(0)?.get(0)
         xml.fileName = generateXmlFileId(departmentConfig, sberbankInnParam, kodNoProm)
 
-        Map<String, RefBookDeductionType> deductionTypesByCode = refBookDeductionTypeService.findAll()
+        Map<String, RefBookDeductionType> deductionTypesByCode = refBookDeductionTypeService.findAllByVersion(reportPeriod.endDate)
                 .collectEntries { [it.code, it] }
         String priznak = definePriznak(departmentConfig)
 

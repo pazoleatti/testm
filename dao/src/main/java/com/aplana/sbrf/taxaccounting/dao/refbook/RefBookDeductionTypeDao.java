@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao.refbook;
 
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDeductionType;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -12,7 +13,8 @@ public interface RefBookDeductionTypeDao {
     /**
      * Возвращяет все записи справочника, актуальные на текущую дату
      *
+     * @param version дата актуальности записи
      * @return список записей справочника
      */
-    List<RefBookDeductionType> findAll();
+    List<RefBookDeductionType> findAllByVersion(Date version);
 }
