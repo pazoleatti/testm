@@ -3,10 +3,16 @@ package com.aplana.sbrf.taxaccounting.model.result;
 import com.aplana.sbrf.taxaccounting.model.json.ISODateDeserializer;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflData;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 
 import java.math.BigDecimal;
 import java.util.Date;
 
+/**
+ * ДТО для данных раздела 2 "Сведения о доходах и НДФЛ"
+ * Для корректной обработки на фронтенде значения типа BigDecimal сериализуются в виде строк.
+ */
 public class NdflPersonIncomeDTO extends NdflData<Long> {
 
     /**
@@ -35,15 +41,19 @@ public class NdflPersonIncomeDTO extends NdflData<Long> {
     private String kpp;
 
     // Доход.Сумма.Начисление (Графа 10)
+    @JsonSerialize(using = ToStringSerializer.class)
     private BigDecimal incomeAccruedSumm;
 
     // Доход.Сумма.Выплата (Графа 11)
+    @JsonSerialize(using = ToStringSerializer.class)
     private BigDecimal incomePayoutSumm;
 
     // Сумма вычета (Графа 12)
+    @JsonSerialize(using = ToStringSerializer.class)
     private BigDecimal totalDeductionsSumm;
 
     // Налоговая база (Графа 13)
+    @JsonSerialize(using = ToStringSerializer.class)
     private BigDecimal taxBase;
 
     // НДФЛ.Процентная ставка (Графа 14)
@@ -54,15 +64,19 @@ public class NdflPersonIncomeDTO extends NdflData<Long> {
     private Date taxDate;
 
     // НДФЛ.Расчет.Сумма.Исчисленный (Графа 16)
+    @JsonSerialize(using = ToStringSerializer.class)
     private BigDecimal calculatedTax;
 
     // НДФЛ.Расчет.Сумма.Удержанный (Графа 17) (НУ)
+    @JsonSerialize(using = ToStringSerializer.class)
     private BigDecimal withholdingTax;
 
     // НДФЛ.Расчет.Сумма.Не удержанный (Графа 18)
+    @JsonSerialize(using = ToStringSerializer.class)
     private BigDecimal notHoldingTax;
 
     // НДФЛ.Расчет.Сумма.Излишне удержанный (Графа 19)
+    @JsonSerialize(using = ToStringSerializer.class)
     private BigDecimal overholdingTax;
 
     // НДФЛ.Расчет.Сумма.Возвращенный налогоплательщику (Графа 20)

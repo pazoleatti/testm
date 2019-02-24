@@ -499,9 +499,9 @@
                                 // если выбранный период есть в списке, то оставляем, иначе установливаем самый последний
                                 var currentValue = _.deep($scope, modelPath);
                                 if (!currentValue || !_.find(periods, function (period) {
-                                        return period.id === currentValue.id && (
-                                            !period.correctionDate && !currentValue.correctionDate || period.correctionDate === currentValue.correctionDate);
-                                    })) {
+                                    return period.id === currentValue.id && (
+                                        !period.correctionDate && !currentValue.correctionDate || period.correctionDate === currentValue.correctionDate);
+                                })) {
                                     var defaultValue = periods[0];
                                     _.deep($scope, modelPath, defaultValue);
                                     angular.forEach(periods, function (period) {
@@ -718,7 +718,7 @@
                  * Инициализация полного списка ОКТМО
                  */
                 $scope.initSelectWithAllOktmo = function () {
-                    $scope.oktmoSelect = GetSelectOption.getAjaxSelectOptions(false, true, "controller/rest/refBookValues/96", {}, {
+                    $scope.oktmoSelect = GetSelectOption.getAjaxSelectOptions(false, false, "controller/rest/refBookValues/96", {}, {
                         property: "name",
                         direction: "asc"
                     }, "codeNameFormatter");

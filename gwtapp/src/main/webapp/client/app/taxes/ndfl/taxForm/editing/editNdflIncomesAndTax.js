@@ -14,9 +14,38 @@
             "$modalInstance", '$logPanel', "$filter", "APP_CONSTANTS", '$shareData', '$dialogs', 'ndflIncomesAndTax',
             function ($scope, $rootScope, $http, $state, $stateParams, $modalInstance, $logPanel, $filter, APP_CONSTANTS, $shareData, $dialogs, ndflIncomesAndTax) {
 
-                $scope.row = {};
+                // Формат положительного числа /20.2/
+                $scope.patternNumber20_2 = /^([0-9]{1,20})([.][0-9]{1,2})?$/;
+                // Форматы целых положительных чисел с ограничением по числу цифр
+                $scope.patternNumber20 = /^[0-9]{1,20}$/;
+                $scope.patternNumber15 = /^[0-9]{1,15}$/;
+                $scope.patternNumber10 = /^[0-9]{1,10}$/;
+
+                // Инициализация чисто для удобства работы с полями в коде
+                $scope.row = {
+                    kpp: null,
+                    incomeCode: null,
+                    incomeAccruedDate: null,
+                    incomeAccruedSumm: null,
+                    incomeType: null,
+                    incomePayoutDate: null,
+                    incomePayoutSumm: null,
+                    taxBase: null,
+                    totalDeductionsSumm: null,
+                    taxRate: null,
+                    calculatedTax: null,
+                    withholdingTax: null,
+                    taxDate: null,
+                    notHoldingTax: null,
+                    overholdingTax: null,
+                    refoundTax: null,
+                    taxTransferDate: null,
+                    paymentDate: null,
+                    taxSumm: null,
+                    paymentNumber: null,
+                    disableTaxTransferDate: false
+                };
                 $scope.temp = {};
-                $scope.row.disableTaxTransferDate = false;
 
                 // Установка блокировки на форму
                 $http({
@@ -89,7 +118,7 @@
                         $scope.row.taxTransferDate = $filter('translate')('title.taxTransferDateZeroDate');
                     }
                     ndflIncomesAndTax.update({declarationDataId: $shareData.declarationId}, $scope.row,
-                        function (response) {
+                        function () {
                             $modalInstance.close(true);
                         });
                 };

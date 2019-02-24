@@ -15,8 +15,8 @@
 
         <div style="height: 400px; position: relative; overflow-y: scroll">
             <!-- Информация об авансовом платеже -->
-            <legend style="margin-top: 20px; margin-bottom: 10px;">{{::'ndflPrepayment.edit.title.prepaymentInfo' |
-                translate}}
+            <legend style="margin-top: 20px; margin-bottom: 10px;">
+                {{::'ndflPrepayment.edit.title.prepaymentInfo' | translate}}
             </legend>
 
             <div class="row">
@@ -33,8 +33,8 @@
                                        data-ng-pattern="patterns.number"
                                        data-required
                                        title="{{ndflPrepayment.edit.summ}}"/>
-                                <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.error' |
-                                    translate}}
+                                <div data-aplana-validator data-key="pattern">
+                                    {{::'common.validation.pattern.error' | translate}}
                                 </div>
                             </div>
                         </div>
@@ -64,8 +64,8 @@
                                     {{::'ndflPrepayment.edit.validation.notifNum' |
                                     translate}}
                                 </div>
-                                <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
-                                    translate}}
+                                <div data-aplana-validator data-key='required'>
+                                    {{::'common.validation.required' | translate}}
                                 </div>
                             </div>
                         </div>
@@ -79,8 +79,8 @@
                                 <div data-aplana-datepicker
                                      data-required
                                      data-ng-model="row.notifDate"></div>
-                                <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
-                                    translate}}
+                                <div data-aplana-validator data-key='required'>
+                                    {{::'common.validation.required' | translate}}
                                 </div>
                             </div>
                         </div>
@@ -99,11 +99,11 @@
                                        data-ng-pattern="patterns.fourDigits"
                                        data-required
                                        title="{{title.codeNO}}"/>
-                                <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.error' |
-                                    translate}}
+                                <div data-aplana-validator data-key="pattern">
+                                    {{::'common.validation.pattern.error' | translate}}
                                 </div>
-                                <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
-                                    translate}}
+                                <div data-aplana-validator data-key='required'>
+                                    {{::'common.validation.required' | translate}}
                                 </div>
                             </div>
                         </div>

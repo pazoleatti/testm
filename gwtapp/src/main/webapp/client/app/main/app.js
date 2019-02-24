@@ -702,7 +702,7 @@
         "incomesAndTax.editDates.emptyData.message.text": "Сохранение невозможно. Необходимо указать значение для хотя бы одной даты.",
         "incomesAndTax.editDates.confirm.cancel.text": "Вы уверены, что хотите отменить редактирование?",
 
-        "incomesAndTax.edit.title": "Редактирование сведений о доходах и НДФЛ, №строки= {{rowNum}}, ID операции = {{operationId}}",
+        "incomesAndTax.edit.title": "Редактирование сведений о доходах и НДФЛ, № строки = {{rowNum}}, ID операции = {{operationId}}",
         "incomesAndTax.edit.cancel.header": "Отмена редактирования строки",
         "incomesAndTax.edit.cancel.text": "Вы уверены, что хотите отменить редактирование строки?",
         "incomesAndTax.edit.title.person": "{{lastName}} {{firstName}} {{middleName}}, {{birthDay}}, ИНП={{inp}}",
