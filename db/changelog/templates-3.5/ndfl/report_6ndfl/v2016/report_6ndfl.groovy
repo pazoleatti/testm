@@ -259,7 +259,10 @@ class Report6Ndfl extends AbstractScriptClass {
                         ОбобщПоказAttrs.put("ВозврНалИт", generalBlock.refoundTotal)
                     } else if (declarationData.taxRefundReflectionMode == TaxRefundReflectionMode.AS_NEGATIVE_WITHHOLDING_TAX) {
                         def refundTax = section2Block.adjustRefundTax(incomeList)
-                        if (refundTax != null) {
+                        if (refundTax == null) {
+                            ОбобщПоказAttrs.put("ВозврНалИт", 0)
+                        }
+                        else {
                             ОбобщПоказAttrs.put("ВозврНалИт", refundTax)
                         }
                     }
