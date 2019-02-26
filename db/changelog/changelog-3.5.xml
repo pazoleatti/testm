@@ -271,4 +271,22 @@
 		</sql>
 	</changeSet>
 
+	<!--https://jira.aplana.com/browse/SBRFNDFL-6633 Реализовать использование кода дохода 1552 с признаками 01,02,03,04-->
+	<changeSet id="3.5-ishevchuk-6" author="ishevchuk">
+		<sql splitStatements="false">
+			begin
+			insert into REF_BOOK_INCOME_KIND(id,income_type_id,mark,name,version)
+			values(seq_ref_book_record.nextval,(select id from (select id,version from ref_book_income_type where code='1552' and status=0 order by version desc) where rownum=1),'01','Начисление дохода при выводе денежных средств с брокерского счёта',to_date('26.12.2016','DD.MM.YYYY'));
+
+			insert into REF_BOOK_INCOME_KIND(id,income_type_id,mark,name,version)
+			values(seq_ref_book_record.nextval,(select id from (select id,version from ref_book_income_type where code='1552' and status=0 order by version desc) where rownum=1),'02','Начисление дохода при выводе ценных бумаг с торгового раздела счёта депо',to_date('26.12.2016','DD.MM.YYYY'));
+
+			insert into REF_BOOK_INCOME_KIND(id,income_type_id,mark,name,version)
+			values(seq_ref_book_record.nextval,(select id from (select id,version from ref_book_income_type where code='1552' and status=0 order by version desc) where rownum=1),'03','Начисление дохода при расторжении договора брокерского обслуживания',to_date('26.12.2016','DD.MM.YYYY'));
+
+			insert into REF_BOOK_INCOME_KIND(id,income_type_id,mark,name,version)
+			values(seq_ref_book_record.nextval,(select id from (select id,version from ref_book_income_type where code='1552' and status=0 order by version desc) where rownum=1),'04','Начисление дохода по окончанию налогового периода за который начислен доход',to_date('26.12.2016','DD.MM.YYYY'));
+			end;
+		</sql>
+	</changeSet>
 </databaseChangeLog>
