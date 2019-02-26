@@ -289,4 +289,21 @@
 			end;
 		</sql>
 	</changeSet>
+
+	<!--https://jira.aplana.com/browse/SBRFNDFL-6684 Реализовать отображение строка с нумерацией под строкой с наименованием столбцов в отчётах РНУ НДФЛ-->
+	<changeSet id="3.5-ishevchuk-7" author="ishevchuk">
+		<update tableName="BLOB_DATA">
+			<column name="data"
+					valueBlobFile="templates-3.5/ndfl/primary_rnu_ndfl/v2016/rnu_ndfl_person_all_db.xlsx"/>
+			<where>id in (select bd.id from declaration_template_file dtf left join blob_data bd on dtf.BLOB_DATA_ID = bd.ID where dtf.DECLARATION_TEMPLATE_ID = 100 and bd.NAME = 'rnu_ndfl_person_all_db.xlsx')</where>
+		</update>
+	</changeSet>
+
+	<changeSet id="3.5-ishevchuk-8" author="ishevchuk">
+		<update tableName="BLOB_DATA">
+			<column name="data"
+					valueBlobFile="templates-3.5/ndfl/consolidated_rnu_ndfl/v2016/rnu_ndfl_person_all_db.xlsx"/>
+			<where>id in (select bd.id from declaration_template_file dtf left join blob_data bd on dtf.BLOB_DATA_ID = bd.ID where dtf.DECLARATION_TEMPLATE_ID = 101 and bd.NAME = 'rnu_ndfl_person_all_db.xlsx')</where>
+		</update>
+	</changeSet>
 </databaseChangeLog>
