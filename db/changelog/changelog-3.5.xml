@@ -306,4 +306,26 @@
 			<where>id in (select bd.id from declaration_template_file dtf left join blob_data bd on dtf.BLOB_DATA_ID = bd.ID where dtf.DECLARATION_TEMPLATE_ID = 101 and bd.NAME = 'rnu_ndfl_person_all_db.xlsx')</where>
 		</update>
 	</changeSet>
+
+	<changeSet id="3.5-ishevchuk-9" author="ishevchuk">
+		<sql splitStatements="false">
+			begin
+			insert into ref_book_doc_type(id, record_id, status, version, code, name, priority)
+			values(seq_ref_book_record.nextval,seq_ref_book_record_row_id.nextval, 0, to_date('01.01.2016','DD.MM.YYYY'), '22', 'Загранпаспорт гражданина Российской Федерации', '3');
+
+			insert into ref_book_doc_type(id, record_id, status, version, code, name, priority)
+			values(seq_ref_book_record.nextval,seq_ref_book_record_row_id.nextval, 0, to_date('01.01.2016','DD.MM.YYYY'), '27', 'Военный билет офицера запаса', '6');
+
+
+			update ref_book_doc_type set priority=2
+			where code='14';
+
+			update ref_book_doc_type set priority=4
+			where code='03';
+
+			update ref_book_doc_type set priority=5
+			where code='07';
+			end;
+		</sql>
+	</changeSet>
 </databaseChangeLog>
