@@ -271,6 +271,63 @@
 		</sql>
 	</changeSet>
 
+	<!--https://jira.aplana.com/browse/SBRFNDFL-6633 Реализовать использование кода дохода 1552 с признаками 01,02,03,04-->
+	<changeSet id="3.5-ishevchuk-6" author="ishevchuk">
+		<sql splitStatements="false">
+			begin
+			insert into REF_BOOK_INCOME_KIND(id,record_id,income_type_id,mark,name,version)
+			values(seq_ref_book_record.nextval,seq_ref_book_record_row_id.nextval,(select id from (select id,version from ref_book_income_type where code='1552' and status=0 order by version desc) where rownum=1),'01','Начисление дохода при выводе денежных средств с брокерского счёта',to_date('26.12.2016','DD.MM.YYYY'));
+
+			insert into REF_BOOK_INCOME_KIND(id,record_id,income_type_id,mark,name,version)
+			values(seq_ref_book_record.nextval,seq_ref_book_record_row_id.nextval,(select id from (select id,version from ref_book_income_type where code='1552' and status=0 order by version desc) where rownum=1),'02','Начисление дохода при выводе ценных бумаг с торгового раздела счёта депо',to_date('26.12.2016','DD.MM.YYYY'));
+
+			insert into REF_BOOK_INCOME_KIND(id,record_id,income_type_id,mark,name,version)
+			values(seq_ref_book_record.nextval,seq_ref_book_record_row_id.nextval,(select id from (select id,version from ref_book_income_type where code='1552' and status=0 order by version desc) where rownum=1),'03','Начисление дохода при расторжении договора брокерского обслуживания',to_date('26.12.2016','DD.MM.YYYY'));
+
+			insert into REF_BOOK_INCOME_KIND(id,record_id,income_type_id,mark,name,version)
+			values(seq_ref_book_record.nextval,seq_ref_book_record_row_id.nextval,(select id from (select id,version from ref_book_income_type where code='1552' and status=0 order by version desc) where rownum=1),'04','Начисление дохода по окончанию налогового периода за который начислен доход',to_date('26.12.2016','DD.MM.YYYY'));
+			end;
+		</sql>
+	</changeSet>
+
+	<!--https://jira.aplana.com/browse/SBRFNDFL-6684 Реализовать отображение строка с нумерацией под строкой с наименованием столбцов в отчётах РНУ НДФЛ-->
+	<changeSet id="3.5-ishevchuk-7" author="ishevchuk">
+		<update tableName="BLOB_DATA">
+			<column name="data"
+					valueBlobFile="templates-3.5/ndfl/primary_rnu_ndfl/v2016/rnu_ndfl_person_all_db.xlsx"/>
+			<where>id in (select bd.id from declaration_template_file dtf left join blob_data bd on dtf.BLOB_DATA_ID = bd.ID where dtf.DECLARATION_TEMPLATE_ID = 100 and bd.NAME = 'rnu_ndfl_person_all_db.xlsx')</where>
+		</update>
+	</changeSet>
+
+	<changeSet id="3.5-ishevchuk-8" author="ishevchuk">
+		<update tableName="BLOB_DATA">
+			<column name="data"
+					valueBlobFile="templates-3.5/ndfl/consolidated_rnu_ndfl/v2016/rnu_ndfl_person_all_db.xlsx"/>
+			<where>id in (select bd.id from declaration_template_file dtf left join blob_data bd on dtf.BLOB_DATA_ID = bd.ID where dtf.DECLARATION_TEMPLATE_ID = 101 and bd.NAME = 'rnu_ndfl_person_all_db.xlsx')</where>
+		</update>
+	</changeSet>
+
+	<changeSet id="3.5-ishevchuk-9" author="ishevchuk">
+		<sql splitStatements="false">
+			begin
+			insert into ref_book_doc_type(id, record_id, status, version, code, name, priority)
+			values(seq_ref_book_record.nextval,seq_ref_book_record_row_id.nextval, 0, to_date('01.01.2016','DD.MM.YYYY'), '22', 'Загранпаспорт гражданина Российской Федерации', '3');
+
+			insert into ref_book_doc_type(id, record_id, status, version, code, name, priority)
+			values(seq_ref_book_record.nextval,seq_ref_book_record_row_id.nextval, 0, to_date('01.01.2016','DD.MM.YYYY'), '27', 'Военный билет офицера запаса', '6');
+
+
+			update ref_book_doc_type set priority=2
+			where code='14';
+
+			update ref_book_doc_type set priority=4
+			where code='03';
+
+			update ref_book_doc_type set priority=5
+			where code='07';
+			end;
+		</sql>
+	</changeSet>
 	<!--https://jira.aplana.com/browse/SBRFNDFL-6560 Реализовать изменения в алгоритм формирования печатного представления 2-НДФЛ (1 и 2)-->
 	<changeSet id="3.5-ytrofimov-9" author="ytrofimov" runAlways="true">
 		<update tableName="BLOB_DATA">

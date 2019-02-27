@@ -945,12 +945,16 @@ public final class ScriptUtils {
         String format = null;
         if (code.equals("21")) {
             format = "[0-9]{10}";
+        } else if (code.equals("22")) {
+            format = "[0-9]{9}";
         } else if (code.equals("07")) {
             format = "[А-ЯЁ]{2}[0-9]?[0-9]{6}";
         } else if (code.equals("18")) {
             format = "[А-ЯЁ]{2}[0-9]{10}";
         } else if (code.equals("24")) {
             format = "[А-ЯЁ]{2}[0-9]{7}";
+        } else if (code.equals("27")) {
+            format = "[А-ЯЁ]{2}[0-9]?[0-9]{6}";
         }
         if (!checkFormat(value, format)) {
             pass = false;
