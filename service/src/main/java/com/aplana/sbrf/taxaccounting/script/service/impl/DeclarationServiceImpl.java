@@ -388,4 +388,9 @@ public class DeclarationServiceImpl implements DeclarationService {
     public InputStream getTemplateFileContent(int declarationTemplateId, String fileName) {
         return declarationTemplateDao.getTemplateFileContent(declarationTemplateId, fileName);
     }
+
+    @Override
+    public String getXmlDataFileName(long declarationDataId, TAUserInfo userInfo) {
+        return declarationDataService.getXmlDataFileName(declarationDataId, userInfo);
+    }
 }

@@ -1505,6 +1505,12 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             reportFile = File.createTempFile("specific_report", ".dat");
             OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(reportFile));
             InputStream inputStream = null;
+            InputStream font = null;
+            if (subreportParamValues.get("font") != null) {
+                font = DeclarationDataServiceImpl.class.getResourceAsStream(subreportParamValues.get("font").toString());
+                subreportParamValues.put("font", font);
+            }
+
             if (ddReportType.getSubreport().getBlobDataId() != null) {
                 inputStream = blobDataService.get(ddReportType.getSubreport().getBlobDataId()).getInputStream();
             }
@@ -1527,6 +1533,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             } finally {
                 IOUtils.closeQuietly(outputStream);
                 IOUtils.closeQuietly(inputStream);
+                IOUtils.closeQuietly(font);
             }
             stateLogger.updateState(AsyncTaskState.SAVING_REPORT);
             return blobDataService.create(reportFile.getPath(), scriptSpecificReportHolder.getFileName());
@@ -2470,6 +2477,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         Logger logger = new Logger();
 
         Map<String, Object> params = new HashMap<>();
+        Map<String, Object> subreportParamValues = action.getSubreportParamValues();
+        subreportParamValues.put("font", "/courier/cour.ttf");
         params.put("declarationDataId", action.getDeclarationDataId());
 
         params.put("alias", alias);

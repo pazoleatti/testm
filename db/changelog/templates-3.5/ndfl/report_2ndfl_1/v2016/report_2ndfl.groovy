@@ -4,7 +4,10 @@ import com.aplana.sbrf.taxaccounting.AbstractScriptClass
 import com.aplana.sbrf.taxaccounting.model.*
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.Logger
-import com.aplana.sbrf.taxaccounting.model.ndfl.*
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment
 import com.aplana.sbrf.taxaccounting.model.refbook.*
 import com.aplana.sbrf.taxaccounting.model.util.Pair
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
@@ -27,13 +30,25 @@ import groovy.xml.MarkupBuilder
 import groovy.xml.XmlUtil
 import org.apache.commons.io.IOUtils
 import org.apache.commons.lang3.StringUtils
+import org.apache.pdfbox.cos.COSDictionary
+import org.apache.pdfbox.cos.COSName
+import org.apache.pdfbox.multipdf.PDFMergerUtility
+import org.apache.pdfbox.pdmodel.PDDocument
+import org.apache.pdfbox.pdmodel.PDDocumentCatalog
+import org.apache.pdfbox.pdmodel.PDResources
+import org.apache.pdfbox.pdmodel.font.PDFont
+import org.apache.pdfbox.pdmodel.font.PDType0Font
+import org.apache.pdfbox.pdmodel.interactive.form.PDAcroForm
+import org.apache.pdfbox.pdmodel.interactive.form.PDField
 import org.apache.poi.ss.usermodel.CellStyle
 import org.apache.poi.xssf.usermodel.*
 
 import java.nio.charset.Charset
 
-import static com.aplana.sbrf.taxaccounting.model.refbook.RefBookDeductionMark.*
+import static com.aplana.sbrf.taxaccounting.model.refbook.RefBookDeductionMark.INVESTMENT_CODE
+import static com.aplana.sbrf.taxaccounting.model.refbook.RefBookDeductionMark.OTHERS_CODE
 import static java.util.Collections.singletonList
+import static java.util.Collections.sort
 import static java.util.TimeZone.getTimeZone
 
 new Report2Ndfl(this).run()
@@ -273,7 +288,7 @@ class Report2Ndfl extends AbstractScriptClass {
                                         НалУдерж: is2Ndfl1() ? НалУдерж(rateIncomes) : 0,
                                         НалПеречисл: is2Ndfl1() ? НалПеречисл(person.incomes) : 0,// тут берутся строки перечисления, у которых rate=null
                                         НалУдержЛиш: is2Ndfl1() ? НалУдержЛиш(rateIncomes) : 0,
-                                        НалНеУдерж: is2Ndfl1() ? НалНеУдерж(rateIncomes) : СуммаНИ (rateIncomes))
+                                        НалНеУдерж: is2Ndfl1() ? НалНеУдерж(rateIncomes) : СуммаНИ(rateIncomes))
                                 НалВычССИ() {
                                     def deductions = rateDeductions.findAll {
                                         it.typeCode && !(deductionTypesByCode[it.typeCode]?.mark?.code in [INVESTMENT_CODE, OTHERS_CODE])
@@ -1107,7 +1122,7 @@ class Report2Ndfl extends AbstractScriptClass {
             createPrimaryRnuWithErrors()
             return
         }
-        def row = scriptSpecificReportHolder.getSelectedRecord()
+        DataRow<Cell> row = scriptSpecificReportHolder.getSelectedRecord()
         def params = scriptSpecificReportHolder.subreportParamValues ?: new HashMap<String, Object>()
         params.put(SubreportAliasConstants.P_NUM_SPRAVKA, row.pNumSpravka)
 
@@ -1120,42 +1135,538 @@ class Report2Ndfl extends AbstractScriptClass {
         subReportViewParams.put('№ ДУЛ', row.idDocNumber.toString())
 
         def xmlStr = declarationService.getXmlData(declarationData.id, userInfo)
-        def Файл = new XmlParser().parseText(xmlStr)
+        Node Файл = new XmlParser().parseText(xmlStr)
 
-        def jasperPrint = declarationService.createJasperReport(scriptSpecificReportHolder.getFileInputStream(), params, { Writer writer ->
-            def ДокументsToDelete = Файл.Документ.findAll {
-                it.@НомСпр != row.pNumSpravka
+        PDFont font = PDType0Font.load(PDDocument.newInstance(), scriptSpecificReportHolder.getSubreportParam("font"))
+
+        String xmlName = declarationService.getXmlDataFileName(declarationData.id, userInfo)
+
+        String fileName = xmlName.substring(0, xmlName.length() - 3).concat("pdf")
+
+        Node reference = Файл.Документ.'НДФЛ-2'.find { doc ->
+            String a = doc.@НомСпр
+            String b = row.pNumSpravka.toString()
+            return a == b
+        }
+
+        List<DocumentWrapper> allPages = createAndOrderReportPages(Файл, row)
+
+        allPages.eachWithIndex { DocumentWrapper page, int index ->
+            PDDocumentCatalog docCatalog = page.document.getDocumentCatalog()
+            PDAcroForm acroForm = docCatalog.getAcroForm()
+
+            PDResources resources = acroForm.getDefaultResources()
+            resources.put(COSName.getPDFName("CourierNew"), font)
+            acroForm.setDefaultAppearance("/CourierNew 16 Tf 0 g")
+
+            if (page instanceof TitlePage) {
+                new TitlePageProcessor().fillPage(new PageVisitor(acroForm, Файл, reference, ++index, page.СведДох, page.ПредВычССИList, page.УведВыч, page.СведСумДохDataList))
+            } else if (page instanceof IncomePage) {
+                new IncomesPageProcessor().fillPage(new PageVisitor(acroForm, Файл, reference, ++index, page.СведДох, page.ПредВычССИList, page.УведВыч, page.СведСумДохDataList))
+            } else if (page instanceof DeductionPage) {
+                new DeductionsPageProcessor().fillPage(new PageVisitor(acroForm, Файл, reference, ++index, page.СведДох, page.ПредВычССИList, page.УведВыч, page.СведСумДохDataList))
+            } else if (page instanceof ApplicationPage) {
+                new ApplicationPageProcessor().fillPage(new PageVisitor(acroForm, Файл, reference, ++index, page.СведДох, page.ПредВычССИList, page.УведВыч, page.СведСумДохDataList))
             }
-            ДокументsToDelete.each {
-                it.replaceNode({})
+            acroForm.flatten()
+        }
+
+        PDDocument destination = new PDDocument();
+
+        PDFMergerUtility merger = new PDFMergerUtility();
+
+        merger.setDestinationStream(scriptSpecificReportHolder.getFileOutputStream())
+
+        for (DocumentWrapper document : allPages) {
+            merger.appendDocument(destination, document.document)
+        }
+
+        OutputStream writer = scriptSpecificReportHolder.getFileOutputStream()
+        destination.save(writer)
+        destination.close()
+
+        scriptSpecificReportHolder.setFileName(fileName)
+    }
+
+    /**
+     * Обертка для PDF документа. Каждая страница представлена отдельным PDF файлом. Как страница заполняется зависит от
+     * реализации этого класса.
+     */
+    abstract class DocumentWrapper {
+        protected PDDocument document
+        protected int incomeIndex
+        protected Node СведДох
+        protected List<Node> ПредВычССИList
+        protected Node УведВыч
+        protected List<СведСумДохData> СведСумДохDataList
+    }
+
+    class TitlePage extends DocumentWrapper {
+
+        TitlePage(PDDocument document) {
+            this.document = document
+        }
+    }
+
+    class IncomePage extends DocumentWrapper {
+
+        IncomePage(PDDocument document) {
+            this.document = document
+        }
+    }
+
+    class DeductionPage extends DocumentWrapper {
+
+        DeductionPage(PDDocument document) {
+            this.document = document
+        }
+    }
+
+    class ApplicationPage extends DocumentWrapper {
+
+        ApplicationPage(PDDocument document) {
+            this.document = document
+        }
+    }
+
+    @TypeChecked(TypeCheckingMode.SKIP)
+    /**
+     * Инкапсулирует поведение по заполнению различных разделов FDF формы
+     */
+    abstract class FDFiller {
+        abstract void accept(PageVisitor pageVisitor)
+
+        @TypeChecked(TypeCheckingMode.SKIP)
+        String getOrgName(xmlRoot) {
+            StringBuilder orgName = new StringBuilder("------------------------------------------------------------------------------------------------------------------------")
+            String orgNameValue = xmlRoot.Документ[0].СвНА[0].СвНАЮЛ[0].@НаимОрг
+            orgName = orgName.replace(0, orgNameValue.length(), orgNameValue)
+            return orgName.toString()
+        }
+
+        void processField(PDField field, String value) {
+            if (value == null) value = ""
+            COSDictionary fieldDict = field.getCOSObject()
+            int maxLength = fieldDict.getInt(COSName.MAX_LEN)
+
+            StringBuilder printingValue = new StringBuilder(value)
+            for (int i = 0; i < maxLength - value.length(); i++) {
+                printingValue.append("-")
             }
-            if (!Файл.Документ.СведДох.isEmpty()) {
-                int incomeSize = Файл.Документ.СведДох.ДохВыч.СвСумДох.size()
-                Файл.Документ.СведДох.ДохВыч.СвСумДох.eachWithIndex { def СвСумДох, int index ->
-                    СвСумДох.@Страница = (index + 1 <= ((incomeSize + 1) / 2) ? 1 : 2)
-                    if (СвСумДох.СвСумВыч.isEmpty()) {
-                        СвСумДох.append(new Node(null, "СвСумВыч", [КодВычет: "", СумВычет: ""]))
-                    }
+            field.setValue(printingValue.toString())
+        }
+
+        void processPageNumField(PDField field, String value) {
+            COSDictionary fieldDict = field.getCOSObject()
+            int maxLength = fieldDict.getInt(COSName.MAX_LEN)
+
+            StringBuilder printingValue = new StringBuilder(value)
+            for (int i = 0; i < maxLength - value.length(); i++) {
+                printingValue.insert(0, 0)
+            }
+            field.setValue(printingValue.toString())
+        }
+
+        void processNumIntField(PDField field, String value) {
+            if (value == null) value = "0"
+            COSDictionary fieldDict = field.getCOSObject()
+            int maxLength = fieldDict.getInt(COSName.MAX_LEN)
+
+            StringBuilder printingValue = new StringBuilder(value)
+            for (int i = 0; i < maxLength - value.length(); i++) {
+                printingValue.append("-")
+            }
+            field.setValue(printingValue.toString())
+        }
+
+        void processNumFractField(PDField field, String value) {
+            if (value == null) value = "00"
+            field.setValue(value)
+        }
+    }
+
+    @TypeChecked(TypeCheckingMode.SKIP)
+    class HeaderFiller extends FDFiller {
+        @Override
+        void accept(PageVisitor pageVisitor) {
+            processField(pageVisitor.acroForm.getField("inn"), pageVisitor.xmlRoot.Документ[0].СвНА[0].СвНАЮЛ[0].@ИННЮЛ)
+            processField(pageVisitor.acroForm.getField("kpp"), pageVisitor.xmlRoot.Документ[0].СвНА[0].СвНАЮЛ[0].@КПП)
+            processPageNumField(pageVisitor.acroForm.getField("pageNum"), String.valueOf(pageVisitor.pageNum))
+            processField(pageVisitor.acroForm.getField("refNum"), pageVisitor.reference.@НомСпр)
+            processField(pageVisitor.acroForm.getField("reportYear"), pageVisitor.xmlRoot.Документ[0].@ОтчетГод)
+            processField(pageVisitor.acroForm.getField("mark"), pageVisitor.xmlRoot.Документ[0].@Признак)
+            processField(pageVisitor.acroForm.getField("corrNum"), pageVisitor.reference.@НомКорр)
+            processField(pageVisitor.acroForm.getField("taxAuthority"), pageVisitor.xmlRoot.Документ[0].@КодНО)
+            processField(pageVisitor.acroForm.getField("signer"), pageVisitor.xmlRoot.Документ[0].Подписант[0].@ПрПодп)
+            processField(pageVisitor.acroForm.getField("signerLastName"), pageVisitor.xmlRoot.Документ[0].Подписант[0].ФИО[0]?.@Фамилия)
+            processField(pageVisitor.acroForm.getField("signerFirstName"), pageVisitor.xmlRoot.Документ[0].Подписант[0].ФИО[0]?.@Имя)
+            processField(pageVisitor.acroForm.getField("signerMiddleName"), pageVisitor.xmlRoot.Документ[0].Подписант[0].ФИО[0]?.@Отчество)
+            processField(pageVisitor.acroForm.getField("approveDoc"), pageVisitor.xmlRoot.Документ[0].Подписант[0].СвПред[0]?.@НаимДок)
+            processField(pageVisitor.acroForm.getField("signDay"), pageVisitor.xmlRoot.Документ[0].@ДатаДок.substring(0, 2))
+            processField(pageVisitor.acroForm.getField("signMonth"), pageVisitor.xmlRoot.Документ[0].@ДатаДок.substring(3, 5))
+            processField(pageVisitor.acroForm.getField("signYear"), pageVisitor.xmlRoot.Документ[0].@ДатаДок.substring(6))
+        }
+    }
+
+    @TypeChecked(TypeCheckingMode.SKIP)
+    class ApplicationHeaderFiller extends FDFiller {
+        @Override
+        void accept(PageVisitor pageVisitor) {
+            processField(pageVisitor.acroForm.getField("inn"), pageVisitor.xmlRoot.Документ[0].СвНА[0].СвНАЮЛ[0].@ИННЮЛ)
+            processField(pageVisitor.acroForm.getField("kpp"), pageVisitor.xmlRoot.Документ[0].СвНА[0].СвНАЮЛ[0].@КПП)
+            processPageNumField(pageVisitor.acroForm.getField("pageNum"), String.valueOf(pageVisitor.pageNum))
+            processField(pageVisitor.acroForm.getField("refNum"), pageVisitor.reference.@НомСпр)
+            processField(pageVisitor.acroForm.getField("reportYear"), pageVisitor.xmlRoot.Документ[0].@ОтчетГод)
+            processField(pageVisitor.acroForm.getField("taxRate"), pageVisitor.СведСумДохDataList[0].taxRate)
+            processField(pageVisitor.acroForm.getField("signDate"), pageVisitor.xmlRoot.Документ[0].@ДатаДок)
+        }
+    }
+
+    @TypeChecked(TypeCheckingMode.SKIP)
+    class InfoFiller extends FDFiller {
+        @Override
+        void accept(PageVisitor pageVisitor) {
+            String orgName = getOrgName(pageVisitor.xmlRoot)
+            processField(pageVisitor.acroForm.getField("taxAgent1"), pageVisitor.pageNum == 1 ? orgName.substring(0, 40) : null)
+            processField(pageVisitor.acroForm.getField("taxAgent2"), pageVisitor.pageNum == 1 ? orgName.substring(40, 80) : null)
+            processField(pageVisitor.acroForm.getField("taxAgent3"), pageVisitor.pageNum == 1 ? orgName.substring(80, 120) : null)
+            processField(pageVisitor.acroForm.getField("liquidation"), pageVisitor.pageNum == 1 ? pageVisitor.xmlRoot.Документ[0].СвНА[0].СвНАЮЛ[0].СвРеоргЮЛ[0]?.@ФормРеорг : null)
+            processField(pageVisitor.acroForm.getField("liquidationInn"), pageVisitor.pageNum == 1 ? pageVisitor.xmlRoot.Документ[0].СвНА[0].СвНАЮЛ[0].СвРеоргЮЛ[0]?.@ИННЮЛ : null)
+            processField(pageVisitor.acroForm.getField("liquidationKpp"), pageVisitor.pageNum == 1 ? pageVisitor.xmlRoot.Документ[0].СвНА[0].СвНАЮЛ[0].СвРеоргЮЛ[0]?.@КПП : null)
+            processField(pageVisitor.acroForm.getField("oktmo"), pageVisitor.pageNum == 1 ? pageVisitor.xmlRoot.Документ[0].СвНА[0].@ОКТМО : null)
+            processField(pageVisitor.acroForm.getField("phone"), pageVisitor.pageNum == 1 ? pageVisitor.xmlRoot.Документ[0].СвНА[0].@Тлф : null)
+
+            processField(pageVisitor.acroForm.getField("innPerson"), pageVisitor.reference.ПолучДох[0].@ИННФЛ)
+            processField(pageVisitor.acroForm.getField("lastName"), pageVisitor.reference.ПолучДох[0].ФИО[0].@Фамилия)
+            processField(pageVisitor.acroForm.getField("firstName"), pageVisitor.reference.ПолучДох[0].ФИО[0].@Имя)
+            processField(pageVisitor.acroForm.getField("middleName"), pageVisitor.reference.ПолучДох[0].ФИО[0].@Отчество)
+            processField(pageVisitor.acroForm.getField("taxPayerState"), pageVisitor.reference.ПолучДох[0].@Статус)
+
+            processField(pageVisitor.acroForm.getField("birthDay"), pageVisitor.reference.ПолучДох[0].@ДатаРожд.substring(0, 2))
+            processField(pageVisitor.acroForm.getField("birthMonth"), pageVisitor.reference.ПолучДох[0].@ДатаРожд.substring(3, 5))
+            processField(pageVisitor.acroForm.getField("birthYear"), pageVisitor.reference.ПолучДох[0].@ДатаРожд.substring(6))
+            processField(pageVisitor.acroForm.getField("citizenship"), pageVisitor.reference.ПолучДох[0].@Гражд)
+            processField(pageVisitor.acroForm.getField("docCode"), pageVisitor.reference.ПолучДох[0].УдЛичнФЛ[0].@КодУдЛичн)
+            processField(pageVisitor.acroForm.getField("docNumber"), pageVisitor.reference.ПолучДох[0].УдЛичнФЛ[0].@СерНомДок)
+        }
+    }
+
+    class EmptyInfoFiller extends FDFiller {
+
+        @Override
+        void accept(PageVisitor pageVisitor) {
+            processField(pageVisitor.acroForm.getField("taxAgent1"), null)
+            processField(pageVisitor.acroForm.getField("taxAgent2"), null)
+            processField(pageVisitor.acroForm.getField("taxAgent3"), null)
+            processField(pageVisitor.acroForm.getField("liquidation"), null)
+            processField(pageVisitor.acroForm.getField("liquidationInn"), null)
+            processField(pageVisitor.acroForm.getField("liquidationKpp"), null)
+            processField(pageVisitor.acroForm.getField("oktmo"), null)
+            processField(pageVisitor.acroForm.getField("phone"), null)
+
+            processField(pageVisitor.acroForm.getField("innPerson"), null)
+            processField(pageVisitor.acroForm.getField("lastName"), null)
+            processField(pageVisitor.acroForm.getField("firstName"), null)
+            processField(pageVisitor.acroForm.getField("middleName"), null)
+            processField(pageVisitor.acroForm.getField("taxPayerState"), null)
+
+            processField(pageVisitor.acroForm.getField("birthDay"), null)
+            processField(pageVisitor.acroForm.getField("birthMonth"), null)
+            processField(pageVisitor.acroForm.getField("birthYear"), null)
+            processField(pageVisitor.acroForm.getField("citizenship"), null)
+            processField(pageVisitor.acroForm.getField("docCode"), null)
+            processField(pageVisitor.acroForm.getField("docNumber"), null)
+        }
+    }
+
+    @TypeChecked(TypeCheckingMode.SKIP)
+    class IncomeFiller extends FDFiller {
+
+        @Override
+        void accept(PageVisitor pageVisitor) {
+            processField(pageVisitor.acroForm.getField("taxRate"), pageVisitor.СведДох.@Ставка)
+            processNumIntField(pageVisitor.acroForm.getField("taxSumIntPart"), pageVisitor.СведДох.СумИтНалПер[0].@СумДохОбщ.split("\\.")[0])
+            processNumFractField(pageVisitor.acroForm.getField("taxSumFractPart"), pageVisitor.СведДох.СумИтНалПер[0].@СумДохОбщ.split("\\.")[1])
+            processNumIntField(pageVisitor.acroForm.getField("fixPayments"), pageVisitor.СведДох.СумИтНалПер[0].@АвансПлатФикс)
+            processNumIntField(pageVisitor.acroForm.getField("taxBaseIntPart"), pageVisitor.СведДох.СумИтНалПер[0].@НалБаза.split("\\.")[0])
+            processNumFractField(pageVisitor.acroForm.getField("taxBaseFractPart"), pageVisitor.СведДох.СумИтНалПер[0].@НалБаза.split("\\.")[1])
+            processNumIntField(pageVisitor.acroForm.getField("transferPayment"), pageVisitor.СведДох.СумИтНалПер[0].@НалПеречисл)
+            processNumIntField(pageVisitor.acroForm.getField("calculatedSum"), pageVisitor.СведДох.СумИтНалПер[0].@НалИсчисл)
+            processNumIntField(pageVisitor.acroForm.getField("overholdingTax"), pageVisitor.СведДох.СумИтНалПер[0].@НалУдержЛиш)
+            processNumIntField(pageVisitor.acroForm.getField("withholdingTax"), pageVisitor.СведДох.СумИтНалПер[0].@НалУдерж)
+            processNumIntField(pageVisitor.acroForm.getField("notholdingTax"), pageVisitor.СведДох.СумИтНалПер[0].@НалНеУдерж)
+        }
+    }
+
+    class EmptyIncomeFiller extends FDFiller {
+
+        @Override
+        void accept(PageVisitor pageVisitor) {
+            processField(pageVisitor.acroForm.getField("taxRate"), null)
+            processNumIntField(pageVisitor.acroForm.getField("taxSumIntPart"), null)
+            processNumFractField(pageVisitor.acroForm.getField("taxSumFractPart"), null)
+            processNumIntField(pageVisitor.acroForm.getField("fixPayments"), null)
+            processNumIntField(pageVisitor.acroForm.getField("taxBaseIntPart"), null)
+            processNumFractField(pageVisitor.acroForm.getField("taxBaseFractPart"), null)
+            processNumIntField(pageVisitor.acroForm.getField("transferPayment"), null)
+            processNumIntField(pageVisitor.acroForm.getField("calculatedSum"), null)
+            processNumIntField(pageVisitor.acroForm.getField("overholdingTax"), null)
+            processNumIntField(pageVisitor.acroForm.getField("withholdingTax"), null)
+            processNumIntField(pageVisitor.acroForm.getField("notholdingTax"), null)
+        }
+    }
+
+    @TypeChecked(TypeCheckingMode.SKIP)
+    class DeductionFiller extends FDFiller {
+        @Override
+        void accept(PageVisitor pageVisitor) {
+            for (int i = 1; i <= 6; i++) {
+                if (pageVisitor.ПредВычССИList && pageVisitor.ПредВычССИList.size() >= i) {
+                    processField(pageVisitor.acroForm.getField("deductionCode" + (i)), pageVisitor.ПредВычССИList.get(i - 1).@КодВычет)
+                    processNumIntField(pageVisitor.acroForm.getField("deductionIntPart" + (i)), pageVisitor.ПредВычССИList.get(i - 1).@СумВычет.split("\\.")[0])
+                    processNumFractField(pageVisitor.acroForm.getField("deductionFractPart" + (i)), pageVisitor.ПредВычССИList.get(i - 1).@СумВычет.split("\\.")[1])
+                } else {
+                    processField(pageVisitor.acroForm.getField("deductionCode" + (i)), null)
+                    processNumIntField(pageVisitor.acroForm.getField("deductionIntPart" + (i)), null)
+                    processNumFractField(pageVisitor.acroForm.getField("deductionFractPart" + (i)), null)
                 }
-                def Строка = null
-                Файл.Документ.СведДох.НалВычССИ.ПредВычССИ.eachWithIndex { def ПредВычССИ, int index ->
-                    if (index % 4 == 0) {
-                        Строка = new Node(null, "Строка")
-                        ПредВычССИ.parent().append(Строка)
-                    }
-                    ПредВычССИ.parent().remove(ПредВычССИ)
-                    Строка.append(ПредВычССИ)
-                }
+            }
+            if (pageVisitor.УведВыч) {
+                processField(pageVisitor.acroForm.getField("notifTypeCode"), pageVisitor.УведВыч.@КодВидУвед)
+                processField(pageVisitor.acroForm.getField("notifNumber"), pageVisitor.УведВыч.@НомерУвед)
+                processField(pageVisitor.acroForm.getField("notifDay"), pageVisitor.УведВыч.@ДатаУвед.substring(0, 2))
+                processField(pageVisitor.acroForm.getField("notifMonth"), pageVisitor.УведВыч.@ДатаУвед.substring(3, 5))
+                processField(pageVisitor.acroForm.getField("notifYear"), pageVisitor.УведВыч.@ДатаУвед.substring(6))
+                processField(pageVisitor.acroForm.getField("notifTaxAuthCode"), pageVisitor.УведВыч.@НОУвед)
             } else {
-                Файл.Документ.each { it.append(new Node(null, "СведДох", [])) }
+                processField(pageVisitor.acroForm.getField("notifTypeCode"), null)
+                processField(pageVisitor.acroForm.getField("notifNumber"), null)
+                processField(pageVisitor.acroForm.getField("notifDay"), null)
+                processField(pageVisitor.acroForm.getField("notifMonth"), null)
+                processField(pageVisitor.acroForm.getField("notifYear"), null)
+                processField(pageVisitor.acroForm.getField("notifTaxAuthCode"), null)
             }
-            new XmlNodePrinter(new PrintWriter(writer)).print(Файл)
-            writer.flush()
-        })
+        }
+    }
 
-        StringBuilder fileName = new StringBuilder(declarationTemplate.name).append("_").append(declarationData.id).append("_").append(row.lastName ?: "").append(" ").append(row.firstName ?: "").append(" ").append(row.middleName ?: "").append("_").append(new Date().format(DATE_FORMAT_FULL)).append(".xlsx")
-        declarationService.exportXLSX(jasperPrint, scriptSpecificReportHolder.getFileOutputStream())
-        scriptSpecificReportHolder.setFileName(fileName.toString())
+    class ApplicationDataFiller extends FDFiller {
+        @Override
+        void accept(PageVisitor pageVisitor) {
+            for (int i = 1; i <= 15; i++) {
+                if (pageVisitor.СведСумДохDataList && pageVisitor.СведСумДохDataList.size() >= i) {
+                    processField(pageVisitor.acroForm.getField("month" + i), !pageVisitor.СведСумДохDataList.get(i - 1).duplicate ? pageVisitor.СведСумДохDataList.get(i - 1).month : null)
+                    processField(pageVisitor.acroForm.getField("incomeCode" + i), !pageVisitor.СведСумДохDataList.get(i - 1).duplicate ? pageVisitor.СведСумДохDataList?.get(i - 1)?.incomeCode : null)
+
+                    processNumIntField(pageVisitor.acroForm.getField("incomeSumIntPart" + i), pageVisitor.СведСумДохDataList?.get(i - 1)?.incomeSum && !pageVisitor.СведСумДохDataList.get(i - 1).duplicate ? pageVisitor.СведСумДохDataList?.get(i - 1)?.incomeSum?.split("\\.")[0] : null)
+                    processNumFractField(pageVisitor.acroForm.getField("incomeSumFractPart" + i), pageVisitor.СведСумДохDataList?.get(i - 1)?.incomeSum && !pageVisitor.СведСумДохDataList.get(i - 1).duplicate ? pageVisitor.СведСумДохDataList?.get(i - 1)?.incomeSum?.split("\\.")[1] : null)
+
+                    processField(pageVisitor.acroForm.getField("deductionCode" + i), pageVisitor.СведСумДохDataList?.get(i - 1)?.deductionCode)
+
+                    processNumIntField(pageVisitor.acroForm.getField("deductionSumIntPart" + i), pageVisitor.СведСумДохDataList?.get(i - 1)?.deductionSum ? pageVisitor.СведСумДохDataList?.get(i - 1)?.deductionSum?.split("\\.")[0] : null)
+                    processNumFractField(pageVisitor.acroForm.getField("deductionSumFractPart" + i), pageVisitor.СведСумДохDataList?.get(i - 1)?.deductionSum ? pageVisitor.СведСумДохDataList?.get(i - 1)?.deductionSum?.split("\\.")[1] : null)
+                } else {
+                    processField(pageVisitor.acroForm.getField("month" + i), null)
+                    processField(pageVisitor.acroForm.getField("incomeCode" + i), null)
+                    processNumIntField(pageVisitor.acroForm.getField("incomeSumIntPart" + i), null)
+                    processNumFractField(pageVisitor.acroForm.getField("incomeSumFractPart" + i), null)
+                    processField(pageVisitor.acroForm.getField("deductionCode" + i), null)
+                    processNumIntField(pageVisitor.acroForm.getField("deductionSumIntPart" + i), null)
+                    processNumFractField(pageVisitor.acroForm.getField("deductionSumFractPart" + i), null)
+                }
+            }
+        }
+    }
+
+    class PageVisitor {
+        PDAcroForm acroForm
+        Node xmlRoot
+        Node reference
+        int pageNum
+        Node СведДох
+        List<Node> ПредВычССИList
+        Node УведВыч
+        List<СведСумДохData> СведСумДохDataList
+
+        PageVisitor(PDAcroForm acroForm, Node xmlRoot, Node reference, int pageNum, Node СведДох, List<Node> ПредВычССИList, Node УведВыч, List<СведСумДохData> СведСумДохDataList) {
+            this.acroForm = acroForm
+            this.xmlRoot = xmlRoot
+            this.reference = reference
+            this.pageNum = pageNum
+            this.СведДох = СведДох
+            this.ПредВычССИList = ПредВычССИList
+            this.УведВыч = УведВыч
+            this.СведСумДохDataList = СведСумДохDataList
+        }
+    }
+
+    /**
+     * Содержит набор правил для заполнения страницы
+     */
+    abstract class FillPageProcessor {
+        abstract void fillPage(PageVisitor pageVisitor)
+    }
+
+    class TitlePageProcessor extends FillPageProcessor {
+        List<FDFiller> pageParts = [new HeaderFiller(), new InfoFiller(), new IncomeFiller(), new DeductionFiller()]
+
+        void fillPage(PageVisitor pageVisitor) {
+            for (FDFiller pagePart : pageParts) {
+                pagePart.accept(pageVisitor)
+            }
+        }
+    }
+
+    class IncomesPageProcessor extends FillPageProcessor {
+        List<FDFiller> pageParts = [new HeaderFiller(), new EmptyInfoFiller(), new IncomeFiller(), new DeductionFiller()]
+
+        void fillPage(PageVisitor pageVisitor) {
+            for (FDFiller pagePart : pageParts) {
+                pagePart.accept(pageVisitor)
+            }
+        }
+    }
+
+    class DeductionsPageProcessor extends FillPageProcessor {
+        List<FDFiller> pageParts = [new HeaderFiller(), new EmptyInfoFiller(), new EmptyIncomeFiller(), new DeductionFiller()]
+
+        void fillPage(PageVisitor pageVisitor) {
+            for (FDFiller pagePart : pageParts) {
+                pagePart.accept(pageVisitor)
+            }
+        }
+    }
+
+    class ApplicationPageProcessor extends FillPageProcessor {
+        List<FDFiller> pageParts = [new ApplicationHeaderFiller(), new ApplicationDataFiller()]
+
+        @Override
+        void fillPage(PageVisitor pageVisitor) {
+            for (FDFiller pagePart : pageParts) {
+                pagePart.accept(pageVisitor)
+            }
+        }
+    }
+
+    @TypeChecked(TypeCheckingMode.SKIP)
+    /**
+     * Создает и определяет порядок заполнения страниц отчета
+     */
+    List<DocumentWrapper> createAndOrderReportPages(Node root, DataRow<Cell> row) {
+        Node reference = root.Документ.'НДФЛ-2'.find { doc ->
+            String a = doc.@НомСпр
+            String b = row.pNumSpravka.toString()
+            return a == b
+        }
+
+        List<Node> СведДохList = reference.СведДох
+
+        СведДохList.sort { o1, o2 ->
+            o1.@Ставка <=> o2.@Ставка
+        }
+
+        List<DocumentWrapper> documentList = []
+
+        СведДохList.eachWithIndex { Node СведДох, int index ->
+            DocumentWrapper basePage = null
+            if (index == 0) {
+                basePage = new TitlePage(PDDocument.load(declarationService.getTemplateFileContent(declarationData.getDeclarationTemplateId(), DeclarationTemplateFile.NDFL_2_REPORT_BY_PERSON_PAGE_BASE)))
+            } else {
+                basePage = new IncomePage(PDDocument.load(declarationService.getTemplateFileContent(declarationData.getDeclarationTemplateId(), DeclarationTemplateFile.NDFL_2_REPORT_BY_PERSON_PAGE_BASE)))
+                basePage.incomeIndex = index
+            }
+            basePage.СведДох = СведДох
+            documentList << basePage
+            if (СведДохList.НалВычССИ) {
+                List<Node> ПредВычССИList = СведДох?.НалВычССИ[0]?.ПредВычССИ ?: []
+                ПредВычССИList.sort { o1, o2 ->
+                    o1.@КодВычет <=> o2.@КодВычет
+                }
+                List<List<Node>> ПредВычССИListDividedByPage = ПредВычССИList?.collate(6)
+                List<Node> УведВычList = СведДох?.НалВычССИ[0]?.УведВыч ?: []
+                basePage.ПредВычССИList = ПредВычССИListDividedByPage[0]
+                basePage.УведВыч = !УведВычList.isEmpty() ? УведВычList[0] : null
+                for (int i = 1; i <= findAdditionalBaseListCount(ПредВычССИList.size(), УведВычList.size()); i++) {
+                    DocumentWrapper deductionPage = new DeductionPage(PDDocument.load(declarationService.getTemplateFileContent(declarationData.getDeclarationTemplateId(), DeclarationTemplateFile.NDFL_2_REPORT_BY_PERSON_PAGE_BASE)))
+                    if (ПредВычССИListDividedByPage.size() >= i) {
+                        deductionPage.ПредВычССИList = ПредВычССИListDividedByPage[i]
+                    }
+                    if (УведВычList.size() >= i) {
+                        deductionPage.УведВыч = УведВычList[i]
+                    }
+                    documentList << deductionPage
+                }
+            }
+        }
+
+        СведДохList.eachWithIndex { Node СведДох, int index ->
+
+            List<Node> СведСумДохList = СведДох.ДохВыч[0].СвСумДох
+            List<СведСумДохData> СведСумДохDataList = []
+
+            СведСумДохList.each { Node СведСумДох ->
+                СведСумДохData data = new СведСумДохData()
+                data.month = СведСумДох.@Месяц
+                data.incomeCode = СведСумДох.@КодДоход
+                data.incomeSum = СведСумДох.@СумДоход
+                data.taxRate = СведДох.@Ставка
+
+                СведСумДохDataList << data
+
+                List<Node> СвСумВычList = СведСумДох.СвСумВыч
+
+                if (СвСумВычList) {
+                    СвСумВычList.eachWithIndex { Node СвСумВыч, int i ->
+                        if (i == 0) {
+                            data.deductionCode = СвСумВыч.@КодВычет
+                            data.deductionSum = СвСумВыч.@СумВычет
+                        } else {
+                            СведСумДохData deductionData = new СведСумДохData()
+                            deductionData.month = СведСумДох.@Месяц
+                            deductionData.incomeCode = СведСумДох.@КодДоход
+                            deductionData.incomeSum = СведСумДох.@СумДоход
+                            deductionData.deductionCode = СвСумВыч.@КодВычет
+                            deductionData.deductionSum = СвСумВыч.@СумВычет
+                            deductionData.taxRate = СведДох.@Ставка
+                            deductionData.duplicate = true
+
+                            СведСумДохDataList << deductionData
+                        }
+                    }
+                }
+            }
+
+            List<List<СведСумДохData>> СведСумДохDataListDividedByPage = СведСумДохDataList.collate(15)
+
+            СведСумДохDataListDividedByPage.each { List<СведСумДохData> PageСведСумДохDataList ->
+                PageСведСумДохDataList.sort { СведСумДохData o1, СведСумДохData o2 ->
+                    Integer.valueOf(o1.month) <=> Integer.valueOf(o2.month) ?: Integer.valueOf(o1.incomeCode) <=> Integer.valueOf(o2.incomeCode) ?: Integer.valueOf(o1.deductionCode) <=> Integer.valueOf(o2.deductionCode)
+                }
+
+                DocumentWrapper applicationPage = new ApplicationPage(PDDocument.load(declarationService.getTemplateFileContent(declarationData.getDeclarationTemplateId(), DeclarationTemplateFile.NDFL_2_REPORT_BY_PERSON_PAGE_APPLICATION)))
+                applicationPage.СведСумДохDataList = PageСведСумДохDataList
+                documentList << applicationPage
+            }
+        }
+
+        return documentList
+    }
+
+    class СведСумДохData {
+        String month
+        String incomeCode
+        String incomeSum
+        String deductionCode
+        String deductionSum
+        String taxRate
+        Boolean duplicate
+    }
+
+    static int findAdditionalBaseListCount(int ПредВычССИListSize, int УведВычListSize) {
+        if (ПредВычССИListSize <= 6 && УведВычListSize <= 1) {
+            return 0
+        } else {
+            return Math.max((int) Math.ceil((ПредВычССИListSize - 6) / 6d), УведВычListSize - 1)
+        }
     }
 
     /**

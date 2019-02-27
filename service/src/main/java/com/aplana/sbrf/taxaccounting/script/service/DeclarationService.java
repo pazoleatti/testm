@@ -332,4 +332,13 @@ public interface DeclarationService {
      * @return содержимое файла
      */
     InputStream getTemplateFileContent(int declarationTemplateId, String fileName);
+
+    /**
+     * Получить имя файла в формате законодателя
+     *
+     * @param declarationDataId идентификатор декларации
+     * @param userInfo          информация о пользователе, выполняющего действие
+     * @return имя файла взятого из xml данных
+     */
+    String getXmlDataFileName(long declarationDataId, TAUserInfo userInfo);
 }

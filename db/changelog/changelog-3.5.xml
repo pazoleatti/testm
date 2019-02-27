@@ -271,4 +271,19 @@
 		</sql>
 	</changeSet>
 
+	<!--https://jira.aplana.com/browse/SBRFNDFL-6560 Реализовать изменения в алгоритм формирования печатного представления 2-НДФЛ (1 и 2)-->
+	<changeSet id="3.5-ytrofimov-9" author="ytrofimov" runAlways="true">
+		<update tableName="BLOB_DATA">
+			<column name="data" valueBlobFile="templates-3.5/ndfl/report_2ndfl_1/v2016/ndfl_2_report_by_person_page_base.pdf"/>
+			<where>id = '79c363f8-52f7-4fa0-94bd-27c693f5cfd9'</where>
+		</update>
+	</changeSet>
+
+	<!--https://jira.aplana.com/browse/SBRFNDFL-6560 Реализовать изменения в алгоритм формирования печатного представления 2-НДФЛ (1 и 2)-->
+	<changeSet id="3.5-ytrofimov-10" author="ytrofimov" runAlways="true">
+		<update tableName="BLOB_DATA">
+			<column name="data" valueBlobFile="templates-3.5/ndfl/report_2ndfl_1/v2016/ndfl_2_report_by_person_page_application.pdf"/>
+			<where>id = '3a8afe75-a882-4ecb-9bd2-46920d12803d'</where>
+		</update>
+	</changeSet>
 </databaseChangeLog>
