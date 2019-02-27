@@ -17,5 +17,8 @@ DEL /s /q /f %LOG_DIR%\*.txt
 ECHO ## delete_duplicates_person
 "%ORA_BIN%\sqlplus" %AUTH% @"delete_duplicates_person.sql" %LOG_DIR%/delete_duplicates_person.txt
 
+ECHO ## update_hanging_duplicates
+"%ORA_BIN%\sqlplus" %AUTH% @"update_hanging_duplicates.sql" %LOG_DIR%/update_hanging_duplicates.txt
+
 rem �������� ������ ���������� �������������������
 PAUSE
