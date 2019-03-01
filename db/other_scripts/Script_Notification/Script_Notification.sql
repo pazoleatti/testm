@@ -11,7 +11,7 @@ column end_date new_val end_date
 SELECT 'd:\Work\SBRF-NDFL\JIRA\SBRFNDFL-6776' outpath from dual;
 
 -- Cписок пользователей формат ввода для одного пользователя (user_id) для нескольких пользователей (user_id1, user_id2, ..., user_idN)
-SELECT '(13277)' users_list from dual;
+SELECT '(13277,1)' users_list from dual;
 
 -- Дата начала периода запроса данных
 SELECT '01.01.2019 00:00:00' start_date FROM dual;
@@ -25,7 +25,7 @@ SELECT 'Script_GeNotificationToFile'||'.sql' filename FROM dual;
 spool &outpath\&filename
 
 SELECT 'set long 32767 pagesize 0 linesize 4000 feedback off echo off verify off trims on heading off termout off' FROM DUAL;
-with TMP_NOTIF (id, filename, sqlquery_header,sqlquery) as (
+WITH TMP_NOTIF (id, filename, sqlquery_header,sqlquery) as (
 SELECT 
   ntf.id, 
   '&outpath\SIB\SIB_'||TO_CHAR(REPLACE(dd.file_name,'.xml'))||'_'||ntf.num_form||'_'
@@ -47,7 +47,7 @@ SELECT
         ELSE '' END 
   ||'_'||TO_CHAR(ntf.id)||'.csv',
   'SELECT ''"№ п/п";"Дата-время";"Тип сообщения";"Текст сообщения";"Тип";"Объект"'' FROM DUAL;',
-  'SELECT TO_CHAR(ord)||'';''||TO_CHAR(creation_date,''DD.MM.YYYY hh24:mi:ss'')||'';''||CASE WHEN log_level = 0 THEN ''Информация'' WHEN log_level = 1 THEN ''предупреждение'' WHEN log_level = 2 THEN ''ошибка'' ELSE '''' END||'';''||TO_CHAR(message)||'';''||TO_CHAR(type)||'';''||TO_CHAR(object) FROM log_entry WHERE log_id = ''' ||TO_CHAR(ntf.log_id)||''';'
+  'SELECT ''"''||TO_CHAR(ord)||''";"''||TO_CHAR(creation_date,''DD.MM.YYYY hh24:mi:ss'')||''";"''||CASE WHEN log_level = 0 THEN ''Информация'' WHEN log_level = 1 THEN ''предупреждение'' WHEN log_level = 2 THEN ''ошибка'' ELSE '''' END||''";"''||TO_CHAR(REPLACE(message,''"'',''""''))||''";"''||TO_CHAR(REPLACE(type,''"'',''""''))||''";"''||TO_CHAR(REPLACE(object,''"'',''""''))||''"'' FROM log_entry WHERE log_id = ''' ||TO_CHAR(ntf.log_id)||''';'
 FROM (
       SELECT 
         nt.user_id,
@@ -67,6 +67,7 @@ WHERE (ntf.up_text LIKE '%ЗАГРУЗКА ФАЙЛА%' AND ntf.up_text LIKE '%�
       OR (ntf.up_text LIKE '%НЕ ВЫПОЛНЕНА ОПЕРАЦИЯ "ПРОВЕРКА" ДЛЯ НАЛОГОВОЙ ФОРМЫ%' AND ntf.up_text NOT LIKE '%ОТМЕН%')
       OR (ntf.up_text LIKE '%ОПЕРАЦИЯ "ИДЕНТИФИКАЦИЯ ФЛ" ВЫПОЛНЕНА ДЛЯ НАЛОГОВОЙ ФОРМЫ%' AND ntf.up_text NOT LIKE '%ОТМЕН%')
       OR (ntf.up_text LIKE '%НЕ ВЫПОЛНЕНА ОПЕРАЦИЯ "ИДЕНТИФИКАЦИЯ ФЛ" ДЛЯ НАЛОГОВОЙ ФОРМЫ%' AND ntf.up_text NOT LIKE '%ОТМЕН%')
+      OR (ntf.up_text NOT LIKE '%МЕНЕН%')
 UNION ALL
 SELECT 
   ntf.id, 
@@ -89,7 +90,7 @@ SELECT
         ELSE '' END 
   ||'_'||TO_CHAR(ntf.id)||'.csv',
   'SELECT ''"№ п/п";"Дата-время";"Тип сообщения";"Текст сообщения";"Тип";"Объект"'' FROM DUAL;',
-  'SELECT TO_CHAR(ord)||'';''||TO_CHAR(creation_date,''DD.MM.YYYY hh24:mi:ss'')||'';''||CASE WHEN log_level = 0 THEN ''Информация'' WHEN log_level = 1 THEN ''предупреждение'' WHEN log_level = 2 THEN ''ошибка'' ELSE '''' END||'';''||TO_CHAR(message)||'';''||TO_CHAR(type)||'';''||TO_CHAR(object) FROM log_entry WHERE log_id = ''' ||TO_CHAR(ntf.log_id)||''';'
+  'SELECT ''"''||TO_CHAR(ord)||''";"''||TO_CHAR(creation_date,''DD.MM.YYYY hh24:mi:ss'')||''";"''||CASE WHEN log_level = 0 THEN ''Информация'' WHEN log_level = 1 THEN ''предупреждение'' WHEN log_level = 2 THEN ''ошибка'' ELSE '''' END||''";"''||TO_CHAR(REPLACE(message,''"'',''""''))||''";"''||TO_CHAR(REPLACE(type,''"'',''""''))||''";"''||TO_CHAR(REPLACE(object,''"'',''""''))||''"'' FROM log_entry WHERE log_id = ''' ||TO_CHAR(ntf.log_id)||''';'
 FROM (
       SELECT 
         nt.user_id,
@@ -109,6 +110,7 @@ WHERE (ntf.up_text LIKE '%ЗАГРУЗКА ФАЙЛА%' AND ntf.up_text LIKE '%�
       OR (ntf.up_text LIKE '%НЕ ВЫПОЛНЕНА ОПЕРАЦИЯ "ПРОВЕРКА" ДЛЯ НАЛОГОВОЙ ФОРМЫ%' AND ntf.up_text NOT LIKE '%ОТМЕН%')
       OR (ntf.up_text LIKE '%ОПЕРАЦИЯ "ИДЕНТИФИКАЦИЯ ФЛ" ВЫПОЛНЕНА ДЛЯ НАЛОГОВОЙ ФОРМЫ%' AND ntf.up_text NOT LIKE '%ОТМЕН%')
       OR (ntf.up_text LIKE '%НЕ ВЫПОЛНЕНА ОПЕРАЦИЯ "ИДЕНТИФИКАЦИЯ ФЛ" ДЛЯ НАЛОГОВОЙ ФОРМЫ%' AND ntf.up_text NOT LIKE '%ОТМЕН%')
+      OR (ntf.up_text NOT LIKE '%МЕНЕН%')
 UNION ALL
 SELECT 
   ntf.id, 
@@ -131,7 +133,7 @@ SELECT
         ELSE '' END 
   ||'_'||TO_CHAR(ntf.id)||'.csv',
   'SELECT ''"№ п/п";"Дата-время";"Тип сообщения";"Текст сообщения";"Тип";"Объект"'' FROM DUAL;',
-  'SELECT TO_CHAR(ord)||'';''||TO_CHAR(creation_date,''DD.MM.YYYY hh24:mi:ss'')||'';''||CASE WHEN log_level = 0 THEN ''Информация'' WHEN log_level = 1 THEN ''предупреждение'' WHEN log_level = 2 THEN ''ошибка'' ELSE '''' END||'';''||TO_CHAR(message)||'';''||TO_CHAR(type)||'';''||TO_CHAR(object) FROM log_entry WHERE log_id = ''' ||TO_CHAR(ntf.log_id)||''';'
+  'SELECT ''"''||TO_CHAR(ord)||''";"''||TO_CHAR(creation_date,''DD.MM.YYYY hh24:mi:ss'')||''";"''||CASE WHEN log_level = 0 THEN ''Информация'' WHEN log_level = 1 THEN ''предупреждение'' WHEN log_level = 2 THEN ''ошибка'' ELSE '''' END||''";"''||TO_CHAR(REPLACE(message,''"'',''""''))||''";"''||TO_CHAR(REPLACE(type,''"'',''""''))||''";"''||TO_CHAR(REPLACE(object,''"'',''""''))||''"'' FROM log_entry WHERE log_id = ''' ||TO_CHAR(ntf.log_id)||''';'
 FROM (
       SELECT 
         nt.user_id,
@@ -151,6 +153,7 @@ WHERE (ntf.up_text LIKE '%ЗАГРУЗКА ФАЙЛА%' AND ntf.up_text LIKE '%�
       OR (ntf.up_text LIKE '%НЕ ВЫПОЛНЕНА ОПЕРАЦИЯ "ПРОВЕРКА" ДЛЯ НАЛОГОВОЙ ФОРМЫ%' AND ntf.up_text NOT LIKE '%ОТМЕН%')
       OR (ntf.up_text LIKE '%ОПЕРАЦИЯ "ИДЕНТИФИКАЦИЯ ФЛ" ВЫПОЛНЕНА ДЛЯ НАЛОГОВОЙ ФОРМЫ%' AND ntf.up_text NOT LIKE '%ОТМЕН%')
       OR (ntf.up_text LIKE '%НЕ ВЫПОЛНЕНА ОПЕРАЦИЯ "ИДЕНТИФИКАЦИЯ ФЛ" ДЛЯ НАЛОГОВОЙ ФОРМЫ%' AND ntf.up_text NOT LIKE '%ОТМЕН%')
+      OR (ntf.up_text NOT LIKE '%МЕНЕН%')
 )
 SELECT  
      'spool '||filename||chr(13)||sqlquery_header||chr(13)||sqlquery||chr(13)||'spool off;'
