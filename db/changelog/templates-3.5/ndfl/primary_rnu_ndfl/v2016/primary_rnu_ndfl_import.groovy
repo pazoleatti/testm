@@ -1037,8 +1037,8 @@ class Import extends AbstractScriptClass {
      * @param persons список ФЛ
      */
     void checkPersonFields(List<NdflPerson> persons) {
-        def aliasList = ["inp", "lastName", "firstName", "birthDay", "citizenship", "idDocType", "idDocNumber", "status", "regionCode", "postIndex"]
-        def aliasNameList = [INP, LAST_NAME, FIRST_NAME, BIRTH_DAY, CITIZENSHIP, ID_DOC_TYPE, ID_DOC_NUMBER, STATUS, REGION_CODE, POST_INDEX]
+        def aliasList = ["inp", "lastName", "firstName", "birthDay", "citizenship", "idDocType", "idDocNumber", "status"]
+        def aliasNameList = [INP, LAST_NAME, FIRST_NAME, BIRTH_DAY, CITIZENSHIP, ID_DOC_TYPE, ID_DOC_NUMBER, STATUS]
         for (def person : persons) {
             List<String> emptyFields = new ArrayList()
             for (int i = 0; i < aliasList.size(); i++) {
