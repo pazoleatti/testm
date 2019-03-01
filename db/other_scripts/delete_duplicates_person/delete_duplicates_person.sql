@@ -19,23 +19,23 @@ begin
               (
               select
               doc.doc_id,
-              lower(doc.doc_number) doc_number,
-              rbp.*
+              regexp_replace(lower(doc.doc_number),'[^0-9A-Za-zА-Яа-я]','') doc_number,
+              rbp.id, rbp.record_id, rbp.last_name, rbp.first_name, rbp.middle_name, rbp.birth_date
               from
               ref_book_person rbp,
               ref_book_id_doc doc
               where
               doc.person_id(+)=rbp.id
+              and
+              not exists(select * from ndfl_references where person_id=rbp.id)
+              and
+              not exists(select * from ndfl_person where person_id=rbp.id)
+              and 
+              not exists(select * from declaration_data_person where person_id=rbp.id)
               ) p
               ) dp where 
               cnt_fl > 1
               and id <> min_id
-              and
-              not exists(select * from ndfl_references where person_id=dp.id)
-              and
-              not exists(select * from ndfl_person where person_id=dp.id)
-              and 
-              not exists(select * from declaration_data_person where person_id=dp.id)
             )
   loop
 	
