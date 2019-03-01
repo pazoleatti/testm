@@ -536,7 +536,12 @@ public class AsyncManagerImpl implements AsyncManager {
         return tx.executeInNewTransaction(new TransactionLogic<AsyncTaskData>() {
             @Override
             public AsyncTaskData execute() {
-                return asyncTaskDao.reserveTask(node, priorityNode, timeout, balancingVariants, maxTasksPerNode);
+                AsyncTaskData result = null;
+                Long id = asyncTaskDao.reserveTask(node, priorityNode, timeout, balancingVariants, maxTasksPerNode);
+                if (id != null) {
+                    result = asyncTaskDao.findById(id);
+                }
+                return result;
             }
         });
     }
