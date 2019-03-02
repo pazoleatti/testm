@@ -4,10 +4,9 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome;
 import com.aplana.sbrf.taxaccounting.model.result.NdflPersonIncomeDatesDTO;
+import com.aplana.sbrf.taxaccounting.model.util.DateUtils;
 
 import java.util.Date;
-
-import static com.aplana.sbrf.taxaccounting.model.util.DateUtils.commonDateFormat;
 
 
 /**
@@ -109,7 +108,7 @@ public abstract class DateEditor {
                 String.format("%s, ИНП: %s, ID операции: %s", person.getFullName(), person.getInp(), income.getOperationId()),
                 income.getRowNum(),
                 fieldTitleForWarning(),
-                commonDateFormat(getDateToSet()),
+                DateUtils.formatPossibleZeroDate(getDateToSet()),
                 rowNameInInstrumentalCase()
         );
     }
@@ -121,8 +120,8 @@ public abstract class DateEditor {
                 String.format("%s, ИНП: %s, ID операции: %s", person.getFullName(), person.getInp(), income.getOperationId()),
                 income.getRowNum(),
                 fieldNameInGenitiveCase(),
-                commonDateFormat(getDateToEdit()),
-                commonDateFormat(getDateToSet())
+                DateUtils.formatPossibleZeroDate(getDateToEdit()),
+                DateUtils.formatPossibleZeroDate(getDateToSet())
         );
     }
 }

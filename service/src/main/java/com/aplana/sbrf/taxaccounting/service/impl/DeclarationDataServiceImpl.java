@@ -2781,7 +2781,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                         DateUtils.commonDateFormat(incomeDates.getAccruedDate(), onEmpty),
                         DateUtils.commonDateFormat(incomeDates.getPayoutDate(), onEmpty),
                         DateUtils.commonDateFormat(incomeDates.getTaxDate(), onEmpty),
-                        DateUtils.commonDateFormat(incomeDates.getTransferDate(), onEmpty)
+                        DateUtils.formatPossibleZeroDate(incomeDates.getTransferDate(), onEmpty)
                 );
                 notification.setText(String.format("Для формы №%s выполнено частичное изменение дат раздела 2", declarationDataId));
             } else if (isAnyDateChanged) {
@@ -2789,7 +2789,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                         DateUtils.commonDateFormat(incomeDates.getAccruedDate(), onEmpty),
                         DateUtils.commonDateFormat(incomeDates.getPayoutDate(), onEmpty),
                         DateUtils.commonDateFormat(incomeDates.getTaxDate(), onEmpty),
-                        DateUtils.commonDateFormat(incomeDates.getTransferDate(), onEmpty)
+                        DateUtils.formatPossibleZeroDate(incomeDates.getTransferDate(), onEmpty)
                 );
                 notification.setText(String.format("Для формы №%s выполнено изменение дат раздела 2", declarationDataId));
             } else {
@@ -2797,7 +2797,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                         DateUtils.commonDateFormat(incomeDates.getAccruedDate(), onEmpty),
                         DateUtils.commonDateFormat(incomeDates.getPayoutDate(), onEmpty),
                         DateUtils.commonDateFormat(incomeDates.getTaxDate(), onEmpty),
-                        DateUtils.commonDateFormat(incomeDates.getTransferDate(), onEmpty)
+                        DateUtils.formatPossibleZeroDate(incomeDates.getTransferDate(), onEmpty)
                 );
                 notification.setText(String.format("Для формы №%s не выполнено изменение дат раздела 2", declarationDataId));
             }
