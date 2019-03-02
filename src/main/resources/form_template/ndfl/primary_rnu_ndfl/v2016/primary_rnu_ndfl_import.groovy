@@ -1065,13 +1065,13 @@ class Import extends AbstractScriptClass {
 
     void checkRequiredFieldsIncome(def incomes, def fioAndInp) {
         for (NdflPersonIncome income : incomes) {
-            checkRequiderFields(income, ["kpp", "oktmo"], [KPP, OKTMO], fioAndInp)
+            checkRequiredFields(income, ["kpp", "oktmo"], [KPP, OKTMO], fioAndInp)
         }
     }
 
     void checkRequiredFieldsDeduction(def deductions, def fioAndInp) {
         for (NdflPersonDeduction deduction : deductions) {
-            checkRequiderFields(deduction,
+            checkRequiredFields(deduction,
                     ["typeCode", "notifType", "notifDate", "notifNum", "notifSource", "operationId", "incomeAccrued", "incomeCode", "incomeSumm", "periodCurrDate", "periodCurrSumm"],
                     [TYPE_CODE, NOTIF_TYPE, NOTIF_DATE, NOTIF_NUM, NOTIF_SOURCE, DEDUCTION_OPERATION_ID, INCOME_ACCRUED, INCOME_CODE, INCOME_SUMM, PERIOD_CURR_DATE, PERIOD_CURR_SUMM],
                     fioAndInp)
@@ -1080,7 +1080,7 @@ class Import extends AbstractScriptClass {
 
     void checkRequiredFieldsPrepayment(def prepayments, def fioAndInp) {
         for (NdflPersonPrepayment prepayment : prepayments) {
-            checkRequiderFields(prepayment,
+            checkRequiredFields(prepayment,
                     ["operationId", "summ", "notifDate", "notifNum", "notifSource"],
                     [PREPAYMENT_OPERATION_ID, PREPAYMENT_SUMM, PREPAYMENT_NOTIF_DATE, PREPAYMENT_NOTIF_NUM, PREPAYMENT_NOTIF_SOURCE],
                     fioAndInp)
@@ -1089,14 +1089,14 @@ class Import extends AbstractScriptClass {
     }
 
     /**
-     * Проверка заполнености обязательных полей
+     * Проверка заполненности обязательных полей
      *
      * @param operation строка из 2, 3, или 4 раздела
      * @param aliasList список названий полей операции, которые необходимо проверить
      * @param aliasNameList список названий граф операций, которые необходимо проверить
      * @param fioAndInp ФИО и ИНП ФЛ
      */
-    void checkRequiderFields(def operation, List aliasList, List aliasNameList, def fioAndInp) {
+    void checkRequiredFields(def operation, List aliasList, List aliasNameList, def fioAndInp) {
         List<String> emptyFields = new ArrayList()
         for (int i = 0; i < aliasList.size(); i++) {
             if (operation[aliasList[i]] == null || (operation[aliasList[i]]) instanceof String && (org.apache.commons.lang3.StringUtils.isBlank((String) operation[aliasList[i]]))) {
@@ -1121,90 +1121,82 @@ class Import extends AbstractScriptClass {
     }
 
     boolean checkIncomesDates(NdflPerson person) {
-        if (person.incomes) {
-            boolean allRecordsFailed = true
-            boolean atLeastOneRecordFailed = false
-            Map<String, List<NdflPersonIncome>> incomesGroupedByOperationId = [:]
-            for (NdflPersonIncome income : person.incomes) {
-                List<NdflPersonIncome> incomes = incomesGroupedByOperationId.get(income.operationId)
-                if (incomes == null) {
-                    incomesGroupedByOperationId.put(income.operationId, [income])
-                } else {
-                    incomes.add(income)
-                }
-            }
-            for (List<NdflPersonIncome> incomesGroup : incomesGroupedByOperationId.values()) {
-                boolean checkPassed = isIncomeDatesInPeriod(incomesGroup)
-                allRecordsFailed &= !checkPassed
-                atLeastOneRecordFailed |= !checkPassed
-            }
-            if (allRecordsFailed) {
-                logger.error("Для ФЛ (ФИО: \"${person.lastName} ${person.firstName}${person.middleName ? " " + person.middleName : ""}\", " +
-                        "ИНП: \"${person.inp}\") отсутствуют операции, принадлежащие периоду формы: Операции по ФЛ не загружено в Налоговую форму " +
-                        "№: \"${declarationData.id}\", Период: \"${reportPeriod.taxPeriod.year}, ${reportPeriod.name}\"," +
-                        " Подразделение: \"${department.name}\", Вид: \"${declarationTemplate.name}\"" +
-                        "${asnuName ? ", АСНУ: \"${asnuName}\"" : ""}.")
-            }
-            return !atLeastOneRecordFailed
+        if (!person.incomes) return true
+
+        boolean allRecordsFailed = true
+        boolean atLeastOneRecordFailed = false
+        Map<String, List<NdflPersonIncome>> incomesGroupedByOperationId = person.incomes.groupBy { it.operationId }
+
+        for (List<NdflPersonIncome> incomesGroup : incomesGroupedByOperationId.values()) {
+            boolean checkPassed = isIncomeDatesInPeriod(incomesGroup)
+            allRecordsFailed &= !checkPassed
+            atLeastOneRecordFailed |= !checkPassed
         }
-        return true
+        if (allRecordsFailed) {
+            logger.warn("Для ФЛ (ФИО: \"${person.fullName}\", ИНП: \"${person.inp}\") " +
+                    "отсутствуют операции, принадлежащие периоду формы:\"${reportPeriod.taxPeriod.year}, ${reportPeriod.name}\". " +
+                    "Операции по ФЛ не загружены в Налоговую форму №: \"${declarationData.id}\", " +
+                    "Период: \"${reportPeriod.taxPeriod.year}, ${reportPeriod.name}\", " +
+                    "Подразделение: \"${department.name}\", Вид: \"${declarationTemplate.name}\"" +
+                    "${asnuName ? ", АСНУ: \"${asnuName}\"" : ""}.")
+        }
+        return !atLeastOneRecordFailed
     }
 
     boolean isIncomeDatesInPeriod(List<NdflPersonIncome> incomeGroup) {
-        Map<Integer, Date> incomeAccruedDateValues = [:]
-        Map<Integer, Date> incomePayoutDateValues = [:]
-        Map<Integer, Date> taxDateValues = [:]
-        for (NdflPersonIncome income : incomeGroup) {
-            if (income.incomeAccruedDate != null) {
-                if (!checkIncomeDate(income.incomeAccruedDate)) {
-                    incomeAccruedDateValues.put((income as NdflPersonIncomeExt).rowIndex, income.incomeAccruedDate)
-                } else {
-                    return true
-                }
-            }
-            if (income.incomePayoutDate != null) {
-                if (!checkIncomeDate(income.incomePayoutDate)) {
-                    incomePayoutDateValues.put((income as NdflPersonIncomeExt).rowIndex, income.incomePayoutDate)
-                } else {
-                    return true
-                }
-            }
-            if (income.taxDate != null) {
-                if (!checkIncomeDate(income.taxDate)) {
-                    taxDateValues.put((income as NdflPersonIncomeExt).rowIndex, income.taxDate)
-                } else {
-                    return true
-                }
-            }
+        // Пользуемся расширенной версией записи о доходе с номером строки, откуда взята запись
+        List<NdflPersonIncomeExt> incomeGroupExt = incomeGroup as NdflPersonIncomeExt[]
+
+        List<NdflPersonIncomeExt> incomesWithAccruedDate = incomeGroupExt.findAll { it.incomeAccruedDate }
+        boolean isAnyAccruedDateInPeriod = incomesWithAccruedDate.any { isDateInReportPeriod(it.incomeAccruedDate) }
+        if (isAnyAccruedDateInPeriod) return true
+
+        List<NdflPersonIncomeExt> incomesWithPayoutDate = incomeGroupExt.findAll { it.incomePayoutDate }
+        boolean isAnyPayoutDateInPeriod = incomesWithPayoutDate.any { isDateInReportPeriod(it.incomePayoutDate) }
+        if (isAnyPayoutDateInPeriod) return true
+
+        List<NdflPersonIncomeExt> incomesWithTaxDate = incomeGroupExt.findAll { it.taxDate }
+        boolean isAnyTaxDateInPeriod = incomesWithTaxDate.any { isDateInReportPeriod(it.taxDate) }
+        if (isAnyTaxDateInPeriod) return true
+
+        // Если не удалось найти ни одной даты в периоде, печатаем информацию обо всех проверенных.
+        incomesWithAccruedDate.each { income ->
+            logIncomeDatesWarning(income, income.incomeAccruedDate, 26)
         }
-        for (Integer rowNumber : incomeAccruedDateValues.keySet()) {
-            logIncomeDatesError(incomeAccruedDateValues.get(rowNumber), incomeGroup.get(0), rowNumber, 26)
+        incomesWithPayoutDate.each { income ->
+            logIncomeDatesWarning(income, income.incomePayoutDate, 27)
         }
-        for (Integer rowNumber : incomePayoutDateValues.keySet()) {
-            logIncomeDatesError(incomePayoutDateValues.get(rowNumber), incomeGroup.get(0), rowNumber, 27)
+        incomesWithTaxDate.each { income ->
+            logIncomeDatesWarning(income, income.taxDate, 35)
         }
-        for (Integer rowNumber : taxDateValues.keySet()) {
-            logIncomeDatesError(taxDateValues.get(rowNumber), incomeGroup.get(0), rowNumber, 35)
+
+        // Если хотя бы одна дата была, валидация не пройдена
+        if (incomesWithAccruedDate || incomesWithPayoutDate || incomesWithTaxDate) {
+            return false
         }
+
+        // Если все даты выше пустые, но есть хотя бы одна дата платежного поручения, тоже берём строки
+        List<NdflPersonIncomeExt> incomesWithPaymentDate = incomeGroupExt.findAll { it.paymentDate }
+        boolean isAnyPaymentDateInPeriod = incomesWithPaymentDate.any { isDateInReportPeriod(it.paymentDate) }
+        if (isAnyPaymentDateInPeriod) return true
+
+        incomesWithPaymentDate.each { income ->
+            logIncomeDatesWarning(income, income.paymentDate, 42)
+        }
+
+        return false
     }
 
-    void logIncomeDatesError(Date date, NdflPersonIncome income, int rowIndex, int colIndex) {
-        logger.error("Дата: \"${date?.format(SharedConstants.DATE_FORMAT)}\", указанная в столбце \"${header[colIndex]}\" № ${colIndex}" +
-                " для строки ${rowIndex} не соответствует периоду формы: \"${reportPeriod.taxPeriod.year}, ${reportPeriod.name}\"." +
+    void logIncomeDatesWarning(NdflPersonIncomeExt income, Date date, int colIndex) {
+        logger.warn("Дата: \"${date?.format(SharedConstants.DATE_FORMAT)}\", указанная в столбце \"${header[colIndex]}\" № ${colIndex}" +
+                " для строки ${income.rowIndex} не соответствует периоду формы: \"${reportPeriod.taxPeriod.year}, ${reportPeriod.name}\"." +
                 " Операция \"${income.operationId}\" не загружена в Налоговую форму №: \"${declarationData.id}\", Период: " +
                 "\"${reportPeriod.taxPeriod.year}, ${reportPeriod.name}\", Подразделение: \"${department.name}\", Вид: \"${declarationTemplate.name}\"" +
                 "${asnuName ? ", АСНУ: \"${asnuName}\"" : ""}.")
-
     }
 
-    boolean checkIncomeDate(Date date) {
-        if (!date) {
-            return true
-        }
-        if (!(reportPeriod.startDate <= date && date <= reportPeriod.endDate)) {
-            return false
-        }
-        return true
+    boolean isDateInReportPeriod(Date date) {
+        return (reportPeriod.calendarStartDate <= date && date <= reportPeriod.endDate)
     }
 
     void checkReferences(List<NdflPerson> persons) {
