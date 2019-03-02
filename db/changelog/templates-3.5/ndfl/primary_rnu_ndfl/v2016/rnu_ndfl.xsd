@@ -171,15 +171,10 @@ GUID</xs:documentation>
 											</xs:restriction>
 										</xs:simpleType>
 									</xs:attribute>
-									<xs:attribute name="”дЋичн‘Ћ од" use="required">
+									<xs:attribute name="”дЋичн‘Ћ од" type="—ѕƒ”Ћ“ип–Ќ”" use="required">
 										<xs:annotation>
 											<xs:documentation> од вида документа</xs:documentation>
 										</xs:annotation>
-										<xs:simpleType>
-											<xs:restriction base="—ѕƒ”Ћ“ип">
-												<xs:length value="2"/>
-											</xs:restriction>
-										</xs:simpleType>
 									</xs:attribute>
 									<xs:attribute name="”дЋичн‘ЋЌом" use="required">
 										<xs:annotation>
@@ -805,6 +800,16 @@ GUID</xs:documentation>
 		<xs:restriction base="xs:string">
 			<xs:length value="2"/>
 			<xs:pattern value="[0-9]{2}"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="—ѕƒ”Ћ“ип–Ќ”">
+		<xs:annotation>
+			<xs:documentation> оды —правочника видов документов, удостовер€ющих личность налогоплательщика</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="2"/>
+			<xs:minLength value="0"/>
+			<xs:pattern value="[0-9]{2}|"/>
 		</xs:restriction>
 	</xs:simpleType>
 	<xs:simpleType name=" ѕѕ“ип">
