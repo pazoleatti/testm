@@ -1417,7 +1417,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         BigDecimal calculatedTax = 0
         BigDecimal withholdingTax = 0
         Long refoundTax = 0
-        Long taxSum = 0
+        BigDecimal taxSum = 0
         int order
 
         @Override
@@ -1466,7 +1466,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         Long refoundTax = 0
         BigDecimal notHoldingTax = 0
         BigDecimal overholdingTax = 0
-        Long taxSum = 0
+        BigDecimal taxSum = 0
 
         BigDecimal getDeptTaxPayer() {
             return notHoldingTax > overholdingTax ? notHoldingTax - overholdingTax : 0
@@ -2249,7 +2249,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         }
         personIncome.paymentDate = toDate((GPathResult) node.getProperty('@ПлПоручДат'))
         personIncome.paymentNumber = toString((GPathResult) node.getProperty('@ПлатПоручНом'))
-        personIncome.taxSumm = toLong((GPathResult) node.getProperty('@НалПерСумм'))
+        personIncome.taxSumm = toBigDecimal((GPathResult) node.getProperty('@НалПерСумм'))
         personIncome.asnuId = declarationData.asnuId
         personIncome.modifiedDate = formCreationDate
 
@@ -3684,4 +3684,3 @@ class Styler {
         return boldFont
     }
 }
-

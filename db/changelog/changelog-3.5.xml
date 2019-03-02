@@ -343,4 +343,11 @@
 			<where>id = '3a8afe75-a882-4ecb-9bd2-46920d12803d'</where>
 		</update>
 	</changeSet>
+
+	<!-- https://jira.aplana.com/browse/SBRFNDFL-6759 В БД под хранение параметра Сумма платежного поручения в раздела 2 РНУ отведено не 20 чисел, а 10 -->
+	<changeSet id="3.5-snazin-5" author="snazin">
+		<modifyDataType tableName="ndfl_person_income"
+						columnName="tax_summ"
+						newDataType="number(20)"/>
+	</changeSet>
 </databaseChangeLog>

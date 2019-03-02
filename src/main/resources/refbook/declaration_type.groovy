@@ -1653,7 +1653,7 @@ class DeclarationType extends AbstractScriptClass {
         BigDecimal taxBaseSum = null
         BigDecimal calculatedTaxSum = null
         BigDecimal withholdingTaxSum = null
-        Long taxSum = null
+        BigDecimal taxSum = null
         BigDecimal overholdingTaxSum = null
         BigDecimal notholdingTaxSum = null
 
@@ -1895,7 +1895,7 @@ class DeclarationType extends AbstractScriptClass {
             add(26, rowGroup.taxBaseSum)
             add(27, rowGroup.calculatedTaxSum)
             add(28, rowGroup.withholdingTaxSum)
-            add(29, rowGroup.taxSum ? new BigDecimal(rowGroup.taxSum) : null)
+            add(29, rowGroup.taxSum ? rowGroup.taxSum : null)
             add(30, rowGroup.overholdingTaxSum)
             add(31, rowGroup.notholdingTaxSum)
         }

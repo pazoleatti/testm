@@ -1029,7 +1029,7 @@ public final class ScriptUtils {
         size += paymentDate.length;
         byte[] paymentNumber = stringToByteArray(income.getPaymentNumber());
         size += paymentNumber.length;
-        byte[] taxSumm = longToByteArray(income.getTaxSumm());
+        byte[] taxSumm = bigDecimalToByteArray(income.getTaxSumm());
         size += taxSumm.length;
 
         int offset = 0;

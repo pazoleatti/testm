@@ -262,7 +262,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                         personIncome.setTaxTransferDate(rs.getDate("tax_transfer_date"));
                         personIncome.setPaymentDate(rs.getDate("payment_date"));
                         personIncome.setPaymentNumber(rs.getString("payment_number"));
-                        personIncome.setTaxSumm(SqlUtils.getLong(rs, "tax_summ"));
+                        personIncome.setTaxSumm(rs.getBigDecimal("tax_summ"));
                         personIncome.setSourceId(SqlUtils.getLong(rs, "source_id"));
                         personIncome.setInp(rs.getString("inp"));
 
@@ -1830,7 +1830,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             personIncome.setTaxTransferDate(rs.getDate("tax_transfer_date"));
             personIncome.setPaymentDate(rs.getDate("payment_date"));
             personIncome.setPaymentNumber(rs.getString("payment_number"));
-            personIncome.setTaxSumm(SqlUtils.getLong(rs, "tax_summ"));
+            personIncome.setTaxSumm(rs.getBigDecimal("tax_summ"));
             personIncome.setSourceId(SqlUtils.getLong(rs, "source_id"));
 
             personIncome.setModifiedDate(rs.getTimestamp("modified_date"));
