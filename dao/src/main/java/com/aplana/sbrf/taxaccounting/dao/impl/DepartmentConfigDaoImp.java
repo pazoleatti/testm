@@ -44,7 +44,7 @@ public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentCon
             return getJdbcTemplate().queryForObject("" +
                     "select " + ALL_FIELDS + " from department_config dc\n" +
                     ALL_FIELDS_JOINS +
-                    "where id = ?", new DepartmentConfigRowMapper(), id);
+                    "where dc.id = ?", new DepartmentConfigRowMapper(), id);
         } catch (EmptyResultDataAccessException e) {
             return null;
         }
