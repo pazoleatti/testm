@@ -74,7 +74,7 @@ public class DeclarationData extends IdentityObject<Long> implements SecuredEnti
      */
     private long permissions;
     /**
-     * Создана в ручную
+     * Создана вручную
      */
     private boolean manuallyCreated = false;
     /**

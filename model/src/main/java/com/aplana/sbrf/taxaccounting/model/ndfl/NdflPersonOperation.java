@@ -5,18 +5,17 @@ import com.aplana.sbrf.taxaccounting.model.IdentityObject;
 import java.math.BigDecimal;
 import java.util.List;
 
-/**
- * @author Andrey Drunk
- */
+
 public abstract class NdflPersonOperation extends IdentityObject<Long> {
 
     /**
-     * Cсылка на запись которая является источником при формирование консолидированной формы
+     * Ссылка на запись, которая является источником при формировании консолидированной формы
      */
     protected Long sourceId;
 
     /**
      * Порядковый номер строки
+     * TODO: Здесь подразумеваются целые значения, лучше бы использовать BigInteger.
      */
     protected BigDecimal rowNum;
 
