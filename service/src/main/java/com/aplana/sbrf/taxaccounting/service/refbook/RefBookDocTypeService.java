@@ -16,4 +16,12 @@ public interface RefBookDocTypeService {
      * @return список действующих записей
      */
     List<RefBookDocType> findAllActive();
+
+    /**
+     * Проверка существования записи по полю code.
+     *
+     * @param code код документа
+     * @return существует ли запись в базе
+     */
+    boolean existsByCode(String code);
 }

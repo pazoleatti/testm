@@ -92,7 +92,7 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
                             }
                         }
                     } else {
-                        logger.warn("Не удалось заустить проверку xml по xsd.");
+                        logger.warn("Не удалось запустить проверку xml по xsd.");
                     }
                 } finally {
                     processDestroy();

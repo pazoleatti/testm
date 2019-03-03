@@ -41,8 +41,6 @@ import java.util.Map;
 
 /**
  * Сервис, реализующий выполение скриптов справочников
- *
- * @author Dmitriy Levykin
  */
 @Service
 @Transactional
@@ -50,7 +48,7 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
 
     private static final Log LOG = LogFactory.getLog(RefBookScriptingServiceImpl.class);
     private static final String DUPLICATING_ARGUMENTS_ERROR = "The key \"%s\" already exists in map. Can't override of them.";
-    public static final String ERROR_MSG = "Ошибка при записи данных";
+    private static final String ERROR_MSG = "Ошибка при записи данных";
 
     @Autowired
     private BlobDataService blobDataService;
@@ -103,7 +101,7 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
             return false;
         }
 
-        boolean result = executeScript(userInfo, refBook, script, scriptFilePath, event, logger, additionalParameters);
+        boolean result = executeScript(userInfo, script, scriptFilePath, event, logger, additionalParameters);
         // Откат при возникновении фатальных ошибок в скрипте
         if (logger.containsLevel(LogLevel.ERROR)) {
             if (event.equals(FormDataEvent.CREATE_APPLICATION_2)) {
@@ -120,7 +118,7 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
     protected String getPackageName(String script) {
         try {
             String packageWord = "package";
-            String scriptLines[] = script.split("\\r\\n|\\n|\\r");
+            String[] scriptLines = script.split("\\r\\n|\\n|\\r");
             String packageName = scriptLines[0].substring(script.indexOf(packageWord) + packageWord.length() + 1, scriptLines[0].indexOf("//")).trim();
             String searchComment = scriptLines[0].substring(scriptLines[0].indexOf("//") + 3).trim();
             String fileName = searchComment.substring(0, searchComment.indexOf(" ")).trim();
@@ -136,7 +134,7 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
         boolean result = tx.executeInNewReadOnlyTransaction(new TransactionLogic<Boolean>() {
             @Override
             public Boolean execute() {
-                return executeScript(userInfo, refBook, script, null, event, logger, additionalParameters);
+                return executeScript(userInfo, script, null, event, logger, additionalParameters);
             }
         });
         return result;
@@ -158,7 +156,7 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
         logger.getEntries().addAll(tempLogger.getEntries());
     }
 
-    private boolean executeScript(TAUserInfo userInfo, RefBook refBook, String script, String scriptFilePath, FormDataEvent event, Logger logger, Map<String, Object> additionalParameters) {
+    private boolean executeScript(TAUserInfo userInfo, String script, String scriptFilePath, FormDataEvent event, Logger logger, Map<String, Object> additionalParameters) {
         // Локальный логгер для импорта конкретного справочника
         Logger scriptLogger = new Logger();
         scriptLogger.setTaUserInfo(userInfo);
@@ -233,7 +231,7 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
     @Override
     public void importScript(long refBookId, String script, Logger log, TAUserInfo userInfo) {
         try {
-            saveScript(refBookId, script, FormDataEvent.SCRIPTS_IMPORT, log, userInfo);
+            saveScript(refBookId, script, log, userInfo);
         } catch (ServiceLoggerException e) {
             LOG.error(e.getLocalizedMessage(), e);
             return;
@@ -242,7 +240,7 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
                 null, null, null, null, "Обнорвлен скрипт справочника \"" + commonRefBookService.get(refBookId).getName() + "\"", null);
     }
 
-    private void saveScript(long refBookId, String script, FormDataEvent formDataEvent, Logger log, TAUserInfo userInfo) {
+    private void saveScript(long refBookId, String script, Logger log, TAUserInfo userInfo) {
         RefBook refBook = commonRefBookService.get(refBookId);
         if (script != null && !script.trim().isEmpty()) {
             InputStream inputStream;
@@ -267,7 +265,7 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
         }
         TemplateChanges templateChanges = new TemplateChanges();
         templateChanges.setRefBookId(Long.valueOf(refBookId).intValue());
-        templateChanges.setEvent(formDataEvent);
+        templateChanges.setEvent(FormDataEvent.SCRIPTS_IMPORT);
         templateChanges.setAuthor(userInfo.getUser());
         templateChanges.setEventDate(new Date());
         templateChangesService.save(templateChanges);
@@ -275,11 +273,6 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
 
     /**
      * Перехват ошибок и исключений
-     *
-     * @param bindings
-     * @param script
-     * @param logger
-     * @return
      */
     private boolean executeScript(Bindings bindings, String script, Logger logger) {
         try {

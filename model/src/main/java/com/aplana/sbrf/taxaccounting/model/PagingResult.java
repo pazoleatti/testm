@@ -34,6 +34,7 @@ public class PagingResult<T> extends ArrayList<T>{
 
     /**
      * @return список записей, попавших в запрошенный диапазон значений
+	 * @deprecated используйте сам объект, как массив
      */
 	@Deprecated
     public List<T> getRecords() {

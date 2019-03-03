@@ -36,7 +36,7 @@ public interface LogBusinessService {
     void logPersonEvent(Long personId, FormDataEvent event, String note, TAUserInfo userInfo);
 
     /**
-     * Возвращяет дату создания формы (по событию {@link FormDataEvent#CREATE})
+     * Возвращает дату создания формы (по событию {@link FormDataEvent#CREATE})
      *
      * @param declarationDataId идентификатор формы
      * @return дата созданий формы
