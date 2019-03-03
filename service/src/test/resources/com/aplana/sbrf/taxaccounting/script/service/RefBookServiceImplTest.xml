@@ -5,34 +5,34 @@
 
     <import resource="classpath:script/testScriptSupportContext.xml"/>
 
-    <bean id="rebBookService" class="com.aplana.sbrf.taxaccounting.script.service.impl.RefBookServiceImpl" />
+    <bean id="rebBookService" class="com.aplana.sbrf.taxaccounting.script.service.impl.RefBookServiceImpl"/>
 
     <bean class="org.mockito.Mockito" factory-method="mock">
-        <constructor-arg value="com.aplana.sbrf.taxaccounting.service.BlobDataService" />
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.service.BlobDataService"/>
     </bean>
 
     <bean class="org.mockito.Mockito" factory-method="mock">
-        <constructor-arg value="com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService" />
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService"/>
     </bean>
 
     <bean class="org.mockito.Mockito" factory-method="mock">
-        <constructor-arg value="com.aplana.sbrf.taxaccounting.refbook.RefBookFactory" />
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.refbook.RefBookFactory"/>
     </bean>
 
     <bean class="org.mockito.Mockito" factory-method="mock">
-        <constructor-arg value="com.aplana.sbrf.taxaccounting.refbook.RefBookHelper" />
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.refbook.RefBookHelper"/>
     </bean>
 
     <bean class="org.mockito.Mockito" factory-method="mock">
-        <constructor-arg value="com.aplana.sbrf.taxaccounting.service.TransactionHelper" />
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.service.TransactionHelper"/>
     </bean>
 
     <bean class="org.mockito.Mockito" factory-method="mock">
-        <constructor-arg value="com.aplana.sbrf.taxaccounting.service.TAUserService" />
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.service.TAUserService"/>
     </bean>
 
     <bean class="org.mockito.Mockito" factory-method="mock">
-        <constructor-arg value="com.aplana.sbrf.taxaccounting.service.LogEntryService" />
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.service.LogEntryService"/>
     </bean>
 
     <bean class="org.mockito.Mockito" factory-method="mock">
@@ -66,11 +66,22 @@
         <constructor-arg value="com.aplana.sbrf.taxaccounting.service.NdflPersonService"/>
     </bean>
 
+    <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.service.refbook.RefBookTaxpayerStateService"/>
+    </bean>
+
+    <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.service.refbook.RefBookDocTypeService"/>
+    </bean>
+
+    <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.service.refbook.RefBookCountryService"/>
+    </bean>
 
     <bean class="org.mockito.Mockito" factory-method="mock">
         <constructor-arg value="com.aplana.sbrf.taxaccounting.permissions.BasePermissionEvaluator"/>
         <property name="permissionFactoryRegistry">
-            <map />
+            <map/>
         </property>
     </bean>
 

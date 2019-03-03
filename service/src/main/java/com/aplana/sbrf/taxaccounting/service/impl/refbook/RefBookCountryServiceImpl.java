@@ -24,4 +24,10 @@ public class RefBookCountryServiceImpl implements RefBookCountryService {
     public List<RefBookCountry> findAllActive() {
         return refBookCountryDao.findAllActive();
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean existsByCode(String code) {
+        return refBookCountryDao.existsByCode(code);
+    }
 }

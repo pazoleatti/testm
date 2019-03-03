@@ -10,8 +10,10 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 
@@ -39,6 +41,12 @@ public class AbstractDaoTest {
         MockitoAnnotations.initMocks(this);
         abstractDao = spy(new AbstractDaoTestImpl());
         when(abstractDao.getNamedParameterJdbcTemplate()).thenReturn(templateMock);
+    }
+
+    @Test
+    public void test_selectIn_byEmptyList_returnsEmptyList() {
+        List result = abstractDao.selectIn("", Collections.emptyList(), "", rowMapperStub);
+        assertThat(result).isEmpty();
     }
 
     @Test

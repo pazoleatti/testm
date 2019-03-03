@@ -22,4 +22,12 @@ public interface RefBookCountryDao {
      * @return список записей справочника
      */
     List<RefBookCountry> findAllByIdIn(List<Long> ids);
+
+    /**
+     * Проверка существования записи по полю code.
+     *
+     * @param code код страны
+     * @return существует ли запись в базе
+     */
+    boolean existsByCode(String code);
 }

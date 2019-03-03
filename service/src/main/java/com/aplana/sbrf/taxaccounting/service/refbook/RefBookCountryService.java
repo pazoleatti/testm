@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.refbook;
 
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookCountry;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDocType;
 import com.aplana.sbrf.taxaccounting.service.ScriptExposed;
 
 import java.util.List;
@@ -17,4 +16,12 @@ public interface RefBookCountryService {
      * @return список действующих записей
      */
     List<RefBookCountry> findAllActive();
+
+    /**
+     * Проверка существования записи по полю code.
+     *
+     * @param code код страны
+     * @return существует ли запись в базе
+     */
+    boolean existsByCode(String code);
 }

@@ -55,11 +55,17 @@ import org.apache.poi.ss.util.CellRangeAddress
 import org.apache.poi.xssf.streaming.SXSSFWorkbook
 import org.apache.poi.xssf.usermodel.XSSFFont
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
+import org.xml.sax.Attributes
+import org.xml.sax.Locator
+import org.xml.sax.SAXException
+import org.xml.sax.ext.Attributes2Impl
 
+import javax.xml.parsers.ParserConfigurationException
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.text.SimpleDateFormat
 
+import static org.apache.commons.lang3.StringUtils.isEmpty
 import static form_template.ndfl.primary_rnu_ndfl.v2016.PrimaryRnuNdfl.DataFormatEnum.*
 
 new PrimaryRnuNdfl(this).run()
@@ -1933,75 +1939,79 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
     @TypeChecked(TypeCheckingMode.SKIP)
     void importData() {
 
-        SimpleDateFormat sdf = new SimpleDateFormat(SharedConstants.DATE_FORMAT)
-        logForDebug("Начало загрузки данных первичной налоговой формы " + declarationData.id + ". Дата начала отчетного периода: " + sdf.format(getReportPeriodStartDate()) + ", дата окончания: " + sdf.format(getReportPeriodEndDate()))
+        String dateFormat = SharedConstants.DATE_FORMAT
+
+        logForDebug("Начало загрузки данных первичной налоговой формы ${declarationData.id}. " +
+                "Дата начала отчетного периода: ${getReportPeriodStartDate().format(dateFormat)}, " +
+                "дата окончания: ${getReportPeriodEndDate().format(dateFormat)}")
 
         formCreationDate = logBusinessService.getFormCreationDate(declarationData.id)
 
-        // "Загрузка ТФ РНУ НДФЛ" п.9
-        // Проверка соответствия атрибута ДатаОтч периоду в наименовании файла
-        // reportPeriodEndDate создаётся на основании периода из имени файла
-
-        File dFile = dataFile
-
-        if (dFile == null) {
+        // Начинаем парсить файл
+        File xmlTF = dataFile
+        if (xmlTF == null) {
             throw new ServiceException("Отсутствует значение параметра dataFile!")
         }
+        def Файл = new LineNumberingSlurper().parse(xmlTF)
 
-        def reportPeriodEndDate = getReportPeriodEndDate().format(SharedConstants.DATE_FORMAT)
-
-        def Файл = new XmlSlurper().parse(dFile)
+        // Проверка соответствия атрибута ДатаОтч периоду в наименовании файла
+        // reportPeriodEndDate получен на основании периода из имени файла
         String reportDate = Файл.СлЧасть.'@ДатаОтч'
-
+        String reportPeriodEndDate = getReportPeriodEndDate().format(dateFormat)
         if (reportPeriodEndDate != reportDate) {
             logger.warn("В ТФ неверно указана «Отчетная дата»: «${reportDate}». Должна быть указана дата окончания периода ТФ, равная «${reportPeriodEndDate}»")
         }
 
-        def ndflPersonNum = 1
-        def success = 0
+        // Обработка "Информационных частей" файла, каждая из которых отвечает за 1 физлицо
+
+        // Номер итерации = номер физлица в файле
+        def personCounter = 1
+        // Кол-во добавленных в ПНФ физлиц
+        def successfulCount = 0
 
         for (infoPart in Файл.ИнфЧасть) {
             ScriptUtils.checkInterrupted()
-            if (processInfoPart(infoPart, ndflPersonNum)) {
-                success++
+            if (processInfoPart(infoPart, personCounter)) {
+                successfulCount++
             }
-            ndflPersonNum++
+            personCounter++
         }
+
+        // Сортировка сформированных из файла строк ПНФ
 
         ndflPersonService.fillNdflPersonIncomeSortFields(ndflPersonCache)
 
         Collections.sort(ndflPersonCache, NdflPerson.getComparator())
         Long personRowNum = 0L
-        BigDecimal incomeRowNum = new BigDecimal("0")
-        BigDecimal deductionRowNum = new BigDecimal("0")
-        BigDecimal prepaymentRowNum = new BigDecimal("0")
+        BigDecimal incomeRowNum = BigDecimal.ZERO
+        BigDecimal deductionRowNum = BigDecimal.ZERO
+        BigDecimal prepaymentRowNum = BigDecimal.ZERO
+
         for (NdflPerson ndflPerson : ndflPersonCache) {
             Collections.sort(ndflPerson.incomes, NdflPersonIncome.getComparator())
-
             Collections.sort(ndflPerson.deductions, NdflPersonDeduction.getComparator(ndflPerson))
-
             Collections.sort(ndflPerson.prepayments, NdflPersonPrepayment.getComparator(ndflPerson))
 
             for (NdflPersonIncome income : ndflPerson.incomes) {
-                incomeRowNum = incomeRowNum.add(new BigDecimal("1"))
+                incomeRowNum = incomeRowNum.add(BigDecimal.ONE)
                 income.rowNum = incomeRowNum
             }
 
             for (NdflPersonDeduction deduction : ndflPerson.deductions) {
-                deductionRowNum = deductionRowNum.add(new BigDecimal("1"))
+                deductionRowNum = deductionRowNum.add(BigDecimal.ONE)
                 deduction.rowNum = deductionRowNum
             }
 
             for (NdflPersonPrepayment prepayment : ndflPerson.prepayments) {
-                prepaymentRowNum = prepaymentRowNum.add(new BigDecimal("1"))
+                prepaymentRowNum = prepaymentRowNum.add(BigDecimal.ONE)
                 prepayment.rowNum = prepaymentRowNum
             }
 
             ndflPerson.rowNum = ++personRowNum
         }
         ndflPersonService.save(ndflPersonCache)
-        if (success == 0) {
-            logger.error("В ТФ отсутствуют операции, принадлежащие отчетному периоду.")
+        if (successfulCount == 0) {
+            logger.error("В файле отсутствуют данные для загрузки. Либо отсутствуют операции, принадлежащие отчетному периоду, либо данные некоторых ФЛ содержат ошибки.")
             logger.error("Налоговая форма не создана.")
         }
     }
@@ -2009,14 +2019,21 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
     @TypeChecked(TypeCheckingMode.SKIP)
     boolean processInfoPart(infoPart, Integer rowNum) {
 
+        // Раздел физлица "Получатель дохода"
+
         NodeChild ndflPersonNode = infoPart.'ПолучДох'[0]
+        // номер строки в файле, был проставлен в ходе парсинга файла
+        String personLineInFile = ndflPersonNode.'@line'
 
         NdflPerson ndflPerson = transformNdflPersonNode(ndflPersonNode)
 
-        def lastName = ndflPerson.lastName != null ? ndflPerson.lastName + " " : ""
-        def firstName = ndflPerson.firstName != null ? ndflPerson.firstName + " " : ""
-        def middleName = ndflPerson.middleName != null ? ndflPerson.middleName : ""
-        def fio = lastName + firstName + middleName
+        if (!isNdflPersonValid(ndflPerson, personLineInFile)) {
+            logger.warn("Данные ФЛ: $ndflPerson.fullName, ИНП: $ndflPerson.inp содержат ошибки. ФЛ не было загружено в налоговую форму.")
+            return false
+        }
+
+        // Раздел операций "Сведения об операциях"
+
         Iterator ndflPersonOperations = infoPart.'СведОпер'.iterator()
 
         // Коды видов доходов Map<REF_BOOK_INCOME_TYPE.ID, REF_BOOK_INCOME_TYPE>
@@ -2026,7 +2043,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         List<String> deductionTypeList = getRefDeductionType()
 
         ndflPersonOperations.each { NodeChild nodeChild ->
-            processNdflPersonOperation(ndflPerson, nodeChild, fio, incomeCodeMap, deductionTypeList)
+            processNdflPersonOperation(ndflPerson, nodeChild, ndflPerson.fullName, incomeCodeMap, deductionTypeList)
         }
 
         //Идентификатор декларации для которой загружаются данные
@@ -2035,10 +2052,69 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
             ndflPerson.rowNum = rowNum
             ndflPersonCache.add(ndflPerson)
         } else {
-            logger.warn("У ФЛ ($fio, ИНП: ${ndflPerson.inp}) отсутствуют операции, принадлежащие отчетному периоду. ФЛ не загружено в налоговую форму")
+            logger.warn("У ФЛ ($ndflPerson.fullName, ИНП: $ndflPerson.inp) отсутствуют операции, принадлежащие отчетному периоду. ФЛ не загружено в налоговую форму.")
             return false
         }
         return true
+    }
+
+    /**
+     * Проверка данных физлица.
+     * @param personLineInFile номер строки в файле, где содержались данные о физлице
+     */
+    boolean isNdflPersonValid(NdflPerson person, String personLineInFile) {
+        String emptyParamErrorMsg = "Строка: ${personLineInFile}. Для ФЛ: $person.fullName, ИНП: $person.inp значение параметра %s не указано."
+        String valueNotFound = "Строка: ${personLineInFile}. ФЛ: $person.fullName, ИНП: $person.inp. Параметр \"%s\" (%s) содержит значение (%s), которое не найдено в справочнике %s."
+        // Проверка поля "Гражданство"
+        boolean valid = true
+        if (isEmpty(person.citizenship)) {
+            logger.warn(emptyParamErrorMsg, '"Код гражданства" (Гражд)')
+            valid = false
+        } else {
+            boolean exists = refBookService.existsCountryByCode(person.citizenship)
+            if (!exists) {
+                logger.warn(valueNotFound, "Гражд", "Код гражданства", person.citizenship, "ОКСМ")
+                valid = false
+            }
+        }
+        // Проверка поля "Код ДУЛ"
+        boolean isDocTypeValid = true
+        if (isEmpty(person.idDocType)) {
+            logger.warn(emptyParamErrorMsg, '"Код вида документа, удостоверяющего личность" (УдЛичнФЛКод)')
+            valid = false
+            isDocTypeValid = false
+        } else {
+            boolean exists = refBookService.existsDocTypeByCode(person.idDocType)
+            if (!exists) {
+                logger.warn(valueNotFound, "УдЛичнФЛКод", "Код вида документа, удостоверяющего личность", person.idDocType, "Коды документов, удостоверяющих личность")
+                valid = false
+                isDocTypeValid = false
+            }
+        }
+        // Проверка поля "Номер ДУЛ"
+        if (isEmpty(person.idDocNumber)) {
+            logger.warn(emptyParamErrorMsg, '"Серия и номер документа, удостоверяющего личность" (УдЛичнФЛНом)')
+            valid = false
+        } else if (isDocTypeValid) {
+            String errorMessage = ScriptUtils.checkDul(person.idDocType, person.idDocNumber, "УдЛичнФЛНом")
+            if (errorMessage != null) {
+                logger.warn("Строка: ${personLineInFile}. ${errorMessage}")
+                valid = false
+            }
+        }
+        // Проверка поля "Статус НП"
+        if (isEmpty(person.status)) {
+            logger.warn(emptyParamErrorMsg, '"Статус налогоплательщика" (СтатусФЛ)')
+            valid = false
+        } else {
+            boolean exists = refBookService.existsTaxpayerStateByCode(person.status)
+            if (!exists) {
+                logger.warn(valueNotFound, "СтатусФЛ", "Статус налогоплательщика", person.status, "Статусы налогоплательщиков")
+                valid = false
+            }
+        }
+
+        return valid
     }
 
     @TypeChecked(TypeCheckingMode.SKIP)
@@ -2058,11 +2134,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
                 return
             }
 
-            incomes.each {
-                if (it != null) {
-                    ndflPerson.incomes.add(it)
-                }
-            }
+            ndflPerson.incomes.addAll(incomes)
 
             List<NdflPersonDeduction> deductions = new ArrayList<NdflPersonDeduction>()
             deductions.addAll(ndflPersonOperationsNode.'СведВыч'.collect {
@@ -2514,6 +2586,33 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
                 logger.warn("Отсутствуют отчетные налоговые формы в некорректировочном периоде. Отчетные налоговые формы не будут сформированы текущем периоде")
             }
         }
+    }
+}
+
+/**
+ * XmlSlurper, проставляющий номера строк на элементы.
+ * Честно взят со StackOverflow.
+ */
+class LineNumberingSlurper extends XmlSlurper {
+
+    private static final String LINE_NUM_ATTR = "line"
+
+    private Locator locator
+
+    LineNumberingSlurper() throws ParserConfigurationException, SAXException {
+        super()
+    }
+
+    @Override
+    void setDocumentLocator(Locator locator) {
+        this.locator = locator
+    }
+
+    @Override
+    void startElement(String uri, String localName, String qName, Attributes attrs) throws SAXException {
+        Attributes2Impl newAttrs = new Attributes2Impl(attrs)
+        newAttrs.addAttribute(uri, LINE_NUM_ATTR, LINE_NUM_ATTR, "ENTITY", locator.lineNumber as String)
+        super.startElement(uri, localName, qName, newAttrs)
     }
 }
 

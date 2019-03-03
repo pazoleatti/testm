@@ -9,19 +9,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
+
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration("RefBookServiceImplTest.xml")
 public class RefBookServiceImplTest {
+
     @Autowired
     private BlobDataService blobDataService;
     @Autowired
@@ -30,11 +26,10 @@ public class RefBookServiceImplTest {
     private CommonRefBookService commonRefBookService;
 
     @Test
-    public void testexportRefBookConfs() throws IOException, InvocationTargetException, IllegalAccessException {
+    public void test_exportRefBookConfs() {
         refBookService.exportRefBookConfs(mock(TAUserInfo.class));
         verify(commonRefBookService).findAllVisible();
         verify(blobDataService).create(any(InputStream.class), eq("refBooksData.zip"));
         verify(blobDataService).get(anyString());
-
     }
 }

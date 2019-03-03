@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDocTypeDao;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDocType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Repository;
 
@@ -12,13 +13,16 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 
 @Repository
 public class RefBookDocTypeDaoImpl extends AbstractDao implements RefBookDocTypeDao {
 
+    private RowMapper<RefBookDocType> docTypeRowMapper;
+
     @Autowired
-    private RefBookMapperFactory refBookMapperFactory;
+    public RefBookDocTypeDaoImpl(RefBookMapperFactory mapperFactory) {
+        docTypeRowMapper = mapperFactory.new DocTypeMapper<>();
+    }
 
     @Override
     public List<RefBookDocType> findAllActive() {
@@ -32,7 +36,7 @@ public class RefBookDocTypeDaoImpl extends AbstractDao implements RefBookDocType
                 "from ref_book_doc_type dt where status = 0) r\n" +
                 "where r.start_date <= :actualDate and (r.end_date >= :actualDate or r.end_date is null)";
         try {
-            return getNamedParameterJdbcTemplate().query(sql, new MapSqlParameterSource("actualDate", actualDate), refBookMapperFactory.new DocTypeMapper<>());
+            return getNamedParameterJdbcTemplate().query(sql, new MapSqlParameterSource("actualDate", actualDate), docTypeRowMapper);
         } catch (EmptyResultDataAccessException e) {
             return new ArrayList<>();
         }
@@ -40,14 +44,17 @@ public class RefBookDocTypeDaoImpl extends AbstractDao implements RefBookDocType
 
     @Override
     public List<RefBookDocType> findAllByIdIn(List<Long> ids) {
-        if (!isEmpty(ids)) {
-            return getNamedParameterJdbcTemplate().query(
-                    "select dt.id, dt.name, dt.code, dt.priority \n" +
-                            "from ref_book_doc_type dt \n" +
-                            "where dt.id in (:ids)",
-                    new MapSqlParameterSource("ids", ids),
-                    refBookMapperFactory.new DocTypeMapper<>());
-        }
-        return new ArrayList<>();
+        //language=sql
+        String sql = "select dt.id, dt.name, dt.code, dt.priority \n" +
+                "from ref_book_doc_type dt \n" +
+                "where dt.id in (:ids)";
+        return selectIn(sql, ids, "ids", docTypeRowMapper);
+    }
+
+    @Override
+    public boolean existsByCode(String code) {
+        String sql = "select count(*) from ref_book_doc_type where code = ?";
+        int count = getJdbcTemplate().queryForObject(sql, new Object[]{code}, Integer.class);
+        return (count > 0);
     }
 }
