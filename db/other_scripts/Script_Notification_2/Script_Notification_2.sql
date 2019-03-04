@@ -1,21 +1,24 @@
-set heading off;
-set feedback off;
-set verify off;
-set termout off;
-set linesize 2000;
-set trimspool on;
-set NEWP NONE;
-WHENEVER SQLERROR EXIT;
+set long 32767 pagesize 0 linesize 4000 feedback off echo off verify off trims on heading off termout off 
+SET SERVEROUTPUT ON
 
-variable v_user_id number;
-variable v_begin_date varchar2(10);
-variable v_end_date varchar2(10);
+column filename new_val filename
+column start_date new_val start_date
+column end_date new_val end_date
+column users_list new_val users_list
 
-exec :v_user_id := &1;
-exec :v_begin_date:='&2';
-exec :v_end_date:='&3';
+-- Cписок пользователей формат ввода для одного пользователя (user_id) для нескольких пользователей (user_id1, user_id2, ..., user_idN)
+SELECT '(13763,44389)' users_list from dual;
 
-spool &4
+-- Дата начала периода запроса данных
+SELECT '25.02.2019 00:00:00' start_date FROM dual;
+
+-- Дата окончание периода запроса данных
+SELECT '02.03.2019 00:00:00' end_date FROM dual;
+
+-- Имя файла скрипта (не изменять)
+SELECT 'NOTIFICATION_'||to_char(systimestamp,'yyyymmdd-hhmiss')||'.csv' filename FROM dual;
+
+spool &1\&filename
 
 select '"Дата-время";"Содержание"' from dual;
 
@@ -30,10 +33,8 @@ notification n,
 log_entry le
 where
 le.log_id=n.log_id
-and n.user_id=:v_user_id
-and n.create_date between to_date(:v_begin_date,'dd.mm.yyyy') and to_date(:v_end_date,'dd.mm.yyyy')
+and n.user_id IN &users_list
+AND n.create_date BETWEEN TO_DATE('&start_date','DD.MM.YYYY hh24:mi:ss') AND TO_DATE('&end_date','DD.MM.YYYY hh24:mi:ss')
 );
-
-spool off;
 
 exit;	
