@@ -2711,7 +2711,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             Set<Pair<Long, String>> personAndOperationAffected = new HashSet<>();
             // Записываем информацию о том, были ли вообще затронуты строки.
             boolean isAnyDateChanged = false;
-            boolean isAnyDateNotChanged = false;
 
             // Заменяем значения в строках
             for (NdflPersonIncome income : incomes) {
@@ -2726,7 +2725,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                         boolean dateChanged = dateEditor.editIncomeDateField(income, incomeDates, person, logger);
 
                         isAnyDateChanged = isAnyDateChanged || dateChanged;
-                        isAnyDateNotChanged = isAnyDateNotChanged || (!dateChanged);
 
                         if (dateChanged) {
                             personAndOperationAffected.add(Pair.of(income.getNdflPersonId(), income.getOperationId()));
@@ -2772,6 +2770,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 );
             }
 
+            // TODO: Костыльное определение ситуации "Есть неизменённые даты", т.к. нормальное логическое требует получения данных о результате из DateEditor.
+            boolean isAnyDateNotChanged = logger.containsLevel(LogLevel.WARNING);
             boolean notAllDatesAreChanged = isAnyDateChanged && isAnyDateNotChanged;
 
             // Не будь, как я, вынеси это в отдельный метод.
