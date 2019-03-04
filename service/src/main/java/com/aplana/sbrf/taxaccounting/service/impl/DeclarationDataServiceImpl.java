@@ -1170,7 +1170,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
 
     @Override
-    @Transactional(noRollbackFor = {Throwable.class})
+    @Transactional(noRollbackFor = {Exception.class})
     public void cancelDeclarationList(List<Long> declarationDataIds, String note, TAUserInfo userInfo) {
         LOG.info(String.format("DeclarationDataServiceImpl.cancelDeclarationList by %s. declarationDataIds: %s; note: %s",
                 userInfo, declarationDataIds, note));
@@ -1204,6 +1204,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                         String asnuClause = declarationTemplate.getType().getId() == DeclarationType.NDFL_PRIMARY ? String.format(", АСНУ: \"%s\"", asnu.get("NAME").getStringValue()) : "";
                         Map<String, Object> exchangeParams = new HashMap<>();
                         moveToCreateFacade.cancel(userInfo, declarationData, logger, exchangeParams);
+                        if (logger.containsLevel(LogLevel.ERROR)) {
+                            sendNotification(logger.getLastEntry().getMessage(), logEntryService.save(logger.getEntries()), userId);
+                            continue;
+                        }
 
                         declarationData.setState(State.CREATED);
                         declarationDataDao.setStatus(declarationId, declarationData.getState());
@@ -1232,7 +1236,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 } else { // Нет прав доступа
                     makeNotificationForAccessDenied(logger);
                 }
-            } catch (Throwable e) {
+            } catch (Exception e) {
                 String errorMessage = String.format(FAIL, "Возврат в Создана", getStandardDeclarationDescription(declarationId).concat(". Причина: ").concat(e.toString()));
                 logger.error(errorMessage);
                 sendNotification(errorMessage, logEntryService.save(logger.getEntries()), userId);
