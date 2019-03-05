@@ -1,28 +1,25 @@
 @ECHO OFF
-REM ����� ��������� ��� � ������ ��������� ����� � ����� ���� ������
 REM ������: user_name/password@host:port/service_name
-SET AUTH=ndfl_schema/schema_password@172.19.214.45:1521/orcl.aplana.local
+SET AUTH=ndfl_schema/schema_password@host:port/service_name
 REM ����� ��������� ���� � ����� ORACLE_HOME\BIN
-SET ORA_BIN=c:\app\client\akorobko\product\12.1.0\client_1\BIN
+SET ORA_BIN=c:\app\client\user\product\12.2.0\client_1\BIN
 SET LOG_DIR=_logs
-REM SET BAD_DIR=_bad
 SET nls_lang=AMERICAN_AMERICA.AL32UTF8
 
 ECHO ## DB: %AUTH%
 
 SET MODE=1
 MKDIR %LOG_DIR%
-REM MKDIR %BAD_DIR%
 
 DEL /s /q /f %LOG_DIR%\*.txt
-REM DEL /s /q /f %BAD_DIR%\*.*
 
 ECHO ## log
-"%ORA_BIN%\sqlplus" %AUTH% @"log.sql" %LOG_DIR%/not_deleted.txt
+"%ORA_BIN%\sqlplus" %AUTH% @"log.sql" %LOG_DIR%/1_not_deleted.txt
 
 ECHO ## delete
-"%ORA_BIN%\sqlplus" %AUTH% @"delete.sql" > "%LOG_DIR%/delete.txt"
+"%ORA_BIN%\sqlplus" %AUTH% @"delete.sql" > "%LOG_DIR%/2_delete.txt"
 
+ECHO ## update_hanging_duplicates
+"%ORA_BIN%\sqlplus" %AUTH% @"update_hanging_duplicates.sql" %LOG_DIR%/3_update_hanging_duplicates.txt
 
-rem �������� ������ ���������� �������������������
 PAUSE
