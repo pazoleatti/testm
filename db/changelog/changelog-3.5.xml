@@ -344,6 +344,29 @@
 		</update>
 	</changeSet>
 
+	<!-- https://jira.aplana.com/browse/SBRFNDFL-6538 Реализовать изменение проверок ТФ по xsd -->
+	<changeSet id="3.5-snazin-3" author="snazin">
+		<update tableName="BLOB_DATA">
+			<column name="data" valueBlobFile="templates-3.5/ndfl/primary_rnu_ndfl/v2016/rnu_ndfl.xsd"/>
+			<column name="name" value="РНУ_НДФЛ_new6.5.xsd"/>
+			<where>id in (select dt.xsd from declaration_template dt where dt.id = 100)</where>
+		</update>
+	</changeSet>
+	<changeSet id="3.5-snazin-4" author="snazin">
+		<update tableName="BLOB_DATA">
+			<column name="data" valueBlobFile="templates-3.5/ndfl/primary_rnu_ndfl/v2016/rnu_ndfl.xsd"/>
+			<column name="name" value="РНУ_НДФЛ_new6.5.xsd"/>
+			<where>id in (select dt.xsd from declaration_template dt where dt.id = 100)</where>
+		</update>
+	</changeSet>
+
+	<!-- https://jira.aplana.com/browse/SBRFNDFL-6759 В БД под хранение параметра Сумма платежного поручения в раздела 2 РНУ отведено не 20 чисел, а 10 -->
+	<changeSet id="3.5-snazin-5" author="snazin">
+		<modifyDataType tableName="ndfl_person_income"
+						columnName="tax_summ"
+						newDataType="number(20)"/>
+	</changeSet>
+
 	<!--https://jira.aplana.com/browse/SBRFNDFL-6678 2 узла берут в работу одну асинхронную задачу -->
 	<changeSet id="3.5-ytrofimov-11" author="ytrofimov">
 		<sql>

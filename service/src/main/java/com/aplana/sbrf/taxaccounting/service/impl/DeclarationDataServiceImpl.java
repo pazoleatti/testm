@@ -1170,7 +1170,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
 
     @Override
-    @Transactional(noRollbackFor = {Throwable.class})
+    @Transactional(noRollbackFor = {Exception.class})
     public void cancelDeclarationList(List<Long> declarationDataIds, String note, TAUserInfo userInfo) {
         LOG.info(String.format("DeclarationDataServiceImpl.cancelDeclarationList by %s. declarationDataIds: %s; note: %s",
                 userInfo, declarationDataIds, note));
@@ -1204,6 +1204,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                         String asnuClause = declarationTemplate.getType().getId() == DeclarationType.NDFL_PRIMARY ? String.format(", АСНУ: \"%s\"", asnu.get("NAME").getStringValue()) : "";
                         Map<String, Object> exchangeParams = new HashMap<>();
                         moveToCreateFacade.cancel(userInfo, declarationData, logger, exchangeParams);
+                        if (logger.containsLevel(LogLevel.ERROR)) {
+                            sendNotification(logger.getLastEntry().getMessage(), logEntryService.save(logger.getEntries()), userId);
+                            continue;
+                        }
 
                         declarationData.setState(State.CREATED);
                         declarationDataDao.setStatus(declarationId, declarationData.getState());
@@ -1232,7 +1236,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 } else { // Нет прав доступа
                     makeNotificationForAccessDenied(logger);
                 }
-            } catch (Throwable e) {
+            } catch (Exception e) {
                 String errorMessage = String.format(FAIL, "Возврат в Создана", getStandardDeclarationDescription(declarationId).concat(". Причина: ").concat(e.toString()));
                 logger.error(errorMessage);
                 sendNotification(errorMessage, logEntryService.save(logger.getEntries()), userId);
@@ -2711,7 +2715,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             Set<Pair<Long, String>> personAndOperationAffected = new HashSet<>();
             // Записываем информацию о том, были ли вообще затронуты строки.
             boolean isAnyDateChanged = false;
-            boolean isAnyDateNotChanged = false;
 
             // Заменяем значения в строках
             for (NdflPersonIncome income : incomes) {
@@ -2726,7 +2729,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                         boolean dateChanged = dateEditor.editIncomeDateField(income, incomeDates, person, logger);
 
                         isAnyDateChanged = isAnyDateChanged || dateChanged;
-                        isAnyDateNotChanged = isAnyDateNotChanged || (!dateChanged);
 
                         if (dateChanged) {
                             personAndOperationAffected.add(Pair.of(income.getNdflPersonId(), income.getOperationId()));
@@ -2772,6 +2774,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 );
             }
 
+            // TODO: Костыльное определение ситуации "Есть неизменённые даты", т.к. нормальное логическое требует получения данных о результате из DateEditor.
+            boolean isAnyDateNotChanged = logger.containsLevel(LogLevel.WARNING);
             boolean notAllDatesAreChanged = isAnyDateChanged && isAnyDateNotChanged;
 
             // Не будь, как я, вынеси это в отдельный метод.
@@ -2781,7 +2785,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                         DateUtils.commonDateFormat(incomeDates.getAccruedDate(), onEmpty),
                         DateUtils.commonDateFormat(incomeDates.getPayoutDate(), onEmpty),
                         DateUtils.commonDateFormat(incomeDates.getTaxDate(), onEmpty),
-                        DateUtils.commonDateFormat(incomeDates.getTransferDate(), onEmpty)
+                        DateUtils.formatPossibleZeroDate(incomeDates.getTransferDate(), onEmpty)
                 );
                 notification.setText(String.format("Для формы №%s выполнено частичное изменение дат раздела 2", declarationDataId));
             } else if (isAnyDateChanged) {
@@ -2789,7 +2793,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                         DateUtils.commonDateFormat(incomeDates.getAccruedDate(), onEmpty),
                         DateUtils.commonDateFormat(incomeDates.getPayoutDate(), onEmpty),
                         DateUtils.commonDateFormat(incomeDates.getTaxDate(), onEmpty),
-                        DateUtils.commonDateFormat(incomeDates.getTransferDate(), onEmpty)
+                        DateUtils.formatPossibleZeroDate(incomeDates.getTransferDate(), onEmpty)
                 );
                 notification.setText(String.format("Для формы №%s выполнено изменение дат раздела 2", declarationDataId));
             } else {
@@ -2797,7 +2801,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                         DateUtils.commonDateFormat(incomeDates.getAccruedDate(), onEmpty),
                         DateUtils.commonDateFormat(incomeDates.getPayoutDate(), onEmpty),
                         DateUtils.commonDateFormat(incomeDates.getTaxDate(), onEmpty),
-                        DateUtils.commonDateFormat(incomeDates.getTransferDate(), onEmpty)
+                        DateUtils.formatPossibleZeroDate(incomeDates.getTransferDate(), onEmpty)
                 );
                 notification.setText(String.format("Для формы №%s не выполнено изменение дат раздела 2", declarationDataId));
             }

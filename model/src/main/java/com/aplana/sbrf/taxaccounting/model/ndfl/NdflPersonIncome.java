@@ -84,7 +84,7 @@ public class NdflPersonIncome extends NdflPersonOperation {
     protected String paymentNumber;
 
     // НДФЛ.Перечисление в бюджет.Платежное поручение.Сумма (Графа 24)
-    protected Long taxSumm;
+    protected BigDecimal taxSumm;
 
     // Дата и время редактирования. Заполняется при редактировании данных НФ через загрузку Excel файла
     protected Date modifiedDate;

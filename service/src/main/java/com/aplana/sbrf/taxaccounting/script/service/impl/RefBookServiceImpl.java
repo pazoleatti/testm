@@ -15,11 +15,9 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.result.RefBookConfListItem;
 import com.aplana.sbrf.taxaccounting.model.util.AppFileUtils;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
-import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
 import com.aplana.sbrf.taxaccounting.script.service.RefBookService;
 import com.aplana.sbrf.taxaccounting.service.*;
-import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
-import com.aplana.sbrf.taxaccounting.service.refbook.RefBookAsnuService;
+import com.aplana.sbrf.taxaccounting.service.refbook.*;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
@@ -39,6 +37,7 @@ import java.util.Map;
 
 import static org.apache.commons.io.FilenameUtils.getExtension;
 
+
 @Service("refBookService")
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class RefBookServiceImpl implements RefBookService {
@@ -53,21 +52,25 @@ public class RefBookServiceImpl implements RefBookService {
     private RefBookDao refBookDao;
 
     @Autowired
-    private RefBookHelper refBookHelper;
-
-    @Autowired
     private TransactionHelper transactionHelper;
-
-    @Autowired
-    private TAUserService taUserService;
 
     @Autowired
     private BlobDataService blobDataService;
 
     @Autowired
     private LogEntryService logEntryService;
+
     @Autowired
     private RefBookAsnuService refBookAsnuService;
+
+    @Autowired
+    private RefBookCountryService refBookCountryService;
+
+    @Autowired
+    private RefBookDocTypeService refBookDocTypeService;
+
+    @Autowired
+    private RefBookTaxpayerStateService refBookTaxpayerStateService;
 
 
     @Override
@@ -188,18 +191,6 @@ public class RefBookServiceImpl implements RefBookService {
         return logEntryService.save(logger.getEntries());
     }
 
-    @Override
-    @Transactional (readOnly = true)
-    public List<RefBookAsnu> findAllAsnu() {
-        return refBookAsnuService.findAll();
-    }
-
-    @Override
-    @Transactional (readOnly = true)
-    public RefBookAsnu getAsnu(Long asnuId) {
-        return refBookAsnuService.fetchById(asnuId);
-    }
-
     private void importRefBookConf(ByteArrayInputStream inputStream, String fileName, Logger logger) throws IOException {
         String dirName = new File(fileName).getParent();
         if (dirName != null && new File(dirName).getParent() == null) {
@@ -255,5 +246,36 @@ public class RefBookServiceImpl implements RefBookService {
             logger.warn("Пропущен файл \"%s\". Загружаемый файл должен лежать в папке с именем, соответствующим идентификатору справочника.",
                     fileName);
         }
+    }
+
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<RefBookAsnu> findAllAsnu() {
+        return refBookAsnuService.findAll();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public RefBookAsnu getAsnu(Long asnuId) {
+        return refBookAsnuService.fetchById(asnuId);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean existsCountryByCode(String code) {
+        return refBookCountryService.existsByCode(code);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean existsDocTypeByCode(String code) {
+        return refBookDocTypeService.existsByCode(code);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean existsTaxpayerStateByCode(String code) {
+        return refBookTaxpayerStateService.existsByCode(code);
     }
 }

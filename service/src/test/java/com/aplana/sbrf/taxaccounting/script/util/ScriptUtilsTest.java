@@ -45,8 +45,8 @@ public class ScriptUtilsTest {
     @Test
     public void checkAndReadMultiheadFileTest() throws IOException, OpenXML4JException, SAXException {
         File file = new File("src/test/resources/script/multiHeaderFile.xlsx");
-        List<List<String>> allValues = new ArrayList<List<String>>();
-        List<List<String>> headerValues = new ArrayList<List<String>>();
+        List<List<String>> allValues = new ArrayList<>();
+        List<List<String>> headerValues = new ArrayList<>();
         Map<String, Object> paramsMap = new HashMap<>();
         paramsMap.put("rowOffset", 0);
         paramsMap.put("colOffset", 0);
@@ -310,7 +310,7 @@ public class ScriptUtilsTest {
         income11.setTaxTransferDate(new Date(1000000000003L));
         income11.setPaymentDate(new Date(1000000000004L));
         income11.setPaymentNumber("1200");
-        income11.setTaxSumm(1000L);
+        income11.setTaxSumm(new BigDecimal("1000"));
         ConsolidationIncome income12 = new ConsolidationIncome();
         income12.setInp("1445019531");
         income12.setIncomeCode("2000");
@@ -333,7 +333,7 @@ public class ScriptUtilsTest {
         income12.setTaxTransferDate(new Date(1000000000003L));
         income12.setPaymentDate(new Date(1000000000004L));
         income12.setPaymentNumber("1200");
-        income12.setTaxSumm(1000L);
+        income12.setTaxSumm(new BigDecimal("1000"));
         ConsolidationIncome income21 = new ConsolidationIncome();
         income21.setInp("1445019531");
         income21.setIncomeCode("2000");
@@ -353,7 +353,7 @@ public class ScriptUtilsTest {
         income21.setTaxTransferDate(new Date(1000000000003L));
         income21.setPaymentDate(new Date(1000000000004L));
         income21.setPaymentNumber("1200");
-        income21.setTaxSumm(1000L);
+        income21.setTaxSumm(new BigDecimal("1000"));
         ConsolidationIncome income22 = new ConsolidationIncome();
         income22.setInp("1445019531");
         income22.setIncomeCode("2000");
@@ -373,7 +373,7 @@ public class ScriptUtilsTest {
         income22.setTaxTransferDate(new Date(1000000000003L));
         income22.setPaymentDate(new Date(1000000000004L));
         income22.setPaymentNumber("1200");
-        income22.setTaxSumm(1000L);
+        income22.setTaxSumm(new BigDecimal("1000"));
 
         String uuid11 = ScriptUtils.getConsolidationIncomeUUID(income11);
         String uuid12 = ScriptUtils.getConsolidationIncomeUUID(income12);

@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.script.service;
 
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriodType;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.service.ScriptExposed;
 
@@ -51,4 +52,8 @@ public interface ReportPeriodService {
      */
     ReportPeriod getByTaxTypedCodeYear(TaxType taxType, String code, int year);
 
+    /**
+     * Получение записи справочника "Коды, определяющие налоговый (отчётный) период" по идентификатору.
+     */
+    ReportPeriodType getReportPeriodTypeById(Long id);
 }

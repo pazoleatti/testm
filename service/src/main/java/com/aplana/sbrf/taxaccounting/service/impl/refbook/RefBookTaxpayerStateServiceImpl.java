@@ -24,4 +24,10 @@ public class RefBookTaxpayerStateServiceImpl implements RefBookTaxpayerStateServ
     public List<RefBookTaxpayerState> findAllActive() {
         return refBookTaxpayerStateDao.findAllActive();
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean existsByCode(String code) {
+        return refBookTaxpayerStateDao.existsByCode(code);
+    }
 }

@@ -3,6 +3,8 @@ package com.aplana.sbrf.taxaccounting.model.ndfl;
 import com.aplana.sbrf.taxaccounting.model.util.NdflComparator;
 import com.aplana.sbrf.taxaccounting.model.util.RnuNdflStringComparator;
 import com.google.common.base.Joiner;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -11,6 +13,8 @@ import java.util.*;
 /**
  * Данные о физическом лице - получателе дохода
  */
+@Getter
+@Setter
 public class NdflPerson extends NdflData<Long> {
 
     // №пп
@@ -112,6 +116,7 @@ public class NdflPerson extends NdflData<Long> {
     // Значение имени пользователя из Справочника пользователей системы. Заполняется при редактировании данных НФ через загрузку Excel файла
     private String modifiedBy;
 
+    // Идентификатор АСНУ, откуда получены данные
     private Long asnuId;
 
     public NdflPerson(List<NdflPersonIncome> incomes, List<NdflPersonDeduction> deductions, List<NdflPersonPrepayment> prepayments) {
@@ -145,221 +150,6 @@ public class NdflPerson extends NdflData<Long> {
             "status", "postIndex", "regionCode", "area", "city", "locality", "street", "house", "building", "flat",
             "countryCode", "address", "additionalData", "modifiedDate", "modifiedBy", "asnuId"};
 
-    public Long getDeclarationDataId() {
-        return declarationDataId;
-    }
-
-    public void setDeclarationDataId(Long declarationDataId) {
-        this.declarationDataId = declarationDataId;
-    }
-
-    public Long getRowNum() {
-        return rowNum;
-    }
-
-    public void setRowNum(Long rowNum) {
-        this.rowNum = rowNum;
-    }
-
-    public Long getPersonId() {
-        return personId;
-    }
-
-    public void setPersonId(Long personId) {
-        this.personId = personId;
-    }
-
-    public String getInp() {
-        return inp;
-    }
-
-    public void setInp(String inp) {
-        this.inp = inp;
-    }
-
-    public String getSnils() {
-        return snils;
-    }
-
-    public void setSnils(String snils) {
-        this.snils = snils;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getMiddleName() {
-        return middleName;
-    }
-
-    public void setMiddleName(String middleName) {
-        this.middleName = middleName;
-    }
-
-    public Date getBirthDay() {
-        return birthDay;
-    }
-
-    public void setBirthDay(Date birthDay) {
-        this.birthDay = birthDay;
-    }
-
-    public String getCitizenship() {
-        return citizenship;
-    }
-
-    public void setCitizenship(String citizenship) {
-        this.citizenship = citizenship;
-    }
-
-    public String getInnNp() {
-        return innNp;
-    }
-
-    public void setInnNp(String innNp) {
-        this.innNp = innNp;
-    }
-
-    public String getInnForeign() {
-        return innForeign;
-    }
-
-    public void setInnForeign(String innForeign) {
-        this.innForeign = innForeign;
-    }
-
-    public String getIdDocType() {
-        return idDocType;
-    }
-
-    public void setIdDocType(String idDocType) {
-        this.idDocType = idDocType;
-    }
-
-    public String getIdDocNumber() {
-        return idDocNumber;
-    }
-
-    public void setIdDocNumber(String idDocNumber) {
-        this.idDocNumber = idDocNumber;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public String getPostIndex() {
-        return postIndex;
-    }
-
-    public void setPostIndex(String postIndex) {
-        this.postIndex = postIndex;
-    }
-
-    public String getRegionCode() {
-        return regionCode;
-    }
-
-    public void setRegionCode(String regionCode) {
-        this.regionCode = regionCode;
-    }
-
-    public String getArea() {
-        return area;
-    }
-
-    public void setArea(String area) {
-        this.area = area;
-    }
-
-    public String getCity() {
-        return city;
-    }
-
-    public void setCity(String city) {
-        this.city = city;
-    }
-
-    public String getLocality() {
-        return locality;
-    }
-
-    public void setLocality(String locality) {
-        this.locality = locality;
-    }
-
-    public String getStreet() {
-        return street;
-    }
-
-    public void setStreet(String street) {
-        this.street = street;
-    }
-
-    public String getHouse() {
-        return house;
-    }
-
-    public void setHouse(String house) {
-        this.house = house;
-    }
-
-    public String getBuilding() {
-        return building;
-    }
-
-    public void setBuilding(String building) {
-        this.building = building;
-    }
-
-    public String getFlat() {
-        return flat;
-    }
-
-    public void setFlat(String flat) {
-        this.flat = flat;
-    }
-
-    public String getCountryCode() {
-        return countryCode;
-    }
-
-    public void setCountryCode(String countryCode) {
-        this.countryCode = countryCode;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public String getAdditionalData() {
-        return additionalData;
-    }
-
-    public void setAdditionalData(String additionalData) {
-        this.additionalData = additionalData;
-    }
 
     public List<NdflPersonIncome> getIncomes() {
         return incomes != null ? incomes : new ArrayList<NdflPersonIncome>();
@@ -389,38 +179,6 @@ public class NdflPerson extends NdflData<Long> {
         if (prepayments != null) {
             this.prepayments = prepayments;
         }
-    }
-
-    public Long getRecordId() {
-        return recordId;
-    }
-
-    public void setRecordId(Long recordId) {
-        this.recordId = recordId;
-    }
-
-    public Date getModifiedDate() {
-        return modifiedDate;
-    }
-
-    public void setModifiedDate(Date modifiedDate) {
-        this.modifiedDate = modifiedDate;
-    }
-
-    public String getModifiedBy() {
-        return modifiedBy;
-    }
-
-    public void setModifiedBy(String modifiedBy) {
-        this.modifiedBy = modifiedBy;
-    }
-
-    public Long getAsnuId() {
-        return asnuId;
-    }
-
-    public void setAsnuId(Long asnuId) {
-        this.asnuId = asnuId;
     }
 
     public String getFullName() {

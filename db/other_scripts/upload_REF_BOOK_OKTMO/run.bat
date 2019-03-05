@@ -11,15 +11,9 @@ ECHO ## DB: %AUTH%
 SET MODE=1
 MKDIR %LOG_DIR%
 
-DEL /s /q /f %LOG_DIR%\*.txt
+DEL /s /q /f %LOG_DIR%\*.csv
 
-ECHO ## log
-"%ORA_BIN%\sqlplus" %AUTH% @"log.sql" %LOG_DIR%/1_not_deleted.txt
-
-ECHO ## delete
-"%ORA_BIN%\sqlplus" %AUTH% @"delete.sql" > "%LOG_DIR%/2_delete.txt"
-
-ECHO ## update_hanging_duplicates
-"%ORA_BIN%\sqlplus" %AUTH% @"update_hanging_duplicates.sql" %LOG_DIR%/3_update_hanging_duplicates.txt
+ECHO ## upload_REF_BOOK_OKTMO
+ "%ORA_BIN%\sqlplus" %AUTH% @"upload_REF_BOOK_OKTMO.sql" %LOG_DIR%/upload_REF_BOOK_OKTMO.csv
 
 PAUSE

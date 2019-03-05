@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookTaxpayerStateDao;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookTaxpayerState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Repository;
 
@@ -12,13 +13,16 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 
 @Repository
 public class RefBookTaxpayerStateDaoImpl extends AbstractDao implements RefBookTaxpayerStateDao {
 
+    private RowMapper<RefBookTaxpayerState> taxpayerStateRowMapper;
+
     @Autowired
-    private RefBookMapperFactory refBookMapperFactory;
+    public RefBookTaxpayerStateDaoImpl(RefBookMapperFactory mapperFactory) {
+        taxpayerStateRowMapper = mapperFactory.new TaxPayerStatusMapper<>();
+    }
 
     @Override
     public List<RefBookTaxpayerState> findAllActive() {
@@ -32,7 +36,7 @@ public class RefBookTaxpayerStateDaoImpl extends AbstractDao implements RefBookT
                 "from ref_book_taxpayer_state ts where status = 0) r\n" +
                 "where r.start_date <= :actualDate and (r.end_date >= :actualDate or r.end_date is null)";
         try {
-            return getNamedParameterJdbcTemplate().query(sql, new MapSqlParameterSource("actualDate", actualDate), refBookMapperFactory.new TaxPayerStatusMapper<RefBookTaxpayerState>());
+            return getNamedParameterJdbcTemplate().query(sql, new MapSqlParameterSource("actualDate", actualDate), taxpayerStateRowMapper);
         } catch (EmptyResultDataAccessException e) {
             return new ArrayList<>();
         }
@@ -40,14 +44,17 @@ public class RefBookTaxpayerStateDaoImpl extends AbstractDao implements RefBookT
 
     @Override
     public List<RefBookTaxpayerState> findAllByIdIn(List<Long> ids) {
-        if (!isEmpty(ids)) {
-            return getNamedParameterJdbcTemplate().query(
-                    "select ts.id, ts.name, ts.code \n" +
-                            "from ref_book_taxpayer_state ts \n" +
-                            "where ts.id in (:ids)",
-                    new MapSqlParameterSource("ids", ids),
-                    refBookMapperFactory.new TaxPayerStatusMapper<>());
-        }
-        return new ArrayList<>();
+        //language=sql
+        String sql = "select ts.id, ts.name, ts.code \n" +
+                "from ref_book_taxpayer_state ts \n" +
+                "where ts.id in (:ids)";
+        return selectIn(sql, ids, "ids", taxpayerStateRowMapper);
+    }
+
+    @Override
+    public boolean existsByCode(String code) {
+        String sql = "select count(*) from ref_book_taxpayer_state where code = ?";
+        int count = getJdbcTemplate().queryForObject(sql, new Object[]{code}, Integer.class);
+        return (count > 0);
     }
 }

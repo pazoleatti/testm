@@ -22,4 +22,12 @@ public interface RefBookDocTypeDao {
      * @return список записей справочника
      */
     List<RefBookDocType> findAllByIdIn(List<Long> ids);
+
+    /**
+     * Проверка существования записи по полю code.
+     *
+     * @param code код документа
+     * @return существует ли запись в базе
+     */
+    boolean existsByCode(String code);
 }

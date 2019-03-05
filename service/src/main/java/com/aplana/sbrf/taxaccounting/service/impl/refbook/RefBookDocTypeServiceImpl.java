@@ -24,4 +24,10 @@ public class RefBookDocTypeServiceImpl implements RefBookDocTypeService {
     public List<RefBookDocType> findAllActive() {
         return refBookDocTypeDao.findAllActive();
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean existsByCode(String code) {
+        return refBookDocTypeDao.existsByCode(code);
+    }
 }

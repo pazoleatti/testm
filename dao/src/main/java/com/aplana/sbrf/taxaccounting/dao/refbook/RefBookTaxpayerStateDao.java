@@ -20,4 +20,12 @@ public interface RefBookTaxpayerStateDao {
      * @return список записей справочника
      */
     List<RefBookTaxpayerState> findAllByIdIn(List<Long> ids);
+
+    /**
+     * Проверка существования записи по полю code.
+     *
+     * @param code код статуса налогоплательщика
+     * @return существует ли запись в базе
+     */
+    boolean existsByCode(String code);
 }

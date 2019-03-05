@@ -9,6 +9,10 @@ import java.util.Date;
 
 public class DateUtils {
 
+    // Принятые в системе обозначения для пустых дат.
+    public final static String DATE_ZERO_AS_DATE = "01.01.1901";
+    public final static String DATE_ZERO_AS_STRING = "00.00.0000";
+
     private static final String COMMON_DATE_FORMAT = "dd.MM.yyyy";
     private static final DateTimeFormatter COMMON_DATE_FORMATTER = DateTimeFormat.forPattern(COMMON_DATE_FORMAT);
 
@@ -36,6 +40,29 @@ public class DateUtils {
             return onNull;
         }
         return formatByFormatter(date, COMMON_DATE_FORMATTER);
+    }
+
+    /**
+     * Если аргумент - дата, которой мы обозначаем нулевую, возвращает принятое для неё стрковое значение.
+     */
+    public static String formatPossibleZeroDate(Date date) {
+        String commonFormat = commonDateFormat(date);
+        if (commonFormat.equals(DATE_ZERO_AS_DATE)) {
+            return DATE_ZERO_AS_STRING;
+        } else {
+            return commonFormat;
+        }
+    }
+
+    /**
+     * Если аргумент - дата, которой мы обозначаем нулевую, возвращает принятое для неё стрковое значение.
+     * Реализация со специальным значением для null-аргумента
+     */
+    public static String formatPossibleZeroDate(Date date, String onNull) {
+        if (date == null) {
+            return onNull;
+        }
+        return formatPossibleZeroDate(date);
     }
 
     /**

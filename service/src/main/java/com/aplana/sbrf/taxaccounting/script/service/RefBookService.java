@@ -77,9 +77,33 @@ public interface RefBookService {
 
     /**
      * Получить АСНУ
-     * @param asnuId    уникальный идентификатор записи
-     * @return  объект АСНУ
+     *
+     * @param asnuId уникальный идентификатор записи
+     * @return объект АСНУ
      */
     RefBookAsnu getAsnu(Long asnuId);
 
+    /**
+     * Проверка существования записи в ref_book_country по полю code.
+     *
+     * @param code код страны
+     * @return существует ли запись в справочнике
+     */
+    boolean existsCountryByCode(String code);
+
+    /**
+     * Проверка существования записи в ref_book_doc_type по полю code.
+     *
+     * @param code код документа
+     * @return существует ли запись в справочнике
+     */
+    boolean existsDocTypeByCode(String code);
+
+    /**
+     * Проверка существования записи в ref_book_taxpayer_state по полю code.
+     *
+     * @param code код статуса налогоплательщика
+     * @return существует ли запись в справочнике
+     */
+    boolean existsTaxpayerStateByCode(String code);
 }

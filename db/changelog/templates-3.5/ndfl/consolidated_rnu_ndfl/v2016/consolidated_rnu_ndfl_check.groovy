@@ -1142,6 +1142,9 @@ class Check extends AbstractScriptClass {
 
         Map<String, List<NdflPersonIncome>> incomesByPersonIdForCol16Sec2Check = null
 
+        // Операции по которым уже сформировано сообщение ошибки при проверке Раздела 2 Графы 16 случай "Графа 14" ≠ "13"
+        Set<String> operationsCol16Sec2TaxRateNot13 = []
+
         incomesByPersonId.each { ndflPersonId, allIncomesOfPerson ->
             ScriptUtils.checkInterrupted()
 
@@ -1475,24 +1478,27 @@ class Check extends AbstractScriptClass {
                     // СведДох5 НДФЛ.Расчет.Сумма.Исчисленный (Заполнение Раздела 2 Графы 16)
                     if (!ndflPersonIncome.isDummy() && ndflPersonIncome.calculatedTax != null) {
                         if (ndflPersonIncome.taxRate != 13) {
-                            // условие | ∑ Р.2.Гр.16 - ∑ ОКРУГЛ(Р.2.Гр.13 x Р.2.Гр.14/100) – ∑ Р.4.Гр.4 | < 1
-                            // ∑ Р.2.Гр.16
-                            BigDecimal var1 = (BigDecimal) allIncomesOfOperation.sum { NdflPersonIncome income -> income.calculatedTax ?: 0 }
-                            // ∑ ОКРУГЛ(Р.2.Гр.13 x Р.2.Гр.14/100)
-                            BigDecimal var2 = (BigDecimal) allIncomesOfOperation.sum { NdflPersonIncome income ->
-                                income.calculatedTax != null ? ScriptUtils.round((income.taxBase ?: 0) * (income.taxRate ?: 0) / 100) : 0
-                            }
-                            // ∑ Р.4.Гр.4
-                            BigDecimal var3 = (BigDecimal) allPrepaymentsOfOperation?.sum { NdflPersonPrepayment prepayment -> prepayment.summ ?: 0 } ?: 0
-                            BigDecimal ВычисленноеЗначениеНалога = var2 - var3
-                            if (!((var1 - ВычисленноеЗначениеНалога).abs() < 1)) {
-                                String errMsg = String.format("Для строк операции с \"ID операции\"=\"%s\" значение налога исчисленного в гр. 16 (%s р) не совпадает с расчетным (%s р)",
-                                        operationId, var1, ВычисленноеЗначениеНалога
-                                )
-                                String pathError = String.format(SECTION_LINES_MSG, T_PERSON_INCOME, rowNums)
-                                logger.logCheck("%s. %s.",
-                                        declarationService.isCheckFatal(DeclarationCheckCode.RNU_SECTION_2_16, declarationData.declarationTemplateId),
-                                        LOG_TYPE_2_16, fioAndInpAndOperId, pathError, errMsg)
+                            if (!operationsCol16Sec2TaxRateNot13.contains(ndflPersonIncome.operationId)) {
+                                // условие | ∑ Р.2.Гр.16 - ∑ ОКРУГЛ(Р.2.Гр.13 x Р.2.Гр.14/100) – ∑ Р.4.Гр.4 | < 1
+                                // ∑ Р.2.Гр.16
+                                BigDecimal var1 = (BigDecimal) allIncomesOfOperation.sum { NdflPersonIncome income -> income.calculatedTax ?: 0 }
+                                // ∑ ОКРУГЛ(Р.2.Гр.13 x Р.2.Гр.14/100)
+                                BigDecimal var2 = (BigDecimal) allIncomesOfOperation.sum { NdflPersonIncome income ->
+                                    income.calculatedTax != null ? ScriptUtils.round((income.taxBase ?: 0) * (income.taxRate ?: 0) / 100) : 0
+                                }
+                                // ∑ Р.4.Гр.4
+                                BigDecimal var3 = (BigDecimal) allPrepaymentsOfOperation?.sum { NdflPersonPrepayment prepayment -> prepayment.summ ?: 0 } ?: 0
+                                BigDecimal ВычисленноеЗначениеНалога = var2 - var3
+                                if (!((var1 - ВычисленноеЗначениеНалога).abs() < 1)) {
+                                    operationsCol16Sec2TaxRateNot13 << ndflPersonIncome.operationId
+                                    String errMsg = String.format("Для строк операции с \"ID операции\"=\"%s\" значение налога исчисленного в гр. 16 (%s р) не совпадает с расчетным (%s р)",
+                                            operationId, var1, ВычисленноеЗначениеНалога
+                                    )
+                                    String pathError = String.format(SECTION_LINES_MSG, T_PERSON_INCOME, rowNums)
+                                    logger.logCheck("%s. %s.",
+                                            declarationService.isCheckFatal(DeclarationCheckCode.RNU_SECTION_2_16, declarationData.declarationTemplateId),
+                                            LOG_TYPE_2_16, fioAndInpAndOperId, pathError, errMsg)
+                                }
                             }
                         } else {
                             if (ndflPersonIncome.incomeCode == "1010") {
