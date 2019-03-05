@@ -1,28 +1,59 @@
 package com.aplana.sbrf.taxaccounting.script.service.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.IdDocDao;
+import com.aplana.sbrf.taxaccounting.dao.IdTaxPayerDao;
+import com.aplana.sbrf.taxaccounting.dao.PersonTbDao;
 import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonRefbookHandler;
+import com.aplana.sbrf.taxaccounting.dao.impl.refbook.person.NaturalPersonMapper;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookPersonDao;
 import com.aplana.sbrf.taxaccounting.model.Configuration;
-import com.aplana.sbrf.taxaccounting.model.identification.*;
+import com.aplana.sbrf.taxaccounting.model.LockData;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.identification.IdentificationData;
+import com.aplana.sbrf.taxaccounting.model.identification.IdentityPerson;
+import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.Address;
 import com.aplana.sbrf.taxaccounting.model.refbook.IdDoc;
 import com.aplana.sbrf.taxaccounting.model.refbook.PersonIdentifier;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookTaxpayerState;
+import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPerson;
 import com.aplana.sbrf.taxaccounting.model.util.BaseWeightCalculator;
 import com.aplana.sbrf.taxaccounting.model.util.WeightCalculator;
 import com.aplana.sbrf.taxaccounting.model.util.impl.PersonDataWeightCalculator;
 import com.aplana.sbrf.taxaccounting.script.service.RefBookPersonService;
 import com.aplana.sbrf.taxaccounting.service.ConfigurationService;
+import com.aplana.sbrf.taxaccounting.service.LockDataService;
+import com.aplana.sbrf.taxaccounting.service.TransactionHelper;
+import com.aplana.sbrf.taxaccounting.service.TransactionLogic;
+import com.aplana.sbrf.taxaccounting.service.component.lock.BaseLockKeyGenerator;
 import com.google.common.collect.Maps;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 import java.text.DecimalFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
-import static com.aplana.sbrf.taxaccounting.model.ConfigurationParam.*;
+import static com.aplana.sbrf.taxaccounting.model.ConfigurationParam.WEIGHT_ADDRESS;
+import static com.aplana.sbrf.taxaccounting.model.ConfigurationParam.WEIGHT_ADDRESS_INO;
+import static com.aplana.sbrf.taxaccounting.model.ConfigurationParam.WEIGHT_BIRTHDAY;
+import static com.aplana.sbrf.taxaccounting.model.ConfigurationParam.WEIGHT_CITIZENSHIP;
+import static com.aplana.sbrf.taxaccounting.model.ConfigurationParam.WEIGHT_DUL;
+import static com.aplana.sbrf.taxaccounting.model.ConfigurationParam.WEIGHT_FIRST_NAME;
+import static com.aplana.sbrf.taxaccounting.model.ConfigurationParam.WEIGHT_INN;
+import static com.aplana.sbrf.taxaccounting.model.ConfigurationParam.WEIGHT_INN_FOREIGN;
+import static com.aplana.sbrf.taxaccounting.model.ConfigurationParam.WEIGHT_INP;
+import static com.aplana.sbrf.taxaccounting.model.ConfigurationParam.WEIGHT_LAST_NAME;
+import static com.aplana.sbrf.taxaccounting.model.ConfigurationParam.WEIGHT_MIDDLE_NAME;
+import static com.aplana.sbrf.taxaccounting.model.ConfigurationParam.WEIGHT_SNILS;
+import static com.aplana.sbrf.taxaccounting.model.ConfigurationParam.WEIGHT_TAX_PAYER_STATUS;
 import static java.util.Arrays.asList;
 
 /**
@@ -35,6 +66,18 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
     private RefBookPersonDao refBookPersonDao;
     @Autowired
     private ConfigurationService configurationService;
+    @Autowired
+    private LockDataService lockDataService;
+    @Autowired
+    private BaseLockKeyGenerator baseLockKeyGenerator;
+    @Autowired
+    private IdTaxPayerDao idTaxPayerDao;
+    @Autowired
+    private IdDocDao idDocDao;
+    @Autowired
+    private PersonTbDao personTbDao;
+    @Autowired
+    private TransactionHelper tx;
 
     // ----------------------------- РНУ-НДФЛ  -----------------------------
 
@@ -372,7 +415,6 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
                 }
             }
 
-
         });
 
         //Адрес ино
@@ -397,6 +439,43 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
             }
         });
 
+        return result;
+    }
+
+    @Override
+    public Long findMaxRegistryPersonId(Date currentDate) {
+        return refBookPersonDao.findMaxRegistryPersonId(currentDate);
+    }
+
+    @Override
+    public boolean lockPersonsRegistry(final TAUserInfo userInfo, Long taskDataId) {
+        Boolean result = false;
+        final String lockKey = baseLockKeyGenerator.generatePersonsRegistryLockKey();
+        try {
+            LockData lockData = tx.executeInNewTransaction(new TransactionLogic<LockData>() {
+                @Override
+                public LockData execute() {
+                    return lockDataService.lock(lockKey, userInfo.getUser().getId(), "Реестр физических лиц");
+                }
+            });
+            if (lockData == null) {
+                result = true;
+                lockDataService.bindTask(lockKey, taskDataId);
+            }
+        } catch (Exception e) {
+            return false;
+        }
+        return result;
+    }
+
+    @Override
+    public List<NaturalPerson> findNewRegistryPersons(Long oldMaxId, Date currentDate, NaturalPersonMapper naturalPersonMapper) {
+        List<NaturalPerson> result = refBookPersonDao.findNewRegistryPersons(oldMaxId, currentDate, naturalPersonMapper);
+        for (RegistryPerson person : result) {
+            person.getPersonIdentityList().addAll(idTaxPayerDao.getByPerson(person));
+            person.getDocuments().addAll(idDocDao.getByPerson(person));
+            person.getPersonTbList().addAll(personTbDao.getByPerson(person));
+        }
         return result;
     }
 

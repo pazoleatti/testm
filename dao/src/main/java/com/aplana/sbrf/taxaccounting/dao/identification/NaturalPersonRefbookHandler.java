@@ -36,22 +36,7 @@ public class NaturalPersonRefbookHandler extends NaturalPersonHandler {
      */
     private Map<Long, Map<Long, IdDoc>> documentsMap;
 
-    /**
-     * Кэш справочника страны
-     */
-    private Map<Long, RefBookCountry> countryMap;
-
-    /**
-     * Кэш справочника статусы Налогоплателищика
-     */
-    private Map<Long, RefBookTaxpayerState> taxpayerStatusMap;
-
-    /**
-     * Кэш справочника типы документов
-     */
-    private Map<Long, RefBookDocType> docTypeMap;
-
-    private Map<Long, RefBookAsnu> asnuMap;
+    private RefDataHolder refDataHolder;
 
     /**
      *
@@ -108,6 +93,14 @@ public class NaturalPersonRefbookHandler extends NaturalPersonHandler {
 
     }
 
+    public RefDataHolder getRefDataHolder() {
+        return refDataHolder;
+    }
+
+    public void setRefDataHolder(RefDataHolder refDataHolder) {
+        this.refDataHolder = refDataHolder;
+    }
+
     private void addPersonIdentifier(ResultSet rs, NaturalPerson naturalPerson) throws SQLException {
 
         Long refBookPersonId = naturalPerson.getId();
@@ -145,7 +138,7 @@ public class NaturalPersonRefbookHandler extends NaturalPersonHandler {
 
         if (docId != null && !pesonDocumentMap.containsKey(docId)) {
             Long docTypeId = SqlUtils.getLong(rs, "doc_id");
-            RefBookDocType docType = getDocTypeById(docTypeId);
+            RefBookDocType docType = refDataHolder.getDocTypeById(docTypeId);
             IdDoc personDocument = new IdDoc();
             personDocument.setId(docId);
 
@@ -210,11 +203,11 @@ public class NaturalPersonRefbookHandler extends NaturalPersonHandler {
             person.setBirthDate(rs.getDate("birth_date"));
 
             //ссылки на справочники
-            person.setTaxPayerState(getTaxpayerStatusById(SqlUtils.getLong(rs, "taxpayer_state")));
-            person.setCitizenship(getCountryById(SqlUtils.getLong(rs, "citizenship")));
+            person.setTaxPayerState(refDataHolder.getTaxpayerStatusById(SqlUtils.getLong(rs, "taxpayer_state")));
+            person.setCitizenship(refDataHolder.getCountryById(SqlUtils.getLong(rs, "citizenship")));
 
             //additional
-            person.setSource(asnuMap.get(SqlUtils.getLong(rs, "source_id")));
+            person.setSource(refDataHolder.getAsnuMap().get(SqlUtils.getLong(rs, "source_id")));
             person.setRecordId(SqlUtils.getLong(rs, "record_id"));
             person.setOldId(SqlUtils.getLong(rs, "old_id"));
             person.setVip(rs.getBoolean("vip"));
@@ -229,7 +222,7 @@ public class NaturalPersonRefbookHandler extends NaturalPersonHandler {
 
     private Address buildAddress(ResultSet rs) throws SQLException {
         Address address = new Address();
-        RefBookCountry country = getCountryById(SqlUtils.getLong(rs, "country_id"));
+        RefBookCountry country = refDataHolder.getCountryById(SqlUtils.getLong(rs, "country_id"));
         address.setCountry(country != null ? country : new RefBookCountry());
         address.setRegionCode(rs.getString("region_code"));
         address.setPostalCode(rs.getString("postal_code"));
@@ -243,65 +236,5 @@ public class NaturalPersonRefbookHandler extends NaturalPersonHandler {
         address.setAddressIno(rs.getString("address_foreign"));
         return address;
     }
-
-    public Map<Long, RefBookCountry> getCountryMap() {
-        return countryMap;
-    }
-
-    public void setCountryMap(Map<Long, RefBookCountry> countryMap) {
-        this.countryMap = countryMap;
-    }
-
-    public Map<Long, RefBookTaxpayerState> getTaxpayerStatusMap() {
-        return taxpayerStatusMap;
-    }
-
-    public void setTaxpayerStatusMap(Map<Long, RefBookTaxpayerState> taxpayerStatusMap) {
-        this.taxpayerStatusMap = taxpayerStatusMap;
-    }
-
-    public Map<Long, RefBookDocType> getDocTypeMap() {
-        return docTypeMap;
-    }
-
-    public void setDocTypeMap(Map<Long, RefBookDocType> docTypeMap) {
-        this.docTypeMap = docTypeMap;
-    }
-
-    public Map<Long, RefBookAsnu> getAsnuMap() {
-        return asnuMap;
-    }
-
-    public void setAsnuMap(Map<Long, RefBookAsnu> asnuMap) {
-        this.asnuMap = asnuMap;
-    }
-
-    private RefBookTaxpayerState getTaxpayerStatusById(Long taxpayerStatusId) {
-        if (taxpayerStatusId != null) {
-            return taxpayerStatusMap != null ? taxpayerStatusMap.get(taxpayerStatusId) : new RefBookTaxpayerState(taxpayerStatusId, null);
-        } else {
-            return new RefBookTaxpayerState();
-        }
-    }
-
-    private RefBookCountry getCountryById(Long countryId) {
-        if (countryId != null) {
-            return countryMap != null ? countryMap.get(countryId) : new RefBookCountry(countryId, null);
-        } else {
-            return new RefBookCountry();
-        }
-    }
-
-    private RefBookDocType getDocTypeById(Long docTypeId) {
-        if (docTypeId != null) {
-            RefBookDocType refBookDocType = new RefBookDocType();
-            refBookDocType.setId(docTypeId);
-            refBookDocType.setCode(null);
-            return docTypeMap != null ? docTypeMap.get(docTypeId) : refBookDocType;
-        } else {
-            return null;
-        }
-    }
-
 
 }

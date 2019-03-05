@@ -343,4 +343,11 @@
 			<where>id = '3a8afe75-a882-4ecb-9bd2-46920d12803d'</where>
 		</update>
 	</changeSet>
+
+	<!--https://jira.aplana.com/browse/SBRFNDFL-6678 2 узла берут в работу одну асинхронную задачу -->
+	<changeSet id="3.5-ytrofimov-11" author="ytrofimov">
+		<sql>
+			alter table async_task drop column task_group;
+		</sql>
+	</changeSet>
 </databaseChangeLog>

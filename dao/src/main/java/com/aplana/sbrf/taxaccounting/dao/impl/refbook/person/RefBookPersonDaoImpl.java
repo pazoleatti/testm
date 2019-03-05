@@ -325,4 +325,24 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
         params.addValue("actualDate", actualDate);
         return getNamedParameterJdbcTemplate().query(query, params, new RegistryPersonMapper());
     }
+
+    @Override
+    public Long findMaxRegistryPersonId(Date currentDate) {
+        return getNamedParameterJdbcTemplate().queryForObject("select max(id) from ref_book_person\n" +
+                "where start_date <= :currentDate and \n" +
+                "(end_date >= :currentDate or end_date is null) and \n" +
+                "record_id = old_id", new MapSqlParameterSource("currentDate", currentDate), Long.class);
+    }
+
+    @Override
+    public List<NaturalPerson> findNewRegistryPersons(Long oldMaxId, Date currentDate, NaturalPersonMapper naturalPersonMapper) {
+        String query = "select " + SelectPersonQueryGenerator.FULL_PERSON_SELECT_BASE + "\n" +
+                "where\n" +
+                "person.id > :oldMaxId and person.start_date <= :currentDate and \n" +
+                "(person.end_date >= :currentDate or person.end_date is null) and \n" +
+                "person.record_id = person.old_id";
+        MapSqlParameterSource params = new MapSqlParameterSource("oldMaxId", oldMaxId);
+        params.addValue("currentDate", currentDate);
+        return getNamedParameterJdbcTemplate().query(query, params, naturalPersonMapper);
+    }
 }
