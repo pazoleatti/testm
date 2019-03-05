@@ -63,8 +63,8 @@ public abstract class PersonPermission extends AbstractPermission<PermissivePers
             return VIEW.isGranted(user, targetDomainObject, logger) && (
                     taUser.hasRole(TARole.N_ROLE_CONTROL_UNP) ||
                             !targetDomainObject.isVip() ||
-                            taUser.hasRoles(TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER) &&
-                                    isPersonTBsContainsAnyUserTBs(taUser, targetDomainObject)
+                            (taUser.hasRoles(TARole.N_ROLE_VIP_READER) && taUser.hasRoles(TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER) &&
+                                    isPersonTBsContainsAnyUserTBs(taUser, targetDomainObject))
             );
         }
     }
