@@ -373,4 +373,12 @@
 			alter table async_task drop column task_group;
 		</sql>
 	</changeSet>
+	
+	<!--https://jira.aplana.com/browse/SBRFNDFL-6552 Сортировка РНУ реализована не по постановке-->
+	<changeSet id="3.5-amandzyak-2" author="amandzyak">
+		<sql>
+			alter table ndfl_person_income add constraint ndfl_person_inc_chk_row_type check(row_type in (100, 200, 300));
+		</sql>
+	</changeSet>
+	
 </databaseChangeLog>
