@@ -2012,7 +2012,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         }
         ndflPersonService.save(ndflPersonCache)
         if (successfulCount == 0) {
-            logger.error("В файле отсутствуют данные для загрузки. Либо отсутствуют операции, принадлежащие отчетному периоду, либо данные некоторых ФЛ содержат ошибки.")
+            logger.error("В ТФ отсутствуют операции, принадлежащие отчетному периоду.")
             logger.error("Налоговая форма не создана.")
         }
     }
@@ -2027,11 +2027,8 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         String personLineInFile = ndflPersonNode.'@line'
 
         NdflPerson ndflPerson = transformNdflPersonNode(ndflPersonNode)
-
-        if (!isNdflPersonValid(ndflPerson, personLineInFile)) {
-            logger.warn("Данные ФЛ: $ndflPerson.fullName, ИНП: $ndflPerson.inp содержат ошибки. ФЛ не было загружено в налоговую форму.")
-            return false
-        }
+        // Проверяется формат заполнения некоторых полей, просто печатает предупреждения.
+        checkNdflPerson(ndflPerson, personLineInFile)
 
         // Раздел операций "Сведения об операциях"
 
@@ -2074,7 +2071,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
      * Проверка данных физлица.
      * @param personLineInFile номер строки в файле, где содержались данные о физлице
      */
-    boolean isNdflPersonValid(NdflPerson person, String personLineInFile) {
+    boolean checkNdflPerson(NdflPerson person, String personLineInFile) {
         String emptyParamErrorMsg = "Строка: ${personLineInFile}. Для ФЛ: $person.fullName, ИНП: $person.inp значение параметра %s не указано."
         String valueNotFound = "Строка: ${personLineInFile}. ФЛ: $person.fullName, ИНП: $person.inp. Параметр \"%s\" (%s) содержит значение (%s), которое не найдено в справочнике %s."
         // Проверка поля "Гражданство"
