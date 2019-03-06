@@ -6,7 +6,6 @@ import com.aplana.sbrf.taxaccounting.model.AsyncTaskType;
 import com.aplana.sbrf.taxaccounting.model.DeclarationData;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.NotificationType;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -19,6 +18,7 @@ import org.springframework.stereotype.Component;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -44,7 +44,9 @@ public class IdentifyAsyncTask extends XmlGeneratorAsyncTask {
             long declarationDataId = (Long) taskData.getParams().get("declarationDataId");
             TAUserInfo userInfo = new TAUserInfo();
             userInfo.setUser(userService.getUser(taskData.getUserId()));
-            declarationDataService.identify(new TargetIdAndLogger(declarationDataId, logger), userInfo, docDate, null, new LockStateLogger() {
+            Map<String, Object> exchangeParams = new HashMap<>();
+            exchangeParams.put("taskDataId", taskData.getId());
+            declarationDataService.identify(new TargetIdAndLogger(declarationDataId, logger), userInfo, docDate, exchangeParams, new LockStateLogger() {
                 @Override
                 public void updateState(AsyncTaskState state) {
                     asyncManager.updateState(taskData.getId(), state);
@@ -69,12 +71,6 @@ public class IdentifyAsyncTask extends XmlGeneratorAsyncTask {
         return String.format("Не выполнена операция \"Идентификация ФЛ\" %s. Причина: %s.",
                 getDeclarationFullName(declarationDataId),
                 taskData.getParams().get("errorsText"));
-    }
-
-    @Override
-    protected void sendNotifications(AsyncTaskData taskData, String msg, String uuid, NotificationType notificationType, String reportId) {
-        msg = isSuccess(taskData) ? getNotificationMsg(taskData) : getErrorMsg(taskData, true);
-        super.sendNotifications(taskData, msg, uuid, notificationType, reportId);
     }
 
     @Override

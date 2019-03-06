@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao.refbook;
 
 import com.aplana.sbrf.taxaccounting.dao.PermissionDao;
 import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonRefbookHandler;
+import com.aplana.sbrf.taxaccounting.dao.impl.refbook.person.NaturalPersonMapper;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookPersonFilter;
@@ -174,4 +175,20 @@ public interface RefBookPersonDao extends PermissionDao {
      * @return список найденных записей реестра ФЛ
      */
     List<RegistryPerson> findActualRefPersonsByDeclarationDataId(Long declarationDataId, Date actualDate);
+
+    /**
+     * Найти идентификатор версии ФЛ в реестре ФЛ с максимальным идентификатором для даты актуальности. Дубликаты также исключаются из результата.
+     * @param currentDate   дата актуальности для определения версии ФЛ
+     * @return идентификатор записи в Реестре ФЛ
+     */
+    Long findMaxRegistryPersonId(Date currentDate);
+
+    /**
+     * Найти список физлиц в реестре ФЛ для даты актуальности, идентификатор которых больше указанного в параметре. Дубликаты также исключаются из результата.
+     * @param oldMaxId              предыдущий идентификатор версии ФЛ
+     * @param currentDate           дата актуальности для определения версии ФЛ
+     * @param naturalPersonMapper   проинициализированный справониками маппер
+     * @return                      список найденных ФЛ
+     */
+    List<NaturalPerson> findNewRegistryPersons(Long oldMaxId, Date currentDate, NaturalPersonMapper naturalPersonMapper);
 }

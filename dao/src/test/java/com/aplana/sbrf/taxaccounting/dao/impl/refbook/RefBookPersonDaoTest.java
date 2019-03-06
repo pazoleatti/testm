@@ -1,9 +1,12 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.refbook;
 
+import com.aplana.sbrf.taxaccounting.dao.identification.RefDataHolder;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.main.RefBookDaoImpl;
+import com.aplana.sbrf.taxaccounting.dao.impl.refbook.person.NaturalPersonMapper;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookPersonDao;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookPersonFilter;
+import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -435,5 +438,53 @@ public class RefBookPersonDaoTest {
         PagingResult<RegistryPerson> result = personDao.fetchOriginalDuplicatesCandidates(null, null);
 
         assertThat(result).hasSize(7);
+    }
+
+    @Test
+    public void test_findMaxRegistryPersonId() {
+        Date currentDate = new Date(2000000000000L);
+        Long result = personDao.findMaxRegistryPersonId(currentDate);
+
+        assertThat(Long.valueOf(6).equals(result));
+    }
+
+    @Test
+    public void test_findNewRegistryPersons() {
+        Date currentDate = new Date(2000000000000L);
+
+        Address address = new Address();
+        address.setCountry(new RefBookCountry());
+
+        RegistryPerson registryPerson1 = new RegistryPerson();
+        registryPerson1.setTaxPayerState(new RefBookTaxpayerState());
+        registryPerson1.setCitizenship(new RefBookCountry());
+        registryPerson1.setReportDoc(new IdDoc());
+        registryPerson1.setSource(new RefBookAsnu());
+        registryPerson1.setAddress(address);
+        registryPerson1.setRecordId(7L);
+        registryPerson1.setOldId(7L);
+        registryPerson1.setStartDate(new Date(0L));
+
+        RegistryPerson registryPerson2 = new RegistryPerson();
+        registryPerson2.setTaxPayerState(new RefBookTaxpayerState());
+        registryPerson2.setCitizenship(new RefBookCountry());
+        registryPerson2.setReportDoc(new IdDoc());
+        registryPerson2.setSource(new RefBookAsnu());
+        registryPerson2.setAddress(address);
+        registryPerson2.setRecordId(8L);
+        registryPerson2.setOldId(8L);
+        registryPerson2.setStartDate(new Date(0L));
+
+        personDao.saveBatch(Arrays.asList(registryPerson1, registryPerson2));
+
+        RefDataHolder refDataHolder = new RefDataHolder();
+        refDataHolder.setAsnuMap(new HashMap<Long, RefBookAsnu>());
+        refDataHolder.setCountryMap(new HashMap<Long, RefBookCountry>());
+        refDataHolder.setDocTypeMap(new HashMap<Long, RefBookDocType>());
+        refDataHolder.setTaxpayerStatusMap(new HashMap<Long, RefBookTaxpayerState>());
+
+        List<NaturalPerson> result = personDao.findNewRegistryPersons(6L, currentDate, new NaturalPersonMapper(refDataHolder));
+
+        assertThat(result).hasSize(2);
     }
 }

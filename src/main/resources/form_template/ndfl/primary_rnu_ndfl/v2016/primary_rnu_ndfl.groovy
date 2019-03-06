@@ -16,6 +16,7 @@ import com.aplana.sbrf.taxaccounting.model.Ndfl2_6DataReportParams
 import com.aplana.sbrf.taxaccounting.model.PagingResult
 import com.aplana.sbrf.taxaccounting.model.PrepareSpecificReportResult
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod
+import com.aplana.sbrf.taxaccounting.model.ReportPeriodType
 import com.aplana.sbrf.taxaccounting.model.ScriptSpecificDeclarationDataReportHolder
 import com.aplana.sbrf.taxaccounting.model.StringColumn
 import com.aplana.sbrf.taxaccounting.model.SubreportAliasConstants
@@ -2197,13 +2198,16 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
 
     void logIncomeDatesWarning(NdflPersonIncomeExt income, Date date, NdflPerson person, String xmlParam, String explicitParamName) {
         String warningMessage = "Строка: ${income.fileLine}. " +
-                "Значение параметра \"${xmlParam}\" (${explicitParamName}) : ${ScriptUtils.formatDate(date)} не входит в \"${reportPeriodFullName}\". " +
+                "Значение параметра \"${xmlParam}\" (${explicitParamName}) : ${ScriptUtils.formatDate(date)} не входит в ${reportPeriodFullName}. " +
                 "Операция (\"${income.operationId}\") не загружена в налоговую форму. ФЛ: $person.fullName, ИНП: $person.inp."
         logger.warnExp(warningMessage, "Даты операций не входят в период", "")
     }
 
     String getReportPeriodFullName() {
-        return "$reportPeriod.taxPeriod.year, $reportPeriod.name"
+        ReportPeriodType periodType = reportPeriodService.getReportPeriodTypeById(reportPeriod.dictTaxPeriodId)
+        String code = periodType.code
+        String title = (code == "21" || code == "51") ? "отчетный период" : "последний квартал отчетного периода"
+        return "${title}: $reportPeriod.taxPeriod.year, $reportPeriod.name"
     }
 
     class NdflPersonIncomeExt extends NdflPersonIncome {

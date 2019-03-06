@@ -4,6 +4,8 @@ import com.aplana.sbrf.taxaccounting.AbstractScriptClass
 import com.aplana.sbrf.taxaccounting.dao.identification.IdentificationUtils
 import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonPrimaryRnuRowMapper
 import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonRefbookHandler
+import com.aplana.sbrf.taxaccounting.dao.identification.RefDataHolder
+import com.aplana.sbrf.taxaccounting.dao.impl.refbook.person.NaturalPersonMapper
 import com.aplana.sbrf.taxaccounting.model.DeclarationData
 import com.aplana.sbrf.taxaccounting.model.Department
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
@@ -64,16 +66,13 @@ class Calculate extends AbstractScriptClass {
     DepartmentService departmentService
     LogBusinessService logBusinessService
     TAUserService taUserService
+    Long taskDataId
 
     // Дата окончания отчетного периода
     Date periodEndDate = null
 
     // Дата начала отчетного периода
     Date reportPeriodStartDate = null
-
-    Integer INCLUDE_TO_REPORT = 1
-
-    Integer NOT_INCLUDE_TO_REPORT = 0
 
     final String TEMPLATE_PERSON_FL = "%s, ИНП: %s"
     final String SECTION_LINE_MSG = "Раздел %s. Строка %s"
@@ -89,14 +88,9 @@ class Calculate extends AbstractScriptClass {
     List<RefBookDocType> docTypeRefBookCache = []
     List<RefBookTaxpayerState> taxpayerStatusRefBookCache = []
 
-    Map<Long, Map<String, String>> refBookAttrCache = new HashMap<Long, Map<String, String>>()
     // Кэш провайдеров cправочников
     Map<Long, RefBookDataProvider> providerCache = [:]
-    HashMap<Long, RefBook> mapRefBookToIdCache = new HashMap<Long, RefBook>()
-    //Коды стран из справочника
-    Map<Long, String> countryCodeCache = [:]
-    //Коды статуса налогоплательщика
-    Map<Long, String> taxpayerStatusCodeCache = [:]
+
     //Коды Асну
     Map<Long, RefBookAsnu> asnuCache = [:]
 
@@ -131,6 +125,36 @@ class Calculate extends AbstractScriptClass {
      *  Тербанки дубликатов в разделе 1 сгруппированные по идентификатору версии ФЛ из Реестра ФЛ
      */
     Map<Long, List<PersonTb>> duplicatedPersonTbs = [:]
+
+    /**
+     * Максимальный идентификатор в реестре ФЛ
+     */
+    Long maxRegistryPersonId
+
+    /**
+     * Флаг снимающийся после первой попытки создания ФЛ в Реестре
+     */
+    Boolean firstAttemptToCreate = true
+
+    /**
+     * Инкапсулирует данные справочников для передачи в мапперы
+     */
+    RefDataHolder refDataHolder
+
+    /**,
+     * Счетчик того сколько раз поток отправился в сон ожидая снятия блокировки с реестра ФЛ
+     */
+    int sleepCounter
+
+    /**
+     * Максимальное количество попыток создать Физлиц в Реестре ФЛ
+     */
+    int maxLockAttempts = 100
+
+    /**
+     * Время (мс) между попытками создать записи в реестре ФЛ
+     */
+    long sleepBetweenTryLock = 5000L
 
     @TypeChecked(TypeCheckingMode.SKIP)
     Calculate(scriptClass) {
@@ -172,6 +196,9 @@ class Calculate extends AbstractScriptClass {
         if (scriptClass.getBinding().hasVariable("taUserService")) {
             this.taUserService = (TAUserService) scriptClass.getProperty("taUserService")
         }
+        if (scriptClass.getBinding().hasVariable("taskDataId")) {
+            this.taskDataId = (Long) scriptClass.getProperty("taskDataId")
+        }
     }
 
     @Override
@@ -184,6 +211,8 @@ class Calculate extends AbstractScriptClass {
                     long time = System.currentTimeMillis()
 
                     logForDebug("Начало расчета ПНФ")
+
+                    maxRegistryPersonId = refBookPersonService.findMaxRegistryPersonId(new Date())
 
                     if (declarationData.asnuId == null) {
                         //noinspection GroovyAssignabilityCheck
@@ -236,7 +265,7 @@ class Calculate extends AbstractScriptClass {
                         logForDebug("Обновление записей (" + ScriptUtils.calcTimeMillis(time))
 
                         time = System.currentTimeMillis()
-                        createNaturalPersonRefBookRecords()
+                        preCreateNaturalPersonRefBookRecords()
                         //noinspection GroovyAssignabilityCheck
                         logForDebug("Создание (" + insertPersonList.size() + " записей, " + ScriptUtils.calcTimeMillis(time))
                     }
@@ -576,12 +605,51 @@ class Calculate extends AbstractScriptClass {
         }
     }
 
+    def preCreateNaturalPersonRefBookRecords() {
+
+        if (firstAttemptToCreate) {
+            performPrimaryPersonDuplicates()
+            if (!insertPersonList.isEmpty()) {
+                boolean personsRegistryLocked = refBookPersonService.lockPersonsRegistry(userInfo, taskDataId)
+
+                while (!personsRegistryLocked) {
+                    logForDebug("Ожидание снятия блокировки с реестра ФЛ")
+                    Thread.sleep(sleepBetweenTryLock)
+                    personsRegistryLocked = refBookPersonService.lockPersonsRegistry(userInfo, taskDataId)
+                    if (maxLockAttempts < ++sleepCounter) {
+                        logger.error("Не удалось установить блокировку на Реестр Физических лиц")
+                        return
+                    }
+                }
+
+                logForDebug("Блокировка на реестр ФЛ установлена")
+
+                long newMaxPersonId = refBookPersonService.findMaxRegistryPersonId(new Date())
+
+                if (newMaxPersonId > maxRegistryPersonId) {
+                    Map<Long, NaturalPerson> primaryPersonMap = insertPersonList.collectEntries { NaturalPerson naturalPerson ->
+                        [naturalPerson.getPrimaryPersonId(), naturalPerson]
+                    }
+                    List<NaturalPerson> newRegistryPersonList = refBookPersonService.findNewRegistryPersons(maxRegistryPersonId, new Date(), new NaturalPersonMapper(getRefData()))
+                    Map<Long, NaturalPerson> newRegistryPersonMap = newRegistryPersonList.collectEntries { NaturalPerson naturalPerson ->
+                        [naturalPerson.getId(), naturalPerson]
+                    }
+                    Map<Long, Map<Long, NaturalPerson>> similarityPersonMap = insertPersonList.collectEntries { NaturalPerson naturalPerson ->
+                        [naturalPerson.getPrimaryPersonId(), newRegistryPersonMap]
+                    }
+                    maxRegistryPersonId = newMaxPersonId
+                    updateNaturalPersonRefBookRecords(primaryPersonMap, similarityPersonMap)
+                }
+            }
+            firstAttemptToCreate = false
+        }
+        createNaturalPersonRefBookRecords()
+    }
+
     def createNaturalPersonRefBookRecords() {
 
         int createCnt = 0
         if (!insertPersonList.isEmpty()) {
-
-            performPrimaryPersonDuplicates()
 
             for (NaturalPerson person : insertPersonList) {
 
@@ -663,26 +731,34 @@ class Calculate extends AbstractScriptClass {
 
         refbookHandler.setLogger(logger)
 
-        List<RefBookCountry> countryList = getCountryRefBookList()
-        refbookHandler.setCountryMap(countryList.collectEntries {
-            [it.id, it]
-        })
-
-        List<RefBookDocType> docTypeList = getDocTypeRefBookList()
-        refbookHandler.setDocTypeMap(docTypeList.collectEntries {
-            [it.id, it]
-        })
-
-        List<RefBookTaxpayerState> taxpayerStatusList = getTaxpayerStatusRefBookList()
-        refbookHandler.setTaxpayerStatusMap(taxpayerStatusList.collectEntries {
-            [it.id, it]
-        })
-        List<RefBookAsnu> asnuList = refBookService.findAllAsnu()
-        refbookHandler.setAsnuMap(asnuList.collectEntries {
-            [it.id, it]
-        })
+        refbookHandler.setRefDataHolder(getRefData())
 
         return refbookHandler
+    }
+
+    RefDataHolder getRefData() {
+        if (refDataHolder == null) {
+            refDataHolder = new RefDataHolder()
+            List<RefBookAsnu> asnuList = refBookService.findAllAsnu();
+            refDataHolder.setAsnuMap(asnuList.collectEntries {
+                [it.id, it]
+            })
+            List<RefBookCountry> countryList = getCountryRefBookList()
+            refDataHolder.setCountryMap(countryList.collectEntries {
+                [it.id, it]
+            })
+
+            List<RefBookDocType> docTypeList = getDocTypeRefBookList()
+            refDataHolder.setDocTypeMap(docTypeList.collectEntries {
+                [it.id, it]
+            })
+
+            List<RefBookTaxpayerState> taxpayerStatusCodeList = getTaxpayerStatusRefBookList()
+            refDataHolder.setTaxpayerStatusMap(taxpayerStatusCodeList.collectEntries {
+                [it.id, it]
+            })
+        }
+        return refDataHolder
     }
 
     def updateNaturalPersonRefBookRecords(Map<Long, NaturalPerson> primaryPersonMap, Map<Long, Map<Long, NaturalPerson>> similarityPersonMap) {
@@ -839,6 +915,10 @@ class Calculate extends AbstractScriptClass {
         logForDebug("Идентификация и обновление (" + ScriptUtils.calcTimeMillis(time))
 
         logForDebug("Обновлено записей: " + updCnt)
+
+        if (!firstAttemptToCreate) {
+            preCreateNaturalPersonRefBookRecords()
+        }
 
     }
 
@@ -1040,7 +1120,7 @@ class Calculate extends AbstractScriptClass {
             refBookPerson.getAddress().setAppartment(primaryPerson.getAddress().getAppartment())
             updated = true
         }
-        if (!BaseWeightCalculator.isEqualsNullSafeStr(refBookPerson.getAddress().getCountry().getCode(), primaryPerson.getAddress().getCountry().getCode())) {
+        if (!BaseWeightCalculator.isEqualsNullSafeStr(refBookPerson.getAddress().getCountry()?.getCode(), primaryPerson.getAddress().getCountry()?.getCode())) {
             infoBuilder.append(makeUpdateMessage("Код страны проживания", refBookPerson.getAddress().getCountry().getCode(), primaryPerson.getAddress().getCountry().getCode()))
             refBookPerson.getAddress().setCountry(primaryPerson.getAddress().getCountry())
             updated = true
