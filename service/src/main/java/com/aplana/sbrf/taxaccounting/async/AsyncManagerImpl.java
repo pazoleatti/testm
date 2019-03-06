@@ -532,20 +532,20 @@ public class AsyncManagerImpl implements AsyncManager {
     @Override
     public AsyncTaskData reserveTask(final String node, final String priorityNode, final int timeout,
                                      final AsyncQueue balancingVariants, final int maxTasksPerNode) {
-        return tx.executeInNewTransaction(new TransactionLogic<AsyncTaskData>() {
+        AsyncTaskData result = null;
+        Long id = tx.executeInNewTransaction(new TransactionLogic<Long>() {
             @Override
-            public AsyncTaskData execute() {
-                AsyncTaskData result = null;
-                Long id = asyncTaskDao.reserveTask(node, priorityNode, timeout, balancingVariants, maxTasksPerNode);
-                if (id != null) {
-                    result = asyncTaskDao.findById(id);
-                }
-                if (result != null) {
-                    LOG.info(String.format("Node '%s' reserved task: %s", node, result));
-                }
-                return result;
+            public Long execute() {
+                return asyncTaskDao.reserveTask(node, priorityNode, timeout, balancingVariants, maxTasksPerNode);
             }
         });
+        if (id != null) {
+            result = asyncTaskDao.findById(id);
+        }
+        if (result != null) {
+            LOG.info(String.format("Node '%s' reserved task: %s", node, result));
+        }
+        return result;
     }
 
     @Override
