@@ -149,7 +149,7 @@ class Calculate extends AbstractScriptClass {
     /**
      * Максимальное количество попыток создать Физлиц в Реестре ФЛ
      */
-    int maxLockAttempts = 100
+    int maxLockAttempts = 300
 
     /**
      * Время (мс) между попытками создать записи в реестре ФЛ
