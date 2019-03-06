@@ -207,9 +207,6 @@ public class AsyncTaskDaoImpl extends AbstractDao implements AsyncTaskDao {
                     return cs.getLong(9);
                 }
             });
-            if (result != null && result != 0) {
-                LOG.info(String.format("Node '%s' reserved task: %s", node, result));
-            }
             return result;
         } catch (EmptyResultDataAccessException e) {
             return null;

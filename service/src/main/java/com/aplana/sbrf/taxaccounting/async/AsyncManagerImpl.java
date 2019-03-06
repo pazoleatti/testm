@@ -540,6 +540,9 @@ public class AsyncManagerImpl implements AsyncManager {
                 if (id != null) {
                     result = asyncTaskDao.findById(id);
                 }
+                if (result != null) {
+                    LOG.info(String.format("Node '%s' reserved task: %s", node, result));
+                }
                 return result;
             }
         });
