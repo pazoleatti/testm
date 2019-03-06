@@ -613,6 +613,7 @@ class Calculate extends AbstractScriptClass {
                 boolean personsRegistryLocked = refBookPersonService.lockPersonsRegistry(userInfo, taskDataId)
 
                 while (!personsRegistryLocked) {
+                    ScriptUtils.checkInterrupted()
                     logForDebug("Ожидание снятия блокировки с реестра ФЛ")
                     Thread.sleep(sleepBetweenTryLock)
                     personsRegistryLocked = refBookPersonService.lockPersonsRegistry(userInfo, taskDataId)
@@ -621,11 +622,11 @@ class Calculate extends AbstractScriptClass {
                         return
                     }
                 }
-
+                ScriptUtils.checkInterrupted()
                 logForDebug("Блокировка на реестр ФЛ установлена")
 
                 long newMaxPersonId = refBookPersonService.findMaxRegistryPersonId(new Date())
-
+                ScriptUtils.checkInterrupted()
                 if (newMaxPersonId > maxRegistryPersonId) {
                     Map<Long, NaturalPerson> primaryPersonMap = insertPersonList.collectEntries { NaturalPerson naturalPerson ->
                         [naturalPerson.getPrimaryPersonId(), naturalPerson]
