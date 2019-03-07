@@ -38,7 +38,7 @@ public class QueryBuilder {
         if (pagingParams != null) {
             addNamedParam("paging_start", pagingParams.getStartIndex() + 1);
             addNamedParam("paging_end", pagingParams.getStartIndex() + pagingParams.getCount());
-            pagedQuery = "SELECT /*+ PARALLEL */ * FROM (\n" + (sortedQuery != null ? sortedQuery : query) + ") WHERE rn between :paging_start and :paging_end";
+            pagedQuery = "SELECT * FROM (\n" + (sortedQuery != null ? sortedQuery : query) + ") WHERE rn between :paging_start and :paging_end";
         } else {
             pagedQuery = sortedQuery != null ? sortedQuery : query.toString();
         }

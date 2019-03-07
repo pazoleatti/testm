@@ -15,6 +15,6 @@ public class QueryBuilderTest {
         String query = "query";
         queryBuilder = queryBuilder.append(query);
         queryBuilder = queryBuilder.withPaging(pagingParams);
-        assertTrue(queryBuilder.getPagedQuery().equalsIgnoreCase("select /*+ PARALLEL */ * FROM (\n" + query + ") WHERE rn between :paging_start and :paging_end"));
+        assertTrue(queryBuilder.getPagedQuery().equalsIgnoreCase("select * FROM (\n" + query + ") WHERE rn between :paging_start and :paging_end"));
     }
 }
