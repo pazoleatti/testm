@@ -54,6 +54,12 @@ public class DeclarationDataFilter implements Serializable {
 
     private String fileName;
 
+    private Date creationDateFrom;
+
+    private Date creationDateTo;
+
+    private String creationUserName;
+
     private String note;
 
     private List<Long> asnuIds;

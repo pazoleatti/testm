@@ -111,7 +111,10 @@
                                     fileName: $scope.searchFilter.params.file,
                                     correctionTag: $filter('correctionTagFormatter')($scope.searchFilter.params.correctionTag),
                                     reportPeriodIds: $filter('idExtractor')($scope.searchFilter.params.periods),
-                                    knfTypeIds: $filter('idExtractor')($scope.searchFilter.params.knfTypes)
+                                    knfTypeIds: $filter('idExtractor')($scope.searchFilter.params.knfTypes),
+                                    creationUserName: $scope.searchFilter.params.creationUserName,
+                                    creationDateFrom: $scope.searchFilter.params.creationDateFrom,
+                                    creationDateTo: $scope.searchFilter.params.creationDateTo
                                 })
                             };
                         },
