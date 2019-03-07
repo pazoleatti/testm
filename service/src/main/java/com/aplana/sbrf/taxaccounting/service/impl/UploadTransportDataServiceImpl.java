@@ -198,6 +198,9 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
                         params.put("blobDataId", fileBlobUuid);
                         params.put("refBookName", refBook.getName());
                         params.put("fileSize", fileSize);
+                        if (archiveName != null) {
+                            params.put("archiveName", archiveName);
+                        }
                         asyncManager.executeTask(asyncLockKey, AsyncTaskType.IMPORT_REF_BOOK_XML, userInfo, params);
                         logger.info(String.format(CREATE_TASK, fileName, archiveName != null ? String.format(ARCHIVE_INFO, archiveName) : ""));
                     } catch (Exception e) {
@@ -234,6 +237,9 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
                 params.put("blobDataId", fileBlobUuid);
                 params.put("fileType", fileType);
                 params.put("fileSize", fileSize);
+                if (archiveName != null) {
+                    params.put("archiveName", archiveName);
+                }
                 try {
                     asyncManager.executeTask(key, AsyncTaskType.LOAD_TRANSPORT_FILE, userInfo, params);
                     logger.info(String.format(CREATE_TASK, fileName, archiveName != null ? String.format(ARCHIVE_INFO, archiveName) : ""));

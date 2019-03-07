@@ -49,7 +49,9 @@ public class LoadTransportFileAsyncTask extends AbstractAsyncTask {
     @Override
     protected String getNotificationMsg(AsyncTaskData taskData) {
         String fileName = getFileName(taskData);
-        return "Загрузка файла \"" + fileName + "\" завершена" + (msg.isEmpty() ? "" : (": " + msg));
+        final String archiveName = (String) taskData.getParams().get("archiveName");
+        String archive = archiveName == null ? "" : String.format(" (из архива \"%s\")", archiveName);
+        return "Загрузка файла \"" + fileName + "\"" + archive + " завершена" + (msg.isEmpty() ? "" : (": " + msg));
     }
 
 
@@ -57,9 +59,11 @@ public class LoadTransportFileAsyncTask extends AbstractAsyncTask {
     protected String getErrorMsg(AsyncTaskData taskData, boolean unexpected) {
 
         String fileName = getFileName(taskData);
+        final String archiveName = (String) taskData.getParams().get("archiveName");
+        String archive = archiveName == null ? "" : String.format(" (из архива \"%s\")", archiveName);
 
         if (unexpected) {
-            return "Произошла непредвиденная ошибка при загрузке файла \"" + fileName + "\"";
+            return "Произошла непредвиденная ошибка при загрузке файла \"" + fileName + "\"" + archive;
         } else {
             // Для ожидаемых ошибок добавляем описание
             Throwable e = (Throwable) taskData.getParams().get("exceptionThrown");
@@ -67,7 +71,7 @@ public class LoadTransportFileAsyncTask extends AbstractAsyncTask {
             if (e.getMessage() != null && !e.getMessage().isEmpty()) {
                 exceptionMessage += e.getMessage();
             }
-            return "Ошибка загрузки файла \"" + fileName + "\". " + exceptionMessage;
+            return "Ошибка загрузки файла \"" + fileName + "\"" + archive + ". " + exceptionMessage;
         }
     }
 
