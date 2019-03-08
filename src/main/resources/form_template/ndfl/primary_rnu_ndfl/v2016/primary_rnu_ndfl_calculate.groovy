@@ -581,7 +581,6 @@ class Calculate extends AbstractScriptClass {
     def preCreateNaturalPersonRefBookRecords() {
 
         if (firstAttemptToCreate) {
-            performPrimaryPersonDuplicates()
             if (!insertPersonList.isEmpty()) {
                 boolean personsRegistryLocked = refBookPersonService.lockPersonsRegistry(userInfo, taskDataId)
 
@@ -617,6 +616,7 @@ class Calculate extends AbstractScriptClass {
             }
             firstAttemptToCreate = false
         }
+        performPrimaryPersonDuplicates()
         createNaturalPersonRefBookRecords()
     }
 
