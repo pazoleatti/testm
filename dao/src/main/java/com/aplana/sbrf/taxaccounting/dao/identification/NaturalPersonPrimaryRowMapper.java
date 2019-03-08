@@ -98,23 +98,24 @@ public abstract class NaturalPersonPrimaryRowMapper implements RowMapper<Natural
         }
     }
 
-    public RefBookDocType getDocTypeByCode(String code, NaturalPerson person) {
+    public RefBookDocType getDocTypeByCode(String code) {
         if (code != null) {
 
             if (docTypeCodeMap == null) {
                 logger.warn("Не проинициализирован кэш справочника 'Коды документов'!");
-                return null;
+                return new RefBookDocType();
             }
 
             RefBookDocType result = docTypeCodeMap.get(code);
 
             if (result == null) {
                 logger.warn("В справочнике 'Коды документов' не найден документ с кодом: " + code);
+                return new RefBookDocType();
             }
 
             return result;
         } else {
-            return null;
+            return new RefBookDocType();
         }
     }
 

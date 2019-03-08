@@ -340,7 +340,10 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
                 //Запись справочника физлиц
                 NaturalPerson refBookPerson = (NaturalPerson) b;
 
-                IdDoc primaryPersonDocument = primaryPerson.getDocuments().get(0);
+                IdDoc primaryPersonDocument = null;
+                if (!primaryPerson.getDocuments().isEmpty()) {
+                    primaryPersonDocument = primaryPerson.getDocuments().get(0);
+                }
 
                 if (primaryPersonDocument != null) {
                     Long docTypeId = primaryPersonDocument.getDocType() != null ? primaryPersonDocument.getDocType().getId() : null;

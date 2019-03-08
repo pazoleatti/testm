@@ -15,7 +15,6 @@ import com.aplana.sbrf.taxaccounting.model.identification.IdentificationData
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson
 import com.aplana.sbrf.taxaccounting.model.identification.PersonalData
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
-import com.aplana.sbrf.taxaccounting.model.log.Logger
 import com.aplana.sbrf.taxaccounting.model.refbook.*
 import com.aplana.sbrf.taxaccounting.model.util.BaseWeightCalculator
 import com.aplana.sbrf.taxaccounting.model.util.impl.PersonDataWeightCalculator
@@ -77,12 +76,20 @@ class Calculate extends AbstractScriptClass {
     final String TEMPLATE_PERSON_FL = "%s, ИНП: %s"
     final String SECTION_LINE_MSG = "Раздел %s. Строка %s"
 
+    final String C_CITIZENSHIP = "Гражданство (код страны)"
+    final String C_STATUS = "Статус (код)"
+    final String C_ID_DOC_TYPE = "ДУЛ Код"
+
     final String T_PERSON = "1" //"Реквизиты"
 
     final String LOG_TYPE_REFERENCES = "Значение не соответствует справочнику \"%s\""
+    final String CLAUSE_END_CREATE = "Физическое лицо будет создано в Реестре физических лиц без указания этого параметра"
+    final String CLAUSE_END_UPDATE = "Это значение не будет сохраняться в Реестр физических лиц"
 
     // Справочники
+    final String R_CITIZENSHIP = "Общероссийский классификатор стран мира"
     final String R_ID_DOC_TYPE = "Коды документов"
+    final String R_STATUS = "Статусы налогоплательщика"
 
     List<RefBookCountry> countryRefBookCache = []
     List<RefBookDocType> docTypeRefBookCache = []
@@ -222,7 +229,7 @@ class Calculate extends AbstractScriptClass {
                     refBookPersonService.clearRnuNdflPerson(declarationData.id)
 
                     //Получаем список всех ФЛ в первичной НФ
-                    primaryPersonDataList = refBookPersonService.findNaturalPersonPrimaryDataFromNdfl(declarationData.id, createPrimaryRowMapper(false))
+                    primaryPersonDataList = refBookPersonService.findNaturalPersonPrimaryDataFromNdfl(declarationData.id, createPrimaryRowMapper())
                     if (logger.containsLevel(LogLevel.ERROR)) {
                         return
                     }
@@ -284,42 +291,8 @@ class Calculate extends AbstractScriptClass {
         logger.info("Записей физических лиц обработано: $countInDeclarationData, всего уникальных записей физических лиц: $countOfUniqueEntries")
     }
 
-    NaturalPersonPrimaryRnuRowMapper createPrimaryRowMapper(boolean isLog) {
-        final Logger localLogger = logger
-        NaturalPersonPrimaryRnuRowMapper naturalPersonRowMapper = new NaturalPersonPrimaryRnuRowMapper() {
-            @Override
-            public RefBookDocType getDocTypeByCode(String code, NaturalPerson ndflPerson) {
-                if (docTypeCodeMap == null) {
-                    throw new ServiceException("Не проинициализирован кэш справочника 'Коды документов'!") as Throwable
-                }
-                RefBookDocType result = docTypeCodeMap.get(code)
-                String fio = buildFio(ndflPerson)
-                String inp = ndflPerson.getPersonIdentifier()?.inp ?: ""
-                String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [fio, inp])
-                //noinspection GroovyAssignabilityCheck
-                String pathError = String.format(SECTION_LINE_MSG + ". %s", T_PERSON, ndflPerson.num ?: "",
-                        "ДУЛ Код='${code ?: ""}'")
-                if (code == null) {
-                    result = null
-                    if (isLog) {
-                        localLogger.warnExp("%s. %s.", "Наличие обязательных реквизитов для формирования отчетности", fioAndInp, pathError,
-                                "Не заполнен обязательный параметр")
-                    }
-                } else if (code == "0") {
-                    result = null
-                    if (isLog) {
-                        localLogger.warnExp("%s. %s.", "Наличие обязательных реквизитов для формирования отчетности", fioAndInp, pathError,
-                                "Параметр не может быть равен \"0\"")
-                    }
-                } else if (result == null) {
-                    if (isLog) {
-                        localLogger.warnExp("%s. %s.", String.format(LOG_TYPE_REFERENCES, R_ID_DOC_TYPE), fioAndInp, pathError,
-                                "\"ДУЛ Код (Графа 10)\" не соответствует справочнику '$R_ID_DOC_TYPE'")
-                    }
-                }
-                return result
-            }
-        }
+    NaturalPersonPrimaryRnuRowMapper createPrimaryRowMapper() {
+        NaturalPersonPrimaryRnuRowMapper naturalPersonRowMapper = new NaturalPersonPrimaryRnuRowMapper()
         naturalPersonRowMapper.setAsnu(refBookService.getAsnu(declarationData.getAsnuId()))
 
         List<RefBookCountry> countryList = getCountryRefBookList()
@@ -660,7 +633,12 @@ class Calculate extends AbstractScriptClass {
 
                 if (CollectionUtils.isNotEmpty(person.documents)) {
                     IdDoc personDocument = person.documents.get(0)
-                    personDocument.documentNumber = performDocNumber(personDocument)
+                    if (!personDocument.docType?.code || !getDocTypeRefBookList().code.contains(personDocument.docType?.code)) {
+                        createMsg(personDocument.docType?.code ?: "_", C_ID_DOC_TYPE, R_ID_DOC_TYPE, CLAUSE_END_CREATE, person)
+                        personDocument = new IdDoc()
+                    } else {
+                        personDocument.documentNumber = performDocNumber(personDocument)
+                    }
                     person.reportDoc = personDocument
                 }
 
@@ -697,6 +675,23 @@ class Calculate extends AbstractScriptClass {
                         person.setInn(null)
                     }
                 }
+                if (!person.getCitizenship()?.code || !getCountryRefBookList().code.contains(person.getCitizenship()?.code)) {
+                    createMsg(person.getCitizenship()?.code ?: "_", C_CITIZENSHIP, R_CITIZENSHIP, CLAUSE_END_CREATE, person)
+                    person.setCitizenship(new RefBookCountry())
+                }
+                if (!person.getTaxPayerState()?.code || !getTaxpayerStatusRefBookList().code.contains(person.getTaxPayerState()?.code)) {
+                    createMsg(person.getTaxPayerState()?.code ?: "_", C_STATUS, R_STATUS, CLAUSE_END_CREATE, person)
+                    person.setTaxPayerState(new RefBookTaxpayerState())
+                }
+                if (!ScriptUtils.checkSnils(person.snils)){
+                    String errMsg = String.format("Значение гр. \"%s\" (\"%s\") не соответствует формату. %s",
+                            "СНИЛС", person.snils ?: "_", CLAUSE_END_CREATE
+                    )
+                    String pathError = String.format(SECTION_LINE_MSG, T_PERSON, person.num ?: "")
+                    logger.warnExp("%s. %s.", "\"СНИЛС\" не соответствует формату", fioAndInp, pathError,
+                            errMsg)
+                    person.setSnils(null)
+                }
             }
 
             List<RegistryPerson> savedPersons = personService.saveNewIdentificatedPersons(insertPersonList)
@@ -724,6 +719,20 @@ class Calculate extends AbstractScriptClass {
         }
 
         logForDebug("Создано записей: " + createCnt)
+    }
+
+    void createMsg(String value, String propertyName, String refBookName, String endClause, NaturalPerson ndflPerson) {
+        String fio = buildFio(ndflPerson)
+        String inp = ndflPerson.getPersonIdentifier()?.inp ?: ""
+        String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [fio, inp])
+        String errMsg = String.format("Значение гр. \"%s\" (\"%s\") отсутствует в справочнике \"%s\". %s",
+                propertyName, value ?: "",
+                refBookName,
+                endClause
+        )
+        String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.num ?: "")
+        logger.warnExp("%s. %s.",
+                String.format(LOG_TYPE_REFERENCES, refBookName), fioAndInp, pathError, errMsg)
     }
 
     NaturalPersonRefbookHandler createRefbookHandler() {
@@ -818,8 +827,11 @@ class Calculate extends AbstractScriptClass {
                 }
 
                 //documents
-                IdDoc primaryPersonDocument = primaryPerson.getDocuments().get(0)
-                if (primaryPersonDocument != null) {
+                IdDoc primaryPersonDocument = null
+                if (!primaryPerson.getDocuments().isEmpty()) {
+                    primaryPersonDocument = primaryPerson.getDocuments().get(0);
+                }
+                if (primaryPersonDocument && primaryPersonDocument.docType?.code && getDocTypeRefBookList().code.contains(primaryPersonDocument.docType?.code)) {
                     Long docTypeId = primaryPersonDocument.getDocType() != null ? primaryPersonDocument.getDocType().getId() : null
                     IdDoc personDocument = BaseWeightCalculator.findDocument(refBookPerson, docTypeId, primaryPersonDocument.getDocumentNumber())
 
@@ -831,6 +843,9 @@ class Calculate extends AbstractScriptClass {
                             infoMsgBuilder.append(String.format("[Добавлена запись о новом ДУЛ: \"Код ДУЛ\" = \"%s\", \"Серия и номер ДУЛ\": \"%s\"]", primaryPersonDocument?.docType?.code, primaryPersonDocument?.getDocumentNumber()))
                         }
                     }
+                } else if (!primaryPersonDocument.docType?.code || !getDocTypeRefBookList().code.contains(primaryPersonDocument.docType?.code)) {
+                    createMsg(primaryPersonDocument.docType?.code ?: "_", C_ID_DOC_TYPE, R_ID_DOC_TYPE, CLAUSE_END_UPDATE, primaryPerson)
+                    primaryPersonDocument = new IdDoc()
                 }
                 if (checkIncReportFlag(refBookPerson, infoMsgBuilder)) {
                     changed = true
@@ -928,7 +943,7 @@ class Calculate extends AbstractScriptClass {
         String toReturn = personDocument.documentNumber
         if (docTypes.contains(personDocument.docType)) {
             String docNumber = personDocument.documentNumber
-            if (ScriptUtils.checkDulSymbols(personDocument.docType.code, BaseWeightCalculator.prepareStringDul(personDocument.documentNumber).toUpperCase())) {
+            if (ScriptUtils.checkDul(personDocument.docType.code, BaseWeightCalculator.prepareStringDul(personDocument.documentNumber).toUpperCase(), "") == null) {
                 toReturn = ScriptUtils.formatDocNumber(personDocument.docType.code, docNumber.replaceAll("[^А-Яа-я\\w]", "").toUpperCase())
             }
         }
@@ -975,7 +990,7 @@ class Calculate extends AbstractScriptClass {
                 IdDoc personDocument = personDocumentList.get(i)
 
                 if (i == incRepIndex) {
-                    if (naturalPerson.reportDoc?.getId() != personDocument?.getId() ) {
+                    if (naturalPerson.reportDoc?.getId() != personDocument?.getId()) {
                         String oldValue = null
                         if (naturalPerson?.reportDoc?.getDocumentNumber()) {
                             oldValue = String.format("%s - (%s) %s", naturalPerson?.reportDoc?.getDocumentNumber(), naturalPerson?.reportDoc?.getDocType()?.getCode(), naturalPerson?.reportDoc?.getDocType()?.getName())
@@ -1023,9 +1038,13 @@ class Calculate extends AbstractScriptClass {
             updated = true
         }
         if (!BaseWeightCalculator.isEqualsNullSafeStr(refBookPerson.getCitizenship()?.getCode(), primaryPerson.getCitizenship()?.getCode())) {
-            infoBuilder.append(makeUpdateMessage("Гражданство", refBookPerson.getCitizenship()?.getCode(), primaryPerson.getCitizenship()?.getCode()))
-            refBookPerson.setCitizenship(primaryPerson.getCitizenship())
-            updated = true
+            if (!primaryPerson.getCitizenship()?.code || !getCountryRefBookList().code.contains(primaryPerson.getCitizenship()?.code)) {
+                createMsg(primaryPerson.getCitizenship()?.code ?: "_", C_CITIZENSHIP, R_CITIZENSHIP, CLAUSE_END_UPDATE, primaryPerson)
+            } else {
+                infoBuilder.append(makeUpdateMessage("Гражданство", refBookPerson.getCitizenship()?.getCode(), primaryPerson.getCitizenship()?.getCode()))
+                refBookPerson.setCitizenship(primaryPerson.getCitizenship())
+                updated = true
+            }
         }
         if (!BaseWeightCalculator.isEqualsNullSafeStr(refBookPerson.getInn(), primaryPerson.getInn())) {
             String fio = (primaryPerson.lastName ?: "") + " " + (primaryPerson.firstName ?: "") + " " + (primaryPerson.middleName ?: "")
@@ -1062,14 +1081,30 @@ class Calculate extends AbstractScriptClass {
             updated = true
         }
         if (!BaseWeightCalculator.isEqualsNullSafeStr(refBookPerson.getSnils(), primaryPerson.getSnils())) {
-            infoBuilder.append(makeUpdateMessage("СНИЛС", refBookPerson.getSnils(), primaryPerson.getSnils()))
-            refBookPerson.setSnils(primaryPerson.getSnils())
-            updated = true
+            String fio = (primaryPerson.lastName ?: "") + " " + (primaryPerson.firstName ?: "") + " " + (primaryPerson.middleName ?: "")
+            String inp = primaryPerson.personIdentifier && primaryPerson.personIdentifier.inp ? primaryPerson.personIdentifier.inp : ""
+            String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [fio, inp])
+            if (!ScriptUtils.checkSnils(primaryPerson.snils)){
+                String errMsg = String.format("Значение гр. \"%s\" (\"%s\") не соответствует формату. %s",
+                        "СНИЛС", primaryPerson.snils ?: "_", CLAUSE_END_UPDATE
+                )
+                String pathError = String.format(SECTION_LINE_MSG, T_PERSON, primaryPerson.num ?: "")
+                logger.warnExp("%s. %s.", "\"СНИЛС\" не соответствует формату", fioAndInp, pathError,
+                        errMsg)
+            } else {
+                infoBuilder.append(makeUpdateMessage("СНИЛС", refBookPerson.getSnils(), primaryPerson.getSnils()))
+                refBookPerson.setSnils(primaryPerson.getSnils())
+                updated = true
+            }
         }
         if (!ScriptUtils.equalsNullSafe(refBookPerson.getTaxPayerState()?.getCode(), primaryPerson.getTaxPayerState()?.getCode())) {
-            infoBuilder.append(makeUpdateMessage("Статус налогоплательщика", refBookPerson.getTaxPayerState()?.getCode(), primaryPerson.getTaxPayerState()?.getCode()))
-            refBookPerson.setTaxPayerState(primaryPerson.getTaxPayerState())
-            updated = true
+            if (!primaryPerson.getTaxPayerState()?.code || !getTaxpayerStatusRefBookList().code.contains(primaryPerson.getTaxPayerState()?.code)) {
+                createMsg(primaryPerson.getTaxPayerState()?.code ?: "_", C_STATUS, R_STATUS, CLAUSE_END_UPDATE, primaryPerson)
+            } else {
+                infoBuilder.append(makeUpdateMessage("Статус налогоплательщика", refBookPerson.getTaxPayerState()?.getCode(), primaryPerson.getTaxPayerState()?.getCode()))
+                refBookPerson.setTaxPayerState(primaryPerson.getTaxPayerState())
+                updated = true
+            }
         }
         if (!BaseWeightCalculator.isEqualsNullSafeStr(refBookPerson.getSource()?.getCode(), primaryPerson.getSource()?.getCode())) {
             refBookPerson.setSource(primaryPerson.getSource())

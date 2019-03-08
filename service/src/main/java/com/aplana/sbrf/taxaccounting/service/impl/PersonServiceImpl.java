@@ -562,7 +562,13 @@ public class PersonServiceImpl implements PersonService {
             Long recordId = dbUtils.getNextIds(DBUtils.Sequence.REF_BOOK_RECORD_ROW, 1).get(0);
             person.setRecordId(recordId);
             person.setOldId(recordId);
-
+            Iterator<IdDoc> idDocIterator = person.getDocuments().iterator();
+            while(idDocIterator.hasNext()) {
+                IdDoc idDoc = idDocIterator.next();
+                if (idDoc.getDocType() == null || idDoc.getDocType().getId() == null) {
+                    idDocIterator.remove();
+                }
+            }
             idDocs.addAll(person.getDocuments());
             for (PersonIdentifier personIdentifier : person.getPersonIdentityList()) {
                 if (!Strings.isNullOrEmpty(personIdentifier.getInp())) {

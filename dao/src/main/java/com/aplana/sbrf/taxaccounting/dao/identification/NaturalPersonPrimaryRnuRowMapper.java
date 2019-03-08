@@ -39,7 +39,12 @@ public class NaturalPersonPrimaryRnuRowMapper extends NaturalPersonPrimaryRowMap
         person.setMiddleName(rs.getString("middle_name"));
         person.setBirthDate(rs.getDate("birth_day"));
 
-        person.setCitizenship(getCountryByCode(rs.getString("citizenship")));
+        String citizenshipCode = rs.getString("citizenship");
+        RefBookCountry citizenship = getCountryByCode(citizenshipCode);
+        citizenship.setCode(citizenshipCode);
+        person.setCitizenship(citizenship);
+
+
         person.setInn(rs.getString("inn_np"));
         person.setInnForeign(rs.getString("inn_foreign"));
 
@@ -55,16 +60,20 @@ public class NaturalPersonPrimaryRnuRowMapper extends NaturalPersonPrimaryRowMap
 
         String documentTypeCode = rs.getString("id_doc_type");
         String documentNumber = rs.getString("id_doc_number");
-
-        if (documentNumber != null && documentTypeCode != null) {
+        RefBookDocType refBookDocType = getDocTypeByCode(documentTypeCode);
+        if (documentNumber != null) {
             IdDoc personDocument = new IdDoc();
             personDocument.setPerson(person);
             personDocument.setDocumentNumber(documentNumber);
-            personDocument.setDocType(getDocTypeByCode(documentTypeCode, person));
+            refBookDocType.setCode(documentTypeCode);
+            personDocument.setDocType(refBookDocType);
             person.getDocuments().add(personDocument);
         }
 
-        person.setTaxPayerState(getTaxpayerStatusByCode(rs.getString("status")));
+        String stateCode = rs.getString("status");
+        RefBookTaxpayerState state = getTaxpayerStatusByCode(stateCode);
+        state.setCode(stateCode);
+        person.setTaxPayerState(state);
 
         person.setAddress(buildAddress(rs));
 
