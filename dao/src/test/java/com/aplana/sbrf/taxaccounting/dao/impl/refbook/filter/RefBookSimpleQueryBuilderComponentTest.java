@@ -88,7 +88,7 @@ public class RefBookSimpleQueryBuilderComponentTest {
         String filter = "";
         String direction = "asc";
         QueryBuilder q = queryBuilderComponent.allRecordsByVersion(mockedRefBook, mockedDate, filter, mockedPagingParams, mockedRefBookAttribute, direction);
-        String expected = new String("SELECT /*+ PARALLEL */ * FROM (\n" +
+        String expected = new String("SELECT * FROM (\n" +
                 "SELECT r.*, row_number() over (order by null asc) as rn FROM (\n" +
                 "SELECT p.*, p.version as record_version_from, (SELECT min(version) - interval '1' day FROM null WHERE status in (0,2) and record_id = p.record_id and version > p.version) as record_version_to \n" +
                 "FROM ( \n" +
@@ -106,7 +106,7 @@ public class RefBookSimpleQueryBuilderComponentTest {
         String filter = "test filter";
         String direction = "asc";
         QueryBuilder q = queryBuilderComponent.allRecordsByVersion(mockedRefBook, mockedDate, filter, mockedPagingParams, mockedRefBookAttribute, direction);
-        String expected = new String("SELECT /*+ PARALLEL */ * FROM (\n" +
+        String expected = new String("SELECT * FROM (\n" +
                 "SELECT r.*, row_number() over (order by null asc) as rn FROM (\n" +
                 "SELECT p.*, p.version as record_version_from, (SELECT min(version) - interval '1' day FROM null WHERE status in (0,2) and record_id = p.record_id and version > p.version) as record_version_to \n" +
                 "FROM ( \n" +
@@ -126,7 +126,7 @@ public class RefBookSimpleQueryBuilderComponentTest {
         String filter = "";
         String direction = "asc";
         QueryBuilder q = queryBuilderComponent.allRecords(mockedRefBook, filter, mockedPagingParams, mockedRefBookAttribute, direction);
-        String expected = new String("SELECT /*+ PARALLEL */ * FROM (\n" +
+        String expected = new String("SELECT * FROM (\n" +
                 "SELECT r.*, row_number() over (order by null asc) as rn FROM (\n" +
                 "SELECT frb.* from null frb\n" +
                 " WHERE frb.status = 0) r\n" +
@@ -140,7 +140,7 @@ public class RefBookSimpleQueryBuilderComponentTest {
         String filter = "test filter";
         String direction = "asc";
         QueryBuilder q = queryBuilderComponent.allRecords(mockedRefBook, filter, mockedPagingParams, mockedRefBookAttribute, direction);
-        String expected = new String("SELECT /*+ PARALLEL */ * FROM (\n" +
+        String expected = new String("SELECT * FROM (\n" +
                 "SELECT r.*, row_number() over (order by null asc) as rn FROM (\n" +
                 "SELECT frb.* from null frb\n" +
                 " WHERE frb.status = 0 and (test filter)\n" +

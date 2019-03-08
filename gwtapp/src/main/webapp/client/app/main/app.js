@@ -523,6 +523,8 @@
         "ndflJournal.filter.knfType": "Тип КНФ",
         "ndflJournal.filter.state": "Состояние",
         "ndflJournal.filter.file": "Файл",
+        "ndflJournal.filter.creationDate": "Дата создания формы с",
+        "ndflJournal.filter.creationUserName": "Создал",
         "ndflJournal.button.create": "Создать налоговую форму",
         "ndflJournal.grid.columnName.declarationNumber": "Номер формы",
         "ndflJournal.grid.columnName.declarationKind": "Тип налоговой формы",

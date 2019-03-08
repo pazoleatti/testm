@@ -308,7 +308,8 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                         "   and (:kpp is null or upper(dd.kpp) like '%' || upper(:kpp) || '%')\n" +
                         "   and (:oktmo is null or upper(dd.oktmo) like '%' || upper(:oktmo) || '%')\n" +
                         "   and (:note is null or upper(dd.note) like '%' || upper(:note) || '%')\n" +
-                        "   and (:taxOrganCode is null or upper(dd.tax_organ_code) like '%' || upper(:taxOrganCode) || '%')\n"
+                        "   and (:taxOrganCode is null or upper(dd.tax_organ_code) like '%' || upper(:taxOrganCode) || '%')\n" +
+                        "   and (:creationUserName is null or upper(su.login) like '%' || upper(:creationUserName) || '%' or upper(su.name) like '%' || upper(:creationUserName) || '%')\n"
         );
         params.addValue("declarationDataId", filter.getDeclarationDataId());
         params.addValue("correctionNum", filter.getCorrectionNum());
@@ -317,6 +318,16 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         params.addValue("oktmo", filter.getOktmo());
         params.addValue("note", filter.getNote());
         params.addValue("taxOrganCode", filter.getTaxOrganCode());
+        params.addValue("creationUserName", filter.getCreationUserName());
+
+        if (filter.getCreationDateFrom() != null) {
+            sql.append(" and (:creationDateFrom is null or log_b.log_date >= trunc(:creationDateFrom))\n");
+            params.addValue("creationDateFrom", filter.getCreationDateFrom());
+        }
+        if (filter.getCreationDateTo() != null) {
+            sql.append(" and (:creationDateTo is null or log_b.log_date <= trunc(:creationDateTo) + INTERVAL '1' DAY)\n");
+            params.addValue("creationDateTo", filter.getCreationDateTo());
+        }
 
         if (filter.getCorrectionTag() != null) {
             if (filter.getCorrectionTag()) {

@@ -52,19 +52,23 @@ public class ImportRefBookXmlAsyncTask extends AbstractAsyncTask {
     protected String getNotificationMsg(AsyncTaskData taskData) {
         long refBookId = (Long) taskData.getParams().get("refBookId");
         final String blobDataId = (String) taskData.getParams().get("blobDataId");
+        final String archiveName = (String) taskData.getParams().get("archiveName");
         BlobData blobData = blobDataService.get(blobDataId);
         String fileName = blobData.getName();
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(taskData.getUserId()));
-        return String.format("Загрузка файла \"%s\" в справочник \"%s\" завершена", fileName, commonRefBookService.get(refBookId).getName());
+        String archive = archiveName == null ? "" : String.format(" (из архива \"%s\")", archiveName);
+        return String.format("Загрузка файла \"%s\"%s в справочник \"%s\" завершена", fileName, archive, commonRefBookService.get(refBookId).getName());
     }
 
     @Override
     protected String getErrorMsg(AsyncTaskData taskData, boolean unexpected) {
         final String blobDataId = (String) taskData.getParams().get("blobDataId");
+        final String archiveName = (String) taskData.getParams().get("archiveName");
         BlobData blobData = blobDataService.get(blobDataId);
         String fileName = blobData.getName();
-        return "Произошла ошибка при загрузке файла \"" + fileName + "\"";
+        String archive = archiveName == null ? "" : String.format(" (из архива \"%s\")", archiveName);
+        return "Произошла ошибка при загрузке файла \"" + fileName + "\"" + archive;
     }
 
     @Override

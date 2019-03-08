@@ -1024,7 +1024,7 @@ class Import extends AbstractScriptClass {
      */
     void checkPersons(List<NdflPerson> persons) {
         if (persons) {
-            checkPersonFields(persons)
+            checkRequiredPersonFields(persons)
             checkRequiredOperationFields(persons)
             checkPersonIncomeDates(persons)
             checkOperationId(persons)
@@ -1036,9 +1036,9 @@ class Import extends AbstractScriptClass {
      * Проверка заполненности обязательных граф раздела 1 "Реквизиты ФЛ"
      * @param persons список ФЛ
      */
-    void checkPersonFields(List<NdflPerson> persons) {
-        def aliasList = ["inp", "lastName", "firstName", "birthDay", "citizenship", "idDocType", "idDocNumber", "status"]
-        def aliasNameList = [INP, LAST_NAME, FIRST_NAME, BIRTH_DAY, CITIZENSHIP, ID_DOC_TYPE, ID_DOC_NUMBER, STATUS]
+    void checkRequiredPersonFields(List<NdflPerson> persons) {
+        def aliasList = ["inp", "lastName", "firstName", "birthDay"]
+        def aliasNameList = [INP, LAST_NAME, FIRST_NAME, BIRTH_DAY]
         for (def person : persons) {
             List<String> emptyFields = new ArrayList()
             for (int i = 0; i < aliasList.size(); i++) {
@@ -1050,7 +1050,6 @@ class Import extends AbstractScriptClass {
                 String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [(person as NdflPersonExt).fio, person.inp])
                 logger.errorExp(EMPTY_REQUIRED_FIELD, "Не указан обязательный реквизит ФЛ", fioAndInp, person.rowIndex, collectionToString(emptyFields))
             }
-
         }
     }
 

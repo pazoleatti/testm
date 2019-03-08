@@ -2012,7 +2012,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         }
         ndflPersonService.save(ndflPersonCache)
         if (successfulCount == 0) {
-            logger.error("В файле отсутствуют данные для загрузки. Либо отсутствуют операции, принадлежащие отчетному периоду, либо данные некоторых ФЛ содержат ошибки.")
+            logger.error("В ТФ отсутствуют операции, принадлежащие отчетному периоду.")
             logger.error("Налоговая форма не создана.")
         }
     }
@@ -2027,11 +2027,8 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         String personLineInFile = ndflPersonNode.'@line'
 
         NdflPerson ndflPerson = transformNdflPersonNode(ndflPersonNode)
-
-        if (!isNdflPersonValid(ndflPerson, personLineInFile)) {
-            logger.warn("Данные ФЛ: $ndflPerson.fullName, ИНП: $ndflPerson.inp содержат ошибки. ФЛ не было загружено в налоговую форму.")
-            return false
-        }
+        // Проверяется формат заполнения некоторых полей, просто печатает предупреждения.
+        checkNdflPerson(ndflPerson, personLineInFile)
 
         // Раздел операций "Сведения об операциях"
 
@@ -2074,7 +2071,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
      * Проверка данных физлица.
      * @param personLineInFile номер строки в файле, где содержались данные о физлице
      */
-    boolean isNdflPersonValid(NdflPerson person, String personLineInFile) {
+    boolean checkNdflPerson(NdflPerson person, String personLineInFile) {
         String emptyParamErrorMsg = "Строка: ${personLineInFile}. Для ФЛ: $person.fullName, ИНП: $person.inp значение параметра %s не указано."
         String valueNotFound = "Строка: ${personLineInFile}. ФЛ: $person.fullName, ИНП: $person.inp. Параметр \"%s\" (%s) содержит значение (%s), которое не найдено в справочнике %s."
         // Проверка поля "Гражданство"
@@ -2419,7 +2416,9 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
     //>------------------< REF BOOK >----------------------<
 
     // Дата начала отчетного периода
-
+    Date periodStartDate = null
+    // "Календарная дата начала отчетного периода" - начало последнего квартала отчетного периода.
+    Date periodCalendarStartDate = null
     // Дата окончания отчетного периода
     Date periodEndDate = null
 
@@ -2431,18 +2430,15 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
     // Коды видов вычетов
     List<String> deductionTypeCache = []
 
-    // Дата начала отчетного периода
-    Date reportPeriodStartDate = null
-
     /**
      * Получить дату начала отчетного периода
      * @return
      */
     Date getReportPeriodStartDate() {
-        if (reportPeriodStartDate == null) {
-            reportPeriodStartDate = reportPeriodService.getStartDate(declarationData.reportPeriodId)?.time
+        if (periodStartDate == null) {
+            periodStartDate = reportPeriodService.getStartDate(declarationData.reportPeriodId)?.time
         }
-        return reportPeriodStartDate
+        return periodStartDate
     }
 
     /**
@@ -2450,10 +2446,10 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
      * @return
      */
     Date getReportPeriodCalendarStartDate() {
-        if (reportPeriodStartDate == null) {
-            reportPeriodStartDate = reportPeriodService.getCalendarStartDate(declarationData.reportPeriodId)?.time
+        if (periodCalendarStartDate == null) {
+            periodCalendarStartDate = reportPeriodService.getCalendarStartDate(declarationData.reportPeriodId)?.time
         }
-        return reportPeriodStartDate
+        return periodCalendarStartDate
     }
 
     /**
@@ -2502,7 +2498,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
      */
     PagingResult<Map<String, RefBookValue>> getRefBook(long refBookId) {
         // Передаем как аргумент только срок действия версии справочника
-        PagingResult<Map<String, RefBookValue>> refBookList = getProvider(refBookId).getRecordsVersion(getReportPeriodStartDate(), getReportPeriodEndDate(), null, null)
+        PagingResult<Map<String, RefBookValue>> refBookList = getProvider(refBookId).getRecordsVersion(getPeriodStartDate(), getReportPeriodEndDate(), null, null)
         if (refBookList == null) {
             throw new Exception("Ошибка при получении записей справочника " + refBookId)
         }

@@ -1,0 +1,23 @@
+LOAD DATA
+INFILE *
+APPEND
+CONTINUEIF NEXT(1:1) = '#'
+INTO TABLE "BLOB_DATA_TMP"
+FIELDS TERMINATED BY'|'
+OPTIONALLY ENCLOSED BY '[' AND ']'
+TRAILING NULLCOLS ( 
+ID char(36),
+NAME char(530),
+L_0 FILLER char,
+DATA LOBFILE( L_0) TERMINATED BY EOF NULLIF L_0 = 'null',
+CREATION_DATE DATE "DD.MM.RR",
+DECLARATION_TEMPLATE_ID)
+begindata
+ 047f207c-113e-488d-8390-9afc248a3bc8|report_ndfl_ref_1.jrxml|templates/data/ndfl/report_2ndfl_1/v2016/report_2ndfl.jrxml|01.01.2016|102|
+ 79c363f8-52f7-4fa0-94bd-27c693f5cfd9|ndfl_2_report_by_person_page_base.pdf|templates/data/ndfl/report_2ndfl_1/v2016/ndfl_2_report_by_person_page_base.pdf|13.02.2019||
+ 3a8afe75-a882-4ecb-9bd2-46920d12803d|ndfl_2_report_by_person_page_application.pdf|templates/data/ndfl/report_2ndfl_1/v2016/ndfl_2_report_by_person_page_application.pdf|13.02.2019||
+ 790782e0-2282-41f4-8735-7b50904703ac|NO_NDFL2_1_399_00_05_06_01.xsd|templates/data/ndfl/report_2ndfl_1/v2016/NO_NDFL2_1_399_00_05_06_01.xsd|01.01.2016||
+ 77d802bf-e3b1-485b-ae52-41a21aac1034|NO_NDFL2_1_399_00_05_06_01.xsd|templates/data/ndfl/report_2ndfl_1/v2016/NO_NDFL2_1_399_00_05_06_01.xsd|25.11.2017||
+ 4b84692c-7f70-4d11-844d-e61e81655336|rnu_ndfl_person_all_db.xlsx|templates/data/ndfl/primary_rnu_ndfl/v2016/rnu_ndfl_person_all_db.xlsx|04.12.2017|100|
+ 64536272-05bc-42e8-82c5-347faf22da20|rnu_ndfl_person_all_db.xlsx|templates/data/ndfl/consolidated_rnu_ndfl/v2016/rnu_ndfl_person_all_db.xlsx|05.12.2017|101|
+ 58adc3c2-66a0-4f11-98a2-defe682a092f|РНУ_НДФЛ_new6.5.xsd|templates/data/ndfl/primary_rnu_ndfl/v2016/rnu_ndfl.xsd|07.02.2019|100|
