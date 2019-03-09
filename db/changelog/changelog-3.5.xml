@@ -381,4 +381,25 @@
 		</sql>
 	</changeSet>
 	
+    <!--https://jira.aplana.com/browse/SBRFNDFL-6833 - Патч БД 3.5 к 11 марта-->
+	<changeSet id="3.5-amandzyak-3" author="amandzyak">
+		<sql>
+			create index IDX_REF_BOOK_PERSON_START_DATE on REF_BOOK_PERSON (START_DATE);
+		</sql>
+	</changeSet>
+	
+    <!--https://jira.aplana.com/browse/SBRFNDFL-6833 - Патч БД 3.5 к 11 марта-->
+	<changeSet id="3.5-amandzyak-4" author="amandzyak">
+		<sql>
+			create index IDX_REF_BOOK_PERSON_END_DATE on REF_BOOK_PERSON (END_DATE);
+		</sql>
+	</changeSet>
+	
+    <!--https://jira.aplana.com/browse/SBRFNDFL-6833 - Патч БД 3.5 к 11 марта-->
+	<changeSet id="3.5-amandzyak-5" author="amandzyak">
+		<sql>
+			drop index idx_tmp_version_calc_ver_rec;
+		</sql>
+	</changeSet>
+	
 </databaseChangeLog>
