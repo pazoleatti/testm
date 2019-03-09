@@ -538,6 +538,11 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Transactional
     public Long createWithotChecks(DeclarationData newDeclaration, Logger logger, TAUserInfo userInfo, boolean writeAudit) {
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(newDeclaration.getDeclarationTemplateId());
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.fetchOne(newDeclaration.getDepartmentReportPeriodId());
+        canCreate(userInfo, declarationTemplate.getId(), departmentReportPeriod, newDeclaration.getAsnuId(), logger);
+        if (logger.containsLevel(LogLevel.ERROR)) {
+            return null;
+        }
         return doCreateWithoutChecks(newDeclaration, declarationTemplate, logger, userInfo, writeAudit);
     }
 
