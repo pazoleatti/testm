@@ -1,5 +1,9 @@
 package com.aplana.sbrf.taxaccounting.model;
 
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -9,6 +13,7 @@ import java.util.Map;
  *
  * @author dloshkarev
  */
+@Getter @Setter @ToString
 public class AsyncTaskData {
     private long id;
     /* Тип задачи - хранит класс-исполнитель задачи */
@@ -22,76 +27,12 @@ public class AsyncTaskData {
     /* Состояние задачи */
     private AsyncTaskState state;
     /**
+     * Название узла
+     */
+    private String node;
+    /**
      * Параметры для выполнения конкретной задачи
      */
     private Map<String, Object> params = new HashMap<String, Object>(0);
 
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public AsyncTaskType getType() {
-        return type;
-    }
-
-    public void setType(AsyncTaskType type) {
-        this.type = type;
-    }
-
-    public int getUserId() {
-        return userId;
-    }
-
-    public void setUserId(int userId) {
-        this.userId = userId;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public AsyncTaskState getState() {
-        return state;
-    }
-
-    public void setState(AsyncTaskState state) {
-        this.state = state;
-    }
-
-    public Map<String, Object> getParams() {
-        return params;
-    }
-
-    public Date getCreateDate() {
-        return createDate;
-    }
-
-    public void setCreateDate(Date createDate) {
-        this.createDate = createDate;
-    }
-
-    public void setParams(Map<String, Object> params) {
-        this.params = params;
-    }
-
-    @Override
-    public String toString() {
-        return "AsyncTaskData{" +
-                "id=" + id +
-                ", type=" + type +
-                ", userId=" + userId +
-                ", description='" + description + '\'' +
-                ", state=" + state +
-                ", createDate=" + createDate +
-                ", params=" + params +
-                '}';
-    }
 }

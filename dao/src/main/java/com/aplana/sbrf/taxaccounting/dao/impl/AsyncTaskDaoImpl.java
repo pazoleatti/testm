@@ -62,6 +62,7 @@ public class AsyncTaskDaoImpl extends AbstractDao implements AsyncTaskDao {
             result.setState(AsyncTaskState.getById(rs.getInt("state")));
             result.setDescription(rs.getString("description"));
             result.setCreateDate(rs.getTimestamp("create_date"));
+            result.setNode(rs.getString("node"));
             return result;
         }
     }
