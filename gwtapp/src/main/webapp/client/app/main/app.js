@@ -1138,7 +1138,6 @@
         'ngMessages',
         'angularFileUpload',
         'pascalprecht.translate',
-        'moment-picker',
         // Наши компоненты
         'aplana.overlay',
         'aplana.alert',

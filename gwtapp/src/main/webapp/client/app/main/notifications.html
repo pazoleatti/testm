@@ -11,25 +11,17 @@
             <!-- Дата и время -->
             <div class="pull-left" style="margin: 5px 5px 0 10px">Дата</div>
             <div class="pull-left"
-                 data-moment-picker="searchFilter.timeFrom"
-                 data-locale="ru"
-                 data-format="DD.MM.YYYY HH:mm"
-                 data-start-view="day"
-                 style="margin-top: 3px">
-                <input placeholder=""
-                       ng-model="searchFilter.timeFrom"
-                       style="width: 110px">
+                 style="width: 100px; margin-top: 3px">
+                <div data-aplana-datepicker
+                     data-ng-model="searchFilter.timeFrom">
+                </div>
             </div>
             <div class="pull-left" style="margin-top: 5px">&nbsp;&mdash;&nbsp;</div>
             <div class="pull-left"
-                 data-moment-picker="searchFilter.timeTo"
-                 data-locale="ru"
-                 data-format="DD.MM.YYYY HH:mm"
-                 data-start-view="day"
-                 style="margin-top: 3px">
-                <input placeholder=""
-                       ng-model="searchFilter.timeTo"
-                       style="width: 110px">
+                 style="width: 100px; margin-top: 3px">
+                <div data-aplana-datepicker
+                     data-ng-model="searchFilter.timeTo">
+                </div>
             </div>
             <!-- Найти -->
             <button type="button"
