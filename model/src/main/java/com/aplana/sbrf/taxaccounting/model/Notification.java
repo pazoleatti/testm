@@ -1,14 +1,17 @@
 package com.aplana.sbrf.taxaccounting.model;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Objects;
 
 /**
  * Оповещения о назначении даты сдачи отчетности
- *
- * @author dloshkarev
  */
+@Getter
+@Setter
 public class Notification implements SecuredEntity, Serializable {
     private static final long serialVersionUID = -5255606476850599691L;
 
@@ -48,57 +51,6 @@ public class Notification implements SecuredEntity, Serializable {
      */
     private long permissions;
 
-    public Integer getRoleId() {
-        return roleId;
-    }
-
-    public void setRoleId(Integer roleId) {
-        this.roleId = roleId;
-    }
-
-    public Integer getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Integer userId) {
-        this.userId = userId;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Integer getReportPeriodId() {
-        return reportPeriodId;
-    }
-
-    public void setReportPeriodId(Integer reportPeriodId) {
-        this.reportPeriodId = reportPeriodId;
-    }
-
-    public Integer getSenderDepartmentId() {
-        return senderDepartmentId;
-    }
-
-    public void setSenderDepartmentId(Integer senderDepartmentId) {
-        this.senderDepartmentId = senderDepartmentId;
-    }
-
-    public Integer getReceiverDepartmentId() {
-        return receiverDepartmentId;
-    }
-
-    public void setReceiverDepartmentId(Integer receiverDepartmentId) {
-        this.receiverDepartmentId = receiverDepartmentId;
-    }
-
-    public String getText() {
-        return text;
-    }
 
     public void setText(String text) {
         text = text.replaceAll("\"\"+", "\"");
@@ -107,64 +59,6 @@ public class Notification implements SecuredEntity, Serializable {
         } else {
             this.text = text;
         }
-    }
-
-    public Date getCreateDate() {
-        return createDate;
-    }
-
-    public void setCreateDate(Date createDate) {
-        this.createDate = createDate;
-    }
-
-    public Date getDeadline() {
-        return deadline;
-    }
-
-    public void setDeadline(Date deadline) {
-        this.deadline = deadline;
-    }
-
-    public boolean isRead() {
-        return read;
-    }
-
-    public void setRead(boolean read) {
-        this.read = read;
-    }
-
-    public String getReportId() {
-        return reportId;
-    }
-
-    public void setReportId(String reportId) {
-        this.reportId = reportId;
-    }
-
-    public NotificationType getNotificationType() {
-        return notificationType;
-    }
-
-    public void setNotificationType(NotificationType notificationType) {
-        this.notificationType = notificationType;
-    }
-
-    public String getLogId() {
-        return logId;
-    }
-
-    public void setLogId(String logId) {
-        this.logId = logId;
-    }
-
-    @Override
-    public long getPermissions() {
-        return permissions;
-    }
-
-    @Override
-    public void setPermissions(long permissions) {
-        this.permissions = permissions;
     }
 
     @Override

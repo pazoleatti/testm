@@ -1,9 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
-import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import org.junit.Assert;
 import org.junit.Before;
@@ -35,8 +33,7 @@ public class DepartmentServiceImplTest {
     @Before
     public void init() {
         departmentDao = mock(DepartmentDao.class);
-        DepartmentReportPeriodDao departmentReportPeriodDao = mock(DepartmentReportPeriodDao.class);
-        departmentService = new DepartmentServiceImpl(departmentDao, departmentReportPeriodDao);
+        departmentService = new DepartmentServiceImpl(departmentDao);
 
         root = new Department();
         root.setName("Bank");
@@ -110,33 +107,6 @@ public class DepartmentServiceImplTest {
             taRole.setAlias(alias);
             taRoles.add(taRole);
         }
-
-        when(departmentReportPeriodDao.isExistsByReportPeriodIdAndDepartmentId(root.getId(), 0)).thenReturn(true);
-        when(departmentReportPeriodDao.isExistsByReportPeriodIdAndDepartmentId(departmentTB2.getId(), 0)).thenReturn(true);
-        when(departmentReportPeriodDao.isExistsByReportPeriodIdAndDepartmentId(departmentTB3.getId(), 0)).thenReturn(false);
-        when(departmentReportPeriodDao.isExistsByReportPeriodIdAndDepartmentId(departmentGOSB31.getId(), 0)).thenReturn(true);
-        when(departmentReportPeriodDao.isExistsByReportPeriodIdAndDepartmentId(departmentOSB311.getId(), 0)).thenReturn(true);
-        when(departmentReportPeriodDao.isExistsByReportPeriodIdAndDepartmentId(departmentOSB311.getId(), 1)).thenReturn(true);
-
-        doAnswer(new Answer<Object>() {
-            @Override
-            public Object answer(InvocationOnMock invocation) {
-                List<DepartmentReportPeriod> result = new ArrayList<>();
-                DepartmentReportPeriodFilter drpf = (DepartmentReportPeriodFilter) invocation.getArguments()[0];
-                Integer repId = drpf.getReportPeriodIdList().get(0);
-                for (final Integer depId : drpf.getDepartmentIdList()) {
-                    if ((depId.equals(root.getId()) && repId.equals(0)) ||
-                            (depId.equals(departmentTB2.getId()) && repId.equals(0)) ||
-                            (depId.equals(departmentOSB311.getId()) && repId.equals(0))
-                    ) {
-                        result.add(new DepartmentReportPeriod() {{
-                            setDepartmentId(depId);
-                        }});
-                    }
-                }
-                return result;
-            }
-        }).when(departmentReportPeriodDao).fetchAllByFilter(any(DepartmentReportPeriodFilter.class));
 
         when(departmentDao.getParentTBId(311)).thenReturn(3);
         when(departmentDao.getParentTBId(31)).thenReturn(3);

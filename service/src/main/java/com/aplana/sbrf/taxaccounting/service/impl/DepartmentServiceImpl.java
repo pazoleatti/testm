@@ -21,12 +21,10 @@ import java.util.Set;
 @Transactional
 public class DepartmentServiceImpl implements DepartmentService {
 
-    private DepartmentDao departmentDao;
-    private DepartmentReportPeriodDao departmentReportPeriodDao;
+    private final DepartmentDao departmentDao;
 
-    public DepartmentServiceImpl(DepartmentDao departmentDao, DepartmentReportPeriodDao departmentReportPeriodDao) {
+    public DepartmentServiceImpl(DepartmentDao departmentDao) {
         this.departmentDao = departmentDao;
-        this.departmentReportPeriodDao = departmentReportPeriodDao;
     }
 
     @Override
@@ -161,25 +159,25 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
-    @Cacheable(value = CacheConstants.DEPARTMENT, key = "'user_departments_'+#tAUser.id")
-    public List<Integer> findAllAvailableIds(TAUser tAUser) {
-        if (tAUser.hasRole(TaxType.NDFL, TARole.N_ROLE_CONTROL_UNP)) {
+    @Cacheable(value = CacheConstants.DEPARTMENT, key = "'user_departments_'+#user.id")
+    public List<Integer> findAllAvailableIds(TAUser user) {
+        if (user.hasRole(TARole.N_ROLE_CONTROL_UNP)) {
             // Все подразделения из справочника подразделений
             return departmentDao.fetchAllIds();
-        } else if (tAUser.hasRole(TaxType.NDFL, TARole.N_ROLE_CONTROL_NS)) {
+        } else if (user.hasRole(TARole.N_ROLE_CONTROL_NS)) {
             Set<Integer> tbDepartmentIds = new HashSet<>();
             // ТБ подразделения пользователя
-            tbDepartmentIds.add(departmentDao.getParentTBId(tAUser.getDepartmentId()));
+            tbDepartmentIds.add(departmentDao.getParentTBId(user.getDepartmentId()));
             // ТБ, на которые (или на их дочерние) подразделение пользователя назначено исполнителем
-            tbDepartmentIds.addAll(departmentDao.findAllTBIdsByPerformerId(tAUser.getDepartmentId()));
+            tbDepartmentIds.addAll(departmentDao.findAllTBIdsByPerformerId(user.getDepartmentId()));
             // В итоге возвращяем все ТБ выше и все их дочерние
             return departmentDao.findAllChildrenIdsByIds(tbDepartmentIds);
-        } else if (tAUser.hasRole(TaxType.NDFL, TARole.N_ROLE_OPER)) {
+        } else if (user.hasRole(TARole.N_ROLE_OPER)) {
             Set<Integer> departmentIds = new HashSet<>();
             // подразделение пользователя
-            departmentIds.add(tAUser.getDepartmentId());
+            departmentIds.add(user.getDepartmentId());
             // подразделения, на которые подразделение пользователя назначено исполнителем
-            departmentIds.addAll(departmentDao.findAllIdsByPerformerIds(Lists.newArrayList((Integer) tAUser.getDepartmentId())));
+            departmentIds.addAll(departmentDao.findAllIdsByPerformerIds(Lists.newArrayList((Integer) user.getDepartmentId())));
             // В итоге возвращяем все подразделение выше и все их дочерние
             return departmentDao.findAllChildrenIdsByIds(departmentIds);
         }

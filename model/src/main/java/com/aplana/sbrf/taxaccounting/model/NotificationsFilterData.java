@@ -1,8 +1,14 @@
 package com.aplana.sbrf.taxaccounting.model;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 
+@Getter
+@Setter
 public class NotificationsFilterData implements Serializable {
     private static final long serialVersionUID = -2957561387544546546L;
 
@@ -12,101 +18,50 @@ public class NotificationsFilterData implements Serializable {
         TEXT
     }
 
-    /** Фильтр по подразделению-отправителю */
-	private Integer senderDepartmentId;
-    /** Фильтр по подразделению-получателю */
-	private List<Integer> receiverDepartmentIds;
-    /** Фильтр по конкретному пользователю, ожидающему уведомлений */
+    /**
+     * Фильтр по подразделению-отправителю
+     */
+    private Integer senderDepartmentId;
+    /**
+     * Фильтр по подразделению-получателю
+     */
+    private List<Integer> receiverDepartmentIds;
+    /**
+     * Фильтр по конкретному пользователю, ожидающему уведомлений
+     */
     private Integer userId;
-    /** Фильтр по ролям пользователя */
+    /**
+     * Фильтр по ролям пользователя
+     */
     private List<Integer> userRoleIds;
-    /** Признак прочтения. Если null - то не учитывается */
+    /**
+     * Фильтр по тексту в сообщениях уведомлений.
+     */
+    private String text;
+    /**
+     * Фильтр по дате уведомлений - нижний порог
+     */
+    private Date timeFrom;
+    /**
+     * Фильтр по дате уведомлений - верхний порог
+     */
+    private Date timeTo;
+    /**
+     * Признак прочтения. Если null - то не учитывается
+     */
     private Boolean read;
 
+    @Deprecated
+    private Integer countOfRecords;
+    @Deprecated
+    private Integer startIndex;
 
-	private Integer countOfRecords;
-	private Integer startIndex;
-
+    @Deprecated
     private SortColumn sortColumn = SortColumn.DATE;
+    @Deprecated
     private boolean isAsc = false;
-
-    public List<Integer> getUserRoleIds() {
-        return userRoleIds;
-    }
-
-    public void setUserRoleIds(List<Integer> userRoleIds) {
-        this.userRoleIds = userRoleIds;
-    }
-
-    public Integer getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Integer userId) {
-        this.userId = userId;
-    }
-
-    public Integer getSenderDepartmentId() {
-		return senderDepartmentId;
-	}
-
-	public void setSenderDepartmentId(Integer senderDepartmentId) {
-		this.senderDepartmentId = senderDepartmentId;
-	}
-
-	@Deprecated
-	public Integer getCountOfRecords() {
-		return countOfRecords;
-	}
-
-	@Deprecated
-	public void setCountOfRecords(Integer countOfRecords) {
-		this.countOfRecords = countOfRecords;
-	}
-
-	@Deprecated
-	public Integer getStartIndex() {
-		return startIndex;
-	}
-
-	@Deprecated
-	public void setStartIndex(Integer startIndex) {
-		this.startIndex = startIndex;
-	}
-
-	@Deprecated
-    public SortColumn getSortColumn() {
-        return sortColumn;
-    }
-
-    @Deprecated
-    public void setSortColumn(SortColumn sortColumn) {
-        this.sortColumn = sortColumn;
-    }
-
-    @Deprecated
-    public boolean isAsc() {
-        return isAsc;
-    }
-
-    @Deprecated
-    public void setAsc(boolean isAsc) {
-        this.isAsc = isAsc;
-    }
 
     public Boolean isRead() {
         return read;
-    }
-
-    public void setRead(Boolean read) {
-        this.read = read;
-    }
-
-    public List<Integer> getReceiverDepartmentIds() {
-        return receiverDepartmentIds;
-    }
-
-    public void setReceiverDepartmentIds(List<Integer> receiverDepartmentIds) {
-        this.receiverDepartmentIds = receiverDepartmentIds;
     }
 }

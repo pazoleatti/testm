@@ -9,6 +9,13 @@
      */
         .controller('notificationsCtrl', ['$scope', '$http', '$modalInstance', 'NotificationResource', '$filter', '$logPanel', '$dialogs', '$rootScope', 'APP_CONSTANTS',
             function ($scope, $http, $modalInstance, NotificationResource, $filter, $logPanel, $dialogs, $rootScope, APP_CONSTANTS) {
+
+                $scope.searchFilter = {
+                    text: null,
+                    timeFrom: null,
+                    timeTo: null
+                };
+
                 // Пометим все оповещения как прочтённые
                 $http({
                     method: "POST",
@@ -39,6 +46,13 @@
                     options: {
                         datatype: "angularResource",
                         angularResource: NotificationResource,
+                        requestParameters: function () {
+                            return {
+                                text: $scope.searchFilter.text,
+                                timeFrom: $scope.searchFilter.timeFrom,
+                                timeTo: $scope.searchFilter.timeTo
+                            }
+                        },
                         height: 250,
                         colNames: [
                             $filter('translate')('notifications.title.createDate'),
@@ -76,6 +90,10 @@
                         hidegrid: false,
                         multiselect: true
                     }
+                };
+
+                $scope.refreshGrid = function (page) {
+                    $scope.notificationsGrid.ctrl.refreshGrid(page);
                 };
 
                 /**

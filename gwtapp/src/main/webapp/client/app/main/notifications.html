@@ -1,9 +1,63 @@
-<div class="modal-body notificationForm flex-column" style="height: 450px;">
+<div class="modal-body notificationForm flex-column" style="height: 450px; margin-top: 0">
     <div class="notification-top">
-        <a class="btn btn-default-nonBg" data-aplana-link-click="delete()"
-           data-aplana-link="'notifications.title.deleteLink' | translate"
-           style="line-height: 13px;margin: 0 0 12px 0;">
-        </a>
+        <!--Поиск-->
+        <div class="btn-toolbar pull-left" role="toolbar" data-ng-controller="CommonFilterCtrl">
+            <!-- Текстовое поле -->
+            <input data-ng-model="searchFilter.text"
+                   placeholder="{{'filter.placeholder.search' | translate}}"
+                   type="text"
+                   class="form-control pull-left"
+                   style="margin-top: 3px; width: 200px"/>
+            <!-- Дата и время -->
+            <div class="pull-left" style="margin: 5px 5px 0 10px">Дата</div>
+            <div class="pull-left"
+                 data-moment-picker="searchFilter.timeFrom"
+                 data-locale="ru"
+                 data-format="DD.MM.YYYY HH:mm"
+                 data-start-view="day"
+                 style="margin-top: 3px">
+                <input placeholder=""
+                       ng-model="searchFilter.timeFrom"
+                       style="width: 110px">
+            </div>
+            <div class="pull-left" style="margin-top: 5px">&nbsp;&mdash;&nbsp;</div>
+            <div class="pull-left"
+                 data-moment-picker="searchFilter.timeTo"
+                 data-locale="ru"
+                 data-format="DD.MM.YYYY HH:mm"
+                 data-start-view="day"
+                 style="margin-top: 3px">
+                <input placeholder=""
+                       ng-model="searchFilter.timeTo"
+                       style="width: 110px">
+            </div>
+            <!-- Найти -->
+            <button type="button"
+                    class="btn btn-default"
+                    id="searchButton"
+                    data-ng-click="submitSearch()"
+                    style="margin-left: 5px">
+                <span data-translate-once="common.button.search"></span>
+            </button>
+        </div>
+        <!--Панель кнопок -->
+        <div class="btn-toolbar pull-right" role="toolbar">
+            <!-- Удалить -->
+            <button type="button" class="btn btn-default"
+                    data-ng-click="delete()">
+                <span data-translate-once="button.delete"></span>
+            </button>
+            <!-- Выгрузить -->
+            <button type="button" class="btn btn-default"
+                    data-ng-disabled="true">
+                <span data-translate-once="notifications.button.download"></span>
+            </button>
+            <!-- Протоколы -->
+            <button type="button" class="btn btn-default"
+                    data-ng-disabled="true">
+                <span data-translate-once="notifications.button.protocols"></span>
+            </button>
+        </div>
     </div>
     <div class="flex-grid flex-fill"
          data-aplana-grid
