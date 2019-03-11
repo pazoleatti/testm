@@ -207,7 +207,7 @@ public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentCon
         String baseSelect = WITH_DEPARTMENT_CONFIG_BY_TB_AND_PERIOD_SQL;
         if (filter.getDeclarationId() != null) {
             baseSelect += "" +
-                    "select dc.id, npi.kpp, npi.oktmo, dc.version_end\n" +
+                    "select rownum id, dc.id dep_conf_id, npi.kpp, npi.oktmo, dc.version_end\n" +
                     "from (" +
                     "   select distinct kpp, oktmo from ndfl_person np\n" +
                     "   join ndfl_person_income npi on npi.ndfl_person_id = np.id" +
@@ -216,7 +216,7 @@ public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentCon
                     "left join actual_department_config dc on dc.kpp = npi.kpp and dc.oktmo_code = npi.oktmo\n";
             params.addValue("declarationId", filter.getDeclarationId());
         } else {
-            baseSelect += "select dc.id, dc.kpp, dc.oktmo_code oktmo, dc.version_end\n" +
+            baseSelect += "select rownum id, dc.id dep_conf_id, dc.kpp, dc.oktmo_code oktmo, dc.version_end\n" +
                     "from actual_department_config dc ";
         }
 
@@ -231,10 +231,10 @@ public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentCon
                     @Override
                     public ReportFormCreationKppOktmoPair mapRow(ResultSet rs, int rowNum) throws SQLException {
                         ReportFormCreationKppOktmoPair kppOktmoPair = new ReportFormCreationKppOktmoPair();
-                        kppOktmoPair.setId(rs.getLong("rn"));
+                        kppOktmoPair.setId(rs.getLong("id"));
                         kppOktmoPair.setKpp(rs.getString("kpp"));
                         kppOktmoPair.setOktmo(rs.getString("oktmo"));
-                        Long departmentConfigId = SqlUtils.getLong(rs, "id");
+                        Long departmentConfigId = SqlUtils.getLong(rs, "dep_conf_id");
                         Date versionEnd = rs.getDate("version_end");
                         if (departmentConfigId == null) {
                             kppOktmoPair.setRelevance("не относится к ТБ в периоде");
