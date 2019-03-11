@@ -8,7 +8,6 @@
         .directive('input', ['$timeout', function ($timeout) {
             return {
                 restrict: 'E',
-                scope: {},
                 link: function (scope, elem, attrs) {
 
                     var validTypes = /^(search|email|url|tel|number|text)$/i;

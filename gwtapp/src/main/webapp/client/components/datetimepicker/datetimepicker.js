@@ -10,8 +10,7 @@
  * http://localhost:8080/#/aplana_datetimepicker
  */
 
-
-
+// Если хранить в отдельном файле, то положение popover`а неправильное при первом открытии
 angular.module("aplana/templates/datetimepicker/bootstrap-datetimepicker.html", []).run(["$templateCache", function($templateCache) {
     $templateCache.put("aplana/templates/datetimepicker/bootstrap-datetimepicker.html",
         "<div style=\"padding: 0px\" class='datetimepicker' data-ng-init=\"init()\">\n" +
