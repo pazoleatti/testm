@@ -640,6 +640,8 @@ class Calculate extends AbstractScriptClass {
                         personDocument.documentNumber = performDocNumber(personDocument)
                     }
                     person.reportDoc = personDocument
+                } else {
+                    person.reportDoc = new IdDoc()
                 }
 
                 Department parentTb = new Department();
