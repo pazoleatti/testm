@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.service.NotificationService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedList;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedResourceAssembler;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -21,7 +22,6 @@ import java.util.*;
 /**
  * Контроллер для работы с оповещениями
  */
-
 @RestController
 public class NotificationController {
 
@@ -52,18 +52,20 @@ public class NotificationController {
      * @return список оповещений
      */
     @GetMapping(value = "/rest/notification")
-    public JqgridPagedList<Notification> fetchNotifications(@RequestParam PagingParams pagingParams) {
+    public JqgridPagedList<Notification> fetchNotifications(
+            @RequestParam PagingParams pagingParams,
+            @RequestParam(required = false) String text,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date timeFrom,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date timeTo) {
         TAUser user = securityService.currentUserInfo().getUser();
-        List<Integer> userRoles = new ArrayList<Integer>();
-        for (TARole role : user.getRoles()) {
-            userRoles.add(role.getId());
-        }
+
         NotificationsFilterData filter = new NotificationsFilterData();
         filter.setUserId(user.getId());
-        Set<Integer> receiverDepartmentIds = new HashSet<Integer>();
-        receiverDepartmentIds.addAll(departmentService.findAllAvailableIds(user));
-        filter.setReceiverDepartmentIds(new ArrayList<Integer>(receiverDepartmentIds));
-        filter.setUserRoleIds(userRoles);
+        filter.setUserRoleIds(user.getRoleIds());
+        filter.setReceiverDepartmentIds(departmentService.findAllAvailableIds(user));
+        filter.setText(text);
+        filter.setTimeFrom(timeFrom);
+        filter.setTimeTo(timeTo);
 
         PagingResult<Notification> notifications = notificationService.fetchAllByFilterAndPaging(filter, pagingParams);
         return JqgridPagedResourceAssembler.buildPagedList(
@@ -91,16 +93,13 @@ public class NotificationController {
     @GetMapping(value = "/rest/notification", params = "projection=count")
     public Map<String, Object> fetchNotificationCount() {
         TAUser user = securityService.currentUserInfo().getUser();
-        List<Integer> userRoles = new ArrayList<Integer>();
-        for (TARole role : user.getRoles()) {
-            userRoles.add(role.getId());
-        }
+
         NotificationsFilterData filter = new NotificationsFilterData();
         filter.setUserId(user.getId());
-        filter.setUserRoleIds(userRoles);
+        filter.setUserRoleIds(user.getRoleIds());
         filter.setRead(false);
 
-        Map<String, Object> result = new HashMap<String, Object>();
+        Map<String, Object> result = new HashMap<>();
         result.put("notifications_count", notificationService.fetchCountByFilter(filter));
         return result;
     }
@@ -111,25 +110,23 @@ public class NotificationController {
     @PostMapping(value = "/actions/notification/markAsRead")
     public void markAsRead() {
         TAUser user = securityService.currentUserInfo().getUser();
-        List<Integer> userRoles = new ArrayList<Integer>();
-        for (TARole role : user.getRoles()) {
-            userRoles.add(role.getId());
-        }
+
         NotificationsFilterData filter = new NotificationsFilterData();
         filter.setUserId(user.getId());
-        filter.setUserRoleIds(userRoles);
+        filter.setUserRoleIds(user.getRoleIds());
         notificationService.updateReadTrueByFilter(filter);
     }
 
     /**
      * Выгрузка файла по uuid из окна оповещения
+     *
      * @param uuid уникальный идентификатор файла
-     * @param req запрос
+     * @param req  запрос
      * @param resp ответ
-     * @throws IOException
+     * @throws IOException из обработки файла
      */
     @GetMapping(value = "/actions/notification/{uuid}/download")
-    public void processDownloadNotif (@PathVariable String uuid, HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    public void processDownloadNotif(@PathVariable String uuid, HttpServletRequest req, HttpServletResponse resp) throws IOException {
         Notification stub = new Notification();
         stub.setUserId(securityService.currentUserInfo().getUser().getId());
         stub.setReportId(uuid);

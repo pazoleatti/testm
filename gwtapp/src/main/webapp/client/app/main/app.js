@@ -447,7 +447,8 @@
         "notifications.title.link": "Ссылка",
         "notifications.title.delete": "Подтверждение удаления оповещений",
         "notifications.title.deleteText": "Вы действительно хотите удалить выбранные оповещения?",
-        "notifications.title.deleteLink": "Удалить оповещение",
+        "notifications.button.download": "Выгрузить",
+        "notifications.button.protocols": "Протоколы",
 
         "logPanel.title.num": "№ п/п",
         "logPanel.title.dateTime": "Дата-время",

@@ -18,6 +18,8 @@ import java.sql.Types;
 import java.util.Date;
 import java.util.List;
 
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+
 @Repository
 public class NotificationDaoImpl extends AbstractDao implements NotificationDao {
 
@@ -164,14 +166,17 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
         return fetchAllByFilterAndPaging(filter, pagingParams);
     }
 
-    private static final String GET_BY_FILTER = "select * from (\n" +
-            "  select ID, REPORT_PERIOD_ID, SENDER_DEPARTMENT_ID, RECEIVER_DEPARTMENT_ID, IS_READ, TEXT, LOG_ID, CREATE_DATE, DEADLINE, USER_ID, ROLE_ID, REPORT_ID, TYPE, \n" +
-            " row_number() %s as rn \n" +
-            "  from notification \n" +
-            "where (\n" +
-            "(:senderDepartmentId is not null and SENDER_DEPARTMENT_ID = :senderDepartmentId) or \n" +
-            "(:userId is not null and USER_ID = :userId)%s%s \n" +
-            ") and (:read is null or IS_READ = :read) \n" +
+
+    private static final String GET_BY_FILTER = "" +
+            "select * from (\n" +
+            "   select ID, REPORT_PERIOD_ID, SENDER_DEPARTMENT_ID, RECEIVER_DEPARTMENT_ID, IS_READ, TEXT, LOG_ID, CREATE_DATE, DEADLINE, USER_ID, ROLE_ID, REPORT_ID, TYPE, \n" +
+            "           row_number() %s as rn \n" +
+            "   from notification \n" +
+            "   where (\n" +
+            "       (:senderDepartmentId is not null and SENDER_DEPARTMENT_ID = :senderDepartmentId) or \n" +
+            "       (:userId is not null and USER_ID = :userId)%s%s \n" +
+            "   ) and (:read is null or IS_READ = :read) \n" +
+            "   %s" +
             ")";
 
     @Override
@@ -179,10 +184,27 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
         MapSqlParameterSource params = new MapSqlParameterSource();
 
         String orderClause = isSupportOver() ? "over (order by " + pagingParams.getProperty() + " " + pagingParams.getDirection() + ")" : "over()";
+
+        String conditions = "";
+        if (isNotEmpty(filter.getText())) {
+            conditions = conditions + " and lower(TEXT) like lower(:text) ";
+            params.addValue("text", "%" + filter.getText() + "%");
+        }
+        if (filter.getTimeFrom() != null) {
+            conditions = conditions + " and (CREATE_DATE >= :timeFrom) ";
+            params.addValue("timeFrom", filter.getTimeFrom());
+        }
+        if (filter.getTimeTo() != null) {
+            conditions += " and (CREATE_DATE <= :timeTo) ";
+            params.addValue("timeTo", filter.getTimeTo());
+        }
+
         StringBuilder sql = new StringBuilder(String.format(GET_BY_FILTER,
                 orderClause,
                 orInStatement("RECEIVER_DEPARTMENT_ID", filter.getReceiverDepartmentIds()),
-                orInStatement("ROLE_ID", filter.getUserRoleIds())));
+                orInStatement("ROLE_ID", filter.getUserRoleIds()),
+                conditions
+        ));
 
         params.addValue("senderDepartmentId", filter.getSenderDepartmentId());
         params.addValue("userId", filter.getUserId());
@@ -199,16 +221,33 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
 
     private static final String GET_COUNT_BY_FILTER = "select count(id) from notification \n" +
             "where (\n" +
-            "(:senderDepartmentId is not null and SENDER_DEPARTMENT_ID = :senderDepartmentId) or \n" +
-            "(:userId is not null and USER_ID = :userId)%s%s \n" +
-            ") and (:read is null or IS_READ = :read)";
+            "   (:senderDepartmentId is not null and SENDER_DEPARTMENT_ID = :senderDepartmentId) or \n" +
+            "   (:userId is not null and USER_ID = :userId)%s%s \n" +
+            ") and (:read is null or IS_READ = :read) %s";
 
     @Override
     public int fetchCountByFilter(NotificationsFilterData filter) {
+        MapSqlParameterSource params = new MapSqlParameterSource();
+
+        String conditions = "";
+        if (isNotEmpty(filter.getText())) {
+            conditions = conditions + " and lower(TEXT) like lower(:text) ";
+            params.addValue("text", "%" + filter.getText() + "%");
+        }
+        if (filter.getTimeFrom() != null) {
+            conditions = conditions + " and (CREATE_DATE >= :timeFrom) ";
+            params.addValue("timeFrom", filter.getTimeFrom());
+        }
+        if (filter.getTimeTo() != null) {
+            conditions += " and (CREATE_DATE <= :timeTo) ";
+            params.addValue("timeTo", filter.getTimeTo());
+        }
+
         String sql = String.format(GET_COUNT_BY_FILTER,
                 orInStatement("RECEIVER_DEPARTMENT_ID", filter.getReceiverDepartmentIds()),
-                orInStatement("ROLE_ID", filter.getUserRoleIds()));
-        MapSqlParameterSource params = new MapSqlParameterSource();
+                orInStatement("ROLE_ID", filter.getUserRoleIds()),
+                conditions);
+
         params.addValue("senderDepartmentId", filter.getSenderDepartmentId());
         params.addValue("userId", filter.getUserId());
         params.addValue("read", filter.isRead());

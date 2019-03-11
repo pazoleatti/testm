@@ -225,3 +225,61 @@ EXCEPTION
 END;
 /
 COMMIT;
+
+-- 3.5-amandzyak-3
+DECLARE
+	v_run_condition number(1);
+	v_task_name varchar2(128):='alter_tables block #12 - create index idx_ref_book_person_start_date';  
+BEGIN
+	select decode(count(*),0,1,0) into v_run_condition from user_indexes where lower(table_name)='ref_book_person' and lower(index_name)='idx_ref_book_person_start_date';
+	IF v_run_condition=1 THEN
+		EXECUTE IMMEDIATE 'create index IDX_REF_BOOK_PERSON_START_DATE on REF_BOOK_PERSON (START_DATE)';
+		dbms_output.put_line(v_task_name||'[INFO]:'||' Success');
+	ELSE
+		dbms_output.put_line(v_task_name||'[WARNING]:'||' changes had already been implemented');
+	END IF; 
+EXCEPTION
+	when OTHERS then
+		dbms_output.put_line(v_task_name||'[FATAL]:'||sqlerrm);
+END;
+/
+COMMIT;
+
+-- 3.5-amandzyak-4
+DECLARE
+	v_run_condition number(1);
+	v_task_name varchar2(128):='alter_tables block #13 - create index idx_ref_book_person_end_date';  
+BEGIN
+	select decode(count(*),0,1,0) into v_run_condition from user_indexes where lower(table_name)='ref_book_person' and lower(index_name)='idx_ref_book_person_end_date';
+	IF v_run_condition=1 THEN
+		EXECUTE IMMEDIATE 'create index IDX_REF_BOOK_PERSON_END_DATE on REF_BOOK_PERSON (END_DATE)';
+		dbms_output.put_line(v_task_name||'[INFO]:'||' Success');
+	ELSE
+		dbms_output.put_line(v_task_name||'[WARNING]:'||' changes had already been implemented');
+	END IF; 
+EXCEPTION
+	when OTHERS then
+		dbms_output.put_line(v_task_name||'[FATAL]:'||sqlerrm);
+END;
+/
+COMMIT;
+
+-- 3.5-amandzyak-5
+DECLARE
+	v_run_condition number(1);
+	v_task_name varchar2(128):='alter_tables block #14 - drop index idx_tmp_version_calc_ver_rec';  
+BEGIN
+	select count(*) into v_run_condition from user_indexes where lower(table_name)='tmp_version' and lower(index_name)=lower('idx_tmp_version_calc_ver_rec');
+	IF v_run_condition=1 THEN
+		EXECUTE IMMEDIATE 'drop index idx_tmp_version_calc_ver_rec';
+		dbms_output.put_line(v_task_name||'[INFO]:'||' Success');
+	ELSE
+		dbms_output.put_line(v_task_name||'[WARNING]:'||' changes had already been implemented');
+	END IF; 
+EXCEPTION
+	when OTHERS then
+		dbms_output.put_line(v_task_name||'[FATAL]:'||sqlerrm);
+END;
+/
+COMMIT;
+
