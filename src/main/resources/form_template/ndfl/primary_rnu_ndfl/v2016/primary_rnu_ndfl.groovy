@@ -2072,53 +2072,54 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
      * @param personLineInFile номер строки в файле, где содержались данные о физлице
      */
     boolean checkNdflPerson(NdflPerson person, String personLineInFile) {
-        String emptyParamErrorMsg = "Строка: ${personLineInFile}. Для ФЛ: $person.fullName, ИНП: $person.inp значение параметра %s не указано."
+        String emptyParamErrorMsg = "Строка: ${personLineInFile}. ФЛ: $person.fullName, ИНП: $person.inp. Значение параметра %s не указано."
         String valueNotFound = "Строка: ${personLineInFile}. ФЛ: $person.fullName, ИНП: $person.inp. Параметр \"%s\" (%s) содержит значение (%s), которое не найдено в справочнике %s."
+        String msgObject = "$person.fullName, ИНП: $person.inp"
         // Проверка поля "Гражданство"
         boolean valid = true
         if (isEmpty(person.citizenship)) {
-            logger.warn(emptyParamErrorMsg, '"Код гражданства" (Гражд)')
+            logger.warnExp(emptyParamErrorMsg, '', msgObject, '"Код гражданства" (Гражд)')
             valid = false
         } else {
             boolean exists = refBookService.existsCountryByCode(person.citizenship)
             if (!exists) {
-                logger.warn(valueNotFound, "Гражд", "Код гражданства", person.citizenship, "ОКСМ")
+                logger.warnExp(valueNotFound, '', msgObject, "Гражд", "Код гражданства", person.citizenship, "ОКСМ")
                 valid = false
             }
         }
         // Проверка поля "Код ДУЛ"
         boolean isDocTypeValid = true
         if (isEmpty(person.idDocType)) {
-            logger.warn(emptyParamErrorMsg, '"Код вида документа, удостоверяющего личность" (УдЛичнФЛКод)')
+            logger.warnExp(emptyParamErrorMsg, '', msgObject, '"Код вида документа, удостоверяющего личность" (УдЛичнФЛКод)')
             valid = false
             isDocTypeValid = false
         } else {
             boolean exists = refBookService.existsDocTypeByCode(person.idDocType)
             if (!exists) {
-                logger.warn(valueNotFound, "УдЛичнФЛКод", "Код вида документа, удостоверяющего личность", person.idDocType, "Коды документов, удостоверяющих личность")
+                logger.warnExp(valueNotFound, '', msgObject, "УдЛичнФЛКод", "Код вида документа, удостоверяющего личность", person.idDocType, "Коды документов, удостоверяющих личность")
                 valid = false
                 isDocTypeValid = false
             }
         }
         // Проверка поля "Номер ДУЛ"
         if (isEmpty(person.idDocNumber)) {
-            logger.warn(emptyParamErrorMsg, '"Серия и номер документа, удостоверяющего личность" (УдЛичнФЛНом)')
+            logger.warnExp(emptyParamErrorMsg, '', msgObject, '"Серия и номер документа, удостоверяющего личность" (УдЛичнФЛНом)')
             valid = false
         } else if (isDocTypeValid) {
             String errorMessage = ScriptUtils.checkDul(person.idDocType, person.idDocNumber, "УдЛичнФЛНом")
             if (errorMessage != null) {
-                logger.warn("Строка: ${personLineInFile}. ${errorMessage}")
+                logger.warnExp("Строка: ${personLineInFile}. ФЛ: $person.fullName, ИНП: $person.inp. ${errorMessage}.", '', msgObject)
                 valid = false
             }
         }
         // Проверка поля "Статус НП"
         if (isEmpty(person.status)) {
-            logger.warn(emptyParamErrorMsg, '"Статус налогоплательщика" (СтатусФЛ)')
+            logger.warnExp(emptyParamErrorMsg, '', msgObject, '"Статус налогоплательщика" (СтатусФЛ)')
             valid = false
         } else {
             boolean exists = refBookService.existsTaxpayerStateByCode(person.status)
             if (!exists) {
-                logger.warn(valueNotFound, "СтатусФЛ", "Статус налогоплательщика", person.status, "Статусы налогоплательщиков")
+                logger.warnExp(valueNotFound, '', msgObject, "СтатусФЛ", "Статус налогоплательщика", person.status, "Статусы налогоплательщиков")
                 valid = false
             }
         }
