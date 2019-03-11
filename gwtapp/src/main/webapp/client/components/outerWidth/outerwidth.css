@@ -31,16 +31,10 @@ label.cbr-fileUpload-viewButton {
 
 /*date picker time picker*/
 .cbr-datepickerTimepicker {
-	width: 220px; /* default width */
+	width: 175px; /* default width */
 }
 .cbr-datepickerTimepicker .cbr-datepickerTimepicker-date .cbr-picker {
 	width: 100%;
-}
-.cbr-datepickerTimepicker-time {
-	float: right;
-}
-.cbr-datepickerTimepicker-date {
-	margin-right: 72px;
 }
 
 /* picker */

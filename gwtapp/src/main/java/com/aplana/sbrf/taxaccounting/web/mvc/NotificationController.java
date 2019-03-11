@@ -55,8 +55,8 @@ public class NotificationController {
     public JqgridPagedList<Notification> fetchNotifications(
             @RequestParam PagingParams pagingParams,
             @RequestParam(required = false) String text,
-            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date timeFrom,
-            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date timeTo) {
+            @RequestParam(required = false) @DateTimeFormat(pattern = "dd.MM.yyyy'T'HH:mm") Date timeFrom,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "dd.MM.yyyy'T'HH:mm") Date timeTo) {
         TAUser user = securityService.currentUserInfo().getUser();
 
         NotificationsFilterData filter = new NotificationsFilterData();

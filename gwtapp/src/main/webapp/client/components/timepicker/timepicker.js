@@ -3,8 +3,43 @@
  * Директива предназначена для создания поля выбора времени
  * http://localhost:8080/#/aplana_timepicker
  */
+// Если хранить в отдельном файле, то положение popover`а неправильное при первом открытии
+angular.module("aplana/templates/timepicker/bootstrap-timepicker.html", []).run(["$templateCache", function($templateCache) {
+    $templateCache.put("aplana/templates/timepicker/bootstrap-timepicker.html",
+        "<table>\n" +
+        "    <tbody>\n" +
+        "    <tr class=\"text-center\">\n" +
+        "        <td><a ng-click=\"incrementHours()\"><span class=\"icon-chevron-up\"></span></a></td>\n" +
+        "        <td>&nbsp;</td>\n" +
+        "        <td><a ng-click=\"incrementMinutes()\"><span class=\"icon-chevron-up\"></span></a></td>\n" +
+        "        <td ng-show=\"showMeridian\"></td>\n" +
+        "    </tr>\n" +
+        "    <tr>\n" +
+        "        <td class=\"form-group\" ng-class=\"{'has-error': invalidHours}\">\n" +
+        "            <input style=\"width:30px;\" type=\"text\" ng-model=\"hours\" ng-change=\"updateHours()\"\n" +
+        "                   class=\"form-control text-center\" ng-mousewheel=\"incrementHours()\" ng-readonly=\"readonlyInput\"\n" +
+        "                   maxlength=\"2\">\n" +
+        "        </td>\n" +
+        "        <td>:</td>\n" +
+        "        <td class=\"form-group\" ng-class=\"{'has-error': invalidMinutes}\">\n" +
+        "            <input style=\"width:30px;\" type=\"text\" ng-model=\"minutes\" ng-change=\"updateMinutes()\"\n" +
+        "                   class=\"form-control text-center\" ng-readonly=\"readonlyInput\" maxlength=\"2\">\n" +
+        "        </td>\n" +
+        "        <td ng-show=\"showMeridian\">\n" +
+        "            <button type=\"button\" class=\"btn btn-default text-center\" ng-click=\"toggleMeridian()\">{{meridian}}</button>\n" +
+        "        </td>\n" +
+        "    </tr>\n" +
+        "    <tr class=\"text-center\">\n" +
+        "        <td><a ng-click=\"decrementHours()\"><span class=\"icon-chevron-down\"></span></a></td>\n" +
+        "        <td>&nbsp;</td>\n" +
+        "        <td><a ng-click=\"decrementMinutes()\"><span class=\"icon-chevron-down\"></span></a></td>\n" +
+        "        <td ng-show=\"showMeridian\"></td>\n" +
+        "    </tr>\n" +
+        "    </tbody>\n" +
+        "</table>\n");
+}]);
 
-angular.module('aplana.timepicker', ['aplana.timeHint'])
+angular.module('aplana.timepicker', ['aplana.timeHint', 'aplana/templates/timepicker/bootstrap-timepicker.html'])
 
 /**
  * Сервис изменения времени у сущности datetime
@@ -292,7 +327,7 @@ angular.module('aplana.timepicker', ['aplana.timeHint'])
             controller: 'TimepickerController',
             replace: true,
             scope: {},
-            templateUrl: AplanaUtils.templatePath + 'timepicker/bootstrap-timepicker.html',
+            templateUrl: 'aplana/templates/timepicker/bootstrap-timepicker.html',
             link: function (scope, element, attrs, ctrls) {
                 var timepickerCtrl = ctrls[0], ngModelCtrl = ctrls[1];
 
