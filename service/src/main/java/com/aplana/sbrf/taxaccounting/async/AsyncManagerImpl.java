@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.dao.AsyncTaskTypeDao;
 import com.aplana.sbrf.taxaccounting.model.AsyncQueue;
 import com.aplana.sbrf.taxaccounting.model.AsyncTaskDTO;
 import com.aplana.sbrf.taxaccounting.model.AsyncTaskData;
+import com.aplana.sbrf.taxaccounting.model.AsyncTaskGroup;
 import com.aplana.sbrf.taxaccounting.model.AsyncTaskState;
 import com.aplana.sbrf.taxaccounting.model.AsyncTaskType;
 import com.aplana.sbrf.taxaccounting.model.AsyncTaskTypeData;
@@ -149,7 +150,7 @@ public class AsyncManagerImpl implements AsyncManager {
                 }
                 // Сохранение в очереди асинхронных задач - запись в БД
                 String priorityNode = applicationInfo.isProductionMode() ? null : serverInfo.getServerName();
-                AsyncTaskData taskData = asyncTaskDao.create(taskType.getAsyncTaskTypeId(), user.getUser().getId(), description, queue, priorityNode, params);
+                AsyncTaskData taskData = asyncTaskDao.create(taskType.getAsyncTaskTypeId(), user.getUser().getId(), description, queue, priorityNode, AsyncTaskGroupFactory.getTaskGroup(taskType), params);
                 lockDataService.bindTask(lockKey, taskData.getId());
 
                 LOG.info(String.format("Task with id %s was put in queue %s. Task type: %s, priority node: %s",
@@ -271,7 +272,7 @@ public class AsyncManagerImpl implements AsyncManager {
                         // Сохранение в очереди асинхронных задач - запись в БД
                         String priorityNode = applicationInfo.isProductionMode() ? null : serverInfo.getServerName();
                         AsyncTaskType asyncTaskType = AsyncTaskType.getByAsyncTaskTypeId(operationType.getAsyncTaskTypeId());
-                        taskData = asyncTaskDao.create(operationType.getAsyncTaskTypeId(), user.getUser().getId(), description, queue, priorityNode, params);
+                        taskData = asyncTaskDao.create(operationType.getAsyncTaskTypeId(), user.getUser().getId(), description, queue, priorityNode, AsyncTaskGroupFactory.getTaskGroup(asyncTaskType), params);
 
                         lockDataService.bindTaskToMultiKeys(keys, taskData.getId());
                         logger.info("Задача %s поставлена в очередь на исполнение", description);
@@ -645,6 +646,21 @@ public class AsyncManagerImpl implements AsyncManager {
             //Все параметры должны быть сериализуемы
             if (!Serializable.class.isAssignableFrom(param.getValue().getClass())) {
                 throw new AsyncTaskSerializationException("Attribute \"" + param.getKey() + "\" doesn't support serialization!");
+            }
+        }
+    }
+
+    /**
+     * Фабрика группы асинхронной задачи по типу асинхронной задачи
+     */
+    public static class AsyncTaskGroupFactory {
+        public static AsyncTaskGroup getTaskGroup(AsyncTaskType taskType) {
+            switch (taskType) {
+                case IDENTIFY_PERSON:
+                case IMPORT_REF_BOOK_XML:
+                    return AsyncTaskGroup.REF_BOOK_PERSON;
+                default:
+                    return null;
             }
         }
     }

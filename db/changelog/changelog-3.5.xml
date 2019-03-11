@@ -401,5 +401,12 @@
 			drop index idx_tmp_version_calc_ver_rec;
 		</sql>
 	</changeSet>
+
+	<!--https://jira.aplana.com/browse/SBRFNDFL-6876 Оптимизация идентификации-->
+	<changeSet id="3.5-ytrofimov-12" author="ytrofimov">
+		<addColumn tableName="ASYNC_TASK">
+			<column name="TASK_GROUP" type="number(3)"/>
+		</addColumn>
+	</changeSet>
 	
 </databaseChangeLog>

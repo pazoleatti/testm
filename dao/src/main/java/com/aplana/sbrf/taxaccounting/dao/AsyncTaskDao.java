@@ -35,11 +35,12 @@ public interface AsyncTaskDao {
      * @param description  описание задачи
      * @param queue        тип очереди задачи - короткая или длинная
      * @param priorityNode приоритетный узел, на который будет назначена задача. Если = null, то назначается на любой узел
+     * @param taskGroup    группа асинхронных задач
      * @param params       параметры для выполнения задачи. Сериализуются и сохраняются в БД
      * @return идентификатор задачи
      */
     AsyncTaskData create(long taskTypeId, int userId, String description, AsyncQueue queue, String priorityNode,
-                         Map<String, Object> params);
+                         AsyncTaskGroup taskGroup, Map<String, Object> params);
 
     /**
      * Резервирует задачу с минимальной датой создания, которая не назначена ни одному из узлов,

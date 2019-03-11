@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.dao.util.DBUtils;
 import com.aplana.sbrf.taxaccounting.model.AsyncQueue;
 import com.aplana.sbrf.taxaccounting.model.AsyncTaskDTO;
 import com.aplana.sbrf.taxaccounting.model.AsyncTaskData;
+import com.aplana.sbrf.taxaccounting.model.AsyncTaskGroup;
 import com.aplana.sbrf.taxaccounting.model.AsyncTaskState;
 import com.aplana.sbrf.taxaccounting.model.AsyncTaskType;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
@@ -150,7 +151,8 @@ public class AsyncTaskDaoImpl extends AbstractDao implements AsyncTaskDao {
     }
 
     @Override
-    public AsyncTaskData create(long taskTypeId, int userId, String description, AsyncQueue queue, String priorityNode, Map<String, Object> params) {
+    public AsyncTaskData create(long taskTypeId, int userId, String description, AsyncQueue queue, String priorityNode,
+                                AsyncTaskGroup taskGroup, Map<String, Object> params) {
         byte[] serializedParams;
         try {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -167,8 +169,8 @@ public class AsyncTaskDaoImpl extends AbstractDao implements AsyncTaskDao {
 
         long id = dbUtils.getNextIds(DBUtils.Sequence.ASYNC_TASK, 1).get(0);
 
-        getJdbcTemplate().update("INSERT INTO async_task (id, type_id, user_id, description, queue, priority_node, serialized_params) VALUES (?, ?, ?, ?, ?, ?, ?)",
-                id, taskTypeId, userId, substring(description, 0, 400), queue.getId(), priorityNode, serializedParams);
+        getJdbcTemplate().update("INSERT INTO async_task (id, type_id, user_id, description, queue, priority_node, task_group, serialized_params) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                id, taskTypeId, userId, substring(description, 0, 400), queue.getId(), priorityNode, taskGroup != null ? taskGroup.getId() : null, serializedParams);
         return findById(id);
     }
 
@@ -182,7 +184,9 @@ public class AsyncTaskDaoImpl extends AbstractDao implements AsyncTaskDao {
                     "(select id from async_task where id = (select id from (\n" +
                     "select id from async_task where ((? is null and priority_node is null) or\n" +
                     "(? is not null and priority_node = ?)) and\n" +
-                    "queue = ? and (node is null or current_timestamp > start_process_date + interval '" + timeoutHours + "' hour)\n" +
+                    "queue = ? and (node is null or current_timestamp > start_process_date + interval '" + timeoutHours + "' hour) and\n" +
+                    "(task_group is null or " +
+                    "(task_group is not null and task_group not in (select task_group from async_task where start_process_date is not null and task_group is not null))) \n" +
                     "order by create_date\n" +
                     ") where rownum = 1))\n" +
                     "returning id into ?";
