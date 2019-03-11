@@ -47,10 +47,17 @@
                         datatype: "angularResource",
                         angularResource: NotificationResource,
                         requestParameters: function () {
+                            // TODO: Нужно только пока используем чисто даты без времени.
+                            var nextDayTo = null;
+                            if ($scope.searchFilter.timeTo) {
+                                nextDayTo = moment($scope.searchFilter.timeTo).add(1, 'days').format('YYYY-MM-DD');
+                            }
+
                             return {
                                 text: $scope.searchFilter.text,
                                 timeFrom: $scope.searchFilter.timeFrom,
-                                timeTo: $scope.searchFilter.timeTo
+                                timeTo: nextDayTo
+                                // timeTo: $scope.searchFilter.timeTo
                             }
                         },
                         height: 250,
