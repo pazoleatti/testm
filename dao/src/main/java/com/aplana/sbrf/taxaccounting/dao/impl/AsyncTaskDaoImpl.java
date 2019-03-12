@@ -175,7 +175,12 @@ public class AsyncTaskDaoImpl extends AbstractDao implements AsyncTaskDao {
     }
 
     @Override
-    public Long reserveTask(final String node, final String priorityNode, final int timeoutHours, final AsyncQueue queue, final int maxTasksPerNode) {
+    public Long reserveTask(final String node, final String priorityNode, final int timeoutHours, final AsyncQueue queue, final int maxTasksPerNode, boolean serialMode) {
+        String serialModeClause = "";
+        if (serialMode) {
+            serialModeClause = "and\n (task_group is null or " +
+                    "(task_group is not null and task_group not in (select task_group from async_task where start_process_date is not null and task_group is not null))) \n";
+        }
         try {
             Long result = null;
             // Привязываем задачу к узлу
@@ -184,9 +189,8 @@ public class AsyncTaskDaoImpl extends AbstractDao implements AsyncTaskDao {
                     "(select id from async_task where id = (select id from (\n" +
                     "select id from async_task where ((? is null and priority_node is null) or\n" +
                     "(? is not null and priority_node = ?)) and\n" +
-                    "queue = ? and (node is null or current_timestamp > start_process_date + interval '" + timeoutHours + "' hour) and\n" +
-                    "(task_group is null or " +
-                    "(task_group is not null and task_group not in (select task_group from async_task where start_process_date is not null and task_group is not null))) \n" +
+                    "queue = ? and (node is null or current_timestamp > start_process_date + interval '" + timeoutHours + "' hour) " +
+                    serialModeClause +
                     "order by create_date\n" +
                     ") where rownum = 1))\n" +
                     "returning id into ?";

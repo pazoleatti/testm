@@ -408,5 +408,14 @@
 			<column name="TASK_GROUP" type="number(3)"/>
 		</addColumn>
 	</changeSet>
+
+	<!--https://jira.aplana.com/browse/SBRFNDFL-6876 Оптимизация идентификации-->
+	<changeSet id="3.5-ytrofimov-13" author="ytrofimov">
+		<insert tableName="configuration">
+			<column name="code" value="ASYNC_SERIAL_MODE"/>
+			<column name="department_id" value="0"/>
+			<column name="value" value="0"/>
+		</insert>
+	</changeSet>
 	
 </databaseChangeLog>

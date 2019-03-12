@@ -3,11 +3,19 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.dao.AsyncTaskTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookUtils;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.AsyncTaskType;
+import com.aplana.sbrf.taxaccounting.model.AsyncTaskTypeData;
+import com.aplana.sbrf.taxaccounting.model.Configuration;
+import com.aplana.sbrf.taxaccounting.model.ConfigurationParam;
+import com.aplana.sbrf.taxaccounting.model.ConfigurationParamGroup;
+import com.aplana.sbrf.taxaccounting.model.ConfigurationParamModel;
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
@@ -32,8 +40,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import com.aplana.sbrf.taxaccounting.model.ConfigurationParam;
-
 
 @Service("configurationService")
 @Transactional
@@ -50,6 +56,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     private static final String REPORT_PERIOD_YEAR_MIN = "2003";
     private static final String REPORT_PERIOD_YEAR_MAX = "2100";
     private static final String DECLARATION_ROWS_BULK_EDIT_MAX_COUNT_DEFAULT = "200";
+    private static final String ASYNC_MODE_DEFAULT = "0";
     private static final String READ_ERROR = "«%s»: Отсутствует доступ на чтение!";
     private static final String WRITE_ERROR = "«%s»: Отсутствует доступ на запись!";
     private static final String READ_INFO = "«%s»: Присутствует доступ на чтение!";
@@ -100,6 +107,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         defaultCommonConfig.add(new Configuration(ConfigurationParam.REPORT_PERIOD_YEAR_MIN.getCaption(), COMMON_PARAM_DEPARTMENT_ID, REPORT_PERIOD_YEAR_MIN));
         defaultCommonConfig.add(new Configuration(ConfigurationParam.REPORT_PERIOD_YEAR_MAX.getCaption(), COMMON_PARAM_DEPARTMENT_ID, REPORT_PERIOD_YEAR_MAX));
         defaultCommonConfig.add(new Configuration(ConfigurationParam.DECLARATION_ROWS_BULK_EDIT_MAX_COUNT.getCaption(), COMMON_PARAM_DEPARTMENT_ID, DECLARATION_ROWS_BULK_EDIT_MAX_COUNT_DEFAULT));
+        defaultCommonConfig.add(new Configuration(ConfigurationParam.ASYNC_SERIAL_MODE.getCaption(), COMMON_PARAM_DEPARTMENT_ID, ASYNC_MODE_DEFAULT));
         // Веса идентификации
         defaultCommonConfig.add(new Configuration(ConfigurationParam.WEIGHT_LAST_NAME.getCaption(), COMMON_PARAM_DEPARTMENT_ID, "5"));
         defaultCommonConfig.add(new Configuration(ConfigurationParam.WEIGHT_FIRST_NAME.getCaption(), COMMON_PARAM_DEPARTMENT_ID, "10"));
@@ -402,6 +410,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
             checkIdentificationWeightParam(config, logger);
         } else if (config.getCode().equals(ConfigurationParam.DECLARATION_ROWS_BULK_EDIT_MAX_COUNT.name())) {
             checkPositiveIntParam(config, logger);
+        } else if (config.getCode().equals(ConfigurationParam.ASYNC_SERIAL_MODE.name())) {
+            checkDiscreteValue(config.getValue(), logger);
         }
     }
 

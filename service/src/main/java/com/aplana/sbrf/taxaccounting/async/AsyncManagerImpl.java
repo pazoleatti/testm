@@ -11,6 +11,8 @@ import com.aplana.sbrf.taxaccounting.model.AsyncTaskGroup;
 import com.aplana.sbrf.taxaccounting.model.AsyncTaskState;
 import com.aplana.sbrf.taxaccounting.model.AsyncTaskType;
 import com.aplana.sbrf.taxaccounting.model.AsyncTaskTypeData;
+import com.aplana.sbrf.taxaccounting.model.Configuration;
+import com.aplana.sbrf.taxaccounting.model.ConfigurationParam;
 import com.aplana.sbrf.taxaccounting.model.DeclarationData;
 import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.LockData;
@@ -26,6 +28,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import com.aplana.sbrf.taxaccounting.service.ConfigurationService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
@@ -95,6 +98,8 @@ public class AsyncManagerImpl implements AsyncManager {
     private DeclarationLocker declarationLocker;
     @Autowired
     private AsyncTaskDescriptor asyncTaskDescriptor;
+    @Autowired
+    private ConfigurationService configurationService;
 
     private static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
         @Override
@@ -534,10 +539,11 @@ public class AsyncManagerImpl implements AsyncManager {
     public AsyncTaskData reserveTask(final String node, final String priorityNode, final int timeout,
                                      final AsyncQueue balancingVariants, final int maxTasksPerNode) {
         AsyncTaskData result = null;
+        final Configuration serialMode = configurationService.fetchByEnum(ConfigurationParam.ASYNC_SERIAL_MODE);
         Long id = tx.executeInNewTransaction(new TransactionLogic<Long>() {
             @Override
             public Long execute() {
-                return asyncTaskDao.reserveTask(node, priorityNode, timeout, balancingVariants, maxTasksPerNode);
+                return asyncTaskDao.reserveTask(node, priorityNode, timeout, balancingVariants, maxTasksPerNode, Integer.valueOf(serialMode.getValue()) == 1);
             }
         });
         if (id != null) {

@@ -6,6 +6,8 @@ import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonPrimaryRnuR
 import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonRefbookHandler
 import com.aplana.sbrf.taxaccounting.dao.identification.RefDataHolder
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.person.NaturalPersonMapper
+import com.aplana.sbrf.taxaccounting.model.ConfigurationParam
+import com.aplana.sbrf.taxaccounting.model.ConfigurationParamModel
 import com.aplana.sbrf.taxaccounting.model.DeclarationData
 import com.aplana.sbrf.taxaccounting.model.Department
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
@@ -163,6 +165,8 @@ class Calculate extends AbstractScriptClass {
      */
     long sleepBetweenTryLock = 5000L
 
+    boolean runParallel
+
     @TypeChecked(TypeCheckingMode.SKIP)
     Calculate(scriptClass) {
         //noinspection GroovyAssignabilityCheck
@@ -218,6 +222,9 @@ class Calculate extends AbstractScriptClass {
                     long time = System.currentTimeMillis()
 
                     logForDebug("Начало расчета ПНФ")
+
+                    ConfigurationParamModel configurationParamModel = declarationService.getAllConfig(userInfo)
+                    runParallel = configurationParamModel?.get(ConfigurationParam.ASYNC_SERIAL_MODE)?.get(0)?.get(0) == "0"
 
                     maxRegistryPersonId = refBookPersonService.findMaxRegistryPersonId(new Date())
 
@@ -580,7 +587,7 @@ class Calculate extends AbstractScriptClass {
 
     def preCreateNaturalPersonRefBookRecords() {
 
-        /*if (firstAttemptToCreate) {
+        if (runParallel && firstAttemptToCreate) {
             if (!insertPersonList.isEmpty()) {
                 boolean personsRegistryLocked = refBookPersonService.lockPersonsRegistry(userInfo, taskDataId)
 
@@ -615,7 +622,7 @@ class Calculate extends AbstractScriptClass {
                 }
             }
             firstAttemptToCreate = false
-        }*/
+        }
         performPrimaryPersonDuplicates()
         createNaturalPersonRefBookRecords()
     }

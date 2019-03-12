@@ -53,7 +53,7 @@ public interface AsyncTaskDao {
      * @param maxTasksPerNode максимальное количество задач, которое параллельно может обрабатываться в этой очереди на одном узле
      * @return зарезервированная задача либо null
      */
-    Long reserveTask(String node, String priorityNode, int timeoutHours, AsyncQueue queue, int maxTasksPerNode);
+    Long reserveTask(String node, String priorityNode, int timeoutHours, AsyncQueue queue, int maxTasksPerNode, boolean serialMode);
 
     /**
      * Возвращает данные задачи по ее идентификатору
