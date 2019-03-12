@@ -418,4 +418,14 @@
 		</insert>
 	</changeSet>
 	
+    <!--https://jira.aplana.com/browse/SBRFNDFL-6887 - Убрать заполнение и использование временной таблицы tmp_version внутри идентификации-->
+    <changeSet id="3.5-amandzyak-6" author="amandzyak">
+        <sqlFile dbms="oracle"
+                 encoding="utf8"
+                 endDelimiter=""
+                 path="/scripts/person_pkg_body16.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
+
 </databaseChangeLog>
