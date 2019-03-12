@@ -261,8 +261,7 @@ class Report6Ndfl extends AbstractScriptClass {
                         def refundTax = section2Block.adjustRefundTax(incomeList)
                         if (refundTax == null) {
                             ОбобщПоказAttrs.put("ВозврНалИт", 0)
-                        }
-                        else {
+                        } else {
                             ОбобщПоказAttrs.put("ВозврНалИт", refundTax)
                         }
                     }
@@ -283,17 +282,14 @@ class Report6Ndfl extends AbstractScriptClass {
                         }
                     }
 
-                    if (declarationData.isAdjustNegativeValues() && section2Block.isEmpty()) {
-                        declarationData.negativeSumsSign = NegativeSumsSign.FROM_PREV_FORM
+                    if (declarationData.isAdjustNegativeValues()) {
+                        section2Block.adjustNegativeValues()
+                        declarationData.negativeIncome = section2Block.negativeIncome.abs()
+                        declarationData.negativeTax = section2Block.negativeWithholding.abs()
                     }
+                    section2Block = section2Block.findAll { it.incomeSum || it.withholdingTaxSum }
+                    declarationData.negativeSumsSign = declarationData.isAdjustNegativeValues() && section2Block.isEmpty() ? NegativeSumsSign.FROM_PREV_FORM : NegativeSumsSign.FROM_CURRENT_FORM
                     if (!section2Block.isEmpty()) {
-                        if (declarationData.isAdjustNegativeValues()) {
-                            section2Block.adjustNegativeValues()
-                            declarationData.negativeIncome = section2Block.negativeIncome.abs()
-                            declarationData.negativeTax = section2Block.negativeWithholding.abs()
-                            declarationData.negativeSumsSign = NegativeSumsSign.FROM_CURRENT_FORM
-                            section2Block = section2Block.findAll { it.incomeSum || it.withholdingTaxSum }
-                        }
                         ДохНал() {
                             for (def row : section2Block) {
                                 if (isZeroDate(row.taxTransferDate)) {
