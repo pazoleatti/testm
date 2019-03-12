@@ -292,24 +292,21 @@ class Report6Ndfl extends AbstractScriptClass {
                             declarationData.negativeIncome = section2Block.negativeIncome.abs()
                             declarationData.negativeTax = section2Block.negativeWithholding.abs()
                             declarationData.negativeSumsSign = NegativeSumsSign.FROM_CURRENT_FORM
+                            section2Block = section2Block.findAll { it.incomeSum || it.withholdingTaxSum }
                         }
                         ДохНал() {
                             for (def row : section2Block) {
-                                // Исключение из списка строки, для которых СуммаФактическогоДохода =0 И СуммаУдержанногоНалога =0
-                                // ИЛИ СрокПеречисленияНалога НЕ принадлежит последним 3 месяцам отчетного периода
-                                if (row.incomeSum || row.withholdingTaxSum) {
-                                    if (isZeroDate(row.taxTransferDate)) {
-                                        logger.warn("В блоке Раздела 2 с параметрами: \"ДатаУдержанияНалога\": ${formatDate(row.taxDate)}; \"СрокПеречисленияНалога: 00.00.0000; " +
-                                                "\"ДатаДохода\": ${formatDate(row.incomeDate)}; исходное значение \"ДатаУдержанияНалога\": ${formatDate(row.taxDate)} заменено на \"00.00.0000\".")
-                                    }
-                                    СумДата(
-                                            ДатаФактДох: formatDate(row.incomeDate),
-                                            ДатаУдержНал: isZeroDate(row.taxTransferDate) ? DATE_ZERO_AS_STRING : formatDate(row.taxDate),
-                                            СрокПрчслНал: isZeroDate(row.taxTransferDate) ? DATE_ZERO_AS_STRING : formatDate(row.taxTransferDate),
-                                            ФактДоход: row.incomeSum,
-                                            УдержНал: row.withholdingTaxSum
-                                    ) {}
+                                if (isZeroDate(row.taxTransferDate)) {
+                                    logger.warn("В блоке Раздела 2 с параметрами: \"ДатаУдержанияНалога\": ${formatDate(row.taxDate)}; \"СрокПеречисленияНалога: 00.00.0000; " +
+                                            "\"ДатаДохода\": ${formatDate(row.incomeDate)}; исходное значение \"ДатаУдержанияНалога\": ${formatDate(row.taxDate)} заменено на \"00.00.0000\".")
                                 }
+                                СумДата(
+                                        ДатаФактДох: formatDate(row.incomeDate),
+                                        ДатаУдержНал: isZeroDate(row.taxTransferDate) ? DATE_ZERO_AS_STRING : formatDate(row.taxDate),
+                                        СрокПрчслНал: isZeroDate(row.taxTransferDate) ? DATE_ZERO_AS_STRING : formatDate(row.taxTransferDate),
+                                        ФактДоход: row.incomeSum,
+                                        УдержНал: row.withholdingTaxSum
+                                ) {}
                             }
                         }
                     }
