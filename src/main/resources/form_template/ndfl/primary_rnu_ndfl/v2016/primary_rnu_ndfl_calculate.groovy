@@ -6,12 +6,7 @@ import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonPrimaryRnuR
 import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonRefbookHandler
 import com.aplana.sbrf.taxaccounting.dao.identification.RefDataHolder
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.person.NaturalPersonMapper
-import com.aplana.sbrf.taxaccounting.model.ConfigurationParam
-import com.aplana.sbrf.taxaccounting.model.ConfigurationParamModel
-import com.aplana.sbrf.taxaccounting.model.DeclarationData
-import com.aplana.sbrf.taxaccounting.model.Department
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.PagingResult
+import com.aplana.sbrf.taxaccounting.model.*
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.identification.IdentificationData
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson
@@ -268,20 +263,25 @@ class Calculate extends AbstractScriptClass {
                         //noinspection GroovyAssignabilityCheck
                         logForDebug("Обновление записей (" + ScriptUtils.calcTimeMillis(time))
 
-                        time = System.currentTimeMillis()
-                        Map<Long, Map<Long, NaturalPerson>> checkSimilarityPersonMap = refBookPersonService.findPersonForCheckFromPrimaryRnuNdfl(declarationData.id, createRefbookHandler())
-                        //noinspection GroovyAssignabilityCheck
-                        logForDebug("Основная выборка по всем параметрам (" + checkSimilarityPersonMap.size() + " записей, " + ScriptUtils.calcTimeMillis(time))
+                        if (!insertPersonList.isEmpty()) {
+                            time = System.currentTimeMillis()
+                            Map<Long, Map<Long, NaturalPerson>> checkSimilarityPersonMap = refBookPersonService.findPersonForCheckFromPrimaryRnuNdfl(declarationData.id, createRefbookHandler())
+                            //noinspection GroovyAssignabilityCheck
+                            logForDebug("Основная выборка по всем параметрам (" + checkSimilarityPersonMap.size() + " записей, " + ScriptUtils.calcTimeMillis(time))
 
-                        time = System.currentTimeMillis()
-                        updateNaturalPersonRefBookRecords(primaryPersonMap, checkSimilarityPersonMap)
-                        //noinspection GroovyAssignabilityCheck
-                        logForDebug("Обновление записей (" + ScriptUtils.calcTimeMillis(time))
+                            time = System.currentTimeMillis()
+                            updateNaturalPersonRefBookRecords(primaryPersonMap, checkSimilarityPersonMap)
+                            //noinspection GroovyAssignabilityCheck
+                            logForDebug("Обновление записей (" + ScriptUtils.calcTimeMillis(time))
+                        }
 
-                        time = System.currentTimeMillis()
-                        preCreateNaturalPersonRefBookRecords()
-                        //noinspection GroovyAssignabilityCheck
-                        logForDebug("Создание (" + insertPersonList.size() + " записей, " + ScriptUtils.calcTimeMillis(time))
+                        if (!insertPersonList.isEmpty()) {
+                            time = System.currentTimeMillis()
+                            preCreateNaturalPersonRefBookRecords()
+                            //noinspection GroovyAssignabilityCheck
+                            logForDebug("Создание (" + insertPersonList.size() + " записей, " + ScriptUtils.calcTimeMillis(time))
+                        }
+
                     }
 
                     countTotalAndUniquePerson()
@@ -586,9 +586,8 @@ class Calculate extends AbstractScriptClass {
     }
 
     def preCreateNaturalPersonRefBookRecords() {
-
-        if (runParallel && firstAttemptToCreate) {
-            if (!insertPersonList.isEmpty()) {
+        if (!insertPersonList.isEmpty()) {
+            if (runParallel && firstAttemptToCreate) {
                 boolean personsRegistryLocked = refBookPersonService.lockPersonsRegistry(userInfo, taskDataId)
 
                 while (!personsRegistryLocked) {
@@ -620,17 +619,16 @@ class Calculate extends AbstractScriptClass {
                     maxRegistryPersonId = newMaxPersonId
                     updateNaturalPersonRefBookRecords(primaryPersonMap, similarityPersonMap)
                 }
+                firstAttemptToCreate = false
             }
-            firstAttemptToCreate = false
+            performPrimaryPersonDuplicates()
+            createNaturalPersonRefBookRecords()
         }
-        performPrimaryPersonDuplicates()
-        createNaturalPersonRefBookRecords()
     }
 
     def createNaturalPersonRefBookRecords() {
 
         int createCnt = 0
-        if (!insertPersonList.isEmpty()) {
 
             for (NaturalPerson person : insertPersonList) {
 
@@ -692,7 +690,7 @@ class Calculate extends AbstractScriptClass {
                     createMsg(person.getTaxPayerState()?.code ?: "_", C_STATUS, R_STATUS, CLAUSE_END_CREATE, person)
                     person.setTaxPayerState(new RefBookTaxpayerState())
                 }
-                if (!ScriptUtils.checkSnils(person.snils)){
+                if (!ScriptUtils.checkSnils(person.snils)) {
                     String errMsg = String.format("Значение гр. \"%s\" (\"%s\") не соответствует формату. %s",
                             "СНИЛС", person.snils ?: "_", CLAUSE_END_CREATE
                     )
@@ -725,7 +723,6 @@ class Calculate extends AbstractScriptClass {
                         taUserService.getSystemUserInfo())
                 createCnt++
             }
-        }
 
         logForDebug("Создано записей: " + createCnt)
     }
@@ -1093,7 +1090,7 @@ class Calculate extends AbstractScriptClass {
             String fio = (primaryPerson.lastName ?: "") + " " + (primaryPerson.firstName ?: "") + " " + (primaryPerson.middleName ?: "")
             String inp = primaryPerson.personIdentifier && primaryPerson.personIdentifier.inp ? primaryPerson.personIdentifier.inp : ""
             String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [fio, inp])
-            if (!ScriptUtils.checkSnils(primaryPerson.snils)){
+            if (!ScriptUtils.checkSnils(primaryPerson.snils)) {
                 String errMsg = String.format("Значение гр. \"%s\" (\"%s\") не соответствует формату. %s",
                         "СНИЛС", primaryPerson.snils ?: "_", CLAUSE_END_UPDATE
                 )
