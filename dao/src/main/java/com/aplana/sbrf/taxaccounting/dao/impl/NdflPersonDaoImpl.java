@@ -550,21 +550,6 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     @Override
-    public List<NdflPersonIncome> findAllIncomesByDeclarationIdAndKppAndOktmo(long declarationId, String kpp, String oktmo) {
-        MapSqlParameterSource params = new MapSqlParameterSource();
-        params.addValue("declarationId", declarationId);
-        params.addValue("kpp", kpp);
-        params.addValue("oktmo", oktmo);
-        return getNamedParameterJdbcTemplate().query("" +
-                        "select rba.name as asnu_name, " + createColumns(NdflPersonIncome.COLUMNS, "npi") + "\n" +
-                        " from NDFL_PERSON_INCOME npi \n" +
-                        "join ndfl_person np on np.id = npi.ndfl_person_id \n" +
-                        "left join ref_book_asnu rba on npi.asnu_id = rba.id \n" +
-                        "where np.declaration_data_id = :declarationId and npi.OKTMO = :oktmo and npi.KPP = :kpp ",
-                params, new NdflPersonDaoImpl.NdflPersonIncomeRowMapper());
-    }
-
-    @Override
     public List<NdflPerson> findAllFor2Ndfl(long declarationId, String kpp, String oktmo, Date startDate, Date endDate) {
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("declarationId", declarationId)

@@ -187,16 +187,6 @@ public interface NdflPersonDao {
     List<NdflPersonIncome> fetchNdflPersonIncomeByNdflPersonKppOktmo(List<Long> ndflPersonId, String kpp, String oktmo);
 
     /**
-     * Возвращяет данные о доходах в форме по КПП и ОКТМО
-     *
-     * @param declarationId ид формы
-     * @param kpp           КПП
-     * @param oktmo         ОКТМО
-     * @return список объектов доходов физического лица
-     */
-    List<NdflPersonIncome> findAllIncomesByDeclarationIdAndKppAndOktmo(long declarationId, String kpp, String oktmo);
-
-    /**
      * Возвращяет строки раздела 1 формы, у которых есть операции, относящиеся к заданной паре КПП/ОКТМО и
      * у которых хотя бы у одной строки дата начиления дохода принадлежит отчетному периоду,
      * вместе со всеми стркоами разделов 2-4 этих операций.

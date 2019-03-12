@@ -101,16 +101,6 @@ public interface NdflPersonService {
     List<NdflPersonIncome> findIncomesForPersonByKppOktmo(List<Long> ndflPersonId, String kpp, String oktmo);
 
     /**
-     * Возвращяет данные о доходах в форме по КПП и ОКТМО
-     *
-     * @param declarationId идентификатор формы
-     * @param kpp           КПП
-     * @param oktmo         ОКТМО
-     * @return список строк 2 раздела
-     */
-    List<NdflPersonIncome> findAllIncomesByDeclarationIdAndKppAndOktmo(long declarationId, String kpp, String oktmo);
-
-    /**
      * Найти все "Стандартные, социальные и имущественные налоговые вычеты" привязанные к декларации
      *
      * @param declarationDataId идентификатор декларации
