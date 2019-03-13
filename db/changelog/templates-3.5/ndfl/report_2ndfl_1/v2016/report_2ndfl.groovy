@@ -48,7 +48,6 @@ import java.nio.charset.Charset
 import static com.aplana.sbrf.taxaccounting.model.refbook.RefBookDeductionMark.INVESTMENT_CODE
 import static com.aplana.sbrf.taxaccounting.model.refbook.RefBookDeductionMark.OTHERS_CODE
 import static java.util.Collections.singletonList
-import static java.util.Collections.sort
 import static java.util.TimeZone.getTimeZone
 
 new Report2Ndfl(this).run()
@@ -134,9 +133,6 @@ class Report2Ndfl extends AbstractScriptClass {
     /************************************* СОЗДАНИЕ XML *****************************************************************/
 
     final Charset xmlCharset = Charset.forName("windows-1251")
-    // Количество физических лиц в одном xml-файле
-    final int NUMBER_OF_PERSONS = 3000
-    int nomSprCounter = 0
 
     // Кэш провайдеров
     Map<Long, RefBookDataProvider> providerCache = [:]
@@ -159,14 +155,14 @@ class Report2Ndfl extends AbstractScriptClass {
      * Создаёт xml-файл по настройке подразделений.
      * @return объект с xml-файлом и дополнительной информацией
      */
-    Xml buildXml(DepartmentConfig departmentConfig) {
+    Xml buildXml(DepartmentConfig departmentConfig, List<Operation> operations) {
         Xml xml = null
         File xmlFile = null
         Writer fileWriter = null
         try {
             xmlFile = File.createTempFile("file_for_validate", ".xml")
             fileWriter = new OutputStreamWriter(new FileOutputStream(xmlFile), xmlCharset)
-            xml = buildXml(departmentConfig, fileWriter)
+            xml = buildXml(departmentConfig, operations, fileWriter)
             if (xml) {
                 xml.xmlFile = xmlFile
             }
@@ -194,11 +190,11 @@ class Report2Ndfl extends AbstractScriptClass {
      * @throw ServiceException
      */
     @TypeChecked(TypeCheckingMode.SKIP)
-    Xml buildXml(DepartmentConfig departmentConfig, Writer writer) {
+    Xml buildXml(DepartmentConfig departmentConfig, List<Operation> operations, Writer writer) {
         ScriptUtils.checkInterrupted()
         Xml xml = new Xml()
 
-        def persons = getPersons()
+        def persons = operations*.person.toSet()
         if (!persons) {
             if (declarationData.declarationTemplateId == DeclarationType.NDFL_2_2) {
                 logger.error("Отчетность $declarationTemplate.name для $department.name за период ${formatPeriod(departmentReportPeriod)} не сформирована. " +
@@ -212,6 +208,7 @@ class Report2Ndfl extends AbstractScriptClass {
             return null
         }
         checkMandatoryFields(persons)
+        def operationsByPersonId = operations.groupBy { it.person.id }
 
         def refPersonIds = []
         ConfigurationParamModel configurationParamModel = declarationService.getAllConfig(userInfo)
@@ -222,6 +219,7 @@ class Report2Ndfl extends AbstractScriptClass {
         Map<String, RefBookDeductionType> deductionTypesByCode = refBookDeductionTypeService.findAllByVersion(reportPeriod.endDate)
                 .collectEntries { [it.code, it] }
         String priznak = definePriznak(departmentConfig)
+        int nomSprCounter = 0
 
         MarkupBuilder builder = new MarkupBuilder(writer)
         builder.setDoubleQuotes(true)
@@ -258,6 +256,9 @@ class Report2Ndfl extends AbstractScriptClass {
                 }
                 for (NdflPerson person : persons) {
                     ScriptUtils.checkInterrupted()
+                    person.incomes = (List<NdflPersonIncome>) operationsByPersonId[person.id]*.incomes.flatten()
+                    person.deductions = (List<NdflPersonDeduction>) operationsByPersonId[person.id]*.deductions.flatten()
+                    person.prepayments = (List<NdflPersonPrepayment>) operationsByPersonId[person.id]*.prepayments.flatten()
                     "НДФЛ-2"(НомСпр: ++nomSprCounter,
                             НомКорр: sprintf('%02d', declarationData.correctionNum ?: 0)) {
                         ПолучДох(ИННФЛ: person.innNp,
@@ -372,6 +373,73 @@ class Report2Ndfl extends AbstractScriptClass {
             }
         }
         return persons
+    }
+
+    /**
+     * Возвращяет операции, в которых хотя бы одна строка принадлежит отчетному периоду,
+     * у тех ФЛ, у которых сумма дохода (для 2-НДЛФЛ(1)) или сумма неудержанного (для 2-НДЛФЛ(2)) больше 0
+     * @return
+     */
+    List<Operation> findOperations() {
+        Map<Long, NdflPerson> personsById = ndflPersonService.findNdflPerson(sourceKnf.id)
+                .collectEntries { [it.id, it] }
+        Map<Long, Map<String, List<NdflPersonIncome>>> incomesByPersonIdAndOperationId = ndflPersonService.findNdflPersonIncome(sourceKnf.id)
+                .groupBy({ NdflPersonIncome it -> it.ndflPersonId }, { NdflPersonIncome it -> it.operationId })
+        Map<Long, Map<String, List<NdflPersonDeduction>>> deductionsByPersonIdAndOperationId = ndflPersonService.findNdflPersonDeduction(sourceKnf.id)
+                .groupBy({ NdflPersonDeduction it -> it.ndflPersonId }, { NdflPersonDeduction it -> it.operationId })
+        Map<Long, Map<String, List<NdflPersonPrepayment>>> prepaymentsByPersonIdAndOperationId = ndflPersonService.findNdflPersonPrepayment(sourceKnf.id)
+                .groupBy({ NdflPersonPrepayment it -> it.ndflPersonId }, { NdflPersonPrepayment it -> it.operationId })
+
+        List<Operation> operations = [] as LinkedList
+        for (def personId : incomesByPersonIdAndOperationId.keySet()) {
+            def personIncomesByOperationId = incomesByPersonIdAndOperationId[personId]
+            def personIncomes = (List<NdflPersonIncome>) personIncomesByOperationId.values().flatten()
+            if (hasPositiveSum(personIncomes)) {
+                for (def operationId : personIncomesByOperationId.keySet()) {
+                    def operation = new Operation()
+                    operation.operationId = operationId
+                    operation.person = personsById[personId]
+                    operation.incomes = incomesByPersonIdAndOperationId[personId][operationId]
+                    operation.deductions = deductionsByPersonIdAndOperationId.get(personId)?.get(operationId) ?: new ArrayList<NdflPersonDeduction>()
+                    operation.prepayments = prepaymentsByPersonIdAndOperationId.get(personId)?.get(operationId) ?: new ArrayList<NdflPersonPrepayment>()
+                    if (isOperationBelongToPeriod(operation)) {
+                        operations.add(operation)
+                    }
+                }
+            }
+        }
+
+        return operations
+    }
+
+    /**
+     * Возвращяет признак наличия суммыФЛ (сумма дохода (для 2-НДЛФЛ(1)) или сумма неудержанного (для 2-НДЛФЛ(2)) больше 0)
+     * @param incomes строки 2 раздела ФЛ
+     */
+    boolean hasPositiveSum(List<NdflPersonIncome> incomes) {
+        BigDecimal sum = 0
+        for (def income : incomes) {
+            if (isBelongToPeriod(income.incomeAccruedDate)) {
+                if (is2Ndfl1()) {
+                    sum += income.incomeAccruedSumm ?: 0
+                } else {
+                    sum += (income.notHoldingTax > 0 ? income.notHoldingTax : 0) - (income.overholdingTax > 0 ? income.overholdingTax : 0)
+                }
+            }
+        }
+        return sum > 0
+    }
+
+    /**
+     * Возвращяет признак принадлежности операции отчетному периоду (если хотя бы у 1 строки дата начисления принадлежит отчетному периоду)
+     */
+    boolean isOperationBelongToPeriod(Operation operation) {
+        for (def income : operation.incomes) {
+            if (isBelongToPeriod(income.incomeAccruedDate)) {
+                return true
+            }
+        }
+        return false
     }
 
     /**
@@ -672,6 +740,7 @@ class Report2Ndfl extends AbstractScriptClass {
         if (!departmentConfigs) {
             return
         }
+        Map<KppOktmoPair, List<Operation>> operationsByKppOktmoPair = findOperations().groupBy { new KppOktmoPair(it.kpp, it.oktmo) }
         List<DeclarationData> createdForms = []
         for (def departmentConfig : departmentConfigs) {
             ScriptUtils.checkInterrupted()
@@ -693,7 +762,8 @@ class Report2Ndfl extends AbstractScriptClass {
             File zipFile = null
             Xml xml = null
             try {
-                xml = buildXml(departmentConfig)
+                def kppOktmoOperations = operationsByKppOktmoPair[new KppOktmoPair(departmentConfig.kpp, departmentConfig.oktmo.code)]
+                xml = buildXml(departmentConfig, kppOktmoOperations)
                 if (xml) {
                     def formsToDelete = existingDeclarations
                     if (deleteForms(formsToDelete)) {
@@ -1954,6 +2024,25 @@ class Report2Ndfl extends AbstractScriptClass {
 
     String formatDate(Date date) {
         return ScriptUtils.formatDate(date, SharedConstants.DATE_FORMAT)
+    }
+
+    /**
+     * Группа строк 2-4 разделов с одинаковым operationId
+     */
+    class Operation {
+        String operationId
+        NdflPerson person
+        List<NdflPersonIncome> incomes = []
+        List<NdflPersonDeduction> deductions = []
+        List<NdflPersonPrepayment> prepayments = []
+
+        String getKpp() {
+            return incomes.first().kpp
+        }
+
+        String getOktmo() {
+            return incomes.first().oktmo
+        }
     }
 
     @ToString(includePackage = false)
