@@ -659,14 +659,13 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
             DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.fetchOne(targetDomainObject.getDepartmentReportPeriodId());
 
             boolean canView = VIEW.isGranted(user, targetDomainObject, logger);
-            boolean hasRoles = taUser.hasRoles(TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS);
 
-            if ((targetDomainObject.getState() == State.CREATED || targetDomainObject.getState() == State.CREATED) && canView && hasRoles) {
+            if (departmentReportPeriod.isActive() && canView && (targetDomainObject.getState() == State.CREATED || targetDomainObject.getState() == State.PREPARED)) {
                 DeclarationFormKind declarationKind = declarationTemplateDao.get(targetDomainObject.getDeclarationTemplateId()).getDeclarationFormKind();
-                if (declarationKind != DeclarationFormKind.CONSOLIDATED || !departmentReportPeriod.isActive()) {
-                    return false;
+                if ((declarationKind == DeclarationFormKind.CONSOLIDATED && taUser.hasRoles(TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS)
+                        || declarationKind == DeclarationFormKind.PRIMARY && taUser.hasRoles(TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER))) {
+                    return true;
                 }
-                return true;
             }
             return false;
         }

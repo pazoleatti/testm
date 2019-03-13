@@ -1,13 +1,11 @@
 package form_template.ndfl.consolidated_rnu_ndfl.v2016
 
 import com.aplana.sbrf.taxaccounting.AbstractScriptClass
-import com.aplana.sbrf.taxaccounting.model.DeclarationData
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.DeclarationFormKind
+import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
-import com.aplana.sbrf.taxaccounting.script.service.PersonService
 import com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils
 import com.aplana.sbrf.taxaccounting.model.DeclarationData
 import com.aplana.sbrf.taxaccounting.model.Department
@@ -16,7 +14,6 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
 import com.aplana.sbrf.taxaccounting.script.SharedConstants
@@ -33,6 +30,7 @@ new UpdatePersonsData(this).run()
 class UpdatePersonsData extends AbstractScriptClass {
 
     DeclarationData declarationData
+    DeclarationTemplate declarationTemplate
     NdflPersonService ndflPersonService
     DepartmentReportPeriodService departmentReportPeriodService
     DepartmentService departmentService
@@ -48,6 +46,7 @@ class UpdatePersonsData extends AbstractScriptClass {
         super(scriptClass)
         if (scriptClass.getBinding().hasVariable("declarationData")) {
             this.declarationData = (DeclarationData) scriptClass.getProperty("declarationData")
+            this.declarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId)
         }
         if (scriptClass.getBinding().hasVariable("ndflPersonService")) {
             this.ndflPersonService = (NdflPersonService) scriptClass.getProperty("ndflPersonService")
@@ -81,10 +80,11 @@ class UpdatePersonsData extends AbstractScriptClass {
                         strCorrPeriod = ", с датой сдачи корректировки " + departmentReportPeriod.getCorrectionDate().format(SharedConstants.DATE_FORMAT)
                     }
                     Department department = departmentService.get(departmentReportPeriod.departmentId)
-                    logger.error("Невозможно обновить форму: № %s, Период %s, Подразделение %s, Вид \"Консолидированная\". Причина: \"%s\", попробуйте повторить операцию позднее\"",
+                    logger.error("Невозможно обновить форму: № %s, Период %s, Подразделение %s, Вид: \"%s\". Причина: \"%s\", попробуйте повторить операцию позднее\"",
                             declarationData.id,
                             departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + ", " + departmentReportPeriod.getReportPeriod().getName() + strCorrPeriod,
                             department.getName(),
+                            declarationTemplate.type.name,
                             e)
                 }
         }
@@ -108,7 +108,7 @@ class UpdatePersonsData extends AbstractScriptClass {
             String personInfo
             List<String> updateInfo = []
             boolean updated = false
-            if (refBookPerson.inp != declarationDataPerson.inp) {
+            if (refBookPerson.inp != declarationDataPerson.inp && declarationTemplate.declarationFormKind == DeclarationFormKind.CONSOLIDATED) {
                 if (refBookPerson.inp == null) {
                     logger.warn(createAbsentValueMessage(declarationDataPerson, SharedConstants.INP_FULL, SharedConstants.REF_PERSON_REC_ID))
                 } else {
@@ -370,10 +370,11 @@ class UpdatePersonsData extends AbstractScriptClass {
 
         Department department = departmentService.get(declarationData.departmentId)
         DepartmentReportPeriod reportPeriod = departmentReportPeriodService.get(declarationData.getDepartmentReportPeriodId())
-        logger.info("Завершено обновление данных ФЛ формы: № %s, Период %s, Подразделение %s, Вид \"Консолидированная\". Обновлено %s записей.",
+        logger.info("Завершено обновление данных ФЛ формы: № %s, Период %s, Подразделение %s, Вид: \"%s\". Обновлено %s записей.",
                 declarationData.id,
                 departmentReportPeriodService.formatPeriodName(reportPeriod, SharedConstants.DATE_FORMAT),
                 department.getName(),
+                declarationTemplate.type.name,
                 toUpdatePersons.size())
     }
 
