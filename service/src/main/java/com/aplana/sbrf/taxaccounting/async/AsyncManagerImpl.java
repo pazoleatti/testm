@@ -540,17 +540,24 @@ public class AsyncManagerImpl implements AsyncManager {
                                      final AsyncQueue balancingVariants, final int maxTasksPerNode) {
         AsyncTaskData result = null;
         final Configuration serialMode = configurationService.fetchByEnum(ConfigurationParam.ASYNC_SERIAL_MODE);
-        Long id = tx.executeInNewTransaction(new TransactionLogic<Long>() {
+        final Long taskId = asyncTaskDao.findTaskIdToReserve(node, priorityNode, timeout, balancingVariants, maxTasksPerNode, Integer.valueOf(serialMode.getValue()) == 1);
+        Boolean reserved = tx.executeInNewTransaction(new TransactionLogic<Boolean>() {
             @Override
-            public Long execute() {
-                return asyncTaskDao.reserveTask(node, priorityNode, timeout, balancingVariants, maxTasksPerNode, Integer.valueOf(serialMode.getValue()) == 1);
+            public Boolean execute() {
+                Boolean result = false;
+                if (taskId != null) {
+                    LOG.info(String.format("Node '%s' trying to reserve task with id=%s", node, taskId));
+                    result = asyncTaskDao.reserveTask(node, taskId);
+                }
+                return result;
             }
         });
-        if (id != null) {
-            result = asyncTaskDao.findById(id);
+        if (reserved) {
+            result = asyncTaskDao.findById(taskId);
         }
         if (result != null) {
             if (!result.getNode().equals(node)) {
+                LOG.error(String.format("Failed to reserve task with id=%s, by node '%s' due task being reserved by another thread", taskId, node));
                 return null;
             }
             LOG.info(String.format("Node '%s' reserved task: %s", node, result));

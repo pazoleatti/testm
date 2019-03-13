@@ -43,17 +43,26 @@ public interface AsyncTaskDao {
                          AsyncTaskGroup taskGroup, Map<String, Object> params);
 
     /**
-     * Резервирует задачу с минимальной датой создания, которая не назначена ни одному из узлов,
+     * Найти задачу для резервирования с минимальной датой создания, которая не назначена ни одному из узлов,
      * либо обработка которой превысила указанный таймаут и значит обрабатывающий ее узел упал, и возвращяет её
-     *
-     * @param node            узел, для которого будет зарезервирована задача
-     * @param priorityNode    узел, для которого будут принудительно отбираться задачи. Используется для dev-moda - отбираются задачи только с этим узлом
-     * @param timeoutHours    таймаут на выполнение задач (часов)
-     * @param queue           тип очереди из которой будет выбрана задача: коротких или длинных задач
-     * @param maxTasksPerNode максимальное количество задач, которое параллельно может обрабатываться в этой очереди на одном узле
-     * @return зарезервированная задача либо null
+     * @param node              узел, для которого будет зарезервирована задача
+     * @param priorityNode      узел, для которого будут принудительно отбираться задачи. Используется для dev-moda - отбираются задачи только с этим узлом
+     * @param timeoutHours      таймаут на выполнение задач (часов)
+     * @param queue             тип очереди из которой будет выбрана задача: коротких или длинных задач
+     * @param maxTasksPerNode   максимальное количество задач, которое параллельно может обрабатываться в этой очереди на одном узле
+     * @param serialMode        следует ли выполнять в последовательном режиме для задач из одной {@link AsyncTaskGroup}
+     * @return  идентификатор задачи для резервирования
      */
-    Long reserveTask(String node, String priorityNode, int timeoutHours, AsyncQueue queue, int maxTasksPerNode, boolean serialMode);
+    Long findTaskIdToReserve(String node, String priorityNode, int timeoutHours, AsyncQueue queue, int maxTasksPerNode, boolean serialMode);
+
+    /**
+     * Резервирует задачу по ее итдентификатору
+     *
+     * @param node      узел, для которого будет зарезервирована задача
+     * @param taskId    идентификатор задачи для блокировки
+     * @return {@code true} в случае успеха
+     */
+    boolean reserveTask(String node, long taskId);
 
     /**
      * Возвращает данные задачи по ее идентификатору

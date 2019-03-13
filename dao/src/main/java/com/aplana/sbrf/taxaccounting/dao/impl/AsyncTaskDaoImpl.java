@@ -15,8 +15,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.CallableStatementCallback;
-import org.springframework.jdbc.core.CallableStatementCreator;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Repository;
@@ -26,11 +24,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.sql.Blob;
-import java.sql.CallableStatement;
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -175,50 +170,47 @@ public class AsyncTaskDaoImpl extends AbstractDao implements AsyncTaskDao {
     }
 
     @Override
-    public Long reserveTask(final String node, final String priorityNode, final int timeoutHours, final AsyncQueue queue, final int maxTasksPerNode, boolean serialMode) {
+    public Long findTaskIdToReserve(String node, String priorityNode, int timeoutHours, AsyncQueue queue, int maxTasksPerNode, boolean serialMode) {
         String serialModeClause = "";
         if (serialMode) {
-            serialModeClause = "and\n (task_group is null or " +
+            serialModeClause = "and \n(task_group is null or " +
                     "(task_group is not null and task_group not in (select task_group from async_task where start_process_date is not null and task_group is not null))) \n";
         }
+        String sql = "select id from async_task where id = (select id from (\n" +
+                " select id from async_task where ((:priorityNode is null) or (:priorityNode is not null and priority_node = :priorityNode)) and \n" +
+                "queue = :queue and " +
+                "((node is null or current_timestamp > start_process_date + interval '" + timeoutHours + "' hour) and :maxTasksPerNode > (select count(*) FROM async_task WHERE node = :node AND queue = :queue)) " +
+                serialModeClause +
+                "order by create_date\n" +
+                ") where rownum = 1)";
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("node", node)
+                .addValue("priorityNode", priorityNode)
+                .addValue("maxTasksPerNode", maxTasksPerNode)
+                .addValue("queue", queue.getId());
         try {
-            Long result = null;
-            // Привязываем задачу к узлу
-            final String updateQuery = "UPDATE async_task SET node = ?, state_date = current_timestamp, start_process_date = current_timestamp\n" +
-                    "WHERE (SELECT count(*) FROM async_task WHERE node = ? AND queue = ?) < ? AND id =\n" +
-                    "(select id from async_task where id = (select id from (\n" +
-                    "select id from async_task where ((? is null and priority_node is null) or\n" +
-                    "(? is not null and priority_node = ?)) and\n" +
-                    "queue = ? and (node is null or current_timestamp > start_process_date + interval '" + timeoutHours + "' hour) " +
-                    serialModeClause +
-                    "order by create_date\n" +
-                    ") where rownum = 1))\n" +
-                    "returning id into ?";
-            result = getJdbcTemplate().execute(new CallableStatementCreator() {
-                @Override
-                public CallableStatement createCallableStatement(Connection con) throws SQLException {
-                    CallableStatement cs = con.prepareCall("{call " + updateQuery + "}");
-                    cs.setString(1, node);
-                    cs.setString(2, node);
-                    cs.setInt(3, queue.getId());
-                    cs.setInt(4, maxTasksPerNode);
-                    cs.setString(5, priorityNode);
-                    cs.setString(6, priorityNode);
-                    cs.setString(7, priorityNode);
-                    cs.setInt(8, queue.getId());
-                    cs.registerOutParameter(9, Types.NUMERIC);
-                    return cs;
-                }
-            }, new CallableStatementCallback<Long>() {
-                @Override
-                public Long doInCallableStatement(CallableStatement cs) throws SQLException, DataAccessException {
-                    cs.execute();
-                    return cs.getLong(9);
-                }
-            });
-            return result;
+            return getNamedParameterJdbcTemplate().queryForObject(sql, params, Long.class);
         } catch (EmptyResultDataAccessException e) {
             return null;
+        }
+    }
+
+    @Override
+    public boolean reserveTask(final String node, long taskId) {
+        try {
+            String select = "select id from async_task where id = :taskId for update skip locked";
+            String update = "UPDATE async_task SET node = :node, state_date = current_timestamp, start_process_date = current_timestamp " +
+                    "WHERE id = :lockedTask";
+            MapSqlParameterSource params = new MapSqlParameterSource();
+            params.addValue("taskId", taskId)
+                    .addValue("node", node);
+
+            Long lockedTask = getNamedParameterJdbcTemplate().queryForObject(select, params, Long.class);
+            params.addValue("lockedTask", lockedTask);
+
+            return getNamedParameterJdbcTemplate().update(update, params) == 1;
+        } catch (EmptyResultDataAccessException e) {
+            return false;
         }
     }
 
