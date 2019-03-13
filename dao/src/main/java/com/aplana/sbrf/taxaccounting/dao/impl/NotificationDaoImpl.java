@@ -15,16 +15,21 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+
 
 @Repository
 public class NotificationDaoImpl extends AbstractDao implements NotificationDao {
 
     @Autowired
     private DBUtils dbUtils;
+
+    private NotificationMapper notificationMapper = new NotificationMapper();
+
 
     private class NotificationMapper implements RowMapper<Notification> {
         @Override
@@ -47,38 +52,6 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
         }
     }
 
-    @Override
-    public Notification fetchOne(long id) {
-        try {
-            MapSqlParameterSource params = new MapSqlParameterSource();
-            params.addValue("id", id);
-            return getNamedParameterJdbcTemplate().queryForObject(
-                    "select * from notification where id = :id", params, new NotificationMapper());
-        } catch (EmptyResultDataAccessException e) {
-            return null;
-        }
-    }
-
-    @Override
-    public Notification fetchOne(int reportPeriodId, Integer senderDepartmentId, Integer receiverDepartmentId) {
-        try {
-            MapSqlParameterSource params = new MapSqlParameterSource();
-            params.addValue("rpid", reportPeriodId);
-            params.addValue("sdid", senderDepartmentId);
-            if (receiverDepartmentId != null) {
-                params.addValue("rdid", receiverDepartmentId);
-            }
-
-            return getNamedParameterJdbcTemplate().queryForObject(
-                    "select * from notification where " +
-                            "REPORT_PERIOD_ID = :rpid and " +
-                            "SENDER_DEPARTMENT_ID " + (senderDepartmentId == null ? "is null" : "= :sdid") + " and " +
-                            "RECEIVER_DEPARTMENT_ID " + (receiverDepartmentId == null ? "is null" : "= :rdid") + "",
-                    params, new NotificationMapper());
-        } catch (EmptyResultDataAccessException e) {
-            return null;
-        }
-    }
 
     @Override
     public void create(final List<Notification> notifications) {
@@ -114,58 +87,27 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
     }
 
     @Override
-    public void delete(int reportPeriodId, List<DepartmentPair> departments) {
-        StringBuilder sql = new StringBuilder("delete from notification where REPORT_PERIOD_ID = ? and (");
-        for (int i = 0; i < departments.size(); i++) {
-            DepartmentPair pair = departments.get(i);
-            sql.append("(SENDER_DEPARTMENT_ID ")
-                    .append(pair.getDepartmentId() == null ? "is null " : " = " + pair.getDepartmentId())
-                    .append(" and RECEIVER_DEPARTMENT_ID ")
-                    .append(pair.getParentDepartmentId() == null ? " is null " : " = " + pair.getParentDepartmentId()).append(")");
-            if (i < departments.size() - 1) {
-                sql.append(" or ");
-            }
+    public Notification findById(long id) {
+        try {
+            MapSqlParameterSource params = new MapSqlParameterSource();
+            params.addValue("id", id);
+            return getNamedParameterJdbcTemplate().queryForObject(
+                    "select * from notification where id = :id", params, notificationMapper);
+        } catch (EmptyResultDataAccessException e) {
+            return null;
         }
-        sql.append(")");
-        getJdbcTemplate().update(sql.toString(),
-                new Object[]{reportPeriodId},
-                new int[]{Types.NUMERIC});
     }
 
     @Override
-    public void deleteByReportPeriod(int reportPeriodId) {
-        getJdbcTemplate().update("delete from notification where REPORT_PERIOD_ID = ?",
-                reportPeriodId);
-    }
-
-    @Override
-    public void deleteAll(List<Long> notificationIds) {
-        getJdbcTemplate().update("delete from notification where " + SqlUtils.transformToSqlInStatement("id", notificationIds));
-    }
-
-    @Override
-    public List<Notification> fetchAllByFilter(NotificationsFilterData filter) {
-        PagingParams pagingParams = null;
-        // Только для GWT, неGWT использует pagingParams, а не filter
-        if (filter.getStartIndex() != null && filter.getCountOfRecords() != null) {
-            pagingParams = new PagingParams(filter.getStartIndex(), filter.getCountOfRecords());
-            switch (filter.getSortColumn()) {
-                case DATE:
-                    pagingParams.setProperty("CREATE_DATE");
-                    break;
-                case TEXT:
-                    pagingParams.setProperty("TEXT");
-                    break;
-                default:
-                    pagingParams.setProperty("CREATE_DATE");
-                    break;
-            }
-            pagingParams.setDirection(filter.isAsc() ? "ASC" : "DESC");
+    public List<Notification> findByIdIn(List<Long> ids) {
+        try {
+            //language=sql
+            String sql = "select * from notification where id in (:ids)";
+            return selectIn(sql, ids, "ids", notificationMapper);
+        } catch (EmptyResultDataAccessException e) {
+            return Collections.emptyList();
         }
-
-        return fetchAllByFilterAndPaging(filter, pagingParams);
     }
-
 
     private static final String GET_BY_FILTER = "" +
             "select * from (\n" +
@@ -180,7 +122,7 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
             ")";
 
     @Override
-    public List<Notification> fetchAllByFilterAndPaging(NotificationsFilterData filter, PagingParams pagingParams) {
+    public List<Notification> findByFilter(NotificationsFilterData filter, PagingParams pagingParams) {
         MapSqlParameterSource params = new MapSqlParameterSource();
 
         String orderClause = isSupportOver() ? "over (order by " + pagingParams.getProperty() + " " + pagingParams.getDirection() + ")" : "over()";
@@ -216,8 +158,60 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
             sql.append(" where rn between :start and :end");
         }
 
-        return getNamedParameterJdbcTemplate().query(sql.toString(), params, new NotificationMapper());
+        return getNamedParameterJdbcTemplate().query(sql.toString(), params, notificationMapper);
     }
+
+    @Override
+    public Notification findByReportPeriodAndDepartments(int reportPeriodId, Integer senderDepartmentId, Integer receiverDepartmentId) {
+        try {
+            MapSqlParameterSource params = new MapSqlParameterSource();
+            params.addValue("rpid", reportPeriodId);
+            params.addValue("sdid", senderDepartmentId);
+            if (receiverDepartmentId != null) {
+                params.addValue("rdid", receiverDepartmentId);
+            }
+
+            return getNamedParameterJdbcTemplate().queryForObject(
+                    "select * from notification where " +
+                            "REPORT_PERIOD_ID = :rpid and " +
+                            "SENDER_DEPARTMENT_ID " + (senderDepartmentId == null ? "is null" : "= :sdid") + " and " +
+                            "RECEIVER_DEPARTMENT_ID " + (receiverDepartmentId == null ? "is null" : "= :rdid") + "",
+                    params, notificationMapper);
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
+    }
+
+    @Override
+    public void deleteByReportPeriodAndDepartments(int reportPeriodId, List<DepartmentPair> departments) {
+        StringBuilder sql = new StringBuilder("delete from notification where REPORT_PERIOD_ID = ? and (");
+        for (int i = 0; i < departments.size(); i++) {
+            DepartmentPair pair = departments.get(i);
+            sql.append("(SENDER_DEPARTMENT_ID ")
+                    .append(pair.getDepartmentId() == null ? "is null " : " = " + pair.getDepartmentId())
+                    .append(" and RECEIVER_DEPARTMENT_ID ")
+                    .append(pair.getParentDepartmentId() == null ? " is null " : " = " + pair.getParentDepartmentId()).append(")");
+            if (i < departments.size() - 1) {
+                sql.append(" or ");
+            }
+        }
+        sql.append(")");
+        getJdbcTemplate().update(sql.toString(),
+                new Object[]{reportPeriodId},
+                new int[]{Types.NUMERIC});
+    }
+
+    @Override
+    public void deleteByReportPeriod(int reportPeriodId) {
+        getJdbcTemplate().update("delete from notification where REPORT_PERIOD_ID = ?",
+                reportPeriodId);
+    }
+
+    @Override
+    public void deleteByIdIn(List<Long> ids) {
+        getJdbcTemplate().update("delete from notification where " + SqlUtils.transformToSqlInStatement("id", ids));
+    }
+
 
     private static final String GET_COUNT_BY_FILTER = "select count(id) from notification \n" +
             "where (\n" +
@@ -226,7 +220,7 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
             ") and (:read is null or IS_READ = :read) %s";
 
     @Override
-    public int fetchCountByFilter(NotificationsFilterData filter) {
+    public int countByFilter(NotificationsFilterData filter) {
         MapSqlParameterSource params = new MapSqlParameterSource();
 
         String conditions = "";
@@ -262,7 +256,7 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
             ") and IS_READ = 0";
 
     @Override
-    public void updateReadTrueByFilter(NotificationsFilterData filter) {
+    public void setReadTrueByFilter(NotificationsFilterData filter) {
         MapSqlParameterSource params = new MapSqlParameterSource();
         String sql = String.format(UPDATE_USER_NOTIFICATIONS_STATUS,
                 orInStatement("RECEIVER_DEPARTMENT_ID", filter.getReceiverDepartmentIds()),
@@ -275,16 +269,7 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
     }
 
     @Override
-    public Date fetchLastNotificationDate() {
-        Date lastDate = getJdbcTemplate().queryForObject("select max(CREATE_DATE) from NOTIFICATION", Date.class);
-        if (lastDate != null) {
-            return new Date(lastDate.getTime());
-        }
-        return null;
-    }
-
-    @Override
-    public boolean isExistsNotificationBlobForUser(int userId, String blobId) {
+    public boolean existsByUserIdAndReportId(int userId, String blobId) {
         String sql = "select count(*) from NOTIFICATION where user_id = :userId and report_id = :blobId";
         MapSqlParameterSource params = new MapSqlParameterSource("userId", userId);
         params.addValue("blobId", blobId);

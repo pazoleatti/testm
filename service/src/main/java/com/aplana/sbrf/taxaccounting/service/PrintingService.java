@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service;
 
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
-import com.aplana.sbrf.taxaccounting.model.TAUserView;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
@@ -86,4 +83,12 @@ public interface PrintingService {
      * @return uuid на блоб файла
      */
     String generateExcelDepartmentConfigs(int departmentId);
+
+    /**
+     * Формирование csv-файла с уведомлениями.
+     *
+     * @param notifications объекты уведомлений.
+     * @return uuid сформированного файла в базе.
+     */
+    String generateCsvNotifications(List<Notification> notifications);
 }

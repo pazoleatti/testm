@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model.util;
 
 import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
@@ -10,14 +11,17 @@ import java.util.Date;
 public class DateUtils {
 
     // Принятые в системе обозначения для пустых дат.
-    public final static String DATE_ZERO_AS_DATE = "01.01.1901";
-    public final static String DATE_ZERO_AS_STRING = "00.00.0000";
+    public static final String DATE_ZERO_AS_DATE = "01.01.1901";
+    public static final String DATE_ZERO_AS_STRING = "00.00.0000";
 
     private static final String COMMON_DATE_FORMAT = "dd.MM.yyyy";
     private static final DateTimeFormatter COMMON_DATE_FORMATTER = DateTimeFormat.forPattern(COMMON_DATE_FORMAT);
 
     private static final String SQL_DATE_FORMAT = "yyyy-MM-dd";
     private static final DateTimeFormatter SQL_DATE_FORMATTER = DateTimeFormat.forPattern(SQL_DATE_FORMAT);
+
+    private static final String COMMON_DATE_TIME_FORMAT = "dd.MM.yyyy HH:mm:ss";
+    private static final DateTimeFormatter COMMON_DATE_TIME_FORMATTER = DateTimeFormat.forPattern(COMMON_DATE_TIME_FORMAT);
 
 
     /**
@@ -39,7 +43,17 @@ public class DateUtils {
         if (date == null) {
             return onNull;
         }
-        return formatByFormatter(date, COMMON_DATE_FORMATTER);
+        return formatByDateFormatter(date, COMMON_DATE_FORMATTER);
+    }
+
+    /**
+     * Строковое значение даты в формате "01.01.2000 23:59:59"
+     * Для null возвращает пустую строку
+     */
+    public static String commonDateTimeFormat(Date date) {
+        if (date == null) return "";
+        LocalDateTime jodaDateTime = LocalDateTime.fromDateFields(date);
+        return COMMON_DATE_TIME_FORMATTER.print(jodaDateTime);
     }
 
     /**
@@ -69,14 +83,14 @@ public class DateUtils {
      * @return строковое представление даты для Oracle и HSQLDB: date '2000-01-01'
      */
     public static String formatForSql(Date date) {
-        String formattedDate = formatByFormatter(date, SQL_DATE_FORMATTER);
+        String formattedDate = formatByDateFormatter(date, SQL_DATE_FORMATTER);
         return "date " + StringUtils.wrapIntoSingleQuotes(formattedDate);
     }
 
     /**
      * @return дата, отформатированная выбранным форматтером.
      */
-    private static String formatByFormatter(Date date, DateTimeFormatter formatter) {
+    private static String formatByDateFormatter(Date date, DateTimeFormatter formatter) {
         LocalDate jodaDate = LocalDate.fromDateFields(date);
         return formatter.print(jodaDate);
     }

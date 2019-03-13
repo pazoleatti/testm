@@ -2,23 +2,12 @@ package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 
-import java.util.Date;
 import java.util.List;
 
 /**
  * Сервис для работы с оповещениями
- *
- * @author dloshkarev
  */
 public interface NotificationService {
-
-    /**
-     * Возвращяет оповещение по его идентификатору
-     *
-     * @param id идентификатор оповещения
-     * @return оповещение или null, если ничего не найдено
-     */
-    Notification fetchOne(long id);
 
     /**
      * Создает список оповещений. В основном выполняется при назначении срока сдачи на подразделение + дочерние подразделения
@@ -28,22 +17,9 @@ public interface NotificationService {
     void create(List<Notification> notifications);
 
     /**
-     * Получает оповещение
-     *
-     * @param reportPeriodId       отчетный период
-     * @param senderDepartmentId   подразделение-отправитель
-     * @param receiverDepartmentId подразделение-получатель
-     * @return оповещение или null, если ничего не найдено
+     * Список оповещений по списку идентификаторов.
      */
-    Notification fetchOne(int reportPeriodId, Integer senderDepartmentId, Integer receiverDepartmentId);
-
-    /**
-     * Получить оповещения по фильтру (без пагинации)
-     *
-     * @param filter фильтр
-     * @return страница с оповещениями
-     */
-    PagingResult<Notification> fetchByFilter(NotificationsFilterData filter);
+    List<Notification> findByIdIn(List<Long> ids);
 
     /**
      * Получить оповещения по фильтру (с пагинацией для angularJs)
@@ -52,7 +28,7 @@ public interface NotificationService {
      * @param pagingParams параметры пагинации
      * @return страница с оповещениями
      */
-    PagingResult<Notification> fetchAllByFilterAndPaging(NotificationsFilterData filter, PagingParams pagingParams);
+    PagingResult<Notification> findByFilter(NotificationsFilterData filter, PagingParams pagingParams);
 
     /**
      * Получить количество оповещений по фильтру
@@ -60,7 +36,7 @@ public interface NotificationService {
      * @param filter фильтр
      * @return количество оповещений
      */
-    int fetchCountByFilter(NotificationsFilterData filter);
+    int countByFilter(NotificationsFilterData filter);
 
     /**
      * Удалить оповещения для отчетного периода
@@ -74,24 +50,22 @@ public interface NotificationService {
      *
      * @param filter фильтр оповещений
      */
-    void updateReadTrueByFilter(NotificationsFilterData filter);
+    void setReadTrueByFilter(NotificationsFilterData filter);
 
     /**
      * Удаляет все оповещения из списка
      *
      * @param notificationIds идентификаторы оповещений
      */
-    void deleteAll(List<Long> notificationIds);
+    void deleteByIdIn(List<Long> notificationIds);
 
-    /**
-     * Возвращяет дату последнего оповещения
-     */
-    Date fetchLastNotificationDate();
+
 
     /**
      * Получение данных оповещения из файлового хранилища
-     * @param notification  объект оповещения. Необходим огрызок объекта с заполненными {@link Notification#userId} и {@link Notification#reportId}.
-     * @return              данные полученные из файлового хранилища
+     *
+     * @param notification объект оповещения. Необходим огрызок объекта Notification с заполненными userId и reportId.
+     * @return данные полученные из файлового хранилища
      */
     BlobData getNotificationBlobData(Notification notification);
 }

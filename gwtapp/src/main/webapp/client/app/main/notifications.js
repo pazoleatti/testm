@@ -7,8 +7,8 @@
     /**
      * @description Контроллер модального окна оповещений
      */
-        .controller('notificationsCtrl', ['$scope', '$http', '$modalInstance', 'NotificationResource', '$filter', '$logPanel', '$dialogs', '$rootScope', 'APP_CONSTANTS',
-            function ($scope, $http, $modalInstance, NotificationResource, $filter, $logPanel, $dialogs, $rootScope, APP_CONSTANTS) {
+        .controller('notificationsCtrl', ['$scope', '$http', '$httpParamSerializer', '$modalInstance', 'NotificationResource', '$filter', '$logPanel', '$dialogs', '$rootScope', 'APP_CONSTANTS',
+            function ($scope, $http, $httpParamSerializer, $modalInstance, NotificationResource, $filter, $logPanel, $dialogs, $rootScope, APP_CONSTANTS) {
 
                 $scope.searchFilter = {
                     text: null,
@@ -97,10 +97,18 @@
                 };
 
                 /**
+                 * @description Выбрана ли хотя бы одна запись в таблице оповещений.
+                 * @returns {boolean}
+                 */
+                $scope.anyChecked = function () {
+                    return ($scope.notificationsGrid.value && $scope.notificationsGrid.value.length > 0)
+                };
+
+                /**
                  * @description Удаление выбранных в гриде оповещений
                  */
                 $scope.delete = function () {
-                    if ($scope.notificationsGrid.value && $scope.notificationsGrid.value.length !== 0) {
+                    if ($scope.anyChecked()) {
                         $dialogs.confirmDialog({
                             title: $filter('translate')('notifications.title.delete'),
                             content: $filter('translate')('notifications.title.deleteText'),
@@ -119,7 +127,18 @@
                     }
                 };
 
-                // TODO: Убрать после https://jira.aplana.com/browse/SBRFNDFL-1671
+                /**
+                 * Формирование адреса для выгрузки выбранных оповещений.
+                 * @returns {string} адрес
+                 */
+                $scope.downloadSelectedLink = function () {
+                    var address = "controller/actions/notification/downloadCsv?";
+                    var idsParam = $httpParamSerializer({
+                        ids: $filter('idExtractor')($scope.notificationsGrid.value)
+                    });
+                    return address + idsParam;
+                };
+
                 /**
                  * @description Закрытие окна
                  */

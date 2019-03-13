@@ -1,19 +1,12 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import au.com.bytecode.opencsv.CSVWriter;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookAsnuDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookCountryDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDocTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookTaxpayerStateDao;
-import com.aplana.sbrf.taxaccounting.model.AsyncTaskState;
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.ScriptSpecificRefBookReportHolder;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
-import com.aplana.sbrf.taxaccounting.model.TAUserView;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.action.DepartmentConfigsFilter;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
@@ -28,6 +21,8 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDepartment;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPersonDTO;
+import com.aplana.sbrf.taxaccounting.model.util.AppFileUtils;
+import com.aplana.sbrf.taxaccounting.model.util.DateUtils;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.LockStateLogger;
@@ -48,15 +43,15 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -369,5 +364,40 @@ public class PrintingServiceImpl implements PrintingService {
             values.put("SBRF_CODE", new RefBookValue(RefBookAttributeType.STRING, department.getSbrfCode()));
         }
         return values;
+    }
+
+    @Override
+    public String generateCsvNotifications(List<Notification> notifications) {
+        FileOutputStream fileOutputStream = null;
+        File file = null;
+        try {
+            file = File.createTempFile("notifications", ".csv");
+            fileOutputStream = new FileOutputStream(file);
+            CSVWriter csvWriter = new CSVWriter(new BufferedWriter(new OutputStreamWriter(fileOutputStream, "windows-1251")), ';');
+
+            String[] header = {"№ п/п", "Дата оповещения", "Содержание"};
+            csvWriter.writeNext(header);
+            for (int i = 0; i < notifications.size(); i++) {
+                Notification notification = notifications.get(i);
+                String notificationDate = DateUtils.commonDateTimeFormat(notification.getCreateDate());
+                String[] row = {String.valueOf(i + 1), notificationDate, notification.getText()};
+                csvWriter.writeNext(row);
+            }
+            csvWriter.close();
+
+            DateTime now = DateTime.now().withZone(DateTimeZone.forID("Europe/Moscow"));
+            DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd_HH-mm-ss");
+            String fileName = "Список оповещений_" + formatter.print(now) + ".csv";
+            return blobDataService.create(file.getAbsolutePath(), fileName);
+
+        } catch (Exception e) {
+            throw new ServiceException("Не выполнена операция \"Выгрузка списка оповещений\". Причина: " + e.getMessage(), e);
+        } finally {
+            AppFileUtils.deleteTmp(file);
+
+            if (fileOutputStream != null) {
+                IOUtils.closeQuietly(fileOutputStream);
+            }
+        }
     }
 }

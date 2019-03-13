@@ -2,9 +2,12 @@ package com.aplana.sbrf.taxaccounting.web.mvc;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
+import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.NotificationService;
+import com.aplana.sbrf.taxaccounting.service.PrintingService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
+import com.aplana.sbrf.taxaccounting.web.model.CustomMediaType;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedList;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedResourceAssembler;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -25,14 +28,22 @@ import java.util.*;
 @RestController
 public class NotificationController {
 
-    private SecurityService securityService;
-    private DepartmentService departmentService;
-    private NotificationService notificationService;
+    private final SecurityService securityService;
+    private final DepartmentService departmentService;
+    private final NotificationService notificationService;
+    private final PrintingService printingService;
+    private final BlobDataService blobDataService;
 
-    public NotificationController(SecurityService securityService, DepartmentService departmentService, NotificationService notificationService) {
+    public NotificationController(SecurityService securityService,
+                                  DepartmentService departmentService,
+                                  NotificationService notificationService,
+                                  PrintingService printingService,
+                                  BlobDataService blobDataService) {
         this.securityService = securityService;
         this.departmentService = departmentService;
         this.notificationService = notificationService;
+        this.printingService = printingService;
+        this.blobDataService = blobDataService;
     }
 
     /**
@@ -67,7 +78,7 @@ public class NotificationController {
         filter.setTimeFrom(timeFrom);
         filter.setTimeTo(timeTo);
 
-        PagingResult<Notification> notifications = notificationService.fetchAllByFilterAndPaging(filter, pagingParams);
+        PagingResult<Notification> notifications = notificationService.findByFilter(filter, pagingParams);
         return JqgridPagedResourceAssembler.buildPagedList(
                 notifications,
                 notifications.getTotalCount(),
@@ -82,7 +93,7 @@ public class NotificationController {
      */
     @PostMapping(value = "/actions/notification/delete")
     public void deleteNotifications(@RequestBody List<Long> ids) {
-        notificationService.deleteAll(ids);
+        notificationService.deleteByIdIn(ids);
     }
 
     /**
@@ -100,7 +111,7 @@ public class NotificationController {
         filter.setRead(false);
 
         Map<String, Object> result = new HashMap<>();
-        result.put("notifications_count", notificationService.fetchCountByFilter(filter));
+        result.put("notifications_count", notificationService.countByFilter(filter));
         return result;
     }
 
@@ -114,7 +125,7 @@ public class NotificationController {
         NotificationsFilterData filter = new NotificationsFilterData();
         filter.setUserId(user.getId());
         filter.setUserRoleIds(user.getRoleIds());
-        notificationService.updateReadTrueByFilter(filter);
+        notificationService.setReadTrueByFilter(filter);
     }
 
     /**
@@ -135,6 +146,30 @@ public class NotificationController {
             ResponseUtils.createBlobResponse(req, resp, blobData);
         } else {
             resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+        }
+    }
+
+    /**
+     * Выгрузка выбранных оповещений в формате csv.
+     *
+     * @param ids      идентификаторы выбранных оповещений.
+     * @param response http-ответ, в теле которого возвращается файл.
+     */
+    @GetMapping(value = "/actions/notification/downloadCsv", produces = CustomMediaType.APPLICATION_VND_UTF8_VALUE)
+    public void downloadNotificationsCsv(@RequestParam List<Long> ids, HttpServletRequest request, HttpServletResponse response) throws IOException {
+
+        List<Notification> notifications = notificationService.findByIdIn(ids);
+        if (notifications.isEmpty()) {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            return;
+        }
+
+        String fileUuid = printingService.generateCsvNotifications(notifications);
+        BlobData blobData = blobDataService.get(fileUuid);
+        if (blobData != null) {
+            ResponseUtils.createBlobResponse(request, response, blobData);
+        } else {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
         }
     }
 

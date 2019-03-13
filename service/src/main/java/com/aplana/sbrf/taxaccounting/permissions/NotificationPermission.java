@@ -32,7 +32,7 @@ public abstract class NotificationPermission extends AbstractPermission<Notifica
 
         @Override
         protected boolean isGrantedInternal(User user, Notification targetDomainObject, Logger logger) {
-            return notificationDao.isExistsNotificationBlobForUser(targetDomainObject.getUserId(), targetDomainObject.getReportId());
+            return notificationDao.existsByUserIdAndReportId(targetDomainObject.getUserId(), targetDomainObject.getReportId());
         }
     }
 }

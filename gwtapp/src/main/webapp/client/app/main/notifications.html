@@ -34,14 +34,17 @@
         <div class="btn-toolbar pull-right" role="toolbar">
             <!-- Удалить -->
             <button type="button" class="btn btn-default"
-                    data-ng-click="delete()">
+                    data-ng-click="delete()"
+                    data-ng-disabled="!anyChecked()">
                 <span data-translate-once="button.delete"></span>
             </button>
             <!-- Выгрузить -->
-            <button type="button" class="btn btn-default"
-                    data-ng-disabled="true">
-                <span data-translate-once="notifications.button.download"></span>
-            </button>
+            <a ng-href="{{downloadSelectedLink()}}" style="text-decoration: none">
+                <button type="button" class="btn btn-default"
+                        data-ng-disabled="!anyChecked()">
+                    <span data-translate-once="notifications.button.download"></span>
+                </button>
+            </a>
             <!-- Протоколы -->
             <button type="button" class="btn btn-default"
                     data-ng-disabled="true">
