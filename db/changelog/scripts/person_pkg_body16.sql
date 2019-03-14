@@ -8,7 +8,6 @@ create or replace package body person_pkg as
   */
   procedure FillRecordVersions(p_date date default trunc(sysdate))
   is
-    p_temp_date DATE;
   begin
 
     p_temp_date := p_date;
