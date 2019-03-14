@@ -2059,8 +2059,14 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                 "  from department_config dc\n" +
                 "  join ref_book_oktmo oktmo on oktmo.id = dc.oktmo\n" +
                 "  where department_id = :departmentId and (\n" +
-                "    dc.version <= :currentDate and (dc.version_end is null or :currentDate <= dc.version_end) or\n" +
-                "    dc.version <= :periodEndDate and (dc.version_end is null or dc.version_end >= :periodStartDate)\n" +
+                "    dc.version <= :currentDate and (dc.version_end is null or :currentDate <= dc.version_end) or (\n" +
+                "      dc.version <= :periodEndDate and (dc.version_end is null or dc.version_end >= :periodStartDate) \n" +
+                (isSupportOver() ?
+                        // В hsqldb ошибка NullPointerException в ядре вылазит и тесты от этого не работают
+                        " and not exists (select * from department_config where kpp = dc.kpp and oktmo = dc.oktmo and version > dc.version and department_id != :departmentId)\n" :
+                        ""
+                ) +
+                "    )\n" +
                 "  )\n" +
                 "  group by dc.kpp, oktmo.code\n" +
                 ")\n" +

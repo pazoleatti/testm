@@ -85,9 +85,9 @@ public interface PrintingService {
     String generateExcelDepartmentConfigs(int departmentId);
 
     /**
-     * Формирование csv-файла с уведомлениями.
+     * Формирование csv-файла с оповещениями.
      *
-     * @param notifications объекты уведомлений.
+     * @param notifications объекты оповещений.
      * @return uuid сформированного файла в базе.
      */
     String generateCsvNotifications(List<Notification> notifications);

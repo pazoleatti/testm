@@ -321,11 +321,11 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         params.addValue("creationUserName", filter.getCreationUserName());
 
         if (filter.getCreationDateFrom() != null) {
-            sql.append(" and (:creationDateFrom is null or log_b.log_date >= trunc(:creationDateFrom))\n");
+            sql.append(" and (:creationDateFrom is null or log_b.log_date >= :creationDateFrom)\n");
             params.addValue("creationDateFrom", filter.getCreationDateFrom());
         }
         if (filter.getCreationDateTo() != null) {
-            sql.append(" and (:creationDateTo is null or log_b.log_date <= trunc(:creationDateTo) + INTERVAL '1' DAY)\n");
+            sql.append(" and (:creationDateTo is null or log_b.log_date <= :creationDateTo)\n");
             params.addValue("creationDateTo", filter.getCreationDateTo());
         }
 

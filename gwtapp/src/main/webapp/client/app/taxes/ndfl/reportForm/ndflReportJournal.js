@@ -124,7 +124,10 @@
                         taxOrganCode: $scope.searchFilter.params.codeNo,
                         correctionTag: $filter('correctionTagFormatter')($scope.searchFilter.params.correctionTag),
                         reportPeriodIds: $filter('idExtractor')($scope.searchFilter.params.periods),
-                        correctionNum: $scope.searchFilter.params.correctionNum
+                        correctionNum: $scope.searchFilter.params.correctionNum,
+                        creationUserName: $scope.searchFilter.params.creationUserName,
+                        creationDateFrom: $scope.searchFilter.params.creationDateFrom,
+                        creationDateTo: $scope.searchFilter.params.creationDateTo
                     };
                 }
 

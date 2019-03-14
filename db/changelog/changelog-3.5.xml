@@ -444,6 +444,16 @@
 		</update>
 	</changeSet>
 
+    <!--https://jira.aplana.com/browse/SBRFNDFL-6887 - Убрать заполнение и использование временной таблицы tmp_version внутри идентификации-->
+    <changeSet id="3.5-amandzyak-7" author="amandzyak">
+        <sqlFile dbms="oracle"
+                 encoding="utf8"
+                 endDelimiter=""
+                 path="/scripts/person_pkg_body17.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
+
 	<!--https://jira.aplana.com/browse/SBRFNDFL-6918 Реализовать сохранение в разделы 2,3,4 информацию о СведДох, КПП, ОКТМО-->
 	<changeSet id="3.5-ytrofimov-14" author="ytrofimov">
 		<createSequence sequenceName="seq_oper_info"

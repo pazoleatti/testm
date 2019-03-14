@@ -141,27 +141,36 @@ public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentCon
     }
 
     /**
-     * actual_department_config - настройки подразделений для departmentId, актуальные на дату relevanceDate или пересекающиеся с периодом reportPeriodId
+     * actual_department_config - настройки подразделений для departmentId, актуальные на дату relevanceDate, или,
+     * пересекающиеся с периодом reportPeriodId, но не имеющая старших версий из другого ТБ
      */
-    public final static String WITH_DEPARTMENT_CONFIG_BY_TB_AND_PERIOD_SQL = "" +
-            "with period as (\n" +
-            "  select * from report_period where id = :reportPeriodId\n" +
-            "),\n" +
-            "actual_vers as (\n" +
-            "  select dc.kpp, dc.oktmo, max(version) version \n" +
-            "  from department_config dc, period\n" +
-            "  where department_id = :departmentId and (\n" +
-            "    dc.version <= :relevanceDate and (dc.version_end is null or :relevanceDate <= dc.version_end) or\n" +
-            "    dc.version <= period.end_date and (dc.version_end is null or dc.version_end >= period.start_date)\n" +
-            "  )\n" +
-            "  group by dc.kpp, dc.oktmo\n" +
-            "),\n" +
-            "actual_department_config as (\n" +
-            "  select " + ALL_FIELDS +
-            "  from department_config dc\n" +
-            "  join actual_vers av on av.kpp = dc.kpp and av.oktmo = dc.oktmo and av.version = dc.version\n" +
-            ALL_FIELDS_JOINS +
-            ")\n";
+    private String WITH_DEPARTMENT_CONFIG_BY_TB_AND_PERIOD_SQL() {
+        //language=sql
+        return "" +
+                "with period as (\n" +
+                "  select * from report_period where id = :reportPeriodId\n" +
+                "),\n" +
+                "actual_vers as (\n" +
+                "  select dc.kpp, dc.oktmo, max(version) version \n" +
+                "  from department_config dc, period\n" +
+                "  where department_id = :departmentId and (\n" +
+                "    dc.version <= :relevanceDate and (dc.version_end is null or :relevanceDate <= dc.version_end) or (\n" +
+                "      dc.version <= period.end_date and (dc.version_end is null or dc.version_end >= period.start_date) \n" +
+                (isSupportOver() ?
+                        // В hsqldb ошибка NullPointerException в ядре вылазит и тесты от этого не работают
+                        " and not exists (select * from department_config where kpp = dc.kpp and oktmo = dc.oktmo and version > dc.version and department_id != :departmentId)\n" :
+                        "") +
+                "    )\n" +
+                "  )\n" +
+                "  group by dc.kpp, dc.oktmo\n" +
+                "),\n" +
+                "actual_department_config as (\n" +
+                "  select " + ALL_FIELDS +
+                "  from department_config dc\n" +
+                "  join actual_vers av on av.kpp = dc.kpp and av.oktmo = dc.oktmo and av.version = dc.version\n" +
+                ALL_FIELDS_JOINS +
+                ")\n";
+    }
 
     @Override
     public List<Pair<KppOktmoPair, DepartmentConfig>> findAllByDeclaration(DeclarationData declaration, Date relevanceDate) {
@@ -170,7 +179,7 @@ public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentCon
         params.addValue("reportPeriodId", declaration.getReportPeriodId());
         params.addValue("departmentId", declaration.getDepartmentId());
         params.addValue("relevanceDate", relevanceDate);
-        String baseSelect = WITH_DEPARTMENT_CONFIG_BY_TB_AND_PERIOD_SQL;
+        String baseSelect = WITH_DEPARTMENT_CONFIG_BY_TB_AND_PERIOD_SQL();
         baseSelect += "" +
                 "select * from (\n" +
                 "   select npi.kpp dec_kpp, npi.oktmo dec_oktmo, dc.* \n" +
@@ -204,14 +213,14 @@ public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentCon
         params.addValue("reportPeriodId", filter.getReportPeriodId());
         params.addValue("departmentId", filter.getDepartmentId());
         params.addValue("relevanceDate", filter.getRelevanceDate());
-        String baseSelect = WITH_DEPARTMENT_CONFIG_BY_TB_AND_PERIOD_SQL;
+        String baseSelect = WITH_DEPARTMENT_CONFIG_BY_TB_AND_PERIOD_SQL();
         if (filter.getDeclarationId() != null) {
             baseSelect += "" +
                     "select rownum id, dc.id dep_conf_id, npi.kpp, npi.oktmo, dc.version_end\n" +
-                    "from (" +
+                    "from (\n" +
                     "   select distinct kpp, oktmo from ndfl_person np\n" +
-                    "   join ndfl_person_income npi on npi.ndfl_person_id = np.id" +
-                    "   where np.declaration_data_id = :declarationId" +
+                    "   join ndfl_person_income npi on npi.ndfl_person_id = np.id\n" +
+                    "   where np.declaration_data_id = :declarationId\n" +
                     ") npi\n" +
                     "left join actual_department_config dc on dc.kpp = npi.kpp and dc.oktmo_code = npi.oktmo\n";
             params.addValue("declarationId", filter.getDeclarationId());
