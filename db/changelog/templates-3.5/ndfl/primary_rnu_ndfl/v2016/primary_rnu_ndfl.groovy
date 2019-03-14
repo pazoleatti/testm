@@ -2039,15 +2039,18 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
 
         List<NdflPersonIncomeExt> incomes = new ArrayList<>()
 
-        infoPart.'СведОпер'.each { NodeChild operationInfo ->
+        List<BigDecimal> operInfoIdList = ndflPersonService.generateOperInfoIds(infoPart.'СведОпер'.size())
+
+        infoPart.'СведОпер'.eachWithIndex { NodeChild operationInfo, int index ->
+            BigDecimal operInfoId = operInfoIdList.get(index)
             incomes.addAll(operationInfo.'СведДохНал'.collect {
-                NodeChild incomeInfo -> transformNdflPersonIncome(incomeInfo, ndflPerson, incomeCodeMap)
+                NodeChild incomeInfo -> transformNdflPersonIncome(incomeInfo, ndflPerson, incomeCodeMap, operInfoId)
             })
             ndflPerson.deductions.addAll(operationInfo.'СведВыч'.collect {
-                NodeChild deductionInfo -> transformNdflPersonDeduction(deductionInfo, ndflPerson, deductionTypeList)
+                NodeChild deductionInfo -> transformNdflPersonDeduction(deductionInfo, ndflPerson, deductionTypeList, operInfoId)
             })
             ndflPerson.prepayments.addAll(operationInfo.'СведАванс'.collect {
-                NodeChild prepaymentInfo -> transformNdflPersonPrepayment(prepaymentInfo)
+                NodeChild prepaymentInfo -> transformNdflPersonPrepayment(prepaymentInfo, operInfoId)
             })
         }
 
@@ -2243,7 +2246,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         return ndflPerson
     }
 
-    NdflPersonIncomeExt transformNdflPersonIncome(NodeChild node, NdflPerson ndflPerson, Map<Long, Map<String, RefBookValue>> incomeCodeMap) {
+    NdflPersonIncomeExt transformNdflPersonIncome(NodeChild node, NdflPerson ndflPerson, Map<Long, Map<String, RefBookValue>> incomeCodeMap, BigDecimal operationInfoId) {
         def operationNode = node.parent()
 
         NdflPersonIncomeExt personIncome = new NdflPersonIncomeExt()
@@ -2281,6 +2284,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         personIncome.taxSumm = toBigDecimal((GPathResult) node.getProperty('@НалПерСумм'))
         personIncome.asnuId = declarationData.asnuId
         personIncome.modifiedDate = formCreationDate
+        personIncome.setOperInfoId(operationInfoId)
 
         // Спр5 Код вида дохода (Необязательное поле)
         if (personIncome.incomeCode != null && personIncome.incomeAccruedDate != null && !incomeCodeMap.find { key, value ->
@@ -2301,8 +2305,8 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         return personIncome
     }
 
-    NdflPersonDeduction transformNdflPersonDeduction(NodeChild node, NdflPerson ndflPerson, List<String> deductionTypeList) {
-
+    NdflPersonDeduction transformNdflPersonDeduction(NodeChild node, NdflPerson ndflPerson, List<String> deductionTypeList, BigDecimal operationInfoId) {
+        def operationNode = node.parent()
         NdflPersonDeduction personDeduction = new NdflPersonDeduction()
         personDeduction.rowNum = toBigDecimal((GPathResult) node.getProperty('@НомСтр'))
         personDeduction.operationId = toString((GPathResult) node.parent().getProperty('@ИдОпер'))
@@ -2321,6 +2325,9 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         personDeduction.periodCurrSumm = toBigDecimal((GPathResult) node.getProperty('@СумТекВыч'))
         personDeduction.asnuId = declarationData.asnuId
         personDeduction.modifiedDate = formCreationDate
+        personDeduction.setOperInfoId(operationInfoId)
+        personDeduction.oktmo = toString((GPathResult) operationNode.getProperty('@ОКТМО'))
+        personDeduction.kpp = toString((GPathResult) operationNode.getProperty('@КПП'))
 
         if (!deductionTypeList.contains(personDeduction.typeCode)) {
             String fioAndInpAndOperId = sprintf(TEMPLATE_PERSON_FL_OPER, [ndflPerson.fullName, ndflPerson.inp, personDeduction.operationId])
@@ -2336,7 +2343,9 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         return personDeduction
     }
 
-    NdflPersonPrepayment transformNdflPersonPrepayment(NodeChild node) {
+    NdflPersonPrepayment transformNdflPersonPrepayment(NodeChild node, BigDecimal operationInfoId) {
+        def operationNode = node.parent()
+
         NdflPersonPrepayment personPrepayment = new NdflPersonPrepayment()
         personPrepayment.rowNum = toBigDecimal((GPathResult) node.getProperty('@НомСтр'))
         personPrepayment.operationId = toString((GPathResult) node.parent().getProperty('@ИдОпер'))
@@ -2346,6 +2355,10 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         personPrepayment.notifSource = toString((GPathResult) node.getProperty('@УведИФНС'))
         personPrepayment.asnuId = declarationData.asnuId
         personPrepayment.modifiedDate = formCreationDate
+        personPrepayment.setOperInfoId(operationInfoId)
+        personPrepayment.oktmo = toString((GPathResult) operationNode.getProperty('@ОКТМО'))
+        personPrepayment.kpp = toString((GPathResult) operationNode.getProperty('@КПП'))
+
         return personPrepayment
     }
 

@@ -113,13 +113,13 @@ public class NdflPersonIncome extends NdflPersonOperation {
             "income_accrued_date", "income_payout_date", "income_accrued_summ", "income_payout_summ", "total_deductions_summ",
             "tax_base", "tax_rate", "tax_date", "calculated_tax", "withholding_tax", "not_holding_tax", "overholding_tax",
             "refound_tax", "tax_transfer_date", "payment_date", "payment_number", "tax_summ", "source_id", "modified_date", "modified_by", "asnu_id",
-            "operation_date", "action_date", "row_type"};
+            "operation_date", "action_date", "row_type", "oper_info_id"};
 
     public static final String[] FIELDS = {"id", "ndflPersonId", "rowNum", "operationId", "oktmo", "kpp", "incomeCode", "incomeType",
             "incomeAccruedDate", "incomePayoutDate", "incomeAccruedSumm", "incomePayoutSumm", "totalDeductionsSumm",
             "taxBase", "taxRate", "taxDate", "calculatedTax", "withholdingTax", "notHoldingTax", "overholdingTax",
             "refoundTax", "taxTransferDate", "paymentDate", "paymentNumber", "taxSumm", "sourceId", "modifiedDate", "modifiedBy", "asnuId",
-            "operationDate", "actionDate", "rowType"};
+            "operationDate", "actionDate", "rowType", "operInfoId"};
 
     @Override
     public String getTableName() {

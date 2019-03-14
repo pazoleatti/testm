@@ -39,6 +39,21 @@ public abstract class NdflPersonOperation extends IdentityObject<Long> {
      */
     protected Long asnuId;
 
+    /**
+     * Уникальный идентификатор, характеризующий элемент СведОпер из ТФ xml. Используется для "связывания" относящихся к этому СведОпер строк разделов 2, 3, 4.
+     */
+    protected BigDecimal operInfoId;
+
+    /**
+     * Доход.Источник выплаты.ОКТМО (Графа 8)
+     */
+    protected String kpp;
+
+    /**
+     * Доход.Источник выплаты.КПП (Графа 9)
+     */
+    protected String oktmo;
+
     public Long getNdflPersonId() {
         return ndflPersonId;
     }
@@ -69,6 +84,30 @@ public abstract class NdflPersonOperation extends IdentityObject<Long> {
 
     public void setSourceId(Long sourceId) {
         this.sourceId = sourceId;
+    }
+
+    public BigDecimal getOperInfoId() {
+        return operInfoId;
+    }
+
+    public void setOperInfoId(BigDecimal operInfoId) {
+        this.operInfoId = operInfoId;
+    }
+
+    public String getKpp() {
+        return kpp;
+    }
+
+    public void setKpp(String kpp) {
+        this.kpp = kpp;
+    }
+
+    public String getOktmo() {
+        return oktmo;
+    }
+
+    public void setOktmo(String oktmo) {
+        this.oktmo = oktmo;
     }
 
     public abstract String getTableName();

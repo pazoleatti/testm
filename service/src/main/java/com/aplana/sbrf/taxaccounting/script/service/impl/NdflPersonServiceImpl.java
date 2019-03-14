@@ -15,6 +15,7 @@ import com.aplana.sbrf.taxaccounting.script.service.NdflPersonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -411,5 +412,10 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     @Override
     public void fillNdflPersonIncomeSortFields(List<NdflPerson> ndflPersonList) {
         ndflPersonService.fillNdflPersonIncomeSortFields(ndflPersonList);
+    }
+
+    @Override
+    public List<BigDecimal> generateOperInfoIds(int count) {
+        return ndflPersonDao.generateOperInfoIds(count);
     }
 }

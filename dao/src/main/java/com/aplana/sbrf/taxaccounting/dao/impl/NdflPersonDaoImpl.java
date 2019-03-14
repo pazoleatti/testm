@@ -1825,6 +1825,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             personIncome.setOperationDate(rs.getDate("operation_date"));
             personIncome.setActionDate(rs.getDate("action_date"));
             personIncome.setRowType(rs.getInt("row_type"));
+            personIncome.setOperInfoId(rs.getBigDecimal("oper_info_id"));
             return personIncome;
         }
     }
@@ -1862,6 +1863,11 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             personDeduction.setModifiedBy(rs.getString("modified_by"));
             personDeduction.setAsnu(rs.getString("asnu_name"));
             personDeduction.setAsnuId(rs.getLong("asnu_id"));
+
+            personDeduction.setOperInfoId(rs.getBigDecimal("oper_info_id"));
+            personDeduction.setOktmo(rs.getString("oktmo"));
+            personDeduction.setKpp(rs.getString("kpp"));
+
             return personDeduction;
         }
     }
@@ -1887,6 +1893,10 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             personPrepayment.setModifiedBy(rs.getString("modified_by"));
             personPrepayment.setAsnu(rs.getString("asnu_name"));
             personPrepayment.setAsnuId(rs.getLong("asnu_id"));
+
+            personPrepayment.setOperInfoId(rs.getBigDecimal("oper_info_id"));
+            personPrepayment.setOktmo(rs.getString("oktmo"));
+            personPrepayment.setKpp(rs.getString("kpp"));
             return personPrepayment;
         }
     }
@@ -2293,5 +2303,10 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                 .addValue("inp", inp)
                 .addValue("operationId", operationId);
         return getNamedParameterJdbcTemplate().queryForObject(sql, params, Date.class);
+    }
+
+    @Override
+    public List<BigDecimal> generateOperInfoIds(int count) {
+        return generateIds("seq_oper_info", count, BigDecimal.class);
     }
 }

@@ -1088,7 +1088,8 @@ create table ndfl_person_income
   asnu_id               number(18),
   operation_date        date,
   action_date           date,
-  row_type              number(3,0)
+  row_type              number(3,0),
+  oper_info_id          number(20)
 );
 
 
@@ -1119,6 +1120,7 @@ comment on column ndfl_person_income.payment_number is 'НДФЛ.Перечис�
 comment on column ndfl_person_income.tax_summ is 'НДФЛ.Перечисление в бюджет.Платежное поручение.Сумма';
 
 create sequence seq_ndfl_person_income start with 1000;
+create sequence seq_oper_info start with 1000;
 ------------------------------------------------------------------------------------------------------
 create table ndfl_person_deduction
 (
@@ -1142,7 +1144,10 @@ create table ndfl_person_deduction
   period_curr_summ number(22, 2),
   modified_date     date,
   modified_by       varchar2(255 char),
-  asnu_id           number(18)
+  asnu_id           number(18),
+  oper_info_id      number(20),
+  oktmo             varchar2(11 char),
+  kpp               varchar2(9 char)
 );
 
 comment on table ndfl_person_deduction is 'Стандартные, социальные и имущественные налоговые вычеты';
@@ -1180,7 +1185,10 @@ create table ndfl_person_prepayment
   notif_source   varchar2(20 char),
   modified_date  date,
   modified_by    varchar2(255 char),
-  asnu_id        number(18)
+  asnu_id        number(18),
+  oper_info_id   number(20),
+  oktmo          varchar2(11 char),
+  kpp            varchar2(9 char)
 );
 
 comment on table ndfl_person_prepayment is 'Cведения о доходах в виде авансовых платежей';

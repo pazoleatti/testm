@@ -10,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment;
 import com.aplana.sbrf.taxaccounting.service.ScriptExposed;
 
+import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -557,5 +558,12 @@ public interface NdflPersonService {
      * @param ndflPersonList список записей раздела 1 которым нужно заполнить поля раздела 2
      */
     void fillNdflPersonIncomeSortFields(List<NdflPerson> ndflPersonList);
+
+    /**
+     * Сгенерировать идентификаторы для операций из узла СведДох из ТФ xml
+     * @param count количество идентификаторов которое должно быть сгенерированно
+     * @return список сгенерированных идентификаторов
+     */
+    List<BigDecimal> generateOperInfoIds(int count);
 }
 

@@ -16,6 +16,7 @@ import com.aplana.sbrf.taxaccounting.model.result.NdflPersonDeductionDTO;
 import com.aplana.sbrf.taxaccounting.model.result.NdflPersonIncomeDTO;
 import com.aplana.sbrf.taxaccounting.model.result.NdflPersonPrepaymentDTO;
 
+import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -687,4 +688,11 @@ public interface NdflPersonDao {
      * @return полученное значение
      */
     Date findOperationDate(Long declarationDataId, String inp, String operationId);
+
+    /**
+     * Сгенерировать идентификаторы для операций из узла СведДох из ТФ xml
+     * @param count количество идентификаторов которое должно быть сгенерированно
+     * @return список сгенерированных идентификаторов
+     */
+    List<BigDecimal> generateOperInfoIds(int count);
 }

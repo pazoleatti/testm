@@ -444,4 +444,43 @@
 		</update>
 	</changeSet>
 
+	<!--https://jira.aplana.com/browse/SBRFNDFL-6918 Реализовать сохранение в разделы 2,3,4 информацию о СведДох, КПП, ОКТМО-->
+	<changeSet id="3.5-ytrofimov-14" author="ytrofimov">
+		<createSequence sequenceName="seq_oper_info"
+		startValue="10000"
+		incrementBy="10"/>
+	</changeSet>
+
+	<!--https://jira.aplana.com/browse/SBRFNDFL-6918 Реализовать сохранение в разделы 2,3,4 информацию о СведДох, КПП, ОКТМО-->
+	<changeSet id="3.5-ytrofimov-15" author="ytrofimov">
+		<addColumn tableName="ndfl_person_income">
+			<column name="oper_info_id" type="number(20)"/>
+		</addColumn>
+		<addColumn tableName="ndfl_person_deduction">
+			<column name="oper_info_id" type="number(20)"/>
+			<column name="kpp" type="varchar2(9 char)" />
+			<column name="oktmo" type="varchar2(11 char)" />
+		</addColumn>
+		<addColumn tableName="ndfl_person_prepayment">
+			<column name="oper_info_id" type="number(20)"/>
+			<column name="kpp" type="varchar2(9 char)" />
+			<column name="oktmo" type="varchar2(11 char)" />
+		</addColumn>
+	</changeSet>
+
+	<!--https://jira.aplana.com/browse/SBRFNDFL-6918 Реализовать сохранение в разделы 2,3,4 информацию о СведДох, КПП, ОКТМО-->
+	<changeSet id="3.5-ytrofimov-16" author="ytrofimov">
+		<sql splitStatements="false">
+			begin
+			execute immediate 'comment on column ndfl_person_income.oper_info_id is ''Уникальный идентификатор, характеризующий элемент СведОпер из ТФ xml.	Используется для "связывания" относящихся к этому СведОпер строк разделов 2, 3, 4.''';
+			execute immediate 'comment on column ndfl_person_deduction.oper_info_id is ''Уникальный идентификатор, характеризующий элемент СведОпер из ТФ xml.	Используется для "связывания" относящихся к этому СведОпер строк разделов 2, 3, 4.''';
+			execute immediate 'comment on column ndfl_person_prepayment.oper_info_id is ''Уникальный идентификатор, характеризующий элемент СведОпер из ТФ xml.	Используется для "связывания" относящихся к этому СведОпер строк разделов 2, 3, 4.''';
+			execute immediate 'comment on column ndfl_person_deduction.kpp is ''КПП, к которому относится строка раздела''';
+			execute immediate 'comment on column ndfl_person_prepayment.kpp is ''КПП, к которому относится строка раздела''';
+			execute immediate 'comment on column ndfl_person_deduction.oktmo is ''ОКТМО, к которому относится строка раздела''';
+			execute immediate 'comment on column ndfl_person_prepayment.oktmo is ''ОКТМО, к которому относится строка раздела''';
+			end;
+		</sql>
+	</changeSet>
+
 </databaseChangeLog>
