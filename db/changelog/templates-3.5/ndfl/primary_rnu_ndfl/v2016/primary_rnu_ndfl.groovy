@@ -2044,13 +2044,13 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         infoPart.'СведОпер'.eachWithIndex { NodeChild operationInfo, int index ->
             BigDecimal operInfoId = operInfoIdList.get(index)
             incomes.addAll(operationInfo.'СведДохНал'.collect {
-                NodeChild incomeInfo -> transformNdflPersonIncome(incomeInfo, ndflPerson, incomeCodeMap, operInfoId)
+                NodeChild incomeInfo -> transformNdflPersonIncome(incomeInfo, ndflPerson, incomeCodeMap, operInfoId, ndflPerson.inp)
             })
             ndflPerson.deductions.addAll(operationInfo.'СведВыч'.collect {
-                NodeChild deductionInfo -> transformNdflPersonDeduction(deductionInfo, ndflPerson, deductionTypeList, operInfoId)
+                NodeChild deductionInfo -> transformNdflPersonDeduction(deductionInfo, ndflPerson, deductionTypeList, operInfoId, ndflPerson.inp)
             })
             ndflPerson.prepayments.addAll(operationInfo.'СведАванс'.collect {
-                NodeChild prepaymentInfo -> transformNdflPersonPrepayment(prepaymentInfo, operInfoId)
+                NodeChild prepaymentInfo -> transformNdflPersonPrepayment(prepaymentInfo, operInfoId, ndflPerson.inp)
             })
         }
 
@@ -2246,7 +2246,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         return ndflPerson
     }
 
-    NdflPersonIncomeExt transformNdflPersonIncome(NodeChild node, NdflPerson ndflPerson, Map<Long, Map<String, RefBookValue>> incomeCodeMap, BigDecimal operationInfoId) {
+    NdflPersonIncomeExt transformNdflPersonIncome(NodeChild node, NdflPerson ndflPerson, Map<Long, Map<String, RefBookValue>> incomeCodeMap, BigDecimal operationInfoId, String inp) {
         def operationNode = node.parent()
 
         NdflPersonIncomeExt personIncome = new NdflPersonIncomeExt()
@@ -2256,9 +2256,12 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         personIncome.incomeCode = toString((GPathResult) node.getProperty('@КодДох'))
         personIncome.incomeType = toString((GPathResult) node.getProperty('@ТипДох'))
 
-        personIncome.operationId = toString((GPathResult) operationNode.getProperty('@ИдОпер'))
-        personIncome.oktmo = toString((GPathResult) operationNode.getProperty('@ОКТМО'))
-        personIncome.kpp = toString((GPathResult) operationNode.getProperty('@КПП'))
+        String kpp = toString((GPathResult) operationNode.getProperty('@КПП'))
+        String oktmo = toString((GPathResult) operationNode.getProperty('@ОКТМО'))
+        personIncome.operationId = generateOperationId(inp, toString((GPathResult) operationNode.getProperty('@ИдОпер')),
+                kpp, oktmo, operationInfoId)
+        personIncome.oktmo = oktmo
+        personIncome.kpp = kpp
 
         personIncome.incomeAccruedDate = toDate((GPathResult) node.getProperty('@ДатаДохНач'))
         personIncome.incomePayoutDate = toDate((GPathResult) node.getProperty('@ДатаДохВыпл'))
@@ -2305,11 +2308,17 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         return personIncome
     }
 
-    NdflPersonDeduction transformNdflPersonDeduction(NodeChild node, NdflPerson ndflPerson, List<String> deductionTypeList, BigDecimal operationInfoId) {
+    NdflPersonDeduction transformNdflPersonDeduction(NodeChild node, NdflPerson ndflPerson, List<String> deductionTypeList, BigDecimal operationInfoId, String inp) {
         def operationNode = node.parent()
+
         NdflPersonDeduction personDeduction = new NdflPersonDeduction()
         personDeduction.rowNum = toBigDecimal((GPathResult) node.getProperty('@НомСтр'))
-        personDeduction.operationId = toString((GPathResult) node.parent().getProperty('@ИдОпер'))
+
+        String kpp = toString((GPathResult) operationNode.getProperty('@КПП'))
+        String oktmo = toString((GPathResult) operationNode.getProperty('@ОКТМО'))
+        personDeduction.operationId = generateOperationId(inp, toString((GPathResult) operationNode.getProperty('@ИдОпер')),
+                kpp, oktmo, operationInfoId)
+
         personDeduction.typeCode = toString((GPathResult) node.getProperty('@ВычетКод'))
         personDeduction.notifType = toString((GPathResult) node.getProperty('@УведТип'))
         personDeduction.notifDate = toDate((GPathResult) node.getProperty('@УведДата'))
@@ -2343,12 +2352,17 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         return personDeduction
     }
 
-    NdflPersonPrepayment transformNdflPersonPrepayment(NodeChild node, BigDecimal operationInfoId) {
+    NdflPersonPrepayment transformNdflPersonPrepayment(NodeChild node, BigDecimal operationInfoId, String inp) {
         def operationNode = node.parent()
 
         NdflPersonPrepayment personPrepayment = new NdflPersonPrepayment()
         personPrepayment.rowNum = toBigDecimal((GPathResult) node.getProperty('@НомСтр'))
-        personPrepayment.operationId = toString((GPathResult) node.parent().getProperty('@ИдОпер'))
+
+        String kpp = toString((GPathResult) operationNode.getProperty('@КПП'))
+        String oktmo = toString((GPathResult) operationNode.getProperty('@ОКТМО'))
+        personPrepayment.operationId = generateOperationId(inp, toString((GPathResult) operationNode.getProperty('@ИдОпер')),
+                kpp, oktmo, operationInfoId)
+
         personPrepayment.summ = toBigDecimal((GPathResult) node.getProperty('@Аванс'))
         personPrepayment.notifNum = toString((GPathResult) node.getProperty('@УведНом'))
         personPrepayment.notifDate = toDate((GPathResult) node.getProperty('@УведДата'))
@@ -2360,6 +2374,25 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         personPrepayment.kpp = toString((GPathResult) operationNode.getProperty('@КПП'))
 
         return personPrepayment
+    }
+
+    String generateOperationId(String inp, String operationId, String kpp, String oktmo, BigDecimal operInfoId) {
+        String result = operationId
+        if ((declarationData.asnuId == 1L || declarationData.asnuId == 13L || declarationData.asnuId == 16L) && operationId.length() <= 10) {
+            StringBuilder newOperationId = new StringBuilder()
+            newOperationId
+                    .append(inp)
+                    .append("_")
+                    .append(operationId)
+                    .append("_")
+                    .append(kpp)
+                    .append("_")
+                    .append(oktmo)
+                    .append("_")
+                    .append(operInfoId)
+            result = newOperationId.toString()
+        }
+        return result
     }
 
     Integer toInteger(GPathResult xmlNode) {
