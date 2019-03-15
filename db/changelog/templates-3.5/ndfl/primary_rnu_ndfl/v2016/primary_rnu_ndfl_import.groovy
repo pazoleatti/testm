@@ -726,7 +726,7 @@ class Import extends AbstractScriptClass {
             }
             ndflPersonService.save(ndflPersonsForCreate)
             ndflPersonService.updateNdflPersons(ndflPersonsForUpdate)
-            if (ndflPersonsForUpdate) {
+            if (ndflPersonsForCreate || ndflPersonsForUpdate) {
                 refBookPersonService.clearRnuNdflPerson(declarationData.id)
             }
             ndflPersonService.saveIncomes(incomesForCreate)
