@@ -608,7 +608,7 @@ public final class ScriptUtils {
                 // строка
                 rowValues.add(getValue());
             } else if (name.equals("row")) { // конец строки
-                if (isData && rowValues != null && !rowValues.isEmpty() && !rowValues.get(0).startsWith(headerStartValue)) {
+                if (isData && rowValues != null && !rowValues.isEmpty() && rowValues.get(0) != null && !rowValues.get(0).startsWith(headerStartValue)) {
                     endRead = (rowValues.contains(tableEndValue));
                     if (!endRead) {
                         // еще не конец таблицы - дополнить список значений недостоющеми значениями и добавить ко всем строкам
@@ -616,7 +616,7 @@ public final class ScriptUtils {
                     }
                 } else {
                     isData = false;
-                    if (rowValues != null && !rowValues.isEmpty() && rowValues.get(0).startsWith(headerStartValue)) {
+                    if (rowValues != null && !rowValues.isEmpty() && rowValues.get(0) != null && rowValues.get(0).startsWith(headerStartValue)) {
                         colOffset = 0;
                         isHeader = true;
                     }
