@@ -264,3 +264,49 @@ EXCEPTION
 end;
 /
 COMMIT;
+
+-- 3.5-ytrofimov-13 https://jira.aplana.com/browse/SBRFNDFL-6876 Оптимизация идентификации
+declare 
+  v_task_name varchar2(128):='insert_update_delete block #13 - merge into configuration';  
+begin
+	merge into configuration a using
+	(select 'ASYNC_SERIAL_MODE' as code, 0 as department_id, 0 as value from dual
+	) b
+	on (a.code=b.code)
+	when not matched then
+		insert (code, department_id, value)
+		values (b.code, b.department_id, b.value);
+	
+	CASE SQL%ROWCOUNT 
+	WHEN 0 THEN dbms_output.put_line(v_task_name||'[WARNING]:'||' No changes was done');
+	ELSE dbms_output.put_line(v_task_name||'[INFO]:'||' Success');
+	END CASE; 
+EXCEPTION
+  when OTHERS then
+    dbms_output.put_line(v_task_name||'[FATAL]:'||sqlerrm);		
+end;
+/
+COMMIT;
+
+-- 3.5-snazin-6 https://jira.aplana.com/browse/SBRFNDFL-6858 Реализовать работу со списком оповещений: Массовая выгрузка уведомлений
+declare 
+  v_task_name varchar2(128):='insert_update_delete block #14 - merge into async_task_type';  
+begin
+	merge into async_task_type a using
+	(select 43 as id, 'Выгрузка протоколов по оповещениям' as name, 'CreateNotificationsLogsAsyncTask' as handler_bean from dual
+	) b
+	on (a.id=b.id)
+	when not matched then
+		insert (id, name, handler_bean)
+		values (b.id, b.name, b.handler_bean);
+	
+	CASE SQL%ROWCOUNT 
+	WHEN 0 THEN dbms_output.put_line(v_task_name||'[WARNING]:'||' No changes was done');
+	ELSE dbms_output.put_line(v_task_name||'[INFO]:'||' Success');
+	END CASE; 
+EXCEPTION
+  when OTHERS then
+    dbms_output.put_line(v_task_name||'[FATAL]:'||sqlerrm);		
+end;
+/
+COMMIT;

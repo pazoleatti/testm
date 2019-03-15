@@ -133,7 +133,7 @@ class Report6Ndfl extends AbstractScriptClass {
     Map<Long, NdflPerson> ndflpersonFromRNUPrimary = [:]
 
     /************************************* СОЗДАНИЕ XML *****************************************************************/
-    Xml buildXml(DepartmentConfig departmentConfig) {
+    Xml buildXml(DepartmentConfig departmentConfig, List<NdflPersonIncome> incomes) {
         Xml xml = null
         File xmlFile = null
         Writer fileWriter = null
@@ -142,7 +142,7 @@ class Report6Ndfl extends AbstractScriptClass {
             fileWriter = new OutputStreamWriter(new FileOutputStream(xmlFile), Charset.forName("windows-1251"))
             fileWriter.write("<?xml version=\"1.0\" encoding=\"windows-1251\"?>")
 
-            xml = buildXml(departmentConfig, fileWriter, false)
+            xml = buildXml(departmentConfig, incomes, fileWriter, false)
             if (xml) {
                 xml.xmlFile = xmlFile
             }
@@ -162,13 +162,14 @@ class Report6Ndfl extends AbstractScriptClass {
 
     Xml buildXmlForSpecificReport(def writer) {
         def departmentConfig = departmentConfigService.findByKppAndOktmoAndDate(declarationData.kpp, declarationData.oktmo, reportPeriod.endDate)
-        return buildXml(departmentConfig, writer, true)
+        return null
     }
 
     @TypeChecked(TypeCheckingMode.SKIP)
-    Xml buildXml(DepartmentConfig departmentConfig, def writer, boolean isForSpecificReport) {
+    Xml buildXml(DepartmentConfig departmentConfig, List<NdflPersonIncome> incomes, def writer, boolean isForSpecificReport) {
         ScriptUtils.checkInterrupted()
         Xml xml = new Xml()
+        def incomeList = new IncomeList(incomes)
 
         ConfigurationParamModel configurationParamModel = declarationService.getAllConfig(userInfo)
         // Получим ИНН из справочника "Общие параметры"
@@ -247,8 +248,6 @@ class Report6Ndfl extends AbstractScriptClass {
                     }
                 }
                 НДФЛ6() {
-                    def incomeList = new IncomeList(ndflPersonService.findAllIncomesByDeclarationIdAndKppAndOktmo(sourceKnf.id, departmentConfig.kpp, departmentConfig.oktmo.code))
-
                     GeneralBlock generalBlock = new GeneralBlock(incomeList)
                     def section2Block = new Section2Block(incomeList)
                     def ОбобщПоказAttrs = [КолФЛДоход  : generalBlock.personCount,
@@ -261,8 +260,7 @@ class Report6Ndfl extends AbstractScriptClass {
                         def refundTax = section2Block.adjustRefundTax(incomeList)
                         if (refundTax == null) {
                             ОбобщПоказAttrs.put("ВозврНалИт", 0)
-                        }
-                        else {
+                        } else {
                             ОбобщПоказAttrs.put("ВозврНалИт", refundTax)
                         }
                     }
@@ -283,33 +281,27 @@ class Report6Ndfl extends AbstractScriptClass {
                         }
                     }
 
-                    if (declarationData.isAdjustNegativeValues() && section2Block.isEmpty()) {
-                        declarationData.negativeSumsSign = NegativeSumsSign.FROM_PREV_FORM
+                    if (declarationData.isAdjustNegativeValues()) {
+                        section2Block.adjustNegativeValues()
+                        declarationData.negativeIncome = section2Block.negativeIncome.abs()
+                        declarationData.negativeTax = section2Block.negativeWithholding.abs()
                     }
+                    section2Block = section2Block.findAll { it.incomeSum || it.withholdingTaxSum }
+                    declarationData.negativeSumsSign = declarationData.isAdjustNegativeValues() && section2Block.isEmpty() ? NegativeSumsSign.FROM_PREV_FORM : NegativeSumsSign.FROM_CURRENT_FORM
                     if (!section2Block.isEmpty()) {
-                        if (declarationData.isAdjustNegativeValues()) {
-                            section2Block.adjustNegativeValues()
-                            declarationData.negativeIncome = section2Block.negativeIncome.abs()
-                            declarationData.negativeTax = section2Block.negativeWithholding.abs()
-                            declarationData.negativeSumsSign = NegativeSumsSign.FROM_CURRENT_FORM
-                        }
                         ДохНал() {
                             for (def row : section2Block) {
-                                // Исключение из списка строки, для которых СуммаФактическогоДохода =0 И СуммаУдержанногоНалога =0
-                                // ИЛИ СрокПеречисленияНалога НЕ принадлежит последним 3 месяцам отчетного периода
-                                if (row.incomeSum || row.withholdingTaxSum) {
-                                    if (isZeroDate(row.taxTransferDate)) {
-                                        logger.warn("В блоке Раздела 2 с параметрами: \"ДатаУдержанияНалога\": ${formatDate(row.taxDate)}; \"СрокПеречисленияНалога: 00.00.0000; " +
-                                                "\"ДатаДохода\": ${formatDate(row.incomeDate)}; исходное значение \"ДатаУдержанияНалога\": ${formatDate(row.taxDate)} заменено на \"00.00.0000\".")
-                                    }
-                                    СумДата(
-                                            ДатаФактДох: formatDate(row.incomeDate),
-                                            ДатаУдержНал: isZeroDate(row.taxTransferDate) ? DATE_ZERO_AS_STRING : formatDate(row.taxDate),
-                                            СрокПрчслНал: isZeroDate(row.taxTransferDate) ? DATE_ZERO_AS_STRING : formatDate(row.taxTransferDate),
-                                            ФактДоход: row.incomeSum,
-                                            УдержНал: row.withholdingTaxSum
-                                    ) {}
+                                if (isZeroDate(row.taxTransferDate)) {
+                                    logger.warn("В блоке Раздела 2 с параметрами: \"ДатаУдержанияНалога\": ${formatDate(row.taxDate)}; \"СрокПеречисленияНалога: 00.00.0000; " +
+                                            "\"ДатаДохода\": ${formatDate(row.incomeDate)}; исходное значение \"ДатаУдержанияНалога\": ${formatDate(row.taxDate)} заменено на \"00.00.0000\".")
                                 }
+                                СумДата(
+                                        ДатаФактДох: formatDate(row.incomeDate),
+                                        ДатаУдержНал: isZeroDate(row.taxTransferDate) ? DATE_ZERO_AS_STRING : formatDate(row.taxDate),
+                                        СрокПрчслНал: isZeroDate(row.taxTransferDate) ? DATE_ZERO_AS_STRING : formatDate(row.taxTransferDate),
+                                        ФактДоход: row.incomeSum,
+                                        УдержНал: row.withholdingTaxSum
+                                ) {}
                             }
                         }
                     }
@@ -431,6 +423,8 @@ class Report6Ndfl extends AbstractScriptClass {
         if (!departmentConfigs) {
             return
         }
+        def incomes = ndflPersonService.findNdflPersonIncome(sourceKnf.id)
+        def incomesByKppOktmoPair = incomes.groupBy { new KppOktmoPair(it.kpp, it.oktmo) }
         List<DeclarationData> createdForms = []
         for (def departmentConfig : departmentConfigs) {
             ScriptUtils.checkInterrupted()
@@ -463,7 +457,8 @@ class Report6Ndfl extends AbstractScriptClass {
             File zipFile = null
             Xml xml = null
             try {
-                xml = buildXml(departmentConfig)
+                def kppOktmoIncomes = incomesByKppOktmoPair[new KppOktmoPair(departmentConfig.kpp, departmentConfig.oktmo.code)]
+                xml = buildXml(departmentConfig, kppOktmoIncomes)
                 if (xml) {
                     if (reportFormsCreationParams.reportFormCreationMode == ReportFormCreationModeEnum.BY_NEW_DATA && existingDeclarations) {
                         if (!hasDifference(xml, existingDeclarations.first())) {

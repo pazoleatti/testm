@@ -108,6 +108,7 @@ class Import extends AbstractScriptClass {
 
     Logger logger
     NdflPersonService ndflPersonService
+    RefBookPersonService refBookPersonService
     DeclarationData declarationData
     DepartmentService departmentService
     CalendarService calendarService
@@ -166,6 +167,7 @@ class Import extends AbstractScriptClass {
         this.ndflPersonService = (NdflPersonService) scriptClass.getProperty("ndflPersonService")
         this.departmentReportPeriodService = (DepartmentReportPeriodService) scriptClass.getProperty("departmentReportPeriodService")
         this.declarationService = (DeclarationService) scriptClass.getProperty("declarationService")
+        this.refBookPersonService = (RefBookPersonService) scriptClass.getProperty("refBookPersonService")
 
         reportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId).reportPeriod
         department = departmentService.get(declarationData.departmentId)
@@ -295,6 +297,7 @@ class Import extends AbstractScriptClass {
                         ndflPersonImportIdCache << ndflPerson.importId
                     }
                     if (persistedPerson != null) {
+                        persistedPerson.personId = null
                         updateRowNumPersonList << ndflPerson
                         if (ndflPerson.middleName?.isEmpty()) ndflPerson.middleName = null
                         if (ndflPerson.innNp?.isEmpty()) ndflPerson.innNp = null
@@ -723,6 +726,9 @@ class Import extends AbstractScriptClass {
             }
             ndflPersonService.save(ndflPersonsForCreate)
             ndflPersonService.updateNdflPersons(ndflPersonsForUpdate)
+            if (ndflPersonsForUpdate) {
+                refBookPersonService.clearRnuNdflPerson(declarationData.id)
+            }
             ndflPersonService.saveIncomes(incomesForCreate)
             ndflPersonService.saveDeductions(deductionsForCreate)
             ndflPersonService.savePrepayments(prepaymentsForCreate)

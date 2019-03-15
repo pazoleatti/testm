@@ -373,28 +373,28 @@
 			alter table async_task drop column task_group;
 		</sql>
 	</changeSet>
-	
+
 	<!--https://jira.aplana.com/browse/SBRFNDFL-6552 Сортировка РНУ реализована не по постановке-->
 	<changeSet id="3.5-amandzyak-2" author="amandzyak">
 		<sql>
 			alter table ndfl_person_income add constraint ndfl_person_inc_chk_row_type check(row_type in (100, 200, 300));
 		</sql>
 	</changeSet>
-	
+
     <!--https://jira.aplana.com/browse/SBRFNDFL-6833 - Патч БД 3.5 к 11 марта-->
 	<changeSet id="3.5-amandzyak-3" author="amandzyak">
 		<sql>
 			create index IDX_REF_BOOK_PERSON_START_DATE on REF_BOOK_PERSON (START_DATE);
 		</sql>
 	</changeSet>
-	
+
     <!--https://jira.aplana.com/browse/SBRFNDFL-6833 - Патч БД 3.5 к 11 марта-->
 	<changeSet id="3.5-amandzyak-4" author="amandzyak">
 		<sql>
 			create index IDX_REF_BOOK_PERSON_END_DATE on REF_BOOK_PERSON (END_DATE);
 		</sql>
 	</changeSet>
-	
+
     <!--https://jira.aplana.com/browse/SBRFNDFL-6833 - Патч БД 3.5 к 11 марта-->
 	<changeSet id="3.5-amandzyak-5" author="amandzyak">
 		<sql>
@@ -417,7 +417,7 @@
 			<column name="value" value="0"/>
 		</insert>
 	</changeSet>
-	
+
     <!--https://jira.aplana.com/browse/SBRFNDFL-6887 - Убрать заполнение и использование временной таблицы tmp_version внутри идентификации-->
     <changeSet id="3.5-amandzyak-6" author="amandzyak">
         <sqlFile dbms="oracle"
@@ -492,5 +492,14 @@
 			end;
 		</sql>
 	</changeSet>
+
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-6858 Реализовать работу со списком оповещений: Массовая выгрузка уведомлений -->
+    <changeSet id="3.5-snazin-6" author="snazin">
+        <insert tableName="async_task_type">
+            <column name="id" value="43"/>
+            <column name="name" value="Выгрузка протоколов по оповещениям"/>
+            <column name="handler_bean" value="CreateNotificationsLogsAsyncTask"/>
+        </insert>
+    </changeSet>
 
 </databaseChangeLog>

@@ -283,3 +283,202 @@ END;
 /
 COMMIT;
 
+-- 3.5-ytrofimov-12 https://jira.aplana.com/browse/SBRFNDFL-6876 Оптимизация идентификации
+DECLARE
+	v_run_condition number(1);
+	v_task_name varchar2(128):='alter_tables block #15 - async_task add task_group';  
+BEGIN
+	select decode(count(*),0,1,0) into v_run_condition from user_tab_columns where lower(table_name)='async_task' and lower(column_name)='task_group';
+	IF v_run_condition=1 THEN
+		EXECUTE IMMEDIATE 'alter table async_task add task_group number(3)';
+		dbms_output.put_line(v_task_name||'[INFO]:'||' Success');
+	ELSE
+		dbms_output.put_line(v_task_name||'[WARNING]:'||' changes had already been implemented');
+	END IF;
+	
+EXCEPTION
+	when OTHERS then
+		dbms_output.put_line(v_task_name||'[FATAL]:'||sqlerrm);	
+END;
+/
+COMMIT;
+
+-- 3.5-ytrofimov-14 https://jira.aplana.com/browse/SBRFNDFL-6918 Реализовать сохранение в разделы 2,3,4 информацию о СведДох, КПП, ОКТМО
+DECLARE
+	v_run_condition number(1);
+	v_task_name varchar2(128):='alter_tables block #16 - create sequence seq_oper_info';  
+BEGIN
+	select decode(count(*),0,1,0) into v_run_condition from user_sequences where lower(sequence_name)='seq_oper_info';
+	IF v_run_condition=1 THEN
+		EXECUTE IMMEDIATE 'create sequence seq_oper_info start with 10000 increment by 10';
+		dbms_output.put_line(v_task_name||'[INFO]:'||' Success');
+	ELSE
+		dbms_output.put_line(v_task_name||'[WARNING]:'||' changes had already been implemented');
+	END IF;
+	
+EXCEPTION
+	when OTHERS then
+		dbms_output.put_line(v_task_name||'[FATAL]:'||sqlerrm);	
+END;
+/
+COMMIT;
+
+-- 3.5-ytrofimov-15 https://jira.aplana.com/browse/SBRFNDFL-6918 Реализовать сохранение в разделы 2,3,4 информацию о СведДох, КПП, ОКТМО
+DECLARE
+	v_run_condition number(1);
+	v_task_name varchar2(128):='alter_tables block #17 - ndfl_person_income add oper_info_id';  
+BEGIN
+	select decode(count(*),0,1,0) into v_run_condition from user_tab_columns where lower(table_name)='ndfl_person_income' and lower(column_name)='oper_info_id';
+	IF v_run_condition=1 THEN
+		EXECUTE IMMEDIATE 'alter table ndfl_person_income add oper_info_id number(20)';
+		dbms_output.put_line(v_task_name||'[INFO]:'||' Success');
+	ELSE
+		dbms_output.put_line(v_task_name||'[WARNING]:'||' changes had already been implemented');
+	END IF;
+	
+EXCEPTION
+	when OTHERS then
+		dbms_output.put_line(v_task_name||'[FATAL]:'||sqlerrm);	
+END;
+/
+COMMIT;
+
+-- 3.5-ytrofimov-15 https://jira.aplana.com/browse/SBRFNDFL-6918 Реализовать сохранение в разделы 2,3,4 информацию о СведДох, КПП, ОКТМО
+DECLARE
+	v_run_condition number(1);
+	v_task_name varchar2(128):='alter_tables block #18 - ndfl_person_deduction add oper_info_id';  
+BEGIN
+	select decode(count(*),0,1,0) into v_run_condition from user_tab_columns where lower(table_name)='ndfl_person_deduction' and lower(column_name)='oper_info_id';
+	IF v_run_condition=1 THEN
+		EXECUTE IMMEDIATE 'alter table ndfl_person_deduction add oper_info_id number(20)';
+		dbms_output.put_line(v_task_name||'[INFO]:'||' Success');
+	ELSE
+		dbms_output.put_line(v_task_name||'[WARNING]:'||' changes had already been implemented');
+	END IF;
+	
+EXCEPTION
+	when OTHERS then
+		dbms_output.put_line(v_task_name||'[FATAL]:'||sqlerrm);	
+END;
+/
+COMMIT;
+
+-- 3.5-ytrofimov-15 https://jira.aplana.com/browse/SBRFNDFL-6918 Реализовать сохранение в разделы 2,3,4 информацию о СведДох, КПП, ОКТМО
+DECLARE
+	v_run_condition number(1);
+	v_task_name varchar2(128):='alter_tables block #19 - ndfl_person_deduction add kpp';  
+BEGIN
+	select decode(count(*),0,1,0) into v_run_condition from user_tab_columns where lower(table_name)='ndfl_person_deduction' and lower(column_name)='kpp';
+	IF v_run_condition=1 THEN
+		EXECUTE IMMEDIATE 'alter table ndfl_person_deduction add kpp varchar2(9 char)';
+		dbms_output.put_line(v_task_name||'[INFO]:'||' Success');
+	ELSE
+		dbms_output.put_line(v_task_name||'[WARNING]:'||' changes had already been implemented');
+	END IF;
+	
+EXCEPTION
+	when OTHERS then
+		dbms_output.put_line(v_task_name||'[FATAL]:'||sqlerrm);	
+END;
+/
+COMMIT;
+
+-- 3.5-ytrofimov-15 https://jira.aplana.com/browse/SBRFNDFL-6918 Реализовать сохранение в разделы 2,3,4 информацию о СведДох, КПП, ОКТМО
+DECLARE
+	v_run_condition number(1);
+	v_task_name varchar2(128):='alter_tables block #20 - ndfl_person_deduction add oktmo';  
+BEGIN
+	select decode(count(*),0,1,0) into v_run_condition from user_tab_columns where lower(table_name)='ndfl_person_deduction' and lower(column_name)='oktmo';
+	IF v_run_condition=1 THEN
+		EXECUTE IMMEDIATE 'alter table ndfl_person_deduction add oktmo varchar2(11 char)';
+		dbms_output.put_line(v_task_name||'[INFO]:'||' Success');
+	ELSE
+		dbms_output.put_line(v_task_name||'[WARNING]:'||' changes had already been implemented');
+	END IF;
+	
+EXCEPTION
+	when OTHERS then
+		dbms_output.put_line(v_task_name||'[FATAL]:'||sqlerrm);	
+END;
+/
+COMMIT;
+
+-- 3.5-ytrofimov-15 https://jira.aplana.com/browse/SBRFNDFL-6918 Реализовать сохранение в разделы 2,3,4 информацию о СведДох, КПП, ОКТМО
+DECLARE
+	v_run_condition number(1);
+	v_task_name varchar2(128):='alter_tables block #21 - ndfl_person_prepayment add oper_info_id';  
+BEGIN
+	select decode(count(*),0,1,0) into v_run_condition from user_tab_columns where lower(table_name)='ndfl_person_prepayment' and lower(column_name)='oper_info_id';
+	IF v_run_condition=1 THEN
+		EXECUTE IMMEDIATE 'alter table ndfl_person_prepayment add oper_info_id number(20)';
+		dbms_output.put_line(v_task_name||'[INFO]:'||' Success');
+	ELSE
+		dbms_output.put_line(v_task_name||'[WARNING]:'||' changes had already been implemented');
+	END IF;
+	
+EXCEPTION
+	when OTHERS then
+		dbms_output.put_line(v_task_name||'[FATAL]:'||sqlerrm);	
+END;
+/
+COMMIT;
+
+-- 3.5-ytrofimov-15 https://jira.aplana.com/browse/SBRFNDFL-6918 Реализовать сохранение в разделы 2,3,4 информацию о СведДох, КПП, ОКТМО
+DECLARE
+	v_run_condition number(1);
+	v_task_name varchar2(128):='alter_tables block #22 - ndfl_person_prepayment add kpp';  
+BEGIN
+	select decode(count(*),0,1,0) into v_run_condition from user_tab_columns where lower(table_name)='ndfl_person_prepayment' and lower(column_name)='kpp';
+	IF v_run_condition=1 THEN
+		EXECUTE IMMEDIATE 'alter table ndfl_person_prepayment add kpp varchar2(9 char)';
+		dbms_output.put_line(v_task_name||'[INFO]:'||' Success');
+	ELSE
+		dbms_output.put_line(v_task_name||'[WARNING]:'||' changes had already been implemented');
+	END IF;
+	
+EXCEPTION
+	when OTHERS then
+		dbms_output.put_line(v_task_name||'[FATAL]:'||sqlerrm);	
+END;
+/
+COMMIT;
+
+-- 3.5-ytrofimov-15 https://jira.aplana.com/browse/SBRFNDFL-6918 Реализовать сохранение в разделы 2,3,4 информацию о СведДох, КПП, ОКТМО
+DECLARE
+	v_run_condition number(1);
+	v_task_name varchar2(128):='alter_tables block #23 - ndfl_person_prepayment add oktmo';  
+BEGIN
+	select decode(count(*),0,1,0) into v_run_condition from user_tab_columns where lower(table_name)='ndfl_person_prepayment' and lower(column_name)='oktmo';
+	IF v_run_condition=1 THEN
+		EXECUTE IMMEDIATE 'alter table ndfl_person_prepayment add oktmo varchar2(11 char)';
+		dbms_output.put_line(v_task_name||'[INFO]:'||' Success');
+	ELSE
+		dbms_output.put_line(v_task_name||'[WARNING]:'||' changes had already been implemented');
+	END IF;
+	
+EXCEPTION
+	when OTHERS then
+		dbms_output.put_line(v_task_name||'[FATAL]:'||sqlerrm);	
+END;
+/
+COMMIT;
+
+-- 3.5-ytrofimov-16 https://jira.aplana.com/browse/SBRFNDFL-6918 Реализовать сохранение в разделы 2,3,4 информацию о СведДох, КПП, ОКТМО
+DECLARE
+	v_run_condition number(1);
+	v_task_name varchar2(128):='alter_tables block #24 - comment';  
+BEGIN
+	execute immediate 'comment on column ndfl_person_income.oper_info_id is ''Уникальный идентификатор, характеризующий элемент СведОпер из ТФ xml.	Используется для "связывания" относящихся к этому СведОпер строк разделов 2, 3, 4.''';
+	execute immediate 'comment on column ndfl_person_deduction.oper_info_id is ''Уникальный идентификатор, характеризующий элемент СведОпер из ТФ xml.	Используется для "связывания" относящихся к этому СведОпер строк разделов 2, 3, 4.''';
+	execute immediate 'comment on column ndfl_person_prepayment.oper_info_id is ''Уникальный идентификатор, характеризующий элемент СведОпер из ТФ xml.	Используется для "связывания" относящихся к этому СведОпер строк разделов 2, 3, 4.''';
+	execute immediate 'comment on column ndfl_person_deduction.kpp is ''КПП, к которому относится строка раздела''';
+	execute immediate 'comment on column ndfl_person_prepayment.kpp is ''КПП, к которому относится строка раздела''';
+	execute immediate 'comment on column ndfl_person_deduction.oktmo is ''ОКТМО, к которому относится строка раздела''';
+	execute immediate 'comment on column ndfl_person_prepayment.oktmo is ''ОКТМО, к которому относится строка раздела''';
+	dbms_output.put_line(v_task_name||'[INFO]:'||' Success');
+EXCEPTION
+	when OTHERS then
+		dbms_output.put_line(v_task_name||'[FATAL]:'||sqlerrm);	
+END;
+/
+COMMIT;

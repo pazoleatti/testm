@@ -985,22 +985,34 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
 
         void createDataForTable() {
             currentRowIndex = 9
+            def styleBuilder = new StyleBuilder(workbook).borders(true).wrapText(true)
+            def kppStyle = styleBuilder.hAlign(CellStyle.ALIGN_LEFT).build()
+            def asnuNameStyle = styleBuilder.hAlign(CellStyle.ALIGN_LEFT).build()
+            def rateStyle = styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER).build()
+            def incomeAccruedSumStyle = styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER_2).build()
+            def incomePayoutSumStyle = styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER_2).build()
+            def totalDeductionsSumStyle = styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER_2).build()
+            def calculatedTaxStyle = styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER).build()
+            def withholdingTaxStyle = styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER).build()
+            def refoundTaxStyle = styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER).build()
+            def deptTaxPayerStyle = styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER).build()
+            def deptAgentStyle = styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER).build()
+            def taxSumStyle = styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER).build()
             for (def dataRow : rows) {
                 sheet.createRow(++currentRowIndex)
                 int colIndex = 0
-                def styleBuilder = new StyleBuilder(workbook).borders(true).wrapText(true)
-                createCell(colIndex, dataRow.kpp, styleBuilder.hAlign(CellStyle.ALIGN_LEFT).build())
-                createCell(++colIndex, dataRow.asnuName, styleBuilder.hAlign(CellStyle.ALIGN_LEFT).build())
-                createCell(++colIndex, dataRow.rate, styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER).build())
-                createCell(++colIndex, dataRow.incomeAccruedSum, styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER_2).build())
-                createCell(++colIndex, dataRow.incomePayoutSum, styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER_2).build())
-                createCell(++colIndex, dataRow.totalDeductionsSum, styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER_2).build())
-                createCell(++colIndex, dataRow.calculatedTax, styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER).build())
-                createCell(++colIndex, dataRow.withholdingTax, styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER).build())
-                createCell(++colIndex, dataRow.refoundTax, styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER).build())
-                createCell(++colIndex, dataRow.deptTaxPayer, styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER).build())
-                createCell(++colIndex, dataRow.deptAgent, styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER).build())
-                createCell(++colIndex, dataRow.taxSum, styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER).build())
+                createCell(colIndex, dataRow.kpp, kppStyle)
+                createCell(++colIndex, dataRow.asnuName, asnuNameStyle)
+                createCell(++colIndex, dataRow.rate, rateStyle)
+                createCell(++colIndex, dataRow.incomeAccruedSum, incomeAccruedSumStyle)
+                createCell(++colIndex, dataRow.incomePayoutSum, incomePayoutSumStyle)
+                createCell(++colIndex, dataRow.totalDeductionsSum, totalDeductionsSumStyle)
+                createCell(++colIndex, dataRow.calculatedTax, calculatedTaxStyle)
+                createCell(++colIndex, dataRow.withholdingTax, withholdingTaxStyle)
+                createCell(++colIndex, dataRow.refoundTax, refoundTaxStyle)
+                createCell(++colIndex, dataRow.deptTaxPayer, deptTaxPayerStyle)
+                createCell(++colIndex, dataRow.deptAgent, deptAgentStyle)
+                createCell(++colIndex, dataRow.taxSum, taxSumStyle)
             }
         }
 
@@ -1067,19 +1079,28 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
 
         void createDataForTable() {
             currentRowIndex = 9
+            def styleBuilder = new StyleBuilder(workbook).borders(true).wrapText(true)
+            def kppStyle = styleBuilder.hAlign(CellStyle.ALIGN_LEFT).dataFormat(STRING).build()
+            def asnuNameStyle = styleBuilder.hAlign(CellStyle.ALIGN_LEFT).dataFormat(STRING).build()
+            def paymentNumberStyle = styleBuilder.hAlign(CellStyle.ALIGN_LEFT).dataFormat(STRING).build()
+            def rateStyle = styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER).build()
+            def calculatedTaxStyle = styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER).build()
+            def withholdingTaxStyle = styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER).build()
+            def refoundTaxStyle = styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER).build()
+            def taxSumStyle = styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER).build()
+            def correctionStyle = styleBuilder.hAlign(CellStyle.ALIGN_LEFT).dataFormat(STRING).build()
             for (def dataRow : rows) {
                 sheet.createRow(++currentRowIndex)
                 int colIndex = 0
-                def styleBuilder = new StyleBuilder(workbook).borders(true).wrapText(true)
-                createCell(colIndex, dataRow.kpp, styleBuilder.hAlign(CellStyle.ALIGN_LEFT).dataFormat(STRING).build())
-                createCell(++colIndex, dataRow.asnuName, styleBuilder.hAlign(CellStyle.ALIGN_LEFT).dataFormat(STRING).build())
-                createCell(++colIndex, dataRow.paymentNumber, styleBuilder.hAlign(CellStyle.ALIGN_LEFT).dataFormat(STRING).build())
-                createCell(++colIndex, dataRow.rate, styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER).build())
-                createCell(++colIndex, dataRow.calculatedTax, styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER).build())
-                createCell(++colIndex, dataRow.withholdingTax, styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER).build())
-                createCell(++colIndex, dataRow.refoundTax, styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER).build())
-                createCell(++colIndex, dataRow.taxSum, styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER).build())
-                createCell(++colIndex, dataRow.correction ? "корр." : "", styleBuilder.hAlign(CellStyle.ALIGN_LEFT).dataFormat(STRING).build())
+                createCell(colIndex, dataRow.kpp, kppStyle)
+                createCell(++colIndex, dataRow.asnuName, asnuNameStyle)
+                createCell(++colIndex, dataRow.paymentNumber, paymentNumberStyle)
+                createCell(++colIndex, dataRow.rate, rateStyle)
+                createCell(++colIndex, dataRow.calculatedTax, calculatedTaxStyle)
+                createCell(++colIndex, dataRow.withholdingTax, withholdingTaxStyle)
+                createCell(++colIndex, dataRow.refoundTax, refoundTaxStyle)
+                createCell(++colIndex, dataRow.taxSum, taxSumStyle)
+                createCell(++colIndex, dataRow.correction ? "корр." : "", correctionStyle)
             }
         }
 
@@ -1146,27 +1167,44 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
 
         void createDataForTable() {
             currentRowIndex = 9
+            def styleBuilder = new StyleBuilder(workbook).borders(true).wrapText(true)
+            def kppStyle = styleBuilder.hAlign(CellStyle.ALIGN_LEFT).dataFormat(STRING).build()
+            def oktmoStyle = styleBuilder.hAlign(CellStyle.ALIGN_LEFT).dataFormat(STRING).build()
+            def asnuNameStyle = styleBuilder.hAlign(CellStyle.ALIGN_LEFT).dataFormat(STRING).build()
+            def rateStyle = styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER).build()
+            def incomeAccruedDateStyle = styleBuilder.hAlign(CellStyle.ALIGN_CENTER).dataFormat(DATE).build()
+            def incomePayoutDateStyle = styleBuilder.hAlign(CellStyle.ALIGN_CENTER).dataFormat(DATE).build()
+            def taxDateStyle = styleBuilder.hAlign(CellStyle.ALIGN_CENTER).dataFormat(DATE).build()
+            def taxTransferDateStyle = styleBuilder.hAlign(CellStyle.ALIGN_CENTER).dataFormat(DATE).build()
+            def incomeAccruedSumStyle = styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER_2).build()
+            def incomePayoutSumStyle = styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER_2).build()
+            def totalDeductionsSumStyle = styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER_2).build()
+            def calculatedTaxStyle = styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER).build()
+            def withholdingTaxStyle = styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER).build()
+            def refoundTaxStyle = styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER).build()
+            def deptTaxPayerStyle = styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER).build()
+            def deptAgentStyle = styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER).build()
+            def taxSumStyle = styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER).build()
             for (def dataRow : rows) {
                 sheet.createRow(++currentRowIndex)
                 int colIndex = 0
-                def styleBuilder = new StyleBuilder(workbook).borders(true).wrapText(true)
-                createCell(colIndex, dataRow.kpp, styleBuilder.hAlign(CellStyle.ALIGN_LEFT).dataFormat(STRING).build())
-                createCell(++colIndex, dataRow.oktmo, styleBuilder.hAlign(CellStyle.ALIGN_LEFT).dataFormat(STRING).build())
-                createCell(++colIndex, dataRow.asnuName, styleBuilder.hAlign(CellStyle.ALIGN_LEFT).dataFormat(STRING).build())
-                createCell(++colIndex, dataRow.rate, styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER).build())
-                createCell(++colIndex, dataRow.incomeAccruedDate, styleBuilder.hAlign(CellStyle.ALIGN_CENTER).dataFormat(DATE).build())
-                createCell(++colIndex, dataRow.incomePayoutDate, styleBuilder.hAlign(CellStyle.ALIGN_CENTER).dataFormat(DATE).build())
-                createCell(++colIndex, dataRow.taxDate, styleBuilder.hAlign(CellStyle.ALIGN_CENTER).dataFormat(DATE).build())
-                createCell(++colIndex, dataRow.taxTransferDate, styleBuilder.hAlign(CellStyle.ALIGN_CENTER).dataFormat(DATE).build())
-                createCell(++colIndex, dataRow.incomeAccruedSum, styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER_2).build())
-                createCell(++colIndex, dataRow.incomePayoutSum, styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER_2).build())
-                createCell(++colIndex, dataRow.totalDeductionsSum, styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER_2).build())
-                createCell(++colIndex, dataRow.calculatedTax, styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER).build())
-                createCell(++colIndex, dataRow.withholdingTax, styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER).build())
-                createCell(++colIndex, dataRow.refoundTax, styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER).build())
-                createCell(++colIndex, dataRow.deptTaxPayer, styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER).build())
-                createCell(++colIndex, dataRow.deptAgent, styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER).build())
-                createCell(++colIndex, dataRow.taxSum, styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER).build())
+                createCell(colIndex, dataRow.kpp, kppStyle)
+                createCell(++colIndex, dataRow.oktmo, oktmoStyle)
+                createCell(++colIndex, dataRow.asnuName, asnuNameStyle)
+                createCell(++colIndex, dataRow.rate, rateStyle)
+                createCell(++colIndex, dataRow.incomeAccruedDate, incomeAccruedDateStyle)
+                createCell(++colIndex, dataRow.incomePayoutDate, incomePayoutDateStyle)
+                createCell(++colIndex, dataRow.taxDate, taxDateStyle)
+                createCell(++colIndex, dataRow.taxTransferDate, taxTransferDateStyle)
+                createCell(++colIndex, dataRow.incomeAccruedSum, incomeAccruedSumStyle)
+                createCell(++colIndex, dataRow.incomePayoutSum, incomePayoutSumStyle)
+                createCell(++colIndex, dataRow.totalDeductionsSum, totalDeductionsSumStyle)
+                createCell(++colIndex, dataRow.calculatedTax, calculatedTaxStyle)
+                createCell(++colIndex, dataRow.withholdingTax, withholdingTaxStyle)
+                createCell(++colIndex, dataRow.refoundTax, refoundTaxStyle)
+                createCell(++colIndex, dataRow.deptTaxPayer, deptTaxPayerStyle)
+                createCell(++colIndex, dataRow.deptAgent, deptAgentStyle)
+                createCell(++colIndex, dataRow.taxSum, taxSumStyle)
             }
         }
 
@@ -1783,18 +1821,26 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         }
 
         void createDataForTable() {
+            def styleBuilder = new StyleBuilder(workbook).borders(true).wrapText(true)
+            def periodCodeStyle = styleBuilder.hAlign(CellStyle.ALIGN_CENTER).dataFormat(STRING).build()
+            def kppStyle = styleBuilder.hAlign(CellStyle.ALIGN_LEFT).dataFormat(STRING).build()
+            def oktmoStyle = styleBuilder.hAlign(CellStyle.ALIGN_LEFT).dataFormat(STRING).build()
+            def incomeDateStyle = styleBuilder.hAlign(CellStyle.ALIGN_CENTER).dataFormat(DATE).build()
+            def witholdingDateStyle = styleBuilder.hAlign(CellStyle.ALIGN_CENTER).dataFormat(DATE).build()
+            def taxTransferDateStyle = styleBuilder.hAlign(CellStyle.ALIGN_CENTER).dataFormat(DATE).build()
+            def incomeSumStyle = styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER_2).build()
+            def withholdingTaxSumStyle = styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER).build()
             for (def dataRow : rows) {
                 sheet.createRow(++currentRowIndex)
                 int colIndex = 0
-                def styleBuilder = new StyleBuilder(workbook).borders(true).wrapText(true)
-                createCell(colIndex, dataRow.periodCode, styleBuilder.hAlign(CellStyle.ALIGN_CENTER).dataFormat(STRING).build())
-                createCell(++colIndex, dataRow.kpp, styleBuilder.hAlign(CellStyle.ALIGN_LEFT).dataFormat(STRING).build())
-                createCell(++colIndex, dataRow.oktmo, styleBuilder.hAlign(CellStyle.ALIGN_LEFT).dataFormat(STRING).build())
-                createCell(++colIndex, dataRow.incomeDate, styleBuilder.hAlign(CellStyle.ALIGN_CENTER).dataFormat(DATE).build())
-                createCell(++colIndex, dataRow.witholdingDate, styleBuilder.hAlign(CellStyle.ALIGN_CENTER).dataFormat(DATE).build())
-                createCell(++colIndex, dataRow.taxTransferDate, styleBuilder.hAlign(CellStyle.ALIGN_CENTER).dataFormat(DATE).build())
-                createCell(++colIndex, dataRow.incomeSum, styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER_2).build())
-                createCell(++colIndex, dataRow.withholdingTaxSum, styleBuilder.hAlign(CellStyle.ALIGN_RIGHT).dataFormat(NUMBER).build())
+                createCell(colIndex, dataRow.periodCode, periodCodeStyle)
+                createCell(++colIndex, dataRow.kpp, kppStyle)
+                createCell(++colIndex, dataRow.oktmo, oktmoStyle)
+                createCell(++colIndex, dataRow.incomeDate, incomeDateStyle)
+                createCell(++colIndex, dataRow.witholdingDate, witholdingDateStyle)
+                createCell(++colIndex, dataRow.taxTransferDate, taxTransferDateStyle)
+                createCell(++colIndex, dataRow.incomeSum, incomeSumStyle)
+                createCell(++colIndex, dataRow.withholdingTaxSum, withholdingTaxSumStyle)
             }
         }
 
@@ -2039,15 +2085,18 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
 
         List<NdflPersonIncomeExt> incomes = new ArrayList<>()
 
-        infoPart.'СведОпер'.each { NodeChild operationInfo ->
+        List<BigDecimal> operInfoIdList = ndflPersonService.generateOperInfoIds(infoPart.'СведОпер'.size())
+
+        infoPart.'СведОпер'.eachWithIndex { NodeChild operationInfo, int index ->
+            BigDecimal operInfoId = operInfoIdList.get(index)
             incomes.addAll(operationInfo.'СведДохНал'.collect {
-                NodeChild incomeInfo -> transformNdflPersonIncome(incomeInfo, ndflPerson, incomeCodeMap)
+                NodeChild incomeInfo -> transformNdflPersonIncome(incomeInfo, ndflPerson, incomeCodeMap, operInfoId)
             })
             ndflPerson.deductions.addAll(operationInfo.'СведВыч'.collect {
-                NodeChild deductionInfo -> transformNdflPersonDeduction(deductionInfo, ndflPerson, deductionTypeList)
+                NodeChild deductionInfo -> transformNdflPersonDeduction(deductionInfo, ndflPerson, deductionTypeList, operInfoId)
             })
             ndflPerson.prepayments.addAll(operationInfo.'СведАванс'.collect {
-                NodeChild prepaymentInfo -> transformNdflPersonPrepayment(prepaymentInfo)
+                NodeChild prepaymentInfo -> transformNdflPersonPrepayment(prepaymentInfo, operInfoId)
             })
         }
 
@@ -2243,7 +2292,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         return ndflPerson
     }
 
-    NdflPersonIncomeExt transformNdflPersonIncome(NodeChild node, NdflPerson ndflPerson, Map<Long, Map<String, RefBookValue>> incomeCodeMap) {
+    NdflPersonIncomeExt transformNdflPersonIncome(NodeChild node, NdflPerson ndflPerson, Map<Long, Map<String, RefBookValue>> incomeCodeMap, BigDecimal operationInfoId) {
         def operationNode = node.parent()
 
         NdflPersonIncomeExt personIncome = new NdflPersonIncomeExt()
@@ -2281,6 +2330,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         personIncome.taxSumm = toBigDecimal((GPathResult) node.getProperty('@НалПерСумм'))
         personIncome.asnuId = declarationData.asnuId
         personIncome.modifiedDate = formCreationDate
+        personIncome.setOperInfoId(operationInfoId)
 
         // Спр5 Код вида дохода (Необязательное поле)
         if (personIncome.incomeCode != null && personIncome.incomeAccruedDate != null && !incomeCodeMap.find { key, value ->
@@ -2301,8 +2351,8 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         return personIncome
     }
 
-    NdflPersonDeduction transformNdflPersonDeduction(NodeChild node, NdflPerson ndflPerson, List<String> deductionTypeList) {
-
+    NdflPersonDeduction transformNdflPersonDeduction(NodeChild node, NdflPerson ndflPerson, List<String> deductionTypeList, BigDecimal operationInfoId) {
+        def operationNode = node.parent()
         NdflPersonDeduction personDeduction = new NdflPersonDeduction()
         personDeduction.rowNum = toBigDecimal((GPathResult) node.getProperty('@НомСтр'))
         personDeduction.operationId = toString((GPathResult) node.parent().getProperty('@ИдОпер'))
@@ -2321,6 +2371,9 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         personDeduction.periodCurrSumm = toBigDecimal((GPathResult) node.getProperty('@СумТекВыч'))
         personDeduction.asnuId = declarationData.asnuId
         personDeduction.modifiedDate = formCreationDate
+        personDeduction.setOperInfoId(operationInfoId)
+        personDeduction.oktmo = toString((GPathResult) operationNode.getProperty('@ОКТМО'))
+        personDeduction.kpp = toString((GPathResult) operationNode.getProperty('@КПП'))
 
         if (!deductionTypeList.contains(personDeduction.typeCode)) {
             String fioAndInpAndOperId = sprintf(TEMPLATE_PERSON_FL_OPER, [ndflPerson.fullName, ndflPerson.inp, personDeduction.operationId])
@@ -2336,7 +2389,9 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         return personDeduction
     }
 
-    NdflPersonPrepayment transformNdflPersonPrepayment(NodeChild node) {
+    NdflPersonPrepayment transformNdflPersonPrepayment(NodeChild node, BigDecimal operationInfoId) {
+        def operationNode = node.parent()
+
         NdflPersonPrepayment personPrepayment = new NdflPersonPrepayment()
         personPrepayment.rowNum = toBigDecimal((GPathResult) node.getProperty('@НомСтр'))
         personPrepayment.operationId = toString((GPathResult) node.parent().getProperty('@ИдОпер'))
@@ -2346,6 +2401,10 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         personPrepayment.notifSource = toString((GPathResult) node.getProperty('@УведИФНС'))
         personPrepayment.asnuId = declarationData.asnuId
         personPrepayment.modifiedDate = formCreationDate
+        personPrepayment.setOperInfoId(operationInfoId)
+        personPrepayment.oktmo = toString((GPathResult) operationNode.getProperty('@ОКТМО'))
+        personPrepayment.kpp = toString((GPathResult) operationNode.getProperty('@КПП'))
+
         return personPrepayment
     }
 
