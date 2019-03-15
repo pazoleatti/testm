@@ -784,7 +784,7 @@ class Import extends AbstractScriptClass {
 
     void checkHeaders(List<List<String>> headersActual) {
         if (headersActual == null || headersActual?.isEmpty() || headersActual[0] == null || headersActual[0]?.isEmpty()) {
-            logger.error("Ошибка при загрузке файла \"$fileName\". Не удалось распознать заголовок таблицы.")
+            logger.error("Ошибка при загрузке файла \"$fileName\". Заголовок таблицы не соответствует требуемой структуре.")
             return
         }
         for (int i = 0; i < header.size(); i++) {
