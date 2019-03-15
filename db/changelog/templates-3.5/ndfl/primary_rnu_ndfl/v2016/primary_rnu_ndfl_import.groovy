@@ -249,8 +249,11 @@ class Import extends AbstractScriptClass {
             Collections.sort(ndflPerson.prepayments, NdflPersonPrepayment.getComparator(ndflPerson))
         }
 
+        Map<Long, NdflPerson> persistedPersonsById = ndflPersonService.findNdflPersonWithOperations(declarationData.id)
+                .collectEntries { [it.id, it] }
+
         // Если в НФ нет данных, то создаем новые из ТФ
-        if (ndflPersonService.findNdflPersonCountByParameters(declarationData.id, [:]) == 0) {
+        if (persistedPersonsById.isEmpty()) {
             transformOperationId()
             updatePersonsRowNum(ndflPersons)
             if (!logger.containsLevel(LogLevel.ERROR)) {
@@ -263,7 +266,7 @@ class Import extends AbstractScriptClass {
         } else {
             // Если в ТФ есть данные
             // Удаляем операции
-            removeOperations()
+            removeOperations(persistedPersonsById)
             List<LogEntry> messages = []
 
             long personRowNum = 0
@@ -293,9 +296,19 @@ class Import extends AbstractScriptClass {
                     NdflPerson persistedPerson = null
                     // Проверяем обновлялись ли уже у этого физлица реквизиты
                     if (!ndflPersonImportIdCache.contains(ndflPerson.importId)) {
-                        persistedPerson = ndflPersonService.get(ndflPerson.importId)
+                        persistedPerson = persistedPersonsById.get(ndflPerson.importId)
                         ndflPersonImportIdCache << ndflPerson.importId
                     }
+                    Map<Long, NdflPersonIncome> persistedPersonIncomesById = persistedPerson.incomes.collectEntries {
+                        [it.id, it]
+                    }
+                    Map<Long, NdflPersonDeduction> persistedPersonDeductionsById = persistedPerson.deductions.collectEntries {
+                        [it.id, it]
+                    }
+                    Map<Long, NdflPersonPrepayment> persistedPersonPrepaymentsById = persistedPerson.prepayments.collectEntries {
+                        [it.id, it]
+                    }
+
                     if (persistedPerson != null) {
                         persistedPerson.personId = null
                         updateRowNumPersonList << ndflPerson
@@ -429,7 +442,7 @@ class Import extends AbstractScriptClass {
                         income.rowNum = ++incomeRowNum
                         NdflPersonIncome persistedIncome = null
                         if (income.id != null) {
-                            persistedIncome = ndflPersonService.getIncome(income.id)
+                            persistedIncome = persistedPersonIncomesById.get(income.id)
                         }
                         if (persistedIncome == null) {
                             income.ndflPersonId = ndflPerson.importId
@@ -568,7 +581,7 @@ class Import extends AbstractScriptClass {
                         deduction.rowNum = ++deductionRowNum
                         NdflPersonDeduction persistedDeduction = null
                         if (deduction.id != null) {
-                            persistedDeduction = ndflPersonService.getDeduction(deduction.id)
+                            persistedDeduction = persistedPersonDeductionsById.get(deduction.id)
                         }
                         if (persistedDeduction == null) {
                             deduction.ndflPersonId = ndflPerson.importId
@@ -664,7 +677,7 @@ class Import extends AbstractScriptClass {
                         prepayment.rowNum = ++prepaymentRowNum
                         NdflPersonPrepayment persistedPrepayment = null
                         if (prepayment.id != null) {
-                            persistedPrepayment = ndflPersonService.getPrepayment(prepayment.id)
+                            persistedPrepayment = persistedPersonPrepaymentsById.get(prepayment.id)
                         }
                         if (persistedPrepayment == null) {
                             prepayment.ndflPersonId = ndflPerson.importId
@@ -1366,8 +1379,8 @@ class Import extends AbstractScriptClass {
     /**
      * Удаляет операции из БД, идентификаторы которых не найдены в ТФ
      */
-    void removeOperations() {
-        List<NdflPerson> ndflPersonFromDeclarationData = ndflPersonService.findNdflPerson(declarationData.id)
+    void removeOperations(Map<Long, NdflPerson> persistedPersonsById) {
+        Collection<NdflPerson> ndflPersonFromDeclarationData = persistedPersonsById.values()
         int rowsCount = 0
         int personsCount = ndflPersonFromDeclarationData.size()
         int incomesCount = 0
@@ -1379,9 +1392,9 @@ class Import extends AbstractScriptClass {
         List<Long> prepaymentsForRemove = []
         List<Long> personIdsForRemove = []
         for (NdflPerson person : ndflPersonFromDeclarationData) {
-            List<Long> incomesIdList = ndflPersonService.fetchIncomeIdByNdflPerson(person.id)
-            List<Long> deductionsIdList = ndflPersonService.fetchDeductionIdByNdflPerson(person.id)
-            List<Long> prepaymentsIdList = ndflPersonService.fetchPrepaymentIdByNdflPerson(person.id)
+            List<Long> incomesIdList = person.incomes*.id
+            List<Long> deductionsIdList = person.deductions*.id
+            List<Long> prepaymentsIdList = person.prepayments*.id
             int personIncomesCount = incomesIdList.size()
             incomesCount += personIncomesCount
             int personDeductionsCount = deductionsIdList.size()
