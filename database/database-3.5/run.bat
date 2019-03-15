@@ -35,8 +35,14 @@ ECHO ## 04_create_views
 ECHO ## 05_exec_scripts
 "%ORA_BIN%\sqlplus" %AUTH% @"05_exec_scripts.sql" > "%LOG_DIR%/05_exec_scripts.txt"
  
+ECHO ## 06_replace_packages
+"%ORA_BIN%\sqlplus" %AUTH% @"06_replace_packages.sql" > "%LOG_DIR%/06_replace_packages.txt"
+ 
+ECHO ## 07_check_index_constraints
+ "%ORA_BIN%\sqlplus" %AUTH% @"07_check_index_constraints.sql" %LOG_DIR%/07_check_index.txt "%LOG_DIR%/07_check_constraints.txt
+
 ECHO ## gather statistics
-"%ORA_BIN%\sqlplus" %AUTH% @"06_gather_statistics.sql" > "%LOG_DIR%/06_gather_statistics.txt"
+"%ORA_BIN%\sqlplus" %AUTH% @"08_gather_statistics.sql" > "%LOG_DIR%/08_gather_statistics.txt"
 
 rem �������� ������ ���������� �������������������
 PAUSE
