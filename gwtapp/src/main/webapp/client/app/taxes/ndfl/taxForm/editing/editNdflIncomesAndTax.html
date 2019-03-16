@@ -73,15 +73,11 @@
                         <div class="span8 field-wrapper">
                             <div data-aplana-field>
                                 <input data-ng-model="row.incomeCode"
-                                       ng-required="isIncomeAttributesRequired() || row.incomeType"
                                        placeholder="{{'filter.placeholder.search' | translate}}"
                                        type="text"
                                        minlength="4"
                                        maxlength="4"
                                        title="{{row.incomeCode}}"/>
-                                <div data-aplana-validator data-key='required'>
-                                    {{::'common.validation.required' | translate}}
-                                </div>
                                 <div data-aplana-validator data-key="minlength">
                                     {{::'incomesAndTax.edit.validation.incomeCode' | translate}}
                                 </div>
@@ -131,14 +127,10 @@
                         <div class="span8 field-wrapper">
                             <div data-aplana-field>
                                 <input data-ng-model="row.incomeType"
-                                       ng-required="isIncomeAttributesRequired() || row.incomeCode"
                                        placeholder="{{'filter.placeholder.search' | translate}}"
                                        type="text"
                                        maxlength="2"
                                        title="{{row.incomeType}}"/>
-                                <div data-aplana-validator data-key='required'>
-                                    {{::'common.validation.required' | translate}}
-                                </div>
                                 <div data-aplana-validator data-key="maxlength">
                                     {{::'incomesAndTax.edit.validation.incomeType' | translate}}
                                 </div>
