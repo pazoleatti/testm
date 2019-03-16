@@ -5,10 +5,18 @@
 
     <import resource="classpath:testServiceContext.xml"/>
 
-    <bean id="notificationService" class="com.aplana.sbrf.taxaccounting.service.impl.NotificationServiceImpl" />
+    <bean id="notificationService" class="com.aplana.sbrf.taxaccounting.service.impl.NotificationServiceImpl"/>
 
     <bean class="org.mockito.Mockito" factory-method="mock">
-        <constructor-arg value="com.aplana.sbrf.taxaccounting.service.BlobDataService" />
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.service.BlobDataService"/>
     </bean>
-
+    <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.async.AsyncManager"/>
+    </bean>
+    <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.service.LogEntryService"/>
+    </bean>
+    <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.service.PrintingService"/>
+    </bean>
 </beans>
