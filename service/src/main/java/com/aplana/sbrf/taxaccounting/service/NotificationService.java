@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 
 import java.util.List;
 
@@ -59,8 +60,6 @@ public interface NotificationService {
      */
     void deleteByIdIn(List<Long> notificationIds);
 
-
-
     /**
      * Получение данных оповещения из файлового хранилища
      *
@@ -68,4 +67,17 @@ public interface NotificationService {
      * @return данные полученные из файлового хранилища
      */
     BlobData getNotificationBlobData(Notification notification);
+
+    /**
+     * Создание асинхронной задачи на выгрузку протокола (уведомлений) выбранных оповещений.
+     */
+    ActionResult createLogsReportAsync(List<Long> ids, TAUserInfo userInfo);
+
+    /**
+     * Создание архива с протоколами (уведомлениями) выбранных оповещений.
+     *
+     * @param ids идентификаторы оповещений.
+     * @return uuid созданного файла архива.
+     */
+    String createLogsReport(List<Long> ids);
 }

@@ -1,16 +1,22 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.async.AsyncManager;
 import com.aplana.sbrf.taxaccounting.dao.api.NotificationDao;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
+import com.aplana.sbrf.taxaccounting.model.util.DateUtils;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.NotificationService;
+import com.aplana.sbrf.taxaccounting.service.PrintingService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Service
 @Transactional
@@ -20,7 +26,13 @@ public class NotificationServiceImpl implements NotificationService {
     private NotificationDao notificationDao;
 
     @Autowired
+    private AsyncManager asyncManager;
+    @Autowired
     private BlobDataService blobDataService;
+    @Autowired
+    private LogEntryService logEntryService;
+    @Autowired
+    private PrintingService printingService;
 
     @Override
     public void create(List<Notification> notifications) {
@@ -70,5 +82,37 @@ public class NotificationServiceImpl implements NotificationService {
     @PreAuthorize("hasPermission(#notification, T(com.aplana.sbrf.taxaccounting.permissions.NotificationPermission).DOWNLOAD_NOTIFICATION_FILE)")
     public BlobData getNotificationBlobData(Notification notification) {
         return blobDataService.get(notification.getReportId());
+    }
+
+    @Override
+    public ActionResult createLogsReportAsync(List<Long> ids, TAUserInfo userInfo) {
+        Logger logger = new Logger();
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("notificationIds", ids);
+
+        List<Notification> notifications = notificationDao.findByIdIn(ids);
+        // TreeSet for sorting
+        Set<String> dates = new TreeSet<>();
+        for (Notification notification : notifications) {
+            String date = DateUtils.commonDateFormat(notification.getCreateDate());
+            dates.add(date);
+        }
+        params.put("dates", StringUtils.join(dates, ", "));
+
+        asyncManager.createSimpleTask(OperationType.CREATE_NOTIFICATIONS_LOGS, userInfo, params, logger);
+
+        String logsUuid = logEntryService.save(logger.getEntries());
+
+        ActionResult result = new ActionResult();
+        result.setSuccess(true);
+        result.setUuid(logsUuid);
+        return result;
+    }
+
+    @Override
+    public String createLogsReport(List<Long> ids) {
+        List<Notification> notifications = notificationDao.findByIdIn(ids);
+        return printingService.generateCsvNotificationsLogsArchive(notifications);
     }
 }

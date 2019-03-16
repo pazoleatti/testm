@@ -15,4 +15,13 @@ public final class AppFileUtils {
             }
         }
     }
+
+    public static void deleteTmp(String filePath) {
+        if (filePath != null) {
+            File file = new File(filePath);
+            if (!file.delete()) {
+                LOG.warn("Не удален временный файл: " + filePath);
+            }
+        }
+    }
 }

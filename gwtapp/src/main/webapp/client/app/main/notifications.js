@@ -140,6 +140,20 @@
                 };
 
                 /**
+                 * Создание асинхронной задачи для выгрузки протоколов оповещений.
+                 */
+                $scope.createSelectedProtocols = function () {
+                    $http.post(
+                        'controller/actions/notification/createLogs',
+                        $filter('idExtractor')($scope.notificationsGrid.value)
+                    ).then(function (response) {
+                        if (response.data && response.data.uuid) {
+                            $logPanel.open('log-panel-container', response.data.uuid);
+                        }
+                    });
+                };
+
+                /**
                  * @description Закрытие окна
                  */
                 $scope.close = function () {

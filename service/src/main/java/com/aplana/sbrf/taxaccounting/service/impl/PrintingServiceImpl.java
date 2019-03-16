@@ -23,13 +23,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPersonDTO;
 import com.aplana.sbrf.taxaccounting.model.util.AppFileUtils;
 import com.aplana.sbrf.taxaccounting.model.util.DateUtils;
-import com.aplana.sbrf.taxaccounting.service.BlobDataService;
-import com.aplana.sbrf.taxaccounting.service.DepartmentService;
-import com.aplana.sbrf.taxaccounting.service.LockStateLogger;
-import com.aplana.sbrf.taxaccounting.service.LogEntryService;
-import com.aplana.sbrf.taxaccounting.service.PersonService;
-import com.aplana.sbrf.taxaccounting.service.PrintingService;
-import com.aplana.sbrf.taxaccounting.service.RefBookScriptingService;
+import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.impl.print.departmentConfigs.DepartmentConfigsReportBuilder;
 import com.aplana.sbrf.taxaccounting.service.impl.print.logentry.LogEntryReportBuilder;
 import com.aplana.sbrf.taxaccounting.service.impl.print.persons.PersonsReportBuilder;
@@ -39,12 +33,16 @@ import com.aplana.sbrf.taxaccounting.service.impl.print.tausers.TAUsersReportBui
 import com.aplana.sbrf.taxaccounting.service.impl.refbook.BatchIterator;
 import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import com.aplana.sbrf.taxaccounting.service.refbook.DepartmentConfigService;
+import com.google.common.collect.HashMultiset;
+import com.google.common.collect.Multiset;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
+import org.joda.time.LocalDateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,12 +50,17 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
+
+import static com.aplana.sbrf.taxaccounting.model.util.StringUtils.containsAll;
+import static org.apache.commons.lang3.StringUtils.containsAny;
+import static org.apache.commons.lang3.StringUtils.substringBeforeLast;
 
 @Service
 public class PrintingServiceImpl implements PrintingService {
@@ -79,6 +82,8 @@ public class PrintingServiceImpl implements PrintingService {
     @Autowired
     private DepartmentService departmentService;
     @Autowired
+    private DeclarationDataService declarationService;
+    @Autowired
     private RefBookDepartmentDao refBookDepartmentDao;
     @Autowired
     private RefBookDocTypeDao refBookDocTypeDao;
@@ -90,28 +95,213 @@ public class PrintingServiceImpl implements PrintingService {
     private RefBookAsnuDao refBookAsnuDao;
 
     @Override
-    public String generateExcelLogEntry(List<LogEntry> listLogEntries) {
+    public String generateCsvLogEntries(List<LogEntry> logEntries) {
         String reportPath = null;
         try {
-            LogEntryReportBuilder builder = new LogEntryReportBuilder(listLogEntries);
+            LogEntryReportBuilder builder = new LogEntryReportBuilder(logEntries);
             reportPath = builder.createReport();
             return blobDataService.create(reportPath, "errors.csv");
         } catch (IOException e) {
             LOG.error(e.getMessage(), e);
             throw new ServiceException("Ошибка при создании печатной формы." + LogEntryReportBuilder.class);
         } finally {
-            cleanTmp(reportPath);
+            AppFileUtils.deleteTmp(reportPath);
         }
     }
 
-    private void cleanTmp(String filePath) {
-        if (filePath != null) {
-            File file = new File(filePath);
-            if (file.delete()) {
-                LOG.warn(String.format("Временный файл %s не был удален", filePath));
+    @Override
+    public String generateCsvNotificationsLogsArchive(List<Notification> notifications) {
+        File zipFile = null;
+        List<String> tmpFiles = new ArrayList<>();
+        Multiset<String> fileNames = HashMultiset.create();
+        try {
+            zipFile = File.createTempFile("archive", ".zip");
+            FileOutputStream fileOut = new FileOutputStream(zipFile);
+            ZipOutputStream zipOut = new ZipOutputStream(fileOut);
+
+            for (Notification notification : notifications) {
+                String logUuid = notification.getLogId();
+                List<LogEntry> logs = logEntryService.getAll(logUuid);
+
+                LogEntryReportBuilder builder = new LogEntryReportBuilder(logs);
+                String reportFilePath = builder.createReport();
+                tmpFiles.add(reportFilePath);
+
+                byte[] reportFileBytes = Files.readAllBytes(Paths.get(reportFilePath));
+
+                String reportName = createReportNameForNotification(notification);
+                // Исключаем дублирующиеся имена файлов.
+                fileNames.add(reportName);
+                int nameOccurrences = fileNames.count(reportName);
+                // Если уже такой был, file.csv -> file (2).csv
+                if (nameOccurrences > 1) {
+                    reportName = substringBeforeLast(reportName, ".csv") + " (" + nameOccurrences + ").csv";
+                }
+
+                ZipEntry zipEntry = new ZipEntry(reportName);
+                zipOut.putNextEntry(zipEntry);
+                zipOut.write(reportFileBytes);
+            }
+            zipOut.close();
+            fileOut.close();
+
+            String fileName = "Протоколы оповещений_" + currentMoscowDateTime() + ".zip";
+            return blobDataService.create(zipFile, fileName, new Date());
+
+        } catch (IOException e) {
+            LOG.error(e.getMessage(), e);
+            throw new ServiceException("");
+        } finally {
+            AppFileUtils.deleteTmp(zipFile);
+            for (String tmpFile : tmpFiles) {
+                AppFileUtils.deleteTmp(tmpFile);
             }
         }
     }
+
+
+    private class NotificationType {
+        final String operation;
+        final String result;
+
+        NotificationType(String operation, String result) {
+            this.operation = operation;
+            this.result = result;
+        }
+    }
+
+    private static final String OPERATION_IMPORT = "Zagr";
+    private static final String OPERATION_CHECK = "Prov";
+    private static final String OPERATION_IDENTIFICATION = "Iden";
+    private static final String OPERATION_ACCEPTING = "Prin";
+    private static final String OPERATION_REPORT = "Otch";
+
+    // Символы - латинские.
+    private static final String RESULT_EXECUTED = "B";
+    private static final String RESULT_NOT_EXECUTED = "H";
+    private static final String RESULT_EXECUTED_WITH_ERRORS = "BF";
+
+    private NotificationType getNotificationType(Notification notification) {
+        String text = notification.getText();
+
+        if (containsAll(text, "Загрузка файла", "Выполнено создание налоговой формы", ".xml")) {
+            return new NotificationType(OPERATION_IMPORT, RESULT_EXECUTED);
+        }
+        if (containsAll(text, "Ошибка загрузки файла", ".xml")) {
+            return new NotificationType(OPERATION_IMPORT, RESULT_NOT_EXECUTED);
+        }
+        if (text.contains("Выполнена проверка налоговой формы") && !containsAny(text, "фаталь", "отмен")) {
+            return new NotificationType(OPERATION_CHECK, RESULT_EXECUTED);
+        }
+        if (containsAll(text, "Выполнена проверка налоговой формы", "фаталь") && !text.contains("отмен")) {
+            return new NotificationType(OPERATION_CHECK, RESULT_EXECUTED_WITH_ERRORS);
+        }
+        if (text.contains("Не выполнена операция \"Проверка\" для налоговой формы") && !text.contains("отмен")) {
+            return new NotificationType(OPERATION_CHECK, RESULT_NOT_EXECUTED);
+        }
+        if (text.contains("Операция \"Идентификация ФЛ\" выполнена для налоговой формы") && !text.contains("отмен")) {
+            return new NotificationType(OPERATION_IDENTIFICATION, RESULT_EXECUTED);
+        }
+        if (text.contains("Не выполнена операция \"Идентификация ФЛ\" для налоговой формы") && !text.contains("отмен")) {
+            return new NotificationType(OPERATION_IDENTIFICATION, RESULT_NOT_EXECUTED);
+        }
+        if (text.contains("Успешно выполнено принятие налоговой формы")) {
+            return new NotificationType(OPERATION_ACCEPTING, RESULT_EXECUTED);
+        }
+        if (text.contains("Не выполнена операция \"Принятие")) {
+            return new NotificationType(OPERATION_ACCEPTING, RESULT_NOT_EXECUTED);
+        }
+        if (text.contains("Сформирован отчет")) {
+            return new NotificationType(OPERATION_REPORT, RESULT_EXECUTED);
+        }
+        return null;
+    }
+
+    private static Map<String, String> TB_CODES = new HashMap<>();
+
+    static {
+        TB_CODES.put("40", "SRB");
+        TB_CODES.put("44", "SIB");
+        TB_CODES.put("54", "PB");
+        TB_CODES.put("18", "BB");
+        TB_CODES.put("42", "VVB");
+        TB_CODES.put("31", "VSB");
+        TB_CODES.put("70", "DB");
+        TB_CODES.put("67", "ZSB");
+        TB_CODES.put("49", "ZUB");
+        TB_CODES.put("38", "MB");
+        TB_CODES.put("77", "SB");
+        TB_CODES.put("36", "SVB");
+        TB_CODES.put("55", "SZB");
+        TB_CODES.put("60", "SKB");
+        TB_CODES.put("16", "UB");
+        TB_CODES.put("13", "CCB");
+        TB_CODES.put("52", "YZB");
+        TB_CODES.put("99", "CA");
+    }
+
+    private String createReportNameForNotification(Notification notification) {
+
+        String text = notification.getText();
+
+        Date notificationDate = notification.getCreateDate();
+        LocalDateTime jodaNotificationDate = LocalDateTime.fromDateFields(notificationDate);
+        DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyyMMddHHmmss");
+        String notificationDateString = formatter.print(jodaNotificationDate);
+
+        NotificationType notificationType = getNotificationType(notification);
+
+        if (notificationType != null && notificationType.operation.equals(OPERATION_IMPORT)) {
+            String[] notificationParts = text.split("\"");
+            if (notificationParts[0].equals("Загрузка файла ") || notificationParts[0].equals("Ошибка загрузки файла ")) {
+                String fileName = notificationParts[1].replace(".xml", "");
+                String tbCode = fileName.replace("_", "").substring(0, 2);
+                String tbIndex = TB_CODES.get(tbCode);
+                String reportName = StringUtils.join(
+                        Arrays.asList(tbIndex, fileName, notificationDateString, notificationType.operation, notificationType.result),
+                        "_"
+                );
+                return reportName + ".csv";
+            }
+        }
+        if (notificationType != null && (notificationType.operation.equals(OPERATION_ACCEPTING) ||
+                notificationType.operation.equals(OPERATION_CHECK) ||
+                notificationType.operation.equals(OPERATION_IDENTIFICATION) ||
+                notificationType.operation.equals(OPERATION_REPORT))) {
+
+            String[] notificationParts = text.replace(":", "").split("№ ");
+
+            if (notificationParts.length > 1) {
+                Matcher matcher = Pattern.compile("\\d+").matcher(notificationParts[1]);
+                matcher.find();
+                long declarationId = Long.parseLong(matcher.group());
+
+                if (declarationService.existDeclarationData(declarationId)) {
+                    DeclarationData declaration = declarationService.get(declarationId);
+                    int departmentId = declaration.getDepartmentId();
+                    Department department = departmentService.getDepartment(departmentId);
+
+                    String tbIndex = department.getTbIndex();
+                    String tbCode = TB_CODES.get(tbIndex);
+                    String fileName = declaration.getFileName().replace(".xml", "");
+
+                    String reportName = StringUtils.join(
+                            Arrays.asList(tbCode, fileName, declarationId, notificationDateString, notificationType.operation, notificationType.result),
+                            "_"
+                    );
+                    return reportName + ".csv";
+                } else {
+                    String reportName = StringUtils.join(
+                            Arrays.asList("--", "удалена", declarationId, notificationDateString, notificationType.operation, notificationType.result),
+                            "_"
+                    );
+                    return reportName + ".csv";
+                }
+            }
+        }
+        return notificationDateString + ".csv";
+    }
+
 
     @Override
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS')")
@@ -125,13 +315,13 @@ public class PrintingServiceImpl implements PrintingService {
             LOG.error(e.getMessage(), e);
             throw new ServiceException("Ошибка при создании печатной формы." + TAUsersReportBuilder.class);
         } finally {
-            cleanTmp(reportPath);
+            AppFileUtils.deleteTmp(reportPath);
         }
     }
 
     @Override
     public String generateRefBookSpecificReport(long refBookId, String specificReportType, Date version, String filter, String searchPattern, RefBookAttribute sortAttribute, boolean isSortAscending, TAUserInfo userInfo, LockStateLogger stateLogger) {
-        Map<String, Object> params = new HashMap<String, Object>();
+        Map<String, Object> params = new HashMap<>();
         ScriptSpecificRefBookReportHolder scriptSpecificReportHolder = new ScriptSpecificRefBookReportHolder();
         File reportFile = null;
         try {
@@ -225,7 +415,7 @@ public class PrintingServiceImpl implements PrintingService {
             LOG.error(e.getMessage(), e);
             throw new ServiceException("Ошибка при формировании отчета по справочнику.");
         } finally {
-            cleanTmp(reportPath);
+            AppFileUtils.deleteTmp(reportPath);
         }
     }
 
@@ -281,7 +471,7 @@ public class PrintingServiceImpl implements PrintingService {
             LOG.error(e.getMessage(), e);
             throw new ServiceException("Ошибка при формировании отчета по справочнику.");
         } finally {
-            cleanTmp(reportPath);
+            AppFileUtils.deleteTmp(reportPath);
         }
     }
 
@@ -305,7 +495,7 @@ public class PrintingServiceImpl implements PrintingService {
             LOG.error(e.getMessage(), e);
             throw new ServiceException(e.getMessage());
         } finally {
-            cleanTmp(reportPath);
+            AppFileUtils.deleteTmp(reportPath);
         }
     }
 
@@ -328,7 +518,7 @@ public class PrintingServiceImpl implements PrintingService {
             LOG.error(e.getMessage(), e);
             throw new ServiceException(e.getMessage());
         } finally {
-            cleanTmp(reportPath);
+            AppFileUtils.deleteTmp(reportPath);
         }
     }
 
@@ -385,9 +575,7 @@ public class PrintingServiceImpl implements PrintingService {
             }
             csvWriter.close();
 
-            DateTime now = DateTime.now().withZone(DateTimeZone.forID("Europe/Moscow"));
-            DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd_HH-mm-ss");
-            String fileName = "Список оповещений_" + formatter.print(now) + ".csv";
+            String fileName = "Список оповещений_" + currentMoscowDateTime() + ".csv";
             return blobDataService.create(file.getAbsolutePath(), fileName);
 
         } catch (Exception e) {
@@ -399,5 +587,14 @@ public class PrintingServiceImpl implements PrintingService {
                 IOUtils.closeQuietly(fileOutputStream);
             }
         }
+    }
+
+    /**
+     * Текущая московская дата со временем в формате "2000-01-01_23:59:59". Используется в названиях файлов.
+     */
+    private static String currentMoscowDateTime() {
+        DateTime now = DateTime.now().withZone(DateTimeZone.forID("Europe/Moscow"));
+        DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd_HH-mm-ss");
+        return formatter.print(now);
     }
 }

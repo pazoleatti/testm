@@ -49,6 +49,7 @@ public class AsyncTaskDescriptorImpl implements AsyncTaskDescriptor {
         Map<String, Object> subreportParamValues = null;
         String fileName = null;
         List<Long> declarationDataIds = null;
+        String dates = "";
         if (params.containsKey("declarationDataId")) {
             declarationDataId = (Long) params.get("declarationDataId");
         }
@@ -66,6 +67,9 @@ public class AsyncTaskDescriptorImpl implements AsyncTaskDescriptor {
         }
         if (params.containsKey("declarationDataIds")) {
             declarationDataIds = (List<Long>) params.get("declarationDataIds");
+        }
+        if (params.containsKey("dates")) {
+            dates = (String) params.get("dates");
         }
         if (operationType.equals(OperationType.IMPORT_DECLARATION_EXCEL))
             return declarationDataAsyncTaskDescriptor.createDescription(declarationDataId, "Загрузка данных в ПНФ РНУ НДФЛ");
@@ -117,6 +121,8 @@ public class AsyncTaskDescriptorImpl implements AsyncTaskDescriptor {
             return transportFileAsyncTaskDescriptor.createDescription(fileName);
         else if (operationType.equals(OperationType.UPDATE_DOC_STATE))
             return declarationDataReportingMultiModeAsyncTaskDescriptor.createDescription(declarationDataIds, "Изменение состояния ЭД");
+        else if (operationType.equals(OperationType.CREATE_NOTIFICATIONS_LOGS))
+            return String.format("Выгрузка протоколов по оповещениям за : %s", dates);
         else {
             throw new IllegalArgumentException("Unknown operationType type!");
         }

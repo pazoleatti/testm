@@ -10,8 +10,6 @@ import java.util.Map;
 
 /**
  * Данные конкретной асинхронной задачи
- *
- * @author dloshkarev
  */
 @Getter @Setter @ToString
 public class AsyncTaskData {
@@ -33,6 +31,5 @@ public class AsyncTaskData {
     /**
      * Параметры для выполнения конкретной задачи
      */
-    private Map<String, Object> params = new HashMap<String, Object>(0);
-
+    private Map<String, Object> params = new HashMap<>(0);
 }

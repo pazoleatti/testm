@@ -13,7 +13,21 @@ import java.util.Map;
  * Интерфейс для формирования отчета по справочнику
  */
 public interface PrintingService {
-    String generateExcelLogEntry(List<LogEntry> listLogEntries);
+
+    /**
+     * Формирование csv-файла уведомлений.
+     *
+     * @param logEntries список уведомлений.
+     * @return uuid csv-файла.
+     */
+    String generateCsvLogEntries(List<LogEntry> logEntries);
+
+    /**
+     * Формирование архива с csv-файлами уведомлений по оповещениям.
+     *
+     * @return uuid файла архива.
+     */
+    String generateCsvNotificationsLogsArchive(List<Notification> notifications);
 
     /**
      * Формирует xlsx-файл со списком пользователей.

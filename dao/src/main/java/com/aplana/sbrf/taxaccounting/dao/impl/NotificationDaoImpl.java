@@ -129,8 +129,9 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
 
         String conditions = "";
         if (isNotEmpty(filter.getText())) {
-            conditions = conditions + " and lower(TEXT) like lower(:text) ";
-            params.addValue("text", "%" + filter.getText() + "%");
+            String escapedText = filter.getText().replace("_", "\\_").replace("%", "\\%");
+            conditions = conditions + " and lower(TEXT) like lower(:text) {escape '\\'} ";
+            params.addValue("text", "%" + escapedText + "%");
         }
         if (filter.getTimeFrom() != null) {
             conditions = conditions + " and (CREATE_DATE >= :timeFrom) ";
@@ -225,8 +226,9 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
 
         String conditions = "";
         if (isNotEmpty(filter.getText())) {
-            conditions = conditions + " and lower(TEXT) like lower(:text) ";
-            params.addValue("text", "%" + filter.getText() + "%");
+            String escapedText = filter.getText().replace("_", "\\_").replace("%", "\\%");
+            conditions = conditions + " and lower(TEXT) like lower(:text) {escape '\\'} ";
+            params.addValue("text", "%" + escapedText + "%");
         }
         if (filter.getTimeFrom() != null) {
             conditions = conditions + " and (CREATE_DATE >= :timeFrom) ";

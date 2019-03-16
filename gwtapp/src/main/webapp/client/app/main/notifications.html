@@ -47,7 +47,8 @@
             </a>
             <!-- Протоколы -->
             <button type="button" class="btn btn-default"
-                    data-ng-disabled="true">
+                    data-ng-disabled="!anyChecked()"
+                    data-ng-click="createSelectedProtocols()">
                 <span data-translate-once="notifications.button.protocols"></span>
             </button>
         </div>

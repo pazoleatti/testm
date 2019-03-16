@@ -126,4 +126,21 @@ public final class StringUtils {
     public static String filterDelimiters(String str) {
         return str.replaceAll("[^0-9A-Za-zА-Яа-я]", "");
     }
+
+    /**
+     * Проверка, содержит ли строка все переданные подстороки.
+     *
+     * @param str    строка, в которой ищем
+     * @param values подстроки, по которым ищем
+     * @return false, если хотя бы одна строка не входит.
+     */
+    public static boolean containsAll(String str, String... values) {
+        if (values.length == 0) return false;
+
+        boolean result = true;
+        for (String value : values) {
+            result &= str.contains(value);
+        }
+        return result;
+    }
 }
