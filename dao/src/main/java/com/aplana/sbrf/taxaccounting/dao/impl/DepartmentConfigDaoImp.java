@@ -230,8 +230,8 @@ public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentCon
         }
 
         if (!isEmpty(filter.getName())) {
-            baseSelect = "select * from (" + baseSelect + ") where (kpp || ' / ' || oktmo) like '%' || :name || '%'";
-            params.addValue("name", filter.getName());
+            baseSelect = "select * from (" + baseSelect + ") where (kpp || '/' || oktmo) like '%' || :name || '%'";
+            params.addValue("name", filter.getName().replaceAll(" ?/ ?", "/"));
         }
 
         List<ReportFormCreationKppOktmoPair> kppOktmoPairs = getNamedParameterJdbcTemplate().query(
