@@ -512,4 +512,11 @@
                  splitStatements="false"/>
     </changeSet>
 
+	<changeSet id="3.5-dnovikov-15" author="dnovikov" runAlways="true">
+		<update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+			<column name="script" valueClobFile="templates-3.5/ndfl/report_6ndfl/v2016/report_6ndfl_check.groovy"/>
+			<where>DECLARATION_TEMPLATE_ID = 103 and EVENT_ID = 5</where>
+		</update>
+	</changeSet>
+
 </databaseChangeLog>
