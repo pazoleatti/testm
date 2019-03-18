@@ -120,26 +120,28 @@ public class PrintingServiceImpl implements PrintingService {
 
             for (Notification notification : notifications) {
                 String logUuid = notification.getLogId();
-                List<LogEntry> logs = logEntryService.getAll(logUuid);
+                if (isNotEmpty(logUuid)) {
+                    List<LogEntry> logs = logEntryService.getAll(logUuid);
 
-                LogEntryReportBuilder builder = new LogEntryReportBuilder(logs);
-                String reportFilePath = builder.createReport();
-                tmpFiles.add(reportFilePath);
+                    LogEntryReportBuilder builder = new LogEntryReportBuilder(logs);
+                    String reportFilePath = builder.createReport();
+                    tmpFiles.add(reportFilePath);
 
-                byte[] reportFileBytes = Files.readAllBytes(Paths.get(reportFilePath));
+                    byte[] reportFileBytes = Files.readAllBytes(Paths.get(reportFilePath));
 
-                String reportName = createReportNameForNotification(notification);
-                // Исключаем дублирующиеся имена файлов.
-                fileNames.add(reportName);
-                int nameOccurrences = fileNames.count(reportName);
-                // Если уже такой был, file.csv -> file (2).csv
-                if (nameOccurrences > 1) {
-                    reportName = substringBeforeLast(reportName, ".csv") + " (" + nameOccurrences + ").csv";
+                    String reportName = createReportNameForNotification(notification);
+                    // Исключаем дублирующиеся имена файлов.
+                    fileNames.add(reportName);
+                    int nameOccurrences = fileNames.count(reportName);
+                    // Если уже такой был, file.csv -> file (2).csv
+                    if (nameOccurrences > 1) {
+                        reportName = substringBeforeLast(reportName, ".csv") + " (" + nameOccurrences + ").csv";
+                    }
+
+                    ZipEntry zipEntry = new ZipEntry(reportName);
+                    zipOut.putNextEntry(zipEntry);
+                    zipOut.write(reportFileBytes);
                 }
-
-                ZipEntry zipEntry = new ZipEntry(reportName);
-                zipOut.putNextEntry(zipEntry);
-                zipOut.write(reportFileBytes);
             }
             zipOut.close();
             fileOut.close();
