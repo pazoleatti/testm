@@ -502,4 +502,14 @@
         </insert>
     </changeSet>
 
+    <!--https://jira.aplana.com/browse/SBRFNDFL-6954 - Реализовать скрипт добавления в БД новых ОКТМО-->
+    <changeSet id="3.5-amandzyak-8" author="amandzyak">
+        <sqlFile dbms="oracle"
+                 encoding="utf8"
+                 endDelimiter=""
+                 path="/scripts/merge_ref_book_oktmo.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
+
 </databaseChangeLog>

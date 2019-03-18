@@ -33,7 +33,7 @@ ECHO ## 04_create_views
 "%ORA_BIN%\sqlplus" %AUTH% @"04_create_views.sql" > "%LOG_DIR%/04_create_views.txt"
  
 ECHO ## 05_exec_scripts
-"%ORA_BIN%\sqlplus" %AUTH% @"05_exec_scripts.sql" > "%LOG_DIR%/05_exec_scripts.txt"
+"%ORA_BIN%\sqlplus" %AUTH% @"05_exec_scripts.sql" %LOG_DIR%/05_exec_scripts_update_npi.txt %LOG_DIR%/05_exec_scripts_merge_oktmo.txt
  
 ECHO ## 06_replace_packages
 "%ORA_BIN%\sqlplus" %AUTH% @"06_replace_packages.sql" > "%LOG_DIR%/06_replace_packages.txt"
