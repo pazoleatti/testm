@@ -26,7 +26,12 @@ public class LoadTransportFileAsyncTask extends AbstractAsyncTask {
     @Autowired
     private UploadTransportDataService uploadTransportDataService;
 
-    private String msg;
+    private ThreadLocal<String> msg = new ThreadLocal<String>() {
+        @Override
+        protected String initialValue() {
+            return "";
+        }
+    };
 
     @Override
     public String createDescription(TAUserInfo userInfo, Map<String, Object> params) {
@@ -42,7 +47,8 @@ public class LoadTransportFileAsyncTask extends AbstractAsyncTask {
         final TransportFileType fileType = (TransportFileType) params.get("fileType");
         BlobData blobData = blobDataService.get(blobDataId);
         asyncManager.updateState(taskData.getId(), AsyncTaskState.FILES_UPLOADING);
-        msg = uploadTransportDataService.processTransportFileUploading(logger, userInfo, fileType, blobData.getName(), blobData.getInputStream(), taskData.getId());
+        String msgValue = uploadTransportDataService.processTransportFileUploading(logger, userInfo, fileType, blobData.getName(), blobData.getInputStream(), taskData.getId());
+        msg.set(msgValue);
         return new BusinessLogicResult(true, null);
     }
 
@@ -51,7 +57,7 @@ public class LoadTransportFileAsyncTask extends AbstractAsyncTask {
         String fileName = getFileName(taskData);
         final String archiveName = (String) taskData.getParams().get("archiveName");
         String archive = archiveName == null ? "" : String.format(" (из архива \"%s\")", archiveName);
-        return "Загрузка файла \"" + fileName + "\"" + archive + " завершена" + (msg.isEmpty() ? "" : (": " + msg));
+        return "Загрузка файла \"" + fileName + "\"" + archive + " завершена" + (msg.get().isEmpty() ? "" : (": " + msg.get()));
     }
 
 
