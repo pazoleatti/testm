@@ -1196,6 +1196,14 @@ class Check extends AbstractScriptClass {
                         }
                     }
 
+                    // Заполнение Раздела 2 Графы 13
+                    if (ndflPersonIncome.incomeAccruedDate && ndflPersonIncome.taxBase != ndflPersonIncome.incomeAccruedSumm - ndflPersonIncome.totalDeductionsSumm) {
+                        String errMsg = "Значение гр. \"Налоговая База\" \"$ndflPersonIncome.taxBase\" не совпадает с расчетным " +
+                                "\"${ndflPersonIncome.incomeAccruedSumm - ndflPersonIncome.totalDeductionsSumm}\""
+                        String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
+                        logger.warnExp("%s. %s.", LOG_TYPE_2_6, fioAndInpAndOperId, pathError, errMsg)
+                    }
+
                     // СведДох3 НДФЛ.Процентная ставка (Графа 14)
                     if (!ndflPersonIncome.isDummy() && ndflPersonIncome.taxRate != null) {
                         boolean checkNdflPersonIncomingTaxRateTotal = false
