@@ -42,7 +42,9 @@ import com.aplana.sbrf.taxaccounting.service.TransactionLogic;
 import com.aplana.sbrf.taxaccounting.service.component.lock.locker.DeclarationLocker;
 import com.aplana.sbrf.taxaccounting.service.component.operation.AsyncTaskDescriptor;
 import com.aplana.sbrf.taxaccounting.utils.ApplicationInfo;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -264,11 +266,11 @@ public class AsyncManagerImpl implements AsyncManager {
                             return false;
                         }
                     }
-                    if (!MapUtils.isEmpty(params)) {
+                    if (MapUtils.isNotEmpty(params)) {
                         checkParams(params);
                     }
                     lockDataList = checkAndCreateLocks(operationType, params, logger, user);
-                    if (lockDataList != null && !lockDataList.isEmpty()) {
+                    if (CollectionUtils.isNotEmpty(lockDataList)) {
                         for (LockData lockData : lockDataList) {
                             keys.add(lockData.getKey());
                         }
@@ -299,6 +301,47 @@ public class AsyncManagerImpl implements AsyncManager {
                         lockDataService.unlockAllByTask(taskData.getId());
                     } else {
                         lockDataService.unlockMultipleTasks(keys);
+                    }
+                }
+                return false;
+            }
+        });
+    }
+
+    @Override
+    public Boolean createSimpleTask(final OperationType operationType, final TAUserInfo user, final Map<String, Object> params, final Logger logger) {
+        LOG.info(String.format("AsyncManagerImpl.executeTask by %s. taskType: %s; params: %s", user, operationType, params));
+        return tx.executeInNewTransaction(new TransactionLogic<Boolean>() {
+            @Override
+            public Boolean execute() {
+                AsyncTaskData taskData = null;
+                String taskDescription = asyncTaskDescriptor.createDescription(params, operationType);
+                try {
+                    // Проверка пришедших параметров
+                    if (MapUtils.isNotEmpty(params)) {
+                        checkParams(params);
+                    }
+                    AsyncTask task = getAsyncTaskBean(operationType.getAsyncTaskTypeId());
+                    //Постановка новой задачи в очередь
+                    AsyncQueue queue = task.defineTaskLimit(taskDescription, user, params);
+                    // Сохранение в очереди асинхронных задач - запись в БД
+                    String priorityNode = applicationInfo.isProductionMode() ? null : serverInfo.getServerName();
+                    AsyncTaskType asyncTaskType = AsyncTaskType.getByAsyncTaskTypeId(operationType.getAsyncTaskTypeId());
+                    taskData = asyncTaskDao.create(operationType.getAsyncTaskTypeId(), user.getUser().getId(), taskDescription, queue, priorityNode, AsyncTaskGroupFactory.getTaskGroup(asyncTaskType), params);
+                    logger.info("Задача \"%s\" поставлена в очередь на исполнение", taskDescription);
+                    LOG.info(String.format("Task with id %s was put in queue %s. Task type: %s, priority node: %s",
+                            taskData.getId(), queue.name(), asyncTaskType.getId(), priorityNode));
+                    return true;
+                } catch (Exception e) {
+                    LOG.error("Async task creation has been failed!", e);
+                    if (e instanceof ServiceException && StringUtils.isNotEmpty(e.getMessage())) {
+                        logger.error(e.getMessage());
+                    } else {
+                        logger.error("Системная ошибка, невозможно создание асинхронной задачи %s",
+                                taskDescription);
+                    }
+                    if (taskData != null) {
+                        asyncTaskDao.delete(taskData.getId());
                     }
                 }
                 return false;

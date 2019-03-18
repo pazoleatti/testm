@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.mvc;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
+import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.NotificationService;
@@ -171,6 +172,15 @@ public class NotificationController {
         } else {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
         }
+    }
+
+    /**
+     * Создание асинхронной задачи на выгрузку протокола (уведомлений) выбранных оповещений.
+     */
+    @PostMapping("/actions/notification/createLogs")
+    public ActionResult createNotificationsLogsReport(@RequestBody List<Long> ids) {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        return notificationService.createLogsReportAsync(ids, userInfo);
     }
 
     @ExceptionHandler(AccessDeniedException.class)

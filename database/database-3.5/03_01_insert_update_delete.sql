@@ -310,3 +310,38 @@ EXCEPTION
 end;
 /
 COMMIT;
+
+--https://jira.aplana.com/browse/SBRFNDFL-6954 - Реализовать скрипт добавления в БД новых ОКТМО
+declare 
+	v_task_name varchar2(128):='merge into ref_book_oktmo';  
+begin
+
+	merge into ref_book_oktmo a using
+	(select '14710000' as code, 'г Алексеевка' as name, 1 as razd, to_date('01.01.2019','dd.mm.yyyy') as version from dual
+	 union all
+	 select '14720000' as code, 'г Валуйки' as name, 1 as razd, to_date('01.01.2019','dd.mm.yyyy') as version from dual
+	 union all
+	 select '14725000' as code, 'г Грайворон' as name, 1 as razd, to_date('01.01.2019','dd.mm.yyyy') as version from dual
+	 union all
+	 select '14735000' as code, 'г Новый Оскол' as name, 1 as razd, to_date('01.01.2019','dd.mm.yyyy') as version from dual
+	 union all
+	 select '14750000' as code, 'г Шебекино' as name, 1 as razd, to_date('01.01.2019','dd.mm.yyyy') as version from dual
+	 union all
+	 select '14755000' as code, 'г Строитель' as name, 1 as razd, to_date('01.01.2019','dd.mm.yyyy') as version from dual
+	) b
+	on (a.code=b.code and a.status=0)
+	when not matched then
+	insert (id, record_id, version, status, code, name, razd)
+	values (seq_ref_book_record.nextval,seq_ref_book_record_row_id.nextval, b.version, 0, b.code, b.name, b.razd);
+
+	CASE SQL%ROWCOUNT 
+	WHEN 0 THEN dbms_output.put_line(v_task_name||'[WARNING]:'||' No changes was done');
+	ELSE dbms_output.put_line(v_task_name||'[INFO]:'||' Success');
+	END CASE; 
+
+EXCEPTION
+	when OTHERS then
+		dbms_output.put_line(v_task_name||'[FATAL]:'||sqlerrm);
+end;
+/
+COMMIT;

@@ -332,13 +332,13 @@ class Report2Ndfl extends AbstractScriptClass {
                                         }
                                         СвСумДох(Месяц: sprintf('%02d', monthAndIncomeCodeKey.month + 1),
                                                 КодДоход: monthAndIncomeCodeKey.incomeCode,
-                                                СумДоход: СумДох(monthAndIncomeCodeIncomes, monthAndIncomeCodeDeductions)) {
+                                                СумДоход: ScriptUtils.round(СумДох(monthAndIncomeCodeIncomes, monthAndIncomeCodeDeductions), 2)) {
                                             def deductionsByCode = monthAndIncomeCodeDeductions.groupBy {
                                                 it.typeCode
                                             }
                                             deductionsByCode.each { deductionCode, deductionsOfCode ->
                                                 СвСумВыч(КодВычет: deductionCode,
-                                                        СумВычет: СумВыч(deductionsOfCode))
+                                                        СумВычет: ScriptUtils.round(СумВыч(deductionsOfCode), 2))
                                             }
                                         }
                                     }

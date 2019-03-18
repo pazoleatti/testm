@@ -77,8 +77,20 @@ public interface AsyncManager {
      * @param user                       пользователь, от имени которого была запущена задача
      * @param params                     кастомные параметры задачи
      * @param logger                     логгер
+     * @return удалось ли запланировать асинхронную задачу
      */
     Boolean createTask(final OperationType operationType, String operationObjectDescription, final TAUserInfo user, final Map<String, Object> params, final Logger logger);
+
+    /**
+     * Создание асинхронной задачи без блокировок.
+     *
+     * @param operationType тип задачи
+     * @param user          пользователь, от имени которого была запущена задача
+     * @param params        кастомные параметры задачи
+     * @param logger        логгер
+     * @return удалось ли запланировать асинхронную задачу
+     */
+    Boolean createSimpleTask(final OperationType operationType, final TAUserInfo user, final Map<String, Object> params, final Logger logger);
 
     /**
      * Выполняет попытку запуска асинхронной задачи, если не удалось - возвращает сообщение для диалога

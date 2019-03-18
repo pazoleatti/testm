@@ -36,6 +36,7 @@ public enum AsyncTaskType {
     CREATE_NOT_HOLDING_TAX_NOTIFICATIONS(40, "CREATE_NOT_HOLDING_TAX_NOTIFICATIONS", "Формирование Уведомлений о неудержанном налоге", 40L),
     EXPORT_REPORTS(41, "EXPORT_REPORTS", "Выгрузка отчетности", 41L),
     UPDATE_DOC_STATE(42, "UPDATE_DOC_STATE", "Изменение состояния ЭД", 42L),
+    CREATE_NOTIFICATIONS_LOGS(43, "CREATE_NOTIFICATIONS_LOGS", "Выгрузка протоколов по оповещениям за: %s", 43L),
 
     //Типы отчетов
     JASPER_DEC(3, "JASPER", ""),
