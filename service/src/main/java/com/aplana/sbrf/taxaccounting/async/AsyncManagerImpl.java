@@ -26,7 +26,6 @@ import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.TaskInterruptCause;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
-import com.aplana.sbrf.taxaccounting.model.exception.TAInterruptedException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.ConfigurationService;
@@ -593,21 +592,15 @@ public class AsyncManagerImpl implements AsyncManager {
                     LOG.info(String.format("Node '%s' trying to reserve task with id=%s", node, taskId));
                     result = asyncTaskDao.reserveTask(node, taskId);
                 }
-                if (result) {
-                    try {
-                        Thread.sleep(2000L);
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                    }
-                    if (Thread.interrupted()) {
-                        LOG.info("Thread " + Thread.currentThread().getName() + " was interrupted");
-                        throw new TAInterruptedException();
-                    }
-                }
                 return result;
             }
         });
         if (reserved) {
+            try {
+                Thread.sleep(2000L);
+            } catch (InterruptedException e) {
+                LOG.info("Thread " + Thread.currentThread().getName() + " was interrupted");
+            }
             result = asyncTaskDao.findById(taskId);
         }
         if (result != null) {
