@@ -33,10 +33,10 @@ import com.aplana.sbrf.taxaccounting.service.impl.print.tausers.TAUsersReportBui
 import com.aplana.sbrf.taxaccounting.service.impl.refbook.BatchIterator;
 import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import com.aplana.sbrf.taxaccounting.service.refbook.DepartmentConfigService;
+import com.google.common.base.Joiner;
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -59,8 +59,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import static com.aplana.sbrf.taxaccounting.model.util.StringUtils.containsAll;
-import static org.apache.commons.lang3.StringUtils.containsAny;
-import static org.apache.commons.lang3.StringUtils.substringBeforeLast;
+import static org.apache.commons.lang3.StringUtils.*;
 
 @Service
 public class PrintingServiceImpl implements PrintingService {
@@ -257,9 +256,8 @@ public class PrintingServiceImpl implements PrintingService {
                 String fileName = notificationParts[1].replace(".xml", "");
                 String tbCode = fileName.replace("_", "").substring(0, 2);
                 String tbIndex = TB_CODES.get(tbCode);
-                String reportName = StringUtils.join(
-                        Arrays.asList(tbIndex, fileName, notificationDateString, notificationType.operation, notificationType.result),
-                        "_"
+                String reportName = Joiner.on("_").skipNulls().join(
+                        Arrays.asList(tbIndex, fileName, notificationDateString, notificationType.operation, notificationType.result)
                 );
                 return reportName + ".csv";
             }
@@ -282,18 +280,19 @@ public class PrintingServiceImpl implements PrintingService {
                     Department department = departmentService.getDepartment(departmentId);
 
                     String tbIndex = department.getTbIndex();
+                    if (tbIndex == null && isNotEmpty(department.getSbrfCode())) {
+                        tbIndex = department.getSbrfCode().substring(0, 2);
+                    }
                     String tbCode = TB_CODES.get(tbIndex);
-                    String fileName = declaration.getFileName().replace(".xml", "");
+                    String fileName = declaration.getFileName() != null ? declaration.getFileName().replace(".xml", "") : null;
 
-                    String reportName = StringUtils.join(
-                            Arrays.asList(tbCode, fileName, declarationId, notificationDateString, notificationType.operation, notificationType.result),
-                            "_"
+                    String reportName = Joiner.on("_").skipNulls().join(
+                            Arrays.asList(tbCode, fileName, declarationId, notificationDateString, notificationType.operation, notificationType.result)
                     );
                     return reportName + ".csv";
                 } else {
-                    String reportName = StringUtils.join(
-                            Arrays.asList("--", "удалена", declarationId, notificationDateString, notificationType.operation, notificationType.result),
-                            "_"
+                    String reportName = Joiner.on("_").skipNulls().join(
+                            Arrays.asList("--", "удалена", declarationId, notificationDateString, notificationType.operation, notificationType.result)
                     );
                     return reportName + ".csv";
                 }
