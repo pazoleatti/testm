@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.FormStyle;
 import com.aplana.sbrf.taxaccounting.model.consolidation.ConsolidationIncome;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.TAInterruptedException;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
@@ -409,14 +410,14 @@ public final class ScriptUtils {
                 if (rowValues.size() < columnIndex - colOffset) {
                     int n = (columnIndex - rowValues.size() - colOffset);
                     for (int i = 1; i <= n; i++) {
-                        rowValues.add("");
+                        rowValues.add(null);
                     }
                 }
-                // строка
-                rowValues.add(getValue());
+                String value = getValue();
+                rowValues.add(StringUtils.isEmpty(value) ? null : value);
             } else if (name.equals("row")) { // конец строки
                 if (isData) {
-                    endRead = (rowValues != null && rowValues.contains(tableEndValue));
+                    endRead = (rowValues != null && tableEndValue != null && rowValues.contains(tableEndValue));
                     if (!endRead) {
                         // еще не конец таблицы - дополнить список значений недостоющеми значениями и добавить ко всем строкам
                         performRowData();
@@ -602,14 +603,14 @@ public final class ScriptUtils {
                 if (rowValues.size() < columnIndex - colOffset) {
                     int n = (columnIndex - rowValues.size() - colOffset);
                     for (int i = 1; i <= n; i++) {
-                        rowValues.add("");
+                        rowValues.add(null);
                     }
                 }
-                // строка
-                rowValues.add(getValue());
+                String value = getValue();
+                rowValues.add(StringUtils.isEmpty(value) ? null : value);
             } else if (name.equals("row")) { // конец строки
                 if (isData && rowValues != null && !rowValues.isEmpty() && rowValues.get(0) != null && !rowValues.get(0).startsWith(headerStartValue)) {
-                    endRead = (rowValues.contains(tableEndValue));
+                    endRead = tableEndValue != null && rowValues.contains(tableEndValue);
                     if (!endRead) {
                         // еще не конец таблицы - дополнить список значений недостоющеми значениями и добавить ко всем строкам
                         performRowData();
