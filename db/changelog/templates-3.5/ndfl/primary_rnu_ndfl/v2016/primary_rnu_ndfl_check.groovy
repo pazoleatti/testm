@@ -1323,7 +1323,7 @@ class Check extends AbstractScriptClass {
                             if (!isDeductionExists) {
                                 logTypeMessagePairList.add(new CheckData("\"Дата исчисленного налога\" указана некорректно",
                                         ("Значение гр. \"${C_TAX_DATE}\" (\"${formatDate(ndflPersonIncome.taxDate)}\") отсутствует в гр. " +
-                                                "\"${C_PERIOD_CURR_DATE}\" хотя бы одной строки операции Раздела 3").toString(),
+                                                "\"${C_PERIOD_CURR_DATE}\" хотя бы одной строки операции Раздела 3.").toString(),
                                         section_2_15_fatal))
                             }
                         }
@@ -1339,7 +1339,7 @@ class Check extends AbstractScriptClass {
                                 if (ndflPersonIncome.taxDate != ndflPersonIncome.incomePayoutDate) {
                                     logTypeMessagePairList.add(new CheckData("\"Дата удержанного налога\" указана некорректно",
                                             ("Значение гр. \"${C_TAX_DATE}\" (\"${formatDate(ndflPersonIncome.taxDate)}\") должно быть равно " +
-                                                    "значению гр. \"${C_INCOME_PAYOUT_DATE}\" (\"${formatDate(ndflPersonIncome.incomePayoutDate)}\")").toString(),
+                                                    "значению гр. \"${C_INCOME_PAYOUT_DATE}\" (\"${formatDate(ndflPersonIncome.incomePayoutDate)}\").").toString(),
                                             section_2_15_fatal))
                                 }
                             }
@@ -1358,7 +1358,7 @@ class Check extends AbstractScriptClass {
                             if (ndflPersonIncome.taxDate != ndflPersonIncome.incomePayoutDate) {
                                 logTypeMessagePairList.add(new CheckData("\"Дата не удержанного налога\" указана некорректно",
                                         ("Значение гр. \"${C_TAX_DATE}\" (\"${formatDate(ndflPersonIncome.taxDate)}\") должно быть равно " +
-                                                "значению гр. \"${C_INCOME_PAYOUT_DATE}\" (\"${formatDate(ndflPersonIncome.incomePayoutDate)}\")").toString(),
+                                                "значению гр. \"${C_INCOME_PAYOUT_DATE}\" (\"${formatDate(ndflPersonIncome.incomePayoutDate)}\").").toString(),
                                         section_2_15_fatal))
                             }
                         }
@@ -1387,7 +1387,7 @@ class Check extends AbstractScriptClass {
                                 if (ndflPersonIncome.taxDate != ndflPersonIncome.incomeAccruedDate) {
                                     logTypeMessagePairList.add(new CheckData("\"Дата не удержанного налога\" указана некорректно",
                                             ("Значение гр. \"${C_TAX_DATE}\" (\"${formatDate(ndflPersonIncome.taxDate)}\") должно быть равно " +
-                                                    "значению гр. \"${C_INCOME_ACCRUED_DATE}\" (\"${formatDate(ndflPersonIncome.incomeAccruedDate)}\")").toString(),
+                                                    "значению гр. \"${C_INCOME_ACCRUED_DATE}\" (\"${formatDate(ndflPersonIncome.incomeAccruedDate)}\").").toString(),
                                             section_2_15_fatal))
                                 }
                             }
@@ -1409,7 +1409,7 @@ class Check extends AbstractScriptClass {
                                 int month = calendarPayout.get(Calendar.MONTH)
                                 if (!(dayOfMonth == 31 && month == 12)) {
                                     logTypeMessagePairList.add(new CheckData("\"Дата не удержаннного налога\" указана некорректно",
-                                            ("Значение гр. \"${C_TAX_DATE}\" (\"${formatDate(ndflPersonIncome.taxDate)}\") должно быть равно последнему календарному дню года налогового периода").toString()))
+                                            ("Значение гр. \"${C_TAX_DATE}\" (\"${formatDate(ndflPersonIncome.taxDate)}\") должно быть равно последнему календарному дню года налогового периода.").toString()))
                                 }
                             }
                         }
@@ -1421,7 +1421,10 @@ class Check extends AbstractScriptClass {
                                 ndflPersonIncome.incomePayoutDate != null) {
                             // "Графа 15" = "Графа 7"
                             if (ndflPersonIncome.taxDate != ndflPersonIncome.incomePayoutDate) {
-                                logTypeMessagePairList.add(new CheckData("\"Дата излишне удержанного налога\" указана некорректно", ("Значение гр. \"${C_TAX_DATE}\" (\"${ndflPersonIncome.taxDate ? ScriptUtils.formatDate(ndflPersonIncome.taxDate) : ""}\") должно быть равно значению гр. \"${C_INCOME_PAYOUT_DATE}\" (\"${ndflPersonIncome.incomePayoutDate ? ScriptUtils.formatDate(ndflPersonIncome.incomePayoutDate) : ""}\")").toString(), section_2_15_fatal))
+                                logTypeMessagePairList.add(new CheckData("\"Дата излишне удержанного налога\" указана некорректно",
+                                        ("Значение гр. \"${C_TAX_DATE}\" (\"${ndflPersonIncome.taxDate ? ScriptUtils.formatDate(ndflPersonIncome.taxDate) : ""}\") " +
+                                                "должно быть равно значению гр. \"${C_INCOME_PAYOUT_DATE}\" " +
+                                                "(\"${ndflPersonIncome.incomePayoutDate ? ScriptUtils.formatDate(ndflPersonIncome.incomePayoutDate) : ""}\").").toString(), section_2_15_fatal))
                             }
                         }
                         // П.8
@@ -1439,7 +1442,7 @@ class Check extends AbstractScriptClass {
                         if (!logTypeMessagePairList.isEmpty()) {
                             String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
                             for (CheckData checkData : logTypeMessagePairList) {
-                                logger.logCheck("%s. %s.", checkData.fatal, checkData.msgFirst, fioAndInpAndOperId, pathError, checkData.msgLast)
+                                logger.logCheck("%s. %s", checkData.fatal, checkData.msgFirst, fioAndInpAndOperId, pathError, checkData.msgLast)
                             }
                         }
                     }
