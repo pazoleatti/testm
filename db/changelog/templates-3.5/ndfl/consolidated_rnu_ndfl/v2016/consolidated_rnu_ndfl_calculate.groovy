@@ -370,7 +370,7 @@ class Calculate extends AbstractScriptClass {
         Map<Long, NdflPerson> refBookPersonsGroupedById = [:]
 
         for (NdflPerson refBookPerson : refBookPersonList) {
-            refBookPersonsGroupedById.put(refBookPerson.personId, refBookPerson)
+            refBookPersonsGroupedById.put(refBookPerson.recordId, refBookPerson)
         }
 
         Map<Long, List<NdflPersonDeduction>> deductionsGroupedByPerson = [:]
@@ -406,9 +406,9 @@ class Calculate extends AbstractScriptClass {
         // Данные для заполнения раздела 1
 
         for (NdflPerson declarationDataPerson : ndflPersonList) {
-            NdflPerson refBookPerson = refBookPersonsGroupedById.get(declarationDataPerson.personId)
-
-            if (declarationDataPerson.personId == null) {
+            NdflPerson refBookPerson = refBookPersonsGroupedById.get(declarationDataPerson.recordId)
+            declarationDataPerson.personId = refBookPerson.personId
+            if (declarationDataPerson.recordId == null) {
                 logger.error("ПНФ: ${declarationDataPerson.declarationDataId} " +
                         "Раздел 1. Строка: ${declarationDataPerson.rowNum}. Для ФЛ:" +
                         "${declarationDataPerson.lastName + " " + declarationDataPerson.firstName + " " + (declarationDataPerson.middleName ?: "")}" +
