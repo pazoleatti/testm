@@ -177,7 +177,7 @@ public class AsyncTaskDaoImpl extends AbstractDao implements AsyncTaskDao {
                     "(task_group is not null and task_group not in (select task_group from async_task where start_process_date is not null and task_group is not null))) \n";
         }
         String sql = "select id from async_task where id = (select id from (\n" +
-                " select id from async_task where ((:priorityNode is null) or (:priorityNode is not null and priority_node = :priorityNode)) and \n" +
+                " select id from async_task where ((:priorityNode is null and priority_node is null) or (:priorityNode is not null and priority_node = :priorityNode)) and \n" +
                 "queue = :queue and " +
                 "((node is null or current_timestamp > start_process_date + interval '" + timeoutHours + "' hour) and :maxTasksPerNode > (select count(*) FROM async_task WHERE node = :node AND queue = :queue)) " +
                 serialModeClause +
