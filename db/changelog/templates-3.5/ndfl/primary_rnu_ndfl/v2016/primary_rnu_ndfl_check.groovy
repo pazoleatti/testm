@@ -1028,7 +1028,7 @@ class Check extends AbstractScriptClass {
         dateConditionDataList << new DateConditionData(["1530", "1531", "1532", "1533", "1535", "1536", "1537", "1539",
                                                         "1541", "1542", "1544", "1546", "1548", "1551", "1552", "1553", "1554"],
                 ["04"], new LastYearWorkDay(),
-                "Значение гр. \"%s\" (\"%s\") должно быть равно последнему рабочему календарному дню года, за который был начислен доход (%4\$s), " +
+                "Значение гр. \"%s\" (\"%s\") должно быть равно последнему рабочему дню года, за который был начислен доход (%4\$s), " +
                         "для Кода дохода = \"%6\$s\" и Признака дохода = \"%8\$s\"")
 
         // 7. Последний календарный день месяца
@@ -1197,9 +1197,9 @@ class Check extends AbstractScriptClass {
                     }
 
                     // Заполнение Раздела 2 Графы 13
-                    if (ndflPersonIncome.incomeAccruedDate && ndflPersonIncome.taxBase != ndflPersonIncome.incomeAccruedSumm - ndflPersonIncome.totalDeductionsSumm) {
+                    if (ndflPersonIncome.incomeAccruedDate && ndflPersonIncome.taxBase != (ndflPersonIncome.incomeAccruedSumm ?: 0) - (ndflPersonIncome.totalDeductionsSumm ?: 0)) {
                         String errMsg = "Значение гр. \"Налоговая База\" \"$ndflPersonIncome.taxBase\" не совпадает с расчетным " +
-                                "\"${ndflPersonIncome.incomeAccruedSumm - ndflPersonIncome.totalDeductionsSumm}\""
+                                "\"${(ndflPersonIncome.incomeAccruedSumm ?: 0) - (ndflPersonIncome.totalDeductionsSumm ?: 0)}\""
                         String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
                         logger.warnExp("%s. %s.", LOG_TYPE_2_6, fioAndInpAndOperId, pathError, errMsg)
                     }
