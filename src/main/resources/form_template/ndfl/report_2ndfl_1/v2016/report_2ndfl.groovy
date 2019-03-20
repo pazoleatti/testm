@@ -249,7 +249,7 @@ class Report2Ndfl extends AbstractScriptClass {
                     ФИО(Фамилия: departmentConfig.signatorySurName,
                             Имя: departmentConfig.signatoryFirstName,
                             Отчество: departmentConfig.signatoryLastName) {}
-                    if (departmentConfig.signatoryMark.code == "2") {
+                    if (departmentConfig.signatoryMark.code == 2) {
                         СвПред(НаимДок: departmentConfig.approveDocName,
                                 НаимОрг: departmentConfig.approveOrgName) {}
                     }

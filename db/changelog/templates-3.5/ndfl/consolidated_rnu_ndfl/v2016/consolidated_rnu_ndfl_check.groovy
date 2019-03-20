@@ -1165,8 +1165,8 @@ class Check extends AbstractScriptClass {
                 /**
                  * Проверки по операциям
                  */
-                // СведДох2 Сумма вычета (Графа 12)
-                if (totalOperationIncome.totalDeductionsSumm != null && totalOperationIncome.incomeAccruedSumm != null) {
+                if (!isDummy(allIncomesOfOperation)) {
+                    // СведДох2 Сумма вычета (Графа 12)
                     BigDecimal incomesAccruedSum = totalOperationIncome.incomeAccruedSumm ?: 0
                     BigDecimal incomesDeductionsSum = totalOperationIncome.totalDeductionsSumm ?: 0
                     BigDecimal deductionsSum = totalOperationDeduction.periodCurrSumm ?: 0
@@ -1194,21 +1194,21 @@ class Check extends AbstractScriptClass {
                         String pathError = String.format(SECTION_LINES_MSG, T_PERSON_INCOME, rowNums)
                         logger.warnExp("%s. %s.", LOG_TYPE_2_12, fioAndInpAndOperId, pathError, errMsg)
                     }
-                }
 
-                // СведДох7 Заполнение Раздела 2 Графы 18 и 19
-                BigDecimal notHoldingTax = totalOperationIncome.notHoldingTax ?: 0
-                BigDecimal overholdingTax = totalOperationIncome.overholdingTax ?: 0
-                BigDecimal calculatedTax = totalOperationIncome.calculatedTax ?: 0
-                BigDecimal withholdingTax = totalOperationIncome.withholdingTax ?: 0
-                if (notHoldingTax - overholdingTax != calculatedTax - withholdingTax) {
-                    // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
-                    String errMsg = "Для строк операции с \"ID операции\"=\"$operationId\" разность сумм значений гр. \"НДФЛ не удержанный\" " +
-                            "(\"$notHoldingTax\") и гр. \"НДФЛ излишне удержанный\" (\"$overholdingTax\") " +
-                            "должна быть равна разности сумм значений гр.\"НДФЛ исчисленный\" (\"$calculatedTax\") и " +
-                            "гр.\"НДФЛ удержанный\" (\"$withholdingTax\") по всем строкам одной операции"
-                    String pathError = String.format(SECTION_LINES_MSG, T_PERSON_INCOME, rowNums)
-                    logger.warnExp("%s. %s.", LOG_TYPE_2_18_19, fioAndInpAndOperId, pathError, errMsg)
+                    // СведДох7 Заполнение Раздела 2 Графы 18 и 19
+                    BigDecimal notHoldingTax = totalOperationIncome.notHoldingTax ?: 0
+                    BigDecimal overholdingTax = totalOperationIncome.overholdingTax ?: 0
+                    BigDecimal calculatedTax = totalOperationIncome.calculatedTax ?: 0
+                    BigDecimal withholdingTax = totalOperationIncome.withholdingTax ?: 0
+                    if (notHoldingTax - overholdingTax != calculatedTax - withholdingTax) {
+                        // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
+                        String errMsg = "Для строк операции с \"ID операции\"=\"$operationId\" разность сумм значений гр. \"НДФЛ не удержанный\" " +
+                                "(\"$notHoldingTax\") и гр. \"НДФЛ излишне удержанный\" (\"$overholdingTax\") " +
+                                "должна быть равна разности сумм значений гр.\"НДФЛ исчисленный\" (\"$calculatedTax\") и " +
+                                "гр.\"НДФЛ удержанный\" (\"$withholdingTax\") по всем строкам одной операции"
+                        String pathError = String.format(SECTION_LINES_MSG, T_PERSON_INCOME, rowNums)
+                        logger.warnExp("%s. %s.", LOG_TYPE_2_18_19, fioAndInpAndOperId, pathError, errMsg)
+                    }
                 }
 
                 /**
@@ -1999,6 +1999,15 @@ class Check extends AbstractScriptClass {
         }
 
         logForDebug("Проверки сведений о доходах в виде авансовых платежей (" + (System.currentTimeMillis() - time) + " мс)")
+    }
+
+    boolean isDummy(List<NdflPersonIncome> incomes) {
+        for (def income : incomes) {
+            if (!income.isDummy()) {
+                return false
+            }
+        }
+        return true
     }
 
     class CheckData {
