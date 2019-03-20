@@ -6,17 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.DepartmentType
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.PagingResult
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
-import com.aplana.sbrf.taxaccounting.model.refbook.Address
-import com.aplana.sbrf.taxaccounting.model.refbook.IdDoc
-import com.aplana.sbrf.taxaccounting.model.refbook.PersonIdentifier
-import com.aplana.sbrf.taxaccounting.model.refbook.PersonTb
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAsnu
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookCountry
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDocType
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookTaxpayerState
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
-import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPerson
+import com.aplana.sbrf.taxaccounting.model.refbook.*
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
@@ -26,8 +16,10 @@ import com.aplana.sbrf.taxaccounting.script.service.TAUserService
 import com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils
 import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService
 import com.aplana.sbrf.taxaccounting.service.refbook.RefBookAsnuService
+import com.google.common.base.Strings
 import groovy.transform.TypeChecked
 import groovy.transform.TypeCheckingMode
+import org.apache.commons.io.IOUtils
 
 import javax.xml.stream.XMLInputFactory
 import javax.xml.stream.XMLStreamReader
@@ -134,6 +126,10 @@ class Person extends AbstractScriptClass {
     Map<RegistryPerson, List<PersonIdentifier>> undefinedAsnu = [:]
     // Маппа неопределенных Видов документов, где ключ ФЛ, значение - ДУЛы у которых не определен вид
     Map<RegistryPerson, List<IdDoc>> undefinedIdDocTypes = [:]
+    /**
+     * Мапа для сопоставления сохраненных и пропарсенных ФЛ
+     */
+    Map<RegistryPerson, RegistryPerson> savedAndParsedPersons = [:]
 
     void importData() {
         defineTB()
@@ -142,8 +138,29 @@ class Person extends AbstractScriptClass {
         }
 
         fillAsnuCache()
-        List<RegistryPerson> parsedPersons = parseXml()
+        // Из потока данных входного xml файла создадим массив байтов для возможности повторного чтения xml-файла
+        ByteArrayOutputStream baos = new ByteArrayOutputStream()
+        IOUtils.copy(inputStream, baos)
+        IOUtils.closeQuietly(inputStream)
+        byte[] bytes = baos.toByteArray()
+
+        /* После процедуры создания ФЛ они изменяются, а при проверках нужно иметь связь данных по ФЛ из xml файла (т.к.
+        * проверки проводятся по атрибутам xml-файла) и созданных ФЛ (т.к. в сообщениях используются идентификаторы из
+        * Реестра ФЛ). Это обуславливает иметь набор объектов ФЛ соответствующий xml файлу и созданный в Реестре список объектов ФЛ.
+        */
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(bytes)
+        List<RegistryPerson> parsedPersons = parseXml(inputStream)
+        IOUtils.closeQuietly(inputStream)
+
+        inputStream = new ByteArrayInputStream(bytes)
+        List<RegistryPerson> parsedPersonsToCheck = parseXml(inputStream)
+        IOUtils.closeQuietly(inputStream)
+
         List<RegistryPerson> savedPersons = save(parsedPersons)
+        parsedPersons.eachWithIndex { RegistryPerson registryPerson, int index ->
+            savedAndParsedPersons.put(savedPersons[index], parsedPersonsToCheck[index])
+        }
+
         checkPersons(savedPersons)
         for (RegistryPerson person : savedPersons) {
             logger.info("Создана новая запись в Реестре физических лиц: " +
@@ -177,7 +194,7 @@ class Person extends AbstractScriptClass {
         }
     }
 
-    List<RegistryPerson> parseXml() {
+    List<RegistryPerson> parseXml(InputStream inputStream) {
         List<RegistryPerson> persons = []
         XMLStreamReader reader = null
         try {
@@ -296,9 +313,6 @@ class Person extends AbstractScriptClass {
             }
             return null
         }
-        if (!document.documentNumber) {
-            return null
-        }
         return document
     }
 
@@ -358,6 +372,8 @@ class Person extends AbstractScriptClass {
         return null
     }
 
+    Map<RegistryPerson, List<IdDoc>> removedDocuments = [:]
+
     List<RegistryPerson> save(List<RegistryPerson> persons) {
         if (persons) {
             for (def person : persons) {
@@ -369,6 +385,13 @@ class Person extends AbstractScriptClass {
                 personTb.setImportDate(importDate)
                 person.personTbList.add(personTb)
                 person.startDate = versionFrom
+                Iterator<IdDoc> idDocIterator = person.documents.iterator()
+                while (idDocIterator.hasNext()) {
+                    IdDoc idDoc = idDocIterator.next()
+                    if (!getDocTypeByCode(idDoc.docType?.getCode()) || Strings.isNullOrEmpty(idDoc.documentNumber)) {
+                        idDocIterator.remove()
+                    }
+                }
             }
 
             personService.savePersons(persons)
@@ -429,7 +452,7 @@ class Person extends AbstractScriptClass {
             checkFilled((person as RegistryPersonExt).birthDateStr, person, "Файл.ИнфЧасть.АнкетДаннФЛ.ДатаРожд")
             checkFilled((person as RegistryPersonExt).citizenshipCode, person, "Файл.ИнфЧасть.АнкетДаннФЛ.Гражд")
             checkFilled((person as RegistryPersonExt).taxPayerStatusCode, person, "Файл.ИнфЧасть.АнкетДаннФЛ.СтатусФЛ")
-            for (def document : person.documents) {
+            for (def document : savedAndParsedPersons.get(person).documents) {
                 checkFilled((document as PersonDocumentExt).docTypeCode, person, "Файл.ИнфЧасть.УдЛичнФЛ.УдЛичнФЛВид")
                 checkFilled(document.documentNumber, person, "Файл.ИнфЧасть.УдЛичнФЛ.УдЛичнФЛНом")
                 checkFilled((document as PersonDocumentExt).incRepStr, person, "Файл.ИнфЧасть.УдЛичнФЛ.УдЛичнФЛГл")
@@ -441,8 +464,8 @@ class Person extends AbstractScriptClass {
             // 4.b Проверки данных ФЛ
             List<String> warnings = []
             // 1. Проверка корректности формата ДУЛ
-            for (def document : person.documents) {
-                if (document.docType && document.documentNumber) {
+            for (def document : savedAndParsedPersons.get(person).documents) {
+                if (document.docType != null && document.documentNumber != null) {
                     warnings.add(ScriptUtils.checkDul(document.docType.getCode(), document.documentNumber, "ДУЛ Номер"))
                 }
             }
@@ -465,7 +488,7 @@ class Person extends AbstractScriptClass {
                 }
             }
             // 6. Проверка, что среди ДУЛ имеется ДУЛ с признаком "главный ДУЛ"
-            if (person.reportDoc?.id == null) {
+            if (savedAndParsedPersons.get(person)?.reportDoc?.incRepStr != "1") {
                 warnings << "Среди записей о ДУЛ отсутствует запись, для которой признак \"Включается в отчетность\"=1"
             }
 
