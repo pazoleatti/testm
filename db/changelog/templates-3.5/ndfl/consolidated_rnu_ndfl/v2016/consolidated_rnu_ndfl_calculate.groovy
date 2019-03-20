@@ -428,7 +428,7 @@ class Calculate extends AbstractScriptClass {
             declarationDataPerson.declarationDataId = declarationData.id
 
             if (refBookPerson.idDocType == null && refBookPerson.idDocNumber == null) {
-                logger.warn("Раздел 1. ФЛ: %s, идентификатор ФЛ %s, включено в форму без заполнения Графы 10 (\"ДУЛ Код\") и Графы 11 (\"ДУЛ Номер\"), т.к. информация о ДУЛ, включаемом в отчетность, отсутствует  в Реестре ФЛ.",
+                logger.warn("Раздел 1. ФЛ: %s, идентификатор ФЛ: %s, включено в форму без заполнения Графы 10 (\"ДУЛ Код\") и Графы 11 (\"ДУЛ Номер\"), т.к. информация о ДУЛ, включаемом в отчетность, отсутствует  в Реестре ФЛ.",
                         "${refBookPerson.lastName + " " + refBookPerson.firstName + " " + (refBookPerson.middleName ?: "")}",
                         refBookPerson.recordId)
             }
