@@ -849,7 +849,7 @@ class Calculate extends AbstractScriptClass {
                             infoMsgBuilder.append(String.format("[Добавлена запись о новом ДУЛ: \"Код ДУЛ\" = \"%s\", \"Серия и номер ДУЛ\": \"%s\"]", primaryPersonDocument?.docType?.code, primaryPersonDocument?.getDocumentNumber()))
                         }
                     }
-                } else if (!primaryPersonDocument.docType?.code || !getDocTypeRefBookList().code.contains(primaryPersonDocument.docType?.code)) {
+                } else if (primaryPersonDocument && (!primaryPersonDocument.docType?.code || !getDocTypeRefBookList().code.contains(primaryPersonDocument.docType?.code))) {
                     createMsg(primaryPersonDocument.docType?.code ?: "_", C_ID_DOC_TYPE, R_ID_DOC_TYPE, CLAUSE_END_UPDATE, primaryPerson)
                     primaryPersonDocument = new IdDoc()
                 }
