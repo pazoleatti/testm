@@ -253,7 +253,7 @@ class Check extends AbstractScriptClass {
                 ScriptUtils.checkInterrupted()
 
                 // Общие проверки
-                checkDataCommon(ndflPersonList, ndflPersonIncomeList, personMap)
+                checkDataCommon(ndflPersonList, ndflPersonIncomeList)
 
                 ScriptUtils.checkInterrupted()
 
@@ -666,7 +666,7 @@ class Check extends AbstractScriptClass {
     /**
      * Общие проверки
      */
-    def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndflPersonIncomeList, Map<Long, RegistryPerson> personMap) {
+    def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndflPersonIncomeList) {
         long time = System.currentTimeMillis()
         long timeTotal = time
         // Параметры подразделения
@@ -677,15 +677,19 @@ class Check extends AbstractScriptClass {
         time = System.currentTimeMillis()
 
         // Общ15 Консолидированная форма не пуста
-        if (ndflPersonList.isEmpty()) {
-            //Консолидированная форма <Номер формы>, <Подразделение>, <Период> не содержит данных, принятие формы невозможно
-            String strCorrPeriod = ""
-            if (departmentReportPeriod.getCorrectionDate() != null) {
-                strCorrPeriod = ", с датой сдачи корректировки " + departmentReportPeriod.getCorrectionDate().format("dd.MM.yyyy")
-            }
-            def strPeriod = departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + ", " + departmentReportPeriod.getReportPeriod().getName() + strCorrPeriod
-            logger.errorExp("Консолидированная форма %s, %s, %s не содержит данных, принятие формы невозможно", "Консолидированная форма не пуста", "",
-                    declarationData.id.toString(), department.name, strPeriod)
+        String strCorrPeriod = (departmentReportPeriod.correctionDate) ?
+                ", с датой сдачи корректировки ${departmentReportPeriod.correctionDate.format("dd.MM.yyyy")}" : ""
+        def strPeriod = departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + ", " + departmentReportPeriod.getReportPeriod().getName() + strCorrPeriod
+
+        if (!ndflPersonList && !ndflPersonIncomeList) {
+            logger.errorExp("Консолидированная форма ${declarationData.id}, ${department.name}, ${strPeriod} не содержит данных, принятие формы невозможно",
+                    "Консолидированная форма не пуста", "")
+        } else if (!ndflPersonList) {
+            logger.errorExp("Консолидированная форма ${declarationData.id}, ${department.name}, ${strPeriod} не содержит данных в разделе 1: \"Реквизиты\", принятие формы невозможно",
+                    "Консолидированная форма не пуста", "")
+        } else if (!ndflPersonIncomeList) {
+            logger.errorExp("Консолидированная форма ${declarationData.id}, ${department.name}, ${strPeriod} не содержит данных в разделе 2: \"Сведения о доходах и НДФЛ\", принятие формы невозможно",
+                    "Консолидированная форма не пуста", "")
         }
 
         for (NdflPerson ndflPerson : ndflPersonList) {
