@@ -519,4 +519,13 @@
 		</update>
 	</changeSet>
 
+	<!--https://jira.aplana.com/browse/SBRFNDFL-6873 Ошибка NULL при загрузке файла первичной загрузки ФЛ с пустым атрибутом номер ДУЛ-->
+	<changeSet id="3.5-ytrofimov-17" author="ytrofimov" runAlways="true">
+		<update tableName="BLOB_DATA">
+			<column name="data"
+					valueBlobFile="templates-3.5/refbook/person.groovy"/>
+			<where>id in (select script_id from ref_book r where r.id = 904)</where>
+		</update>
+	</changeSet>
+
 </databaseChangeLog>
