@@ -3181,6 +3181,8 @@ class ExportDeclarationDataSheetFiller implements SheetFiller {
         int pointer = OFFSET
         // Максимальное количество строк для заполнеиния на одном листе
         final int MAX_ROWS = 1_000_000
+        // Используемый формат даты
+        final String DATE_FORMAT = SharedConstants.DATE_FORMAT
         // Индекс листа
         int sheetIndex = 1
         Sheet sheet = wb.getSheetAt(sheetIndex)
@@ -3249,9 +3251,7 @@ class ExportDeclarationDataSheetFiller implements SheetFiller {
                 cell_5.setCellValue(np.getMiddleName() != null ? np.getMiddleName() : "")
                 Cell cell_6 = row.createCell(6)
                 cell_6.setCellStyle(centeredStyleDate)
-                if (np.birthDay != null) {
-                    cell_6.setCellValue(np.birthDay)
-                }
+                cell_6.setCellValue(np.birthDay?.format(DATE_FORMAT) ?: "")
                 Cell cell_7 = row.createCell(7)
                 cell_7.setCellStyle(centeredStyle)
                 cell_7.setCellValue(np.getCitizenship() != null ? np.getCitizenship() : "")
@@ -3350,12 +3350,8 @@ class ExportDeclarationDataSheetFiller implements SheetFiller {
                     cell_23.setCellValue(npi.getOperationId() != null ? npi.getOperationId() : "")
                     cell_24.setCellValue(npi.getIncomeCode() != null ? npi.getIncomeCode() : "")
                     cell_25.setCellValue(npi.getIncomeType() != null ? npi.getIncomeType() : "")
-                    if (npi.incomeAccruedDate != null) {
-                        cell_26.setCellValue(npi.incomeAccruedDate)
-                    }
-                    if (npi.incomePayoutDate != null) {
-                        cell_27.setCellValue(npi.incomePayoutDate)
-                    }
+                    cell_26.setCellValue(npi.incomeAccruedDate?.format(DATE_FORMAT) ?: "")
+                    cell_27.setCellValue(npi.incomePayoutDate?.format(DATE_FORMAT) ?: "")
                     cell_28.setCellValue(npi.getKpp() != null ? npi.getKpp() : "")
                     cell_29.setCellValue(npi.getOktmo() != null ? npi.getOktmo() : "")
                     if (npi.incomeAccruedSumm != null) {
@@ -3373,9 +3369,7 @@ class ExportDeclarationDataSheetFiller implements SheetFiller {
                     if (npi.taxRate != null) {
                         cell_34.setCellValue(npi.taxRate)
                     }
-                    if (npi.taxDate != null) {
-                        cell_35.setCellValue(npi.taxDate)
-                    }
+                    cell_35.setCellValue(npi.taxDate?.format(DATE_FORMAT) ?: "")
                     if (npi.calculatedTax != null) {
                         cell_36.setCellValue(npi.calculatedTax.doubleValue())
                     }
@@ -3391,18 +3385,14 @@ class ExportDeclarationDataSheetFiller implements SheetFiller {
                     if (npi.refoundTax != null) {
                         cell_40.setCellValue(npi.refoundTax.doubleValue())
                     }
-                    if (npi.taxTransferDate != null) {
-                        if (npi.taxTransferDate?.format(SharedConstants.DATE_FORMAT) == SharedConstants.DATE_ZERO_AS_DATE) {
-                            cell_41.setCellStyle(centeredStyle)
-                            cell_41.setCellValue(SharedConstants.DATE_ZERO_AS_STRING)
-                        } else {
-                            cell_41.setCellStyle(centeredStyleDate)
-                            cell_41.setCellValue(npi.taxTransferDate)
-                        }
+                    if (npi.taxTransferDate?.format(SharedConstants.DATE_FORMAT) == SharedConstants.DATE_ZERO_AS_DATE) {
+                        cell_41.setCellStyle(centeredStyle)
+                        cell_41.setCellValue(SharedConstants.DATE_ZERO_AS_STRING)
+                    } else {
+                        cell_41.setCellStyle(centeredStyleDate)
+                        cell_41.setCellValue(npi.taxTransferDate?.format(DATE_FORMAT) ?: "")
                     }
-                    if (npi.paymentDate != null) {
-                        cell_42.setCellValue(npi.paymentDate)
-                    }
+                    cell_42.setCellValue(npi.paymentDate?.format(DATE_FORMAT) ?: "")
                     cell_43.setCellValue(npi.getPaymentNumber() != null ? npi.getPaymentNumber() : "")
                     if (npi.taxSumm != null) {
                         cell_44.setCellValue(npi.taxSumm.intValue())
@@ -3443,31 +3433,23 @@ class ExportDeclarationDataSheetFiller implements SheetFiller {
                     cell0Value.append(npd.id.toString())
                     cell_45.setCellValue(npd.getTypeCode() != null ? npd.getTypeCode() : "")
                     cell_46.setCellValue(npd.getNotifType() != null ? npd.getNotifType() : "")
-                    if (npd.notifDate != null) {
-                        cell_47.setCellValue(npd.notifDate)
-                    }
+                    cell_47.setCellValue(npd.notifDate?.format(DATE_FORMAT) ?: "")
                     cell_48.setCellValue(npd.getNotifNum() != null ? npd.getNotifNum() : "")
                     cell_49.setCellValue(npd.getNotifSource() != null ? npd.getNotifSource() : "")
                     if (npd.notifSumm != null) {
                         cell_50.setCellValue(npd.notifSumm.doubleValue())
                     }
                     cell_51.setCellValue(npd.getOperationId() != null ? npd.getOperationId() : "")
-                    if (npd.incomeAccrued != null) {
-                        cell_52.setCellValue(npd.incomeAccrued)
-                    }
+                    cell_52.setCellValue(npd.incomeAccrued?.format(DATE_FORMAT) ?: "")
                     cell_53.setCellValue(npd.getIncomeCode() != null ? npd.getIncomeCode() : "")
                     if (npd.incomeSumm != null) {
                         cell_54.setCellValue(npd.incomeSumm.doubleValue())
                     }
-                    if (npd.periodPrevDate != null) {
-                        cell_55.setCellValue(npd.periodPrevDate)
-                    }
+                    cell_55.setCellValue(npd.periodPrevDate?.format(DATE_FORMAT) ?: "")
                     if (npd.periodPrevSumm != null) {
                         cell_56.setCellValue(npd.periodPrevSumm.doubleValue())
                     }
-                    if (npd.periodCurrDate != null) {
-                        cell_57.setCellValue(npd.periodCurrDate)
-                    }
+                    cell_57.setCellValue(npd.periodCurrDate?.format(DATE_FORMAT) ?: "")
                     if (npd.periodCurrSumm != null) {
                         cell_58.setCellValue(npd.periodCurrSumm.doubleValue())
                     }
@@ -3492,9 +3474,7 @@ class ExportDeclarationDataSheetFiller implements SheetFiller {
                         cell_60.setCellValue(npp.summ.doubleValue())
                     }
                     cell_61.setCellValue(npp.getNotifNum() != null ? npp.getNotifNum() : "")
-                    if (npp.notifDate != null) {
-                        cell_62.setCellValue(npp.notifDate)
-                    }
+                    cell_62.setCellValue(npp.notifDate?.format(DATE_FORMAT) ?: "")
                     cell_63.setCellValue(npp.getNotifSource() != null ? npp.getNotifSource() : "")
                 }
                 cell_0.setCellValue(cell0Value.toString())

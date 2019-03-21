@@ -740,7 +740,9 @@ class Report2Ndfl extends AbstractScriptClass {
         if (!departmentConfigs) {
             return
         }
-        Map<KppOktmoPair, List<Operation>> operationsByKppOktmoPair = findOperations().groupBy { new KppOktmoPair(it.kpp, it.oktmo) }
+        Map<KppOktmoPair, List<Operation>> operationsByKppOktmoPair = findOperations().groupBy {
+            new KppOktmoPair(it.kpp, it.oktmo)
+        }
         List<DeclarationData> createdForms = []
         for (def departmentConfig : departmentConfigs) {
             ScriptUtils.checkInterrupted()
@@ -811,7 +813,10 @@ class Report2Ndfl extends AbstractScriptClass {
         }
         List<Pair<KppOktmoPair, DepartmentConfig>> kppOktmoPairs = departmentConfigService.findAllByDeclaration(sourceKnf)
         if (reportFormsCreationParams.kppOktmoPairs) {
-            kppOktmoPairs = kppOktmoPairs.findAll { reportFormsCreationParams.kppOktmoPairs.contains(it.first) }
+            kppOktmoPairs = kppOktmoPairs.findAll {
+                reportFormsCreationParams.kppOktmoPairs.contains(it.first) ||
+                        it.second && reportFormsCreationParams.kppOktmoPairs.contains(new KppOktmoPair(it.second.kpp, it.second.oktmo.code))
+            }
         }
         def missingDepartmentConfigs = kppOktmoPairs.findResults { it.first == null ? it.second : null }
         for (def departmentConfig : missingDepartmentConfigs) {

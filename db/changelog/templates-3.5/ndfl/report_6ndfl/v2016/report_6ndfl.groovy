@@ -512,7 +512,10 @@ class Report6Ndfl extends AbstractScriptClass {
         }
         List<Pair<KppOktmoPair, DepartmentConfig>> kppOktmoPairs = departmentConfigService.findAllByDeclaration(sourceKnf)
         if (reportFormsCreationParams.kppOktmoPairs) {
-            kppOktmoPairs = kppOktmoPairs.findAll { reportFormsCreationParams.kppOktmoPairs.contains(it.first) }
+            kppOktmoPairs = kppOktmoPairs.findAll {
+                reportFormsCreationParams.kppOktmoPairs.contains(it.first) ||
+                        it.second && reportFormsCreationParams.kppOktmoPairs.contains(new KppOktmoPair(it.second.kpp, it.second.oktmo.code))
+            }
         }
         def missingDepartmentConfigs = kppOktmoPairs.findResults { it.first == null ? it.second : null }
         for (def departmentConfig : missingDepartmentConfigs) {
