@@ -211,6 +211,15 @@
                                         !!declarationData.adjustNegativeValues) | translate}}</label>
                                 </div>
                             </div>
+                            <div class="row-fluid"
+                                 ng-if="declarationData.declarationType == APP_CONSTANTS.DECLARATION_TYPE.REPORT_6_NDFL.id">
+                                <div class="span6">
+                                    <label class="control-label">{{::'title.taxRefund' | translate}}:</label>
+                                </div>
+                                <div class="span6">
+                                    <label class="font-normal info-text">{{declarationData.taxRefundReflectionMode | taxRefundReflectModeEnumFormatter}}</label>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

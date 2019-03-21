@@ -741,6 +741,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             result.setNegativeIncome(declaration.getNegativeIncome());
             result.setNegativeTax(declaration.getNegativeTax());
             result.setNegativeSumsSign(declaration.getNegativeSumsSign());
+            result.setTaxRefundReflectionMode(declaration.getTaxRefundReflectionMode());
             if (declaration.getDocStateId() != null) {
                 RefBookDataProvider stateEDProvider = refBookFactory.getDataProvider(RefBook.Id.DOC_STATE.getId());
                 result.setDocState(stateEDProvider.getRecordData(declaration.getDocStateId()).get("NAME").getStringValue());
