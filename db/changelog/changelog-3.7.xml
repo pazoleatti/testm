@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+	<changeSet id="3.7-dnovikov-1" author="dnovikov">
+		<update tableName="blob_data">
+			<column name="data"
+					valueBlobFile="templates-3.7/refbook/department_configs.groovy"/>
+			<where>id = (select script_id from ref_book r where r.id = 951)</where>
+		</update>
+	</changeSet>
+
+</databaseChangeLog>
