@@ -85,7 +85,7 @@ class Check extends AbstractScriptClass {
         //---------------------------------------------------------------
         // Внутридокументные проверки
         ScriptUtils.checkInterrupted()
-        def msgError = "В форме \"%s\" КПП: \"%s\" ОКТМО: \"%s\" "
+        def msgError = "В форме \"%s\" КПП: \"%s\", ОКТМО: \"%s\" "
         msgError = sprintf(msgError, FORM_NAME_NDFL6, declarationData.kpp, declarationData.oktmo)
 
         def ndfl6Stream = declarationService.getXmlStream(declarationData.id, userInfo)
@@ -118,7 +118,7 @@ class Check extends AbstractScriptClass {
             def Дельта = ИсчислНалРасч - ИсчислНал
             // ВнДок2 Исчисленный налог
             if (!(Math.abs(Дельта) <= ДопустимаяПогрешность)) {
-                logger.warnExp(msgError + " неверно рассчитана «Cумма исчисленного налога. Модуль разности ($Дельта) рассчитанного " +
+                logger.warnExp(msgError + " неверно рассчитана «Cумма исчисленного налога». Модуль разности (${Math.abs(Дельта)}) рассчитанного " +
                         "значения суммы исчисленного налога ($ИсчислНалРасч) и указанного в строке 040 ($ИсчислНал) больше допустимого " +
                         "значения погрешности ($ДопустимаяПогрешность).", "«Cумма исчисленного налога» рассчитана некорректно", "")
             }
