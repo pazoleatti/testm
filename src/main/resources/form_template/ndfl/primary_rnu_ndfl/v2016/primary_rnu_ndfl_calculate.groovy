@@ -22,6 +22,7 @@ import com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils
 import com.aplana.sbrf.taxaccounting.service.LogBusinessService
 import com.aplana.sbrf.taxaccounting.service.TAUserService
 import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService
+import com.google.common.base.Strings
 import groovy.transform.TypeChecked
 import groovy.transform.TypeCheckingMode
 import org.apache.commons.collections4.CollectionUtils
@@ -630,99 +631,136 @@ class Calculate extends AbstractScriptClass {
 
         int createCnt = 0
 
-            for (NaturalPerson person : insertPersonList) {
+        Map<Long, String> infoData = [:]
 
-                ScriptUtils.checkInterrupted()
+        for (NaturalPerson person : insertPersonList) {
 
-                person.setStartDate(getReportPeriodStartDate())
+            ScriptUtils.checkInterrupted()
 
-                if (CollectionUtils.isNotEmpty(person.documents)) {
-                    IdDoc personDocument = person.documents.get(0)
-                    if (!personDocument.docType?.code || !getDocTypeRefBookList().code.contains(personDocument.docType?.code)) {
-                        createMsg(personDocument.docType?.code ?: "_", C_ID_DOC_TYPE, R_ID_DOC_TYPE, CLAUSE_END_CREATE, person)
-                        personDocument = new IdDoc()
-                    } else {
-                        personDocument.documentNumber = performDocNumber(personDocument)
-                    }
-                    person.reportDoc = personDocument
-                } else {
-                    person.reportDoc = new IdDoc()
-                }
+            StringBuilder infoMsgBuilder = new StringBuilder()
 
-                Department parentTb = new Department();
-                parentTb.setId(departmentService.getParentTBId(declarationData.departmentId))
-
-                PersonTb personTb = new PersonTb()
-                personTb.person = person
-                personTb.tbDepartment = parentTb
-                personTb.importDate = getDeclarationDataCreationDate()
-                person.getPersonTbList().add(personTb)
-
-                String fio = (person.lastName ?: "") + " " + (person.firstName ?: "") + " " + (person.middleName ?: "")
-                String inp = person.personIdentifier && person.personIdentifier.inp ? person.personIdentifier.inp : ""
-                String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [fio, inp])
-                if (person.inn == null) {
-                    if (person.citizenship?.code == "643") {
-                        logger.warnExp("Для физического лица ФИО: \"%s\", ИНП: %s в Разделе 1 не указано значение ИНН в РФ. Физическое лицо будет создано в Реестре физических лиц без указания ИНН в РФ",
-                                "\"ИНН\" не указан",
-                                fioAndInp,
-                                fio,
-                                person.personIdentifier && person.personIdentifier.inp ? person.personIdentifier.inp : "")
-                    }
-                } else {
-                    String checkInn = ScriptUtils.checkInn(person.inn)
-                    if (checkInn != null) {
-                        logger.warnExp("Для физического лица ФИО: \"%s\", ИНП: %s в Разделе 1 указано некорректное значение ИНН в РФ  (%s). Причина: %s. Физическое лицо будет создано в Реестре физических лиц без указания ИНН в РФ",
-                                "\"ИНН\" не соответствует формату",
-                                fioAndInp,
-                                fio,
-                                person.personIdentifier && person.personIdentifier.inp ? person.personIdentifier.inp : "",
-                                person.inn,
-                                checkInn)
-                        person.setInn(null)
-                    }
-                }
-                if (!person.getCitizenship()?.code || !getCountryRefBookList().code.contains(person.getCitizenship()?.code)) {
-                    createMsg(person.getCitizenship()?.code ?: "_", C_CITIZENSHIP, R_CITIZENSHIP, CLAUSE_END_CREATE, person)
-                    person.setCitizenship(new RefBookCountry())
-                }
-                if (!person.getTaxPayerState()?.code || !getTaxpayerStatusRefBookList().code.contains(person.getTaxPayerState()?.code)) {
-                    createMsg(person.getTaxPayerState()?.code ?: "_", C_STATUS, R_STATUS, CLAUSE_END_CREATE, person)
-                    person.setTaxPayerState(new RefBookTaxpayerState())
-                }
-                if (!ScriptUtils.checkSnils(person.snils)) {
-                    String errMsg = String.format("Значение гр. \"%s\" (\"%s\") не соответствует формату. %s",
-                            "СНИЛС", person.snils ?: "_", CLAUSE_END_CREATE
-                    )
-                    String pathError = String.format(SECTION_LINE_MSG, T_PERSON, person.num ?: "")
-                    logger.warnExp("%s. %s.", "\"СНИЛС\" не соответствует формату", fioAndInp, pathError,
-                            errMsg)
-                    person.setSnils(null)
+            person.personIdentityList.eachWithIndex { PersonIdentifier personIdentifier, int index ->
+                if (index > 0) {
+                    infoMsgBuilder.append(String.format("[Добавлен новый \"ИНП\": \"%s\", \"АСНУ\": \"%s\"]", personIdentifier?.inp, personIdentifier?.getAsnu()?.getCode()))
                 }
             }
 
-            List<RegistryPerson> savedPersons = personService.saveNewIdentificatedPersons(insertPersonList)
+            person.setStartDate(getReportPeriodStartDate())
 
-            //update reference to ref book
-            updatePrimaryToRefBookPersonReferences(insertPersonList)
-
-            for (Map.Entry<Long, List<NaturalPerson>> entry : primaryPersonOriginalDuplicates.entrySet()) {
-                for (NaturalPerson duplicatePerson : entry.getValue()) {
-                    NaturalPerson original = insertPersonList.find { NaturalPerson insertPerson ->
-                        entry.getKey() == insertPerson?.primaryPersonId
-                    }
-                    duplicatePerson.id = original.id
+            if (CollectionUtils.isNotEmpty(person.documents)) {
+                IdDoc personDocument = person.documents.get(0)
+                if (!personDocument.docType?.code || !getDocTypeRefBookList().code.contains(personDocument.docType?.code)) {
+                    createMsg(personDocument.docType?.code ?: "_", C_ID_DOC_TYPE, R_ID_DOC_TYPE, CLAUSE_END_CREATE, person)
+                    personDocument = new IdDoc()
+                } else {
+                    personDocument.documentNumber = performDocNumber(personDocument)
                 }
-                updatePrimaryToRefBookPersonReferences(entry.getValue())
+                person.reportDoc = personDocument
+            } else {
+                person.reportDoc = new IdDoc()
             }
 
-            for (RegistryPerson person : savedPersons) {
-                logger.infoExp("Создана новая запись в Реестре физических лиц. Идентификатор ФЛ: %s, ФИО: %s %s %s", "", String.format("%s, ИНП: %s", buildFio(person), person.getPersonIdentityList().get(0).inp), person.recordId, person.getLastName() ?: "", person.getFirstName() ?: "", person.getMiddleName() ?: "")
-                logBusinessService.logPersonEvent(person.id, FormDataEvent.CREATE_PERSON,
-                        "ФЛ создано в ходе операции \"Идентификация\" первичной формы № $declarationData.id.",
+            person.documents.eachWithIndex { IdDoc document, int index ->
+                if (index > 0) {
+                    infoMsgBuilder.append(String.format("[Добавлена запись о новом ДУЛ: \"Код ДУЛ\" = \"%s\", \"Серия и номер ДУЛ\": \"%s\"]", document?.docType?.code, document?.getDocumentNumber()))
+                }
+            }
+
+            if (person.documents.size() > 1) {
+                checkIncReportFlag(person, infoMsgBuilder)
+            }
+
+            Department parentTb = new Department()
+            parentTb.setId(departmentService.getParentTBId(declarationData.departmentId))
+
+            PersonTb personTb = new PersonTb()
+            personTb.person = person
+            personTb.tbDepartment = parentTb
+            personTb.importDate = getDeclarationDataCreationDate()
+            person.getPersonTbList().add(personTb)
+
+            String fio = (person.lastName ?: "") + " " + (person.firstName ?: "") + " " + (person.middleName ?: "")
+            String inp = person.personIdentifier && person.personIdentifier.inp ? person.personIdentifier.inp : ""
+            String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [fio, inp])
+            if (person.inn == null) {
+                if (person.citizenship?.code == "643") {
+                    logger.warnExp("Для физического лица ФИО: \"%s\", ИНП: %s в Разделе 1 не указано значение ИНН в РФ. Физическое лицо будет создано в Реестре физических лиц без указания ИНН в РФ",
+                            "\"ИНН\" не указан",
+                            fioAndInp,
+                            fio,
+                            person.personIdentifier && person.personIdentifier.inp ? person.personIdentifier.inp : "")
+                }
+            } else {
+                String checkInn = ScriptUtils.checkInn(person.inn)
+                if (checkInn != null) {
+                    logger.warnExp("Для физического лица ФИО: \"%s\", ИНП: %s в Разделе 1 указано некорректное значение ИНН в РФ  (%s). Причина: %s. Физическое лицо будет создано в Реестре физических лиц без указания ИНН в РФ",
+                            "\"ИНН\" не соответствует формату",
+                            fioAndInp,
+                            fio,
+                            person.personIdentifier && person.personIdentifier.inp ? person.personIdentifier.inp : "",
+                            person.inn,
+                            checkInn)
+                    person.setInn(null)
+                }
+            }
+            if (!person.getCitizenship()?.code || !getCountryRefBookList().code.contains(person.getCitizenship()?.code)) {
+                createMsg(person.getCitizenship()?.code ?: "_", C_CITIZENSHIP, R_CITIZENSHIP, CLAUSE_END_CREATE, person)
+                person.setCitizenship(new RefBookCountry())
+            }
+            if (!person.getTaxPayerState()?.code || !getTaxpayerStatusRefBookList().code.contains(person.getTaxPayerState()?.code)) {
+                createMsg(person.getTaxPayerState()?.code ?: "_", C_STATUS, R_STATUS, CLAUSE_END_CREATE, person)
+                person.setTaxPayerState(new RefBookTaxpayerState())
+            }
+            if (!ScriptUtils.checkSnils(person.snils)) {
+                String errMsg = String.format("Значение гр. \"%s\" (\"%s\") не соответствует формату. %s",
+                        "СНИЛС", person.snils ?: "_", CLAUSE_END_CREATE
+                )
+                String pathError = String.format(SECTION_LINE_MSG, T_PERSON, person.num ?: "")
+                logger.warnExp("%s. %s.", "\"СНИЛС\" не соответствует формату", fioAndInp, pathError,
+                        errMsg)
+                person.setSnils(null)
+            }
+
+            if (infoMsgBuilder.length() != 0) {
+                infoData.put(person.primaryPersonId, infoMsgBuilder.toString())
+            }
+        }
+
+        List<RegistryPerson> savedPersons = personService.saveNewIdentificatedPersons(insertPersonList)
+
+        //update reference to ref book
+        updatePrimaryToRefBookPersonReferences(insertPersonList)
+
+        for (Map.Entry<Long, List<NaturalPerson>> entry : primaryPersonOriginalDuplicates.entrySet()) {
+            for (NaturalPerson duplicatePerson : entry.getValue()) {
+                NaturalPerson original = insertPersonList.find { NaturalPerson insertPerson ->
+                    entry.getKey() == insertPerson?.primaryPersonId
+                }
+                duplicatePerson.id = original.id
+            }
+            updatePrimaryToRefBookPersonReferences(entry.getValue())
+        }
+
+        for (NaturalPerson person : insertPersonList) {
+            ScriptUtils.checkInterrupted()
+            String info = infoData.get(person.primaryPersonId)
+            if (info) {
+                logger.infoExp("Обновлена запись в Реестре физических лиц. Идентификатор ФЛ: %s, ФИО: %s. Изменено:  %s", "", String.format("%s, ИНП: %s", buildFio(person), person.getPersonIdentifier().getInp()), person.getRecordId(), buildFio(person), info)
+                logBusinessService.logPersonEvent(person.id, FormDataEvent.UPDATE_PERSON,
+                        "В ходе идентификации ФЛ первичной формы № $declarationData.id изменено: " + info,
                         taUserService.getSystemUserInfo())
-                createCnt++
             }
+        }
+
+
+        for (RegistryPerson person : savedPersons) {
+            ScriptUtils.checkInterrupted()
+            logger.infoExp("Создана новая запись в Реестре физических лиц. Идентификатор ФЛ: %s, ФИО: %s %s %s", "", String.format("%s, ИНП: %s", buildFio(person), person.getPersonIdentityList().get(0).inp), person.recordId, person.getLastName() ?: "", person.getFirstName() ?: "", person.getMiddleName() ?: "")
+            logBusinessService.logPersonEvent(person.id, FormDataEvent.CREATE_PERSON,
+                    "ФЛ создано в ходе операции \"Идентификация\" первичной формы № $declarationData.id.",
+                    taUserService.getSystemUserInfo())
+            createCnt++
+        }
 
         logForDebug("Создано записей: " + createCnt)
     }
@@ -996,7 +1034,7 @@ class Calculate extends AbstractScriptClass {
                 IdDoc personDocument = personDocumentList.get(i)
 
                 if (i == incRepIndex) {
-                    if (naturalPerson.reportDoc?.getId() != personDocument?.getId()) {
+                    if (naturalPerson.reportDoc?.getDocType()?.code != personDocument?.getDocType()?.code || BaseWeightCalculator.prepareStringDul(naturalPerson.reportDoc?.documentNumber).toUpperCase() != BaseWeightCalculator.prepareStringDul(personDocument?.documentNumber).toUpperCase()) {
                         String oldValue = null
                         if (naturalPerson?.reportDoc?.getDocumentNumber()) {
                             oldValue = String.format("%s - (%s) %s", naturalPerson?.reportDoc?.getDocumentNumber(), naturalPerson?.reportDoc?.getDocType()?.getCode(), naturalPerson?.reportDoc?.getDocType()?.getName())
