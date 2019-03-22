@@ -830,9 +830,9 @@ class Import extends AbstractScriptClass {
         }
         ndflPerson.declarationDataId = declarationData.id
         ndflPerson.inp = row.cell(3).toString(25)
-        ndflPerson.lastName = row.cell(4).toString(36)
-        ndflPerson.firstName = row.cell(5).toString(36)
-        ndflPerson.middleName = row.cell(6).toString(36)
+        ndflPerson.lastName = row.cell(4).toString(60)
+        ndflPerson.firstName = row.cell(5).toString(60)
+        ndflPerson.middleName = row.cell(6).toString(60)
         ndflPerson.fio = (ndflPerson.lastName ?: "") + " " + (ndflPerson.firstName ?: "") + " " + (ndflPerson.middleName ?: "")
         ndflPerson.birthDay = row.cell(7).toDate()
         ndflPerson.citizenship = row.cell(8).toString(3)
@@ -849,7 +849,7 @@ class Import extends AbstractScriptClass {
         ndflPerson.street = row.cell(19).toString(50)
         ndflPerson.house = row.cell(20).toString(20)
         ndflPerson.building = row.cell(21).toString(20)
-        ndflPerson.flat = row.cell(22).toString(8)
+        ndflPerson.flat = row.cell(22).toString(20)
         ndflPerson.snils = row.cell(23).toString(14)
         ndflPerson.asnuId = declarationData.asnuId
         ndflPerson.modifiedDate = importDate
