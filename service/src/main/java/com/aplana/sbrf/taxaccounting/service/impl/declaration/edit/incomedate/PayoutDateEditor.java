@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.impl.declaration.edit.incomedate;
 
+import com.aplana.sbrf.taxaccounting.model.util.DateUtils;
+
 import java.util.Date;
 
 public class PayoutDateEditor extends DateEditor {
@@ -20,22 +22,15 @@ public class PayoutDateEditor extends DateEditor {
     }
 
     @Override
-    protected String fieldTitleForWarning() {
-        return "Дата выплаты дохода";
-    }
-
-    @Override
     protected String fieldNameInGenitiveCase() {
         return "Даты выплаты дохода";
     }
 
     @Override
-    protected String rowNameInInstrumentalCase() {
-        return "строкой выплаты дохода";
-    }
-
-    @Override
-    public String fieldName() {
-        return "Дата выплаты дохода";
+    protected String warningText() {
+        return String.format("Раздел 2. Строка %s. Дата выплаты дохода: \" __ \" не может быть заменена значением \"%s\", т.к. строка не является строкой выплаты дохода.",
+                income.getRowNum(),
+                DateUtils.formatPossibleZeroDate(getDateToSet())
+        );
     }
 }

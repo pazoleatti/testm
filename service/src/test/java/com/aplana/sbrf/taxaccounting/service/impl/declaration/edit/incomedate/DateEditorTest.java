@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome;
 import com.aplana.sbrf.taxaccounting.model.result.NdflPersonIncomeDatesDTO;
+import com.aplana.sbrf.taxaccounting.model.util.DateUtils;
 import org.joda.time.LocalDate;
 import org.junit.Before;
 import org.junit.Test;
@@ -18,14 +19,19 @@ import static org.assertj.core.api.Assertions.*;
 
 public class DateEditorTest {
 
+    // Редактируемая строка раздела 2
     private NdflPersonIncome income;
+    // Объект с датами, которые нужно заменить
     private NdflPersonIncomeDatesDTO datesDTO;
+    // ФЛ, в данных которого производится операция
     private NdflPerson person;
+    // Логгер, куда печатаются сообщения о результатах
     private Logger logger = new Logger();
 
 
     @Before
     public void init() {
+        // Строка раздела 2, номер строки 1, начальные значения всех дат "01.01.1970"
         income = new NdflPersonIncome();
         income.setRowNum(BigDecimal.ONE);
         income.setNdflPersonId(10L);
@@ -36,6 +42,7 @@ public class DateEditorTest {
         income.setTaxTransferDate(new Date(0));
         income.setModifiedDate(new Date(0));
 
+        // Заменяем все даты на указанную
         Date date = LocalDate.parse("2000-01-01").toDate();
         datesDTO = new NdflPersonIncomeDatesDTO();
         datesDTO.setAccruedDate(date);
@@ -115,7 +122,7 @@ public class DateEditorTest {
 
         assertThat(edited).isFalse();
         assertThat(income.getTaxDate()).isNull();
-        assertThat(lastEntry.getMessage()).isEqualTo("Раздел 2. Строка 1. Дата выплаты дохода: \" __ \" не может быть заменена значением \"01.01.2000\", т.к. строка не является строкой начисления либо выплаты дохода.");
+        assertThat(lastEntry.getMessage()).isEqualTo("Раздел 2. Строка 1. Дата НДФЛ: \" __ \" не может быть заменена значением \"01.01.2000\", т.к. строка не является строкой начисления либо выплаты дохода.");
     }
 
     @Test
@@ -128,7 +135,7 @@ public class DateEditorTest {
 
         assertThat(edited).isFalse();
         assertThat(income.getTaxTransferDate()).isNull();
-        assertThat(lastEntry.getMessage()).isEqualTo("Раздел 2. Строка 1. Дата выплаты дохода: \" __ \" не может быть заменена значением \"01.01.2000\", т.к. строка не является строкой перечисления в бюджет.");
+        assertThat(lastEntry.getMessage()).isEqualTo("Раздел 2. Строка 1. Срок перечисления: \" __ \" не может быть заменен значением \"01.01.2000\", т.к. строка не является строкой выплаты дохода либо перечисления в бюджет.");
     }
 
     @Test
@@ -184,7 +191,29 @@ public class DateEditorTest {
     }
 
     @Test
-    public void test_editIncomeDateField_successLogEntries() {
+    public void test_editTransferDate_onZeroDateToEdit_logMessage() {
+        DateEditor editor = DateEditorFactory.getEditor(EditableDateField.TRANSFER);
+        income.setTaxTransferDate(DateUtils.DATE_ZERO);
+
+        editor.editIncomeDateField(income, datesDTO, person, logger);
+
+        LogEntry lastEntry = logger.getLastEntry();
+        assertThat(lastEntry.getMessage()).isEqualTo("Раздел 2. Строка 1. Выполнена замена Срока перечисления: \"00.00.0000\" -> \"01.01.2000\".");
+    }
+
+    @Test
+    public void test_editTransferDate_onZeroDateToSet_logMessage() {
+        DateEditor editor = DateEditorFactory.getEditor(EditableDateField.TRANSFER);
+        datesDTO.setTransferDate(DateUtils.DATE_ZERO);
+
+        editor.editIncomeDateField(income, datesDTO, person, logger);
+
+        LogEntry lastEntry = logger.getLastEntry();
+        assertThat(lastEntry.getMessage()).isEqualTo("Раздел 2. Строка 1. Выполнена замена Срока перечисления: \"01.01.1970\" -> \"00.00.0000\".");
+    }
+
+    @Test
+    public void test_editIncomeDateField_onSuccess_logEntry() {
         DateEditor editor = DateEditorFactory.getEditor(EditableDateField.ACCRUED);
 
         editor.editIncomeDateField(income, datesDTO, person, logger);
@@ -201,7 +230,27 @@ public class DateEditorTest {
     }
 
     @Test
-    public void test_editIncomeDateField_logEntriesWhenNotEdited() {
+    public void test_editIncomeDateField_onReplacingTheSame() {
+        DateEditor editor = DateEditorFactory.getEditor(EditableDateField.ACCRUED);
+        datesDTO.setAccruedDate(new Date(0));
+
+        boolean edited = editor.editIncomeDateField(income, datesDTO, person, logger);
+
+        LogEntry lastEntry = logger.getLastEntry();
+
+        assertThat(edited).isFalse();
+        assertThat(lastEntry)
+                .extracting("level", "message", "type", "object")
+                .containsExactly(
+                        LogLevel.INFO,
+                        "Раздел 2. Строка 1. Значение Даты начисления дохода не было изменено. Графа уже содержит требуемое значение: \"01.01.1970\".",
+                        "Графа уже содержит значение",
+                        "Иванов Иван Иванович, ИНП: 1000, ID операции: 100"
+                );
+    }
+
+    @Test
+    public void test_editIncomeDateField_onNotEdited_logEntry() {
         DateEditor editor = DateEditorFactory.getEditor(EditableDateField.ACCRUED);
         income.setIncomeAccruedDate(null);
 
@@ -216,5 +265,17 @@ public class DateEditorTest {
                         "Установка даты не предусмотрена для этой строки",
                         "Иванов Иван Иванович, ИНП: 1000, ID операции: 100"
                 );
+    }
+
+    @Test
+    public void test_editTransferDate_onBothZeroDates_logMessage() {
+        DateEditor editor = DateEditorFactory.getEditor(EditableDateField.TRANSFER);
+        income.setTaxTransferDate(DateUtils.DATE_ZERO);
+        datesDTO.setTransferDate(DateUtils.DATE_ZERO);
+
+        editor.editIncomeDateField(income, datesDTO, person, logger);
+
+        LogEntry lastEntry = logger.getLastEntry();
+        assertThat(lastEntry.getMessage()).isEqualTo("Раздел 2. Строка 1. Значение Срока перечисления не было изменено. Графа уже содержит требуемое значение: \"00.00.0000\".");
     }
 }

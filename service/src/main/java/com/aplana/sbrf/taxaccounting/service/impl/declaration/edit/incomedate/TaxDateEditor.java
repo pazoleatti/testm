@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.impl.declaration.edit.incomedate;
 
+import com.aplana.sbrf.taxaccounting.model.util.DateUtils;
+
 import java.util.Date;
 
 public class TaxDateEditor extends DateEditor {
@@ -20,22 +22,15 @@ public class TaxDateEditor extends DateEditor {
     }
 
     @Override
-    protected String fieldTitleForWarning() {
-        return "Дата выплаты дохода";
-    }
-
-    @Override
     protected String fieldNameInGenitiveCase() {
         return "Даты НДФЛ";
     }
 
     @Override
-    protected String rowNameInInstrumentalCase() {
-        return "строкой начисления либо выплаты дохода";
-    }
-
-    @Override
-    public String fieldName() {
-        return "Дата НДФЛ";
+    protected String warningText() {
+        return String.format("Раздел 2. Строка %s. Дата НДФЛ: \" __ \" не может быть заменена значением \"%s\", т.к. строка не является строкой начисления либо выплаты дохода.",
+                income.getRowNum(),
+                DateUtils.formatPossibleZeroDate(getDateToSet())
+        );
     }
 }

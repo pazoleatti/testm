@@ -11,6 +11,8 @@ import java.util.Date;
 public class DateUtils {
 
     // Принятые в системе обозначения для пустых дат.
+    private static final LocalDate LOCAL_DATE_ZERO = LocalDate.parse("1901-01-01");
+    public static final Date DATE_ZERO = LOCAL_DATE_ZERO.toDate();
     public static final String DATE_ZERO_AS_DATE = "01.01.1901";
     public static final String DATE_ZERO_AS_STRING = "00.00.0000";
 

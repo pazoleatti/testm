@@ -2779,21 +2779,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 );
             }
 
-            // TODO: Костыльное определение ситуации "Есть неизменённые даты", т.к. нормальное логическое требует получения данных о результате из DateEditor.
-            boolean isAnyDateNotChanged = logger.containsLevel(LogLevel.WARNING);
-            boolean notAllDatesAreChanged = isAnyDateChanged && isAnyDateNotChanged;
-
-            // Не будь, как я, вынеси это в отдельный метод.
             String onEmpty = " __ ";
-            if (notAllDatesAreChanged) {
-                logger.error("Выполнено частичное изменение дат, указанных пользователем. Дата начисления дохода = \"%s\", Дата выплаты дохода = \"%s\", Дата НДФЛ = \"%s\", Срок перечисления = \"%s\".",
-                        DateUtils.commonDateFormat(incomeDates.getAccruedDate(), onEmpty),
-                        DateUtils.commonDateFormat(incomeDates.getPayoutDate(), onEmpty),
-                        DateUtils.commonDateFormat(incomeDates.getTaxDate(), onEmpty),
-                        DateUtils.formatPossibleZeroDate(incomeDates.getTransferDate(), onEmpty)
-                );
-                notification.setText(String.format("Для формы №%s выполнено частичное изменение дат раздела 2", declarationDataId));
-            } else if (isAnyDateChanged) {
+            if (isAnyDateChanged) {
                 logger.info("Выполнено изменение дат, указанных пользователем. Дата начисления дохода = \"%s\", Дата выплаты дохода = \"%s\", Дата НДФЛ = \"%s\", Срок перечисления = \"%s\".",
                         DateUtils.commonDateFormat(incomeDates.getAccruedDate(), onEmpty),
                         DateUtils.commonDateFormat(incomeDates.getPayoutDate(), onEmpty),
@@ -2802,7 +2789,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 );
                 notification.setText(String.format("Для формы №%s выполнено изменение дат раздела 2", declarationDataId));
             } else {
-                logger.error("Не выполнено изменение дат, указанных пользователем. Дата начисления дохода = \"%s\", Дата выплаты дохода = \"%s\", Дата НДФЛ = \"%s\", Срок перечисления = \"%s\".",
+                logger.warn("Не выполнено изменение дат, указанных пользователем. Дата начисления дохода = \"%s\", Дата выплаты дохода = \"%s\", Дата НДФЛ = \"%s\", Срок перечисления = \"%s\".",
                         DateUtils.commonDateFormat(incomeDates.getAccruedDate(), onEmpty),
                         DateUtils.commonDateFormat(incomeDates.getPayoutDate(), onEmpty),
                         DateUtils.commonDateFormat(incomeDates.getTaxDate(), onEmpty),

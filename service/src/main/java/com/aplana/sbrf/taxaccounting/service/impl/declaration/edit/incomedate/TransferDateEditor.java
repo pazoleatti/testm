@@ -1,41 +1,36 @@
 package com.aplana.sbrf.taxaccounting.service.impl.declaration.edit.incomedate;
 
+import com.aplana.sbrf.taxaccounting.model.util.DateUtils;
+
 import java.util.Date;
 
-public class TransferDateEditor extends DateEditor {
+class TransferDateEditor extends DateEditor {
 
     @Override
-    protected Date getDateToEdit() {
+    Date getDateToEdit() {
         return this.income.getTaxTransferDate();
     }
 
     @Override
-    protected Date getDateToSet() {
+    Date getDateToSet() {
         return this.incomeDatesDTO.getTransferDate();
     }
 
     @Override
-    protected void editDate() {
+    void editDate() {
         this.income.setTaxTransferDate(getDateToSet());
     }
 
     @Override
-    protected String fieldTitleForWarning() {
-        return "Дата выплаты дохода";
-    }
-
-    @Override
-    protected String fieldNameInGenitiveCase() {
+    String fieldNameInGenitiveCase() {
         return "Срока перечисления";
     }
 
     @Override
-    protected String rowNameInInstrumentalCase() {
-        return "строкой перечисления в бюджет";
-    }
-
-    @Override
-    public String fieldName() {
-        return "Срок перечисления";
+    String warningText() {
+        return String.format("Раздел 2. Строка %s. Срок перечисления: \" __ \" не может быть заменен значением \"%s\", т.к. строка не является строкой выплаты дохода либо перечисления в бюджет.",
+                income.getRowNum(),
+                DateUtils.formatPossibleZeroDate(getDateToSet())
+        );
     }
 }

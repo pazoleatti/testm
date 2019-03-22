@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome;
 import com.aplana.sbrf.taxaccounting.model.result.NdflPersonIncomeDatesDTO;
 import com.aplana.sbrf.taxaccounting.model.util.DateUtils;
+import org.joda.time.LocalDate;
 
 import java.util.Date;
 
@@ -18,11 +19,11 @@ public abstract class DateEditor {
     /**
      * Строка раздела 2 "Сведения о доходах и НДФЛ"
      */
-    protected NdflPersonIncome income;
+    NdflPersonIncome income;
     /**
      * ДТО с данными для редактирования, пришедшее с фронтенда.
      */
-    protected NdflPersonIncomeDatesDTO incomeDatesDTO;
+    NdflPersonIncomeDatesDTO incomeDatesDTO;
 
     /**
      * ФЛ, к которому относится редактируемая строка. Нужно для вывода сообщений.
@@ -33,37 +34,27 @@ public abstract class DateEditor {
     /**
      * Возвращает значение редактируемого поля.
      */
-    protected abstract Date getDateToEdit();
+    abstract Date getDateToEdit();
 
     /**
      * Возвращает значение, которое нужно установить.
      */
-    protected abstract Date getDateToSet();
+    abstract Date getDateToSet();
 
     /**
      * Устанавливает новое значение в редактируемое поле.
      */
-    protected abstract void editDate();
-
-    /**
-     * Название редактируемого поля в тексте обоснования неудачной замены.
-     */
-    protected abstract String fieldTitleForWarning();
+    abstract void editDate();
 
     /**
      * Название редактируемого поля в родительном падеже.
      */
-    protected abstract String fieldNameInGenitiveCase();
+    abstract String fieldNameInGenitiveCase();
 
     /**
      * Название редактируемой строки в творительном падеже.
      */
-    protected abstract String rowNameInInstrumentalCase();
-
-    /**
-     * Название редактируемого поля в именительном падеже.
-     */
-    public abstract String fieldName();
+    abstract String warningText();
 
 
     /**
@@ -86,6 +77,10 @@ public abstract class DateEditor {
             printWarning(logger);
             return false;
         }
+        if (areDatesTheSame()) {
+            printTheSameDatesMessage(logger);
+            return false;
+        }
 
         printSuccess(logger);
         editDate();
@@ -101,15 +96,29 @@ public abstract class DateEditor {
         return getDateToEdit() == null;
     }
 
+    private boolean areDatesTheSame() {
+        // Сделал сравнение через LocalDate, мало ли попадутся одинаковые даты с разным временем.
+        LocalDate localDateToSet = LocalDate.fromDateFields(getDateToSet());
+        LocalDate localDateToEdit = LocalDate.fromDateFields(getDateToEdit());
+        return localDateToEdit.equals(localDateToSet);
+    }
+
     private void printWarning(Logger logger) {
         logger.warnExp(
-                "Раздел 2. Строка %s. %s: \" __ \" не может быть заменена значением \"%s\", т.к. строка не является %s.",
+                warningText(),
                 "Установка даты не предусмотрена для этой строки",
-                String.format("%s, ИНП: %s, ID операции: %s", person.getFullName(), person.getInp(), income.getOperationId()),
+                editingObject()
+        );
+    }
+
+    private void printTheSameDatesMessage(Logger logger) {
+        logger.infoExp(
+                "Раздел 2. Строка %s. Значение %s не было изменено. Графа уже содержит требуемое значение: \"%s\".",
+                "Графа уже содержит значение",
+                editingObject(),
                 income.getRowNum(),
-                fieldTitleForWarning(),
-                DateUtils.formatPossibleZeroDate(getDateToSet()),
-                rowNameInInstrumentalCase()
+                fieldNameInGenitiveCase(),
+                DateUtils.formatPossibleZeroDate(getDateToSet())
         );
     }
 
@@ -117,11 +126,16 @@ public abstract class DateEditor {
         logger.infoExp(
                 "Раздел 2. Строка %s. Выполнена замена %s: \"%s\" -> \"%s\".",
                 "Дата изменена",
-                String.format("%s, ИНП: %s, ID операции: %s", person.getFullName(), person.getInp(), income.getOperationId()),
+                editingObject(),
                 income.getRowNum(),
                 fieldNameInGenitiveCase(),
                 DateUtils.formatPossibleZeroDate(getDateToEdit()),
                 DateUtils.formatPossibleZeroDate(getDateToSet())
         );
+    }
+
+    // Строковое представление объекта редактирования: ФЛ, ИНП, операция.
+    private String editingObject() {
+        return String.format("%s, ИНП: %s, ID операции: %s", person.getFullName(), person.getInp(), income.getOperationId());
     }
 }
