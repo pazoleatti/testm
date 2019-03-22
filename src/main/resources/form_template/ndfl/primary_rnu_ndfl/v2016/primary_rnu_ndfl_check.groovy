@@ -522,8 +522,8 @@ class Check extends AbstractScriptClass {
                         }
                     }
 
-                    // Спр18 Статус налогоплательщика (Обязательное поле)
-                    if (ndflPerson.status != null && !ndflPerson.status.equals(personRecord.taxPayerState.code)) {
+                    // Спр18 Статус налогоплательщика
+                    if (ndflPerson.status != personRecord.taxPayerState?.code) {
                         String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                         logger.warnExp("%s. %s.", "Статус налогоплательщика не соответствует Реестру физических лиц", fioAndInp, pathError,
                                 String.format(LOG_TYPE_PERSON_MSG, C_STATUS, ndflPerson.status ?: ""))
