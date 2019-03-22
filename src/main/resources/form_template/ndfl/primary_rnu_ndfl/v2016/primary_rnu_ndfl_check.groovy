@@ -3,7 +3,6 @@ package form_template.ndfl.primary_rnu_ndfl.v2016
 import com.aplana.sbrf.taxaccounting.AbstractScriptClass
 import com.aplana.sbrf.taxaccounting.model.DeclarationCheckCode
 import com.aplana.sbrf.taxaccounting.model.DeclarationData
-import com.aplana.sbrf.taxaccounting.model.Department
 import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
@@ -21,6 +20,7 @@ import com.aplana.sbrf.taxaccounting.model.util.BaseWeightCalculator
 import com.aplana.sbrf.taxaccounting.model.util.Pair
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
+import com.aplana.sbrf.taxaccounting.script.SharedConstants
 import com.aplana.sbrf.taxaccounting.script.service.CalendarService
 import com.aplana.sbrf.taxaccounting.script.service.DeclarationService
 import com.aplana.sbrf.taxaccounting.script.service.DepartmentReportPeriodService
@@ -2332,6 +2332,18 @@ class Check extends AbstractScriptClass {
      * Используется для проверки НДФЛ.Перечисление в бюджет.Срок (Графа 21)
      */
     abstract class TaxTransferDateConditionChecker implements DateConditionCheckerForBudget {
+
+        /**
+         * "Дата перечисления в бюджет" может иметь значение "00.00.0000", для этого форматируем её этим способом.
+         */
+        static String formatTaxTransferDate(Date taxTransferDate) {
+            String dateString = taxTransferDate.format(SharedConstants.DATE_FORMAT)
+            if (dateString == SharedConstants.DATE_ZERO_AS_DATE) {
+                return SharedConstants.DATE_ZERO_AS_STRING
+            } else {
+                return dateString
+            }
+        }
     }
 
     interface DateConditionChecker {
@@ -2447,7 +2459,7 @@ class Check extends AbstractScriptClass {
             }
 
             return String.format("Значение гр. \"Срок перечисления в бюджет\" (%s) должно быть равно значению гр. \"Дата выплаты дохода\" (%s) + 1 рабочий день. Корректное значение срока перечисления в бюджет: %s",
-                    ScriptUtils.formatDate(checkedIncome.taxTransferDate),
+                    formatTaxTransferDate(checkedIncome.taxTransferDate),
                     ScriptUtils.formatDate(checkedIncome.incomePayoutDate),
                     ScriptUtils.formatDate(calendar7.getTime()))
         }
@@ -2467,7 +2479,7 @@ class Check extends AbstractScriptClass {
                 return null
             }
             return String.format("Значение гр. \"Срок перечисления в бюджет\" (%s) должно быть равно значению гр. \"Дата выплаты дохода\" (%s) + 30 календарных дней. Если дата попадает на выходной день, то дата переносится на следующий рабочий день. Корректное значение срока перечисления в бюджет: %s",
-                    ScriptUtils.formatDate(checkedIncome.taxTransferDate),
+                    formatTaxTransferDate(checkedIncome.taxTransferDate),
                     ScriptUtils.formatDate(checkedIncome.incomePayoutDate),
                     ScriptUtils.formatDate(incomePayoutPlus30CalendarDaysWorkingDay))
         }
@@ -2500,7 +2512,7 @@ class Check extends AbstractScriptClass {
             }
             return String.format("Значение гр. \"Срок перечисления в бюджет\" (%s) должно быть равно последнему календарному дню месяца, указанного в гр.\"Дата выплаты дохода\" (%s). " +
                     "Если дата попадает на выходной день, то дата переносится на следующий рабочий день. Корректное значение срока перечисления в бюджет: %s",
-                    ScriptUtils.formatDate(checkedIncome.taxTransferDate),
+                    formatTaxTransferDate(checkedIncome.taxTransferDate),
                     ScriptUtils.formatDate(checkedIncome.incomePayoutDate),
                     ScriptUtils.formatDate(calendar7.getTime()))
         }
@@ -2523,7 +2535,7 @@ class Check extends AbstractScriptClass {
             zeroDate.set(1901, Calendar.JANUARY, 1)
             if (matchedIncomes.isEmpty() && checkedIncome.taxTransferDate != SimpleDateUtils.toStartOfDay(zeroDate.getTime())) {
                 return String.format("Значение гр. \"Срок перечисления в бюджет\" (%s) должно быть равно значению (00.00.0000), так как не найдена строка выплаты, у которой \"Признак дохода\" не равен 02 или 14",
-                        ScriptUtils.formatDate(checkedIncome.taxTransferDate))
+                        formatTaxTransferDate(checkedIncome.taxTransferDate))
             } else if (matchedIncomes.isEmpty()) {
                 return null
             } else {
@@ -2539,8 +2551,8 @@ class Check extends AbstractScriptClass {
                     return null
                 } else {
                     return String.format("Значение гр. \"Срок перечисления в бюджет\" (%s) должно быть равно значению гр. \"Срок перечисления в бюджет\" (%s) строки выплаты, у которой \"Признак дохода\" не равен 02 или 14",
-                            ScriptUtils.formatDate(checkedIncome.taxTransferDate),
-                            ScriptUtils.formatDate(matchedIncomes.get(0).taxTransferDate))
+                            formatTaxTransferDate(checkedIncome.taxTransferDate),
+                            formatTaxTransferDate(matchedIncomes.get(0).taxTransferDate))
                 }
             }
 
@@ -2560,7 +2572,7 @@ class Check extends AbstractScriptClass {
                 return null
             }
             return String.format("Значение гр. \"Срок перечисления в бюджет\" (%s) должно быть равно последнему календарному дню месяца, следующего за годом указанным в гр. \"Дата выплаты дохода\" (%s). Если дата попадает на выходной день, то она переносится на следующий рабочий день. Корректное значение срока перечисления в бюджет: %s",
-                    ScriptUtils.formatDate(checkedIncome.taxTransferDate),
+                    formatTaxTransferDate(checkedIncome.taxTransferDate),
                     ScriptUtils.formatDate(checkedIncome.incomePayoutDate),
                     ScriptUtils.formatDate(referenceValue))
         }
