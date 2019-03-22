@@ -534,7 +534,7 @@ class Report6Ndfl extends AbstractScriptClass {
         List<DepartmentConfig> departmentConfigs = kppOktmoPairs.findAll { it.first && it.second }.collect { it.second }
         if (!departmentConfigs) {
             logger.error("Отчетность $declarationTemplate.name для $department.name за период ${formatPeriod(departmentReportPeriod)} не сформирована. " +
-                    "Отсутствуют настройки указанного подразделения в справочнике \"Настройки подразделений\"")
+                    "Отсутствуют пары КПП/ОКТМО, присутствующие одновременно в справочнике \"Настройки подразделений\" (актуальные на текущий момент, либо бывшие актуальными в отчетном периоде) и в КНФ.")
         }
         return departmentConfigs
     }
