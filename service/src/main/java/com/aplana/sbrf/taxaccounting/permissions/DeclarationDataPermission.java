@@ -596,12 +596,13 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
             }
             if (logger != null && !granted) {
                 Department department = departmentService.getDepartment(targetDomainObject.getDepartmentId());
-                String errorCommonPart = String.format("Операция \"%s\" не выполнена для формы № %d, Период: \"%s, %s\", " +
+                String errorCommonPart = String.format("Операция \"%s\" не выполнена для формы № %d, Период: \"%s, %s%s\", " +
                                 "Подразделение \"%s\".",
                         OPERATION_NAME,
                         targetDomainObject.getId(),
                         departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(),
                         departmentReportPeriod.getReportPeriod().getName(),
+                        departmentReportPeriod.getCorrectionDate() != null ? " корр. " + FastDateFormat.getInstance("dd.MM.yyyy").format(departmentReportPeriod.getCorrectionDate()) : "",
                         department.getName());
                 logger.error("%s Причина: " + StringUtils.join(causes, ", "), errorCommonPart);
             }
