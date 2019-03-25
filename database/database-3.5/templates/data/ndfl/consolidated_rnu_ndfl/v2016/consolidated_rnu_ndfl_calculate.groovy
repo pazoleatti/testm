@@ -370,7 +370,7 @@ class Calculate extends AbstractScriptClass {
         Map<Long, NdflPerson> refBookPersonsGroupedById = [:]
 
         for (NdflPerson refBookPerson : refBookPersonList) {
-            refBookPersonsGroupedById.put(refBookPerson.personId, refBookPerson)
+            refBookPersonsGroupedById.put(refBookPerson.recordId, refBookPerson)
         }
 
         Map<Long, List<NdflPersonDeduction>> deductionsGroupedByPerson = [:]
@@ -406,9 +406,9 @@ class Calculate extends AbstractScriptClass {
         // Данные для заполнения раздела 1
 
         for (NdflPerson declarationDataPerson : ndflPersonList) {
-            NdflPerson refBookPerson = refBookPersonsGroupedById.get(declarationDataPerson.personId)
-
-            if (declarationDataPerson.personId == null) {
+            NdflPerson refBookPerson = refBookPersonsGroupedById.get(declarationDataPerson.recordId)
+            declarationDataPerson.personId = refBookPerson.personId
+            if (declarationDataPerson.recordId == null) {
                 logger.error("ПНФ: ${declarationDataPerson.declarationDataId} " +
                         "Раздел 1. Строка: ${declarationDataPerson.rowNum}. Для ФЛ:" +
                         "${declarationDataPerson.lastName + " " + declarationDataPerson.firstName + " " + (declarationDataPerson.middleName ?: "")}" +
@@ -428,7 +428,7 @@ class Calculate extends AbstractScriptClass {
             declarationDataPerson.declarationDataId = declarationData.id
 
             if (refBookPerson.idDocType == null && refBookPerson.idDocNumber == null) {
-                logger.warn("Раздел 1. ФЛ: %s, идентификатор ФЛ %s, включено в форму без заполнения Графы 10 (\"ДУЛ Код\") и Графы 11 (\"ДУЛ Номер\"), т.к. информация о ДУЛ, включаемом в отчетность, отсутствует  в Реестре ФЛ.",
+                logger.warn("Раздел 1. ФЛ: %s, идентификатор ФЛ: %s, включено в форму без заполнения Графы 10 (\"ДУЛ Код\") и Графы 11 (\"ДУЛ Номер\"), т.к. информация о ДУЛ, включаемом в отчетность, отсутствует  в Реестре ФЛ.",
                         "${refBookPerson.lastName + " " + refBookPerson.firstName + " " + (refBookPerson.middleName ?: "")}",
                         refBookPerson.recordId)
             }

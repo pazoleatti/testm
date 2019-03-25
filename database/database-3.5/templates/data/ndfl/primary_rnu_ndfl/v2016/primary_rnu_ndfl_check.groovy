@@ -3,7 +3,6 @@ package form_template.ndfl.primary_rnu_ndfl.v2016
 import com.aplana.sbrf.taxaccounting.AbstractScriptClass
 import com.aplana.sbrf.taxaccounting.model.DeclarationCheckCode
 import com.aplana.sbrf.taxaccounting.model.DeclarationData
-import com.aplana.sbrf.taxaccounting.model.Department
 import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
@@ -21,6 +20,7 @@ import com.aplana.sbrf.taxaccounting.model.util.BaseWeightCalculator
 import com.aplana.sbrf.taxaccounting.model.util.Pair
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
+import com.aplana.sbrf.taxaccounting.script.SharedConstants
 import com.aplana.sbrf.taxaccounting.script.service.CalendarService
 import com.aplana.sbrf.taxaccounting.script.service.DeclarationService
 import com.aplana.sbrf.taxaccounting.script.service.DepartmentReportPeriodService
@@ -522,8 +522,8 @@ class Check extends AbstractScriptClass {
                         }
                     }
 
-                    // Спр18 Статус налогоплательщика (Обязательное поле)
-                    if (ndflPerson.status != null && !ndflPerson.status.equals(personRecord.taxPayerState.code)) {
+                    // Спр18 Статус налогоплательщика
+                    if (ndflPerson.status != personRecord.taxPayerState?.code) {
                         String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                         logger.warnExp("%s. %s.", "Статус налогоплательщика не соответствует Реестру физических лиц", fioAndInp, pathError,
                                 String.format(LOG_TYPE_PERSON_MSG, C_STATUS, ndflPerson.status ?: ""))
@@ -1028,7 +1028,7 @@ class Check extends AbstractScriptClass {
         dateConditionDataList << new DateConditionData(["1530", "1531", "1532", "1533", "1535", "1536", "1537", "1539",
                                                         "1541", "1542", "1544", "1546", "1548", "1551", "1552", "1553", "1554"],
                 ["04"], new LastYearWorkDay(),
-                "Значение гр. \"%s\" (\"%s\") должно быть равно последнему рабочему календарному дню года, за который был начислен доход (%4\$s), " +
+                "Значение гр. \"%s\" (\"%s\") должно быть равно последнему рабочему дню года, за который был начислен доход (%4\$s), " +
                         "для Кода дохода = \"%6\$s\" и Признака дохода = \"%8\$s\"")
 
         // 7. Последний календарный день месяца
@@ -1126,8 +1126,8 @@ class Check extends AbstractScriptClass {
                 /**
                  * Проверки по операциям
                  */
-                // СведДох2 Сумма вычета (Графа 12)
-                if (totalOperationIncome.totalDeductionsSumm != null && totalOperationIncome.incomeAccruedSumm != null) {
+                if (!isDummy(allIncomesOfOperation)) {
+                    // СведДох2 Сумма вычета (Графа 12)
                     BigDecimal incomesAccruedSum = totalOperationIncome.incomeAccruedSumm ?: 0
                     BigDecimal incomesDeductionsSum = totalOperationIncome.totalDeductionsSumm ?: 0
                     BigDecimal deductionsSum = totalOperationDeduction.periodCurrSumm ?: 0
@@ -1155,21 +1155,21 @@ class Check extends AbstractScriptClass {
                         String pathError = String.format(SECTION_LINES_MSG, T_PERSON_INCOME, rowNums)
                         logger.warnExp("%s. %s.", LOG_TYPE_2_12, fioAndInpAndOperId, pathError, errMsg)
                     }
-                }
 
-                // СведДох7 Заполнение Раздела 2 Графы 18 и 19
-                BigDecimal notHoldingTax = totalOperationIncome.notHoldingTax ?: 0
-                BigDecimal overholdingTax = totalOperationIncome.overholdingTax ?: 0
-                BigDecimal calculatedTax = totalOperationIncome.calculatedTax ?: 0
-                BigDecimal withholdingTax = totalOperationIncome.withholdingTax ?: 0
-                if (notHoldingTax - overholdingTax != calculatedTax - withholdingTax) {
-                    // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
-                    String errMsg = "Для строк операции с \"ID операции\"=\"$operationId\" разность сумм значений гр. \"НДФЛ не удержанный\" " +
-                            "(\"$notHoldingTax\") и гр. \"НДФЛ излишне удержанный\" (\"$overholdingTax\") " +
-                            "должна быть равна разности сумм значений гр.\"НДФЛ исчисленный\" (\"$calculatedTax\") и " +
-                            "гр.\"НДФЛ удержанный\" (\"$withholdingTax\") по всем строкам одной операции"
-                    String pathError = String.format(SECTION_LINES_MSG, T_PERSON_INCOME, rowNums)
-                    logger.warnExp("%s. %s.", LOG_TYPE_2_18_19, fioAndInpAndOperId, pathError, errMsg)
+                    // СведДох7 Заполнение Раздела 2 Графы 18 и 19
+                    BigDecimal notHoldingTax = totalOperationIncome.notHoldingTax ?: 0
+                    BigDecimal overholdingTax = totalOperationIncome.overholdingTax ?: 0
+                    BigDecimal calculatedTax = totalOperationIncome.calculatedTax ?: 0
+                    BigDecimal withholdingTax = totalOperationIncome.withholdingTax ?: 0
+                    if (notHoldingTax - overholdingTax != calculatedTax - withholdingTax) {
+                        // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
+                        String errMsg = "Для строк операции с \"ID операции\"=\"$operationId\" разность сумм значений гр. \"НДФЛ не удержанный\" " +
+                                "(\"$notHoldingTax\") и гр. \"НДФЛ излишне удержанный\" (\"$overholdingTax\") " +
+                                "должна быть равна разности сумм значений гр.\"НДФЛ исчисленный\" (\"$calculatedTax\") и " +
+                                "гр.\"НДФЛ удержанный\" (\"$withholdingTax\") по всем строкам одной операции"
+                        String pathError = String.format(SECTION_LINES_MSG, T_PERSON_INCOME, rowNums)
+                        logger.warnExp("%s. %s.", LOG_TYPE_2_18_19, fioAndInpAndOperId, pathError, errMsg)
+                    }
                 }
 
                 /**
@@ -1194,6 +1194,14 @@ class Check extends AbstractScriptClass {
                                 }
                             }
                         }
+                    }
+
+                    // Заполнение Раздела 2 Графы 13
+                    if (ndflPersonIncome.incomeAccruedDate && ndflPersonIncome.taxBase != (ndflPersonIncome.incomeAccruedSumm ?: 0) - (ndflPersonIncome.totalDeductionsSumm ?: 0)) {
+                        String errMsg = "Значение гр. \"Налоговая База\" \"$ndflPersonIncome.taxBase\" не совпадает с расчетным " +
+                                "\"${(ndflPersonIncome.incomeAccruedSumm ?: 0) - (ndflPersonIncome.totalDeductionsSumm ?: 0)}\""
+                        String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
+                        logger.warnExp("%s. %s.", LOG_TYPE_2_6, fioAndInpAndOperId, pathError, errMsg)
                     }
 
                     // СведДох3 НДФЛ.Процентная ставка (Графа 14)
@@ -1315,7 +1323,7 @@ class Check extends AbstractScriptClass {
                             if (!isDeductionExists) {
                                 logTypeMessagePairList.add(new CheckData("\"Дата исчисленного налога\" указана некорректно",
                                         ("Значение гр. \"${C_TAX_DATE}\" (\"${formatDate(ndflPersonIncome.taxDate)}\") отсутствует в гр. " +
-                                                "\"${C_PERIOD_CURR_DATE}\" хотя бы одной строки операции Раздела 3").toString(),
+                                                "\"${C_PERIOD_CURR_DATE}\" хотя бы одной строки операции Раздела 3.").toString(),
                                         section_2_15_fatal))
                             }
                         }
@@ -1331,7 +1339,7 @@ class Check extends AbstractScriptClass {
                                 if (ndflPersonIncome.taxDate != ndflPersonIncome.incomePayoutDate) {
                                     logTypeMessagePairList.add(new CheckData("\"Дата удержанного налога\" указана некорректно",
                                             ("Значение гр. \"${C_TAX_DATE}\" (\"${formatDate(ndflPersonIncome.taxDate)}\") должно быть равно " +
-                                                    "значению гр. \"${C_INCOME_PAYOUT_DATE}\" (\"${formatDate(ndflPersonIncome.incomePayoutDate)}\")").toString(),
+                                                    "значению гр. \"${C_INCOME_PAYOUT_DATE}\" (\"${formatDate(ndflPersonIncome.incomePayoutDate)}\").").toString(),
                                             section_2_15_fatal))
                                 }
                             }
@@ -1350,7 +1358,7 @@ class Check extends AbstractScriptClass {
                             if (ndflPersonIncome.taxDate != ndflPersonIncome.incomePayoutDate) {
                                 logTypeMessagePairList.add(new CheckData("\"Дата не удержанного налога\" указана некорректно",
                                         ("Значение гр. \"${C_TAX_DATE}\" (\"${formatDate(ndflPersonIncome.taxDate)}\") должно быть равно " +
-                                                "значению гр. \"${C_INCOME_PAYOUT_DATE}\" (\"${formatDate(ndflPersonIncome.incomePayoutDate)}\")").toString(),
+                                                "значению гр. \"${C_INCOME_PAYOUT_DATE}\" (\"${formatDate(ndflPersonIncome.incomePayoutDate)}\").").toString(),
                                         section_2_15_fatal))
                             }
                         }
@@ -1379,7 +1387,7 @@ class Check extends AbstractScriptClass {
                                 if (ndflPersonIncome.taxDate != ndflPersonIncome.incomeAccruedDate) {
                                     logTypeMessagePairList.add(new CheckData("\"Дата не удержанного налога\" указана некорректно",
                                             ("Значение гр. \"${C_TAX_DATE}\" (\"${formatDate(ndflPersonIncome.taxDate)}\") должно быть равно " +
-                                                    "значению гр. \"${C_INCOME_ACCRUED_DATE}\" (\"${formatDate(ndflPersonIncome.incomeAccruedDate)}\")").toString(),
+                                                    "значению гр. \"${C_INCOME_ACCRUED_DATE}\" (\"${formatDate(ndflPersonIncome.incomeAccruedDate)}\").").toString(),
                                             section_2_15_fatal))
                                 }
                             }
@@ -1401,7 +1409,7 @@ class Check extends AbstractScriptClass {
                                 int month = calendarPayout.get(Calendar.MONTH)
                                 if (!(dayOfMonth == 31 && month == 12)) {
                                     logTypeMessagePairList.add(new CheckData("\"Дата не удержаннного налога\" указана некорректно",
-                                            ("Значение гр. \"${C_TAX_DATE}\" (\"${formatDate(ndflPersonIncome.taxDate)}\") должно быть равно последнему календарному дню года налогового периода").toString()))
+                                            ("Значение гр. \"${C_TAX_DATE}\" (\"${formatDate(ndflPersonIncome.taxDate)}\") должно быть равно последнему календарному дню года налогового периода.").toString()))
                                 }
                             }
                         }
@@ -1413,7 +1421,10 @@ class Check extends AbstractScriptClass {
                                 ndflPersonIncome.incomePayoutDate != null) {
                             // "Графа 15" = "Графа 7"
                             if (ndflPersonIncome.taxDate != ndflPersonIncome.incomePayoutDate) {
-                                logTypeMessagePairList.add(new CheckData("\"Дата излишне удержанного налога\" указана некорректно", ("Значение гр. \"${C_TAX_DATE}\" (\"${ndflPersonIncome.taxDate ? ScriptUtils.formatDate(ndflPersonIncome.taxDate) : ""}\") должно быть равно значению гр. \"${C_INCOME_PAYOUT_DATE}\" (\"${ndflPersonIncome.incomePayoutDate ? ScriptUtils.formatDate(ndflPersonIncome.incomePayoutDate) : ""}\")").toString(), section_2_15_fatal))
+                                logTypeMessagePairList.add(new CheckData("\"Дата излишне удержанного налога\" указана некорректно",
+                                        ("Значение гр. \"${C_TAX_DATE}\" (\"${ndflPersonIncome.taxDate ? ScriptUtils.formatDate(ndflPersonIncome.taxDate) : ""}\") " +
+                                                "должно быть равно значению гр. \"${C_INCOME_PAYOUT_DATE}\" " +
+                                                "(\"${ndflPersonIncome.incomePayoutDate ? ScriptUtils.formatDate(ndflPersonIncome.incomePayoutDate) : ""}\").").toString(), section_2_15_fatal))
                             }
                         }
                         // П.8
@@ -1431,7 +1442,7 @@ class Check extends AbstractScriptClass {
                         if (!logTypeMessagePairList.isEmpty()) {
                             String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
                             for (CheckData checkData : logTypeMessagePairList) {
-                                logger.logCheck("%s. %s.", checkData.fatal, checkData.msgFirst, fioAndInpAndOperId, pathError, checkData.msgLast)
+                                logger.logCheck("%s. %s", checkData.fatal, checkData.msgFirst, fioAndInpAndOperId, pathError, checkData.msgLast)
                             }
                         }
                     }
@@ -1952,6 +1963,15 @@ class Check extends AbstractScriptClass {
         logForDebug("Проверки сведений о доходах в виде авансовых платежей (" + (System.currentTimeMillis() - time) + " мс)")
     }
 
+    boolean isDummy(List<NdflPersonIncome> incomes) {
+        for (def income : incomes) {
+            if (!income.isDummy()) {
+                return false
+            }
+        }
+        return true
+    }
+
     class NdflPersonFL {
         String fio
         String inp
@@ -2312,6 +2332,18 @@ class Check extends AbstractScriptClass {
      * Используется для проверки НДФЛ.Перечисление в бюджет.Срок (Графа 21)
      */
     abstract class TaxTransferDateConditionChecker implements DateConditionCheckerForBudget {
+
+        /**
+         * "Дата перечисления в бюджет" может иметь значение "00.00.0000", для этого форматируем её этим способом.
+         */
+        static String formatTaxTransferDate(Date taxTransferDate) {
+            String dateString = taxTransferDate.format(SharedConstants.DATE_FORMAT)
+            if (dateString == SharedConstants.DATE_ZERO_AS_DATE) {
+                return SharedConstants.DATE_ZERO_AS_STRING
+            } else {
+                return dateString
+            }
+        }
     }
 
     interface DateConditionChecker {
@@ -2427,7 +2459,7 @@ class Check extends AbstractScriptClass {
             }
 
             return String.format("Значение гр. \"Срок перечисления в бюджет\" (%s) должно быть равно значению гр. \"Дата выплаты дохода\" (%s) + 1 рабочий день. Корректное значение срока перечисления в бюджет: %s",
-                    ScriptUtils.formatDate(checkedIncome.taxTransferDate),
+                    formatTaxTransferDate(checkedIncome.taxTransferDate),
                     ScriptUtils.formatDate(checkedIncome.incomePayoutDate),
                     ScriptUtils.formatDate(calendar7.getTime()))
         }
@@ -2447,7 +2479,7 @@ class Check extends AbstractScriptClass {
                 return null
             }
             return String.format("Значение гр. \"Срок перечисления в бюджет\" (%s) должно быть равно значению гр. \"Дата выплаты дохода\" (%s) + 30 календарных дней. Если дата попадает на выходной день, то дата переносится на следующий рабочий день. Корректное значение срока перечисления в бюджет: %s",
-                    ScriptUtils.formatDate(checkedIncome.taxTransferDate),
+                    formatTaxTransferDate(checkedIncome.taxTransferDate),
                     ScriptUtils.formatDate(checkedIncome.incomePayoutDate),
                     ScriptUtils.formatDate(incomePayoutPlus30CalendarDaysWorkingDay))
         }
@@ -2480,7 +2512,7 @@ class Check extends AbstractScriptClass {
             }
             return String.format("Значение гр. \"Срок перечисления в бюджет\" (%s) должно быть равно последнему календарному дню месяца, указанного в гр.\"Дата выплаты дохода\" (%s). " +
                     "Если дата попадает на выходной день, то дата переносится на следующий рабочий день. Корректное значение срока перечисления в бюджет: %s",
-                    ScriptUtils.formatDate(checkedIncome.taxTransferDate),
+                    formatTaxTransferDate(checkedIncome.taxTransferDate),
                     ScriptUtils.formatDate(checkedIncome.incomePayoutDate),
                     ScriptUtils.formatDate(calendar7.getTime()))
         }
@@ -2503,7 +2535,7 @@ class Check extends AbstractScriptClass {
             zeroDate.set(1901, Calendar.JANUARY, 1)
             if (matchedIncomes.isEmpty() && checkedIncome.taxTransferDate != SimpleDateUtils.toStartOfDay(zeroDate.getTime())) {
                 return String.format("Значение гр. \"Срок перечисления в бюджет\" (%s) должно быть равно значению (00.00.0000), так как не найдена строка выплаты, у которой \"Признак дохода\" не равен 02 или 14",
-                        ScriptUtils.formatDate(checkedIncome.taxTransferDate))
+                        formatTaxTransferDate(checkedIncome.taxTransferDate))
             } else if (matchedIncomes.isEmpty()) {
                 return null
             } else {
@@ -2519,8 +2551,8 @@ class Check extends AbstractScriptClass {
                     return null
                 } else {
                     return String.format("Значение гр. \"Срок перечисления в бюджет\" (%s) должно быть равно значению гр. \"Срок перечисления в бюджет\" (%s) строки выплаты, у которой \"Признак дохода\" не равен 02 или 14",
-                            ScriptUtils.formatDate(checkedIncome.taxTransferDate),
-                            ScriptUtils.formatDate(matchedIncomes.get(0).taxTransferDate))
+                            formatTaxTransferDate(checkedIncome.taxTransferDate),
+                            formatTaxTransferDate(matchedIncomes.get(0).taxTransferDate))
                 }
             }
 
@@ -2540,7 +2572,7 @@ class Check extends AbstractScriptClass {
                 return null
             }
             return String.format("Значение гр. \"Срок перечисления в бюджет\" (%s) должно быть равно последнему календарному дню месяца, следующего за годом указанным в гр. \"Дата выплаты дохода\" (%s). Если дата попадает на выходной день, то она переносится на следующий рабочий день. Корректное значение срока перечисления в бюджет: %s",
-                    ScriptUtils.formatDate(checkedIncome.taxTransferDate),
+                    formatTaxTransferDate(checkedIncome.taxTransferDate),
                     ScriptUtils.formatDate(checkedIncome.incomePayoutDate),
                     ScriptUtils.formatDate(referenceValue))
         }

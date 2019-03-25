@@ -5,22 +5,19 @@ import com.aplana.sbrf.taxaccounting.model.*
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.log.Logger
-import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson
-import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction
-import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome
-import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonOperation
-import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment
+import com.aplana.sbrf.taxaccounting.model.ndfl.*
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
 import com.aplana.sbrf.taxaccounting.script.SharedConstants
 import com.aplana.sbrf.taxaccounting.script.service.*
+import form_template.ndfl.primary_rnu_ndfl.v2016.Import.Cell
 
 import java.text.SimpleDateFormat
 
-import static com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils.readSheetsRange
 import static com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils.checkInterrupted
+import static com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils.readSheetsRange
 
 new Import(this).run()
 
@@ -833,9 +830,9 @@ class Import extends AbstractScriptClass {
         }
         ndflPerson.declarationDataId = declarationData.id
         ndflPerson.inp = row.cell(3).toString(25)
-        ndflPerson.lastName = row.cell(4).toString(36)
-        ndflPerson.firstName = row.cell(5).toString(36)
-        ndflPerson.middleName = row.cell(6).toString(36)
+        ndflPerson.lastName = row.cell(4).toString(60)
+        ndflPerson.firstName = row.cell(5).toString(60)
+        ndflPerson.middleName = row.cell(6).toString(60)
         ndflPerson.fio = (ndflPerson.lastName ?: "") + " " + (ndflPerson.firstName ?: "") + " " + (ndflPerson.middleName ?: "")
         ndflPerson.birthDay = row.cell(7).toDate()
         ndflPerson.citizenship = row.cell(8).toString(3)
@@ -852,7 +849,7 @@ class Import extends AbstractScriptClass {
         ndflPerson.street = row.cell(19).toString(50)
         ndflPerson.house = row.cell(20).toString(20)
         ndflPerson.building = row.cell(21).toString(20)
-        ndflPerson.flat = row.cell(22).toString(8)
+        ndflPerson.flat = row.cell(22).toString(20)
         ndflPerson.snils = row.cell(23).toString(14)
         ndflPerson.asnuId = declarationData.asnuId
         ndflPerson.modifiedDate = importDate
@@ -1046,6 +1043,9 @@ class Import extends AbstractScriptClass {
             checkRequiredPersonFields(persons)
             checkRequiredOperationFields(persons)
             checkPersonIncomeDates(persons)
+            if (logger.containsLevel(LogLevel.ERROR)) {
+                return
+            }
             checkOperationId(persons)
             checkReferences(persons)
         }
@@ -1142,23 +1142,28 @@ class Import extends AbstractScriptClass {
         if (!person.incomes) return true
 
         boolean allRecordsFailed = true
-        boolean atLeastOneRecordFailed = false
         Map<String, List<NdflPersonIncome>> incomesGroupedByOperationId = person.incomes.groupBy { it.operationId }
 
         for (List<NdflPersonIncome> incomesGroup : incomesGroupedByOperationId.values()) {
             boolean checkPassed = isIncomeDatesInPeriod(incomesGroup)
+            if(!checkPassed) {
+                logger.error("Для ФЛ: \"${person.fullName}\", ИНП: \"${person.inp ?: "_"}\" операция \"${incomesGroup[0].operationId}\" " +
+                        "не загружена в Налоговую форму №: \"${declarationData.id}\", Период: " +
+                        "\"${reportPeriod.taxPeriod.year}, ${reportPeriod.name}\", Подразделение: \"${department.name}\", Вид: \"${declarationTemplate.name}\"" +
+                        "${asnuName ? ", АСНУ: \"${asnuName}\"" : ""}. Ни одна из дат операции: \"Дата начисления дохода\", " +
+                        "\"Дата выплаты дохода\", \"Дата НДФЛ\", \"Дата платежного поручения\" не соответствуют периоду формы.")
+            }
             allRecordsFailed &= !checkPassed
-            atLeastOneRecordFailed |= !checkPassed
         }
         if (allRecordsFailed) {
-            logger.warn("Для ФЛ (ФИО: \"${person.fullName}\", ИНП: \"${person.inp}\") " +
+            logger.error("Для ФЛ (ФИО: \"${person.fullName}\", ИНП: \"${person.inp}\") " +
                     "отсутствуют операции, принадлежащие периоду формы:\"${reportPeriod.taxPeriod.year}, ${reportPeriod.name}\". " +
                     "Операции по ФЛ не загружены в Налоговую форму №: \"${declarationData.id}\", " +
                     "Период: \"${reportPeriod.taxPeriod.year}, ${reportPeriod.name}\", " +
                     "Подразделение: \"${department.name}\", Вид: \"${declarationTemplate.name}\"" +
                     "${asnuName ? ", АСНУ: \"${asnuName}\"" : ""}.")
         }
-        return !atLeastOneRecordFailed
+        return !allRecordsFailed
     }
 
     boolean isIncomeDatesInPeriod(List<NdflPersonIncome> incomeGroup) {
@@ -1177,17 +1182,6 @@ class Import extends AbstractScriptClass {
         boolean isAnyTaxDateInPeriod = incomesWithTaxDate.any { isDateInReportPeriod(it.taxDate) }
         if (isAnyTaxDateInPeriod) return true
 
-        // Если не удалось найти ни одной даты в периоде, печатаем информацию обо всех проверенных.
-        incomesWithAccruedDate.each { income ->
-            logIncomeDatesWarning(income, income.incomeAccruedDate, 26)
-        }
-        incomesWithPayoutDate.each { income ->
-            logIncomeDatesWarning(income, income.incomePayoutDate, 27)
-        }
-        incomesWithTaxDate.each { income ->
-            logIncomeDatesWarning(income, income.taxDate, 35)
-        }
-
         // Если хотя бы одна дата была, валидация не пройдена
         if (incomesWithAccruedDate || incomesWithPayoutDate || incomesWithTaxDate) {
             return false
@@ -1198,19 +1192,7 @@ class Import extends AbstractScriptClass {
         boolean isAnyPaymentDateInPeriod = incomesWithPaymentDate.any { isDateInReportPeriod(it.paymentDate) }
         if (isAnyPaymentDateInPeriod) return true
 
-        incomesWithPaymentDate.each { income ->
-            logIncomeDatesWarning(income, income.paymentDate, 42)
-        }
-
         return false
-    }
-
-    void logIncomeDatesWarning(NdflPersonIncomeExt income, Date date, int colIndex) {
-        logger.warn("Дата: \"${date?.format(SharedConstants.DATE_FORMAT)}\", указанная в столбце \"${header[colIndex]}\" № ${colIndex}" +
-                " для строки ${income.rowIndex} не соответствует периоду формы: \"${reportPeriod.taxPeriod.year}, ${reportPeriod.name}\"." +
-                " Операция \"${income.operationId}\" не загружена в Налоговую форму №: \"${declarationData.id}\", Период: " +
-                "\"${reportPeriod.taxPeriod.year}, ${reportPeriod.name}\", Подразделение: \"${department.name}\", Вид: \"${declarationTemplate.name}\"" +
-                "${asnuName ? ", АСНУ: \"${asnuName}\"" : ""}.")
     }
 
     boolean isDateInReportPeriod(Date date) {

@@ -253,7 +253,7 @@ class Check extends AbstractScriptClass {
                 ScriptUtils.checkInterrupted()
 
                 // Общие проверки
-                checkDataCommon(ndflPersonList, ndflPersonIncomeList, personMap)
+                checkDataCommon(ndflPersonList, ndflPersonIncomeList)
 
                 ScriptUtils.checkInterrupted()
 
@@ -666,7 +666,7 @@ class Check extends AbstractScriptClass {
     /**
      * Общие проверки
      */
-    def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndflPersonIncomeList, Map<Long, RegistryPerson> personMap) {
+    def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndflPersonIncomeList) {
         long time = System.currentTimeMillis()
         long timeTotal = time
         // Параметры подразделения
@@ -677,15 +677,19 @@ class Check extends AbstractScriptClass {
         time = System.currentTimeMillis()
 
         // Общ15 Консолидированная форма не пуста
-        if (ndflPersonList.isEmpty()) {
-            //Консолидированная форма <Номер формы>, <Подразделение>, <Период> не содержит данных, принятие формы невозможно
-            String strCorrPeriod = ""
-            if (departmentReportPeriod.getCorrectionDate() != null) {
-                strCorrPeriod = ", с датой сдачи корректировки " + departmentReportPeriod.getCorrectionDate().format("dd.MM.yyyy")
-            }
-            def strPeriod = departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + ", " + departmentReportPeriod.getReportPeriod().getName() + strCorrPeriod
-            logger.errorExp("Консолидированная форма %s, %s, %s не содержит данных, принятие формы невозможно", "Консолидированная форма не пуста", "",
-                    declarationData.id.toString(), department.name, strPeriod)
+        String strCorrPeriod = (departmentReportPeriod.correctionDate) ?
+                ", с датой сдачи корректировки ${departmentReportPeriod.correctionDate.format("dd.MM.yyyy")}" : ""
+        def strPeriod = departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + ", " + departmentReportPeriod.getReportPeriod().getName() + strCorrPeriod
+
+        if (!ndflPersonList && !ndflPersonIncomeList) {
+            logger.errorExp("Консолидированная форма ${declarationData.id}, ${department.name}, ${strPeriod} не содержит данных, принятие формы невозможно",
+                    "Консолидированная форма не пуста", "")
+        } else if (!ndflPersonList) {
+            logger.errorExp("Консолидированная форма ${declarationData.id}, ${department.name}, ${strPeriod} не содержит данных в разделе 1: \"Реквизиты\", принятие формы невозможно",
+                    "Консолидированная форма не пуста", "")
+        } else if (!ndflPersonIncomeList) {
+            logger.errorExp("Консолидированная форма ${declarationData.id}, ${department.name}, ${strPeriod} не содержит данных в разделе 2: \"Сведения о доходах и НДФЛ\", принятие формы невозможно",
+                    "Консолидированная форма не пуста", "")
         }
 
         for (NdflPerson ndflPerson : ndflPersonList) {
@@ -1165,8 +1169,8 @@ class Check extends AbstractScriptClass {
                 /**
                  * Проверки по операциям
                  */
-                // СведДох2 Сумма вычета (Графа 12)
-                if (totalOperationIncome.totalDeductionsSumm != null && totalOperationIncome.incomeAccruedSumm != null) {
+                if (!isDummy(allIncomesOfOperation)) {
+                    // СведДох2 Сумма вычета (Графа 12)
                     BigDecimal incomesAccruedSum = totalOperationIncome.incomeAccruedSumm ?: 0
                     BigDecimal incomesDeductionsSum = totalOperationIncome.totalDeductionsSumm ?: 0
                     BigDecimal deductionsSum = totalOperationDeduction.periodCurrSumm ?: 0
@@ -1194,21 +1198,21 @@ class Check extends AbstractScriptClass {
                         String pathError = String.format(SECTION_LINES_MSG, T_PERSON_INCOME, rowNums)
                         logger.warnExp("%s. %s.", LOG_TYPE_2_12, fioAndInpAndOperId, pathError, errMsg)
                     }
-                }
 
-                // СведДох7 Заполнение Раздела 2 Графы 18 и 19
-                BigDecimal notHoldingTax = totalOperationIncome.notHoldingTax ?: 0
-                BigDecimal overholdingTax = totalOperationIncome.overholdingTax ?: 0
-                BigDecimal calculatedTax = totalOperationIncome.calculatedTax ?: 0
-                BigDecimal withholdingTax = totalOperationIncome.withholdingTax ?: 0
-                if (notHoldingTax - overholdingTax != calculatedTax - withholdingTax) {
-                    // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
-                    String errMsg = "Для строк операции с \"ID операции\"=\"$operationId\" разность сумм значений гр. \"НДФЛ не удержанный\" " +
-                            "(\"$notHoldingTax\") и гр. \"НДФЛ излишне удержанный\" (\"$overholdingTax\") " +
-                            "должна быть равна разности сумм значений гр.\"НДФЛ исчисленный\" (\"$calculatedTax\") и " +
-                            "гр.\"НДФЛ удержанный\" (\"$withholdingTax\") по всем строкам одной операции"
-                    String pathError = String.format(SECTION_LINES_MSG, T_PERSON_INCOME, rowNums)
-                    logger.warnExp("%s. %s.", LOG_TYPE_2_18_19, fioAndInpAndOperId, pathError, errMsg)
+                    // СведДох7 Заполнение Раздела 2 Графы 18 и 19
+                    BigDecimal notHoldingTax = totalOperationIncome.notHoldingTax ?: 0
+                    BigDecimal overholdingTax = totalOperationIncome.overholdingTax ?: 0
+                    BigDecimal calculatedTax = totalOperationIncome.calculatedTax ?: 0
+                    BigDecimal withholdingTax = totalOperationIncome.withholdingTax ?: 0
+                    if (notHoldingTax - overholdingTax != calculatedTax - withholdingTax) {
+                        // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
+                        String errMsg = "Для строк операции с \"ID операции\"=\"$operationId\" разность сумм значений гр. \"НДФЛ не удержанный\" " +
+                                "(\"$notHoldingTax\") и гр. \"НДФЛ излишне удержанный\" (\"$overholdingTax\") " +
+                                "должна быть равна разности сумм значений гр.\"НДФЛ исчисленный\" (\"$calculatedTax\") и " +
+                                "гр.\"НДФЛ удержанный\" (\"$withholdingTax\") по всем строкам одной операции"
+                        String pathError = String.format(SECTION_LINES_MSG, T_PERSON_INCOME, rowNums)
+                        logger.warnExp("%s. %s.", LOG_TYPE_2_18_19, fioAndInpAndOperId, pathError, errMsg)
+                    }
                 }
 
                 /**
@@ -1233,6 +1237,14 @@ class Check extends AbstractScriptClass {
                                 }
                             }
                         }
+                    }
+
+                    // Заполнение Раздела 2 Графы 13
+                    if (ndflPersonIncome.incomeAccruedDate && ndflPersonIncome.taxBase != (ndflPersonIncome.incomeAccruedSumm ?: 0) - (ndflPersonIncome.totalDeductionsSumm ?: 0)) {
+                        String errMsg = "Значение гр. \"Налоговая База\" \"$ndflPersonIncome.taxBase\" не совпадает с расчетным " +
+                                "\"${(ndflPersonIncome.incomeAccruedSumm ?: 0) - (ndflPersonIncome.totalDeductionsSumm ?: 0)}\""
+                        String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
+                        logger.warnExp("%s. %s.", LOG_TYPE_2_6, fioAndInpAndOperId, pathError, errMsg)
                     }
 
                     // СведДох3 НДФЛ.Процентная ставка (Графа 14)
@@ -1354,7 +1366,7 @@ class Check extends AbstractScriptClass {
                             if (!isDeductionExists) {
                                 logTypeMessagePairList.add(new CheckData("\"Дата исчисленного налога\" указана некорректно",
                                         ("Значение гр. \"${C_TAX_DATE}\" (\"${formatDate(ndflPersonIncome.taxDate)}\") отсутствует в гр. " +
-                                                "\"${C_PERIOD_CURR_DATE}\" хотя бы одной строки операции Раздела 3").toString(),
+                                                "\"${C_PERIOD_CURR_DATE}\" хотя бы одной строки операции Раздела 3.").toString(),
                                         section_2_15_fatal))
                             }
                         }
@@ -1370,7 +1382,7 @@ class Check extends AbstractScriptClass {
                                 if (ndflPersonIncome.taxDate != ndflPersonIncome.incomePayoutDate) {
                                     logTypeMessagePairList.add(new CheckData("\"Дата удержанного налога\" указана некорректно",
                                             ("Значение гр. \"${C_TAX_DATE}\" (\"${formatDate(ndflPersonIncome.taxDate)}\") должно быть равно " +
-                                                    "значению гр. \"${C_INCOME_PAYOUT_DATE}\" (\"${formatDate(ndflPersonIncome.incomePayoutDate)}\")").toString(),
+                                                    "значению гр. \"${C_INCOME_PAYOUT_DATE}\" (\"${formatDate(ndflPersonIncome.incomePayoutDate)}\").").toString(),
                                             section_2_15_fatal))
                                 }
                             }
@@ -1389,7 +1401,7 @@ class Check extends AbstractScriptClass {
                             if (ndflPersonIncome.taxDate != ndflPersonIncome.incomePayoutDate) {
                                 logTypeMessagePairList.add(new CheckData("\"Дата не удержанного налога\" указана некорректно",
                                         ("Значение гр. \"${C_TAX_DATE}\" (\"${formatDate(ndflPersonIncome.taxDate)}\") должно быть равно " +
-                                                "значению гр. \"${C_INCOME_PAYOUT_DATE}\" (\"${formatDate(ndflPersonIncome.incomePayoutDate)}\")").toString(),
+                                                "значению гр. \"${C_INCOME_PAYOUT_DATE}\" (\"${formatDate(ndflPersonIncome.incomePayoutDate)}\").").toString(),
                                         section_2_15_fatal))
                             }
                         }
@@ -1418,7 +1430,7 @@ class Check extends AbstractScriptClass {
                                 if (ndflPersonIncome.taxDate != ndflPersonIncome.incomeAccruedDate) {
                                     logTypeMessagePairList.add(new CheckData("\"Дата не удержанного налога\" указана некорректно",
                                             ("Значение гр. \"${C_TAX_DATE}\" (\"${formatDate(ndflPersonIncome.taxDate)}\") должно быть равно " +
-                                                    "значению гр. \"${C_INCOME_ACCRUED_DATE}\" (\"${formatDate(ndflPersonIncome.incomeAccruedDate)}\")").toString(),
+                                                    "значению гр. \"${C_INCOME_ACCRUED_DATE}\" (\"${formatDate(ndflPersonIncome.incomeAccruedDate)}\").").toString(),
                                             section_2_15_fatal))
                                 }
                             }
@@ -1440,7 +1452,7 @@ class Check extends AbstractScriptClass {
                                 int month = calendarPayout.get(Calendar.MONTH)
                                 if (!(dayOfMonth == 31 && month == 12)) {
                                     logTypeMessagePairList.add(new CheckData("\"Дата не удержаннного налога\" указана некорректно",
-                                            ("Значение гр. \"${C_TAX_DATE}\" (\"${formatDate(ndflPersonIncome.taxDate)}\") должно быть равно последнему календарному дню года налогового периода").toString()))
+                                            ("Значение гр. \"${C_TAX_DATE}\" (\"${formatDate(ndflPersonIncome.taxDate)}\") должно быть равно последнему календарному дню года налогового периода.").toString()))
                                 }
                             }
                         }
@@ -1452,25 +1464,28 @@ class Check extends AbstractScriptClass {
                                 ndflPersonIncome.incomePayoutDate != null) {
                             // "Графа 15" = "Графа 7"
                             if (ndflPersonIncome.taxDate != ndflPersonIncome.incomePayoutDate) {
-                                logTypeMessagePairList.add(new CheckData("\"Дата излишне удержанного налога\" указана некорректно", ("Значение гр. \"${C_TAX_DATE}\" (\"${ndflPersonIncome.taxDate ? ScriptUtils.formatDate(ndflPersonIncome.taxDate) : ""}\") должно быть равно значению гр. \"${C_INCOME_PAYOUT_DATE}\" (\"${ndflPersonIncome.incomePayoutDate ? ScriptUtils.formatDate(ndflPersonIncome.incomePayoutDate) : ""}\")").toString(), section_2_15_fatal))
+                                logTypeMessagePairList.add(new CheckData("\"Дата излишне удержанного налога\" указана некорректно",
+                                        ("Значение гр. \"${C_TAX_DATE}\" (\"${ndflPersonIncome.taxDate ? ScriptUtils.formatDate(ndflPersonIncome.taxDate) : ""}\") " +
+                                                "должно быть равно значению гр. \"${C_INCOME_PAYOUT_DATE}\" " +
+                                                "(\"${ndflPersonIncome.incomePayoutDate ? ScriptUtils.formatDate(ndflPersonIncome.incomePayoutDate) : ""}\").").toString(), section_2_15_fatal))
                             }
                         }
                         // П.8
                         // Проверка не должна выполняться.
                         /*if (ndflPersonIncome.refoundTax != null && ndflPersonIncome.overholdingTax != null && withholdingTaxPresented && calculatedTaxPresented && (ndflPersonIncome.refoundTax ?: 0 > 0) &&
-                            (ndflPersonIncome.withholdingTax ?: 0) > (ndflPersonIncome.calculatedTax ?: 0) &&
-                            (ndflPersonIncome.overholdingTax ?: 0) &&
-                            ndflPersonIncome.incomeCode != "0" && ndflPersonIncome.incomeCode != null) {
-                        // «Графа 15 Раздел 2» = «Графа 7 Раздел 2»
-                        if (ndflPersonIncome.taxDate != null && ndflPersonIncome.incomePayoutDate != null && ndflPersonIncome.taxDate != ndflPersonIncome.incomePayoutDate) {
-                            checkTaxDate = false
-                            logTypeMessagePairList.add(new CheckData("\"Дата расчета возвращенного налогоплательщику налога\" указана некорректно", ("Значение гр. \"${C_TAX_DATE}\" (\"${ndflPersonIncome.taxDate ? ScriptUtils.formatDate(ndflPersonIncome.taxDate) : ""}\") должно быть равно значению гр. \"${C_INCOME_PAYOUT_DATE}\" (\"${ndflPersonIncome.incomePayoutDate ? ScriptUtils.formatDate(ndflPersonIncome.incomePayoutDate) : ""}\")").toString(), section_2_15_fatal))
-                        }
-                    }*/
+                                (ndflPersonIncome.withholdingTax ?: 0) > (ndflPersonIncome.calculatedTax ?: 0) &&
+                                (ndflPersonIncome.overholdingTax ?: 0) &&
+                                ndflPersonIncome.incomeCode != "0" && ndflPersonIncome.incomeCode != null) {
+                            // «Графа 15 Раздел 2» = «Графа 7 Раздел 2»
+                            if (ndflPersonIncome.taxDate != null && ndflPersonIncome.incomePayoutDate != null && ndflPersonIncome.taxDate != ndflPersonIncome.incomePayoutDate) {
+                                checkTaxDate = false
+                                logTypeMessagePairList.add(new CheckData("\"Дата расчета возвращенного налогоплательщику налога\" указана некорректно", ("Значение гр. \"${C_TAX_DATE}\" (\"${ndflPersonIncome.taxDate ? ScriptUtils.formatDate(ndflPersonIncome.taxDate) : ""}\") должно быть равно значению гр. \"${C_INCOME_PAYOUT_DATE}\" (\"${ndflPersonIncome.incomePayoutDate ? ScriptUtils.formatDate(ndflPersonIncome.incomePayoutDate) : ""}\")").toString(), section_2_15_fatal))
+                            }
+                        }*/
                         if (!logTypeMessagePairList.isEmpty()) {
                             String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
                             for (CheckData checkData : logTypeMessagePairList) {
-                                logger.logCheck("%s. %s.", checkData.fatal, checkData.msgFirst, fioAndInpAndOperId, pathError, checkData.msgLast)
+                                logger.logCheck("%s. %s", checkData.fatal, checkData.msgFirst, fioAndInpAndOperId, pathError, checkData.msgLast)
                             }
                         }
                     }
@@ -1988,6 +2003,15 @@ class Check extends AbstractScriptClass {
         }
 
         logForDebug("Проверки сведений о доходах в виде авансовых платежей (" + (System.currentTimeMillis() - time) + " мс)")
+    }
+
+    boolean isDummy(List<NdflPersonIncome> incomes) {
+        for (def income : incomes) {
+            if (!income.isDummy()) {
+                return false
+            }
+        }
+        return true
     }
 
     class CheckData {
