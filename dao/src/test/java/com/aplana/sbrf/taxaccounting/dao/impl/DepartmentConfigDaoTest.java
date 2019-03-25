@@ -28,8 +28,7 @@ import static java.util.Collections.singletonList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"DepartmentConfigDaoTest.xml"})
@@ -156,6 +155,13 @@ public class DepartmentConfigDaoTest {
         assertThat(kppOktmoPairs, contains(
                 new ReportFormCreationKppOktmoPair("000000003", "111", null),
                 new ReportFormCreationKppOktmoPair("000000002", "111", "действует до 31.12.2017")));
+    }
+
+    @Test
+    public void existsByKppAndOkmtoAndPeriodId() {
+        assertTrue(departmentConfigDao.existsByKppAndOkmtoAndPeriodId("000000001", "111", 1));
+        assertFalse(departmentConfigDao.existsByKppAndOkmtoAndPeriodId("000000001", "111", 2));
+        assertTrue(departmentConfigDao.existsByKppAndOkmtoAndPeriodId("000000003", "111", 2));
     }
 
     private DeclarationData declarationData(long id, int reportPeriodId, int departmentId) {

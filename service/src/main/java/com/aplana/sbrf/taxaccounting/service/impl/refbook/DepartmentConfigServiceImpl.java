@@ -157,6 +157,11 @@ public class DepartmentConfigServiceImpl implements DepartmentConfigService {
     }
 
     @Override
+    public boolean existsByKppAndOkmtoAndPeriodId(String kpp, String oktmo, int reportPeriodId) {
+        return departmentConfigDao.existsByKppAndOkmtoAndPeriodId(kpp, oktmo, reportPeriodId);
+    }
+
+    @Override
     @PreAuthorize("hasPermission(#departmentConfig, T(com.aplana.sbrf.taxaccounting.permissions.DepartmentConfigPermission).CREATE)")
     public ActionResult create(DepartmentConfig departmentConfig, TAUserInfo userInfo) {
         LOG.info("create: kpp=" + departmentConfig.getKpp() + ", oktmo=" + departmentConfig.getOktmo().getCode());
