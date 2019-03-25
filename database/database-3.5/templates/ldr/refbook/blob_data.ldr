@@ -14,3 +14,4 @@ CREATION_DATE DATE "DD.MM.RR",
 DECLARATION_TEMPLATE_ID)
 begindata
  352adf59-372b-4020-98fe-8960dd5bc972|refbook_declaration_type.groovy|templates/data/refbook/declaration_type.groovy|01.01.2016||
+ 884b9f2e-1678-4d69-9652-b036bba2f728|refbook_person.groovy|templates/data/refbook/person.groovy|01.01.2016||
