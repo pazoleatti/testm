@@ -7,7 +7,6 @@ import com.aplana.sbrf.taxaccounting.model.FormStyle;
 import com.aplana.sbrf.taxaccounting.model.consolidation.ConsolidationIncome;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.TAInterruptedException;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
@@ -27,7 +26,11 @@ import org.apache.poi.xssf.model.StylesTable;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 import org.joda.time.LocalDateTime;
-import org.xml.sax.*;
+import org.xml.sax.Attributes;
+import org.xml.sax.ContentHandler;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 import org.xml.sax.helpers.XMLReaderFactory;
 
@@ -39,7 +42,15 @@ import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -410,14 +421,14 @@ public final class ScriptUtils {
                 if (rowValues.size() < columnIndex - colOffset) {
                     int n = (columnIndex - rowValues.size() - colOffset);
                     for (int i = 1; i <= n; i++) {
-                        rowValues.add(null);
+                        rowValues.add("");
                     }
                 }
-                String value = getValue();
-                rowValues.add(StringUtils.isEmpty(value) ? null : value);
+                // строка
+                rowValues.add(getValue());
             } else if (name.equals("row")) { // конец строки
                 if (isData) {
-                    endRead = (rowValues != null && tableEndValue != null && rowValues.contains(tableEndValue));
+                    endRead = (rowValues != null && rowValues.contains(tableEndValue));
                     if (!endRead) {
                         // еще не конец таблицы - дополнить список значений недостоющеми значениями и добавить ко всем строкам
                         performRowData();
@@ -603,14 +614,13 @@ public final class ScriptUtils {
                 if (rowValues.size() < columnIndex - colOffset) {
                     int n = (columnIndex - rowValues.size() - colOffset);
                     for (int i = 1; i <= n; i++) {
-                        rowValues.add(null);
+                        rowValues.add("");
                     }
                 }
-                String value = getValue();
-                rowValues.add(StringUtils.isEmpty(value) ? null : value);
+                rowValues.add(getValue());
             } else if (name.equals("row")) { // конец строки
                 if (isData && rowValues != null && !rowValues.isEmpty() && rowValues.get(0) != null && !rowValues.get(0).startsWith(headerStartValue)) {
-                    endRead = tableEndValue != null && rowValues.contains(tableEndValue);
+                    endRead = (rowValues != null && rowValues.contains(tableEndValue));
                     if (!endRead) {
                         // еще не конец таблицы - дополнить список значений недостоющеми значениями и добавить ко всем строкам
                         performRowData();
