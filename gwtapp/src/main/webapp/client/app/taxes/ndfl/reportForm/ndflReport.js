@@ -455,13 +455,13 @@
                 };
 
                 $scope.downloadXml = function () {
-                    $window.location = "controller/rest/declarationData/" + $stateParams.declarationDataId + "/xml";
+                    $window.open("controller/rest/declarationData/" + $stateParams.declarationDataId + "/xml", '_blank');
                 };
                 $scope.downloadPdf = function () {
-                    $window.location = "controller/rest/declarationData/" + $stateParams.declarationDataId + "/pdf";
+                    $window.open("controller/rest/declarationData/" + $stateParams.declarationDataId + "/pdf", '_blank');
                 };
                 $scope.downloadDeptNoticeDoc = function () {
-                    $window.location = "controller/rest/declarationData/" + $stateParams.declarationDataId + "/deptNoticeDoc";
+                    $window.open("controller/rest/declarationData/" + $stateParams.declarationDataId + "/deptNoticeDoc", '_blank');
                 };
             }]);
 }());
