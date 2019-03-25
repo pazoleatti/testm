@@ -1201,7 +1201,7 @@ class Check extends AbstractScriptClass {
                         String errMsg = "Значение гр. \"Налоговая База\" \"$ndflPersonIncome.taxBase\" не совпадает с расчетным " +
                                 "\"${(ndflPersonIncome.incomeAccruedSumm ?: 0) - (ndflPersonIncome.totalDeductionsSumm ?: 0)}\""
                         String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
-                        logger.warnExp("%s. %s.", LOG_TYPE_2_6, fioAndInpAndOperId, pathError, errMsg)
+                        logger.warnExp("%s. %s.", "\"Налоговая база\" указана некорректно", fioAndInpAndOperId, pathError, errMsg)
                     }
 
                     // СведДох3 НДФЛ.Процентная ставка (Графа 14)

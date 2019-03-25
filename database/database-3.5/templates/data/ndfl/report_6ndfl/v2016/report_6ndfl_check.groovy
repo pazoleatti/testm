@@ -85,7 +85,7 @@ class Check extends AbstractScriptClass {
         //---------------------------------------------------------------
         // Внутридокументные проверки
         ScriptUtils.checkInterrupted()
-        def msgError = "В форме \"%s\" КПП: \"%s\", ОКТМО: \"%s\" "
+        def msgError = "В форме \"%s\", КПП: \"%s\", ОКТМО: \"%s\" "
         msgError = sprintf(msgError, FORM_NAME_NDFL6, declarationData.kpp, declarationData.oktmo)
 
         def ndfl6Stream = declarationService.getXmlStream(declarationData.id, userInfo)

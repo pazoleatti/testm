@@ -2424,7 +2424,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
 
     String generateOperationId(String inp, String operationId, String kpp, String oktmo, BigDecimal operInfoId) {
         String result = operationId
-        if ((declarationData.asnuId == 1L || declarationData.asnuId == 13L || declarationData.asnuId == 16L) && operationId.length() <= 10) {
+        if ((declarationData.asnuId == 1L || declarationData.asnuId == 13L || declarationData.asnuId == 16L) && operationId != "0" && operationId.length() <= 10) {
             StringBuilder newOperationId = new StringBuilder()
             newOperationId
                     .append(inp)

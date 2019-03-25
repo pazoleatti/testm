@@ -156,7 +156,8 @@ GUID</xs:documentation>
 										</xs:annotation>
 										<xs:simpleType>
 											<xs:restriction base="xs:string">
-												<xs:length value="12"/>
+												<xs:minLength value="0"/>
+												<xs:maxLength value="12"/>
 											</xs:restriction>
 										</xs:simpleType>
 									</xs:attribute>
