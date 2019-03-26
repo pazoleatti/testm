@@ -312,6 +312,8 @@ class Import extends AbstractScriptClass {
                         if (ndflPerson.middleName?.isEmpty()) ndflPerson.middleName = null
                         if (ndflPerson.innNp?.isEmpty()) ndflPerson.innNp = null
                         if (ndflPerson.innForeign?.isEmpty()) ndflPerson.innForeign = null
+                        if (ndflPerson.regionCode?.isEmpty()) ndflPerson.regionCode = null
+                        if (ndflPerson.postIndex?.isEmpty()) ndflPerson.postIndex = null
                         if (ndflPerson.area?.isEmpty()) ndflPerson.area = null
                         if (ndflPerson.city?.isEmpty()) ndflPerson.city = null
                         if (ndflPerson.locality?.isEmpty()) ndflPerson.locality = null
@@ -544,7 +546,9 @@ class Import extends AbstractScriptClass {
                                 updated = true
                             }
                             if (income.taxTransferDate != persistedIncome.taxTransferDate) {
-                                messages << createUpdateOperationMessage(ndflPerson, INCOME_TITLE, income.id, TAX_TRANSFER_DATE, persistedIncome.taxTransferDate?.format(SharedConstants.DATE_FORMAT), income.taxTransferDate?.format(SharedConstants.DATE_FORMAT))
+                                messages << createUpdateOperationMessage(ndflPerson, INCOME_TITLE, income.id, TAX_TRANSFER_DATE,
+                                        persistedIncome.taxTransferDate?.format(SharedConstants.DATE_FORMAT) != SharedConstants.DATE_ZERO_AS_DATE ? persistedIncome.taxTransferDate?.format(SharedConstants.DATE_FORMAT) : SharedConstants.DATE_ZERO_AS_STRING,
+                                        income.taxTransferDate?.format(SharedConstants.DATE_FORMAT) != SharedConstants.DATE_ZERO_AS_DATE ? income.taxTransferDate?.format(SharedConstants.DATE_FORMAT) : SharedConstants.DATE_ZERO_AS_STRING)
                                 persistedIncome.taxTransferDate = income.taxTransferDate
                                 updated = true
                             }
