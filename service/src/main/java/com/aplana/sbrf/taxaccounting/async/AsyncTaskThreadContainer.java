@@ -117,34 +117,36 @@ public class AsyncTaskThreadContainer implements DisposableBean {
                     return;
                 }
                 try {
-                    MDC.put("processId", String.format("AsyncTaskId=%s ", taskData.getId()));
-                    //Запускаем выполнение бина-обработчика задачи в новом потоке
-                    LOG.info("Task started: " + taskData);
-                    final AsyncTask task = asyncManager.getAsyncTaskBean(taskData.getType().getAsyncTaskTypeId());
-                    final Map<String, String> mdcContext = MDC.getCopyOfContextMap();
                     Future<?> taskFuture = asyncTaskPool.submit(new Thread("AsyncTask-" + taskData.getId()) {
                         @Override
                         public void run() {
                             try {
-                                MDC.setContextMap(mdcContext);
-                                //Запускаем задачу под нужным пользователем
-                                TAUser user = taUserService.getUser(taskData.getUserId());
-                                MDC.put("userInfo", String.format("%s ", user.getLogin()));
-                                //Формируем и передаём в контекст спринга параметры аутентификации (пользователь и его роли)
-                                //чтобы корректно работала security в данном потоке
-                                List<String> roles = new ArrayList<>();
-                                for (TARole role : user.getRoles()) {
-                                    roles.add(role.getAlias());
+                                if (asyncManager.isTaskActive(taskData.getId())) {
+                                    MDC.put("processId", String.format("AsyncTaskId=%s ", taskData.getId()));
+                                    //Запускаем выполнение бина-обработчика задачи в новом потоке
+                                    LOG.info("Task started: " + taskData);
+                                    final AsyncTask task = asyncManager.getAsyncTaskBean(taskData.getType().getAsyncTaskTypeId());
+                                    final Map<String, String> mdcContext = MDC.getCopyOfContextMap();
+                                    MDC.setContextMap(mdcContext);
+                                    //Запускаем задачу под нужным пользователем
+                                    TAUser user = taUserService.getUser(taskData.getUserId());
+                                    MDC.put("userInfo", String.format("%s ", user.getLogin()));
+                                    //Формируем и передаём в контекст спринга параметры аутентификации (пользователь и его роли)
+                                    //чтобы корректно работала security в данном потоке
+                                    List<String> roles = new ArrayList<>();
+                                    for (TARole role : user.getRoles()) {
+                                        roles.add(role.getAlias());
+                                    }
+                                    Collection<GrantedAuthority> authorities;
+                                    authorities = AuthorityUtils.createAuthorityList(roles.toArray(new String[0]));
+                                    Authentication authentication = new UsernamePasswordAuthenticationToken(
+                                            new User(user.getLogin(), "user", authorities),
+                                            user.getLogin(),
+                                            authorities
+                                    );
+                                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                                    task.execute(taskData);
                                 }
-                                Collection<GrantedAuthority> authorities;
-                                authorities = AuthorityUtils.createAuthorityList(roles.toArray(new String[0]));
-                                Authentication authentication = new UsernamePasswordAuthenticationToken(
-                                        new User(user.getLogin(), "user", authorities),
-                                        user.getLogin(),
-                                        authorities
-                                );
-                                SecurityContextHolder.getContext().setAuthentication(authentication);
-                                task.execute(taskData);
                             } catch (Exception e) {
                                 LOG.error("Unexpected error during async task execution", e);
                             } finally {

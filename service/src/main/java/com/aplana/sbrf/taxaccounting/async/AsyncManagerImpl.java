@@ -296,8 +296,7 @@ public class AsyncManagerImpl implements AsyncManager {
                                 description);
                     }
                     if (taskData != null && !keys.isEmpty()) {
-                        asyncTaskDao.delete(taskData.getId());
-                        lockDataService.unlockAllByTask(taskData.getId());
+                        finishTask(taskData.getId());
                     } else {
                         lockDataService.unlockMultipleTasks(keys);
                     }
@@ -340,7 +339,7 @@ public class AsyncManagerImpl implements AsyncManager {
                                 taskDescription);
                     }
                     if (taskData != null) {
-                        asyncTaskDao.delete(taskData.getId());
+                        finishTask(taskData.getId());
                     }
                 }
                 return false;
@@ -521,7 +520,7 @@ public class AsyncManagerImpl implements AsyncManager {
                                     }
                                     asyncTaskDao.updateState(taskData.getId(), AsyncTaskState.CANCELLED);
                                 } else {
-                                    asyncTaskDao.delete(taskData.getId());
+                                    finishTask(taskData.getId());
                                 }
                             } catch (Exception e) {
                                 throw new ServiceException("Удаление асинхронной задачи не может быть выполнено. Причина: \"" + e.getMessage() + "\"", e);
