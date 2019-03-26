@@ -544,7 +544,9 @@ class Import extends AbstractScriptClass {
                                 updated = true
                             }
                             if (income.taxTransferDate != persistedIncome.taxTransferDate) {
-                                messages << createUpdateOperationMessage(ndflPerson, INCOME_TITLE, income.id, TAX_TRANSFER_DATE, persistedIncome.taxTransferDate?.format(SharedConstants.DATE_FORMAT), income.taxTransferDate?.format(SharedConstants.DATE_FORMAT))
+                                messages << createUpdateOperationMessage(ndflPerson, INCOME_TITLE, income.id, TAX_TRANSFER_DATE,
+                                        persistedIncome.taxTransferDate?.format(SharedConstants.DATE_FORMAT) != SharedConstants.DATE_ZERO_AS_DATE ? persistedIncome.taxTransferDate?.format(SharedConstants.DATE_FORMAT) : SharedConstants.DATE_ZERO_AS_STRING,
+                                        income.taxTransferDate?.format(SharedConstants.DATE_FORMAT) != SharedConstants.DATE_ZERO_AS_DATE ? income.taxTransferDate?.format(SharedConstants.DATE_FORMAT) : SharedConstants.DATE_ZERO_AS_STRING)
                                 persistedIncome.taxTransferDate = income.taxTransferDate
                                 updated = true
                             }
