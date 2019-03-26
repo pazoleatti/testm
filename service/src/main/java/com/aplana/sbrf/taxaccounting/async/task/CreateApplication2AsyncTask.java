@@ -6,6 +6,8 @@ import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.CreateApplication2Service;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -15,6 +17,7 @@ import java.util.Map;
  * Формирование приложения 2
  */
 @Component("CreateApplication2AsyncTask")
+@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class CreateApplication2AsyncTask extends AbstractAsyncTask {
 
     @Autowired

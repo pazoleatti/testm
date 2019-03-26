@@ -8,12 +8,15 @@ import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
 import com.aplana.sbrf.taxaccounting.service.ReportService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
 
 @Component("XlsxGeneratorAsyncTask")
+@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class XlsxGeneratorAsyncTask extends AbstractDeclarationAsyncTask {
 
     private static final String SUCCESS = "Сформирован %s отчет налоговой формы: %s";

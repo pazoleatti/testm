@@ -13,6 +13,8 @@ import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.refbook.RefBookAsnuService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -21,6 +23,7 @@ import java.util.Map;
  * Загрузка данных РНУ НДФЛ из Excel-файла в ПНФ
  */
 @Component("ImportExcelFileAsyncTask")
+@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class ImportExcelFileAsyncTask extends AbstractAsyncTask {
 
     @Autowired

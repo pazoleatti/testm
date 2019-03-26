@@ -86,7 +86,7 @@ public abstract class AbstractDeclarationAsyncTask extends AbstractAsyncTask {
     }
 
     private String getCorrectionDateString(DepartmentReportPeriod reportPeriod) {
-        return reportPeriod.getCorrectionDate() != null ? String.format(" с датой сдачи корректировки %s", SDF_DD_MM_YYYY.get().format(reportPeriod.getCorrectionDate())) : "";
+        return reportPeriod.getCorrectionDate() != null ? String.format(" с датой сдачи корректировки %s", SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())) : "";
     }
 
     /**

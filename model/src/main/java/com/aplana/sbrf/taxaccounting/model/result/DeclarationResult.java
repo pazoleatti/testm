@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model.result;
 
 import com.aplana.sbrf.taxaccounting.model.NegativeSumsSign;
+import com.aplana.sbrf.taxaccounting.model.TaxRefundReflectionMode;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookKnfType;
 import lombok.Getter;
 import lombok.Setter;
@@ -147,5 +148,9 @@ public class DeclarationResult {
      * Признак нераспределенных сумм
      */
     private NegativeSumsSign negativeSumsSign;
+    /**
+     * см {@link TaxRefundReflectionMode}
+     */
+    private TaxRefundReflectionMode taxRefundReflectionMode;
 
 }

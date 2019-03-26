@@ -411,9 +411,10 @@
         "title.prepayment.notifSource": "Код налогового органа, выдавшего уведомление",
         "title.prepayment.filter.notifSource": "Код НО, выдавшего уведомление",
         "title.adjustNegativeValues": "Отрицательные значения Раздела 2",
-        "title.negativeIncome": "Нераспределенный отрицательный Доход",
-        "title.negativeTax": "Нераспределенный отрицательный Налог",
-        "title.negativeSumsSign": "Признак нераспределенных сумм",
+        "title.negativeIncome": "Нерасп. Доход",
+        "title.negativeTax": "Нераспр. Налог",
+        "title.negativeSumsSign": "Нерасп. суммы",
+        "title.taxRefund": "Возвращенный налог",
         "negativeValuesAdjustment.true": "Корректировать",
         "negativeValuesAdjustment.false": "Не корректировать",
 

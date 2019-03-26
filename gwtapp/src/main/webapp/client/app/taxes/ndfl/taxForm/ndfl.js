@@ -700,34 +700,34 @@
                 };
 
                 $scope.downloadXml = function () {
-                    $window.location = "controller/rest/declarationData/" + $stateParams.declarationDataId + "/xml";
+                    $window.open("controller/rest/declarationData/" + $stateParams.declarationDataId + "/xml", '_blank');
                 };
                 $scope.downloadXlsx = function () {
-                    $window.location = "controller/rest/declarationData/" + $stateParams.declarationDataId + "/xlsx";
+                    $window.open("controller/rest/declarationData/" + $stateParams.declarationDataId + "/xlsx", '_blank');
                 };
                 $scope.downloadSpecific = function () {
-                    $window.location = "controller/rest/declarationData/" + $stateParams.declarationDataId + "/specific/" + APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.RNU_NDFL_PERSON_ALL_DB;
+                    $window.open("controller/rest/declarationData/" + $stateParams.declarationDataId + "/specific/" + APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.RNU_NDFL_PERSON_ALL_DB, '_blank');
                 };
                 $scope.downloadRateReport = function () {
-                    $window.location = "controller/rest/declarationData/" + $stateParams.declarationDataId + "/specific/" + APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.RNU_RATE_REPORT;
+                    $window.open("controller/rest/declarationData/" + $stateParams.declarationDataId + "/specific/" + APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.RNU_RATE_REPORT, '_blank');
                 };
                 $scope.downloadPaymentReport = function () {
-                    $window.location = "controller/rest/declarationData/" + $stateParams.declarationDataId + "/specific/" + APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.RNU_PAYMENT_REPORT;
+                    $window.open("controller/rest/declarationData/" + $stateParams.declarationDataId + "/specific/" + APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.RNU_PAYMENT_REPORT, '_blank');
                 };
                 $scope.downloadNdflDetailReport = function () {
-                    $window.location = "controller/rest/declarationData/" + $stateParams.declarationDataId + "/specific/" + APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.RNU_NDFL_DETAIL_REPORT;
+                    $window.open("controller/rest/declarationData/" + $stateParams.declarationDataId + "/specific/" + APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.RNU_NDFL_DETAIL_REPORT, '_blank');
                 };
                 $scope.downloadNdfl2_6DataXlsxReport = function () {
-                    $window.location = "controller/rest/declarationData/" + $stateParams.declarationDataId + "/specific/" + APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.RNU_NDFL_2_6_DATA_XLSX_REPORT;
+                    $window.open("controller/rest/declarationData/" + $stateParams.declarationDataId + "/specific/" + APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.RNU_NDFL_2_6_DATA_XLSX_REPORT, '_blank');
                 };
                 $scope.downloadNdfl2_6DataTxtReport = function () {
-                    $window.location = "controller/rest/declarationData/" + $stateParams.declarationDataId + "/specific/" + APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.RNU_NDFL_2_6_DATA_TXT_REPORT;
+                    $window.open("controller/rest/declarationData/" + $stateParams.declarationDataId + "/specific/" + APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.RNU_NDFL_2_6_DATA_TXT_REPORT, '_blank');
                 };
                 $scope.downloadPairKppOktmo = function () {
-                    $window.location = "controller/rest/declarationData/" + $stateParams.declarationDataId + "/specific/" + APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.REPORT_KPP_OKTMO;
+                    $window.open("controller/rest/declarationData/" + $stateParams.declarationDataId + "/specific/" + APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.REPORT_KPP_OKTMO, '_blank');
                 };
                 $scope.downloadExcelTemplate = function () {
-                    $window.location = "controller/rest/declarationData/" + $stateParams.declarationDataId + "/excelTemplate";
+                    $window.open("controller/rest/declarationData/" + $stateParams.declarationDataId + "/excelTemplate", '_blank');
                 };
 
                 $scope.createReportXlsx = function () {

@@ -84,4 +84,14 @@ public interface DepartmentConfigDao extends PermissionDao {
      * @return страница пар КПП/ОКТМО
      */
     PagingResult<ReportFormCreationKppOktmoPair> findAllKppOktmoPairsByFilter(ReportFormCreationKppOktmoPairFilter filter, PagingParams pagingParams);
+
+    /**
+     * Возвращяет признак наличия настройки с заданными КПП и ОКТМО, актуальной на текущий момент или пересекающейся с периодов формы
+     *
+     * @param kpp            КПП
+     * @param oktmo          ОКТМО
+     * @param reportPeriodId идентификатор периода формы
+     * @return признак наличия настройки подразделения
+     */
+    boolean existsByKppAndOkmtoAndPeriodId(String kpp, String oktmo, int reportPeriodId);
 }

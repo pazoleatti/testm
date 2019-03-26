@@ -11,6 +11,8 @@ import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -19,6 +21,7 @@ import java.util.Map;
  * Создание Отчетности
  */
 @Component("CreateFormsAsyncTask")
+@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class CreateFormsAsyncTask extends AbstractAsyncTask {
 
     @Autowired
@@ -96,7 +99,7 @@ public class CreateFormsAsyncTask extends AbstractAsyncTask {
 
         String strCorrPeriod = "";
         if (departmentReportPeriod.getCorrectionDate() != null) {
-            strCorrPeriod = " (корр. " + SDF_DD_MM_YYYY.get().format(departmentReportPeriod.getCorrectionDate()) + ")";
+            strCorrPeriod = " (корр. " + SDF_DD_MM_YYYY.format(departmentReportPeriod.getCorrectionDate()) + ")";
         }
 
         return String.format("Создание отчетных форм: \"%s\", Период: \"%s, %s%s\", Подразделение: \"%s\"",

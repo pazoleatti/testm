@@ -13,6 +13,8 @@ import com.aplana.sbrf.taxaccounting.service.PrintingService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -23,6 +25,7 @@ import java.util.Map;
  * Формирование специфичных отчетов налоговых форм
  */
 @Component("SpecificReportRefBookAsyncTask")
+@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class SpecificReportRefBookAsyncTask extends AbstractAsyncTask {
 
     @Autowired
@@ -88,7 +91,7 @@ public class SpecificReportRefBookAsyncTask extends AbstractAsyncTask {
         String specificReportType = (String) taskData.getParams().get("specificReportType");
         RefBook refBook = commonRefBookService.get(refBookId);
 
-        return String.format("Сформирован отчет \"%s\" справочника \"%s\": Версия: %s, Фильтр: \"%s\"", specificReportType, refBook.getName(), SDF_DD_MM_YYYY.get().format(version), searchPattern);
+        return String.format("Сформирован отчет \"%s\" справочника \"%s\": Версия: %s, Фильтр: \"%s\"", specificReportType, refBook.getName(), SDF_DD_MM_YYYY.format(version), searchPattern);
     }
 
     @Override
@@ -99,7 +102,7 @@ public class SpecificReportRefBookAsyncTask extends AbstractAsyncTask {
         String specificReportType = (String) taskData.getParams().get("specificReportType");
         RefBook refBook = commonRefBookService.get(refBookId);
 
-        return String.format("Произошла %sошибка при формировании отчета \"%s\" справочника \"%s\": Версия: %s, Фильтр: \"%s\"", unexpected ? "непредвиденная " : "", specificReportType, refBook.getName(), SDF_DD_MM_YYYY.get().format(version), searchPattern);
+        return String.format("Произошла %sошибка при формировании отчета \"%s\" справочника \"%s\": Версия: %s, Фильтр: \"%s\"", unexpected ? "непредвиденная " : "", specificReportType, refBook.getName(), SDF_DD_MM_YYYY.format(version), searchPattern);
     }
 
     @Override

@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.async.task;
 import com.aplana.sbrf.taxaccounting.async.AsyncManager;
 import com.aplana.sbrf.taxaccounting.async.AsyncTask;
 import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
-import com.aplana.sbrf.taxaccounting.dao.AsyncTaskDao;
 import com.aplana.sbrf.taxaccounting.dao.AsyncTaskTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.model.*;
@@ -18,11 +17,11 @@ import com.aplana.sbrf.taxaccounting.service.NotificationService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import com.aplana.sbrf.taxaccounting.service.TransactionHelper;
 import com.aplana.sbrf.taxaccounting.service.TransactionLogic;
+import org.apache.commons.lang3.time.FastDateFormat;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -37,7 +36,6 @@ import java.util.TimeZone;
  * @author dloshkarev
  */
 public abstract class AbstractAsyncTask implements AsyncTask {
-
     private static final Log LOG = LogFactory.getLog(AbstractAsyncTask.class);
 
     @Autowired
@@ -54,41 +52,9 @@ public abstract class AbstractAsyncTask implements AsyncTask {
     protected TAUserService userService;
     @Autowired
     private ConfigurationDao configurationDao;
-    @Autowired
-    private AsyncTaskDao asyncTaskDao;
 
-
-    private static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
-        @Override
-        protected SimpleDateFormat initialValue() {
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
-            simpleDateFormat.setTimeZone(TimeZone.getTimeZone(TIME_ZONE_MOSCOW.get()));
-            return simpleDateFormat;
-        }
-    };
-    protected static final ThreadLocal<SimpleDateFormat> SDF_DD_MM_YYYY = new ThreadLocal<SimpleDateFormat>() {
-        @Override
-        protected SimpleDateFormat initialValue() {
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd.MM.yyyy");
-            simpleDateFormat.setTimeZone(TimeZone.getTimeZone(TIME_ZONE_MOSCOW.get()));
-            return simpleDateFormat;
-        }
-    };
-    private static final ThreadLocal<SimpleDateFormat> sdf_time = new ThreadLocal<SimpleDateFormat>() {
-        @Override
-        protected SimpleDateFormat initialValue() {
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm:ss.SSS");
-            simpleDateFormat.setTimeZone(TimeZone.getTimeZone(TIME_ZONE_MOSCOW.get()));
-            return simpleDateFormat;
-        }
-    };
-
-    private static final ThreadLocal<String> TIME_ZONE_MOSCOW = new ThreadLocal<String>() {
-        @Override
-        protected String initialValue() {
-            return "GMT+3";
-        }
-    };
+    static final FastDateFormat SDF_DD_MM_YYYY = FastDateFormat.getInstance("dd.MM.yyyy", TimeZone.getTimeZone("GMT+3"));
+    private static final FastDateFormat sdf_time = FastDateFormat.getInstance("HH:mm:ss.SSS", TimeZone.getTimeZone("GMT+3"));
 
     /**
      * Выполнение бизнес логики задачи
@@ -147,14 +113,14 @@ public abstract class AbstractAsyncTask implements AsyncTask {
 
     @Override
     public void execute(final AsyncTaskData taskData) {
-        TimeZone.setDefault(TimeZone.getTimeZone(TIME_ZONE_MOSCOW.get()));
+        TimeZone.setDefault(TimeZone.getTimeZone("GMT+3"));
         final Logger logger = new Logger();
         final Date startDate = Calendar.getInstance().getTime();
 
         Configuration shotTimingConfiguration = configurationDao.fetchByEnum(ConfigurationParam.SHOW_TIMING);
         final boolean isShowTiming = "1".equals(shotTimingConfiguration.getValue());
         if (isShowTiming) {
-            logger.info("Начало выполнения операции %s", sdf_time.get().format(startDate));
+            logger.info("Начало выполнения операции %s", sdf_time.format(startDate));
         }
         asyncManager.updateState(taskData.getId(), AsyncTaskState.STARTED);
         final BusinessLogicResult taskStatus = tx.executeInNewTransaction(new TransactionLogic<BusinessLogicResult>() {
@@ -164,9 +130,9 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                     LOG.info(String.format("Business logic execution has been started for task with id %s", taskData.getId()));
                     BusinessLogicResult taskStatus = executeBusinessLogic(taskData, logger);
                     LOG.debug("Business logic execution is complete");
-                    Date endDate = Calendar.getInstance(TimeZone.getTimeZone(TIME_ZONE_MOSCOW.get())).getTime();
+                    Date endDate = Calendar.getInstance(TimeZone.getTimeZone("GMT+3")).getTime();
                     if (isShowTiming) {
-                        logger.info("Длительность выполнения операции: %d мс (%s - %s)", (endDate.getTime() - startDate.getTime()), sdf_time.get().format(startDate), sdf_time.get().format(endDate));
+                        logger.info("Длительность выполнения операции: %d мс (%s - %s)", (endDate.getTime() - startDate.getTime()), sdf_time.format(startDate), sdf_time.format(endDate));
                     }
                     return taskStatus;
                 } catch (final Throwable e) {
@@ -204,8 +170,8 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                                 Date endDate = new Date();
                                 logger.info("Длительность выполнения операции: %d мс (%s - %s)",
                                         (endDate.getTime() - startDate.getTime()),
-                                        sdf_time.get().format(startDate),
-                                        sdf_time.get().format(endDate));
+                                        sdf_time.format(startDate),
+                                        sdf_time.format(endDate));
                             }
 
                             // Публикация оповещений всем подписчикам

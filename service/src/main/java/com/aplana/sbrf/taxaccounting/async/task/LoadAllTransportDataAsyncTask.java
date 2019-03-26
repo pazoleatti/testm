@@ -7,6 +7,8 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.LoadRefBookDataService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -16,6 +18,7 @@ import java.util.UUID;
  * Загрузка из каталога загрузки
  */
 @Component("LoadAllTransportDataAsyncTask")
+@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class LoadAllTransportDataAsyncTask extends AbstractAsyncTask {
 
     @Autowired

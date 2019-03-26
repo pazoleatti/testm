@@ -29,11 +29,11 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 @Repository
 public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentConfigDao {
-    public final static String ALL_FIELDS = " dc.id, dc.record_id, dc.kpp, oktmo.id oktmo_id, oktmo.code oktmo_code, oktmo.name oktmo_name, dc.version, dc.version_end," +
+    private final static String ALL_FIELDS = " dc.id, dc.record_id, dc.kpp, oktmo.id oktmo_id, oktmo.code oktmo_code, oktmo.name oktmo_name, dc.version, dc.version_end," +
             " dc.department_id, dc.tax_organ_code, pp.id present_place_id, pp.code present_place_code, pp.name present_place_name, dc.name, dc.phone," +
             " reorg.id reorg_id, reorg.code reorg_code, reorg.name reorg_name, dc.reorg_inn, reorg_kpp, sign.id signatory_id, sign.code signatory_code, sign.name signatory_name, " +
             " dc.signatory_surname, dc.signatory_firstname, dc.signatory_lastname, dc.approve_doc_name, dc.approve_org_name ";
-    public final static String ALL_FIELDS_JOINS = "join ref_book_oktmo oktmo on oktmo.id = dc.oktmo \n" +
+    private final static String ALL_FIELDS_JOINS = "join ref_book_oktmo oktmo on oktmo.id = dc.oktmo \n" +
             "left join ref_book_present_place pp on pp.id = dc.present_place\n" +
             "left join ref_book_reorganization reorg on reorg.id = dc.reorg_form_code\n" +
             "left join ref_book_signatory_mark sign on sign.id = dc.signatory_id\n";
@@ -256,5 +256,21 @@ public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentCon
 
         int count = getNamedParameterJdbcTemplate().queryForObject("select count(*) from (" + baseSelect + ")", params, Integer.class);
         return new PagingResult<>(kppOktmoPairs, count);
+    }
+
+    @Override
+    public boolean existsByKppAndOkmtoAndPeriodId(String kpp, String oktmo, int reportPeriodId) {
+        return getJdbcTemplate().queryForObject("" +
+                        "with period as (select * from report_period where id = ?),\n" +
+                        "actual_vers as (\n" +
+                        "  SELECT dc.kpp, oktmo.code oktmo, MAX(dc.version) version\n" +
+                        "  FROM department_config dc, period, ref_book_oktmo oktmo\n" +
+                        "  WHERE oktmo.id = dc.oktmo and (dc.version    <= sysdate AND (dc.version_end IS NULL OR sysdate   <= dc.version_end)\n" +
+                        "    OR dc.version     <= period.end_date AND (dc.version_end IS NULL OR dc.version_end   >= period.start_date)\n" +
+                        "  )\n" +
+                        "  group by dc.kpp, oktmo.code\n" +
+                        ")\n" +
+                        "select case when exists(select * from actual_vers where kpp = ? and oktmo = ?) then 1 else 0 end from dual",
+                Boolean.class, reportPeriodId, kpp, oktmo);
     }
 }

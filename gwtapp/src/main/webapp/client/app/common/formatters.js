@@ -168,6 +168,15 @@
         }])
 
         /**
+         * @description Форматтер для enum TaxRefundReflectionMode
+         */
+        .filter('taxRefundReflectModeEnumFormatter', ['APP_CONSTANTS', function (APP_CONSTANTS) {
+            return function (enumName) {
+                return APP_CONSTANTS.TAX_REFUND_REFLECT_MODE[enumName].name;
+            };
+        }])
+
+        /**
          * @description Форматтер для получения наименования отчетного периода в нужном формате "год: наименование периода"
          * @param reportPeriod Отчетный период
          */

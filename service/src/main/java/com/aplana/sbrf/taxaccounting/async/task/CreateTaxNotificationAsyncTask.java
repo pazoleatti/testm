@@ -8,6 +8,8 @@ import com.aplana.sbrf.taxaccounting.service.TaxNotificationService;
 import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
@@ -17,6 +19,7 @@ import java.util.Map;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
 @Component("CreateTaxNotificationAsyncTask")
+@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @SuppressWarnings("unchecked")
 public class CreateTaxNotificationAsyncTask extends AbstractAsyncTask {
 

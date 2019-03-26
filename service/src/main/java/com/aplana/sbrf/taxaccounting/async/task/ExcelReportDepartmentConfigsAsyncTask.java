@@ -10,6 +10,8 @@ import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.PrintingService;
 import com.aplana.sbrf.taxaccounting.service.refbook.DepartmentConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -18,6 +20,7 @@ import java.util.Map;
  * Выгрузка настроек подразделений в excel-файд
  */
 @Component("ExcelReportDepartmentConfigsAsyncTask")
+@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class ExcelReportDepartmentConfigsAsyncTask extends AbstractAsyncTask {
     @Autowired
     private PrintingService printingService;
