@@ -1,6 +1,8 @@
 package com.aplana.sbrf.taxaccounting.model;
 
+import com.aplana.sbrf.taxaccounting.model.json.DateTimeDeserializer;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -53,9 +55,9 @@ public class DeclarationDataFilter implements Serializable {
     private List<Long> formKindIds;
 
     private String fileName;
-
+    @JsonDeserialize(using = DateTimeDeserializer.class)
     private Date creationDateFrom;
-
+    @JsonDeserialize(using = DateTimeDeserializer.class)
     private Date creationDateTo;
 
     private String creationUserName;

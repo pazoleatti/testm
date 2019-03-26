@@ -113,8 +113,8 @@
                                     reportPeriodIds: $filter('idExtractor')($scope.searchFilter.params.periods),
                                     knfTypeIds: $filter('idExtractor')($scope.searchFilter.params.knfTypes),
                                     creationUserName: $scope.searchFilter.params.creationUserName,
-                                    creationDateFrom: $scope.searchFilter.params.creationDateFrom,
-                                    creationDateTo: $scope.searchFilter.params.creationDateTo
+                                    creationDateFrom: $filter('dateTimeSerializer')($scope.searchFilter.params.creationDateFrom),
+                                    creationDateTo: $filter('dateTimeSerializer')($scope.searchFilter.params.creationDateTo)
                                 })
                             };
                         },

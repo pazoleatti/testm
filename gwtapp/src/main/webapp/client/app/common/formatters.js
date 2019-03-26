@@ -66,6 +66,15 @@
         }])
 
         /**
+         * @description Форматирует дату для передачи на сервер, на сервер используем @DateTimeFormat(pattern = "dd.MM.yyyy'T'HH:mm")
+         */
+        .filter('dateTimeSerializer', ['$filter', function ($filter) {
+            return function (date) {
+                return date ? date.format("dd.mm.yyyy'T'HH:MM") : null;
+            };
+        }])
+
+        /**
          * @description Фильтр создаёт по коллекции объектов коллекцию их идентификаторов.
          *
          * @param items - коллекция объектов

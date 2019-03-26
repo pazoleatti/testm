@@ -49,8 +49,8 @@
                         requestParameters: function () {
                             return {
                                 text: $scope.searchFilter.text,
-                                timeFrom: $scope.searchFilter.timeFrom ? $scope.searchFilter.timeFrom.format("dd.mm.yyyy'T'HH:MM") : null,
-                                timeTo: $scope.searchFilter.timeTo ? $scope.searchFilter.timeTo.format("dd.mm.yyyy'T'HH:MM") : null
+                                timeFrom: $filter('dateTimeSerializer')($scope.searchFilter.timeFrom),
+                                timeTo: $filter('dateTimeSerializer')($scope.searchFilter.timeTo)
                             };
                         },
                         height: 250,

@@ -126,8 +126,8 @@
                         reportPeriodIds: $filter('idExtractor')($scope.searchFilter.params.periods),
                         correctionNum: $scope.searchFilter.params.correctionNum,
                         creationUserName: $scope.searchFilter.params.creationUserName,
-                        creationDateFrom: $scope.searchFilter.params.creationDateFrom,
-                        creationDateTo: $scope.searchFilter.params.creationDateTo
+                        creationDateFrom: $filter('dateTimeSerializer')($scope.searchFilter.params.creationDateFrom),
+                        creationDateTo: $filter('dateTimeSerializer')($scope.searchFilter.params.creationDateTo)
                     };
                 }
 
