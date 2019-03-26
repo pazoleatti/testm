@@ -2102,7 +2102,13 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
 
         // Фильтруем сведения о доходах, не попадающие в отчетный период
         ndflPerson.incomes.addAll(filterIncomesByDates(incomes, ndflPerson))
+        ndflPerson.deductions.removeAll {
+            NdflPersonDeduction deduction -> !ndflPerson.incomes.operationId.contains(deduction.operationId)
+        }
 
+        ndflPerson.prepayments.removeAll {
+            NdflPersonPrepayment prepayment -> !ndflPerson.incomes.operationId.contains(prepayment.operationId)
+        }
         // Если сведения о доходах остались, добавляем сведения о физлице в форму
         if (ndflPerson.incomes) {
             //Идентификатор декларации для которой загружаются данные
