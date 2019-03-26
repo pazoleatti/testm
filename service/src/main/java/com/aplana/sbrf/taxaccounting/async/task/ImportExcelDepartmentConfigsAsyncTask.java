@@ -6,6 +6,8 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.refbook.DepartmentConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -14,6 +16,7 @@ import java.util.Map;
  * Загрузка excel-файла с настройками подразделений
  */
 @Component("ImportExcelDepartmentConfigsAsyncTask")
+@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class ImportExcelDepartmentConfigsAsyncTask extends AbstractAsyncTask {
 
     @Autowired

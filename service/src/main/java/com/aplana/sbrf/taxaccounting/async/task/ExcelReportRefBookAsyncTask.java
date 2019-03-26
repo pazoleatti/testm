@@ -12,6 +12,8 @@ import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -21,6 +23,7 @@ import java.util.Map;
  * Формирование Excel-отчета по справочнику
  */
 @Component("ExcelReportRefBookAsyncTask")
+@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class ExcelReportRefBookAsyncTask extends AbstractAsyncTask {
 
     @Autowired
@@ -84,7 +87,7 @@ public class ExcelReportRefBookAsyncTask extends AbstractAsyncTask {
 
         return String.format("Сформирован \"%s\" отчет справочника \"%s\".%s%s%s",
                 getAsyncTaskType().getName(), refBook.getName(),
-                version != null ? " Дата актуальности: " + SDF_DD_MM_YYYY.get().format(version) + "," : "",
+                version != null ? " Дата актуальности: " + SDF_DD_MM_YYYY.format(version) + "," : "",
                 StringUtils.isNotEmpty(searchPattern) ? " Параметр поиска: \"" + searchPattern + "\"" : " Параметр поиска: не задан",
                 exactSearch ? " (по точному совпадению)" : "");
     }
@@ -99,7 +102,7 @@ public class ExcelReportRefBookAsyncTask extends AbstractAsyncTask {
 
         return String.format("Произошла непредвиденная ошибка при формировании \"%s\" отчета справочника \"%s\".%s%s%s",
                 getAsyncTaskType().getName(), refBook.getName(),
-                version != null ? " Дата актуальности: " + SDF_DD_MM_YYYY.get().format(version) + "," : "",
+                version != null ? " Дата актуальности: " + SDF_DD_MM_YYYY.format(version) + "," : "",
                 StringUtils.isNotEmpty(searchPattern) ? " Параметр поиска: \"" + searchPattern + "\"" : " Параметр поиска: не задан",
                 exactSearch ? " (по точному совпадению)" : "");
     }

@@ -12,6 +12,8 @@ import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
 import com.aplana.sbrf.taxaccounting.service.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -20,6 +22,7 @@ import java.util.Map;
  * Принятие налоговой формы
  */
 @Component("AcceptDeclarationAsyncTask")
+@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class AcceptDeclarationAsyncTask extends AbstractDeclarationAsyncTask {
 
     private static final String SUCCESS = "Успешно выполнено принятие налоговой формы: %s";
