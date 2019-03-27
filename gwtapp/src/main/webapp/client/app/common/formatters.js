@@ -70,7 +70,7 @@
          */
         .filter('dateTimeSerializer', ['$filter', function ($filter) {
             return function (date) {
-                return date ? date.format("dd.mm.yyyy'T'HH:MM") : null;
+                return date ? new Date(date).format("dd.mm.yyyy'T'HH:MM") : null;
             };
         }])
 
