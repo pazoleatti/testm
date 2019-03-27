@@ -217,7 +217,8 @@ public class PersonServiceImpl implements PersonService {
             if (CollectionUtils.isNotEmpty(idDocsToUpdate)) {
                 idDocDaoImpl.updateBatch(idDocsToUpdate);
                 for (IdDoc idDoc : idDocsToUpdate) {
-                    changeLogBuilder.dulUpdated(idDoc);
+                    IdDoc persistedIdDoc = findById(persistedIdDocs, idDoc.getId());
+                    changeLogBuilder.dulUpdated(persistedIdDoc, idDoc);
                 }
             }
             if (CollectionUtils.isNotEmpty(idDocsToDelete)) {
@@ -333,7 +334,8 @@ public class PersonServiceImpl implements PersonService {
             if (CollectionUtils.isNotEmpty(inpToUpdate)) {
                 idTaxPayerDaoImpl.updateBatch(inpToUpdate);
                 for (PersonIdentifier inp : inpToUpdate) {
-                    changeLogBuilder.inpUpdated(inp);
+                    PersonIdentifier persistedInp = findById(persistedInpList, inp.getId());
+                    changeLogBuilder.inpUpdated(persistedInp, inp);
                 }
             }
             if (CollectionUtils.isNotEmpty(inpToDelete)) {
@@ -370,7 +372,8 @@ public class PersonServiceImpl implements PersonService {
             if (CollectionUtils.isNotEmpty(tBToUpdate)) {
                 personTbDaoImpl.updateBatch(tBToUpdate);
                 for (PersonTb personTb : tBToUpdate) {
-                    changeLogBuilder.tbUpdated(personTb);
+                    PersonTb persistedPersonTb = findById(persistedTbList, personTb.getId());
+                    changeLogBuilder.tbUpdated(persistedPersonTb, personTb);
                 }
             }
             if (CollectionUtils.isNotEmpty(tbToDelete)) {

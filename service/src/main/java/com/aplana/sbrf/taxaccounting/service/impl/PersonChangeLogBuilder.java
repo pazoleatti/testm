@@ -45,16 +45,22 @@ class PersonChangeLogBuilder {
         changes.add("[ Удалён ИНП. ИНП: \"" + format(identifier.getInp()) + "\", АСНУ: \"" + format(identifier.getAsnu().getCode()) + "\" ]");
     }
 
-    public void inpUpdated(PersonIdentifier identifier) {
-        changes.add("[ Изменён ИНП. ИНП: \"" + format(identifier.getInp()) + "\", АСНУ: \"" + format(identifier.getAsnu().getCode()) + "\" ]");
+    public void inpUpdated(PersonIdentifier oldIdentifier, PersonIdentifier newIdentifier) {
+        changes.add("[ Изменён ИНП. " +
+                "ИНП: \"" + format(oldIdentifier.getInp()) + "\", АСНУ: \"" + format(oldIdentifier.getAsnu().getCode()) + "\" -> " +
+                "ИНП: \"" + format(newIdentifier.getInp()) + "\", АСНУ: \"" + format(newIdentifier.getAsnu().getCode()) + "\"" +
+                " ]");
     }
 
     public void tbAdded(PersonTb tb) {
         changes.add("[ Добавлен Тербанк: \"" + format(tb.getTbDepartment().getShortName()) + "\" ]");
     }
 
-    public void tbUpdated(PersonTb tb) {
-        changes.add("[ Изменён Тербанк: \"" + format(tb.getTbDepartment().getShortName()) + "\"]");
+    public void tbUpdated(PersonTb oldTb, PersonTb newTb) {
+        changes.add("[ Изменён Тербанк. " +
+                "Тербанк: \"" + format(oldTb.getTbDepartment().getShortName()) + "\", Дата: \"" + format(oldTb.getImportDate()) + "\" ->" +
+                "Тербанк: \"" + format(newTb.getTbDepartment().getShortName()) + "\", Дата: \"" + format(newTb.getImportDate()) + "\"" +
+                " ]");
     }
 
     public void tbDeleted(PersonTb tb) {
@@ -62,15 +68,18 @@ class PersonChangeLogBuilder {
     }
 
     public void dulCreated(IdDoc doc) {
-        changes.add("[ Добавлен ДУЛ. \"Код ДУЛ\": \"" + format(doc.getDocType()) + "\", \"Серия и номер ДУЛ\": \"" + format(doc.getDocumentNumber()) + "\" ]");
+        changes.add("[ Добавлен ДУЛ. Код: \"" + format(doc.getDocType()) + "\", Серия и номер: \"" + format(doc.getDocumentNumber()) + "\" ]");
     }
 
     public void dulDeleted(IdDoc doc) {
-        changes.add("[ Удалён ДУЛ. \"Код ДУЛ\": \"" + format(doc.getDocType().getCode()) + "\", \"Серия и номер ДУЛ\": \"" + format(doc.getDocumentNumber()) + "\" ]");
+        changes.add("[ Удалён ДУЛ. Код: \"" + format(doc.getDocType().getCode()) + "\", Серия и номер: \"" + format(doc.getDocumentNumber()) + "\" ]");
     }
 
-    public void dulUpdated(IdDoc doc) {
-        changes.add("[ Изменён ДУЛ. \"Код ДУЛ\": \"" + format(doc.getDocType().getCode()) + "\", \"Серия и номер ДУЛ\": \"" + format(doc.getDocumentNumber()) + "\" ]");
+    public void dulUpdated(IdDoc oldDoc, IdDoc newDoc) {
+        changes.add("[ Изменён ДУЛ. " +
+                "Код: \"" + format(oldDoc.getDocType().getCode()) + "\", Серия и номер: \"" + format(oldDoc.getDocumentNumber()) + "\" -> " +
+                "Код: \"" + format(newDoc.getDocType().getCode()) + "\", Серия и номер: \"" + format(newDoc.getDocumentNumber()) + "\"" +
+                " ]");
     }
 
     public PersonChangeLogBuilder originalSet(RegistryPersonDTO original) {
