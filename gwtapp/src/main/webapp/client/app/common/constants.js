@@ -314,10 +314,16 @@
                 FOR_APP2: {id: 5, name: "КНФ для Приложения 2"}
             },
             TAX_REFUND_REFLECT_MODE: {
-                NORMAL: {id: 1, name: "Показывать в строке 090 Раздела 1", enumName: "NORMAL"},
+                NORMAL: {
+                    id: 1,
+                    name: "Показывать в строке 090 Раздела 1",
+                    shortname: "В строке 090 Раздела 1",
+                    enumName: "NORMAL"
+                },
                 AS_NEGATIVE_WITHHOLDING_TAX: {
                     id: 2,
                     name: "Учитывать возврат как отрицательное удержание в Разделе 2",
+                    shortname: "Отрицательное удержание в Разделе 2",
                     enumName: "AS_NEGATIVE_WITHHOLDING_TAX"
                 }
             },
@@ -327,8 +333,8 @@
                 UNACCEPTED_BY_FNS: {id: 3, name: "Для отчетных форм, не принятых ФНС", enumName: "UNACCEPTED_BY_FNS"}
             },
             NEGATIVE_SUMS_SIGN: {
-                FROM_CURRENT_FORM: {id: 0, name: "из текущей формы", enumName: "FROM_CURRENT_FORM"},
-                FROM_PREV_FORM: {id: 1, name: "из предыдущей формы", enumName: "FROM_PREV_FORM"}
+                FROM_CURRENT_FORM: {id: 0, name: "Из текущей формы", enumName: "FROM_CURRENT_FORM"},
+                FROM_PREV_FORM: {id: 1, name: "Из предыдущей формы", enumName: "FROM_PREV_FORM"}
             }
         });
 }());

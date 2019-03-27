@@ -181,7 +181,7 @@
          */
         .filter('taxRefundReflectModeEnumFormatter', ['APP_CONSTANTS', function (APP_CONSTANTS) {
             return function (enumName) {
-                return APP_CONSTANTS.TAX_REFUND_REFLECT_MODE[enumName].name;
+                return APP_CONSTANTS.TAX_REFUND_REFLECT_MODE[enumName].shortname;
             };
         }])
 
