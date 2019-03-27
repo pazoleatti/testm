@@ -31,7 +31,7 @@
                                        placeholder="{{'filter.placeholder.search' | translate}}"
                                        type="text"
                                        maxlength="3"
-                                       data-required
+                                       data-ng-required="true"
                                        title="{{row.deductionCode}}"/>
                                 <div data-aplana-validator data-key="maxlength">
                                     {{::'ndflDeduction.edit.validation.deductionCode' | translate}}
@@ -61,7 +61,7 @@
                                        placeholder="{{'filter.placeholder.search' | translate}}"
                                        type="text"
                                        data-ng-pattern="/^[1|2]$/"
-                                       data-required
+                                       data-ng-required="true"
                                        title="{{ndflDeduction.edit.notifType}}"/>
                                 <div data-aplana-validator data-key="pattern">
                                     {{::'ndflDeduction.edit.validation.notifType' | translate}}
@@ -82,7 +82,7 @@
                                        placeholder="{{'filter.placeholder.search' | translate}}"
                                        type="text"
                                        maxlength="20"
-                                       data-required
+                                       data-ng-required="true"
                                        title="{{ndflDeduction.edit.notifNum}}"/>
                                 <div data-aplana-validator data-key="maxlength">
                                     {{::'ndflDeduction.edit.validation.notifNum' | translate}}
@@ -122,7 +122,7 @@
                                        placeholder="{{'filter.placeholder.search' | translate}}"
                                        type="text"
                                        data-ng-pattern="patterns.fourDigits"
-                                       data-required
+                                       data-ng-required="true"
                                        title="{{title.sourceCode}}"/>
                                 <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.error' |
                                     translate}}
@@ -140,7 +140,7 @@
                         <div class="span8 field-wrapper">
                             <div data-aplana-field>
                                 <div data-aplana-datepicker
-                                     data-required
+                                     data-ng-required="true"
                                      data-ng-model="row.notifDate"></div>
                                 <div data-aplana-validator data-key='required'>
                                     {{::'common.validation.required' | translate}}
@@ -167,7 +167,7 @@
                                        placeholder="{{'filter.placeholder.search' | translate}}"
                                        type="text"
                                        data-ng-pattern="patterns.fourDigits"
-                                       data-required
+                                       data-ng-required="true"
                                        title="{{title.incomeCode}}"/>
                                 <div data-aplana-validator data-key="pattern">
                                     {{::'common.validation.pattern.error' | translate}}
@@ -188,7 +188,7 @@
                                        placeholder="{{'filter.placeholder.search' | translate}}"
                                        type="text"
                                        data-ng-pattern="patterns.number"
-                                       data-required
+                                       data-ng-required="true"
                                        title="{{title.incomeAmount}}"/>
                                 <div data-aplana-validator data-key="pattern">
                                     {{::'common.validation.pattern.error' | translate}}
@@ -208,7 +208,7 @@
                         <div class="span8 field-wrapper">
                             <div data-aplana-field>
                                 <div data-aplana-datepicker
-                                     data-required
+                                     data-ng-required="true"
                                      data-ng-model="row.incomeAccrued"></div>
                                 <div data-aplana-validator data-key='required'>
                                     {{::'common.validation.required' | translate}}
@@ -252,7 +252,7 @@
                                        placeholder="{{'filter.placeholder.search' | translate}}"
                                        type="text"
                                        data-ng-pattern="patterns.number"
-                                       data-required
+                                       data-ng-required="true"
                                        title="{{ndflDeduction.edit.periodCurrSumm}}"/>
                                 <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.error' |
                                     translate}}
@@ -283,7 +283,7 @@
                         <div class="span8 field-wrapper">
                             <div data-aplana-field>
                                 <div data-aplana-datepicker
-                                     data-required
+                                     data-ng-required="true"
                                      data-ng-model="row.periodCurrDate"></div>
                                 <div data-aplana-validator data-key='required'>
                                     {{::'common.validation.required' | translate}}
