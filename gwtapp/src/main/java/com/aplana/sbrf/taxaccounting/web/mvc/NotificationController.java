@@ -8,9 +8,9 @@ import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.NotificationService;
 import com.aplana.sbrf.taxaccounting.service.PrintingService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
-import com.aplana.sbrf.taxaccounting.web.model.CustomMediaType;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedList;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedResourceAssembler;
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -153,24 +153,38 @@ public class NotificationController {
     /**
      * Выгрузка выбранных оповещений в формате csv.
      *
-     * @param ids      идентификаторы выбранных оповещений.
-     * @param response http-ответ, в теле которого возвращается файл.
+     * @param ids идентификаторы выбранных оповещений.
+     * @return идентификатор созданного файла в базе
      */
-    @GetMapping(value = "/actions/notification/downloadCsv", produces = CustomMediaType.APPLICATION_VND_UTF8_VALUE)
-    public void downloadNotificationsCsv(@RequestParam List<Long> ids, HttpServletRequest request, HttpServletResponse response) throws IOException {
-
+    @PostMapping("/actions/notification/createCsv")
+    public ResponseEntity<String> createNotificationsCsv(@RequestBody List<Long> ids) {
         List<Notification> notifications = notificationService.findByIdIn(ids);
         if (notifications.isEmpty()) {
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            return;
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-
         String fileUuid = printingService.generateCsvNotifications(notifications);
-        BlobData blobData = blobDataService.get(fileUuid);
-        if (blobData != null) {
-            ResponseUtils.createBlobResponse(request, response, blobData);
-        } else {
+        return new ResponseEntity<>(fileUuid, HttpStatus.OK);
+    }
+
+    /**
+     * Выгрузка файла csv с оповещениями.
+     * Чтобы не сделать этот адрес способом выгрузки любого файла, проверяем, что у файла подходящее название.
+     *
+     * @param fileId id файла
+     */
+    @GetMapping("/actions/notification/downloadCsv")
+    public void getFile(@RequestParam String fileId, HttpServletRequest request, HttpServletResponse response) throws IOException {
+        BlobData fileData = blobDataService.get(fileId);
+        if (fileData == null) {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+        } else {
+            String fileName = fileData.getName();
+            String fileExtension = FilenameUtils.getExtension(fileName);
+            if (fileName.startsWith("Список оповещений") && fileExtension.equals("csv")) {
+                ResponseUtils.createBlobResponse(request, response, fileData);
+            } else {
+                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            }
         }
     }
 

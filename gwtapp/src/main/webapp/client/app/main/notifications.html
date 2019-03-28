@@ -39,12 +39,11 @@
                 <span data-translate-once="button.delete"></span>
             </button>
             <!-- Выгрузить -->
-            <a ng-href="{{downloadSelectedLink()}}" style="text-decoration: none">
-                <button type="button" class="btn btn-default"
-                        data-ng-disabled="!anyChecked()">
-                    <span data-translate-once="notifications.button.download"></span>
-                </button>
-            </a>
+            <button type="button" class="btn btn-default"
+                    data-ng-click="downloadSelectedCsv()"
+                    data-ng-disabled="!anyChecked()">
+                <span data-translate-once="notifications.button.download"></span>
+            </button>
             <!-- Протоколы -->
             <button type="button" class="btn btn-default"
                     data-ng-disabled="!anyChecked()"

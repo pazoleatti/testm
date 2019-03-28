@@ -7,8 +7,10 @@
     /**
      * @description Контроллер модального окна оповещений
      */
-        .controller('notificationsCtrl', ['$scope', '$http', '$httpParamSerializer', '$modalInstance', 'NotificationResource', '$filter', '$logPanel', '$dialogs', '$rootScope', 'APP_CONSTANTS',
-            function ($scope, $http, $httpParamSerializer, $modalInstance, NotificationResource, $filter, $logPanel, $dialogs, $rootScope, APP_CONSTANTS) {
+        .controller('notificationsCtrl', ['$scope', '$http', '$httpParamSerializer', '$modalInstance', 'NotificationResource',
+            '$filter', '$logPanel', '$dialogs', '$rootScope', '$window', 'APP_CONSTANTS',
+            function ($scope, $http, $httpParamSerializer, $modalInstance, NotificationResource,
+                      $filter, $logPanel, $dialogs, $rootScope, $window, APP_CONSTANTS) {
 
                 $scope.searchFilter = {
                     text: null,
@@ -128,15 +130,17 @@
                 };
 
                 /**
-                 * Формирование адреса для выгрузки выбранных оповещений.
-                 * @returns {string} адрес
+                 * Выгрузка выбранных оповещений.
                  */
-                $scope.downloadSelectedLink = function () {
-                    var address = "controller/actions/notification/downloadCsv?";
-                    var idsParam = $httpParamSerializer({
-                        ids: $filter('idExtractor')($scope.notificationsGrid.value)
+                $scope.downloadSelectedCsv = function () {
+                    $http.post(
+                        'controller/actions/notification/createCsv',
+                        $filter('idExtractor')($scope.notificationsGrid.value)
+                    ).then(function (response) {
+                        return response.data;
+                    }).then(function (fileId) {
+                        $window.location = 'controller/actions/notification/downloadCsv?fileId=' + fileId;
                     });
-                    return address + idsParam;
                 };
 
                 /**
