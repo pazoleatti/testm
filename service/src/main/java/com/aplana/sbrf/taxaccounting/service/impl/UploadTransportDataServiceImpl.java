@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
 import java.util.zip.ZipInputStream;
 
 /**
@@ -96,6 +97,16 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
                         }
                     }
                 }
+            } catch (ZipException e) {
+                LOG.error("Произошла ошибка при обработке архива", e);
+                String msg;
+                if ("encrypted ZIP entry not supported".equals(e.getMessage())) {
+                    msg = "Ошибка при обработке архива " + fileName + ". На архив установлен пароль.";
+                } else {
+                    msg = "Ошибка при обработке архива " + fileName + ". Нарушена структура архива.";
+                }
+                logger.error(msg);
+                throw new ServiceLoggerException("Произошла ошибка при обработке архива", logEntryService.save(logger.getEntries()));
             } catch (IOException e) {
                 LOG.error("Произошла ошибка при обработке архива", e);
                 logger.error(e.getLocalizedMessage());
