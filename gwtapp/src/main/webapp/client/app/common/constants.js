@@ -199,9 +199,9 @@
                 DEFAULT_TYPE_ID: 21657700
             },
             PERSON_SEARCH_FIELDS: {
-                LAST_NAME: {alias: "lastName", length: 36, label: "Фамилия"},
-                FIRST_NAME: {alias: "firstName", length: 36, label: "Имя"},
-                MIDDLE_NAME: {alias: "middleName", length: 36, label: "Отчество"},
+                LAST_NAME: {alias: "lastName", length: 60, label: "Фамилия"},
+                FIRST_NAME: {alias: "firstName", length: 60, label: "Имя"},
+                MIDDLE_NAME: {alias: "middleName", length: 60, label: "Отчество"},
                 INN: {alias: "inn", length: 50, label: "ИНН"},
                 ID_DOC: {alias: "idDocNumber", length: 25, label: "№ ДУЛ"},
                 REF_NUMBER: {alias: "refNumber", length: 10, label: "Номер справки"}
