@@ -7,12 +7,9 @@ import com.aplana.sbrf.taxaccounting.model.util.Pair;
 
 import java.util.Date;
 
-/**
- * User: avanteev
- */
-public interface VersionOperatingService {
+
+public interface DeclarationTemplateVersionService {
     boolean isUsedVersion(int templateId, int typeId, VersionedObjectStatus status, Date versionActualDateStart, Date versionActualDateEnd, Logger logger);
-    void isCorrectVersion(int templateId, int typeId, VersionedObjectStatus status, Date versionActualDateStart, Date versionActualDateEnd, Logger logger);
     void isIntersectionVersion(int templateId, int typeId, VersionedObjectStatus status, Date versionActualDateStart, Date versionActualDateEnd, Logger logger, TAUserInfo userInfo);
     void cleanVersions(int templateId, int typeId, VersionedObjectStatus status, Date versionActualDateStart, Date versionActualDateEnd, Logger logger);
 

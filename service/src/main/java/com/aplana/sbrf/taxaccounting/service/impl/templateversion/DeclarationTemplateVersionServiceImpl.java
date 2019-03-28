@@ -6,7 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.*;
-import com.aplana.sbrf.taxaccounting.templateversion.VersionOperatingService;
+import com.aplana.sbrf.taxaccounting.templateversion.DeclarationTemplateVersionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,26 +16,22 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-/**
- * User: avanteev
- */
-@Service("declarationTemplateOperatingService")
-@Transactional
-public class VersionDTOperatingServiceImpl implements VersionOperatingService {
 
-    public static final String MSG_IS_USED_VERSION =
+@Service
+@Transactional
+public class DeclarationTemplateVersionServiceImpl implements DeclarationTemplateVersionService {
+
+    private static final String MSG_IS_USED_VERSION =
             "Существует экземпляр налоговой формы для макета:";
     private static final String MSG_HAVE_DESTINATION =
             "Существует назначение налоговой формы в качестве источника данных для налоговой формы вида \"%s\" в подразделении \"%s\" начиная с периода %s!";
-    private static final String MSG_HAVE_SOURCE =
-            "Существует назначение налоговой формы в качестве приёмника данных для %s типа \"%s\" вида \"%s\" в подразделении \"%s\" начиная с периода %s!";
-
     private static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
         @Override
         protected SimpleDateFormat initialValue() {
             return new SimpleDateFormat("dd.MM.yyyy");
         }
     };
+
     @Autowired
     private DeclarationDataDao declarationDataDao;
     @Autowired
@@ -71,11 +67,6 @@ public class VersionDTOperatingServiceImpl implements VersionOperatingService {
             result = true;
         }
         return result;
-    }
-
-    @Override
-    public void isCorrectVersion(int templateId, int typeId, VersionedObjectStatus status, Date versionActualDateStart, Date versionActualDateEnd, Logger logger) {
-        throw new UnsupportedOperationException();
     }
 
     @Override

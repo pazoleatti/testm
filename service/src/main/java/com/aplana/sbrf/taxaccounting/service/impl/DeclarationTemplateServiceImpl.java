@@ -14,20 +14,20 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 import com.aplana.sbrf.taxaccounting.model.result.UpdateTemplateResult;
 import com.aplana.sbrf.taxaccounting.model.result.UpdateTemplateStatusResult;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.*;
+import com.aplana.sbrf.taxaccounting.templateversion.DeclarationTemplateVersionService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.xml.bind.JAXBContext;
@@ -35,7 +35,6 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import java.io.*;
-import java.math.BigDecimal;
 import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -45,16 +44,16 @@ import java.util.zip.ZipOutputStream;
 
 import static com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus.FAKE;
 
+
 /**
- * Сервис для работы с шаблонами деклараций
- *
- * @author Eugene Stetsenko
+ * Сервис для работы с шаблонами деклараций.
  */
 @Service
 @Transactional
 public class DeclarationTemplateServiceImpl implements DeclarationTemplateService {
 
     private static final Log LOG = LogFactory.getLog(DeclarationTemplateServiceImpl.class);
+
     private static final String ENCODING = "UTF-8";
     private static final String JRXML_NOT_FOUND = "Не удалось получить jrxml-шаблон налоговой формы!";
     private static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
@@ -65,16 +64,10 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     };
     private static final int SUBREPORT_NAME_MAX_VALUE = 1000;
     private static final int SUBREPORT_ALIAS_MAX_VALUE = 128;
-
-    public final static String VERSION_FILE = "version";
-    public final static String SCRIPT_FILE = "script.groovy";
-    public final static String REPORT_FILE = "report.jrxml";
-    public final static String CONTENT_FILE = "content.xml";
-    public final static String XSD = "main.xsd";
-
-    private static final String DEC_TEMPLATES_FOLDER = "declaration";
-    private static final int MAX_NAME_OF_DIR = 50;
-    private static final String REG_EXP = "[^\\d\\sA-Za-z'-]";
+    private static final String SCRIPT_FILE = "script.groovy";
+    private static final String REPORT_FILE = "report.jrxml";
+    private static final String CONTENT_FILE = "content.xml";
+    private static final String XSD = "main.xsd";
     private static final ThreadLocal<SimpleDateFormat> SIMPLE_DATE_FORMAT_YEAR = new ThreadLocal<SimpleDateFormat>() {
         @Override
         protected SimpleDateFormat initialValue() {
@@ -83,40 +76,43 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     };
 
     @Autowired
-    private DeclarationTemplateDao declarationTemplateDao;
+    private AsyncManager asyncManager;
+    @Autowired
+    private LogEntryService logEntryService;
+    @Autowired
+    private DeclarationTemplateService declarationTemplateService;
+    @Autowired
+    private DeclarationTemplateVersionService declarationTemplateVersionService;
+    @Autowired
+    private TemplateChangesService templateChangesService;
+    @Autowired
+    private DeclarationDataService declarationDataService;
+    @Autowired
+    private AuditService auditService;
     @Autowired
     private BlobDataService blobDataService;
-    @Autowired
-    private TransactionHelper tx;
     @Autowired
     private LockDataService lockDataService;
     @Autowired
     private DepartmentService departmentService;
     @Autowired
-    private DeclarationDataService declarationDataService;
-    @Autowired
-    private DeclarationDataDao declarationDataDao;
-    @Autowired
     private PeriodService periodService;
-    @Autowired
-    private ReportDao reportDao;
     @Autowired
     private DepartmentReportPeriodService departmentReportPeriodService;
     @Autowired
     private DeclarationDataScriptingService declarationDataScriptingService;
+
     @Autowired
-    private LogEntryService logEntryService;
+    private ReportDao reportDao;
     @Autowired
-    private TAUserService userService;
+    private DeclarationDataDao declarationDataDao;
+    @Autowired
+    private DeclarationTemplateDao declarationTemplateDao;
     @Autowired
     private DeclarationSubreportDao declarationSubreportDao;
     @Autowired
-    @Qualifier("declarationTemplateMainOperatingService")
-    MainOperatingService mainOperatingService;
-    @Autowired
     private DeclarationTemplateEventScriptDao declarationTemplateEventScriptDao;
-    @Autowired
-    private AsyncManager asyncManager;
+
 
     @Override
     public List<DeclarationTemplate> listAll() {
@@ -163,8 +159,8 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     }
 
     private void saveDeclarationTemplateFile(int declarationTemplateId, List<DeclarationTemplateFile> oldFiles, List<DeclarationTemplateFile> newFiles) {
-        List<String> deleteBlobIds = new ArrayList<String>();
-        List<String> createBlobIds = new ArrayList<String>();
+        List<String> deleteBlobIds = new ArrayList<>();
+        List<String> createBlobIds = new ArrayList<>();
 
         for (DeclarationTemplateFile oldFile : oldFiles) {
             if (!newFiles.contains(oldFile)) {
@@ -199,15 +195,6 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
         logger.getEntries().addAll(tempLogger.getEntries());
     }
 
-    @Override
-    public void update(List<DeclarationTemplate> declarationTemplates) {
-        try {
-            if (ArrayUtils.contains(declarationTemplateDao.update(declarationTemplates), 0))
-                throw new ServiceException("Не все записи макета обновились.");
-        } catch (DaoException e) {
-            throw new ServiceException("Ошибки при обновлении списка версий макета.", e);
-        }
-    }
 
     @Override
     public int getActiveDeclarationTemplateId(int declarationTypeId, int reportPeriodId) {
@@ -238,8 +225,13 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
         }
     }
 
-    @Override
-    public void checkLockedByAnotherUser(Integer declarationTemplateId, TAUserInfo userInfo) {
+    /**
+     * Проверяет, не заблокирован ли шаблон декларации другим пользователем
+     *
+     * @param declarationTemplateId идентификатор вида декларации
+     * @param userInfo              - информация о пользователе
+     */
+    private void checkLockedByAnotherUser(Integer declarationTemplateId, TAUserInfo userInfo) {
         if (declarationTemplateId != null) {
             LockData objectLock = lockDataService.findLock(LockData.LockObjects.DECLARATION_TEMPLATE.name() + "_" + declarationTemplateId);
             if (objectLock != null && objectLock.getUserId() != userInfo.getUser().getId()) {
@@ -249,51 +241,14 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
-    public LockData getObjectLock(final Integer declarationTemplateId, final TAUserInfo userInfo) {
-        return tx.executeInNewTransaction(new TransactionLogic<LockData>() {
-            @Override
-            public LockData execute() {
-                return lockDataService.findLock(LockData.LockObjects.DECLARATION_TEMPLATE.name() + "_" + declarationTemplateId);
-            }
-        });
-    }
-
-    @Override
     public String getDeclarationTemplateScript(int declarationTemplateId) {
         return declarationTemplateDao.getDeclarationTemplateScript(declarationTemplateId);
-    }
-
-    @Override
-    public List<DeclarationTemplate> getByFilter(TemplateFilter filter) {
-        List<DeclarationTemplate> templates = new ArrayList<DeclarationTemplate>();
-        for (Integer id : declarationTemplateDao.getByFilter(filter)) {
-            templates.add(declarationTemplateDao.get(id));
-        }
-        return templates;
     }
 
     @Override
     @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).VIEW_ADMINISTRATION_SETTINGS)")
     public List<DeclarationTemplate> fetchAllByType(int declarationTypeId, TAUserInfo userInfo) {
         return declarationTemplateDao.fetchAllByType(declarationTypeId);
-    }
-
-    @Override
-    public List<DeclarationTemplate> getDecTemplateVersionsByStatus(int formTypeId, VersionedObjectStatus... status) {
-        List<Integer> statusList = createStatusList(status);
-
-        List<Integer> declarationTemplateIds = declarationTemplateDao.getDeclarationTemplateVersions(formTypeId, 0, statusList, null, null);
-        List<DeclarationTemplate> declarationTemplates = new ArrayList<DeclarationTemplate>();
-        for (Integer id : declarationTemplateIds)
-            declarationTemplates.add(declarationTemplateDao.get(id));
-        return declarationTemplates;
-    }
-
-    @Override
-    public List<Integer> getDTVersionIdsByStatus(int formTypeId, VersionedObjectStatus... status) {
-        List<Integer> statusList = createStatusList(status);
-        return declarationTemplateDao.getDeclarationTemplateVersions(formTypeId, 0, statusList, null, null);
     }
 
     @Override
@@ -304,11 +259,6 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     @Override
     public int delete(int declarationTemplateId) {
         return declarationTemplateDao.delete(declarationTemplateId);
-    }
-
-    @Override
-    public void delete(Collection<Integer> templateIds) {
-        declarationTemplateDao.delete(templateIds);
     }
 
     @Override
@@ -332,24 +282,6 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     }
 
     @Override
-    public int versionTemplateCount(int typeId, VersionedObjectStatus... status) {
-        List<Integer> statusList = createStatusList(status);
-        return declarationTemplateDao.versionTemplateCount(typeId, statusList);
-    }
-
-    @Override
-    public Map<Long, Integer> versionTemplateCountByFormType(Collection<Integer> formTypeIds) {
-        Map<Long, Integer> integerMap = new HashMap<Long, Integer>();
-        if (formTypeIds.isEmpty())
-            return integerMap;
-        List<Map<String, Object>> mapList = declarationTemplateDao.versionTemplateCountByType(formTypeIds);
-        for (Map<String, Object> map : mapList) {
-            integerMap.put(((BigDecimal) map.get("type_id")).longValue(), ((BigDecimal) map.get("version_count")).intValue());
-        }
-        return integerMap;
-    }
-
-    @Override
     public int updateVersionStatus(VersionedObjectStatus versionStatus, int declarationTemplateId) {
         try {
             return declarationTemplateDao.updateVersionStatus(versionStatus, declarationTemplateId);
@@ -358,37 +290,14 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
         }
     }
 
-    @Override
-    public void deleteXsd(int dtId) {
-        LOG.info(String.format("DeclarationTemplateServiceImpl.deleteXsd. declarationTemplate: %s", dtId));
-        try {
-            DeclarationTemplate template = get(dtId);
-            declarationTemplateDao.deleteXsd(dtId);
-            blobDataService.delete(template.getXsdId());
-        } catch (DaoException e) {
-            throw new ServiceException("Ошибка при удалении xsd", e);
-        }
-    }
-
-    @Override
-    public void deleteJrxml(int declarationTemplateId) {
-        LOG.info(String.format("DeclarationTemplateServiceImpl.deleteJrxml. declarationTemplate: %s", declarationTemplateId));
-        try {
-            DeclarationTemplate template = get(declarationTemplateId);
-            declarationTemplateDao.deleteJrxml(declarationTemplateId);
-            blobDataService.delete(template.getJrxmlBlobId());
-        } catch (DaoException e) {
-            throw new ServiceException("Ошибка при удалении jrxml", e);
-        }
-    }
-
-    @Override
-    public boolean existDeclarationTemplate(int declarationTypeId, int reportPeriodId) {
-        return declarationTemplateDao.existDeclarationTemplate(declarationTypeId, reportPeriodId);
-    }
-
-    @Override
-    public boolean checkExistingDataJrxml(int dtId, Logger logger) {
+    /**
+     * Поиск экземпляров деклараций использующих данную версию макета, которые имеют pdf/xlsx отчеты и/или
+     * для которых созданы блокировки для задания формирования pdf/xlsx отчета
+     *
+     * @param dtId идентификатор макета декларации
+     * @return true - если есть декларации
+     */
+    private boolean checkExistingDataJrxml(int dtId, Logger logger) {
         boolean isExist = false;
         DeclarationTemplate template = declarationTemplateDao.get(dtId);
         ArrayList<String> existDec = new ArrayList<>();
@@ -436,25 +345,26 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
         return isExist;
     }
 
-    @Override
-    @Transactional(propagation = Propagation.SUPPORTS)
-    public Collection<Long> getDataIdsThatUseJrxml(int dtId, TAUserInfo userInfo) {
-        HashSet<Long> dataIds = new HashSet<Long>();
+    /**
+     * Получает идентификаторы деклараций, которые используют jrxml этого макета
+     */
+    private Collection<Long> getDataIdsThatUseJrxml(int dtId) {
+        HashSet<Long> dataIds = new HashSet<>();
         DeclarationTemplate template = declarationTemplateDao.get(dtId);
         for (Long dataId : declarationDataService.getFormDataListInActualPeriodByTemplate(template.getId(), template.getVersion())) {
             if (reportDao.getDec(dataId, DeclarationDataReportType.PDF_DEC) != null
-                    ||
-                    reportDao.getDec(dataId, DeclarationDataReportType.EXCEL_DEC) != null) {
+                    || reportDao.getDec(dataId, DeclarationDataReportType.EXCEL_DEC) != null) {
                 dataIds.add(dataId);
             }
         }
         return Collections.unmodifiableCollection(dataIds);
     }
 
-    @Override
-    @Transactional(propagation = Propagation.SUPPORTS)
-    public Collection<Long> getLockDataIdsThatUseJrxml(int dtId) {
-        HashSet<Long> lockDataIds = new HashSet<Long>();
+    /**
+     * Получает идентификаторы деклараций, для которых формируется отчет по этому jrxml
+     */
+    private Collection<Long> getLockDataIdsThatUseJrxml(int dtId) {
+        HashSet<Long> lockDataIds = new HashSet<>();
         DeclarationTemplate template = declarationTemplateDao.get(dtId);
         for (Long dataId : declarationDataService.getFormDataListInActualPeriodByTemplate(template.getId(), template.getVersion())) {
             String decKeyPDF = declarationDataService.generateAsyncTaskKey(dataId, DeclarationDataReportType.PDF_DEC);
@@ -466,8 +376,14 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
         return Collections.unmodifiableCollection(lockDataIds);
     }
 
-    @Override
-    public LockData lock(int declarationTemplateId, TAUserInfo userInfo) {
+    /**
+     * Блокировка declarationTemplate.
+     *
+     * @param declarationTemplateId - идентификатор налоговой формы
+     * @param userInfo              - информация о пользователе
+     * @return информацию о блокировке объекта
+     */
+    private LockData lock(int declarationTemplateId, TAUserInfo userInfo) {
         DeclarationTemplate declarationTemplate = get(declarationTemplateId);
         Date endVersion = getDTEndDate(declarationTemplateId);
         return lockDataService.lock(LockData.LockObjects.DECLARATION_TEMPLATE.name() + "_" + declarationTemplateId, userInfo.getUser().getId(),
@@ -480,15 +396,21 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
                 ));
     }
 
-    @Override
-    public boolean unlock(int declarationTemplateId, TAUserInfo userInfo) {
+    /**
+     * Снять блокировку с declarationTemplate.
+     *
+     * @param declarationTemplateId - идентификатор шаблона налоговой формы
+     * @param userInfo              - информация о пользователе
+     * @return true - если удалось разблокировать форму декларации, иначе - false
+     */
+    private boolean unlock(int declarationTemplateId, TAUserInfo userInfo) {
         lockDataService.unlock(LockData.LockObjects.DECLARATION_TEMPLATE.name() + "_" + declarationTemplateId,
                 userInfo.getUser().getId());
         return true;
     }
 
     private List<Integer> createStatusList(VersionedObjectStatus[] status) {
-        List<Integer> statusList = new ArrayList<Integer>();
+        List<Integer> statusList = new ArrayList<>();
         if (status.length == 0) {
             statusList.add(VersionedObjectStatus.NORMAL.getId());
             statusList.add(FAKE.getId());
@@ -511,7 +433,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
             return;
         }
         declarationTemplateDao.updateScript(declarationTemplate.getId(), declarationTemplate.getCreateScript());
-        mainOperatingService.logging(declarationTemplate.getId(), FormDataEvent.SCRIPTS_IMPORT, userInfo.getUser());
+        logging(declarationTemplate.getId(), FormDataEvent.SCRIPTS_IMPORT, userInfo.getUser());
     }
 
     @Override
@@ -527,16 +449,11 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     @Override
     public void validateDeclarationTemplate(DeclarationTemplate declarationTemplate, Logger logger) {
         List<DeclarationSubreport> subreports = declarationTemplate.getSubreports();
-        Set<String> checkSet = new HashSet<String>();
+        Set<String> checkSet = new HashSet<>();
 
         for (DeclarationSubreport subreport : subreports) {
             if (subreport.getAlias() == null || subreport.getAlias().isEmpty()) {
-                logger.error(
-                        String.format(
-                                "Отчет №\"%s\". Поле \"Псевдоним\" обязательно для заполнения.",
-                                subreport.getOrder(), subreport.getAlias()
-                        )
-                );
+                logger.error(String.format("Отчет №\"%s\". Поле \"Псевдоним\" обязательно для заполнения.", subreport.getOrder()));
             } else {
                 if (!checkSet.add(subreport.getAlias())) {
                     logger.error(
@@ -565,20 +482,8 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     }
 
     @Override
-    public boolean checkIfEventScriptPresent(int declarationTemplateId, int formDataEventId) {
-        return declarationTemplateEventScriptDao.checkIfEventScriptPresent(declarationTemplateId, formDataEventId);
-    }
-
-    @Override
     public List<DeclarationTemplateCheck> getChecks(int declarationTypeId, Integer declarationTemplateId) {
         return declarationTemplateDao.getChecks(declarationTypeId, declarationTemplateId);
-    }
-
-    @Override
-    public void createChecks(List<DeclarationTemplateCheck> checks, Integer declarationTemplateId) {
-        if (CollectionUtils.isNotEmpty(checks)) {
-            declarationTemplateDao.createChecks(checks, declarationTemplateId);
-        }
     }
 
     @Override
@@ -594,29 +499,31 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
         LOG.info(String.format("DeclarationTemplateServiceImpl.update. action: %s", action));
         UpdateTemplateResult result = new UpdateTemplateResult();
         Logger logger = new Logger();
+
+        // Устанавливаем границы действия макета полученной с фронтенда версии
         DeclarationTemplate template = action.getDeclarationTemplate();
         template.setVersion(DateUtils.truncate(template.getVersion(), Calendar.DATE));
         if (template.getVersionEnd() != null) {
             template.setVersionEnd(DateUtils.truncate(template.getVersionEnd(), Calendar.DATE));
         }
 
+        // Блокируем макет
         LockData lockData = lock(template.getId(), userInfo);
         if (lockData != null && lockData.getUserId() != userInfo.getUser().getId()) {
             throw new ServiceException("Макет формы заблокирован другим пользователем");
-        } else {
-            try {
-                if (mainOperatingService.edit(template, action.getChecks(),
-                        template.getVersionEnd(), logger, userInfo, action.isFormsExistWarningConfirmed())) {
-                    result.setSuccess(true);
-                    if (!logger.getEntries().isEmpty()) {
-                        result.setUuid(logEntryService.save(logger.getEntries()));
-                    }
-                } else {
-                    result.setConfirmNeeded(true);
+        }
+        try {
+            //TODO: Подразумевается, что false вернётся только в случае, когда потребуется подтверждение. Странный подход
+            if (edit(template, action.getChecks(), template.getVersionEnd(), logger, userInfo, action.isFormsExistWarningConfirmed())) {
+                result.setSuccess(true);
+                if (!logger.getEntries().isEmpty()) {
+                    result.setUuid(logEntryService.save(logger.getEntries()));
                 }
-            } finally {
-                unlock(template.getId(), userInfo);
+            } else {
+                result.setConfirmNeeded(true);
             }
+        } finally {
+            unlock(template.getId(), userInfo);
         }
         return result;
     }
@@ -628,7 +535,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
         UpdateTemplateStatusResult result = new UpdateTemplateStatusResult();
         Logger logger = new Logger();
 
-        result.setSuccess(mainOperatingService.setStatusTemplate(action.getTemplateId(), logger, userInfo, action.isFormsExistWarningConfirmed()));
+        result.setSuccess(setStatusTemplate(action.getTemplateId(), logger, userInfo, action.isFormsExistWarningConfirmed()));
         result.setConfirmNeeded(!result.isSuccess());
 
         result.setStatus(get(action.getTemplateId()).getStatus());
@@ -642,7 +549,13 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     @PreAuthorize("hasPermission(#declarationTemplateId, 'com.aplana.sbrf.taxaccounting.model.DeclarationTemplate', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationTemplatePermission).VIEW)")
     public String uploadXsd(int declarationTemplateId, InputStream inputStream, String fileName) {
         LOG.info(String.format("DeclarationTemplateServiceImpl.uploadXsd. declarationTemplateId: %s; fileName: %s", declarationTemplateId, fileName));
-        return blobDataService.create(inputStream, fileName);
+
+        String fileExtension = FilenameUtils.getExtension(fileName);
+        if (fileExtension.equals("xsd")) {
+            return blobDataService.create(inputStream, fileName);
+        } else {
+            throw new ServiceException("Файл должен иметь расширение xsd!");
+        }
     }
 
     @Override
@@ -745,7 +658,6 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
      * @param fileName имя файла, которое будет ему присвоено в архиве. Если null - присваивается имя из блоба
      * @param blobId   идентификатор блоба из БД
      * @param zos      поток записи в архив
-     * @throws IOException
      */
     private void putBlobIntoZip(String path, String fileName, String blobId, ZipOutputStream zos) throws IOException {
         if (blobId != null) {
@@ -778,8 +690,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
 
             if (declarationTemplate.getStatus().equals(VersionedObjectStatus.NORMAL)) {
                 // Проверка использования макета в формах
-                mainOperatingService.isInUsed(
-                        declarationTemplateId,
+                isInUsed(declarationTemplateId,
                         declarationTemplate.getType().getId(),
                         declarationTemplate.getStatus(),
                         declarationTemplate.getVersion(),
@@ -795,7 +706,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
             // Если найдены созданные отчеты - требуется запрос подтверждения для их удаления
             result.setSuccess(declarationTemplate.getJrxmlBlobId() == null || !checkExistingDataJrxml(declarationTemplateId, logger));
             // Сохраняем изменения в любом случае
-            mainOperatingService.edit(declarationTemplate, endDate, logger, userInfo);
+            edit(declarationTemplate, endDate, logger, userInfo);
             result.setUuid(logEntryService.save(logger.getEntries()));
             return result;
         } finally {
@@ -809,7 +720,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     public void deleteJrxmlReports(TAUserInfo userInfo, int declarationTemplateId) {
         LOG.info(String.format("DeclarationTemplateServiceImpl.deleteJrxmlReports. declarationTemplateId: %s", declarationTemplateId));
         declarationDataService.cleanBlobs(
-                getDataIdsThatUseJrxml(declarationTemplateId, userInfo),
+                getDataIdsThatUseJrxml(declarationTemplateId),
                 Arrays.asList(DeclarationDataReportType.EXCEL_DEC, DeclarationDataReportType.PDF_DEC, DeclarationDataReportType.JASPER_DEC));
         for (Long id : getLockDataIdsThatUseJrxml(declarationTemplateId)) {
             String keyPDF = declarationDataService.generateAsyncTaskKey(id, DeclarationDataReportType.PDF_DEC);
@@ -820,12 +731,22 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
         deleteJrxml(declarationTemplateId);
     }
 
+    private void deleteJrxml(int declarationTemplateId) {
+        LOG.info(String.format("DeclarationTemplateServiceImpl.deleteJrxml. declarationTemplate: %s", declarationTemplateId));
+        try {
+            DeclarationTemplate template = get(declarationTemplateId);
+            declarationTemplateDao.deleteJrxml(declarationTemplateId);
+            blobDataService.delete(template.getJrxmlBlobId());
+        } catch (DaoException e) {
+            throw new ServiceException("Ошибка при удалении jrxml", e);
+        }
+    }
+
     /**
      * Выполняет непосредственно импорт файла в макет
      *
      * @param declarationTemplateId идентификатор макета
      * @param data                  содержимое архива
-     * @return
      */
     private DeclarationTemplate doImportDeclarationTemplate(int declarationTemplateId, InputStream data) {
         try {
@@ -915,6 +836,126 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
             throw new ServiceException("Не удалось импортировать шаблон", e);
         } finally {
             IOUtils.closeQuietly(data);
+        }
+    }
+
+    private <T> boolean edit(T template, Date templateActualEndDate, Logger logger, TAUserInfo user) {
+        return edit(template, null, templateActualEndDate, logger, user, null);
+    }
+
+    private <T> boolean edit(T template, List<DeclarationTemplateCheck> checks, Date templateActualEndDate, Logger logger, TAUserInfo user, Boolean force) {
+        DeclarationTemplate declarationTemplate = (DeclarationTemplate) template;
+        checkRole(user.getUser());
+        declarationTemplateService.validateDeclarationTemplate(declarationTemplate, logger);
+        checkError(logger);
+        Date dbVersionBeginDate = declarationTemplateService.get(declarationTemplate.getId()).getVersion();
+        Date dbVersionEndDate = declarationTemplateService.getDTEndDate(declarationTemplate.getId());
+        if (dbVersionBeginDate.compareTo(declarationTemplate.getVersion()) != 0
+                || (dbVersionEndDate != null && templateActualEndDate == null)
+                || (dbVersionEndDate == null && templateActualEndDate != null)
+                || (dbVersionEndDate != null && dbVersionEndDate.compareTo(templateActualEndDate) != 0)) {
+            declarationTemplateVersionService.isIntersectionVersion(declarationTemplate.getId(), declarationTemplate.getType().getId(),
+                    declarationTemplate.getStatus(), declarationTemplate.getVersion(), templateActualEndDate, logger, user);
+            checkError(logger);
+            //Выполенение шага 5.А.1.1
+            Pair<Date, Date> beginRange = null;
+            Pair<Date, Date> endRange = null;
+            if (dbVersionBeginDate.compareTo(declarationTemplate.getVersion()) < 0) {
+                Calendar c = Calendar.getInstance();
+                c.setTime(declarationTemplate.getVersion());
+                c.add(Calendar.DATE, -1);
+                beginRange = new Pair<>(dbVersionBeginDate, c.getTime());
+            }
+            if (
+                    (dbVersionEndDate == null && templateActualEndDate != null)
+                            ||
+                            (dbVersionEndDate != null && templateActualEndDate != null && dbVersionEndDate.compareTo(templateActualEndDate) > 0)) {
+                Calendar c = Calendar.getInstance();
+                c.setTime(templateActualEndDate);
+                c.add(Calendar.DATE, 1);
+                endRange = new Pair<>(c.getTime(), dbVersionEndDate);
+            }
+            declarationTemplateVersionService.checkDestinationsSources(declarationTemplate.getType().getId(), beginRange, endRange, logger);
+            checkError(logger);
+            declarationDataService.findDDIdsByRangeInReportPeriod(declarationTemplate.getId(), declarationTemplate.getVersion(), templateActualEndDate, logger);
+            checkError(logger);
+        }
+
+        if ((force == null || !force) && declarationTemplate.getStatus().equals(VersionedObjectStatus.NORMAL)) {
+            boolean isUsedVersion = declarationTemplateVersionService.isUsedVersion(declarationTemplate.getId(), declarationTemplate.getType().getId(),
+                    declarationTemplate.getStatus(), declarationTemplate.getVersion(), templateActualEndDate, logger);
+            if (force == null)
+                checkError(logger);
+            else {
+                if (isUsedVersion)
+                    return false;
+            }
+        }
+
+        List<Long> ddIds = declarationDataService.getFormDataListInActualPeriodByTemplate(declarationTemplate.getId(), declarationTemplate.getVersion());
+        for (long declarationId : ddIds) {
+            // Отменяем задачи формирования спец отчетов/удаляем спец отчеты
+            declarationDataService.interruptAsyncTask(declarationId, user, AsyncTaskType.UPDATE_TEMPLATE_DEC, TaskInterruptCause.DECLARATION_TEMPLATE_UPDATE);
+        }
+
+        declarationTemplateService.save(declarationTemplate, user);
+        logger.info("Изменения сохранены");
+        int id = declarationTemplate.getId();
+
+        List<DeclarationTemplateCheck> oldChecks = declarationTemplateService.getChecks(declarationTemplate.getType().getId(), declarationTemplate.getId());
+        if (checks != null && !oldChecks.containsAll(checks) && !checks.containsAll(oldChecks)) {
+            declarationTemplateService.updateChecks(checks, declarationTemplate.getId());
+            auditService.add(FormDataEvent.TEMPLATE_MODIFIED, user, declarationTemplate.getVersion(),
+                    declarationTemplateService.getDTEndDate(id), null, declarationTemplate.getName(), "Обновлена информация о фатальности проверок НФ", null);
+        }
+
+        auditService.add(FormDataEvent.TEMPLATE_MODIFIED, user, declarationTemplate.getVersion(),
+                declarationTemplateService.getDTEndDate(id), null, declarationTemplate.getName(), null, null);
+        logging(id, FormDataEvent.TEMPLATE_MODIFIED, user.getUser());
+
+        return true;
+    }
+
+    private boolean setStatusTemplate(int templateId, Logger logger, TAUserInfo user, boolean force) {
+        DeclarationTemplate declarationTemplate = declarationTemplateService.get(templateId);
+        checkRole(user.getUser());
+        if (declarationTemplate.getStatus() == VersionedObjectStatus.NORMAL) {
+            declarationTemplateVersionService.isUsedVersion(declarationTemplate.getId(), declarationTemplate.getType().getId(),
+                    declarationTemplate.getStatus(), declarationTemplate.getVersion(), null, logger);
+            if (!force && logger.containsLevel(LogLevel.ERROR)) return false;
+            declarationTemplate.setStatus(VersionedObjectStatus.DRAFT);
+            declarationTemplateService.updateVersionStatus(VersionedObjectStatus.DRAFT, templateId);
+            logging(templateId, FormDataEvent.TEMPLATE_DEACTIVATED, user.getUser());
+        } else {
+            declarationTemplate.setStatus(VersionedObjectStatus.NORMAL);
+            declarationTemplateService.updateVersionStatus(VersionedObjectStatus.NORMAL, templateId);
+            logging(templateId, FormDataEvent.TEMPLATE_ACTIVATED, user.getUser());
+        }
+        return true;
+    }
+
+    private void isInUsed(int templateId, int typeId, VersionedObjectStatus status, Date versionActualDateStart, Date versionActualDateEnd, Logger logger) {
+        declarationTemplateVersionService.isUsedVersion(templateId, typeId, status, versionActualDateStart, versionActualDateEnd, logger);
+    }
+
+    private void logging(int id, FormDataEvent event, TAUser user) {
+        TemplateChanges changes = new TemplateChanges();
+        changes.setEvent(event);
+        changes.setEventDate(new Date());
+        changes.setDeclarationTemplateId(id);
+        changes.setAuthor(user);
+        templateChangesService.save(changes);
+    }
+
+    private void checkError(Logger logger) {
+        if (logger.containsLevel(LogLevel.ERROR))
+            throw new ServiceLoggerException("Версия макета не сохранена. Обнаружены фатальные ошибки!", logEntryService.save(logger.getEntries()));
+    }
+
+    private void checkRole(TAUser user) {
+        TaxType taxType = TaxType.NDFL;
+        if (!user.hasRole(taxType, TARole.N_ROLE_CONF)) {
+            throw new ServiceException("Нет прав доступа к данному виду налогу \"%s\"!", taxType.getName());
         }
     }
 }

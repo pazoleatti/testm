@@ -23,11 +23,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-
-import static org.apache.commons.lang3.CharEncoding.UTF_8;
 
 
 @RestController
@@ -121,7 +120,7 @@ public class DeclarationTemplateController {
      * @param declarationTemplateId идентификатор макета
      * @param req   запрос
      * @param resp  ответ
-     * @throws IOException
+     * @throws IOException IOException
      */
     @GetMapping(value="/actions/declarationTemplate/{declarationTemplateId}", params = "projection=downloadXsd")
     public void downloadXsd(@PathVariable int declarationTemplateId, HttpServletRequest req, HttpServletResponse resp) throws IOException {
@@ -146,7 +145,7 @@ public class DeclarationTemplateController {
         String fileName = "declarationTemplate_" + declarationTemplateId + ".zip";
         resp.setContentType(CustomMediaType.APPLICATION_ZIP_VALUE);
         resp.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
-        resp.setCharacterEncoding(UTF_8);
+        resp.setCharacterEncoding(StandardCharsets.UTF_8.name());
         try {
             declarationTemplateService.exportDeclarationTemplate(securityService.currentUserInfo(), declarationTemplateId, resp.getOutputStream());
         } finally {
@@ -165,7 +164,7 @@ public class DeclarationTemplateController {
         String fileName = String.format("Templates_%s.zip", new SimpleDateFormat("yyyy_MM_dd").format(new Date()));
         resp.setContentType(CustomMediaType.APPLICATION_ZIP_VALUE);
         resp.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
-        resp.setCharacterEncoding(UTF_8);
+        resp.setCharacterEncoding(StandardCharsets.UTF_8.name());
         try {
             declarationTemplateService.exportAllDeclarationTemplates(securityService.currentUserInfo(), resp.getOutputStream());
         } finally {
