@@ -339,7 +339,7 @@
                                     class="dropdown-menu dropdown-menu-block"
                                     aria-labelledby="download-reports-button">
                                     <li role="menuitem">
-                                        <a data-ng-class="{disabled: !(getActiveTab().getSelectedRows().length === 1)}"
+                                        <a data-ng-class="{disabled: !(getActiveTab().getSection() !== 1 && getActiveTab().getSelectedRows().length === 1)}"
                                            data-ng-click="showEditRowModal()">
                                             {{::'button.edit.row' | translate}}
                                         </a>

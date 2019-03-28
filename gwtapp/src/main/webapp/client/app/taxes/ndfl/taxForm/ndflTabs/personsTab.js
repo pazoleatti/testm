@@ -36,7 +36,12 @@
 
                 // Получение номера раздела, который отображается на вкладке
                 tab.getSection = function () {
-                    return 1
+                    return 1;
+                };
+
+                // Получение строк выбранных в таблице внутри вкладки
+                tab.getSelectedRows = function () {
+                    return $scope.ndflPersonGrid.value;
                 };
 
                 $scope.ndflPersonGrid = {
