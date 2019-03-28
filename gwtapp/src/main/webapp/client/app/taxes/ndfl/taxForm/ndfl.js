@@ -104,7 +104,7 @@
                                     // Логика в этом блоке выстроена для этой цели.
                                     var oldActualDate = null;
                                     if ($scope.declarationData && $scope.declarationData.actualDataDate) {
-                                        oldActualDate = $scope.declarationData.actualDataDate
+                                        oldActualDate = $scope.declarationData.actualDataDate;
                                     }
                                     if ($scope.declarationData && $scope.declarationData.actualDataDate &&
                                         $scope.declarationData.actualDataDate < data.lastDataModifiedDate) {
@@ -115,7 +115,7 @@
                                     if (isRefreshGridNeeded) {
                                         $scope.refreshGrid(1);
                                     } else if (oldActualDate) {
-                                        $scope.declarationData.actualDataDate = oldActualDate
+                                        $scope.declarationData.actualDataDate = oldActualDate;
                                     }
                                 }
                             }
@@ -240,6 +240,10 @@
                 };
                 $scope.ndflTabs = [$scope.ndfFLTab, $scope.incomesAndTaxTab, $scope.deductionsTab, $scope.prepaymentTab];
 
+                $scope.getActiveTab = function () {
+                    return $scope.ndflTabsCtrl.getActiveTab();
+                };
+
                 $scope.refreshGrid = function (page) {
                     $scope.ndflTabs.forEach(function (tab) {
                         tab.isDataLoaded = false;
@@ -263,8 +267,8 @@
                  * @description Установка признака заполненности фильтра
                  */
                 $scope.searchFilter.isClearByFilterParams = function () {
-                    $scope.searchFilter.isClear = !(isEmpty($scope.ndflFilter.person) && isEmpty($scope.ndflFilter.income)
-                        && isEmpty($scope.ndflFilter.deduction) && isEmpty($scope.ndflFilter.prepayment));
+                    $scope.searchFilter.isClear = !(isEmpty($scope.ndflFilter.person) && isEmpty($scope.ndflFilter.income) &&
+                        isEmpty($scope.ndflFilter.deduction) && isEmpty($scope.ndflFilter.prepayment));
                 };
 
                 function isEmpty(object) {
@@ -364,38 +368,18 @@
                     });
                 };
 
-
-                /**
-                 * Флаг, означающий, может ли текущий пользоватеть выполнить редактирование строки в таблице
-                 * Зависит от выделенных строк на вкладках, поэтому реализовано через события
-                 */
-                $scope.canEditRow = false;
-                /**
-                 * Флаг, может ли текущий пользователь выполнить массовое редактирование выбранных строк.
-                 */
-                $scope.canEditSelectedRows = false;
-                /**
-                 * Обработка события смены состояния чекбоксов в таблице.
-                 */
-                $rootScope.$on("selectedRowCountChanged", function (event, count) {
-                    // Выбрана ровно одна строка.
-                    $scope.canEditRow = count === 1;
-
-                    // Выбрана хотя бы 1 строка на вкладке 2
-                    $scope.canEditSelectedRows = ($scope.ndflTabsCtrl.getActiveTab().getSection() === 2) && (count > 0);
-                });
                 /**
                  * Все записи можно редактировать, если выбрана 2 вкладка, и там есть хотя бы 1 строка.
                  */
                 $scope.canEditAllRows = function () {
-                    return ($scope.ndflTabsCtrl.getActiveTab().getSection() === 2) && ($scope.ndflTabsCtrl.getActiveTab().getRowsCount() > 0)
+                    return ($scope.ndflTabsCtrl.getActiveTab().getSection() === 2) && ($scope.ndflTabsCtrl.getActiveTab().getRowsCount() > 0);
                 };
 
                 /**
                  * Событие, которое возникает по нажатию на кнопку "Редактировать строку"
                  */
                 $scope.showEditRowModal = function () {
-                    var row = $scope.ndflTabsCtrl.getActiveTab().getRows()[0];
+                    var row = $scope.ndflTabsCtrl.getActiveTab().getSelectedRows()[0];
 
                     //Раздел 2 (Сведения о доходах и НДФЛ)
                     var title = "incomesAndTax.edit.title";
@@ -438,8 +422,6 @@
                             $scope.unlockEdit();
 
                             if (edited) {
-                                $scope.canEditRow = false;
-                                $scope.canEditSelectedRows = false;
                                 $scope.refreshGrid(1);
                             }
                         });
@@ -462,7 +444,7 @@
                  * @param byFilter boolean режим запуска, по фильтру или по выбранным строкам
                  */
                 $scope.checkRowsAndShowModal = function (byFilter) {
-                    var selectedRows = $scope.ndflTabsCtrl.getActiveTab().getRows();
+                    var selectedRows = $scope.ndflTabsCtrl.getActiveTab().getSelectedRows();
                     var rowsCount = byFilter ? $scope.ndflTabsCtrl.getActiveTab().getRowsCount() : selectedRows.length;
 
                     if (rowsCount > 0) {
@@ -479,7 +461,7 @@
                             if (response.data.success === true) {
                                 $scope.showBulkEditDatesModal(byFilter);
                             }
-                        })
+                        });
                     }
                 };
 
@@ -488,7 +470,7 @@
                  * @param byFilter режим показа окна, по фильтру или по выбранным строкам
                  */
                 $scope.showBulkEditDatesModal = function (byFilter) {
-                    var selectedRows = $scope.ndflTabsCtrl.getActiveTab().getRows();
+                    var selectedRows = $scope.ndflTabsCtrl.getActiveTab().getSelectedRows();
                     var title = byFilter ?
                         $filter('translate')('incomesAndTax.editDates.byFilter.title') :
                         $filter('translate')('incomesAndTax.editDates.selected.title');
@@ -515,8 +497,6 @@
                         $scope.unlockEdit();
 
                         if (edited) {
-                            $scope.canEditRow = false;
-                            $scope.canEditSelectedRows = false;
                             $scope.refreshGrid(1);
                         }
                     });

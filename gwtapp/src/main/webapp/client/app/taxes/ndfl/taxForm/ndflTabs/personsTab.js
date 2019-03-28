@@ -28,7 +28,6 @@
                 // Обработчик на активацию таба
                 $scope.$watch("ndfFLTab.active", function (newValue, oldValue) {
                     if (!tab.isDataLoaded) {
-                        $rootScope.$emit("selectedRowCountChanged", 0);
                         if (newValue && !oldValue) {
                             tab.refreshGrid(1);
                         }

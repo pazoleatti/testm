@@ -24,7 +24,6 @@
                 // Обработчик на активацию таба
                 $scope.$watch("deductionsTab.active", function (newValue, oldValue) {
                     if (!tab.isDataLoaded) {
-                        $rootScope.$emit("selectedRowCountChanged", 0);
                         if (newValue && !oldValue) {
                             tab.refreshGrid(1);
                         }
@@ -33,12 +32,12 @@
 
                 // Получение номера раздела, который отображается на вкладке
                 tab.getSection = function () {
-                    return 3
+                    return 3;
                 };
 
                 // Получение строк выбранных в таблице внутри вкладки
-                tab.getRows = function () {
-                    return $scope.deductionGrid.value
+                tab.getSelectedRows = function () {
+                    return $scope.deductionGrid.value;
                 };
 
                 $scope.deductionGrid = {
@@ -130,12 +129,7 @@
                         hidegrid: false,
                         multiselect: true,
                         disableAutoLoad: true,
-                        fullScreen: true,
-                        onSelectRow: function (rowId, status) {
-                            if (status) {
-                                $rootScope.$emit("selectedRowCountChanged", $scope.deductionGrid.value.length + 1)
-                            } else $rootScope.$emit("selectedRowCountChanged", $scope.deductionGrid.value.length - 1)
-                        }
+                        fullScreen: true
                     }
                 };
             }]);

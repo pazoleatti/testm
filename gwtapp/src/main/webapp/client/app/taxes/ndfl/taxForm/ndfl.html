@@ -339,13 +339,13 @@
                                     class="dropdown-menu dropdown-menu-block"
                                     aria-labelledby="download-reports-button">
                                     <li role="menuitem">
-                                        <a data-ng-class="{disabled: !canEditRow}"
+                                        <a data-ng-class="{disabled: !(getActiveTab().getSelectedRows().length === 1)}"
                                            data-ng-click="showEditRowModal()">
                                             {{::'button.edit.row' | translate}}
                                         </a>
                                     </li>
                                     <li role="menuitem">
-                                        <a data-ng-class="{disabled: !canEditSelectedRows}"
+                                        <a data-ng-class="{disabled: !(getActiveTab().getSection() === 2 && getActiveTab().getSelectedRows().length > 0)}"
                                            data-ng-click="checkRowsAndShowModal(false)">
                                             {{::'button.edit.datesSelected' | translate}}
                                         </a>

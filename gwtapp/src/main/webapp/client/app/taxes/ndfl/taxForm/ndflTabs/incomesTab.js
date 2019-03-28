@@ -24,7 +24,6 @@
                 // Обработчик на активацию таба
                 $scope.$watch("incomesAndTaxTab.active", function (newValue, oldValue) {
                     if (!tab.isDataLoaded) {
-                        $rootScope.$emit("selectedRowCountChanged", 0);
                         if (newValue && !oldValue) {
                             tab.refreshGrid(1);
                         }
@@ -33,11 +32,11 @@
 
                 // Получение номера раздела, который отображается на вкладке
                 tab.getSection = function () {
-                    return 2
+                    return 2;
                 };
 
                 // Получение строк выбранных в таблице внутри вкладки
-                tab.getRows = function () {
+                tab.getSelectedRows = function () {
                     return $scope.incomesAndTaxGrid.value;
                 };
                 // Полное число строк в таблице вкладки
@@ -150,21 +149,7 @@
                         hidegrid: false,
                         multiselect: true,
                         disableAutoLoad: true,
-                        fullScreen: true,
-                        onSelectRow: function (rowId, status) {
-                            if (status) {
-                                $rootScope.$emit("selectedRowCountChanged", $scope.incomesAndTaxGrid.value.length + 1)
-                            } else {
-                                $rootScope.$emit("selectedRowCountChanged", $scope.incomesAndTaxGrid.value.length - 1)
-                            }
-                        },
-                        onSelectAll: function (rowIds, status) {
-                            if (status) {
-                                $rootScope.$emit('selectedRowCountChanged', rowIds.length);
-                            } else {
-                                $rootScope.$emit('selectedRowCountChanged', 0);
-                            }
-                        }
+                        fullScreen: true
                     }
                 };
             }
