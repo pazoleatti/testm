@@ -24,11 +24,17 @@
                             translate}}:</label>
                     </div>
                     <div class="span8">
-                        <input data-ng-model="searchFilter.params.refNumber"
-                               placeholder="{{'filter.placeholder.search' | translate}}"
-                               type="text" class="form-control"
-                               title="{{searchFilter.params.refNumber}}"
-                               ng-style="fieldStyles.refNumber"/>
+                        <div data-aplana-field>
+                            <input data-ng-model="searchFilter.params.refNumber"
+                                   placeholder="{{'filter.placeholder.search' | translate}}"
+                                   type="text" class="form-control"
+                                   data-ng-pattern="patterns.number"
+                                   title="{{searchFilter.params.refNumber}}"
+                                   ng-style="fieldStyles.refNumber"/>
+                            <div data-aplana-validator data-key='pattern'>
+                                {{'common.validation.number' | translate}}
+                            </div>
+                        </div>
                     </div>
                 </div>
 

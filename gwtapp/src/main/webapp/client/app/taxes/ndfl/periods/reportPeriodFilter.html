@@ -31,7 +31,8 @@
                         </td>
                         <td>
                             <div data-aplana-field>
-                                <input type="number"
+                                <input type="text"
+                                       data-ng-pattern="patterns.number"
                                        style="width: 58px;text-align: left;"
                                        data-ng-model="searchFilter.params.yearStart"
                                        id="searchfilter_params_yearstart"
@@ -48,6 +49,9 @@
                                 <div data-aplana-validator data-key='max'>
                                     {{'common.validation.max.value' | translate:'{ maxValue: ' + yearMax + ' }'}}
                                 </div>
+                                <div data-aplana-validator data-key='pattern'>
+                                    {{'common.validation.number' | translate}}
+                                </div>
                             </div>
                         </td>
 
@@ -58,7 +62,8 @@
                         </td>
                         <td>
                             <div data-aplana-field>
-                                <input type="number"
+                                <input type="text"
+                                       data-ng-pattern="patterns.number"
                                        style="width: 58px; text-align: left;"
                                        data-ng-model="searchFilter.params.yearEnd"
                                        id="searchfilter_params_yearend"
@@ -74,6 +79,9 @@
                                 </div>
                                 <div data-aplana-validator data-key='max'>
                                     {{'common.validation.max.value' | translate:'{ maxValue: ' + yearMax + ' }'}}
+                                </div>
+                                <div data-aplana-validator data-key='pattern'>
+                                    {{'common.validation.number' | translate}}
                                 </div>
                             </div>
                         </td>
