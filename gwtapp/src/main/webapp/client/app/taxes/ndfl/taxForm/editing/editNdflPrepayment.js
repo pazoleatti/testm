@@ -17,32 +17,19 @@
                 $scope.row = {};
                 $scope.temp = {};
 
-                // Установка блокировки на форму
+                // Получение данных ФЛ из раздела 1
                 $http({
-                    method: "POST",
-                    url: "controller/actions/declarationData/" + $shareData.declarationId + "/lockEdit"
-                }).success(function (lock) {
-                    if (lock.uuid) {
-                        $logPanel.open('log-panel-container', lock.uuid);
-                    }
-                    if (!lock.success) {
-                        $modalInstance.dismiss('Не можем установить блокировку');
-                    } else {
-                        // Получение данных ФЛ из раздела 1
-                        $http({
-                            method: "GET",
-                            url: "controller/rest/ndflPerson/" + $shareData.row.ndflPersonId
-                        }).success(function (person) {
-                            $scope.row = $shareData.row;
-                            $scope.temp.person = person;
-                            $http({
-                                method: "GET",
-                                url: "controller/rest/getPersonDocTypeName/" + person.idDocType
-                            }).success(function (docTypeName) {
-                                $scope.temp.docTypeName = docTypeName;
-                            });
-                        });
-                    }
+                    method: "GET",
+                    url: "controller/rest/ndflPerson/" + $shareData.row.ndflPersonId
+                }).success(function (person) {
+                    $scope.row = $shareData.row;
+                    $scope.temp.person = person;
+                    $http({
+                        method: "GET",
+                        url: "controller/rest/getPersonDocTypeName/" + person.idDocType
+                    }).success(function (docTypeName) {
+                        $scope.temp.docTypeName = docTypeName;
+                    });
                 });
 
                 /**

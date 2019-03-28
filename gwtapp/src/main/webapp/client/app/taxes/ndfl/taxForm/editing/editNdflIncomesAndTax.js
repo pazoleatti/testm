@@ -46,53 +46,40 @@
                 };
                 $scope.temp = {};
 
-                // Установка блокировки на форму
+                // Получение данных ФЛ из раздела 1
                 $http({
-                    method: "POST",
-                    url: "controller/actions/declarationData/" + $shareData.declarationId + "/lockEdit"
-                }).success(function (lock) {
-                    if (lock.uuid) {
-                        $logPanel.open('log-panel-container', lock.uuid);
+                    method: "GET",
+                    url: "controller/rest/ndflPerson/" + $shareData.row.ndflPersonId
+                }).success(function (person) {
+                    $scope.row = $shareData.row;
+                    $scope.temp.person = person;
+                    if ($scope.row.taxTransferDate === APP_CONSTANTS.DATE_ZERO.AS_DATE) {
+                        $scope.row.disableTaxTransferDate = true;
+                        $scope.row.taxTransferDate = null;
                     }
-                    if (!lock.success) {
-                        $modalInstance.dismiss('Не можем установить блокировку');
-                    } else {
-                        // Получение данных ФЛ из раздела 1
+                    if (person.idDocType) {
                         $http({
                             method: "GET",
-                            url: "controller/rest/ndflPerson/" + $shareData.row.ndflPersonId
-                        }).success(function (person) {
-                            $scope.row = $shareData.row;
-                            $scope.temp.person = person;
-                            if ($scope.row.taxTransferDate === APP_CONSTANTS.DATE_ZERO.AS_DATE) {
-                                $scope.row.disableTaxTransferDate = true;
-                                $scope.row.taxTransferDate = null;
-                            }
-                            if (person.idDocType) {
-                                $http({
-                                    method: "GET",
-                                    url: "controller/rest/getPersonDocTypeName/" + person.idDocType
-                                }).success(function (docTypeName) {
-                                    $scope.temp.docTypeName = docTypeName;
-                                });
-                            }
-                            // Получение данных ОКТМО для установки значения в выпадашку
-                            $http({
-                                method: "GET",
-                                url: "controller/rest/refBookValues/oktmoByCode",
-                                params: {
-                                    code: $scope.row.oktmo
-                                }
-                            }).success(function (oktmo) {
-                                if (oktmo) {
-                                    $scope.temp.oktmo = oktmo;
-                                } else {
-                                    // Если запись не найдена - подставляем текст для кода, чтобы он отобразился в выпадашке
-                                    $scope.temp.oktmo = {code: $scope.row.oktmo, name: "-"};
-                                }
-                            });
+                            url: "controller/rest/getPersonDocTypeName/" + person.idDocType
+                        }).success(function (docTypeName) {
+                            $scope.temp.docTypeName = docTypeName;
                         });
                     }
+                    // Получение данных ОКТМО для установки значения в выпадашку
+                    $http({
+                        method: "GET",
+                        url: "controller/rest/refBookValues/oktmoByCode",
+                        params: {
+                            code: $scope.row.oktmo
+                        }
+                    }).success(function (oktmo) {
+                        if (oktmo) {
+                            $scope.temp.oktmo = oktmo;
+                        } else {
+                            // Если запись не найдена - подставляем текст для кода, чтобы он отобразился в выпадашке
+                            $scope.temp.oktmo = {code: $scope.row.oktmo, name: "-"};
+                        }
+                    });
                 });
 
                 /**

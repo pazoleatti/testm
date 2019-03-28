@@ -7,21 +7,6 @@
         .controller('editNdflDatesFormCtrl', ['$scope', '$http', '$filter', '$shareData', '$modalInstance', '$dialogs', '$logPanel', 'APP_CONSTANTS',
             function ($scope, $http, $filter, $shareData, $modalInstance, $dialogs, $logPanel, APP_CONSTANTS) {
 
-                // Установка блокировки на форму
-                $http({
-                    method: "POST",
-                    url: "controller/actions/declarationData/" + $shareData.declarationId + "/lockEdit"
-                }).then(function (response) {
-                    if (response.data.uuid) {
-                        $logPanel.open('log-panel-container', response.data.uuid);
-                    }
-                    if (!response.data.success) {
-                        $modalInstance.dismiss();
-                    }
-                }).catch(function (reason) {
-                    $modalInstance.dismiss('Не можем установить блокировку на форму. Причина: ' + reason);
-                });
-
                 $scope.byFilter = $shareData.byFilter;
 
                 $scope.params = {

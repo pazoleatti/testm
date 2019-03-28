@@ -72,10 +72,10 @@
          * @description Контроллер страницы РНУ НДФЛ и вкладки "Реквизиты"
          */
         .controller('ndflCtrl', [
-            '$scope', '$timeout', '$window', '$stateParams', 'ShowToDoDialog', '$http', 'DeclarationDataResource', '$filter', '$logPanel', '$aplanaModal', '$dialogs',
+            '$scope', '$q', '$timeout', '$window', '$stateParams', 'ShowToDoDialog', '$http', 'DeclarationDataResource', '$filter', '$logPanel', '$aplanaModal', '$dialogs',
             '$rootScope', 'RefBookValuesResource', 'APP_CONSTANTS', '$state', '$interval', 'acceptDeclarationData',
             'checkDeclarationData', 'moveToCreatedDeclarationData', 'Upload', 'PermissionChecker',
-            function ($scope, $timeout, $window, $stateParams, $showToDoDialog, $http, DeclarationDataResource, $filter,
+            function ($scope, $q, $timeout, $window, $stateParams, $showToDoDialog, $http, DeclarationDataResource, $filter,
                       $logPanel, $aplanaModal, $dialogs, $rootScope, RefBookValuesResource, APP_CONSTANTS, $state,
                       $interval, acceptDeclarationData, checkDeclarationData, moveToCreatedDeclarationData, Upload, PermissionChecker) {
 
@@ -398,37 +398,53 @@
                         controller = "editNdflPrepaymentFormCtrl";
                     }
 
-                    $aplanaModal.open({
-                        title: $filter('translate')(title, {
-                            rowNum: row.rowNum,
-                            operationId: row.operationId
-                        }),
-                        templateUrl: templateUrl,
-                        controller: controller,
-                        windowClass: 'modal900',
-                        resolve: {
-                            $shareData: function () {
-                                return {
-                                    row: $.extend(true, {}, row),
-                                    declarationId: $stateParams.declarationDataId,
-                                    department: $scope.declarationData.department
-                                };
+                    lock().then(function () {
+                        $aplanaModal.open({
+                            title: $filter('translate')(title, {
+                                rowNum: row.rowNum,
+                                operationId: row.operationId
+                            }),
+                            templateUrl: templateUrl,
+                            controller: controller,
+                            windowClass: 'modal900',
+                            resolve: {
+                                $shareData: function () {
+                                    return {
+                                        row: $.extend(true, {}, row),
+                                        declarationId: $stateParams.declarationDataId,
+                                        department: $scope.declarationData.department
+                                    };
+                                }
+                            },
+                            closeCallback: function (scope) {
+                                scope.close();
                             }
-                        },
-                        closeCallback: function (scope) {
-                            scope.close();
-                        }
-                    }).result.then(function (edited) {
-                            $scope.unlockEdit();
+                        }).result.then(function (edited) {
+                            unlockEdit();
 
                             if (edited) {
                                 $scope.refreshGrid(1);
                             }
                         });
+                    });
                 };
 
+                // Блокирует форму на редактирование
+                function lock() {
+                    return $http({
+                        method: "POST",
+                        url: "controller/actions/declarationData/" + $scope.declarationDataId + "/lockEdit"
+                    }).then(function (response) {
+                        if (response.data.uuid) {
+                            $logPanel.open('log-panel-container', response.data.uuid);
+                        }
+                        if (!response.data.success) {
+                            return $q.reject();
+                        }
+                    });
+                }
                 // Метод снятия блокировки с редактирования формы.
-                $scope.unlockEdit = function () {
+                function unlockEdit() {
                     $http({
                         method: 'POST',
                         url: 'controller/actions/declarationData/' + $stateParams.declarationDataId + '/unlockEdit'
@@ -437,7 +453,7 @@
                             $logPanel.open('log-panel-container', unlock.data.uuid);
                         }
                     });
-                };
+                }
 
                 /**
                  * Событие по пунктам меню "Редактировать даты строк".
@@ -475,30 +491,32 @@
                         $filter('translate')('incomesAndTax.editDates.byFilter.title') :
                         $filter('translate')('incomesAndTax.editDates.selected.title');
 
-                    $aplanaModal.open({
-                        title: title,
-                        templateUrl: 'client/app/taxes/ndfl/taxForm/editing/editNdflDates.html',
-                        controller: "editNdflDatesFormCtrl",
-                        windowClass: 'modal500',
-                        resolve: {
-                            $shareData: function () {
-                                return {
-                                    byFilter: byFilter,
-                                    declarationId: $stateParams.declarationDataId,
-                                    filter: $scope.searchFilter.params,
-                                    rowIds: $filter('idExtractor')(selectedRows)
-                                };
+                    lock().then(function () {
+                        $aplanaModal.open({
+                            title: title,
+                            templateUrl: 'client/app/taxes/ndfl/taxForm/editing/editNdflDates.html',
+                            controller: "editNdflDatesFormCtrl",
+                            windowClass: 'modal500',
+                            resolve: {
+                                $shareData: function () {
+                                    return {
+                                        byFilter: byFilter,
+                                        declarationId: $stateParams.declarationDataId,
+                                        filter: $scope.searchFilter.params,
+                                        rowIds: $filter('idExtractor')(selectedRows)
+                                    };
+                                }
+                            },
+                            closeCallback: function (scope) {
+                                scope.close();
                             }
-                        },
-                        closeCallback: function (scope) {
-                            scope.close();
-                        }
-                    }).result.then(function (edited) {
-                        $scope.unlockEdit();
+                        }).result.then(function (edited) {
+                            unlockEdit();
 
-                        if (edited) {
-                            $scope.refreshGrid(1);
-                        }
+                            if (edited) {
+                                $scope.refreshGrid(1);
+                            }
+                        });
                     });
                 };
 
