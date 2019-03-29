@@ -119,7 +119,7 @@
                                         width: 1278,
                                         sortable: false,
                                         formatter: $filter('textColorFormatter'),
-                                        classes: 'grid-cell-white-space'
+                                        classes: 'white-space-pre-line'
                                     },
                                     {
                                         name: 'type',
