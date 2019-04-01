@@ -961,13 +961,13 @@ class Check extends AbstractScriptClass {
                     }
                 }
 
-                // Общ10 Существование настроек подразделения для КПП-ОКТМО
+                // Общ11 Существование настроек подразделения для КПП-ОКТМО
                 if (ndflPersonIncome.kpp && ndflPersonIncome.oktmo && !existsDepartmentConfig(ndflPersonIncome.kpp, ndflPersonIncome.oktmo)) {
                     String errMsg = "Ни для одного из ТБ не найдено ни одной настройки подразделения с КПП = \"$ndflPersonIncome.kpp\", ОКТМО= \"$ndflPersonIncome.oktmo\", " +
                             "которая была бы актуальная на настоящий момент, либо актуальна в периоде \"$reportPeriod.taxPeriod.year, $reportPeriod.name\". " +
                             "По этому сочетанию КПП-ОКТМО не будут сформированы отчетные формы для отправки в ФНС"
                     String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
-                    logger.warnExp("%s. %s.", "\"КПП\" и \"ОКТМО\" не соответствуют Тербанку", fioAndInpAndOperId, pathError,
+                    logger.warnExp("%s. %s.", "\"КПП\" и \"ОКТМО\" отсутствует в настройках подразделений", fioAndInpAndOperId, pathError,
                             errMsg)
                 }
             }
