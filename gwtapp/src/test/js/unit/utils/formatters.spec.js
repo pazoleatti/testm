@@ -277,10 +277,12 @@ describe('formatters', function () {
         it('delegates formatting to codeNameFormatter', function () {
             var data = {
                 permission: true,
-                value: {anyKey: 'anyValue'}
+                value: {
+                    docType: 'anyValue'
+                }
             };
             docTypeFormatter(data);
-            expect(codeNameFormatter).toHaveBeenCalledWith({anyKey: 'anyValue'});
+            expect(codeNameFormatter).toHaveBeenCalledWith('anyValue');
         });
     });
 });
