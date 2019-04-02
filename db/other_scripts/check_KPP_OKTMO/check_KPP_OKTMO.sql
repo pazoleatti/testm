@@ -31,7 +31,7 @@ DECLARATION_DATA dd
 ,tax_period tp
 ,(
 select rbnd.id as detail_id, rbnd.record_id, rbnd.kpp, rbo.code as oktmo, rbnd.version as start_date
-,(select min(rbnd2.version) from ref_book_ndfl_detail rbnd2 where rbnd2.record_id = rbnd.record_id and rbnd2.version>rbnd.version) as end_date
+,(select min(rbnd2.version) from ref_book_ndfl_detail rbnd2 where rbnd2.status <> -1 and rbnd2.record_id = rbnd.record_id and rbnd2.version>rbnd.version) as end_date
 from 
 ref_book_ndfl_detail rbnd
 ,REF_BOOK_OKTMO rbo
