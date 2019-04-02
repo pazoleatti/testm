@@ -21,13 +21,14 @@ select
 distinct 
 kpp, oktmo, declaration_data_id, dep_name, rep_name, exists_flag
 from (
-select dd.kpp, dd.oktmo, dd.id as declaration_data_id, drp.department_id, d.name as dep_name, rp.id, rp.name as rep_name, det.detail_id, det.start_date, det.end_date
+select dd.kpp, dd.oktmo, dd.id as declaration_data_id, drp.department_id, d.name as dep_name, rp.id, to_char(tp.year)||' '||rp.name as rep_name, det.detail_id, det.start_date, det.end_date
 ,case when det.detail_id is null then 'отсутствует' else 'неактуальна' end exists_flag
 from 
 DECLARATION_DATA dd
 ,DEPARTMENT_REPORT_PERIOD drp
 ,department d
 ,REPORT_PERIOD rp
+,tax_period tp
 ,(
 select rbnd.id as detail_id, rbnd.record_id, rbnd.kpp, rbo.code as oktmo, rbnd.version as start_date
 ,(select min(rbnd2.version) from ref_book_ndfl_detail rbnd2 where rbnd2.record_id = rbnd.record_id and rbnd2.version>rbnd.version) as end_date
@@ -44,6 +45,7 @@ dd.oktmo is not null
 and drp.id = dd.department_report_period_id
 and d.id = drp.department_id
 and rp.id=drp.report_period_id
+and tp.id=rp.tax_period_id
 and det.kpp(+) = dd.kpp
 and det.oktmo(+) = dd.oktmo
 )
