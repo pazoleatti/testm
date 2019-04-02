@@ -3,6 +3,8 @@ set serveroutput on;
 begin
 merge into ref_book_oktmo a using
 (
+select * from 
+(
 select to_date('01.06.2017','dd.mm.yyyy') as version, '01641425103' as code, 'п им Владимира Ильича' as name, 2 as razd from dual union all 
 select to_date('01.09.2018','dd.mm.yyyy') as version, '01645428104' as code, 'с Новосёловка' as name, 2 as razd from dual union all 
 select to_date('01.09.2018','dd.mm.yyyy') as version, '01645428105' as code, 'с Омутское' as name, 2 as razd from dual union all 
@@ -2383,11 +2385,6 @@ select to_date('01.03.2018','dd.mm.yyyy') as version, '42612444146' as code, 'д
 select to_date('01.03.2018','dd.mm.yyyy') as version, '42612444151' as code, 'п им. Ильича' as name, 2 as razd from dual union all 
 select to_date('01.01.2019','dd.mm.yyyy') as version, '42633432116' as code, 'с Павловское' as name, 2 as razd from dual union all 
 select to_date('01.01.2019','dd.mm.yyyy') as version, '42633432121' as code, 'с Грязновка' as name, 2 as razd from dual union all 
-select to_date('01.01.2012','dd.mm.yyyy') as version, '4610433' as code, 'Предивинский сельсовет' as name, 1 as razd from dual union all 
-select to_date('01.01.2012','dd.mm.yyyy') as version, '4614454' as code, 'сельсовет Памяти 13 Борцов' as name, 1 as razd from dual union all 
-select to_date('01.01.2012','dd.mm.yyyy') as version, '4635426' as code, 'Южно-Енисейский сельсовет' as name, 1 as razd from dual union all 
-select to_date('01.01.2012','dd.mm.yyyy') as version, '4647454' as code, 'Уральский сельсовет' as name, 1 as razd from dual union all 
-select to_date('01.01.2012','dd.mm.yyyy') as version, '4654439' as code, 'Светлогорский сельсовет' as name, 1 as razd from dual union all 
 select to_date('01.03.2019','dd.mm.yyyy') as version, '46715000' as code, 'Дмитровский' as name, 1 as razd from dual union all 
 select to_date('01.03.2019','dd.mm.yyyy') as version, '46715000001' as code, 'г Дмитров' as name, 2 as razd from dual union all 
 select to_date('01.03.2019','dd.mm.yyyy') as version, '46715000006' as code, 'г Яхрома' as name, 2 as razd from dual union all 
@@ -7593,6 +7590,7 @@ select to_date('01.03.2018','dd.mm.yyyy') as version, '94637425116' as code, 'д
 select to_date('01.03.2018','dd.mm.yyyy') as version, '94637440106' as code, 'д Соколовка' as name, 2 as razd from dual union all 
 select to_date('01.03.2017','dd.mm.yyyy') as version, '96610430' as code, 'Ново-Бенойское' as name, 1 as razd from dual union all 
 select to_date('01.03.2017','dd.mm.yyyy') as version, '96610430101' as code, 'с Новый Беной' as name, 2 as razd from dual
+) where (length(code) = 8) or (length(code) = 11)
 ) b
 on (a.code=b.code and a.status=0)
 when not matched then
