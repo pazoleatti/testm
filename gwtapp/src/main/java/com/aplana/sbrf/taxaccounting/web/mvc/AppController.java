@@ -7,9 +7,11 @@ import com.aplana.sbrf.taxaccounting.service.ServerInfo;
 import com.aplana.sbrf.taxaccounting.utils.ApplicationInfo;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.model.ConfigModel;
+import com.fasterxml.jackson.databind.node.TextNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -59,11 +61,11 @@ public class AppController {
      * @throws IOException IOException
      */
     @PostMapping(value = "/rest/executeScript")
-    public ActionResult executeScript(@RequestParam String script) {
-        if (script.isEmpty()) {
+    public ActionResult executeScript(@RequestBody TextNode script) {
+        if (script.asText().isEmpty()) {
             throw new ServiceException("Скрипт не может быть пустым");
         }
-        return scriptExecutionService.executeScript(securityService.currentUserInfo(), script);
+        return scriptExecutionService.executeScript(securityService.currentUserInfo(), script.asText());
     }
 
     /**
