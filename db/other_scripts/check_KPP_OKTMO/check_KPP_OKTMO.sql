@@ -8,7 +8,7 @@ set NEWP NONE;
 
 column filename new_val filename
 
-SELECT '_logs\KPP-OTMO_'||to_char(sysdate, 'yyyymmdd_hhmiss')||'.csv' filename FROM dual;
+SELECT '_logs\KPP-OKTMO_'||to_char(sysdate, 'yyyymmdd_hh24miss')||'.csv' filename FROM dual;
 
 spool &filename
 
