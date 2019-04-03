@@ -55,9 +55,7 @@
                     $http({
                         method: "POST",
                         url: "controller/rest/executeScript",
-                        params: {
-                            script: editor.getValue()
-                        }
+                        data: JSON.stringify(editor.getValue())
                     }).then(function (response) {
                         if (response.data && response.data.uuid) {
                             $logPanel.open('log-panel-container', response.data.uuid);
