@@ -30,4 +30,20 @@
         </update>
     </changeSet>
 
+    <!--https://jira.aplana.com/browse/SBRFNDFL-7175 Реализовать запись в историю изменений ОНФ информацию о замене "состояние ЭД" и прикладывании файла-->
+    <changeSet id="3.6-ytrofimov-3" author="ytrofimov">
+        <sql>
+            insert into event(id, name) values(10002, 'Прикрепление файла ответа от ФНС');
+        </sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-7175 Реализовать запись в историю изменений ОНФ информацию о замене "состояние ЭД" и прикладывании файла-->
+    <changeSet id="3.6-ytrofimov-4" author="ytrofimov" runAlways="true">
+        <update tableName="BLOB_DATA">
+            <column name="data"
+                    valueBlobFile="templates-3.6/refbook/declaration_type.groovy"/>
+            <where>id in (select script_id from ref_book r where r.id = 207)</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>
