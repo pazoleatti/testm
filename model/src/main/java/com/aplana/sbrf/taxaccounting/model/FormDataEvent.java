@@ -81,7 +81,9 @@ public enum FormDataEvent implements Serializable {
 	DELETE_LOCK(960, "Удаление блокировки"),
 
 	CREATE_PERSON(10000, "Создание ФЛ"),
-	UPDATE_PERSON(10001, "Изменение данных ФЛ");
+	UPDATE_PERSON(10001, "Изменение данных ФЛ"),
+
+	ATTACH_RESPONSE_FILE(10002, "Прикрепление файла ответа от ФНС");
 
 	private String title;
 	private int code;

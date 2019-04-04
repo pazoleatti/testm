@@ -16,6 +16,7 @@ import com.aplana.sbrf.taxaccounting.script.service.*
 import com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataService
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService
+import com.aplana.sbrf.taxaccounting.service.LogBusinessService
 import com.aplana.sbrf.taxaccounting.service.impl.TAAbstractScriptingServiceImpl
 import groovy.transform.TypeChecked
 import groovy.transform.TypeCheckingMode
@@ -60,6 +61,7 @@ class DeclarationType extends AbstractScriptClass {
     OutputStream outputStream
     int reportYear
     NdflPersonService ndflPersonService
+    LogBusinessService logBusinessService
     String version
 
     private DeclarationType() {
@@ -119,6 +121,9 @@ class DeclarationType extends AbstractScriptClass {
         }
         if (scriptClass.getBinding().hasVariable("version")) {
             this.version = (String) scriptClass.getProperty("version")
+        }
+        if (scriptClass.getBinding().hasVariable("logBusinessService")) {
+            this.logBusinessService = (LogBusinessService) scriptClass.getProperty("logBusinessService")
         }
     }
 
@@ -833,6 +838,9 @@ class DeclarationType extends AbstractScriptClass {
         }
 
         // Сохранение файла ответа в форме
+
+        logBusinessService.logFormEvent(declarationData.id, FormDataEvent.ATTACH_RESPONSE_FILE, UploadFileName, userInfo ?: declarationService.getSystemUserInfo())
+
         def fileUuid = blobDataServiceDaoImpl.create(dataFile, UploadFileName, new Date())
         def createUser = declarationService.getSystemUserInfo().getUser()
         def fileTypeSaveId = fileTypeProvider.getUniqueRecordIds(new Date(), "CODE = ${AttachFileType.INCOMING_FROM_FNS.code}").get(0)
@@ -891,7 +899,10 @@ class DeclarationType extends AbstractScriptClass {
             if (nextKnd != null) {
                 def docStateProvider = refBookFactory.getDataProvider(RefBook.Id.DOC_STATE.getId())
                 def docStateId = docStateProvider.getUniqueRecordIds(new Date(), "KND = '${nextKnd}'").get(0)
-                declarationService.setDocStateId(declarationData.id, docStateId)
+                if (declarationData.docStateId != docStateId) {
+                    logBusinessService.logFormEvent(declarationData.id, FormDataEvent.CHANGE_STATUS_ED, "Изменено \"Состояние ЭД\"  на основании обработки файла ответа от ФНС", userInfo ?: declarationService.getSystemUserInfo())
+                    declarationService.setDocStateId(declarationData.id, docStateId)
+                }
             }
         }
         declarationService.createPdfReport(logger, declarationData, userInfo)
