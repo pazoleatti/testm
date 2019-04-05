@@ -1,20 +1,22 @@
 package com.aplana.sbrf.taxaccounting.model;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Перечисление типов параметров приложения
  */
+@Getter
+@AllArgsConstructor
 public enum ConfigurationParam {
-    /**
-     * Путь к файлу/каталогу ключей ЭП
-     */
-    KEY_FILE("Путь к файлу/каталогу ключей ЭП (БОК)", ConfigurationParamGroup.COMMON, false, null, 1),
 
     /**
-     * Проверять ЭП
+     * Администрирование - Конфигурационные параметры - Общие параметры
      */
+    KEY_FILE("Путь к файлу/каталогу ключей ЭП (БОК)", ConfigurationParamGroup.COMMON, false, null, 1),
     SIGN_CHECK("Проверять ЭП (1 - проверять, 0 - не проверять)", ConfigurationParamGroup.COMMON, true, false, 0),
     ACCOUNT_PLAN_UPLOAD_DIRECTORY("Путь к каталогу загрузки транспортных файлов, содержащих данные справочника «План счетов»", ConfigurationParamGroup.COMMON, true, true, 1),
     OKATO_UPLOAD_DIRECTORY("Путь к каталогу загрузки транспортных файлов, содержащих данные справочника «ОКАТО»", ConfigurationParamGroup.COMMON, true, true, 1),
@@ -23,16 +25,17 @@ public enum ConfigurationParam {
     FIAS_UPLOAD_DIRECTORY("Путь к каталогу загрузки транспортных файлов, содержащих данные справочника ФИАС", ConfigurationParamGroup.COMMON, true, true, 1),
     REF_BOOK_ARCHIVE_DIRECTORY("Путь к каталогу архива справочников", ConfigurationParamGroup.COMMON, true, true, 2),
     REF_BOOK_ERROR_DIRECTORY("Путь к каталогу ошибок справочников", ConfigurationParamGroup.COMMON, true, true, 2),
-
-    /**
-     * Путь к библиотеке подписи
-     */
     ENCRYPT_DLL("Путь к библиотеке подписи", ConfigurationParamGroup.COMMON, true, true, 1),
-
-    /**
-     * Путь к руководству
-     */
     MANUAL_PATH("Путь к руководству пользователя и настройщика", ConfigurationParamGroup.COMMON, true, true, 1),
+    JNDI_QUEUE_IN("JNDI для получения сообщений в ФП \"НДФЛ\"", ConfigurationParamGroup.COMMON, true, null, 0),
+    JNDI_QUEUE_OUT("JNDI для отправки сообщений в ФП \"Фонды\"", ConfigurationParamGroup.COMMON, true, null, 0),
+    DOCUMENT_EXCHANGE_DIRECTORY("Путь к каталогу обмена с ФП \"Фонды\"", ConfigurationParamGroup.COMMON, true, true, 2),
+    TAX_MESSAGE_RECEIPT_WAITING_TIME("Период ожидания технологической квитанции из ФП \"Фонды\", сек", ConfigurationParamGroup.COMMON, true, null, 0),
+    TAX_MESSAGE_RETRY_COUNT("Максимальное число повторных отправок сообщений в ФП \"Фонды\" при неполучении технологической квитанции", ConfigurationParamGroup.COMMON, true, null, 0),
+    NDFL_SUBSYSTEM_ID("Обозначение системы НДФЛ для внешнего взаимодействия", ConfigurationParamGroup.COMMON, true, null, 0),
+    TARGET_SUBSYSTEM_ID("Система для отправки ОНФ в ФНС", ConfigurationParamGroup.COMMON, true, null, 0),
+    DOCUMENTS_SENDING_ENABLED("Отправлять документы в ФП \"Фонды\" (1 - Отправлять, 0 - Не отправлять)", ConfigurationParamGroup.COMMON, true, null, 0),
+    DOCUMENTS_RECEPTION_ENABLED("Получать документы из ФП \"Фонды\" (1 - Получать, 0 - Не получать)", ConfigurationParamGroup.COMMON, true, null, 0),
 
     /**
      * Загрузка НФ
@@ -42,7 +45,7 @@ public enum ConfigurationParam {
     FORM_ERROR_DIRECTORY("Путь к каталогу ошибок", ConfigurationParamGroup.FORM, true, true, 2),
 
     /**
-     * Общие параметры
+     * Налоги - Общие параметры
      */
     SBERBANK_INN("ИНН ПАО Сбербанк", ConfigurationParamGroup.COMMON_PARAM, true, false, 2),
     NO_CODE("Код НО (пром.)", ConfigurationParamGroup.COMMON_PARAM, true, false, 2),
@@ -68,28 +71,26 @@ public enum ConfigurationParam {
     DECLARATION_ROWS_BULK_EDIT_MAX_COUNT("Максимальное количество строк РНУ для массового изменения", ConfigurationParamGroup.COMMON_PARAM, true, null, 0),
     ASYNC_SERIAL_MODE("Включить возможность последовательного выполнения асинхронных задач", ConfigurationParamGroup.COMMON_PARAM, true, null, 0);
 
-    private String caption;
-    private ConfigurationParamGroup group;
-    private boolean unique;
-    private Boolean folder;
-    private int checkAccess;
-
     /**
-     * Параметр
-     *
-     * @param caption     Имя параметра
-     * @param group       Группа параметра
-     * @param unique      Признак уникальности
-     * @param folder      Признак директории: false - файл, true - каталог, null - нет ограничения
-     * @param checkAccess Признак проверки доступа на: 0 — нет проверки, 1 — чтение, 2 — запись.
+     * Имя параметра
      */
-    ConfigurationParam(String caption, ConfigurationParamGroup group, boolean unique, Boolean folder, int checkAccess) {
-        this.caption = caption;
-        this.group = group;
-        this.unique = unique;
-        this.folder = folder;
-        this.checkAccess = checkAccess;
-    }
+    private String caption;
+    /**
+     * Группа параметра
+     */
+    private ConfigurationParamGroup group;
+    /**
+     * Признак уникальности
+     */
+    private boolean unique;
+    /**
+     * Признак директории: false - файл, true - каталог, null - нет ограничения
+     */
+    private Boolean folder;
+    /**
+     * Признак проверки доступа на: 0 — нет проверки, 1 — чтение, 2 — запись.
+     */
+    private int checkAccess;
 
     /**
      * Находит имя параметра хранящееся в бд по имени, которое видит пользователь
@@ -100,10 +101,7 @@ public enum ConfigurationParam {
                 return configParams.name();
             }
         }
-        if (nameParamsForUser == null) {
-            nameParamsForUser = "";
-        }
-        return nameParamsForUser;
+        return nameParamsForUser != null ? nameParamsForUser : "";
     }
 
     /**
@@ -122,25 +120,8 @@ public enum ConfigurationParam {
         return params;
     }
 
-    /**
-     * Имя параметра
-     */
-    public String getCaption() {
-        return caption;
-    }
-
-    /**
-     * Группа параметра
-     */
-    public ConfigurationParamGroup getGroup() {
-        return group;
-    }
-
-    /**
-     * Признак уникальности
-     */
-    public boolean isUnique() {
-        return unique;
+    public Boolean isFolder() {
+        return folder;
     }
 
     /**
@@ -155,21 +136,5 @@ public enum ConfigurationParam {
      */
     public boolean hasReadCheck() {
         return checkAccess == 1;
-    }
-
-    /**
-     * Признак того, что значеним параметра является путь к какому-либо каталогу
-     */
-    public Boolean isFolder() {
-        return folder;
-    }
-
-    public static ConfigurationParam getValueByCode(String code) {
-        for (ConfigurationParam configurationParam : ConfigurationParam.values()) {
-            if (configurationParam.name().equals(code)) {
-                return configurationParam;
-            }
-        }
-        return null;
     }
 }

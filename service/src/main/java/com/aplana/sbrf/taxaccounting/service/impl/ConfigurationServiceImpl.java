@@ -1,18 +1,10 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.AsyncTaskTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.SubsystemDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookUtils;
-import com.aplana.sbrf.taxaccounting.model.AsyncTaskType;
-import com.aplana.sbrf.taxaccounting.model.AsyncTaskTypeData;
-import com.aplana.sbrf.taxaccounting.model.Configuration;
-import com.aplana.sbrf.taxaccounting.model.ConfigurationParam;
-import com.aplana.sbrf.taxaccounting.model.ConfigurationParamGroup;
-import com.aplana.sbrf.taxaccounting.model.ConfigurationParamModel;
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
@@ -82,10 +74,12 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     private static final String NOT_POSITIVE_INTEGER_ERROR = "Значение параметра \"%s\" должно быть целым числом, большим нуля"; // > 0
     private static final String REPORT_PERIOD_YEAR_MIN_HIGHER_MAX_ERROR = "Минимальное значение отчетного года\" должно быть не больше \"Максимального значения отчетного года";
     private static final String REPORT_PERIOD_YEAR_MAX_LOWER_MIN_ERROR = "Максимальное значение отчетного года\" должно быть не меньше \"Минимального значения отчетного года";
+    private static final String SUBSYSTEM_PARAM_ERROR = "Значение параметра \"%s\" должно содержаться в справочнике \"Подсистемы АС УН\"";
 
 
     @Autowired
     private ConfigurationDao configurationDao;
+
     @Autowired
     private RefBookFactory refBookFactory;
     @Autowired
@@ -94,6 +88,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     private LogEntryService logEntryService;
     @Autowired
     private AsyncTaskTypeDao asyncTaskTypeDao;
+    @Autowired
+    private SubsystemDao subsystemDao;
 
     //Значение конфигурационных параметров по умолчанию
     private List<Configuration> defaultCommonParams() {
@@ -386,7 +382,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     }
 
     /**
-     * Проверка параметра на пренадлежность к {@link ConfigurationParamGroup#COMMON_PARAM}
+     * Проверка параметра на принадлежность к {@link ConfigurationParamGroup#COMMON_PARAM}
      *
      * @param config проверяемый параметр
      * @param logger логгер
@@ -587,8 +583,10 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         } else if (isFolder) {
             param.setValue(param.getValue() + "/");
         }
-        // Проверка значения параметра "Проверять ЭП"
-        if (configParam.equals(ConfigurationParam.SIGN_CHECK)) {
+        // Проверка параметров, принимающих значения 0/1
+        if (configParam.equals(ConfigurationParam.SIGN_CHECK)
+                || configParam.equals(ConfigurationParam.DOCUMENTS_SENDING_ENABLED)
+                || configParam.equals(ConfigurationParam.DOCUMENTS_RECEPTION_ENABLED)) {
             checkDiscreteValue(param.getValue(), logger);
         }
         if (configParam.hasReadCheck() && (isFolder
@@ -608,6 +606,26 @@ public class ConfigurationServiceImpl implements ConfigurationService {
                 logger.info(WRITE_INFO, param.getValue());
             }
         }
+        // Проверка параметра, который должен быть id в справочнике "Подсистемы АС УН"
+        if (configParam.equals(ConfigurationParam.NDFL_SUBSYSTEM_ID) || configParam.equals(ConfigurationParam.TARGET_SUBSYSTEM_ID)) {
+            if (!checkSubsystemIdString(param.getValue())) {
+                logger.error(SUBSYSTEM_PARAM_ERROR, param.getValue());
+            }
+        }
         return logger;
+    }
+
+    /**
+     * Проверка, что строка является id подсистемы "АС УН".
+     */
+    private boolean checkSubsystemIdString(String value) {
+        long longValue;
+        try {
+            longValue = Long.parseLong(value);
+        } catch (NumberFormatException e) {
+            return false;
+        }
+        Subsystem subsystem = subsystemDao.findById(longValue);
+        return subsystem != null;
     }
 }

@@ -99,7 +99,6 @@
                             });
                         }
                     });
-
                 };
 
                 /**
@@ -159,7 +158,6 @@
                             return PermissionChecker.check($scope.commonParamGrid.value[0], APP_CONSTANTS.CONFIGURATION_PERMISSION.REMOVE);
                     }
                 };
-
-
-            }]);
+            }
+        ]);
 }());

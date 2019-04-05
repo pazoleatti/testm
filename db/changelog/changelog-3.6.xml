@@ -17,7 +17,8 @@
     <!--https://jira.aplana.com/browse/SBRFNDFL-7159 Реализовать перенос пустых значений из Реестра ФЛ в Раздел 1 РНУ при обновлении данных ФЛ-->
     <changeSet id="3.6-ytrofimov-1" author="ytrofimov" runAlways="true">
         <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
-            <column name="script" valueClobFile="templates-3.6/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl_update_persons_data.groovy"/>
+            <column name="script"
+                    valueClobFile="templates-3.6/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl_update_persons_data.groovy"/>
             <where>DECLARATION_TEMPLATE_ID = 101 and EVENT_ID = 11</where>
         </update>
     </changeSet>
@@ -25,7 +26,8 @@
     <!--https://jira.aplana.com/browse/SBRFNDFL-7159 Реализовать перенос пустых значений из Реестра ФЛ в Раздел 1 РНУ при обновлении данных ФЛ-->
     <changeSet id="3.6-ytrofimov-2" author="ytrofimov" runAlways="true">
         <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
-            <column name="script" valueClobFile="templates-3.6/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_update_persons_data.groovy"/>
+            <column name="script"
+                    valueClobFile="templates-3.6/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_update_persons_data.groovy"/>
             <where>DECLARATION_TEMPLATE_ID = 100 and EVENT_ID = 11</where>
         </update>
     </changeSet>
@@ -44,6 +46,41 @@
                     valueBlobFile="templates-3.6/refbook/declaration_type.groovy"/>
             <where>id in (select script_id from ref_book r where r.id = 207)</where>
         </update>
+    </changeSet>
+
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-7093 Реализовать добавление новых конфигурационных параметров для взаимодействия с ЭДО -->
+    <!-- Добавляем только параметры, имеющие значения по умолчанию -->
+    <changeSet id="3.6-snazin-1" author="snazin">
+        <insert tableName="CONFIGURATION">
+            <column name="code" value="TAX_MESSAGE_RECEIPT_WAITING_TIME"/>
+            <column name="department_id" value="0"/>
+            <column name="value" value="30"/>
+        </insert>
+        <insert tableName="CONFIGURATION">
+            <column name="code" value="TAX_MESSAGE_RETRY_COUNT"/>
+            <column name="department_id" value="0"/>
+            <column name="value" value="20"/>
+        </insert>
+        <insert tableName="CONFIGURATION">
+            <column name="code" value="DOCUMENTS_SENDING_ENABLED"/>
+            <column name="department_id" value="0"/>
+            <column name="value" value="0"/>
+        </insert>
+        <insert tableName="CONFIGURATION">
+            <column name="code" value="DOCUMENTS_RECEPTION_ENABLED"/>
+            <column name="department_id" value="0"/>
+            <column name="value" value="0"/>
+        </insert>
+    </changeSet>
+
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-7093 Реализовать добавление новых конфигурационных параметров для взаимодействия с ЭДО -->
+    <!-- Добавлено значение по умолчанию для параметра "Обозначение системы НДФЛ для внешнего взаимодействия" -->
+    <changeSet id="3.6-snazin-2" author="snazin">
+        <insert tableName="CONFIGURATION">
+            <column name="code" value="NDFL_SUBSYSTEM_ID"/>
+            <column name="department_id" value="0"/>
+            <column name="value" value="11"/>
+        </insert>
     </changeSet>
 
 </databaseChangeLog>
