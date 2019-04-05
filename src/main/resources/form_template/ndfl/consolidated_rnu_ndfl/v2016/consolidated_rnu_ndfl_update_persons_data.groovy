@@ -100,7 +100,7 @@ class UpdatePersonsData extends AbstractScriptClass {
                 logger.warn("Невозможно обновить запись: ${createPersonInfo(declarationDataPerson)}. Причина: \"Для связанного физического лица в Реестре физических лиц отсутствует актуальная запись о физическом лице\"")
                 continue
             }
-            String personInfo
+            String personInfo = createPersonInfo(declarationDataPerson)
             List<String> updateInfo = []
             boolean updated = false
             if (refBookPerson.inp != declarationDataPerson.inp && declarationTemplate.declarationFormKind == DeclarationFormKind.CONSOLIDATED) {
@@ -219,7 +219,6 @@ class UpdatePersonsData extends AbstractScriptClass {
                 updated = true
             }
             if (updated) {
-                personInfo = createPersonInfo(declarationDataPerson)
                 logs << createLogMessage(personInfo, updateInfo)
                 declarationDataPerson.modifiedDate = new Date()
                 declarationDataPerson.modifiedBy = "${userInfo.getUser().getName()} (${userInfo.getUser().getLogin()})"
