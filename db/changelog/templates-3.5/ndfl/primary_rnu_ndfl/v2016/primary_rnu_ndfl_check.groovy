@@ -738,6 +738,183 @@ class Check extends AbstractScriptClass {
         }
         logForDebug("Общие проверки / '${T_PERSON_NAME}' (" + (System.currentTimeMillis() - time) + " мс)")
 
+        // Общ7 Наличие или отсутствие значения в графе в зависимости от условий
+        List<ColumnFillConditionData> columnFillConditionDataList = []
+        //1 Раздел 2. Графа 4 должна быть заполнена, если заполнена хотя бы одна из граф: "Раздел 2. Графа 10" ИЛИ "Раздел 2. Графа 11"
+        columnFillConditionDataList << new ColumnFillConditionData(
+                new Column10Fill(),
+                new Column4Fill(),
+                String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
+                        C_INCOME_CODE,
+                        C_INCOME_ACCRUED_SUMM
+                )
+        )
+        columnFillConditionDataList << new ColumnFillConditionData(
+                new Column11Fill(),
+                new Column4Fill(),
+                String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
+                        C_INCOME_CODE,
+                        C_INCOME_PAYOUT_SUMM
+                )
+        )
+        //2 Раздел 2. Графа 5 должна быть заполнена, если заполнена хотя бы одна из граф: "Раздел 2. Графа 10" ИЛИ "Раздел 2. Графа 11"
+        columnFillConditionDataList << new ColumnFillConditionData(
+                new Column10Fill(),
+                new Column5Fill(),
+                String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
+                        C_INCOME_TYPE,
+                        C_INCOME_ACCRUED_SUMM
+                )
+        )
+        columnFillConditionDataList << new ColumnFillConditionData(
+                new Column11Fill(),
+                new Column5Fill(),
+                String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
+                        C_INCOME_TYPE,
+                        C_INCOME_PAYOUT_SUMM
+                )
+        )
+        //3 Раздел 2. Графа 6 должна быть заполнена, если заполнена Раздел 2. Графа 10
+        columnFillConditionDataList << new ColumnFillConditionData(
+                new Column10Fill(),
+                new Column6Fill(),
+                String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
+                        C_INCOME_ACCRUED_DATE,
+                        C_INCOME_ACCRUED_SUMM
+                )
+        )
+        //4 Раздел 2. Графа 7 должна быть заполнена, если заполнена Раздел 2. Графа 11
+        columnFillConditionDataList << new ColumnFillConditionData(
+                new Column11Fill(),
+                new Column7Fill(),
+                String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
+                        C_INCOME_PAYOUT_DATE,
+                        C_INCOME_PAYOUT_SUMM
+                )
+        )
+        //5 Раздел 2. Графа 8 Должна быть всегда заполнена
+        columnFillConditionDataList << new ColumnFillConditionData(
+                new ColumnTrueFillOrNotFill(),
+                new Column8Fill(),
+                String.format("Не заполнена гр. \"%s\"",
+                        C_OKTMO
+                )
+        )
+        //6 Раздел 2. Графа 9 Должна быть всегда заполнена
+        columnFillConditionDataList << new ColumnFillConditionData(
+                new ColumnTrueFillOrNotFill(),
+                new Column9Fill(),
+                String.format("Не заполнена гр. \"%s\"",
+                        C_KPP
+                )
+        )
+        //7 Раздел 2. Графа 10 должна быть заполнена, если заполнена Раздел 2. Графа 6
+        columnFillConditionDataList << new ColumnFillConditionData(
+                new Column6Fill(),
+                new Column10Fill(),
+                String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
+                        C_INCOME_ACCRUED_SUMM,
+                        C_INCOME_ACCRUED_DATE
+                )
+        )
+        //8 Раздел 2. Графа 11 должна быть заполнена, если заполнена Раздел 2. Графа 7
+        columnFillConditionDataList << new ColumnFillConditionData(
+                new Column7Fill(),
+                new Column11Fill(),
+                String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
+                        C_INCOME_PAYOUT_SUMM,
+                        C_INCOME_PAYOUT_DATE
+                )
+        )
+        //9 Раздел 2. Графа 13 Должна быть заполнена, если заполнена Раздел 2. Графа 10.
+        columnFillConditionDataList << new ColumnFillConditionData(
+                new Column10Fill(),
+                new Column13Fill(),
+                String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
+                        C_TAX_BASE,
+                        C_INCOME_ACCRUED_SUMM
+                )
+        )
+        //10 Раздел 2. Графы 14 Должна быть заполнена, если заполнена Раздел 2. Графа 10 ИЛИ Раздел 2. Графа 11.
+        columnFillConditionDataList << new ColumnFillConditionData(
+                new Column10Fill(),
+                new Column14Fill(),
+                String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
+                        C_TAX_RATE, C_INCOME_ACCRUED_SUMM
+                )
+        )
+        columnFillConditionDataList << new ColumnFillConditionData(
+                new Column11Fill(),
+                new Column14Fill(),
+                String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
+                        C_TAX_RATE, C_INCOME_PAYOUT_SUMM
+                )
+        )
+        //11 Раздел 2. Графы 15 Должна быть заполнена, если заполнена хотя бы одна из граф: "Раздел 2. Графа 10" ИЛИ "Раздел 2. Графа 11"
+        columnFillConditionDataList << new ColumnFillConditionData(
+                new Column10Fill(),
+                new Column15Fill(),
+                String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
+                        C_TAX_DATE, C_INCOME_ACCRUED_SUMM
+                )
+        )
+        columnFillConditionDataList << new ColumnFillConditionData(
+                new Column11Fill(),
+                new Column15Fill(),
+                String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
+                        C_TAX_DATE, C_INCOME_PAYOUT_SUMM
+                )
+        )
+        //12 Раздел 2. Графа 16 Должна быть заполнена, если заполнена "Раздел 2. Графа 10"
+        columnFillConditionDataList << new ColumnFillConditionData(
+                new Column10Fill(),
+                new Column16Fill(),
+                String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
+                        C_CALCULATED_TAX, C_INCOME_ACCRUED_SUMM
+                )
+        )
+        //13 Раздел 2. Графа 17 Должна быть заполнена, если заполнена "Раздел 2. Графа 11"
+        columnFillConditionDataList << new ColumnFillConditionData(
+                new Column11Fill(),
+                new Column17Fill(),
+                String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
+                        C_WITHHOLDING_TAX, C_INCOME_PAYOUT_SUMM
+                )
+        )
+        //14 Раздел 2. Графа 21 Должна быть заполнена, если выполняется одно из условий:
+        // 1. заполнена "Раздел 2. Графа 7"
+        // 2. одновременно заполнены "Раздел 2. Графа 22" И "Раздел 2. Графа 23" И "Раздел 2. Графа 24"
+        columnFillConditionDataList << new ColumnFillConditionData(
+                new Column7Fill(),
+                new Column21Fill(),
+                String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
+                        C_TAX_TRANSFER_DATE, C_INCOME_PAYOUT_DATE
+                )
+
+        )
+        columnFillConditionDataList << new ColumnFillConditionData(
+                new Column22And23And24Fill(),
+                new Column21Fill(),
+                String.format("Гр. \"%s\" должна быть заполнена, так как заполнены гр. \"%s\", \"%s\", \"%s\"",
+                        C_TAX_TRANSFER_DATE,
+                        C_PAYMENT_DATE,
+                        C_PAYMENT_NUMBER,
+                        C_TAX_SUMM
+                )
+
+        )
+        //15 Должны быть либо заполнены все 3 Графы 22, 23, 24, либо ни одна из них
+        columnFillConditionDataList << new ColumnFillConditionData(
+                new ColumnTrueFillOrNotFill(),
+                new Column22And23And24FillOrColumn22And23And24NotFill(),
+                String.format("Гр. \"%s\", гр. \"%s\", гр. \"%s\" должны быть заполнены одновременно или не заполнена ни одна из них",
+                        C_PAYMENT_DATE,
+                        C_PAYMENT_NUMBER,
+                        C_TAX_SUMM
+                )
+
+        )
+
         time = System.currentTimeMillis()
         for (NdflPersonIncome ndflPersonIncome : ndflPersonIncomeList) {
             if (!ndflPersonIncome.isDummy()) {
@@ -750,208 +927,14 @@ class Check extends AbstractScriptClass {
                 // Общ5 Принадлежность дат операций к отчетному периоду. Проверка перенесана в событие загрузки ТФ
 
                 // Общ7 Наличие или отсутствие значения в графе в зависимости от условий
-                List<ColumnFillConditionData> columnFillConditionDataList = []
-                //1 Раздел 2. Графа 4 должна быть заполнена, если заполнена хотя бы одна из граф: "Раздел 2. Графа 10" ИЛИ "Раздел 2. Графа 11"
-                columnFillConditionDataList << new ColumnFillConditionData(
-                        new Column10Fill(),
-                        new Column4Fill(),
-                        String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
-                        String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
-                                C_INCOME_CODE,
-                                C_INCOME_ACCRUED_SUMM
-                        )
-                )
-                columnFillConditionDataList << new ColumnFillConditionData(
-                        new Column11Fill(),
-                        new Column4Fill(),
-                        String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
-                        String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
-                                C_INCOME_CODE,
-                                C_INCOME_PAYOUT_SUMM
-                        )
-                )
-                //2 Раздел 2. Графа 5 должна быть заполнена, если заполнена хотя бы одна из граф: "Раздел 2. Графа 10" ИЛИ "Раздел 2. Графа 11"
-                columnFillConditionDataList << new ColumnFillConditionData(
-                        new Column10Fill(),
-                        new Column5Fill(),
-                        String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
-                        String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
-                                C_INCOME_TYPE,
-                                C_INCOME_ACCRUED_SUMM
-                        )
-                )
-                columnFillConditionDataList << new ColumnFillConditionData(
-                        new Column11Fill(),
-                        new Column5Fill(),
-                        String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
-                        String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
-                                C_INCOME_TYPE,
-                                C_INCOME_PAYOUT_SUMM
-                        )
-                )
-                //3 Раздел 2. Графа 6 должна быть заполнена, если заполнена Раздел 2. Графа 10
-                columnFillConditionDataList << new ColumnFillConditionData(
-                        new Column10Fill(),
-                        new Column6Fill(),
-                        String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
-                        String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
-                                C_INCOME_ACCRUED_DATE,
-                                C_INCOME_ACCRUED_SUMM
-                        )
-                )
-                //4 Раздел 2. Графа 7 должна быть заполнена, если заполнена Раздел 2. Графа 11
-                columnFillConditionDataList << new ColumnFillConditionData(
-                        new Column11Fill(),
-                        new Column7Fill(),
-                        String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
-                        String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
-                                C_INCOME_PAYOUT_DATE,
-                                C_INCOME_PAYOUT_SUMM
-                        )
-                )
-                //5 Раздел 2. Графа 8 Должна быть всегда заполнена
-                columnFillConditionDataList << new ColumnFillConditionData(
-                        new ColumnTrueFillOrNotFill(),
-                        new Column8Fill(),
-                        String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
-                        String.format("Не заполнена гр. \"%s\"",
-                                C_OKTMO
-                        )
-                )
-                //6 Раздел 2. Графа 9 Должна быть всегда заполнена
-                columnFillConditionDataList << new ColumnFillConditionData(
-                        new ColumnTrueFillOrNotFill(),
-                        new Column9Fill(),
-                        String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
-                        String.format("Не заполнена гр. \"%s\"",
-                                C_KPP
-                        )
-                )
-                //7 Раздел 2. Графа 10 должна быть заполнена, если заполнена Раздел 2. Графа 6
-                columnFillConditionDataList << new ColumnFillConditionData(
-                        new Column6Fill(),
-                        new Column10Fill(),
-                        String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
-                        String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
-                                C_INCOME_ACCRUED_SUMM,
-                                C_INCOME_ACCRUED_DATE
-                        )
-                )
-                //8 Раздел 2. Графа 11 должна быть заполнена, если заполнена Раздел 2. Графа 7
-                columnFillConditionDataList << new ColumnFillConditionData(
-                        new Column7Fill(),
-                        new Column11Fill(),
-                        String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
-                        String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
-                                C_INCOME_PAYOUT_SUMM,
-                                C_INCOME_PAYOUT_DATE
-                        )
-                )
-                //9 Раздел 2. Графа 13 Должна быть заполнена, если заполнена Раздел 2. Графа 10.
-                columnFillConditionDataList << new ColumnFillConditionData(
-                        new Column10Fill(),
-                        new Column13Fill(),
-                        String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
-                        String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
-                                C_TAX_BASE,
-                                C_INCOME_ACCRUED_SUMM
-                        )
-                )
-                //10 Раздел 2. Графы 14 Должна быть заполнена, если заполнена Раздел 2. Графа 10 ИЛИ Раздел 2. Графа 11.
-                columnFillConditionDataList << new ColumnFillConditionData(
-                        new Column10Fill(),
-                        new Column14Fill(),
-                        String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
-                        String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
-                                C_TAX_RATE, C_INCOME_ACCRUED_SUMM
-                        )
-                )
-                columnFillConditionDataList << new ColumnFillConditionData(
-                        new Column11Fill(),
-                        new Column14Fill(),
-                        String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
-                        String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
-                                C_TAX_RATE, C_INCOME_PAYOUT_SUMM
-                        )
-                )
-                //11 Раздел 2. Графы 15 Должна быть заполнена, если заполнена хотя бы одна из граф: "Раздел 2. Графа 10" ИЛИ "Раздел 2. Графа 11"
-                columnFillConditionDataList << new ColumnFillConditionData(
-                        new Column10Fill(),
-                        new Column15Fill(),
-                        String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
-                        String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
-                                C_TAX_DATE, C_INCOME_ACCRUED_SUMM
-                        )
-                )
-                columnFillConditionDataList << new ColumnFillConditionData(
-                        new Column11Fill(),
-                        new Column15Fill(),
-                        String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
-                        String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
-                                C_TAX_DATE, C_INCOME_PAYOUT_SUMM
-                        )
-                )
-                //12 Раздел 2. Графа 16 Должна быть заполнена, если заполнена "Раздел 2. Графа 10"
-                columnFillConditionDataList << new ColumnFillConditionData(
-                        new Column10Fill(),
-                        new Column16Fill(),
-                        String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
-                        String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
-                                C_CALCULATED_TAX, C_INCOME_ACCRUED_SUMM
-                        )
-                )
-                //13 Раздел 2. Графа 17 Должна быть заполнена, если заполнена "Раздел 2. Графа 11"
-                columnFillConditionDataList << new ColumnFillConditionData(
-                        new Column11Fill(),
-                        new Column17Fill(),
-                        String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
-                        String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
-                                C_WITHHOLDING_TAX, C_INCOME_PAYOUT_SUMM
-                        )
-                )
-                //14 Раздел 2. Графа 21 Должна быть заполнена, если выполняется одно из условий:
-                // 1. заполнена "Раздел 2. Графа 7"
-                // 2. одновременно заполнены "Раздел 2. Графа 22" И "Раздел 2. Графа 23" И "Раздел 2. Графа 24"
-                columnFillConditionDataList << new ColumnFillConditionData(
-                        new Column7Fill(),
-                        new Column21Fill(),
-                        String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
-                        String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
-                                C_TAX_TRANSFER_DATE, C_INCOME_PAYOUT_DATE
-                        )
-
-                )
-                columnFillConditionDataList << new ColumnFillConditionData(
-                        new Column22And23And24Fill(),
-                        new Column21Fill(),
-                        String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
-                        String.format("Гр. \"%s\" должна быть заполнена, так как заполнены гр. \"%s\", \"%s\", \"%s\"",
-                                C_TAX_TRANSFER_DATE,
-                                C_PAYMENT_DATE,
-                                C_PAYMENT_NUMBER,
-                                C_TAX_SUMM
-                        )
-
-                )
-                //15 Должны быть либо заполнены все 3 Графы 22, 23, 24, либо ни одна из них
-                columnFillConditionDataList << new ColumnFillConditionData(
-                        new ColumnTrueFillOrNotFill(),
-                        new Column22And23And24FillOrColumn22And23And24NotFill(),
-                        String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
-                        String.format("Гр. \"%s\", гр. \"%s\", гр. \"%s\" должны быть заполнены одновременно или не заполнена ни одна из них",
-                                C_PAYMENT_DATE,
-                                C_PAYMENT_NUMBER,
-                                C_TAX_SUMM
-                        )
-
-                )
                 columnFillConditionDataList.each { columnFillConditionData ->
                     if (columnFillConditionData.columnConditionCheckerAsIs.check(ndflPersonIncome) &&
                             !columnFillConditionData.columnConditionCheckerToBe.check(ndflPersonIncome)) {
+                        String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
                         logger.logCheck("%s. %s.",
                                 declarationService.isCheckFatal(DeclarationCheckCode.RNU_VALUE_CONDITION, declarationData.declarationTemplateId),
                                 "Наличие (отсутствие) значения в графе не соответствует алгоритму заполнения РНУ НДФЛ",
-                                fioAndInpAndOperId, columnFillConditionData.conditionPath, columnFillConditionData.conditionMessage)
+                                fioAndInpAndOperId, pathError, columnFillConditionData.conditionMessage)
                     }
                 }
             }
@@ -1988,13 +1971,11 @@ class Check extends AbstractScriptClass {
     class ColumnFillConditionData {
         ColumnFillConditionChecker columnConditionCheckerAsIs
         ColumnFillConditionChecker columnConditionCheckerToBe
-        String conditionPath
         String conditionMessage
 
-        ColumnFillConditionData(ColumnFillConditionChecker columnConditionCheckerAsIs, ColumnFillConditionChecker columnConditionCheckerToBe, String conditionPath, String conditionMessage) {
+        ColumnFillConditionData(ColumnFillConditionChecker columnConditionCheckerAsIs, ColumnFillConditionChecker columnConditionCheckerToBe, String conditionMessage) {
             this.columnConditionCheckerAsIs = columnConditionCheckerAsIs
             this.columnConditionCheckerToBe = columnConditionCheckerToBe
-            this.conditionPath = conditionPath
             this.conditionMessage = conditionMessage
         }
     }
