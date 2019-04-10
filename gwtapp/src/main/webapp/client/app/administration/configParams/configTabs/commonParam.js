@@ -31,12 +31,14 @@
                         value: [],
                         colNames: [
                             "",
+                            "",
                             $filter('translate')('commonParam.grid.columnName.code'),
                             $filter('translate')('commonParam.grid.columnName.value')
                         ],
                         colModel: [
                             {name: 'departmentId', index: 'departmentId', hidden: true},
-                            {name: 'description', index: 'code', width: 500, key: true},
+                            {name: 'code', index: 'code', hidden: true, key: true},
+                            {name: 'description', index: 'code', width: 500},
                             {name: 'value', index: 'value', width: 700}
                         ],
                         rowNum: APP_CONSTANTS.COMMON.PAGINATION[0],
