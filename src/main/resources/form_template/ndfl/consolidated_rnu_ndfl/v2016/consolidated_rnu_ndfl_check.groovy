@@ -725,7 +725,7 @@ class Check extends AbstractScriptClass {
             checkRequiredAttribute(ndflPerson, fioAndInp, "status", C_STATUS)
 
             if (checkLastName) {
-                List<String> errorMessages = ScriptUtils.checkLastName(ndflPerson.lastName, ndflPerson.citizenship)
+                List<String> errorMessages = ScriptUtils.checkLastName(ndflPerson.lastName, ndflPerson.citizenship ?: "")
                 if (!errorMessages.isEmpty()) {
                     String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                     for (String message : errorMessages) {
@@ -734,7 +734,7 @@ class Check extends AbstractScriptClass {
                 }
             }
             if (checkFirstName) {
-                List<String> errorMessages = ScriptUtils.checkFirstName(ndflPerson.firstName, ndflPerson.citizenship)
+                List<String> errorMessages = ScriptUtils.checkFirstName(ndflPerson.firstName, ndflPerson.citizenship ?: "")
                 if (!errorMessages.isEmpty()) {
                     String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                     for (String message : errorMessages) {
