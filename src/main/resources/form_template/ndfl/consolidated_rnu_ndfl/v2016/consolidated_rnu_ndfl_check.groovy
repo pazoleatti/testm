@@ -32,13 +32,14 @@ import com.aplana.sbrf.taxaccounting.script.service.PersonService
 import com.aplana.sbrf.taxaccounting.script.service.ReportPeriodService
 import com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils
 import com.aplana.sbrf.taxaccounting.utils.SimpleDateUtils
+import groovy.transform.EqualsAndHashCode
+import groovy.transform.TypeChecked
+import groovy.transform.TypeCheckingMode
 import org.apache.commons.lang3.time.DateUtils
-
-import java.util.regex.Matcher
-import java.util.regex.Pattern
 
 new Check(this).run()
 
+@TypeChecked
 class Check extends AbstractScriptClass {
 
     NdflPersonService ndflPersonService
@@ -168,7 +169,16 @@ class Check extends AbstractScriptClass {
     // Сведения о доходах и НДФЛ
     List<NdflPersonIncome> ndflPersonIncomeList
 
-    public Check(scriptClass) {
+    boolean section_2_15_fatal
+    boolean citizenship_fatal
+    boolean valueCondition_fatal
+    boolean section_2_16Fatal
+    boolean section_2_21_fatal
+    boolean section_3_10_fatal
+    boolean section_3_16_fatal
+
+    @TypeChecked(TypeCheckingMode.SKIP)
+    Check(scriptClass) {
         //noinspection GroovyAssignabilityCheck
         super(scriptClass)
         if (scriptClass.getBinding().hasVariable("departmentService")) {
@@ -214,8 +224,8 @@ class Check extends AbstractScriptClass {
                 ScriptUtils.checkInterrupted()
 
                 long time = System.currentTimeMillis()
+                readChecksFatals()
 
-                // ФЛ Map<person_id, RefBook>
                 Map<Long, RegistryPerson> personMap = getActualRefPersonsByDeclarationDataId(declarationData.id)
                 logForDebug(SUCCESS_GET_TABLE, R_PERSON, personMap.size())
 
@@ -274,11 +284,21 @@ class Check extends AbstractScriptClass {
         }
     }
 
+    void readChecksFatals() {
+        section_2_15_fatal = declarationService.isCheckFatal(DeclarationCheckCode.RNU_SECTION_2_15, declarationData.declarationTemplateId)
+        citizenship_fatal = declarationService.isCheckFatal(DeclarationCheckCode.RNU_CITIZENSHIP, declarationData.declarationTemplateId)
+        valueCondition_fatal = declarationService.isCheckFatal(DeclarationCheckCode.RNU_VALUE_CONDITION, declarationData.declarationTemplateId)
+        section_2_16Fatal = declarationService.isCheckFatal(DeclarationCheckCode.RNU_SECTION_2_16, declarationData.declarationTemplateId)
+        section_2_21_fatal = declarationService.isCheckFatal(DeclarationCheckCode.RNU_SECTION_2_21, declarationData.declarationTemplateId)
+        section_3_10_fatal = declarationService.isCheckFatal(DeclarationCheckCode.RNU_SECTION_3_10, declarationData.declarationTemplateId)
+        section_3_16_fatal = declarationService.isCheckFatal(DeclarationCheckCode.RNU_SECTION_3_16, declarationData.declarationTemplateId)
+    }
+
     /**
      * Получить актуальные на отчетную дату записи Реестра физических лиц
      * @return
      */
-    Map<Long, RegistryPerson> getActualRefPersonsByDeclarationDataId(declarationDataId) {
+    Map<Long, RegistryPerson> getActualRefPersonsByDeclarationDataId(long declarationDataId) {
         List<RegistryPerson> persons = personService.findActualRefPersonsByDeclarationDataId(declarationDataId)
         Map<Long, RegistryPerson> result = new HashMap<>()
         for (RegistryPerson person : persons) {
@@ -389,7 +409,7 @@ class Check extends AbstractScriptClass {
                 )
                 String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                 logger.logCheck("%s. %s.",
-                        declarationService.isCheckFatal(DeclarationCheckCode.RNU_CITIZENSHIP, declarationData.declarationTemplateId),
+                        citizenship_fatal,
                         String.format(LOG_TYPE_REFERENCES, R_CITIZENSHIP), fioAndInp, pathError, errMsg)
             }
 
@@ -959,7 +979,7 @@ class Check extends AbstractScriptClass {
                             !columnFillConditionData.columnConditionCheckerToBe.check(ndflPersonIncome)) {
                         String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
                         logger.logCheck("%s. %s.",
-                                declarationService.isCheckFatal(DeclarationCheckCode.RNU_VALUE_CONDITION, declarationData.declarationTemplateId),
+                                valueCondition_fatal,
                                 "Наличие (отсутствие) значения в графе не соответствует алгоритму заполнения РНУ НДФЛ",
                                 fioAndInpAndOperId, pathError, columnFillConditionData.conditionMessage)
                     }
@@ -982,12 +1002,13 @@ class Check extends AbstractScriptClass {
                 }
             }
         }
+        ScriptUtils.checkInterrupted()
+        logForDebug("Общие проверки / " + T_PERSON_INCOME_NAME + " (" + (System.currentTimeMillis() - time) + " мс)")
+
+        time = System.currentTimeMillis()
         // Общ16 Для ФЛ в разделе 2 есть только одна фиктивная строка
         checkDummyIncomes(ndflPersonIncomeList)
-
-        ScriptUtils.checkInterrupted()
-
-        logForDebug("Общие проверки / " + T_PERSON_INCOME_NAME + " (" + (System.currentTimeMillis() - time) + " мс)")
+        logForDebug("Общие проверки / Фиктивные записи (" + (System.currentTimeMillis() - time) + " мс)")
 
         logForDebug("Общие проверки всего (" + (System.currentTimeMillis() - timeTotal) + " мс)")
     }
@@ -1142,8 +1163,8 @@ class Check extends AbstractScriptClass {
             }.values()
             for (List<NdflPersonIncome> allIncomesOfOperation : personOperations) {
                 def operationId = allIncomesOfOperation.first().operationId
-                List<NdflPersonDeduction> allDeductionsOfOperation = deductionsByPersonIdAndOperationId.get(ndflPersonId)?.get(operationId) ?: []
-                List<NdflPersonPrepayment> allPrepaymentsOfOperation = prepaymentsByPersonIdAndOperationId.get(ndflPersonId)?.get(operationId) ?: []
+                List<NdflPersonDeduction> allDeductionsOfOperation = deductionsByPersonIdAndOperationId.get(ndflPersonId)?.get(operationId) ?: new ArrayList<NdflPersonDeduction>()
+                List<NdflPersonPrepayment> allPrepaymentsOfOperation = prepaymentsByPersonIdAndOperationId.get(ndflPersonId)?.get(operationId) ?: new ArrayList<NdflPersonPrepayment>()
                 String fioAndInpAndOperId = sprintf(TEMPLATE_PERSON_FL_OPER, [ndflPersonFL.fio, ndflPersonFL.inp, operationId])
                 String rowNums = allIncomesOfOperation?.rowNum?.sort()?.join(", ") ?: ""
                 // содержат суммы всех строк операции, если ни в одной строке значение не заполнено, то сумма равна null
@@ -1322,7 +1343,6 @@ class Check extends AbstractScriptClass {
                     // СведДох4 НДФЛ.Расчет.Дата (Графа 15)
                     if (!ndflPersonIncome.isDummy() && ndflPersonIncome.taxDate != null) {
                         List<CheckData> logTypeMessagePairList = []
-                        boolean section_2_15_fatal = declarationService.isCheckFatal(DeclarationCheckCode.RNU_SECTION_2_15, declarationData.declarationTemplateId)
                         // П.1
                         if (ndflPersonIncome.calculatedTax >= 0 && ndflPersonIncome.incomeAccruedDate &&
                                 ndflPersonIncome.incomeAccruedDate >= reportPeriod.calendarStartDate &&
@@ -1494,7 +1514,7 @@ class Check extends AbstractScriptClass {
                                     )
                                     String pathError = String.format(SECTION_LINES_MSG, T_PERSON_INCOME, rowNums)
                                     logger.logCheck("%s. %s.",
-                                            declarationService.isCheckFatal(DeclarationCheckCode.RNU_SECTION_2_16, declarationData.declarationTemplateId),
+                                            section_2_16Fatal,
                                             LOG_TYPE_2_16, fioAndInpAndOperId, pathError, errMsg)
                                 }
                             }
@@ -1509,7 +1529,7 @@ class Check extends AbstractScriptClass {
                                     )
                                     String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
                                     logger.logCheck("%s. %s.",
-                                            declarationService.isCheckFatal(DeclarationCheckCode.RNU_SECTION_2_16, declarationData.declarationTemplateId),
+                                            section_2_16Fatal,
                                             LOG_TYPE_2_16, fioAndInpAndOperId, pathError, errMsg)
                                 }
                             } else {
@@ -1589,7 +1609,7 @@ class Check extends AbstractScriptClass {
                                                 ndflPersonIncome.calculatedTax, ВычисленноеЗначениеНалога)
                                         String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
                                         logger.logCheck("%s. %s.",
-                                                declarationService.isCheckFatal(DeclarationCheckCode.RNU_SECTION_2_16, declarationData.declarationTemplateId),
+                                                section_2_16Fatal,
                                                 LOG_TYPE_2_16, fioAndInpAndOperId, pathError, errMsg)
                                     }
                                 }
@@ -1717,7 +1737,7 @@ class Check extends AbstractScriptClass {
                                 if (checkedIncome != null && errMsg != null) {
                                     String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, checkedIncome.rowNum ?: "")
                                     logger.logCheck("%s. %s.",
-                                            declarationService.isCheckFatal(DeclarationCheckCode.RNU_SECTION_2_21, declarationData.declarationTemplateId),
+                                            section_2_21_fatal,
                                             LOG_TYPE_2_21, fioAndInpAndOperId, pathError, errMsg)
                                 }
                             }
@@ -1737,34 +1757,34 @@ class Check extends AbstractScriptClass {
         def totalIncome = new NdflPersonIncome()
         for (def income : incomes) {
             if (income.totalDeductionsSumm != null) {
-                totalIncome.totalDeductionsSumm = (totalIncome.totalDeductionsSumm ?: 0) + income.totalDeductionsSumm
+                totalIncome.totalDeductionsSumm = (totalIncome.totalDeductionsSumm ?: new BigDecimal(0)) + income.totalDeductionsSumm
             }
             if (income.incomePayoutSumm != null) {
-                totalIncome.incomePayoutSumm = (totalIncome.incomePayoutSumm ?: 0) + income.incomePayoutSumm
+                totalIncome.incomePayoutSumm = (totalIncome.incomePayoutSumm ?: new BigDecimal(0)) + income.incomePayoutSumm
             }
             if (income.incomeAccruedSumm != null) {
-                totalIncome.incomeAccruedSumm = (totalIncome.incomeAccruedSumm ?: 0) + income.incomeAccruedSumm
+                totalIncome.incomeAccruedSumm = (totalIncome.incomeAccruedSumm ?: new BigDecimal(0)) + income.incomeAccruedSumm
             }
             if (income.refoundTax != null) {
-                totalIncome.refoundTax = (totalIncome.refoundTax ?: 0) + income.refoundTax
+                totalIncome.refoundTax = (totalIncome.refoundTax ?: 0L) + income.refoundTax
             }
             if (income.calculatedTax != null) {
-                totalIncome.calculatedTax = (totalIncome.calculatedTax ?: 0) + income.calculatedTax
+                totalIncome.calculatedTax = (totalIncome.calculatedTax ?: new BigDecimal(0)) + income.calculatedTax
             }
             if (income.withholdingTax != null) {
-                totalIncome.withholdingTax = (totalIncome.withholdingTax ?: 0) + income.withholdingTax
+                totalIncome.withholdingTax = (totalIncome.withholdingTax ?: new BigDecimal(0)) + income.withholdingTax
             }
             if (income.overholdingTax != null) {
-                totalIncome.overholdingTax = (totalIncome.overholdingTax ?: 0) + income.overholdingTax
+                totalIncome.overholdingTax = (totalIncome.overholdingTax ?: new BigDecimal(0)) + income.overholdingTax
             }
             if (income.notHoldingTax != null) {
-                totalIncome.notHoldingTax = (totalIncome.notHoldingTax ?: 0) + income.notHoldingTax
+                totalIncome.notHoldingTax = (totalIncome.notHoldingTax ?: new BigDecimal(0)) + income.notHoldingTax
             }
             if (income.taxSumm != null) {
-                totalIncome.taxSumm = (totalIncome.taxSumm ?: 0) + income.taxSumm
+                totalIncome.taxSumm = (totalIncome.taxSumm ?: new BigDecimal(0)) + income.taxSumm
             }
             if (income.taxBase != null) {
-                totalIncome.taxBase = (totalIncome.taxBase ?: 0) + income.taxBase
+                totalIncome.taxBase = (totalIncome.taxBase ?: new BigDecimal(0)) + income.taxBase
             }
         }
         return totalIncome
@@ -1777,16 +1797,16 @@ class Check extends AbstractScriptClass {
         def totalDeduction = new NdflPersonDeduction()
         for (def deduction : deductions) {
             if (deduction.incomeSumm != null) {
-                totalDeduction.incomeSumm = (totalDeduction.incomeSumm ?: 0) + deduction.incomeSumm
+                totalDeduction.incomeSumm = (totalDeduction.incomeSumm ?: new BigDecimal(0)) + deduction.incomeSumm
             }
             if (deduction.notifSumm != null) {
-                totalDeduction.notifSumm = (totalDeduction.notifSumm ?: 0) + deduction.notifSumm
+                totalDeduction.notifSumm = (totalDeduction.notifSumm ?: new BigDecimal(0)) + deduction.notifSumm
             }
             if (deduction.periodCurrSumm != null) {
-                totalDeduction.periodCurrSumm = (totalDeduction.periodCurrSumm ?: 0) + deduction.periodCurrSumm
+                totalDeduction.periodCurrSumm = (totalDeduction.periodCurrSumm ?: new BigDecimal(0)) + deduction.periodCurrSumm
             }
             if (deduction.periodPrevSumm != null) {
-                totalDeduction.periodPrevSumm = (totalDeduction.periodPrevSumm ?: 0) + deduction.periodPrevSumm
+                totalDeduction.periodPrevSumm = (totalDeduction.periodPrevSumm ?: new BigDecimal(0)) + deduction.periodPrevSumm
             }
         }
         return totalDeduction
@@ -1815,20 +1835,21 @@ class Check extends AbstractScriptClass {
 
         Map<Long, Map<String, List<NdflPersonIncome>>> incomesByPersonIdAndOperationId =
                 ndflPersonIncomeList.groupBy({ NdflPersonIncome it -> it.ndflPersonId }, { NdflPersonIncome it -> it.operationId })
-        def col16CheckDeductionGroups = ndflPersonDeductionList.findAll {
-            it.notifType == "2"
-        }.groupBy({ it.ndflPersonId }, { it.operationId }, { it.notifDate },
-                { it.notifNum }, { it.notifSource }, { it.notifSumm }
-        )
         def col16CheckDeductionGroups_1 = ndflPersonDeductionList.findAll {
+            it.notifType == "2"
+        }.groupBy {
+            new Col16CheckDeductionGroup_1Key(it.ndflPersonId, it.operationId, it.notifDate, it.notifNum, it.notifSource, it.notifSumm)
+        }
+
+        def col16CheckDeductionGroups_2 = ndflPersonDeductionList.findAll {
             it.notifType == "1"
-        }.groupBy({ it.ndflPersonId }, { it.operationId })
+        }.groupBy { new Col16CheckDeductionGroup_2Key(it.ndflPersonId, it.operationId) }
 
         for (NdflPersonDeduction ndflPersonDeduction : ndflPersonDeductionList) {
             ScriptUtils.checkInterrupted()
 
             def operationId = ndflPersonDeduction.operationId
-            def allIncomesOfOperation = incomesByPersonIdAndOperationId.get(ndflPersonDeduction.ndflPersonId)?.get(operationId) ?: []
+            def allIncomesOfOperation = incomesByPersonIdAndOperationId.get(ndflPersonDeduction.ndflPersonId)?.get(operationId) ?: new ArrayList<NdflPersonIncome>()
 
             NdflPersonFL ndflPersonFL = ndflPersonFLMap.get(ndflPersonDeduction.ndflPersonId)
             String fioAndInpAndOperId = sprintf(TEMPLATE_PERSON_FL_OPER, [ndflPersonFL.fio, ndflPersonFL.inp, operationId])
@@ -1878,7 +1899,7 @@ class Check extends AbstractScriptClass {
                             "\"Дата НДФЛ\": ${formatDate(ndflPersonDeduction.periodCurrDate)}"
                     String pathError = String.format(SECTION_LINE_MSG, T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum ?: "")
                     logger.logCheck("%s. %s.",
-                            declarationService.isCheckFatal(DeclarationCheckCode.RNU_SECTION_3_10, declarationData.declarationTemplateId),
+                            section_3_10_fatal,
                             LOG_TYPE_3_10, fioAndInpAndOperId, pathError, errMsg)
                 }
             }
@@ -1897,17 +1918,16 @@ class Check extends AbstractScriptClass {
                             departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + ", " + departmentReportPeriod.getReportPeriod().getName() + strCorrPeriod)
                     String pathError = String.format(SECTION_LINE_MSG, T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum ?: "")
                     logger.logCheck("%s. %s.",
-                            declarationService.isCheckFatal(DeclarationCheckCode.RNU_SECTION_2_15, declarationData.declarationTemplateId),
+                            section_2_15_fatal,
                             LOG_TYPE_3_15, fioAndInpAndOperId, pathError, errMsg)
                 }
             }
 
             // Выч6 Применение вычета.Текущий период.Сумма (Графы 16)
             if (ndflPersonDeduction.notifType == "2") {
-                List<NdflPersonDeduction> deductionsGroup = col16CheckDeductionGroups?.get(ndflPersonDeduction.ndflPersonId)
-                        ?.get(ndflPersonDeduction.operationId)?.get(ndflPersonDeduction.notifDate)
-                        ?.get(ndflPersonDeduction.notifNum)?.get(ndflPersonDeduction.notifSource)
-                        ?.get(ndflPersonDeduction.notifSumm) ?: []
+                def key = new Col16CheckDeductionGroup_1Key(ndflPersonDeduction.ndflPersonId, ndflPersonDeduction.operationId, ndflPersonDeduction.notifDate,
+                        ndflPersonDeduction.notifNum, ndflPersonDeduction.notifSource, ndflPersonDeduction.notifSumm)
+                List<NdflPersonDeduction> deductionsGroup = col16CheckDeductionGroups_1?.get(key) ?: new ArrayList<NdflPersonDeduction>()
                 if (deductionsGroup) {
                     BigDecimal sum16 = (BigDecimal) deductionsGroup.sum { NdflPersonDeduction deduction -> deduction.periodCurrSumm ?: 0 } ?: 0
                     if (sum16 > ndflPersonDeduction.notifSumm) {
@@ -1919,7 +1939,7 @@ class Check extends AbstractScriptClass {
                                 sum16, ndflPersonDeduction.notifSumm
                         )
                         logger.logCheck(errMsg,
-                                declarationService.isCheckFatal(DeclarationCheckCode.RNU_SECTION_3_16, declarationData.declarationTemplateId),
+                                section_3_16_fatal,
                                 LOG_TYPE_3_16, fioAndInpAndOperId)
                     }
                     deductionsGroup.clear()
@@ -1927,8 +1947,8 @@ class Check extends AbstractScriptClass {
             }
             // Выч6.1
             if (ndflPersonDeduction.notifType == "1") {
-                List<NdflPersonDeduction> deductionsGroup = col16CheckDeductionGroups_1?.get(ndflPersonDeduction.ndflPersonId)
-                        ?.get(ndflPersonDeduction.operationId) ?: []
+                def key = new Col16CheckDeductionGroup_2Key(ndflPersonDeduction.ndflPersonId, ndflPersonDeduction.operationId)
+                List<NdflPersonDeduction> deductionsGroup = col16CheckDeductionGroups_2?.get(key) ?: new ArrayList<NdflPersonDeduction>()
                 if (deductionsGroup) {
                     BigDecimal sum16 = (BigDecimal) deductionsGroup.sum { NdflPersonDeduction deduction -> deduction.periodCurrSumm ?: 0 } ?: 0
                     BigDecimal sum8 = (BigDecimal) deductionsGroup.sum { NdflPersonDeduction deduction -> deduction.notifSumm ?: 0 } ?: 0
@@ -1938,7 +1958,7 @@ class Check extends AbstractScriptClass {
                                 C_PERIOD_CURR_SUMM, sum16, C_NOTIF_SUMM, sum8
                         )
                         logger.logCheck(errMsg,
-                                declarationService.isCheckFatal(DeclarationCheckCode.RNU_SECTION_3_16, declarationData.declarationTemplateId),
+                                section_3_16_fatal,
                                 LOG_TYPE_3_16, fioAndInpAndOperId)
                     }
                     deductionsGroup.clear()
@@ -1960,7 +1980,7 @@ class Check extends AbstractScriptClass {
                 ndflPersonIncomeList.groupBy({ NdflPersonIncome it -> it.ndflPersonId }, { NdflPersonIncome it -> it.operationId })
         for (def prepayment : ndflPersonPrepaymentList) {
             def operationId = prepayment.operationId
-            def allIncomesOfOperation = incomesByPersonIdAndOperationId.get(prepayment.ndflPersonId)?.get(operationId) ?: []
+            def allIncomesOfOperation = incomesByPersonIdAndOperationId.get(prepayment.ndflPersonId)?.get(operationId) ?: new ArrayList<NdflPersonIncome>()
             NdflPersonFL ndflPersonFL = ndflPersonFLMap.get(prepayment.ndflPersonId)
             String fioAndInpAndOperId = sprintf(TEMPLATE_PERSON_FL_OPER, [ndflPersonFL.fio, ndflPersonFL.inp, operationId])
 
@@ -2766,7 +2786,7 @@ class Check extends AbstractScriptClass {
         return true
     }
 
-    int signOf(def number) {
+    int signOf(BigDecimal number) {
         return number > 0 ? 1 : number < 0 ? -1 : 0
     }
 
@@ -2963,5 +2983,35 @@ class Check extends AbstractScriptClass {
                 departmentService.get(departmentId).getName(),
                 reportPeriod.getTaxPeriod().getYear() + ", " + reportPeriod.getName()
         ) as Throwable
+    }
+
+    @EqualsAndHashCode
+    class Col16CheckDeductionGroup_1Key {
+        Long ndflPersonId
+        String operationId
+        Date notifDate
+        String notifNum
+        String notifSource
+        BigDecimal notifSumm
+
+        public Col16CheckDeductionGroup_1Key(Long ndflPersonId, String operationId, Date notifDate, String notifNum, String notifSource, BigDecimal notifSumm) {
+            this.ndflPersonId = ndflPersonId
+            this.operationId = operationId
+            this.notifDate = notifDate
+            this.notifNum = notifNum
+            this.notifSource = notifSource
+            this.notifSumm = notifSumm
+        }
+    }
+
+    @EqualsAndHashCode
+    class Col16CheckDeductionGroup_2Key {
+        long ndflPersonId
+        String operationId
+
+        public Col16CheckDeductionGroup_2Key(long ndflPersonId, String operationId) {
+            this.ndflPersonId = ndflPersonId
+            this.operationId = operationId
+        }
     }
 }
