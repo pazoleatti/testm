@@ -280,8 +280,8 @@ class Calculate extends AbstractScriptClass {
         }
 
         if (pickedRows && declarationData.getKnfType() == RefBookKnfType.BY_NONHOLDING_TAX) {
-            Map<Long, List<ConsolidationIncome>> incomesByPersonId = pickedRows.groupBy { it.ndflPersonId }
-            for (def personIncomes : incomesByPersonId.values()) {
+            Map<String, List<ConsolidationIncome>> incomesByInp = pickedRows.groupBy { it.inp }
+            for (def personIncomes : incomesByInp.values()) {
                 BigDecimal НачисленныйНалогПоОперации = 0
                 BigDecimal УдержанныйНалогПоОперации = 0
                 BigDecimal НеУдержанныйНалогПоОперации = 0
