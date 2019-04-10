@@ -528,4 +528,10 @@
 		</update>
 	</changeSet>
 
+	<changeSet id="3.5-dnovikov-16" author="dnovikov">
+		<sql>
+			alter table REF_BOOK_INCOME_KIND modify name varchar2(255 char);
+		</sql>
+	</changeSet>
+
 </databaseChangeLog>
