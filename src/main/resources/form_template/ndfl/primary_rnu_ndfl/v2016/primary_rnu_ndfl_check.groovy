@@ -385,7 +385,7 @@ class Check extends AbstractScriptClass {
 
         logForDebug("Проверки на соответствие справочникам / Выгрузка справочников (" + (System.currentTimeMillis() - time) + " мс)")
 
-        long timeIsExistsAddress = 0
+        //long timeIsExistsAddress = 0
         time = System.currentTimeMillis()
         //в таком цикле не отображается номер строки при ошибках ndflPersonList.each { ndflPerson ->}
         for (NdflPerson ndflPerson : ndflPersonList) {
@@ -395,14 +395,18 @@ class Check extends AbstractScriptClass {
             NdflPersonFL ndflPersonFL = ndflPersonFLMap.get(ndflPerson.id)
             String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [ndflPersonFL.fio, ndflPersonFL.inp])
 
-            long tIsExistsAddress = System.currentTimeMillis()
+            // Проверка отключена в рамках https://jira.aplana.com/browse/SBRFNDFL-7256
+            /*long tIsExistsAddress = System.currentTimeMillis()
+
+
             if (!isPersonAddressEmpty(ndflPerson)) {
                 String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                 if (ndflPerson.postIndex != null && !ndflPerson.postIndex.matches("[0-9]{6}")) {
                     logFiasIndexError(fioAndInp, pathError, "Индекс", ndflPerson.postIndex)
                 }
             }
-            timeIsExistsAddress += System.currentTimeMillis() - tIsExistsAddress
+
+            timeIsExistsAddress += System.currentTimeMillis() - tIsExistsAddress*/
 
             // Спр2 Гражданство (Обязательное поле)
             if (ndflPerson.citizenship != null && !citizenshipCodeMap.find { key, value -> value == ndflPerson.citizenship }) {
@@ -557,7 +561,7 @@ class Check extends AbstractScriptClass {
         }
         logForDebug("Проверки на соответствие справочникам / " + T_PERSON_NAME + " (" + (System.currentTimeMillis() - time) + " мс)")
 
-        logForDebug("Проверки на соответствие справочникам / Проверка существования адреса (" + timeIsExistsAddress + " мс)")
+        /*logForDebug("Проверки на соответствие справочникам / Проверка существования адреса (" + timeIsExistsAddress + " мс)")*/
 
         time = System.currentTimeMillis()
         for (NdflPersonIncome ndflPersonIncome : ndflPersonIncomeList) {
