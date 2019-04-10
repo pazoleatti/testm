@@ -695,10 +695,6 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
             if (!(canView && hasRoles)) {
                 errMsgs.add("недостаточно прав (обратитесь к администратору)");
             }
-            if (!(targetDomainObject.getState() == State.ACCEPTED)) {
-                errMsgs.add("операция \"" + AsyncTaskType.UPDATE_DOC_STATE.getDescription() + "\" не допустима для форм в состоянии \"" +
-                        targetDomainObject.getState().getTitle() + "\"");
-            }
             if (template.getDeclarationFormKind() == DeclarationFormKind.REPORTS && errMsgs.isEmpty()) {
                 return true;
             } else {
