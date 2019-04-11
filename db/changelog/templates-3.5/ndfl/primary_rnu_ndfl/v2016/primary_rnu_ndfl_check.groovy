@@ -1027,7 +1027,7 @@ class Check extends AbstractScriptClass {
                         "указанных в гр. \"%s\" (\"%s\") и гр. \"%s\" (\"%s\")")
 
         // 4. "Графа 6" = "Графе 7"
-        dateConditionDataList << new DateConditionData(["2013", "2014", "4800"], ["13"], new Column6EqualsColumn7(),
+        dateConditionDataList << new DateConditionData(["2013", "2014", "4800", "2510", "2202", "2740", "2750", "2790", "2520"], ["13"], new Column6EqualsColumn7(),
                 "Значение гр. \"%s\" (\"%s\") должно быть равно значению гр. \"%s\" (\"%s\") для кода дохода и признака дохода, " +
                         "указанных в гр. \"%s\" (\"%s\") и гр. \"%s\" (\"%s\")")
 
@@ -1077,7 +1077,8 @@ class Check extends AbstractScriptClass {
                 new Column21EqualsColumn7Plus1WorkingDay(), null)
 
         // 6 "Графа 21" = "Графа 7" + "1 рабочий день"
-        dateConditionDataListForBudget << new DateConditionData(["2520", "2740", "2750", "2790", "4800", "2013", "2014"], ["13"],
+        dateConditionDataListForBudget << new DateConditionData(["2520", "2740", "2750", "2790", "4800", "2013", "2014",
+                                                                 "2510", "2202", "2740", "2750", "2790", "2520"], ["13"],
                 new Column21EqualsColumn7Plus1WorkingDay(), null)
 
         // 7,8,9 "Графа 21" = "Графа 7" + "1 рабочий день"
@@ -1780,10 +1781,6 @@ class Check extends AbstractScriptClass {
 
     /**
      * Проверки Сведения о вычетах
-     * @param ndflPersonList
-     * @param ndflPersonIncomeList
-     * @param ndflPersonDeductionList
-     * @param personMap
      */
     def checkDataDeduction(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndflPersonIncomeList,
                            List<NdflPersonDeduction> ndflPersonDeductionList, Map<Long, RegistryPerson> personMap) {
