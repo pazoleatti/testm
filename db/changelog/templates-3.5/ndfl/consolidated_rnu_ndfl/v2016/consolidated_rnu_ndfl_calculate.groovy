@@ -594,7 +594,7 @@ class Calculate extends AbstractScriptClass {
         for (def department : tbWithChildren) {
             def departmentPnfs = declarationService.findAllDeclarationData(DeclarationType.NDFL_PRIMARY, department.id, reportPeriod.id)
             for (def departmentPnf : departmentPnfs) {
-                if (!acceptedSources.get(Boolean.TRUE).contains(departmentPnf.id)) {
+                if (!allSourcesIdList.contains(departmentPnf.id)) {
                     allPrimariesExceptAccepted.add(departmentPnf.id)
                 }
             }
