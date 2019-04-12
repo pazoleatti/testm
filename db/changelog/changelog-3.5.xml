@@ -534,4 +534,11 @@
 		</sql>
 	</changeSet>
 
+	<!--https://jira.aplana.com/browse/SBRFNDFL-7269 Изменить размерность поля "Наименование" в Справочнике Виды дохода, добавить новые виды доходов в справочник-->
+	<changeSet id="3.5-ytrofimov-18" author="ytrofimov">
+		<sql>
+			alter table REF_BOOK_INCOME_KIND modify name varchar2(2000 char);
+		</sql>
+	</changeSet>
+
 </databaseChangeLog>
