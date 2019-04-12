@@ -14,14 +14,16 @@ spool &filename
 
 select '"Наименование ТБ";"КПП";"ОКТМО";"Действует с";"Действует по"' from dual;
 
-select '"'||d.name||'";"'||dc.KPP||'";"'||to_char(dc.OKTMO)||'";"'||to_char(dc.VERSION,'dd.mm.yyyy')||'";"'||to_char(dc.VERSION_END,'dd.mm.yyyy')||'"' 
+select '"'||d.name||'";"'||dc.kpp||'";"'||o.code||'";"'||to_char(dc.version,'dd.mm.yyyy')||'";"'||to_char(dc.version_end,'dd.mm.yyyy')||'"' 
 from 
-VW_DEPARTMENT_CONFIG dc,
-department d
+vw_department_config dc,
+department d, 
+ref_book_oktmo o
 where
-d.id = dc.DEPARTMENT_ID
+d.id = dc.department_id and
+o.id = dc.oktmo
 order by
-d.name, OKTMO, KPP, VERSION;
+d.name, o.code, dc.kpp, dc.version;
 
 spool off;
 
