@@ -1944,6 +1944,12 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
      */
     SheetFillerContext createExportDeclarationDataSheetFillerContext() {
         List<NdflPerson> ndflPersonList = ndflPersonService.findNdflPerson(declarationData.id)
+        Collections.sort(ndflPersonList, new Comparator<NdflPerson>() {
+            @Override
+            int compare(NdflPerson o1, NdflPerson o2) {
+                return o1.rowNum <=> o2.rowNum
+            }
+        })
         List<NdflPersonIncome> ndflPersonIncomeList = ndflPersonService.findNdflPersonIncome(declarationData.id)
         List<NdflPersonDeduction> ndflPersonDeductionList = ndflPersonService.findNdflPersonDeduction(declarationData.id)
         List<NdflPersonPrepayment> ndflPersonPrepaymentList = ndflPersonService.findNdflPersonPrepayment(declarationData.id)
