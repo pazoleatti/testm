@@ -3197,19 +3197,10 @@ class ExportDeclarationDataSheetFiller implements SheetFiller {
         CellStyle centeredStyleDate = styler.createVerticalByTopHorizontalByCenterDate()
         CellStyle textCenteredStyle = styler.createBorderStyleCenterAlignedTypeText()
         CellStyle numberCenteredStyle = styler.createBorderStyleCenterAlignedTypeNumber()
+
+        Map<NdflPerson, List<ExcelTemplateRow>> excelData = [:]
         for (NdflPerson np : context.getNdflPersonList()) {
-            ScriptUtils.checkInterrupted()
-            // определяем для физлица какой вид операций имеет наибольшее количество строк (доход, вычет, аванс)
-            int maxOperationSize = [np.incomes.size(), np.deductions.size(), np.prepayments.size()].max()
-            // Определяем сколько строк будет заполнено на листе после окончания заполнения для текущего физлица
-            counter += maxOperationSize
-            // если количество заполненных строк будет больше допустимого, тогда начинаем заполнять следующий лист
-            if (counter > MAX_ROWS) {
-                counter = OFFSET + maxOperationSize
-                pointer = OFFSET
-                sheetIndex++
-                sheet = wb.getSheetAt(sheetIndex - 1)
-            }
+            excelData.put(np,[])
             // Сортировка каждого вида операции по № пп
             Collections.sort(np.incomes, new Comparator<NdflPersonIncome>() {
                 @Override
@@ -3229,8 +3220,119 @@ class ExportDeclarationDataSheetFiller implements SheetFiller {
                     return o1.rowNum <=> o2.rowNum
                 }
             })
-            // Для каждого физлица формируем  количество строк равное максимальному количеству строк из каждого вида операций
-            for (int i = 0; i < maxOperationSize; i++) {
+
+            Map<String, List<NdflPersonIncome>> incomesGroupedByOperationId = [:]
+            for (NdflPersonIncome income : np.incomes) {
+                List<NdflPersonIncome> group = incomesGroupedByOperationId.get(income.operationId)
+                if (!group) {
+                    incomesGroupedByOperationId.put(income.operationId, [income])
+                } else {
+                    group << income
+                }
+            }
+
+            for (List<NdflPersonIncome> entry : incomesGroupedByOperationId.values()) {
+                int rowCounter = 0
+                entry.each {NdflPersonIncome income ->
+                    List<NdflPersonDeduction> matchedDeductions = np.deductions.findAll { NdflPersonDeduction deduction ->
+                        deduction.operationId == income.operationId &&
+                                income.incomeAccruedDate == deduction.incomeAccrued &&
+                                income.incomeCode == deduction.incomeCode &&
+                                income.incomeAccruedSumm == deduction.incomeSumm &&
+                                income.taxDate == deduction.periodCurrDate
+                    }
+                    if (income.totalDeductionsSumm && !matchedDeductions.isEmpty()) {
+                        matchedDeductions.eachWithIndex {NdflPersonDeduction deduction, int index ->
+                            ExcelTemplateRow row = new ExcelTemplateRow()
+                            if (index == 0) {
+                                row.setNdflPersonIncome(income)
+                                row.setNdflPersonDeduction(deduction)
+                                np.deductions.remove(deduction)
+                                Iterator<NdflPersonPrepayment> prepaymentIterator = np.prepayments.iterator()
+                                while(prepaymentIterator.hasNext()) {
+                                    NdflPersonPrepayment prepayment = prepaymentIterator.next()
+                                    if (prepayment.operationId == entry.get(0).operationId) {
+                                        row.setNdflPersonPrepayment(prepayment)
+                                        prepaymentIterator.remove()
+                                        break
+                                    }
+                                }
+                            } else {
+                                row.setNdflPersonDeduction(deduction)
+                                np.deductions.remove(deduction)
+                                Iterator<NdflPersonPrepayment> prepaymentIterator = np.prepayments.iterator()
+                                while(prepaymentIterator.hasNext()) {
+                                    NdflPersonPrepayment prepayment = prepaymentIterator.next()
+                                    if (prepayment.operationId == entry.get(0).operationId) {
+                                        row.setNdflPersonPrepayment(prepayment)
+                                        prepaymentIterator.remove()
+                                        break
+                                    }
+                                }
+                            }
+                            excelData.get(np) << row
+                            rowCounter++
+                        }
+                    } else {
+                        ExcelTemplateRow row = new ExcelTemplateRow()
+                        row.setNdflPersonIncome(income)
+                        Iterator<NdflPersonPrepayment> prepaymentIterator = np.prepayments.iterator()
+                        while(prepaymentIterator.hasNext()) {
+                            NdflPersonPrepayment prepayment = prepaymentIterator.next()
+                            if (prepayment.operationId == entry.get(0).operationId) {
+                                row.setNdflPersonPrepayment(prepayment)
+                                prepaymentIterator.remove()
+                                break
+                            }
+                        }
+                        excelData.get(np) << row
+                        rowCounter++
+                    }
+                }
+                Iterator<NdflPersonDeduction> deductionIterator = np.deductions.iterator()
+                while(deductionIterator.hasNext()) {
+                    NdflPersonDeduction deduction = deductionIterator.next()
+                    if (deduction.operationId == entry.get(0).operationId) {
+                        ExcelTemplateRow row = new ExcelTemplateRow()
+                        row.setNdflPersonDeduction(deduction)
+                        deductionIterator.remove()
+                        Iterator<NdflPersonPrepayment> prepaymentIterator = np.prepayments.iterator()
+                        while(prepaymentIterator.hasNext()) {
+                            NdflPersonPrepayment prepayment = prepaymentIterator.next()
+                            if (prepayment.operationId == entry.get(0).operationId) {
+                                row.setNdflPersonPrepayment(prepayment)
+                                prepaymentIterator.remove()
+                                break
+                            }
+                        }
+                        excelData.get(np) << row
+                        rowCounter++
+                    }
+                }
+                Iterator<NdflPersonPrepayment> prepaymentIterator = np.prepayments.iterator()
+                while(prepaymentIterator.hasNext()) {
+                    NdflPersonPrepayment prepayment = prepaymentIterator.next()
+                    if (prepayment.operationId == entry.get(0).operationId) {
+                        ExcelTemplateRow row = new ExcelTemplateRow()
+                        row.setNdflPersonPrepayment(prepayment)
+                        prepaymentIterator.remove()
+                        excelData.get(np) << row
+                        rowCounter++
+                    }
+                }
+            }
+
+        }
+
+        for (Map.Entry<NdflPerson, List<ExcelTemplateRow>> entry : excelData) {
+            if (counter > MAX_ROWS) {
+                counter = OFFSET + entry.getValue().size()
+                pointer = OFFSET
+                sheetIndex++
+                sheet = wb.getSheetAt(sheetIndex - 1)
+            }
+            NdflPerson np = entry.getKey()
+            for (ExcelTemplateRow rowData : entry.getValue()) {
                 StringBuilder cell0Value = new StringBuilder(np.id.toString())
                 cell0Value.append("_")
                 Row row = sheet.createRow(pointer)
@@ -3240,8 +3342,8 @@ class ExportDeclarationDataSheetFiller implements SheetFiller {
                 Cell cell_1 = row.createCell(1)
                 cell_1.setCellStyle(centeredStyle)
                 cell_1.setCellType(Cell.CELL_TYPE_STRING)
-                if (i < np.incomes.size()) {
-                    cell_1.setCellValue(np.incomes.get(i).rowNum != null ? np.incomes.get(i).rowNum.toString() : "")
+                if (rowData.ndflPersonIncome) {
+                    cell_1.setCellValue(rowData.ndflPersonIncome?.rowNum != null ? rowData.ndflPersonIncome?.rowNum?.toString() : "")
                 }
                 Cell cell_2 = row.createCell(2)
                 cell_2.setCellStyle(centeredStyle)
@@ -3344,14 +3446,15 @@ class ExportDeclarationDataSheetFiller implements SheetFiller {
                 Cell cell_40 = row.createCell(40)
                 cell_40.setCellStyle(numberCenteredStyle)
                 Cell cell_41 = row.createCell(41)
+                cell_41.setCellStyle(centeredStyle)
                 Cell cell_42 = row.createCell(42)
                 cell_42.setCellStyle(centeredStyleDate)
                 Cell cell_43 = row.createCell(43)
                 cell_43.setCellStyle(centeredStyle)
                 Cell cell_44 = row.createCell(44)
                 cell_44.setCellStyle(numberCenteredStyle)
-                if (i < np.incomes.size()) {
-                    NdflPersonIncome npi = np.incomes.get(i)
+                if (rowData.ndflPersonIncome) {
+                    NdflPersonIncome npi = rowData.ndflPersonIncome
                     cell0Value.append(npi.id.toString())
                     cell_23.setCellValue(npi.getOperationId() != null ? npi.getOperationId() : "")
                     cell_24.setCellValue(npi.getIncomeCode() != null ? npi.getIncomeCode() : "")
@@ -3434,8 +3537,8 @@ class ExportDeclarationDataSheetFiller implements SheetFiller {
                 cell_57.setCellStyle(centeredStyleDate)
                 Cell cell_58 = row.createCell(58)
                 cell_58.setCellStyle(numberCenteredStyle)
-                if (i < np.deductions.size()) {
-                    NdflPersonDeduction npd = np.deductions.get(i)
+                if (rowData.ndflPersonDeduction) {
+                    NdflPersonDeduction npd = rowData.ndflPersonDeduction
                     cell0Value.append(npd.id.toString())
                     cell_45.setCellValue(npd.getTypeCode() != null ? npd.getTypeCode() : "")
                     cell_46.setCellValue(npd.getNotifType() != null ? npd.getNotifType() : "")
@@ -3472,8 +3575,8 @@ class ExportDeclarationDataSheetFiller implements SheetFiller {
                 cell_62.setCellStyle(centeredStyleDate)
                 Cell cell_63 = row.createCell(63)
                 cell_63.setCellStyle(centeredStyle)
-                if (i < np.prepayments.size()) {
-                    NdflPersonPrepayment npp = np.prepayments.get(i)
+                if (rowData.ndflPersonPrepayment) {
+                    NdflPersonPrepayment npp = rowData.ndflPersonPrepayment
                     cell0Value.append(npp.id.toString())
                     cell_59.setCellValue(npp.getOperationId() != null ? npp.getOperationId() : "")
                     if (npp.summ != null) {
@@ -3778,4 +3881,14 @@ class Styler {
         boldFont.setBold(true)
         return boldFont
     }
+}
+
+/**
+ * Класс соответсвующий данным одной строки из шаблона выгрузки в Excel
+ */
+class ExcelTemplateRow {
+    NdflPerson ndflPerson
+    NdflPersonIncome ndflPersonIncome
+    NdflPersonDeduction ndflPersonDeduction
+    NdflPersonPrepayment ndflPersonPrepayment
 }
