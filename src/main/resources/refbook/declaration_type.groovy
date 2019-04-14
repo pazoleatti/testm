@@ -635,9 +635,9 @@ class DeclarationType extends AbstractScriptClass {
         return result
     }
 
-/**
- * Загрузка ответов ФНС 2 и 6 НДФЛ
- */
+    /**
+     * Загрузка ответов ФНС 2 и 6 НДФЛ
+     */
     def importNdflResponse() {
         // Прочитать Имя отчетного файла из файла ответа
         Map<Object, Object> ndfl2ContentMap = [:]
@@ -830,7 +830,9 @@ class DeclarationType extends AbstractScriptClass {
         Date fileDate = null
 
         if (isNdfl6Response(UploadFileName)) {
-            fileDate = Date.parse("yyyyMMdd", UploadFileName.substring(56, 64))
+            String[] fileNameParts = UploadFileName.split("_")
+            String date = fileNameParts[fileNameParts.length - 2]
+            fileDate = Date.parse("yyyyMMdd", date)
         } else if (isNdfl2ResponseReestr(UploadFileName)) {
             fileDate = Date.parse("dd.MM.yyyy", ndfl2ContentReestrMap.get(NDFL2_REGISTER_DATE) as String)
         } else if (isNdfl2ResponseProt(UploadFileName)) {
@@ -1129,7 +1131,7 @@ class DeclarationType extends AbstractScriptClass {
             }
 
             // Проверка не загружен ли уже такой файл в систему
-            if (UploadFileName != null && !UploadFileName.isEmpty()) {
+            if (UploadFileName) {
                 DeclarationDataFilter declarationFilter = new DeclarationDataFilter()
 
                 declarationFilter.setFileName(UploadFileName)
