@@ -541,4 +541,14 @@
 		</sql>
 	</changeSet>
 
+    <!--https://jira.aplana.com/browse/SBRFNDFL-7321 - Добавление видов доходов в справочник.-->
+    <changeSet id="3.5-amandzyak-9" author="amandzyak">
+        <sqlFile dbms="oracle"
+                 encoding="utf8"
+                 endDelimiter=""
+                 path="/scripts/update-ref_book_income_kind.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
+
 </databaseChangeLog>
