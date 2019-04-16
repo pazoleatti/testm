@@ -17,8 +17,7 @@
             <!--КПП-->
             <div class="row-fluid form-group">
                 <div class="span4">
-                    <label class="control-label">{{::'title.kpp' |
-                        translate}}:</label>
+                    <label class="control-label">{{::'title.kpp' | translate}}:</label>
                 </div>
                 <div class="span8">
                     <input data-ng-model="searchFilter.params.income.kpp"
@@ -30,8 +29,7 @@
             <!--ОКТМО-->
             <div class="row-fluid form-group">
                 <div class="span4">
-                    <label class="control-label">{{::'title.oktmo' |
-                        translate}}:</label>
+                    <label class="control-label">{{::'title.oktmo' | translate}}:</label>
                 </div>
                 <div class="span8">
                     <input data-ng-model="searchFilter.params.income.oktmo"
@@ -43,8 +41,7 @@
             <!--Процентная ставка-->
             <div class="row-fluid form-group">
                 <div class="span4">
-                    <label class="control-label">{{::'title.taxRate' |
-                        translate}}:</label>
+                    <label class="control-label">{{::'title.taxRate' | translate}}:</label>
                 </div>
                 <div class="span8">
                     <input data-ng-model="searchFilter.params.income.taxRate"
@@ -56,8 +53,7 @@
             <!--Код дохода-->
             <div class="row-fluid form-group">
                 <div class="span4">
-                    <label class="control-label">{{::'title.incomeCode' |
-                        translate}}:</label>
+                    <label class="control-label">{{::'title.incomeCode' | translate}}:</label>
                 </div>
                 <div class="span8">
                     <input data-ng-model="searchFilter.params.income.incomeCode"
@@ -121,15 +117,16 @@
                 <date-from-to-filter
                         data-label-width="4"
                         ng-period-model="searchFilter.params.income"
-                        ng-from-param="paymentOrderDateFrom"
-                        ng-to-param="paymentOrderDateTo"
+                        ng-from-param="paymentDateFrom"
+                        ng-to-param="paymentDateTo"
                         ng-label="title.paymentOrderDateFrom"></date-from-to-filter>
             </div>
             <!--Номер платёжного поручения-->
             <div class="row-fluid form-group">
                 <div class="span4">
-                    <label class="control-label" style="min-width: 113px;">{{::'title.numberPaymentOrder' |
-                        translate}}:</label>
+                    <label class="control-label" style="min-width: 113px;">
+                        {{::'title.numberPaymentOrder' | translate}}:
+                    </label>
                 </div>
                 <div class="span8">
                     <input data-ng-model="searchFilter.params.income.numberPaymentOrder"
@@ -158,8 +155,7 @@
             <!--Номер строки-->
             <div class="row-fluid form-group">
                 <div class="span4">
-                    <label class="control-label">{{::'title.rowNum' |
-                        translate}}:</label>
+                    <label class="control-label">{{::'title.rowNum' | translate}}:</label>
                 </div>
                 <div class="span8">
                     <input data-ng-model="searchFilter.params.income.rowNum" type="text"
@@ -171,8 +167,7 @@
             <!--Идентификатор строки-->
             <div class="row-fluid form-group">
                 <div class="span4">
-                    <label class="control-label">{{::'title.id' |
-                        translate}}:</label>
+                    <label class="control-label">{{::'title.id' | translate}}:</label>
                 </div>
                 <div class="span8">
                     <input data-ng-model="searchFilter.params.income.id" type="text"
@@ -193,8 +188,7 @@
             <!--Обновил-->
             <div class="row-fluid form-group">
                 <div class="span4">
-                    <label class="control-label">{{::'title.modifiedBy' |
-                        translate}}:</label>
+                    <label class="control-label">{{::'title.modifiedBy' | translate}}:</label>
                 </div>
                 <div class="span8">
                     <input data-ng-model="searchFilter.params.income.modifiedBy" type="text"
