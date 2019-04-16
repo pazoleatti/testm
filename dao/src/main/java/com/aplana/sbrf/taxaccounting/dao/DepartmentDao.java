@@ -191,11 +191,6 @@ public interface DepartmentDao extends PermissionDao {
     List<Integer> findAllTBIdsByPerformerId(int performerDepartmentId);
 
     /**
-     * Поиск названия подразделения по паре КПП/ОКТМО с учетом версии настроек подразделения
-     */
-    String getDepartmentNameByPairKppOktmo(String kpp, String oktmo, Date reportPeriodEndDate);
-
-    /**
      * Получение подразделений по их идентификаторам
      *
      * @param ids список идентификаторов

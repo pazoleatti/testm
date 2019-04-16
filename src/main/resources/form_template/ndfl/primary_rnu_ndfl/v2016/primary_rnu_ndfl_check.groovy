@@ -1,14 +1,7 @@
 package form_template.ndfl.primary_rnu_ndfl.v2016
 
 import com.aplana.sbrf.taxaccounting.AbstractScriptClass
-import com.aplana.sbrf.taxaccounting.model.DeclarationCheckCode
-import com.aplana.sbrf.taxaccounting.model.DeclarationData
-import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.FormDataKind
-import com.aplana.sbrf.taxaccounting.model.KppOktmoPair
-import com.aplana.sbrf.taxaccounting.model.PagingResult
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod
+import com.aplana.sbrf.taxaccounting.model.*
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome
@@ -22,14 +15,7 @@ import com.aplana.sbrf.taxaccounting.model.util.Pair
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
 import com.aplana.sbrf.taxaccounting.script.SharedConstants
-import com.aplana.sbrf.taxaccounting.script.service.CalendarService
-import com.aplana.sbrf.taxaccounting.script.service.DeclarationService
-import com.aplana.sbrf.taxaccounting.script.service.DepartmentReportPeriodService
-import com.aplana.sbrf.taxaccounting.script.service.DepartmentService
-import com.aplana.sbrf.taxaccounting.script.service.FiasRefBookService
-import com.aplana.sbrf.taxaccounting.script.service.NdflPersonService
-import com.aplana.sbrf.taxaccounting.script.service.PersonService
-import com.aplana.sbrf.taxaccounting.script.service.ReportPeriodService
+import com.aplana.sbrf.taxaccounting.script.service.*
 import com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils
 import com.aplana.sbrf.taxaccounting.service.refbook.DepartmentConfigService
 import com.aplana.sbrf.taxaccounting.utils.SimpleDateUtils
@@ -745,6 +731,10 @@ class Check extends AbstractScriptClass {
         logForDebug("Общие проверки / '${T_PERSON_NAME}' (" + (System.currentTimeMillis() - time) + " мс)")
 
         time = System.currentTimeMillis()
+        def actualKppOktmoPairs = departmentConfigService.findAllKppOktmoPairs(declarationData.id, null, declarationData.reportPeriodId).toSet()
+        long departmentConfigTime = System.currentTimeMillis() - time
+        time = System.currentTimeMillis()
+
         for (NdflPersonIncome ndflPersonIncome : ndflPersonIncomeList) {
             if (!ndflPersonIncome.isDummy()) {
                 ScriptUtils.checkInterrupted()
@@ -961,8 +951,9 @@ class Check extends AbstractScriptClass {
                     }
                 }
 
+                long departmentConfigTimePart = System.currentTimeMillis()
                 // Общ11 Существование настроек подразделения для КПП-ОКТМО
-                if (ndflPersonIncome.kpp && ndflPersonIncome.oktmo && !existsDepartmentConfig(ndflPersonIncome.kpp, ndflPersonIncome.oktmo)) {
+                if (ndflPersonIncome.kpp && ndflPersonIncome.oktmo && !actualKppOktmoPairs.contains(new KppOktmoPair(ndflPersonIncome.kpp, ndflPersonIncome.oktmo))) {
                     String errMsg = "Ни для одного из ТБ не найдено ни одной настройки подразделения с КПП = \"$ndflPersonIncome.kpp\", ОКТМО= \"$ndflPersonIncome.oktmo\", " +
                             "которая была бы актуальная на настоящий момент, либо актуальна в периоде \"$reportPeriod.taxPeriod.year, $reportPeriod.name\". " +
                             "По этому сочетанию КПП-ОКТМО не будут сформированы отчетные формы для отправки в ФНС"
@@ -970,6 +961,7 @@ class Check extends AbstractScriptClass {
                     logger.warnExp("%s. %s.", "\"КПП\" и \"ОКТМО\" отсутствует в настройках подразделений", fioAndInpAndOperId, pathError,
                             errMsg)
                 }
+                departmentConfigTime += (System.currentTimeMillis() - departmentConfigTimePart)
             }
         }
         // Общ16 Для ФЛ в разделе 2 есть только одна фиктивная строка
@@ -977,6 +969,7 @@ class Check extends AbstractScriptClass {
 
         ScriptUtils.checkInterrupted()
 
+        logForDebug("Общие проверки / Соответствие настройкам подразделений (" + departmentConfigTime + " мс)")
         logForDebug("Общие проверки / " + T_PERSON_INCOME_NAME + " (" + (System.currentTimeMillis() - time) + " мс)")
 
         logForDebug("Общие проверки всего (" + (System.currentTimeMillis() - timeTotal) + " мс)")
@@ -1978,18 +1971,6 @@ class Check extends AbstractScriptClass {
         }
 
         logForDebug("Проверки сведений о доходах в виде авансовых платежей (" + (System.currentTimeMillis() - time) + " мс)")
-    }
-
-    Map<KppOktmoPair, Boolean> existingKppOktmoPairs = [:]
-
-    boolean existsDepartmentConfig(String kpp, String oktmo) {
-        def kppOktmoPair = new KppOktmoPair(kpp, oktmo)
-        Boolean exists = existingKppOktmoPairs.get(kppOktmoPair)
-        if (exists == null) {
-            exists = departmentConfigService.existsByKppAndOkmtoAndPeriodId(kpp, oktmo, reportPeriod.id)
-            existingKppOktmoPairs.put(kppOktmoPair, exists)
-        }
-        return exists
     }
 
     boolean isDummy(List<NdflPersonIncome> incomes) {

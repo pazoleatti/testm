@@ -61,6 +61,18 @@ public class PagingParams implements Serializable {
     }
 
     /**
+     * Возвращает новый экземпляр PagingParams
+     */
+    public static PagingParams getInstance(int page, int count, String property, String direction) {
+        PagingParams toReturn = new PagingParams();
+        toReturn.setPage(page);
+        toReturn.setCount(count);
+        toReturn.setProperty(property);
+        toReturn.setDirection(direction);
+        return toReturn;
+    }
+
+    /**
      * Получить стартовый индекс
      *
      * @return стартовый индекс списка записей (начиная с 0)
@@ -101,42 +113,23 @@ public class PagingParams implements Serializable {
      * @param params параметры запроса
      * @return запрос с пагинацией и сортировкой
      */
-    public String wrapQuery(String query, List<Object> params) {
-        if (isNotBlank(property) && isNotBlank(direction)) {
-            query = query + " order by " + property + " " + direction + ", id";
-        } else {
-            query = query + " order by id";
-        }
-        params.add(getStartIndex());
-        params.add(count);
-        return "select * \n" +
-                "from ( \n" +
-                "   select a.*, rownum rn \n" +
-                "   from ( \n" + query + ") a \n" +
-                ") \n" +
-                "where rn > ? and rownum <= ?";
-    }
-
-    /**
-     * Оборачивает основной запрос в запрос, добавляя пагинацию и сортировку
-     *
-     * @param query  основной запрос без пагинации и сортировки
-     * @param params параметры запроса
-     * @return запрос с пагинацией и сортировкой
-     */
     public String wrapQuery(String query, MapSqlParameterSource params) {
-        if (isNotBlank(property) && isNotBlank(direction)) {
+        if (isNotBlank(property)) {
             query = query + " order by " + property + " " + direction + ", id";
         } else {
             query = query + " order by id";
         }
-        params.addValue("startIndex", getStartIndex());
-        params.addValue("count", count);
-        return "select * \n" +
-                "from ( \n" +
-                "   select a.*, rownum rn \n" +
-                "   from ( \n" + query + ") a \n" +
-                ") \n" +
-                "where rn > :startIndex and rownum <= :count";
+        if (isNoPaging()) {
+            return query;
+        } else {
+            params.addValue("startIndex", getStartIndex());
+            params.addValue("count", count);
+            return "select * \n" +
+                    "from ( \n" +
+                    "   select a.*, rownum rn \n" +
+                    "   from ( \n" + query + ") a \n" +
+                    ") \n" +
+                    "where rn > :startIndex and rownum <= :count";
+        }
     }
 }

@@ -41,7 +41,7 @@ public class ExcelReportDepartmentConfigsAsyncTask extends AbstractAsyncTask {
         int departmentId = (int) params.get("departmentId");
         DepartmentConfigsFilter filter = new DepartmentConfigsFilter();
         filter.setDepartmentId(departmentId);
-        Long value = (long) departmentConfigService.fetchCount(filter);
+        Long value = (long) departmentConfigService.countByFilter(filter);
         if (value == 0) {
             throw new ServiceException("Выполнение операции \"%s\" невозможно, т.к. по заданным параметрам не найдено ни одной записи", taskDescription);
         }

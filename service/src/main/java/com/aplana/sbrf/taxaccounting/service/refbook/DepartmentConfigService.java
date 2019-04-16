@@ -7,20 +7,18 @@ import com.aplana.sbrf.taxaccounting.model.KppSelect;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.ReportFormCreationKppOktmoPair;
-import com.aplana.sbrf.taxaccounting.model.ReportFormCreationKppOktmoPairFilter;
+import com.aplana.sbrf.taxaccounting.model.KppOktmoPairFilter;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.action.DepartmentConfigsFilter;
 import com.aplana.sbrf.taxaccounting.model.action.ImportDepartmentConfigsAction;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.DepartmentConfig;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord;
 import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 import com.aplana.sbrf.taxaccounting.model.result.ImportDepartmentConfigsResult;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.ScriptExposed;
 
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -28,14 +26,14 @@ import java.util.List;
  */
 @ScriptExposed
 public interface DepartmentConfigService {
+
     /**
-     * Возвращяет страницу настроек подразделений для отображения в GUI
+     * Возвращяет настройку подразделений по идентификатору, null если не найдена
      *
-     * @param filter       объект содержащих данные используемые для фильтрации
-     * @param pagingParams параметры пагиинации
-     * @return список объектов содержащих данные о настройках подразделений
+     * @param id идентификатор версии настройки подразделений
+     * @return настройка подразделений
      */
-    PagingResult<DepartmentConfig> fetchAllByFilter(DepartmentConfigsFilter filter, PagingParams pagingParams);
+    DepartmentConfig findById(long id);
 
     /**
      * Возвращяет список настроек подразделений по ид подразделения
@@ -43,11 +41,31 @@ public interface DepartmentConfigService {
      * @param departmentId ид подразделения
      * @return список настроек подразделений
      */
-    List<DepartmentConfig> fetchAllByDepartmentId(int departmentId);
+    List<DepartmentConfig> findAllByDepartmentId(int departmentId);
 
     /**
-     * Возвращяет пары КПП/ОКТМО из формы и связанные с ними настройки подразделений, которые актуальны на текущую дату или пересекаются с периодом формы.
-     * Если для определенной пары КПП/ОКТМО настройки не найдено, то вернет настройку с id=null
+     * Возвращяет пары КПП/ОКТМО формы, для которых существуют настройки подразделений по ТБ.
+     * Настройки берутся только актуальные на текущую дату или которые пересекаются с периодом формы, но не переходят в другой ТБ в старших версиях
+     *
+     * @param declarationId  ид формы
+     * @param departmentId   ид подразделений
+     * @param reportPeriodId ид периода формы
+     * @return пары КПП/ОКТМО
+     */
+    List<KppOktmoPair> findAllKppOktmoPairs(long declarationId, Integer departmentId, int reportPeriodId);
+
+    /**
+     * Возвращяет страницу настроек подразделений для отображения в GUI
+     *
+     * @param filter       объект содержащих данные используемые для фильтрации
+     * @param pagingParams параметры пагиинации
+     * @return список объектов содержащих данные о настройках подразделений
+     */
+    PagingResult<DepartmentConfig> findAllByFilter(DepartmentConfigsFilter filter, PagingParams pagingParams);
+
+    /**
+     * Возвращяет все пары КПП/ОКТМО из формы и настройки подразделений, которые актуальны на текущую дату или пересекаются с периодом формы,
+     * и связывает их по КПП/ОКТМО
      *
      * @param declaration НФ
      * @return список пар КПП/ОКТМО из формы и связанные с ними настройки подразделений
@@ -55,23 +73,13 @@ public interface DepartmentConfigService {
     List<Pair<KppOktmoPair, DepartmentConfig>> findAllByDeclaration(DeclarationData declaration);
 
     /**
-     * Возвращяет настройку подразделений по КПП/ОКТМО и актуальную на дату
-     *
-     * @param kpp       КПП
-     * @param oktmoCode ОКТМО
-     * @param date      дата актуальности
-     * @return найстройка подразделений
-     */
-    DepartmentConfig findByKppAndOktmoAndDate(String kpp, String oktmoCode, Date date);
-
-    /**
      * Возвращяет список настроек подразделений по КПП/ОКТМО
      *
-     * @param kpp       КПП
-     * @param oktmoCode код ОКТМО
+     * @param kpp   КПП
+     * @param oktmo код ОКТМО
      * @return список настроек подразделений
      */
-    List<DepartmentConfig> fetchAllByKppAndOktmo(String kpp, String oktmoCode);
+    List<DepartmentConfig> findAllByKppAndOktmo(String kpp, String oktmo);
 
     /**
      * Возвращяет страницу из значений КПП тербанка по фильтру
@@ -81,7 +89,7 @@ public interface DepartmentConfigService {
      * @param pagingParams данные пагинатора
      * @return страница из значений КПП тербанка
      */
-    PagingResult<KppSelect> findAllKppByDepartmentIdAndKpp(int departmentId, String kpp, PagingParams pagingParams);
+    PagingResult<KppSelect> findAllKppByDepartmentIdAndKppContaining(int departmentId, String kpp, PagingParams pagingParams);
 
     /**
      * Возвращяет пары КПП/ОКТМО для формы создания отчетности
@@ -90,17 +98,7 @@ public interface DepartmentConfigService {
      * @param pagingParams параметры пагинации и сортировки
      * @return страница пар КПП/ОКТМО
      */
-    PagingResult<ReportFormCreationKppOktmoPair> findAllKppOktmoPairsByFilter(ReportFormCreationKppOktmoPairFilter filter, PagingParams pagingParams);
-
-    /**
-     * Возвращяет признак наличия настройки с заданными КПП и ОКТМО, актуальной на текущий момент или пересекающейся с периодов формы
-     *
-     * @param kpp            КПП
-     * @param oktmo          ОКТМО
-     * @param reportPeriodId идентификатор периода формы
-     * @return признак наличия настройки подразделения
-     */
-    boolean existsByKppAndOkmtoAndPeriodId(String kpp, String oktmo, int reportPeriodId);
+    PagingResult<ReportFormCreationKppOktmoPair> findAllKppOktmoPairsByFilter(KppOktmoPairFilter filter, PagingParams pagingParams);
 
     /**
      * Возвращяет кол-во записей настроек подразделений по фильтру
@@ -108,36 +106,61 @@ public interface DepartmentConfigService {
      * @param filter фильтр
      * @return кол-во записей
      */
-    int fetchCount(DepartmentConfigsFilter filter);
+    int countByFilter(DepartmentConfigsFilter filter);
 
     /**
-     * Создаёт запись настройки подразделений, используется в gui, обрабатывает всякие ошибки
+     * Создаёт настройку подразделений
      *
-     * @param departmentConfig данные записи настроек подразделений
+     * @param departmentConfig настройка подразделений
      */
-    ActionResult create(DepartmentConfig departmentConfig, TAUserInfo user);
+    ActionResult createForGui(DepartmentConfig departmentConfig);
 
     /**
-     * Изменяет запись настройки подразделений
+     * Создаёт настройку подразделений
      *
-     * @param departmentConfig данные записи настроек подразделений
+     * @param departmentConfig настройка подразделений
+     * @param logger           логгер
+     * @throws ServiceException если не прошла проверка перечений с существующими настройками той же пары КПП/ОКТМО
      */
-    ActionResult update(DepartmentConfig departmentConfig, TAUserInfo user);
+    void create(DepartmentConfig departmentConfig, Logger logger);
 
     /**
-     * Удаляет запись настройки подразделений
+     * Изменяет настройку подразделений
+     *
+     * @param departmentConfig настройка подразделений
+     */
+    ActionResult updateForGui(DepartmentConfig departmentConfig);
+
+    /**
+     * Изменяет настройку подразделений
+     *
+     * @param departmentConfig настройка подразделений
+     * @param logger           логгер
+     * @throws ServiceException если не прошла проверка перечений с существующими настройками той же пары КПП/ОКТМО
+     */
+    void update(DepartmentConfig departmentConfig, Logger logger);
+
+    /**
+     * Удаляет настройки подразделений по отдельности, пропуская те, на которых произошла ошибка
      *
      * @param ids список id записи настроек подразделений
      */
-    ActionResult delete(List<Long> ids, TAUserInfo user);
+    ActionResult deleteForGui(List<Long> ids);
 
     /**
-     * Удаляет настройки подразделений
+     * Удаляет настройку подразделений
      *
-     * @param departmentConfigs удаляемые настройки подразделений
-     * @param logger            логгер, нужен для универсального провайдера справочников
+     * @param departmentConfig настройка подразделений
+     * @param logger           логгер
      */
-    void delete(List<DepartmentConfig> departmentConfigs, Logger logger);
+    void delete(DepartmentConfig departmentConfig, Logger logger);
+
+    /**
+     * Удаляет настройки указанного подразделения
+     *
+     * @param departmentId ид подразделения
+     */
+    void deleteByDepartmentId(int departmentId);
 
     /**
      * Выполняет проверки возможности сохранения настройки подразделений
@@ -175,12 +198,4 @@ public interface DepartmentConfigService {
      * @param userInfo     пользователь запустивший задачу
      */
     void importExcel(int departmentId, BlobData blobData, TAUserInfo userInfo, Logger logger);
-
-    /**
-     * Преобразует настройку подразделений из модели {@link DepartmentConfig} в модель {@link RefBookRecord}, с которой работаю провайдеры справочников
-     *
-     * @param departmentConfig настройка подразделений
-     * @return настройка подразделений в виде RefBookRecord
-     */
-    RefBookRecord convertToRefBookRecord(DepartmentConfig departmentConfig);
 }

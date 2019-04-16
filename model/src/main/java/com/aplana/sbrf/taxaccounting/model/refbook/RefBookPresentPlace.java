@@ -1,25 +1,19 @@
 package com.aplana.sbrf.taxaccounting.model.refbook;
 
+import lombok.Getter;
+import lombok.Setter;
+
 /**
  * Справочник "Коды места представления расчета"
  */
+@Getter
+@Setter
 public class RefBookPresentPlace extends RefBookSimple<Long> {
     private String code;
     private String name;
 
-    public String getCode() {
-        return code;
-    }
-
-    public void setCode(String code) {
-        this.code = code;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
+    public RefBookPresentPlace id(Long id) {
+        this.id = id;
+        return this;
     }
 }

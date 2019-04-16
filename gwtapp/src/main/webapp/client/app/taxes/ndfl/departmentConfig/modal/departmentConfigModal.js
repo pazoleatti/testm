@@ -27,7 +27,7 @@
                 };
                 // Валидация дат актуальности
                 $scope.isVersionDatesValid = function (dateFrom, dateTo) {
-                    return !dateFrom || !dateTo || toDate(dateFrom) < toDate(dateTo);
+                    return !dateFrom || !dateTo || toDate(dateFrom) <= toDate(dateTo);
                 };
 
                 function toDate(value) {

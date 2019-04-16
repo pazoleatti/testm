@@ -1650,3 +1650,50 @@ comment on column ref_book_person_tb.status is 'Статус записи (0 - �
 comment on column ref_book_person_tb.person_id is 'Ссылка на запись справочника ФЛ';
 comment on column ref_book_person_tb.tb_department_id is 'Ссылка на тербанк';
 comment on column ref_book_person_tb.import_date is 'Дата, показывающая, когда в Систему была загружена из даного ТБ последняя РНУ.';
+
+-----------------------------------------------------
+CREATE TABLE department_config_test (
+  ID                  NUMBER(18) NOT NULL,
+  KPP                 VARCHAR2(9 CHAR) NOT NULL,
+  OKTMO_ID            NUMBER(18,0) NOT NULL,
+  start_date          DATE NOT NULL,
+  end_date            DATE,
+  DEPARTMENT_ID       NUMBER(18) NOT NULL,
+  TAX_ORGAN_CODE      VARCHAR2(4 CHAR) NOT NULL,
+  TAX_ORGAN_CODE_MID  VARCHAR2(4 CHAR),
+  present_place_id    NUMBER(18,0) NOT NULL,
+  NAME                VARCHAR2(1000 CHAR),
+  PHONE               VARCHAR2(20 CHAR),
+  reorganization_id   NUMBER(18,0),
+  REORG_INN           VARCHAR2(12 CHAR),
+  REORG_KPP           VARCHAR2(9 CHAR),
+  SIGNATORY_ID        NUMBER(18,0) NOT NULL,
+  SIGNATORY_SURNAME   VARCHAR2(60 CHAR),
+  SIGNATORY_FIRSTNAME VARCHAR2(60 CHAR),
+  SIGNATORY_LASTNAME  VARCHAR2(60 CHAR),
+  APPROVE_DOC_NAME    VARCHAR2(120 CHAR),
+  APPROVE_ORG_NAME    VARCHAR2(1000 CHAR)
+);
+COMMENT ON TABLE department_config_test IS 'Настройки подразделений';
+COMMENT ON COLUMN department_config_test.ID IS 'Уникальный идентификатор';
+COMMENT ON COLUMN department_config_test.KPP IS 'КПП';
+COMMENT ON COLUMN department_config_test.OKTMO_ID IS 'ОКТМО';
+COMMENT ON COLUMN department_config_test.start_date IS 'Дата начала актуальности';
+COMMENT ON COLUMN department_config_test.end_date IS 'Дата окончания актуальности';
+COMMENT ON COLUMN department_config_test.DEPARTMENT_ID IS 'Код обособленного подразделения';
+COMMENT ON COLUMN department_config_test.TAX_ORGAN_CODE IS 'Код налогового органа конечного';
+COMMENT ON COLUMN department_config_test.TAX_ORGAN_CODE_MID IS 'Код налогового органа промежуточного';
+COMMENT ON COLUMN department_config_test.present_place_id IS 'Место, по которому представляется документ.';
+COMMENT ON COLUMN department_config_test.NAME IS 'Наименование для титульного листа';
+COMMENT ON COLUMN department_config_test.PHONE IS 'Номер контактного телефона';
+COMMENT ON COLUMN department_config_test.reorganization_id IS 'Код формы реорганизации и ликвидации';
+COMMENT ON COLUMN department_config_test.REORG_INN IS 'ИНН реорганизованного обособленного подразделения';
+COMMENT ON COLUMN department_config_test.REORG_KPP IS 'КПП реорганизованного обособленного подразделения';
+COMMENT ON COLUMN department_config_test.SIGNATORY_ID IS 'признак лица, подписавшего документ';
+COMMENT ON COLUMN department_config_test.SIGNATORY_SURNAME IS 'Фамилия подписанта';
+COMMENT ON COLUMN department_config_test.SIGNATORY_FIRSTNAME IS 'Имя подписанта';
+COMMENT ON COLUMN department_config_test.SIGNATORY_LASTNAME IS 'Отчество подписанта';
+COMMENT ON COLUMN department_config_test.APPROVE_DOC_NAME IS 'Наименование документа, подтверждающего полномочия';
+COMMENT ON COLUMN department_config_test.APPROVE_ORG_NAME IS 'Наименование организации-представителя налогоплательщика';
+
+create sequence seq_department_config start with 10000;

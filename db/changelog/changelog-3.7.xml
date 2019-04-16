@@ -71,4 +71,94 @@
 		</update>
 	</changeSet>
 
+	<changeSet id="3.7-dnovikov-7" author="dnovikov">
+		<sql>
+			CREATE TABLE department_config_test (
+				ID                  NUMBER(18) NOT NULL,
+				KPP                 VARCHAR2(9 CHAR) NOT NULL,
+				OKTMO_ID            NUMBER(18,0) NOT NULL,
+				start_date          DATE NOT NULL,
+				end_date          	DATE,
+				DEPARTMENT_ID       NUMBER(18) NOT NULL,
+				TAX_ORGAN_CODE      VARCHAR2(4 CHAR) NOT NULL,
+				TAX_ORGAN_CODE_MID  VARCHAR2(4 CHAR),
+				present_place_id    NUMBER(18,0) NOT NULL,
+				NAME                VARCHAR2(1000 CHAR),
+				PHONE               VARCHAR2(20 CHAR),
+				reorganization_id   NUMBER(18,0),
+				REORG_INN           VARCHAR2(12 CHAR),
+				REORG_KPP           VARCHAR2(9 CHAR),
+				SIGNATORY_ID        NUMBER(18,0) NOT NULL,
+				SIGNATORY_SURNAME   VARCHAR2(60 CHAR),
+				SIGNATORY_FIRSTNAME VARCHAR2(60 CHAR),
+				SIGNATORY_LASTNAME  VARCHAR2(60 CHAR),
+				APPROVE_DOC_NAME    VARCHAR2(120 CHAR),
+				APPROVE_ORG_NAME    VARCHAR2(1000 CHAR)
+			);
+			COMMENT ON TABLE department_config_test IS 'Настройки подразделений';
+			COMMENT ON COLUMN department_config_test.ID IS 'Уникальный идентификатор';
+			COMMENT ON COLUMN department_config_test.KPP IS 'КПП';
+			COMMENT ON COLUMN department_config_test.OKTMO_ID IS 'ОКТМО';
+			COMMENT ON COLUMN department_config_test.start_date IS 'Дата начала действия настройки';
+			COMMENT ON COLUMN department_config_test.end_date IS 'Дата окончания действия настройки';
+			COMMENT ON COLUMN department_config_test.DEPARTMENT_ID IS 'Код обособленного подразделения';
+			COMMENT ON COLUMN department_config_test.TAX_ORGAN_CODE IS 'Код налогового органа конечного';
+			COMMENT ON COLUMN department_config_test.TAX_ORGAN_CODE_MID IS 'Код налогового органа промежуточного';
+			COMMENT ON COLUMN department_config_test.present_place_id IS 'Место, по которому представляется документ.';
+			COMMENT ON COLUMN department_config_test.NAME IS 'Наименование для титульного листа';
+			COMMENT ON COLUMN department_config_test.PHONE IS 'Номер контактного телефона';
+			COMMENT ON COLUMN department_config_test.reorganization_id IS 'Код формы реорганизации и ликвидации';
+			COMMENT ON COLUMN department_config_test.REORG_INN IS 'ИНН реорганизованного обособленного подразделения';
+			COMMENT ON COLUMN department_config_test.REORG_KPP IS 'КПП реорганизованного обособленного подразделения';
+			COMMENT ON COLUMN department_config_test.SIGNATORY_ID IS 'признак лица, подписавшего документ';
+			COMMENT ON COLUMN department_config_test.SIGNATORY_SURNAME IS 'Фамилия подписанта';
+			COMMENT ON COLUMN department_config_test.SIGNATORY_FIRSTNAME IS 'Имя подписанта';
+			COMMENT ON COLUMN department_config_test.SIGNATORY_LASTNAME IS 'Отчество подписанта';
+			COMMENT ON COLUMN department_config_test.APPROVE_DOC_NAME IS 'Наименование документа, подтверждающего полномочия';
+			COMMENT ON COLUMN department_config_test.APPROVE_ORG_NAME IS 'Наименование организации-представителя налогоплательщика';
+
+			alter table department_config_test add constraint dep_conf_pk primary key (id);
+			alter table department_config_test add constraint dep_conf_kpp_oktmo_st_date_uk unique (kpp, oktmo_id, start_date);
+			alter table department_config_test add constraint dep_conf_oktmo_fk FOREIGN KEY (oktmo_id) REFERENCES REF_BOOK_OKTMO (ID);
+			alter table department_config_test add constraint dep_conf_dep_fk FOREIGN KEY (DEPARTMENT_ID) REFERENCES DEPARTMENT (ID);
+			alter table department_config_test add constraint dep_conf_present_place_fk FOREIGN KEY (present_place_id) REFERENCES REF_BOOK_PRESENT_PLACE (ID);
+			alter table department_config_test add constraint dep_conf_reorg_fk FOREIGN KEY (reorganization_id) REFERENCES REF_BOOK_REORGANIZATION (ID);
+			alter table department_config_test add constraint dep_conf_sign_mark_fk FOREIGN KEY (SIGNATORY_ID) REFERENCES REF_BOOK_SIGNATORY_MARK (ID);
+		</sql>
+	</changeSet>
+
+	<changeSet id="3.7-dnovikov-8" author="dnovikov">
+		<sql>
+			insert into department_config_test
+			select id, kpp, oktmo oktmo_id, version start_date, end_date, department_id, TAX_ORGAN_CODE, TAX_ORGAN_CODE_MID, present_place present_place_id, NAME, PHONE,
+			REORG_FORM_CODE reorganization_id, REORG_INN, REORG_KPP, SIGNATORY_ID, SIGNATORY_SURNAME, SIGNATORY_FIRSTNAME, SIGNATORY_LASTNAME, APPROVE_DOC_NAME, APPROVE_ORG_NAME
+			from (
+				select * from (
+					select rbnd.*, lead(version) over(partition by rbnd.record_id order by version) - interval '1' DAY end_date
+					from ref_book_ndfl_detail rbnd
+					where status != -1
+				) where status = 0
+			);
+		</sql>
+	</changeSet>
+
+	<changeSet id="3.7-dnovikov-9" author="dnovikov">
+		<sql splitStatements="false">
+			declare
+				max_id number;
+			begin
+				select max(id) into max_id from department_config_test;
+				execute immediate 'create sequence seq_department_config start with ' || (max_id + 1);
+			end;
+		</sql>
+	</changeSet>
+
+	<changeSet id="3.7-dnovikov-10" author="dnovikov">
+		<sql>
+			create unique index dep_conf_kpp_ok_st_end_uidx on department_config_test(kpp, oktmo_id, start_date, end_date);
+			create index dep_conf_dep_st_end_idx on department_config_test(department_id, start_date, end_date);
+			create index dep_conf_dep_kpp_ok_st_end_idx on department_config_test(department_id, kpp, oktmo_id, start_date, end_date);
+		</sql>
+	</changeSet>
+
 </databaseChangeLog>

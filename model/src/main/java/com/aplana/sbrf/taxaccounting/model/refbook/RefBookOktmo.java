@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.model.refbook;
 
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
@@ -9,7 +8,6 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-@NoArgsConstructor
 public class RefBookOktmo extends RefBookSimple<Long> {
     // Код
     private String code;
@@ -18,7 +16,13 @@ public class RefBookOktmo extends RefBookSimple<Long> {
     // Раздел
     private Integer section;
 
-    public RefBookOktmo(Long id) {
+    public RefBookOktmo id(Long id) {
         this.id = id;
+        return this;
+    }
+
+    public RefBookOktmo code(String code) {
+        this.code = code;
+        return this;
     }
 }

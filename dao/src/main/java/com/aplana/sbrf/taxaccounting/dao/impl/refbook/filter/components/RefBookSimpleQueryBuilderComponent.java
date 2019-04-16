@@ -381,7 +381,7 @@ public class RefBookSimpleQueryBuilderComponent {
     public PreparedStatementData psGetRecordsQuery(RefBook refBook, PreparedStatementData ps, boolean checkVersion, RefBookAttribute sortAttribute, List<String> columns,
                                                    String filter, PagingParams pagingParams, boolean isSortAscending, boolean onlyId, boolean withVersion) {
         ps.appendQuery("SELECT ")
-                .appendQuery(refBook.getId() != RefBook.Id.NDFL_DETAIL.getId() ? "/*+ FIRST_ROWS */" : "")
+                .appendQuery("/*+ FIRST_ROWS */")
                 .appendQuery(" * FROM (");
         if (onlyId) {
             ps.appendQuery("SELECT ")
@@ -416,26 +416,11 @@ public class RefBookSimpleQueryBuilderComponent {
                 ps.appendQuery(attribute.getAlias());
             }
         }
-        if (refBook.getId() == RefBook.Id.NDFL_DETAIL.getId()) {
-            ps.appendQuery(", rownum row_ord");
-        }
         ps.appendQuery(" FROM ");
         if (refBook.isVersioned()) {
             ps.appendQuery(" t, ");
         }
-        if (refBook.getId() == RefBook.Id.NDFL_DETAIL.getId() && pagingParams != null) {
-            ps.appendQuery("(SELECT t.*," +
-                    "lead(t.version) over(partition BY t.record_id order by t.version) - interval '1' DAY version_end\n" +
-                    "FROM ref_book_ndfl_detail t\n" +
-                    "join ref_book_oktmo oktmo on oktmo.id = t.oktmo\n");
-            if (pagingParams.getCount() == -1) { // значит выполняется выгрузка в excel
-                ps.appendQuery("order by t.kpp, oktmo.code)");
-            } else {
-                ps.appendQuery("order by t.kpp, oktmo.code, t.tax_organ_code)");
-            }
-        } else {
-            ps.appendQuery(refBook.getTableName());
-        }
+        ps.appendQuery(refBook.getTableName());
         ps.appendQuery(" frb \n");
         if (refBook.isVersioned() && withVersion) {
             ps.appendQuery("left join nextVersionEnd nve on nve.record_id = frb.record_id \n");
@@ -483,43 +468,20 @@ public class RefBookSimpleQueryBuilderComponent {
             ps.appendQuery("(frb.version = t.version AND frb.record_id = t.record_id AND frb.status = 0)");
         }
 
-        if (refBook.getId() == RefBook.Id.NDFL_DETAIL.getId()) {
-            if (pagingParams != null) {
-                if (sortAttribute == null) {
-                    // Для сортировки по датам версии
-                    ps.appendQuery(" ORDER BY ").appendQuery("rownum".equals(pagingParams.getProperty()) || isEmpty(pagingParams.getProperty()) ? "" : "frb.")
-                            .appendQuery(!isEmpty(pagingParams.getProperty()) ? pagingParams.getProperty() : "rownum")
-                            .appendQuery(" ").appendQuery(pagingParams.getDirection());
-                } else {
-                    String tableAlias = "frb";
-                    if (sortAttribute.getAttributeType() == RefBookAttributeType.REFERENCE) {
-                        sortAttribute = sortAttribute.getRefBookAttribute();
-                        tableAlias = "a_sort";
-                    }
-                    ps.appendQuery(" ORDER BY ")
-                            .appendQuery(tableAlias + "." + sortAttribute.getAlias())
-                            .appendQuery(" " + pagingParams.getDirection());
-                }
-                if (refBook.isVersioned() && !checkVersion) {
-                    ps.appendQuery(" , t.version\n");
-                }
+        if (sortAttribute != null) {
+            String tableAlias = "frb";
+            if (sortAttribute.getAttributeType() == RefBookAttributeType.REFERENCE) {
+                sortAttribute = sortAttribute.getRefBookAttribute();
+                tableAlias = "a_sort";
             }
+            ps.appendQuery(" ORDER BY ")
+                    .appendQuery(tableAlias + "." + sortAttribute.getAlias())
+                    .appendQuery(isSortAscending ? " ASC" : " DESC");
         } else {
-            if (sortAttribute != null) {
-                String tableAlias = "frb";
-                if (sortAttribute.getAttributeType() == RefBookAttributeType.REFERENCE) {
-                    sortAttribute = sortAttribute.getRefBookAttribute();
-                    tableAlias = "a_sort";
-                }
-                ps.appendQuery(" ORDER BY ")
-                        .appendQuery(tableAlias + "." + sortAttribute.getAlias())
-                        .appendQuery(isSortAscending ? " ASC" : " DESC");
-            } else {
-                ps.appendQuery(" ORDER BY frb.id");
-            }
-            if (refBook.isVersioned() && !checkVersion) {
-                ps.appendQuery(" , t.version\n");
-            }
+            ps.appendQuery(" ORDER BY frb.id");
+        }
+        if (refBook.isVersioned() && !checkVersion) {
+            ps.appendQuery(" , t.version\n");
         }
 
         ps.appendQuery(") res) ");

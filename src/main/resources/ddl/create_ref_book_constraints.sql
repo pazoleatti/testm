@@ -19,8 +19,6 @@ alter table ref_book_income_kind add constraint pk_ref_book_income_kind primary 
 alter table ref_book_attach_file_type add constraint pk_ref_book_attach_file_type primary key(id);
 alter table ref_book_tax_inspection add constraint pk_ref_book_tax_inspection primary key(id);
 alter table ref_book_ndfl_rate add constraint pk_ref_book_ndfl_rate primary key(id);
-alter table ref_book_ndfl add constraint pk_ref_book_ndfl primary key(id);
-alter table ref_book_ndfl_detail add constraint pk_ref_book_ndfl_detail primary key(id);
 alter table ref_book_fond add constraint pk_ref_book_fond primary key(id);
 alter table ref_book_fond_detail add constraint pk_ref_book_fond_detail primary key(id);
 alter table ref_book_fill_base add constraint pk_ref_book_fill_base primary key (id);
@@ -42,12 +40,6 @@ alter table ref_book_region add constraint fk_ref_book_region_oktmo foreign key(
 alter table ref_book_person add constraint fk_ref_book_person_source foreign key(source_id) references ref_book_asnu(id);
 alter table ref_book_income_kind add constraint fk_ref_book_inckind_inctype foreign key (income_type_id) references ref_book_income_type(id);
 alter table declaration_data_file add constraint fk_decl_data_file_type_id foreign key (file_type_id) references ref_book_attach_file_type(id);
-alter table ref_book_ndfl add constraint fk_ref_book_ndfl_depart foreign key(department_id) references department(id);
-alter table ref_book_ndfl_detail add constraint fk_ref_book_ndfl_det_pres_pl foreign key(present_place) references ref_book_present_place(id);
-alter table ref_book_ndfl_detail add constraint fk_ref_book_ndfl_det_re_code foreign key(reorg_form_code) references ref_book_reorganization(id);
-alter table ref_book_ndfl_detail add constraint fk_ref_book_ndfl_det_signatory foreign key(signatory_id) references ref_book_signatory_mark(id);
-alter table ref_book_ndfl_detail add constraint fk_ref_book_ndfl_det_depart foreign key (department_id) references department(id);
-alter table ref_book_ndfl_detail add constraint fk_ref_book_ndfl_det_oktmo foreign key (oktmo) references ref_book_oktmo(id);
 alter table ref_book_fond_detail add constraint fk_ref_book_fond_det_parent foreign key(ref_book_fond_id) references ref_book_fond(id) on delete cascade;
 alter table ref_book_fond_detail add constraint fk_ref_book_fond_det_pres_pl foreign key(present_place) references ref_book_present_place(id);
 alter table ref_book_fond_detail add constraint fk_ref_book_fond_det_okved foreign key(okved) references ref_book_okved(id);
@@ -88,8 +80,6 @@ alter table ref_book_present_place add constraint chk_ref_book_pres_place_st che
 alter table ref_book_okved add constraint chk_ref_book_okved_status check (status between -1 and 2);
 alter table ref_book_deduction_mark add constraint chk_ref_book_ded_mark_status check (status between -1 and 2);
 alter table ref_book_reorganization add constraint chk_ref_book_reorg_status check(status between -1 and 2);
-alter table ref_book_ndfl add constraint chk_ref_book_ndfl_status check (status in (-1,0,1,2));
-alter table ref_book_ndfl_detail add constraint chk_ref_book_ndfl_det_status check (status in (-1,0,1,2));
 alter table ref_book_fond add constraint chk_ref_book_fond_status check (status in (-1,0,1,2));
 alter table ref_book_fond_detail add constraint chk_ref_book_fond_det_status check (status in (-1,0,1,2));
 alter table ref_book_country add constraint chk_ref_book_countr_st check (status between -1 and 2);
@@ -100,6 +90,15 @@ alter table ref_book_detach_tax_pay add constraint chk_rbook_detach_tax_pay_st c
 alter table ref_book_make_calc add constraint chk_rbook_make_calc_st check(status between -1 and 2);
 alter table ref_book_calendar add constraint chk_ref_book_cal_work check (ctype in (0,1));
 alter table ref_book_asnu add constraint ref_book_asnu_chk_priority check(priority between 1 and 999);
+
+
+alter table department_config_test add constraint dep_conf_pk primary key (id);
+alter table department_config_test add constraint dep_conf_kpp_oktmo_st_date_uk unique (kpp, oktmo_id, start_date);
+alter table department_config_test add constraint dep_conf_oktmo_fk FOREIGN KEY (oktmo_id) REFERENCES REF_BOOK_OKTMO (ID);
+alter table department_config_test add constraint dep_conf_dep_fk FOREIGN KEY (DEPARTMENT_ID) REFERENCES DEPARTMENT (ID);
+alter table department_config_test add constraint dep_conf_present_place_fk FOREIGN KEY (present_place_id) REFERENCES REF_BOOK_PRESENT_PLACE (ID);
+alter table department_config_test add constraint dep_conf_reorg_fk FOREIGN KEY (reorganization_id) REFERENCES REF_BOOK_REORGANIZATION (ID);
+alter table department_config_test add constraint dep_conf_sign_mark_fk FOREIGN KEY (SIGNATORY_ID) REFERENCES REF_BOOK_SIGNATORY_MARK (ID);
 
 --unique
 --create unique index unq_ref_book_oktmo_code_vers on ref_book_oktmo(code,version);

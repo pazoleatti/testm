@@ -2,22 +2,22 @@ package refbook// department_configs_ref комментарий для лока�
 
 import com.aplana.sbrf.taxaccounting.AbstractScriptClass
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.log.Logger
 import com.aplana.sbrf.taxaccounting.model.refbook.*
-import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
 import com.aplana.sbrf.taxaccounting.script.SharedConstants
+import com.aplana.sbrf.taxaccounting.service.TransactionHelper
+import com.aplana.sbrf.taxaccounting.service.TransactionLogic
 import com.aplana.sbrf.taxaccounting.service.refbook.DepartmentConfigService
 import com.aplana.sbrf.taxaccounting.service.refbook.RefBookDepartmentService
 import com.aplana.sbrf.taxaccounting.service.refbook.RefBookOktmoService
 import groovy.transform.TypeChecked
 import org.apache.commons.lang3.time.FastDateFormat
+import org.codehaus.groovy.ast.stmt.ReturnStatement
 import org.joda.time.LocalDate
 import org.joda.time.format.DateTimeFormat
 
-import static com.aplana.sbrf.taxaccounting.model.refbook.RefBook.Id.NDFL_DETAIL
 import static com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils.checkAndReadFile
 import static com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils.checkInterrupted
 
@@ -35,6 +35,7 @@ class DepartmentConfigScript extends AbstractScriptClass {
     RefBookOktmoService refBookOktmoService
     RefBookFactory refBookFactory
     DepartmentConfigService departmentConfigService
+    TransactionHelper transactionHelper
 
     Integer departmentId
     RefBookDepartment department
@@ -49,6 +50,7 @@ class DepartmentConfigScript extends AbstractScriptClass {
         this.refBookOktmoService = (RefBookOktmoService) getSafeProperty("refBookOktmoService")
         this.refBookFactory = (RefBookFactory) getSafeProperty("refBookFactory")
         this.departmentConfigService = (DepartmentConfigService) getSafeProperty("departmentConfigService")
+        this.transactionHelper = (TransactionHelper) getSafeProperty("transactionHelper")
         this.departmentId = (Integer) getSafeProperty("departmentId")
         this.inputStream = (InputStream) getSafeProperty("inputStream")
         this.fileName = (String) getSafeProperty("fileName")
@@ -106,8 +108,10 @@ class DepartmentConfigScript extends AbstractScriptClass {
             } else if (departmentConfigs.isEmpty()) {
                 logger.warn("Не удалось загрузить ни одной строки")
             } else {
-                List<DepartmentConfig> departmentConfigsBeforeSave = departmentConfigService.fetchAllByDepartmentId(department.id)
-                departmentConfigService.delete(departmentConfigsBeforeSave, logger)
+                List<DepartmentConfig> departmentConfigsBeforeSave = departmentConfigService.findAllByDepartmentId(department.id)
+                executeInNewTransaction {
+                    departmentConfigService.deleteByDepartmentId(department.id)
+                }
 
                 List<DepartmentConfigExt> savedDepartmentConfigs = save(departmentConfigs)
 
@@ -164,52 +168,30 @@ class DepartmentConfigScript extends AbstractScriptClass {
         return departmentConfig
     }
 
-    // Сохраняет настройки подразделений с проверками
+    // Создаёт настройки подразделений поочередно, с проверками на возможность создания.
+    // Те что не удалось создать система просто пропускает
     List<DepartmentConfigExt> save(List<DepartmentConfigExt> departmentConfigs) {
         List<DepartmentConfigExt> savedDepartmentConfigs = []
         for (def departmentConfig : departmentConfigs) {
             checkInterrupted()
-
-            List<DepartmentConfig> relatedDepartmentConfigs = departmentConfigService.fetchAllByKppAndOktmo(departmentConfig.kpp, departmentConfig.oktmo.code)
+            def localLogger = new Logger()
             try {
-                departmentConfigService.checkDepartmentConfig(departmentConfig, relatedDepartmentConfigs)
-            } catch (ServiceException e) {
-                // пропускаем запись и переходим на следующую
+                executeInNewTransaction {
+                    departmentConfigService.create(departmentConfig, localLogger)
+                }
+            } catch (Exception e) {
                 departmentConfig.row.logger.warn("Строка " + departmentConfig.row.num + ". " + e.getMessage())
                 continue
             }
-            if (!relatedDepartmentConfigs.isEmpty()) {
-                // если записи с такой парой КПП/ОКТМО уже есть, то recordId должен быть тот же что у них
-                departmentConfig.setRecordId(relatedDepartmentConfigs.get(0).getRecordId())
+            if (localLogger.containsLevel(LogLevel.ERROR)) {
+                for (def logEntry : localLogger.getEntries()) {
+                    departmentConfig.row.logger.warn("Строка " + departmentConfig.row.num + ". " + logEntry.getMessage())
+                }
+                continue
             }
-            def insertedDepartmentConfig = insertRecord(departmentConfig)
-            if (insertedDepartmentConfig != null) {
-                savedDepartmentConfigs.add(insertedDepartmentConfig)
-            }
+            savedDepartmentConfigs.add(departmentConfig)
         }
         return savedDepartmentConfigs
-    }
-
-    // Сохраняет запись настройки подразделений в бд
-    // через batch не получается из-за дат актуальности
-    DepartmentConfigExt insertRecord(DepartmentConfigExt departmentConfig) {
-        RefBookDataProvider provider = refBookFactory.getDataProvider(NDFL_DETAIL.getId())
-        Logger localLogger = new Logger()
-        RefBookRecord record = departmentConfigService.convertToRefBookRecord(departmentConfig)
-        try {
-            def ids = provider.createRecordVersionWithoutLock(localLogger, departmentConfig.getStartDate(), departmentConfig.getEndDate(), [record])
-            departmentConfig.setId(ids[0])
-        } catch (Exception e) {
-            departmentConfig.row.logger.warn("Строка " + departmentConfig.row.num + ". " + e.getMessage())
-            return null
-        }
-        if (localLogger.containsLevel(LogLevel.ERROR)) {
-            for (def logEntry : localLogger.getEntries()) {
-                departmentConfig.row.logger.warn("Строка " + departmentConfig.row.num + ". " + logEntry.getMessage())
-            }
-            return null
-        }
-        return departmentConfig
     }
 
     void logSaveResult(List<DepartmentConfigExt> savedDepartmentConfigs, List<DepartmentConfig> departmentConfigsBeforeSave) {
@@ -236,6 +218,15 @@ class DepartmentConfigScript extends AbstractScriptClass {
                     "с ${dateFormat.format(deletedDepartmentConfig.startDate)} по " +
                     "${deletedDepartmentConfig.endDate ? dateFormat.format(deletedDepartmentConfig.endDate) : "__"}.")
         }
+    }
+
+    void executeInNewTransaction(Closure closure) {
+        transactionHelper.executeInNewTransaction(new TransactionLogic<Object>() {
+            @Override
+            Object execute() {
+                closure.call()
+            }
+        })
     }
 
     /**************************************
@@ -406,7 +397,7 @@ class DepartmentConfigScript extends AbstractScriptClass {
                     logIncorrectTypeError("Дата")
                 }
             }
-            return null
+            savedDepartmentConfigs.add(departmentConfig)
         }
 
         String getKpp() {

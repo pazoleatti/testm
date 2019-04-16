@@ -58,7 +58,6 @@ create index idx_decl_data_oktmo_kpp on declaration_data(oktmo, kpp);
 create index idx_log_entry_date on log_entry(creation_date);
 create index idx_ref_book_cal_work on ref_book_calendar(ctype);
 --create index i_ref_book_oktmo_code on ref_book_oktmo (code); -- дубль в create_ref_constraints.sql
-create index idx_ref_book_ndfl_detail_load on ref_book_ndfl_detail (ref_book_ndfl_id,tax_organ_code,kpp);
 create index idx_ndfl_references_person on ndfl_references(ndfl_person_id);
 create index idx_rbook_country_svr on ref_book_country(status,version,record_id);
 create index idx_rbook_oktmo_svr on ref_book_oktmo(status,version,record_id);
@@ -77,8 +76,6 @@ create index srch_full_ref_pers_duble on ref_book_person (replace(lower(nvl(last
 create index i_notification_log_id on notification(log_id);
 create index fk_log_entry_log on log_entry(log_id);
 
-create index idx_rb_ndfl_det_ndfl_id on ref_book_ndfl_detail(ref_book_ndfl_id);
-create index idx_refbook_ndfl_depart on ref_book_ndfl(department_id);
 create index idx_decl_templ_form_kind on declaration_template(form_kind);
 
 create index idx_ndfl_person_ded_src on ndfl_person_deduction(source_id);

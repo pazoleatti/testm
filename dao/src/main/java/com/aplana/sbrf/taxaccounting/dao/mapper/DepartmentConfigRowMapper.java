@@ -16,11 +16,10 @@ public class DepartmentConfigRowMapper implements RowMapper<DepartmentConfig> {
     public DepartmentConfig mapRow(ResultSet rs, int rowNum) throws SQLException {
         DepartmentConfig departmentConfig = new DepartmentConfig();
         departmentConfig.setId(rs.getLong("id"));
-        departmentConfig.setRecordId(rs.getLong("record_id"));
         departmentConfig.setKpp(rs.getString("kpp"));
         departmentConfig.setOktmo(mapOktmo(rs));
-        departmentConfig.setStartDate(rs.getDate("version"));
-        departmentConfig.setEndDate(rs.getDate("version_end"));
+        departmentConfig.setStartDate(rs.getDate("start_date"));
+        departmentConfig.setEndDate(rs.getDate("end_date"));
         departmentConfig.setDepartment(mapDepartment(rs));
         departmentConfig.setTaxOrganCode(rs.getString("tax_organ_code"));
         departmentConfig.setPresentPlace(mapPresentPlace(rs));
@@ -49,6 +48,7 @@ public class DepartmentConfigRowMapper implements RowMapper<DepartmentConfig> {
     private RefBookDepartment mapDepartment(ResultSet rs) throws SQLException {
         RefBookDepartment department = new RefBookDepartment();
         department.setId(rs.getInt("department_id"));
+        department.setName(rs.getString("department_name"));
         return department;
     }
 

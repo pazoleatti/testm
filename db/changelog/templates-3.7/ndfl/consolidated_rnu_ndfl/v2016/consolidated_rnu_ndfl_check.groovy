@@ -1,15 +1,7 @@
 package form_template.ndfl.consolidated_rnu_ndfl.v2016
 
 import com.aplana.sbrf.taxaccounting.AbstractScriptClass
-import com.aplana.sbrf.taxaccounting.model.DeclarationCheckCode
-import com.aplana.sbrf.taxaccounting.model.DeclarationData
-import com.aplana.sbrf.taxaccounting.model.Department
-import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.FormDataKind
-import com.aplana.sbrf.taxaccounting.model.KppOktmoPair
-import com.aplana.sbrf.taxaccounting.model.PagingResult
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod
+import com.aplana.sbrf.taxaccounting.model.*
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction
@@ -23,21 +15,11 @@ import com.aplana.sbrf.taxaccounting.model.util.BaseWeightCalculator
 import com.aplana.sbrf.taxaccounting.model.util.Pair
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
-import com.aplana.sbrf.taxaccounting.script.service.CalendarService
-import com.aplana.sbrf.taxaccounting.script.service.DeclarationService
-import com.aplana.sbrf.taxaccounting.script.service.DepartmentReportPeriodService
-import com.aplana.sbrf.taxaccounting.script.service.DepartmentService
-import com.aplana.sbrf.taxaccounting.script.service.FiasRefBookService
-import com.aplana.sbrf.taxaccounting.script.service.NdflPersonService
-import com.aplana.sbrf.taxaccounting.script.service.PersonService
-import com.aplana.sbrf.taxaccounting.script.service.ReportPeriodService
+import com.aplana.sbrf.taxaccounting.script.service.*
 import com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils
 import com.aplana.sbrf.taxaccounting.service.refbook.DepartmentConfigService
 import com.aplana.sbrf.taxaccounting.utils.SimpleDateUtils
 import org.apache.commons.lang3.time.DateUtils
-
-import java.util.regex.Matcher
-import java.util.regex.Pattern
 
 new Check(this).run()
 
@@ -675,8 +657,6 @@ class Check extends AbstractScriptClass {
     def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndflPersonIncomeList) {
         long time = System.currentTimeMillis()
         long timeTotal = time
-        // Параметры подразделения
-        Map<String, List<String>> mapRefBookNdflDetail = getRefBookNdflDetail()
 
         logForDebug("Общие проверки: инициализация (" + (System.currentTimeMillis() - time) + " мс)")
 
@@ -769,6 +749,10 @@ class Check extends AbstractScriptClass {
         }
         logForDebug("Общие проверки / '${T_PERSON_NAME}' (" + (System.currentTimeMillis() - time) + " мс)")
 
+        time = System.currentTimeMillis()
+        def actualKppOktmoPairsByDepartmentId = departmentConfigService.findAllKppOktmoPairs(declarationData.id, declarationData.departmentId, declarationData.reportPeriodId).toSet()
+        def actualKppOktmoPairs = departmentConfigService.findAllKppOktmoPairs(declarationData.id, null, declarationData.reportPeriodId).toSet()
+        long departmentConfigTime = System.currentTimeMillis() - time
         time = System.currentTimeMillis()
         Department department = departmentService.get(declarationData.departmentId)
 
@@ -988,24 +972,22 @@ class Check extends AbstractScriptClass {
                     }
                 }
 
+                long departmentConfigTimePart = System.currentTimeMillis()
                 // Общ10 Соответствие КПП и ОКТМО Тербанку
-                if (ndflPersonIncome.oktmo != null) {
-                    List<String> kppList = mapRefBookNdflDetail.get(ndflPersonIncome.oktmo)
-                    if (kppList == null || !kppList?.contains(ndflPersonIncome.kpp)) {
-                        String errMsg = String.format("Значение гр. \"%s\" (\"%s\"), \"%s\" (\"%s\") отсутствует в справочнике \"%s\" для \"%s\"",
-                                C_KPP, ndflPersonIncome.kpp ?: "",
-                                C_OKTMO, ndflPersonIncome.oktmo ?: "",
-                                R_DETAIL,
-                                department ? department.name : ""
-                        )
-                        String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
-                        logger.warnExp("%s. %s.", "\"КПП\" и \"ОКТМО\" не соответствуют Тербанку", fioAndInpAndOperId, pathError,
-                                errMsg)
-                    }
+                if (ndflPersonIncome.kpp && ndflPersonIncome.oktmo && !actualKppOktmoPairsByDepartmentId.contains(new KppOktmoPair(ndflPersonIncome.kpp, ndflPersonIncome.oktmo))) {
+                    String errMsg = String.format("Значение гр. \"%s\" (\"%s\"), \"%s\" (\"%s\") отсутствует в справочнике \"%s\" для \"%s\"",
+                            C_KPP, ndflPersonIncome.kpp ?: "",
+                            C_OKTMO, ndflPersonIncome.oktmo ?: "",
+                            R_DETAIL,
+                            department ? department.name : ""
+                    )
+                    String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
+                    logger.warnExp("%s. %s.", "\"КПП\" и \"ОКТМО\" не соответствуют Тербанку", fioAndInpAndOperId, pathError,
+                            errMsg)
                 }
 
                 // Общ11 Существование настроек подразделения для КПП-ОКТМО
-                if (ndflPersonIncome.kpp && ndflPersonIncome.oktmo && !existsDepartmentConfig(ndflPersonIncome.kpp, ndflPersonIncome.oktmo)) {
+                if (ndflPersonIncome.kpp && ndflPersonIncome.oktmo && !actualKppOktmoPairs.contains(new KppOktmoPair(ndflPersonIncome.kpp, ndflPersonIncome.oktmo))) {
                     String errMsg = "Ни для одного из ТБ не найдено ни одной настройки подразделения с КПП = \"$ndflPersonIncome.kpp\", ОКТМО= \"$ndflPersonIncome.oktmo\", " +
                             "которая была бы актуальная на настоящий момент, либо актуальна в периоде \"$reportPeriod.taxPeriod.year, $reportPeriod.name\". " +
                             "По этому сочетанию КПП-ОКТМО не будут сформированы отчетные формы для отправки в ФНС"
@@ -1013,6 +995,7 @@ class Check extends AbstractScriptClass {
                     logger.warnExp("%s. %s.", "\"КПП\" и \"ОКТМО\" отсутствует в настройках подразделений", fioAndInpAndOperId, pathError,
                             errMsg)
                 }
+                departmentConfigTime += (System.currentTimeMillis() - departmentConfigTimePart)
             }
         }
         // Общ16 Для ФЛ в разделе 2 есть только одна фиктивная строка
@@ -1020,6 +1003,7 @@ class Check extends AbstractScriptClass {
 
         ScriptUtils.checkInterrupted()
 
+        logForDebug("Общие проверки / Соответствие настройкам подразделений (" + departmentConfigTime + " мс)")
         logForDebug("Общие проверки / " + T_PERSON_INCOME_NAME + " (" + (System.currentTimeMillis() - time) + " мс)")
 
         logForDebug("Общие проверки всего (" + (System.currentTimeMillis() - timeTotal) + " мс)")
@@ -2021,18 +2005,6 @@ class Check extends AbstractScriptClass {
         logForDebug("Проверки сведений о доходах в виде авансовых платежей (" + (System.currentTimeMillis() - time) + " мс)")
     }
 
-    Map<KppOktmoPair, Boolean> existingKppOktmoPairs = [:]
-
-    boolean existsDepartmentConfig(String kpp, String oktmo) {
-        def kppOktmoPair = new KppOktmoPair(kpp, oktmo)
-        Boolean exists = existingKppOktmoPairs.get(kppOktmoPair)
-        if (exists == null) {
-            exists = departmentConfigService.existsByKppAndOkmtoAndPeriodId(kpp, oktmo, reportPeriod.id)
-            existingKppOktmoPairs.put(kppOktmoPair, exists)
-        }
-        return exists
-    }
-
     boolean isDummy(List<NdflPersonIncome> incomes) {
         for (def income : incomes) {
             if (!income.isDummy()) {
@@ -2962,53 +2934,5 @@ class Check extends AbstractScriptClass {
             throw new ScriptException("Ошибка при получении записей справочника " + refBookId)
         }
         return refBookMap
-    }
-    //>------------------< CHECK DATA UTILS >----------------------<
-
-    /**
-     * Получить параметры подразделения
-     */
-    Map<String, List<String>> getRefBookNdflDetail() {
-        Map<String, List<String>> mapNdflDetail = [:]
-        def filter = "DEPARTMENT_ID = " + declarationData.departmentId
-        PagingResult<Map<String, RefBookValue>> departmentParamTableList = getProvider(RefBook.Id.NDFL_DETAIL.id).getRecords(getReportPeriodEndDate(), null, filter, null)
-        if (departmentParamTableList == null || departmentParamTableList.size() == 0 || departmentParamTableList.get(0) == null) {
-            departmentParamException(declarationData.departmentId, declarationData.reportPeriodId)
-        }
-
-        Set<Long> oktmoRefs = []
-        for (Map<String, RefBookValue> departmentParamTable : departmentParamTableList) {
-            oktmoRefs.add(departmentParamTable?.OKTMO?.referenceValue)
-        }
-        Map<Long, Map<String, RefBookValue>> mapOktmo = getRefOktmoByIds(new ArrayList<Long>(oktmoRefs))
-
-        for (Map<String, RefBookValue> departmentParamTable : departmentParamTableList) {
-            String oktmoCode = mapOktmo.get(departmentParamTable?.OKTMO?.referenceValue)?.CODE?.stringValue
-            List<String> kppList = mapNdflDetail.get(oktmoCode)
-            if (kppList == null) {
-                kppList = []
-            }
-
-            if (!kppList.contains(departmentParamTable?.KPP?.stringValue)) {
-                kppList.add(departmentParamTable?.KPP?.stringValue)
-                mapNdflDetail.put(oktmoCode, kppList)
-            }
-        }
-        return mapNdflDetail
-    }
-
-    /**
-     * Получить записи спр. "ОКТМО" по списку идентификаторов
-     */
-    Map<Long, Map<String, RefBookValue>> getRefOktmoByIds(List<Long> ids) {
-        return getProvider(RefBook.Id.OKTMO.id).getRecordData(ids)
-    }
-
-    void departmentParamException(int departmentId, int reportPeriodId) {
-        ReportPeriod reportPeriod = reportPeriodService.get(reportPeriodId)
-        throw new ServiceException("Отсутствуют настройки подразделения \"%s\" периода \"%s\". Необходимо выполнить настройку в разделе меню \"Налоги->НДФЛ->Настройки подразделений\"",
-                departmentService.get(departmentId).getName(),
-                reportPeriod.getTaxPeriod().getYear() + ", " + reportPeriod.getName()
-        ) as Throwable
     }
 }

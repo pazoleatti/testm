@@ -20,7 +20,9 @@
 
         .controller('departmentConfigCtrl', ['$scope', '$filter', '$rootScope', 'APP_CONSTANTS', 'DepartmentConfigResource', '$http', '$aplanaModal', '$dialogs', '$logPanel', 'PermissionChecker', 'Upload',
             function ($scope, $filter, $rootScope, APP_CONSTANTS, DepartmentConfigResource, $http, $aplanaModal, $dialogs, $logPanel, PermissionChecker, Upload) {
-                var defaultDepartment = undefined;
+
+                var defaultDepartment;
+
                 $scope.searchFilter = {
                     params: getDefaultFilterParams(),
                     ajaxFilter: [],
@@ -34,7 +36,7 @@
                         relevance: APP_CONSTANTS.DEPARTMENT_CONFIG_RELEVANCE_SELECT.DATE,
                         relevanceDate: new Date().format("yyyy-mm-dd"),
                         kpp: null, oktmo: null, taxOrganCode: null
-                    }
+                    };
                 }
 
                 function isFilterParamsEquals(params1, params2) {
@@ -117,31 +119,31 @@
                         ],
                         colModel: [
                             {name: 'id', index: 'id', hidden: true, key: true},
-                            {name: 'rowOrd', index: 'rownum', width: 55},
+                            {name: 'rowOrd', index: 'row_ord', width: 55},
                             {
                                 name: 'startDate',
-                                index: 'version',
+                                index: 'start_date',
                                 width: 100,
                                 formatter: $filter('dateFormatter')
                             },
                             {
                                 name: 'endDate',
-                                index: 'version_end',
+                                index: 'end_date',
                                 width: 120,
                                 formatter: $filter('dateFormatter')
                             },
-                            {name: 'department.name', index: 'department_id', width: 170},
+                            {name: 'department.name', index: 'department_name', width: 170},
                             {name: 'kpp', index: 'kpp', width: 75},
                             {
                                 name: 'oktmo',
-                                index: 'oktmo',
+                                index: 'oktmo_code',
                                 width: 250,
                                 formatter: $filter('codeNameFormatter')
                             },
                             {name: 'taxOrganCode', index: 'tax_organ_code', width: 85},
                             {
                                 name: 'presentPlace',
-                                index: 'present_Place',
+                                index: 'present_place_code',
                                 width: 210,
                                 formatter: $filter('codeNameFormatter')
                             },
@@ -149,30 +151,31 @@
                             {name: 'phone', index: 'phone', width: 120},
                             {
                                 name: 'signatoryMark',
-                                index: 'signatory_id',
+                                index: 'signatory_code',
                                 width: 210,
                                 formatter: $filter('codeNameFormatter')
                             },
-                            {name: 'signatorySurName', index: 'signatory_surName', width: 110},
-                            {name: 'signatoryFirstName', index: 'signatory_firstName', width: 110},
-                            {name: 'signatoryLastName', index: 'signatory_lastName', width: 130},
+                            {name: 'signatorySurName', index: 'signatory_surname', width: 110},
+                            {name: 'signatoryFirstName', index: 'signatory_firstname', width: 110},
+                            {name: 'signatoryLastName', index: 'signatory_lastname', width: 130},
                             {
                                 name: 'approveDocName',
-                                index: 'approve_Doc_Name',
+                                index: 'approve_doc_name',
                                 width: 165,
                                 classes: 'grid-cell-white-space'
                             },
                             {
                                 name: 'reorganization',
-                                index: 'reorg_form_code',
+                                index: 'reorg_code',
                                 width: 200,
                                 formatter: $filter('codeNameFormatter')
                             },
-                            {name: 'reorgKpp', index: 'reorg_Kpp', width: 150},
-                            {name: 'reorgInn', index: 'reorg_Inn', width: 150}
+                            {name: 'reorgKpp', index: 'reorg_kpp', width: 150},
+                            {name: 'reorgInn', index: 'reorg_inn', width: 150}
                         ],
                         rowNum: APP_CONSTANTS.COMMON.PAGINATION[0],
                         rowList: APP_CONSTANTS.COMMON.PAGINATION,
+                        sortname: 'row_ord',
                         viewrecords: true,
                         disableAutoLoad: true,
                         hidegrid: false,

@@ -504,10 +504,7 @@ public class PrintingServiceImpl implements PrintingService {
     public String generateExcelDepartmentConfigs(int departmentId) {
         DepartmentConfigsFilter filter = new DepartmentConfigsFilter();
         filter.setDepartmentId(departmentId);
-        // pagingParams не null, т.к. нужна сортировка по-умолчанию (по КПП/ОКТМО/Код НО)
-        PagingParams pagingParams = new PagingParams();
-        pagingParams.setNoPaging();
-        List<DepartmentConfig> departmentConfigs = departmentConfigService.fetchAllByFilter(filter, pagingParams);
+        List<DepartmentConfig> departmentConfigs = departmentConfigService.findAllByFilter(filter, null);
         Department department = departmentService.getDepartment(filter.getDepartmentId());
         DepartmentConfigsReportBuilder reportBuilder = new DepartmentConfigsReportBuilder(departmentConfigs, department);
         String reportPath = null;

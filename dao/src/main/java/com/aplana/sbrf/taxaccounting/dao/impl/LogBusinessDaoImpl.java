@@ -48,14 +48,14 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
                 "from log_business lb \n" +
                 "left join event e on e.id = lb.event_id \n" +
                 "left join sec_user u on u.login = lb.user_login \n" +
-                "where person_id = ?";
-        List<Object> params = new ArrayList<>();
-        params.add(personId);
+                "where person_id = :personId";
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("personId", personId);
         if (pagingParams != null) {
             query = pagingParams.wrapQuery(query, params);
         }
-        List<LogBusinessDTO> logs = getJdbcTemplate().query(query, params.toArray(), new BeanPropertyRowMapper<>(LogBusinessDTO.class));
-        int total = getJdbcTemplate().queryForObject("select count(*) from(" + query + ")", params.toArray(), Integer.class);
+        List<LogBusinessDTO> logs = getNamedParameterJdbcTemplate().query(query, params, new BeanPropertyRowMapper<>(LogBusinessDTO.class));
+        int total = getNamedParameterJdbcTemplate().queryForObject("select count(*) from(" + query + ")", params, Integer.class);
         return new PagingResult<>(logs, total);
     }
 

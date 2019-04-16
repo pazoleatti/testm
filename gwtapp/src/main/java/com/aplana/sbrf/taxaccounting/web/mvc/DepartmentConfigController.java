@@ -5,7 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.KppSelect;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.ReportFormCreationKppOktmoPair;
-import com.aplana.sbrf.taxaccounting.model.ReportFormCreationKppOktmoPairFilter;
+import com.aplana.sbrf.taxaccounting.model.KppOktmoPairFilter;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.action.DepartmentConfigsFilter;
 import com.aplana.sbrf.taxaccounting.model.action.ImportDepartmentConfigsAction;
@@ -17,10 +17,13 @@ import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 import com.aplana.sbrf.taxaccounting.model.result.ImportDepartmentConfigsResult;
 import com.aplana.sbrf.taxaccounting.permissions.DepartmentConfigPermission;
 import com.aplana.sbrf.taxaccounting.permissions.DepartmentConfigPermissionSetter;
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.refbook.DepartmentConfigService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedList;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedResourceAssembler;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -40,9 +43,12 @@ import java.util.List;
  */
 @RestController
 public class DepartmentConfigController {
+    protected static final Log LOG = LogFactory.getLog(DepartmentConfigController.class);
 
     @Autowired
     private DepartmentConfigService departmentConfigService;
+    @Autowired
+    private LogEntryService logEntryService;
     @Autowired
     private SecurityService securityService;
     @Autowired
@@ -56,7 +62,7 @@ public class DepartmentConfigController {
         binder.registerCustomEditor(RefBookDepartment.class, new RequestParamEditor(RefBookDepartment.class));
         binder.registerCustomEditor(DepartmentType.class, new RequestParamEditor(DepartmentType.class));
         binder.registerCustomEditor(ImportDepartmentConfigsAction.class, new RequestParamEditor(ImportDepartmentConfigsAction.class));
-        binder.registerCustomEditor(ReportFormCreationKppOktmoPairFilter.class, new RequestParamEditor(ReportFormCreationKppOktmoPairFilter.class));
+        binder.registerCustomEditor(KppOktmoPairFilter.class, new RequestParamEditor(KppOktmoPairFilter.class));
     }
 
     /**
@@ -71,7 +77,7 @@ public class DepartmentConfigController {
         if (filter.getDepartmentId() == null) {
             return new JqgridPagedList<>();
         }
-        PagingResult<DepartmentConfig> result = departmentConfigService.fetchAllByFilter(filter, pagingParams);
+        PagingResult<DepartmentConfig> result = departmentConfigService.findAllByFilter(filter, pagingParams);
 
         setDepartmentConfigsPermission(result);
 
@@ -99,7 +105,7 @@ public class DepartmentConfigController {
      */
     @GetMapping(value = "/rest/departmentConfig/kppSelect")
     public JqgridPagedList<KppSelect> findAllKppByDepartmentIdAndKpp(@RequestParam String kpp, @RequestParam int departmentId, @RequestParam PagingParams pagingParams) {
-        PagingResult<KppSelect> result = departmentConfigService.findAllKppByDepartmentIdAndKpp(departmentId, kpp, pagingParams);
+        PagingResult<KppSelect> result = departmentConfigService.findAllKppByDepartmentIdAndKppContaining(departmentId, kpp, pagingParams);
 
         return JqgridPagedResourceAssembler.buildPagedList(
                 result,
@@ -117,7 +123,7 @@ public class DepartmentConfigController {
      * @return возвращает страницу из списка пар КПП/ОКТМО
      */
     @GetMapping(value = "/rest/departmentConfig/kppOktmoPairsSelect")
-    public JqgridPagedList<ReportFormCreationKppOktmoPair> findAllKppOktmoPairsByDepartmentAndPeriod(@RequestParam ReportFormCreationKppOktmoPairFilter filter,
+    public JqgridPagedList<ReportFormCreationKppOktmoPair> findAllKppOktmoPairsByDepartmentAndPeriod(@RequestParam KppOktmoPairFilter filter,
                                                                                                      @RequestParam(required = false) String name,
                                                                                                      @RequestParam PagingParams pagingParams) {
         filter.setName(name);
@@ -131,27 +137,27 @@ public class DepartmentConfigController {
     }
 
     /**
-     * Создание записи настроек подразделений
+     * Создание настройки подразделений
      */
     @PostMapping(value = "/actions/departmentConfig/create")
     public ActionResult create(@RequestBody DepartmentConfig departmentConfig) {
-        return departmentConfigService.create(departmentConfig, securityService.currentUserInfo());
+        return departmentConfigService.createForGui(departmentConfig);
     }
 
     /**
-     * Создание записи настроек подразделений
+     * Изменение настройки подразделений
      */
     @PostMapping(value = "/actions/departmentConfig/update")
     public ActionResult update(@RequestBody DepartmentConfig departmentConfig) {
-        return departmentConfigService.update(departmentConfig, securityService.currentUserInfo());
+        return departmentConfigService.updateForGui(departmentConfig);
     }
 
     /**
-     * Создание записи настроек подразделений
+     * Удаляет настройки подразделений
      */
     @PostMapping(value = "/actions/departmentConfig/delete")
     public ActionResult delete(@RequestBody List<Long> ids) {
-        return departmentConfigService.delete(ids, securityService.currentUserInfo());
+        return departmentConfigService.deleteForGui(ids);
     }
 
     /**

@@ -465,78 +465,6 @@ comment on column ref_book_person_category.version is 'Версия. Дата а
 comment on column ref_book_person_category.code is 'Код категории застрахованного лица';
 comment on column ref_book_person_category.name is 'Название категории застрахованного лица';
 
-
--- Параметры подразделения по НДФЛ
-create table ref_book_ndfl
-(
-  id            number(18)          not null,
-  record_id     number(9)           not null,
-  version       date                not null,
-  status        number(1) default 0 not null,
-  department_id number(18),
-  inn           varchar2(12 char)
-);
-
-comment on table ref_book_ndfl is 'Параметры подразделения по НДФЛ';
-comment on column ref_book_ndfl.id is 'Уникальный идентификатор';
-comment on column ref_book_ndfl.record_id is 'Идентификатор строки справочника. Может повторяться у разных версий';
-comment on column ref_book_ndfl.version is 'Версия. Дата актуальности записи';
-comment on column ref_book_ndfl.status is 'Статус записи (0 - обычная запись, -1 - удаленная, 1 - черновик, 2 - фиктивная)';
-comment on column ref_book_ndfl.department_id is 'Подразделение';
-comment on column ref_book_ndfl.inn is 'ИНН';
-
--- Параметры подразделения по НДФЛ (таблица)
-create table ref_book_ndfl_detail
-(
-  id                  number(18)          not null,
-  record_id           number(9)           not null,
-  version             date                not null,
-  status              number(1) default 0 not null,
-  department_id       number(18)          not null,
-  --Строка сведений о налогоплательщике
-  tax_organ_code      varchar2(4 char),
-  kpp                 varchar2(9 char),
-  tax_organ_code_mid  varchar2(4 char),
-  present_place       number(18),
-  name                varchar2(1000 char),
-  oktmo               number(18),
-  phone               varchar2(25 char),
-  --Сведения о реорганизации
-  reorg_form_code     number(18),
-  reorg_inn           varchar2(12 char),
-  reorg_kpp           varchar2(9 char),
-  --Ответственный за расчет
-  signatory_id        number(18),
-  signatory_surname   varchar2(60 char),
-  signatory_firstname varchar2(60 char),
-  signatory_lastname  varchar2(60 char),
-  approve_doc_name    varchar2(120 char),
-  approve_org_name    varchar2(1000 char)
-);
-
-comment on table ref_book_ndfl_detail is 'Параметры подразделения по НДФЛ (таблица)';
-comment on column ref_book_ndfl_detail.id is 'Уникальный идентификатор';
-comment on column ref_book_ndfl_detail.record_id is 'Идентификатор строки справочника. Может повторяться у разных версий';
-comment on column ref_book_ndfl_detail.version is 'Версия. Дата актуальности записи';
-comment on column ref_book_ndfl_detail.status is 'Статус записи (0 - обычная запись, -1 - удаленная, 1 - черновик, 2 - фиктивная)';
-comment on column ref_book_ndfl_detail.department_id is 'Код обособленного подразделения';
-comment on column ref_book_ndfl_detail.tax_organ_code is 'Код налогового органа конечного';
-comment on column ref_book_ndfl_detail.kpp is 'КПП';
-comment on column ref_book_ndfl_detail.tax_organ_code_mid is 'Код налогового органа промежуточного';
-comment on column ref_book_ndfl_detail.present_place is 'Место, по которому представляется документ.';
-comment on column ref_book_ndfl_detail.name is 'Наименование для титульного листа';
-comment on column ref_book_ndfl_detail.oktmo is 'ОКТМО';
-comment on column ref_book_ndfl_detail.phone is 'Номер контактного телефона';
-comment on column ref_book_ndfl_detail.reorg_form_code is 'Код формы реорганизации и ликвидации';
-comment on column ref_book_ndfl_detail.reorg_inn is 'ИНН реорганизованного обособленного подразделения';
-comment on column ref_book_ndfl_detail.reorg_kpp is 'КПП реорганизованного обособленного подразделения';
-comment on column ref_book_ndfl_detail.signatory_id is 'признак лица, подписавшего документ';
-comment on column ref_book_ndfl_detail.signatory_surname is 'Фамилия подписанта';
-comment on column ref_book_ndfl_detail.signatory_firstname is 'Имя подписанта';
-comment on column ref_book_ndfl_detail.signatory_lastname is 'Отчество подписанта';
-comment on column ref_book_ndfl_detail.approve_doc_name is 'Наименование документа, подтверждающего полномочия';
-comment on column ref_book_ndfl_detail.approve_org_name is 'Наименование организации-представителя налогоплательщика';
-
 -- Параметры подразделения по сборам, взносам
 create table ref_book_fond
 (
@@ -619,12 +547,6 @@ comment on column ref_book_fond_detail.signatory_firstname is 'Имя подпи
 comment on column ref_book_fond_detail.signatory_lastname is 'Отчество подписанта';
 comment on column ref_book_fond_detail.approve_doc_name is 'Наименование документа, подтверждающего полномочия';
 comment on column ref_book_fond_detail.approve_org_name is 'Наименование организации-представителя налогоплательщика';
-------------------------------------------------------------------------------------
-create view department_config as
-  select * from (
-    select rbnd.*, (SELECT min(version) - interval '1' day FROM ref_book_ndfl_detail WHERE status != -1 and record_id = rbnd.record_id and version > rbnd.version) version_end
-    from ref_book_ndfl_detail rbnd
-  ) where status = 0;
 
 --Признак возложения обязанности по уплате налога на обособленное подразделение
 create table ref_book_detach_tax_pay

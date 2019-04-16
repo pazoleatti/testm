@@ -196,11 +196,11 @@ INSERT INTO ref_book_oktmo(id, code, name, version, status, record_id) VALUES (5
 INSERT INTO ref_book_oktmo(id, code, name, version, status, record_id) VALUES (6,'6','Долинненское',to_date('01.09.2014', 'DD.MM.YYYY'),1,6);
 INSERT INTO ref_book_oktmo(id, code, name, version, status, record_id) VALUES (7,'7','Тест',to_date('01.09.2014', 'DD.MM.YYYY'),1,7);
 
-insert into REF_BOOK_NDFL(id,department_id,record_id,version,status) values(-1,7,-1,to_date('01.01.2016', 'DD.MM.YYYY'),0);
-insert into REF_BOOK_NDFL(id,department_id,record_id,version,status) values(-2,2,-1,to_date('01.01.2016', 'DD.MM.YYYY'),0);
+insert into ref_book_present_place(id, record_id, version, code, name) values (1, 1, to_date('01.09.2014', 'DD.MM.YYYY'), '1', 'present place');
+insert into ref_book_signatory_mark(id, record_id, version, code, name) values (1, 1, to_date('01.09.2014', 'DD.MM.YYYY'), '1', 'signatory mark');
 
-insert into REF_BOOK_NDFL_DETAIL(id,record_id,version,status,department_id, kpp, oktmo) values(10,1,to_date('01.01.2016', 'DD.MM.YYYY'),0,7, '000000001', 1);
-insert into REF_BOOK_NDFL_DETAIL(id,record_id,version,status,department_id, kpp, oktmo) values(20,2,to_date('01.01.2016', 'DD.MM.YYYY'),0,7, '000000002', 2);
-insert into REF_BOOK_NDFL_DETAIL(id,record_id,version,status,department_id, kpp, oktmo) values(30,3,to_date('01.01.2016', 'DD.MM.YYYY'),0,2, '000000003', 7);
-insert into REF_BOOK_NDFL_DETAIL(id,record_id,version,status,department_id, kpp, oktmo) values(40,1,to_date('01.01.2017', 'DD.MM.YYYY'),2,7, '000000001', 1);
-insert into REF_BOOK_NDFL_DETAIL(id,record_id,version,status,department_id, kpp, oktmo) values(50,1,to_date('01.01.2017', 'DD.MM.YYYY'),0,7, '000000004', 1);
+insert into department_config_test(id, kpp, oktmo_id, start_date, end_date, department_id, tax_organ_code, present_place_id, signatory_id) values
+(10, '000000001', 1, to_date('01.01.2016', 'DD.MM.YYYY'), to_date('31.12.2016', 'DD.MM.YYYY'), 7, '0001', 1, 1),
+(20, '000000002', 2, to_date('01.01.2016', 'DD.MM.YYYY'), null, 7, '0002', 1, 1),
+(30, '000000003', 7, to_date('01.01.2016', 'DD.MM.YYYY'), null, 2, '0003', 1, 1),
+(50, '000000004', 1, to_date('01.01.2017', 'DD.MM.YYYY'), null, 7, '0004', 1, 1);

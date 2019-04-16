@@ -182,22 +182,12 @@ public class RefBookSimpleDataProvider implements RefBookDataProvider {
                     if (record.getRecordId() != null) {
                         List<CheckCrossVersionsResult> checkCrossVersionsResults =
                                 dao.checkCrossVersions(getRefBook(), record.getRecordId(), versionFrom, record.getVersionTo(), null);
-                        if (!getRefBook().getId().equals(RefBook.WithTable.NDFL.getRefBookId()) &&
-                                !getRefBook().getId().equals(RefBook.WithTable.NDFL.getTableRefBookId())) {
-                            //Проверка пересечения версий
-                            boolean needToCreateFakeVersion = helper.crossVersionsProcessing(checkCrossVersionsResults,
-                                    getRefBook(), versionFrom, record.getVersionTo(), logger);
-                            if (!needToCreateFakeVersion) {
-                                //Добавляем запись в список тех, для которых не будут созданы фиктивные версии
-                                excludedVersionEndRecords.add(record.getRecordId());
-                            }
-                        } else {
-                            // для настроек подразделений только удаляем ненужные фиктивные версии (как это делается в crossVersionsProcessing)
-                            for (CheckCrossVersionsResult checkCrossVersionsResult : checkCrossVersionsResults) {
-                                if (checkCrossVersionsResult.getResult() == CrossResult.NEED_DELETE) {
-                                    refBookDao.deleteRecordVersions(getRefBook().getTableName(), singletonList(checkCrossVersionsResult.getRecordId()), refBook.getId() == RefBook.Id.NDFL_DETAIL.getId());
-                                }
-                            }
+                        //Проверка пересечения версий
+                        boolean needToCreateFakeVersion = helper.crossVersionsProcessing(checkCrossVersionsResults,
+                                getRefBook(), versionFrom, record.getVersionTo(), logger);
+                        if (!needToCreateFakeVersion) {
+                            //Добавляем запись в список тех, для которых не будут созданы фиктивные версии
+                            excludedVersionEndRecords.add(record.getRecordId());
                         }
                     }
                 }
@@ -361,7 +351,7 @@ public class RefBookSimpleDataProvider implements RefBookDataProvider {
                     if (previousVersion != null && (previousVersion.isVersionEndFake() && SimpleDateUtils.addDayToDate(previousVersion.getVersionEnd(), 1).equals(versionFrom))) {
                         //Если установлена дата окончания, которая совпадает с существующей фиктивной версией - то она удаляется
                         Long previousVersionEnd = dao.findRecord(getRefBook(), recordId, versionFrom);
-                        refBookDao.deleteRecordVersions(getRefBook().getTableName(), Arrays.asList(previousVersionEnd), refBook.getId() == RefBook.Id.NDFL_DETAIL.getId());
+                        refBookDao.deleteRecordVersions(getRefBook().getTableName(), Arrays.asList(previousVersionEnd), false);
                     }
 
                     boolean delayedUpdate = false;
@@ -391,14 +381,14 @@ public class RefBookSimpleDataProvider implements RefBookDataProvider {
                                 refBookDao.updateVersionRelevancePeriod(getRefBook().getTableName(), relatedVersions.get(0), SimpleDateUtils.addDayToDate(versionTo, 1));
                             } else {
                                 //Удаляем дату окончания. Теперь дата окончания задается началом следующей версии
-                                refBookDao.deleteRecordVersions(getRefBook().getTableName(), relatedVersions, refBook.getId() == RefBook.Id.NDFL_DETAIL.getId());
+                                refBookDao.deleteRecordVersions(getRefBook().getTableName(), relatedVersions, false);
                             }
                         }
                     }
 
                     if (!relatedVersions.isEmpty() && versionTo == null) {
                         //Удаляем фиктивную запись - теперь у версии нет конца
-                        refBookDao.deleteRecordVersions(getRefBook().getTableName(), relatedVersions, refBook.getId() == RefBook.Id.NDFL_DETAIL.getId());
+                        refBookDao.deleteRecordVersions(getRefBook().getTableName(), relatedVersions, false);
                     }
 
                     if (delayedUpdate) {
@@ -520,7 +510,7 @@ public class RefBookSimpleDataProvider implements RefBookDataProvider {
                 List<Long> fakeVersionIds = dao.getRelatedVersions(getRefBook(), uniqueRecordIds);
                 uniqueRecordIds.addAll(fakeVersionIds);
             }
-            refBookDao.deleteRecordVersions(getRefBook().getTableName(), uniqueRecordIds, refBook.getId() == RefBook.Id.NDFL_DETAIL.getId());
+            refBookDao.deleteRecordVersions(getRefBook().getTableName(), uniqueRecordIds, false);
         } catch (Exception e) {
             if (logger != null) {
                 logger.error(e);

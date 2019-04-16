@@ -33,54 +33,6 @@ public class RefBook implements Serializable {
     public static final List<String> SYSTEM_ALIASES = Arrays.asList("record_id", "version", "status");
 
     /**
-     * Соотношение основной и табличной части настроек подразделений с типом налога
-     */
-    @Deprecated
-    public enum WithTable {
-        NDFL(TaxType.NDFL, 950L, 951L);
-
-        private TaxType taxType;
-        private Long refBookId;
-        private Long tableRefBookId;
-
-        WithTable(TaxType taxType, Long refBookId, Long tableRefBookId) {
-            this.taxType = taxType;
-            this.refBookId = refBookId;
-            this.tableRefBookId = tableRefBookId;
-        }
-
-        public TaxType getTaxType() {
-            return taxType;
-        }
-
-        public Long getRefBookId() {
-            return refBookId;
-        }
-
-        public Long getTableRefBookId() {
-            return tableRefBookId;
-        }
-
-        public static WithTable getByTaxType(TaxType taxType) {
-            for (WithTable item : WithTable.values()) {
-                if (item.getTaxType() == taxType) {
-                    return item;
-                }
-            }
-            throw new RuntimeException("Не найдено сочетание табличной и нетабличной части настроек подразделения для указанного налога");
-        }
-
-        public static Long getTablesIdByRefBook(long refBookId) {
-            for (WithTable r : values()) {
-                if (r.refBookId == refBookId) {
-                    return r.getTableRefBookId();
-                }
-            }
-            return null;
-        }
-    }
-
-    /**
      * Индентификаторы таблиц, используются датапровайдерами
      */
     public enum Id {
@@ -125,8 +77,6 @@ public class RefBook implements Serializable {
         HARD_WORK(939),                                // Коды классов условий труда
         KBK(940),                                   // Классификатор доходов бюджетов Российской Федерации
         PERSON_CATEGORY(941),                        // Категорий застрахованных лиц
-        @Deprecated
-        NDFL(950),                                    // Настройки подразделений по НДФЛ
         NDFL_DETAIL(951),                            // Настройки подразделений по НДФЛ (таблица)
         NDFL_REFERENCES(964);                            // Ограничение доступа по АСНУ
 
@@ -158,7 +108,6 @@ public class RefBook implements Serializable {
         ASNU("REF_BOOK_ASNU"),
         PERSON("REF_BOOK_PERSON"),
         REGION("REF_BOOK_REGION"),
-        NDFL_DETAIL("REF_BOOK_NDFL_DETAIL"),
         FOND("REF_BOOK_FOND"),
         FOND_DETAIL("REF_BOOK_FOND_DETAIL"),
         FIAS_ADDR_OBJECT("FIAS_ADDROBJ"),

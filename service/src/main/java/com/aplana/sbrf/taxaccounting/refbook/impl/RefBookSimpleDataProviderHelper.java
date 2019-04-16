@@ -71,20 +71,15 @@ public class RefBookSimpleDataProviderHelper {
             throw new ServiceException("Обнаружено некорректное значение атрибута");
         }
 
-        //Признак настроек подразделений
-        boolean isConfig = refBook.getId().equals(RefBook.WithTable.NDFL.getTableRefBookId());
-
-        if (!isConfig) {
-            // Проверяем каждую запись по-отдельности на уникальность значений
-            for (RefBookRecord record : records) {
-                // Найденные совпадения [uniqRecordId-атрибут(ы), ...]
-                List<Pair<Long, String>> matchedRecords = dao.getMatchedRecordsByUniqueAttributes(refBook, uniqueRecordId, record);
-                if (matchedRecords != null && !matchedRecords.isEmpty()) {
-                    List<Long> conflictedIds = dao.checkConflictValuesVersions(refBook, matchedRecords, versionFrom, record.getVersionTo());
-                    // Если значения совпадают и перересекаются сроки действия записей, то выбрасываем ошибку
-                    if (!conflictedIds.isEmpty()) {
-                        throw new ServiceException(makeAttrNames(refBook, record, matchedRecords, conflictedIds));
-                    }
+        // Проверяем каждую запись по-отдельности на уникальность значений
+        for (RefBookRecord record : records) {
+            // Найденные совпадения [uniqRecordId-атрибут(ы), ...]
+            List<Pair<Long, String>> matchedRecords = dao.getMatchedRecordsByUniqueAttributes(refBook, uniqueRecordId, record);
+            if (matchedRecords != null && !matchedRecords.isEmpty()) {
+                List<Long> conflictedIds = dao.checkConflictValuesVersions(refBook, matchedRecords, versionFrom, record.getVersionTo());
+                // Если значения совпадают и перересекаются сроки действия записей, то выбрасываем ошибку
+                if (!conflictedIds.isEmpty()) {
+                    throw new ServiceException(makeAttrNames(refBook, record, matchedRecords, conflictedIds));
                 }
             }
         }
@@ -160,12 +155,7 @@ public class RefBookSimpleDataProviderHelper {
                     uniqueAliases.add(attribute.getAlias());
                 }
             }
-            boolean isDepartmentConfigTable = false;
             Integer i = null;
-            if (RefBook.WithTable.NDFL.getTableRefBookId().equals(refBook.getId())) {
-                isDepartmentConfigTable = true;
-                i = 1;
-            }
             //Группируем ссылки по провайдерам
             for (RefBookRecord record : records) {
                 Map<String, RefBookValue> values = record.getValues();
@@ -213,7 +203,6 @@ public class RefBookSimpleDataProviderHelper {
                         references.get(provider).add(new RefBookLinkModel(i, attribute.getAlias(), id, specialId != null ? specialId.toString() : null, versionFrom, record.getVersionTo()));
                     }
                 }
-                if (isDepartmentConfigTable) i++;
             }
             refBookHelper.checkReferenceValues(refBook, references, logger);
         }
@@ -244,7 +233,7 @@ public class RefBookSimpleDataProviderHelper {
                 return false;
             }
             if (result.getResult() == CrossResult.NEED_DELETE) {
-                refBookDao.deleteRecordVersions(refBook.getTableName(), Arrays.asList(result.getRecordId()), refBook.getId() == RefBook.Id.NDFL_DETAIL.getId());
+                refBookDao.deleteRecordVersions(refBook.getTableName(), Arrays.asList(result.getRecordId()), false);
             }
         }
         return true;

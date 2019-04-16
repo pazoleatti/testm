@@ -77,16 +77,6 @@ public interface DepartmentService {
     String getParentsHierarchyShortNames(Integer departmentId);
 
     /**
-     * Поиск названия подразделения по паре КПП/ОКТМО с учетом версии настроек подразделения
-     *
-     * @param kpp
-     * @param oktmo
-     * @param reportPeriodEndDate
-     * @return
-     */
-    String getDepartmentNameByPairKppOktmo(String kpp, String oktmo, Date reportPeriodEndDate);
-
-    /**
      * Получение родительского территориального банка
      *
      * @param departmentId идентификатор подразделения

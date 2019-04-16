@@ -10,7 +10,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
-@Service
+@Service("transactionHelper")
 public class TransactionHelperImpl implements TransactionHelper {
 
     @Autowired

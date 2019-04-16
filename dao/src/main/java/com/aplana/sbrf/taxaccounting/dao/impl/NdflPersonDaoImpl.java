@@ -775,7 +775,6 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         if (!filter.getUrmList().isEmpty() && !filter.getUrmList().containsAll(asList(URM.values()))) {
             List<URM> urmList = filter.getUrmList();
             List<Pair<String, String>> kppOktmoPairs = getKppOktmoPairsByURM(filter.getNdflFilter().getDeclarationDataId(), urmList);
-            System.out.println(kppOktmoPairs.toString());
             if (!filter.getUrmList().contains(URM.NONE_TB)) {
                 filterBuilder.append(SqlUtils.pairInStatement("and (npi.kpp, npi.oktmo)", kppOktmoPairs));
             } else {
@@ -872,14 +871,14 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
             if (urmList.size() == 1 && urmList.contains(URM.CURRENT_TB) ||
                     urmList.size() == 2 && urmList.containsAll(asList(URM.OTHERS_TB, URM.NONE_TB))) {
-                return departmentConfigDao.findKppOktmoPairs(singletonList(currentTB), new Date());
+                return departmentConfigDao.findAllKppOktmoPairsByDepartmentIdIn(singletonList(currentTB), new Date());
             } else if (urmList.size() == 1 && urmList.contains(URM.OTHERS_TB) ||
                     urmList.size() == 2 && urmList.containsAll(asList(URM.CURRENT_TB, URM.NONE_TB))) {
                 List<Integer> allTbExceptCurrent = new ArrayList<>(allTB);
                 allTbExceptCurrent.remove(currentTB);
-                return departmentConfigDao.findKppOktmoPairs(allTbExceptCurrent, new Date());
+                return departmentConfigDao.findAllKppOktmoPairsByDepartmentIdIn(allTbExceptCurrent, new Date());
             } else {
-                return departmentConfigDao.findKppOktmoPairs(allTB, new Date());
+                return departmentConfigDao.findAllKppOktmoPairsByDepartmentIdIn(allTB, new Date());
             }
         }
         return new ArrayList<>();
@@ -2054,17 +2053,13 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     @Override
     public List<ConsolidationIncome> fetchIncomeSourcesConsolidation(ConsolidationSourceDataSearchFilter searchData) {
         String departmentConfigsKppOktmoSelect = "" +
-                "  select dc.kpp, oktmo.code oktmo, max(dc.version) version \n" +
-                "  from department_config dc\n" +
-                "  join ref_book_oktmo oktmo on oktmo.id = dc.oktmo\n" +
+                "  select dc.kpp, oktmo.code oktmo, max(dc.start_date) start_date \n" +
+                "  from department_config_test dc\n" +
+                "  join ref_book_oktmo oktmo on oktmo.id = dc.oktmo_id\n" +
                 "  where department_id = :departmentId and (\n" +
-                "    dc.version <= :currentDate and (dc.version_end is null or :currentDate <= dc.version_end) or (\n" +
-                "      dc.version <= :periodEndDate and (dc.version_end is null or dc.version_end >= :periodStartDate) \n" +
-                (isSupportOver() ?
-                        // В hsqldb ошибка NullPointerException в ядре вылазит и тесты от этого не работают
-                        " and not exists (select * from department_config where kpp = dc.kpp and oktmo = dc.oktmo and version > dc.version and department_id != :departmentId)\n" :
-                        ""
-                ) +
+                "    dc.start_date <= :currentDate and (dc.end_date is null or :currentDate <= dc.end_date) or (\n" +
+                "      dc.start_date <= :periodEndDate and (dc.end_date is null or :periodStartDate <= dc.end_date) \n" +
+                "      and not exists (select * from department_config_test where kpp = dc.kpp and oktmo_id = dc.oktmo_id and start_date > dc.start_date and department_id != :departmentId)\n" +
                 "    )\n" +
                 "  )\n" +
                 "  group by dc.kpp, oktmo.code\n";

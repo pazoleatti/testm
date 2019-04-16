@@ -15,7 +15,8 @@
                             <span data-aplana-datepicker
                                   data-ng-model="record.startDate"
                                   data-ng-required="true"
-                                  data-ui-validate="{versionDate : 'isVersionDatesValid($value, record.endDate)'}"></span>
+                                  data-ui-validate="{versionDate : 'isVersionDatesValid($value, record.endDate)'}"
+                                  data-ui-validate-watch="['record.startDate','record.endDate']"></span>
                             <div data-aplana-validator data-key='required'>{{::'common.validation.required' | translate}}</div>
                             <div data-aplana-validator data-key='versionDate'>{{::'refBook.versionDates.validates' | translate}}</div>
                         </span>
@@ -30,7 +31,8 @@
                         <span data-aplana-field>
                             <span data-aplana-datepicker
                                   data-ng-model="record.endDate"
-                                  data-ui-validate="{versionDate : 'isVersionDatesValid(record.startDate, $value)'}"></span>
+                                  data-ui-validate="{versionDate : 'isVersionDatesValid(record.startDate, $value)'}"
+                                  data-ui-validate-watch="['record.startDate','record.endDate']"></span>
                             <div data-aplana-validator data-key='versionDate'>{{::'refBook.versionDates.validates' | translate}}</div>
                         </span>
                 </div>

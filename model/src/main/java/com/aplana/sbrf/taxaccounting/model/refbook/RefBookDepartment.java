@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.model.refbook;
 
 import com.aplana.sbrf.taxaccounting.model.DepartmentType;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.ArrayList;
@@ -9,8 +10,6 @@ import java.util.List;
 
 /**
  * Подразделения
- *
- * @author dloshkarev
  */
 @Getter
 @Setter
@@ -52,5 +51,15 @@ public class RefBookDepartment extends RefBookSimple<Integer> {
             children = new ArrayList<>();
         }
         children.add(department);
+    }
+
+    public RefBookDepartment id(Integer id) {
+        this.id = id;
+        return this;
+    }
+
+    public RefBookDepartment name(String name) {
+        this.name = name;
+        return this;
     }
 }

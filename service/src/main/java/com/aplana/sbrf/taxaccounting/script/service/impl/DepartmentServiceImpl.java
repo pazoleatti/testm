@@ -75,11 +75,6 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
-    public String getDepartmentNameByPairKppOktmo(String kpp, String oktmo, Date reportPeriodEndDate) {
-        return departmentDao.getDepartmentNameByPairKppOktmo(kpp, oktmo, reportPeriodEndDate);
-    }
-
-    @Override
     public Department getParentTB(int departmentId) {
         return departmentDao.getDepartmentTB(departmentId);
     }

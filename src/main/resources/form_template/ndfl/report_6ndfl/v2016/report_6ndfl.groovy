@@ -100,10 +100,6 @@ class Report6Ndfl extends AbstractScriptClass {
     @Override
     public void run() {
         switch (formDataEvent) {
-            case FormDataEvent.CREATE_SPECIFIC_REPORT: //создание спецефичного отчета
-                println "!CREATE_SPECIFIC_REPORT!"
-                createSpecificReport()
-                break
             case FormDataEvent.CREATE_FORMS: // создание экземпляра
                 println "!CREATE_FORMS!"
                 createReportForms()
@@ -142,7 +138,7 @@ class Report6Ndfl extends AbstractScriptClass {
             fileWriter = new OutputStreamWriter(new FileOutputStream(xmlFile), Charset.forName("windows-1251"))
             fileWriter.write("<?xml version=\"1.0\" encoding=\"windows-1251\"?>")
 
-            xml = buildXml(departmentConfig, incomes, fileWriter, false)
+            xml = buildXml(departmentConfig, incomes, fileWriter)
             if (xml) {
                 xml.xmlFile = xmlFile
             }
@@ -160,13 +156,8 @@ class Report6Ndfl extends AbstractScriptClass {
         return null
     }
 
-    Xml buildXmlForSpecificReport(def writer) {
-        def departmentConfig = departmentConfigService.findByKppAndOktmoAndDate(declarationData.kpp, declarationData.oktmo, reportPeriod.endDate)
-        return null
-    }
-
     @TypeChecked(TypeCheckingMode.SKIP)
-    Xml buildXml(DepartmentConfig departmentConfig, List<NdflPersonIncome> incomes, def writer, boolean isForSpecificReport) {
+    Xml buildXml(DepartmentConfig departmentConfig, List<NdflPersonIncome> incomes, def writer) {
         ScriptUtils.checkInterrupted()
         Xml xml = new Xml()
         def incomeList = new IncomeList(incomes)
@@ -671,23 +662,6 @@ class Report6Ndfl extends AbstractScriptClass {
     final String ALIAS_PRIMARY_RNU_W_ERRORS = "primary_rnu_w_errors"
 
     final String TRANSPORT_FILE_TEMPLATE = "ТФ"
-
-    def createSpecificReport() {
-        def alias = scriptSpecificReportHolder.getDeclarationSubreport().getAlias()
-        if (alias == ALIAS_PRIMARY_RNU_W_ERRORS) {
-            createPrimaryRnuWithErrors()
-            return
-        }
-
-        def params = scriptSpecificReportHolder.subreportParamValues ?: new HashMap<String, Object>()
-
-        def jasperPrint = declarationService.createJasperReport(scriptSpecificReportHolder.getFileInputStream(), params, {
-            buildXmlForSpecificReport(it)
-        })
-
-        declarationService.exportXLSX(jasperPrint, scriptSpecificReportHolder.getFileOutputStream())
-        scriptSpecificReportHolder.setFileName(scriptSpecificReportHolder.getDeclarationSubreport().getAlias() + ".xlsx")
-    }
 
     /**
      * Создать Спецотчет Первичные РНУ с ошибками

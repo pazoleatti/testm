@@ -5,20 +5,24 @@ import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.mapper.DepartmentConfigRowMapper;
 import com.aplana.sbrf.taxaccounting.model.DeclarationData;
 import com.aplana.sbrf.taxaccounting.model.KppOktmoPair;
+import com.aplana.sbrf.taxaccounting.model.KppOktmoPairFilter;
 import com.aplana.sbrf.taxaccounting.model.KppSelect;
+import com.aplana.sbrf.taxaccounting.model.NamedParameterSql;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.ReportFormCreationKppOktmoPair;
-import com.aplana.sbrf.taxaccounting.model.ReportFormCreationKppOktmoPairFilter;
 import com.aplana.sbrf.taxaccounting.model.SecuredEntity;
-import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.model.action.DepartmentConfigsFilter;
 import com.aplana.sbrf.taxaccounting.model.refbook.DepartmentConfig;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import org.apache.commons.lang3.time.FastDateFormat;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.Assert;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -29,20 +33,38 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 @Repository
 public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentConfigDao {
-    private final static String ALL_FIELDS = " dc.id, dc.record_id, dc.kpp, oktmo.id oktmo_id, oktmo.code oktmo_code, oktmo.name oktmo_name, dc.version, dc.version_end," +
-            " dc.department_id, dc.tax_organ_code, pp.id present_place_id, pp.code present_place_code, pp.name present_place_name, dc.name, dc.phone," +
+
+    private final static String ALL_FIELDS = "" +
+            " dc.id, dc.kpp, oktmo.id oktmo_id, oktmo.code oktmo_code, oktmo.name oktmo_name, dc.start_date, dc.end_date," +
+            " dc.department_id, dep.name department_name, dc.tax_organ_code, pp.id present_place_id, pp.code present_place_code, pp.name present_place_name, dc.name, dc.phone," +
             " reorg.id reorg_id, reorg.code reorg_code, reorg.name reorg_name, dc.reorg_inn, reorg_kpp, sign.id signatory_id, sign.code signatory_code, sign.name signatory_name, " +
             " dc.signatory_surname, dc.signatory_firstname, dc.signatory_lastname, dc.approve_doc_name, dc.approve_org_name ";
-    private final static String ALL_FIELDS_JOINS = "join ref_book_oktmo oktmo on oktmo.id = dc.oktmo \n" +
-            "left join ref_book_present_place pp on pp.id = dc.present_place\n" +
-            "left join ref_book_reorganization reorg on reorg.id = dc.reorg_form_code\n" +
+    private final static String ALL_FIELDS_JOINS = "" +
+            "join department dep on dep.id = dc.department_id \n" +
+            "join ref_book_oktmo oktmo on oktmo.id = dc.oktmo_id \n" +
+            "left join ref_book_present_place pp on pp.id = dc.present_place_id\n" +
+            "left join ref_book_reorganization reorg on reorg.id = dc.reorganization_id\n" +
             "left join ref_book_signatory_mark sign on sign.id = dc.signatory_id\n";
+    /**
+     * Возвращяет все пары КПП/ОКТМО по настройкам подразделений, актуальные на дату relevanceDate, или
+     * пересекающиеся с периодом reportPeriodId, но не имеющая старших версий из другого ТБ
+     */
+    private final static String ACTUAL_KPP_OKTMO_SELECT = "" +
+            "  select dc.kpp, dc.oktmo_id, max(dc.start_date) start_date \n" +
+            "  from department_config_test dc\n" +
+            "  join report_period rp on rp.id = :reportPeriodId\n" +
+            "  where (:departmentId is null or department_id = :departmentId) and (\n" +
+            "    dc.start_date <= :relevanceDate and (dc.end_date is null or :relevanceDate <= dc.end_date)\n" +
+            "    or dc.start_date <= rp.end_date and (dc.end_date is null or rp.start_date <= dc.end_date)\n" +
+            "       and (:departmentId is null or not exists (select * from department_config_test where kpp = dc.kpp and oktmo_id = dc.oktmo_id and start_date > dc.start_date and department_id != :departmentId))\n" +
+            "  )\n" +
+            "  group by dc.kpp, dc.oktmo_id\n";
 
     @Override
     public DepartmentConfig findById(long id) {
         try {
             return getJdbcTemplate().queryForObject("" +
-                    "select " + ALL_FIELDS + " from department_config dc\n" +
+                    "select " + ALL_FIELDS + " from department_config_test dc\n" +
                     ALL_FIELDS_JOINS +
                     "where dc.id = ?", new DepartmentConfigRowMapper(), id);
         } catch (EmptyResultDataAccessException e) {
@@ -56,36 +78,164 @@ public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentCon
     }
 
     @Override
-    public DepartmentConfig findPrev(DepartmentConfig departmentConfig) {
+    public List<DepartmentConfig> findAllByDepartmentId(int departmentId) {
+        return getJdbcTemplate().query("" +
+                "select " + ALL_FIELDS + " from department_config_test dc\n" +
+                ALL_FIELDS_JOINS +
+                "where department_id = ?", new DepartmentConfigRowMapper(), departmentId);
+    }
+
+    @Override
+    public List<KppOktmoPair> findAllKppOKtmoPairs(long declarationId, Integer departmentId, int reportPeriodId, Date relevanceDate) {
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("declarationId", declarationId);
+        params.addValue("departmentId", departmentId);
+        params.addValue("reportPeriodId", reportPeriodId);
+        params.addValue("relevanceDate", relevanceDate);
+        return getNamedParameterJdbcTemplate().query("" +
+                "select distinct npi.kpp, npi.oktmo\n" +
+                "from ndfl_person np\n" +
+                "join ndfl_person_income npi on npi.ndfl_person_id = np.id\n" +
+                "where np.declaration_data_id = :declarationId and (npi.kpp, npi.oktmo) in (\n" +
+                "  select dc.kpp, oktmo.code from department_config_test dc\n" +
+                "  join report_period rp on rp.id = :reportPeriodId\n" +
+                "  join ref_book_oktmo oktmo on oktmo.id = dc.oktmo_id\n" +
+                "  where oktmo.id = dc.oktmo_id and (:departmentId is null or dc.department_id = :departmentId) and (\n" +
+                "    dc.start_date <= :relevanceDate and (dc.end_date is null or :relevanceDate <= dc.end_date)\n" +
+                "    or (dc.start_date <= rp.end_date and (dc.end_date is null or rp.start_date <= dc.end_date)\n" +
+                "      and (:departmentId is null or not exists (select * from department_config_test where kpp = dc.kpp and oktmo_id = dc.oktmo_id and start_date > dc.start_date and department_id != :departmentId))\n" +
+                "    )\n" +
+                "  )\n" +
+                ")", params, new RowMapper<KppOktmoPair>() {
+            @Override
+            public KppOktmoPair mapRow(ResultSet rs, int rowNum) throws SQLException {
+                return new KppOktmoPair(rs.getString("kpp"), rs.getString("oktmo"));
+            }
+        });
+    }
+
+    @Override
+    public List<DepartmentConfig> findAllByKppAndOktmo(String kpp, String oktmo) {
+        return getJdbcTemplate().query("" +
+                "select " + ALL_FIELDS + " from department_config_test dc\n" +
+                ALL_FIELDS_JOINS +
+                "where dc.kpp = ? and oktmo.code = ?", new DepartmentConfigRowMapper(), kpp, oktmo);
+    }
+
+    @Override
+    public PagingResult<DepartmentConfig> findAllByFilter(DepartmentConfigsFilter filter, PagingParams pagingParams) {
+        NamedParameterSql parameterSql = createSelectByFilter(filter);
+        String baseSql = parameterSql.getSql();
+
+        if (pagingParams != null) {
+            parameterSql.setSql(pagingParams.wrapQuery(parameterSql.getSql(), parameterSql.getParams()));
+        }
+
+        List<DepartmentConfig> departmentConfigs = getNamedParameterJdbcTemplate().query(parameterSql.getSql(), parameterSql.getParams(), new RowMapper<DepartmentConfig>() {
+            @Override
+            public DepartmentConfig mapRow(ResultSet rs, int rowNum) throws SQLException {
+                DepartmentConfig departmentConfig = new DepartmentConfigRowMapper().mapRow(rs, rowNum);
+                departmentConfig.setRowOrd(rs.getInt("row_ord"));
+                return departmentConfig;
+            }
+        });
+
+        int total = pagingParams == null ?
+                getNamedParameterJdbcTemplate().queryForObject("select count(*) from (" + baseSql + ")", parameterSql.getParams(), Integer.class) :
+                departmentConfigs.size();
+        return new PagingResult<>(departmentConfigs, total);
+    }
+
+    @Override
+    public int countByFilter(DepartmentConfigsFilter filter) {
+        NamedParameterSql parameterSql = createSelectByFilter(filter);
+        return getNamedParameterJdbcTemplate().queryForObject("select count(*) from (" + parameterSql.getSql() + ")", parameterSql.getParams(), Integer.class);
+    }
+
+    private NamedParameterSql createSelectByFilter(DepartmentConfigsFilter filter) {
+        //language=sql
+        String sql = "select " +
+                (isSupportOver() ? "row_number() over (order by dc.kpp, oktmo.code, dc.tax_organ_code, dc.start_date) row_ord, " : " rownum row_ord, ") +
+                ALL_FIELDS +
+                "from department_config_test dc\n" +
+                ALL_FIELDS_JOINS +
+                "where 1=1\n";
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        if (filter.getDepartmentId() != null) {
+            params.addValue("departmentId", filter.getDepartmentId());
+            sql += " and dc.department_id = :departmentId";
+        }
+
+        if (filter.getRelevanceDate() != null) {
+            params.addValue("relevanceDate", filter.getRelevanceDate());
+            sql += " and start_date <= :relevanceDate and (end_date is null or :relevanceDate <= end_date)";
+        }
+        if (!isEmpty(filter.getKpp())) {
+            params.addValue("kpp", filter.getKpp().toLowerCase());
+            sql += " and lower(kpp) like '%' || :kpp || '%'";
+        }
+        if (!isEmpty(filter.getOktmo())) {
+            params.addValue("oktmo", filter.getOktmo().toLowerCase());
+            sql += " and lower(oktmo.code) like '%' || :oktmo || '%'";
+        }
+        if (!isEmpty(filter.getTaxOrganCode())) {
+            params.addValue("taxOrganCode", filter.getTaxOrganCode().toLowerCase());
+            sql += " and lower(tax_organ_code) like '%' || :taxOrganCode || '%'";
+        }
+        return new NamedParameterSql(sql, params);
+    }
+
+    @Override
+    public DepartmentConfig findPrevById(long id) {
         try {
             return getJdbcTemplate().queryForObject("" +
                             "with all_prev_vers as (\n" +
-                            "  select * from department_config dc\n" +
-                            "  where kpp = ? and oktmo = ? and version < ?\n" +
-                            "  order by version desc\n" +
+                            "  select prev_dc.* from department_config_test prev_dc\n" +
+                            "  join department_config_test cur_dc on cur_dc.id = ?\n" +
+                            "  where prev_dc.kpp = cur_dc.kpp and prev_dc.oktmo_id = cur_dc.oktmo_id and prev_dc.start_date < cur_dc.start_date\n" +
+                            "  order by prev_dc.start_date desc\n" +
                             ")\n" +
                             "select " + ALL_FIELDS + " from all_prev_vers dc\n" +
                             ALL_FIELDS_JOINS +
                             "where rownum <= 1",
-                    new DepartmentConfigRowMapper(), departmentConfig.getKpp(), departmentConfig.getOktmo().getId(), departmentConfig.getStartDate());
+                    new DepartmentConfigRowMapper(), id);
         } catch (EmptyResultDataAccessException e) {
             return null;
         }
     }
 
     @Override
-    public List<Pair<String, String>> findKppOktmoPairs(List<Integer> departmentIds, Date relevanceDate) {
+    public DepartmentConfig findNextById(long id) {
+        try {
+            return getJdbcTemplate().queryForObject("" +
+                            "with all_next_vers as (\n" +
+                            "  select next_dc.* from department_config_test next_dc\n" +
+                            "  join department_config_test cur_dc on cur_dc.id = ?\n" +
+                            "  where next_dc.kpp = cur_dc.kpp and next_dc.oktmo_id = cur_dc.oktmo_id and next_dc.start_date > cur_dc.start_date\n" +
+                            "  order by next_dc.start_date asc\n" +
+                            ")\n" +
+                            "select " + ALL_FIELDS + " from all_next_vers dc\n" +
+                            ALL_FIELDS_JOINS +
+                            "where rownum <= 1",
+                    new DepartmentConfigRowMapper(), id);
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
+    }
+
+    @Override
+    public List<Pair<String, String>> findAllKppOktmoPairsByDepartmentIdIn(List<Integer> departmentIds, Date relevanceDate) {
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("departmentIds", departmentIds);
         params.addValue("relevanceDate", relevanceDate);
-        return getNamedParameterJdbcTemplate().query(
-                "SELECT rbnd.kpp, oktmo.code AS oktmo " +
-                        "FROM ( " +
-                        "  SELECT * FROM department_config dc " +
-                        "  WHERE department_id IN (:departmentIds) AND (version <= :relevanceDate " +
-                        "  AND (version_end IS NULL OR :relevanceDate <= version_end)) " +
-                        ") rbnd " +
-                        "JOIN ref_book_oktmo oktmo ON oktmo.id = rbnd.oktmo ",
+        return getNamedParameterJdbcTemplate().query("" +
+                        "select dc.kpp, oktmo.code as oktmo " +
+                        "from ( " +
+                        "  select * from department_config_test dc " +
+                        "  where department_id in (:departmentIds) and (start_date <= :relevanceDate " +
+                        "  and (end_date is null or :relevanceDate <= end_date)) " +
+                        ") dc " +
+                        "join ref_book_oktmo oktmo on oktmo.id = dc.oktmo_id ",
                 params, new RowMapper<Pair<String, String>>() {
                     @Override
                     public Pair<String, String> mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -95,10 +245,10 @@ public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentCon
     }
 
     @Override
-    public PagingResult<KppSelect> findAllKppByDepartmentIdAndKpp(int departmentId, String kpp, PagingParams pagingParams) {
+    public PagingResult<KppSelect> findAllKppByDepartmentIdAndKppContaining(int departmentId, String kpp, PagingParams pagingParams) {
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("departmentId", departmentId);
-        String baseSelect = "select distinct kpp from ref_book_ndfl_detail where department_id = :departmentId and status = 0";
+        String baseSelect = "select distinct kpp from department_config_test where department_id = :departmentId";
         if (!isEmpty(kpp)) {
             baseSelect += " and kpp like '%' || :kpp || '%'";
             params.addValue("kpp", kpp);
@@ -123,64 +273,19 @@ public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentCon
     }
 
     @Override
-    public DepartmentConfig findByKppAndOktmoAndDate(String kpp, String oktmoCode, Date relevanceDate) {
-        MapSqlParameterSource params = new MapSqlParameterSource();
-        params.addValue("kpp", kpp);
-        params.addValue("oktmoCode", oktmoCode);
-        params.addValue("relevanceDate", relevanceDate);
-        try {
-            return getNamedParameterJdbcTemplate().queryForObject("" +
-                            "select " + ALL_FIELDS + " \n" +
-                            "from department_config dc\n" + ALL_FIELDS_JOINS +
-                            "where kpp = :kpp and oktmo.code = :oktmoCode and (dc.version <= :relevanceDate \n" +
-                            " and (version_end is null or :relevanceDate <= version_end)) ",
-                    params, new DepartmentConfigRowMapper());
-        } catch (EmptyResultDataAccessException e) {
-            throw new DaoException("Не найдена настройка подразделений по КПП = " + kpp + ", ОКТМО = " + oktmoCode + " и дате актуальности = " + relevanceDate);
-        }
-    }
-
-    /**
-     * actual_department_config - настройки подразделений для departmentId, актуальные на дату relevanceDate, или,
-     * пересекающиеся с периодом reportPeriodId, но не имеющая старших версий из другого ТБ
-     */
-    private String WITH_DEPARTMENT_CONFIG_BY_TB_AND_PERIOD_SQL() {
-        //language=sql
-        return "" +
-                "with period as (\n" +
-                "  select * from report_period where id = :reportPeriodId\n" +
-                "),\n" +
-                "actual_vers as (\n" +
-                "  select dc.kpp, dc.oktmo, max(version) version \n" +
-                "  from department_config dc, period\n" +
-                "  where department_id = :departmentId and (\n" +
-                "    dc.version <= :relevanceDate and (dc.version_end is null or :relevanceDate <= dc.version_end) or (\n" +
-                "      dc.version <= period.end_date and (dc.version_end is null or dc.version_end >= period.start_date) \n" +
-                (isSupportOver() ?
-                        // В hsqldb ошибка NullPointerException в ядре вылазит и тесты от этого не работают
-                        " and not exists (select * from department_config where kpp = dc.kpp and oktmo = dc.oktmo and version > dc.version and department_id != :departmentId)\n" :
-                        "") +
-                "    )\n" +
-                "  )\n" +
-                "  group by dc.kpp, dc.oktmo\n" +
-                "),\n" +
-                "actual_department_config as (\n" +
-                "  select " + ALL_FIELDS +
-                "  from department_config dc\n" +
-                "  join actual_vers av on av.kpp = dc.kpp and av.oktmo = dc.oktmo and av.version = dc.version\n" +
-                ALL_FIELDS_JOINS +
-                ")\n";
-    }
-
-    @Override
     public List<Pair<KppOktmoPair, DepartmentConfig>> findAllByDeclaration(DeclarationData declaration, Date relevanceDate) {
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("declarationId", declaration.getId());
         params.addValue("reportPeriodId", declaration.getReportPeriodId());
         params.addValue("departmentId", declaration.getDepartmentId());
         params.addValue("relevanceDate", relevanceDate);
-        String baseSelect = WITH_DEPARTMENT_CONFIG_BY_TB_AND_PERIOD_SQL();
-        baseSelect += "" +
+        String baseSelect = "with actual_kpp_oktmo as (" + ACTUAL_KPP_OKTMO_SELECT + "),\n" +
+                "actual_department_config as (\n" +
+                "  select " + ALL_FIELDS +
+                "  from department_config_test dc\n" +
+                "  join actual_kpp_oktmo kpp_oktmo on kpp_oktmo.kpp = dc.kpp and kpp_oktmo.oktmo_id = dc.oktmo_id and kpp_oktmo.start_date = dc.start_date\n" +
+                ALL_FIELDS_JOINS +
+                ")\n" +
                 "select * from (\n" +
                 "   select npi.kpp dec_kpp, npi.oktmo dec_oktmo, dc.* \n" +
                 "   from (" +
@@ -208,15 +313,22 @@ public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentCon
     }
 
     @Override
-    public PagingResult<ReportFormCreationKppOktmoPair> findAllKppOktmoPairsByFilter(ReportFormCreationKppOktmoPairFilter filter, PagingParams pagingParams) {
+    public PagingResult<ReportFormCreationKppOktmoPair> findAllKppOktmoPairsByFilter(KppOktmoPairFilter filter, PagingParams pagingParams) {
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("reportPeriodId", filter.getReportPeriodId());
         params.addValue("departmentId", filter.getDepartmentId());
         params.addValue("relevanceDate", filter.getRelevanceDate());
-        String baseSelect = WITH_DEPARTMENT_CONFIG_BY_TB_AND_PERIOD_SQL();
+        String withSelect = "with actual_kpp_oktmo as (" + ACTUAL_KPP_OKTMO_SELECT + "),\n" +
+                "actual_department_config as (\n" +
+                "  select dc.id, dc.kpp, oktmo.code oktmo_code, dc.start_date, dc.end_date\n" +
+                "  from department_config_test dc\n" +
+                "  join actual_kpp_oktmo kpp_oktmo on kpp_oktmo.kpp = dc.kpp and kpp_oktmo.oktmo_id = dc.oktmo_id and kpp_oktmo.start_date = dc.start_date\n" +
+                "  join ref_book_oktmo oktmo on oktmo.id = dc.oktmo_id\n" +
+                ")\n";
+        String baseSelect;
         if (filter.getDeclarationId() != null) {
-            baseSelect += "" +
-                    "select rownum id, dc.id dep_conf_id, npi.kpp, npi.oktmo, dc.version_end\n" +
+            baseSelect = withSelect +
+                    "select rownum id, dc.id dep_conf_id, npi.kpp, npi.oktmo, dc.end_date\n" +
                     "from (\n" +
                     "   select distinct kpp, oktmo from ndfl_person np\n" +
                     "   join ndfl_person_income npi on npi.ndfl_person_id = np.id\n" +
@@ -225,7 +337,8 @@ public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentCon
                     "left join actual_department_config dc on dc.kpp = npi.kpp and dc.oktmo_code = npi.oktmo\n";
             params.addValue("declarationId", filter.getDeclarationId());
         } else {
-            baseSelect += "select rownum id, dc.id dep_conf_id, dc.kpp, dc.oktmo_code oktmo, dc.version_end\n" +
+            baseSelect = withSelect +
+                    "select rownum id, dc.id dep_conf_id, dc.kpp, dc.oktmo_code oktmo, dc.end_date\n" +
                     "from actual_department_config dc ";
         }
 
@@ -234,8 +347,12 @@ public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentCon
             params.addValue("name", filter.getName().replaceAll(" ?/ ?", "/"));
         }
 
+        String sql = baseSelect;
+        if (pagingParams != null) {
+            sql = pagingParams.wrapQuery(baseSelect, params);
+        }
         List<ReportFormCreationKppOktmoPair> kppOktmoPairs = getNamedParameterJdbcTemplate().query(
-                pagingParams.wrapQuery(baseSelect, params),
+                sql,
                 params, new RowMapper<ReportFormCreationKppOktmoPair>() {
                     @Override
                     public ReportFormCreationKppOktmoPair mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -244,7 +361,7 @@ public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentCon
                         kppOktmoPair.setKpp(rs.getString("kpp"));
                         kppOktmoPair.setOktmo(rs.getString("oktmo"));
                         Long departmentConfigId = SqlUtils.getLong(rs, "dep_conf_id");
-                        Date versionEnd = rs.getDate("version_end");
+                        Date versionEnd = rs.getDate("end_date");
                         if (departmentConfigId == null) {
                             kppOktmoPair.setRelevance("не относится к ТБ в периоде");
                         } else if (versionEnd != null && versionEnd.before(new Date())) {
@@ -254,23 +371,93 @@ public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentCon
                     }
                 });
 
-        int count = getNamedParameterJdbcTemplate().queryForObject("select count(*) from (" + baseSelect + ")", params, Integer.class);
-        return new PagingResult<>(kppOktmoPairs, count);
+        int total = pagingParams != null ?
+                getNamedParameterJdbcTemplate().queryForObject("select count(*) from (" + baseSelect + ")", params, Integer.class) :
+                kppOktmoPairs.size();
+        return new PagingResult<>(kppOktmoPairs, total);
     }
 
     @Override
-    public boolean existsByKppAndOkmtoAndPeriodId(String kpp, String oktmo, int reportPeriodId) {
-        return getJdbcTemplate().queryForObject("" +
-                        "with period as (select * from report_period where id = ?),\n" +
-                        "actual_vers as (\n" +
-                        "  SELECT dc.kpp, oktmo.code oktmo, MAX(dc.version) version\n" +
-                        "  FROM department_config dc, period, ref_book_oktmo oktmo\n" +
-                        "  WHERE oktmo.id = dc.oktmo and (dc.version    <= sysdate AND (dc.version_end IS NULL OR sysdate   <= dc.version_end)\n" +
-                        "    OR dc.version     <= period.end_date AND (dc.version_end IS NULL OR dc.version_end   >= period.start_date)\n" +
-                        "  )\n" +
-                        "  group by dc.kpp, oktmo.code\n" +
-                        ")\n" +
-                        "select case when exists(select * from actual_vers where kpp = ? and oktmo = ?) then 1 else 0 end from dual",
-                Boolean.class, reportPeriodId, kpp, oktmo);
+    public void create(DepartmentConfig departmentConfig) {
+        final KeyHolder keyHolder = new GeneratedKeyHolder();
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("kpp", departmentConfig.getKpp());
+        params.addValue("oktmo_id", departmentConfig.getOktmo() != null ? departmentConfig.getOktmo().getId() : null);
+        params.addValue("start_date", departmentConfig.getStartDate());
+        params.addValue("end_date", departmentConfig.getEndDate());
+        params.addValue("department_id", departmentConfig.getDepartment() != null ? departmentConfig.getDepartment().getId() : null);
+        params.addValue("tax_organ_code", departmentConfig.getTaxOrganCode());
+        params.addValue("present_place_id", departmentConfig.getPresentPlace() != null ? departmentConfig.getPresentPlace().getId() : null);
+        params.addValue("name", departmentConfig.getName());
+        params.addValue("phone", departmentConfig.getPhone());
+        params.addValue("reorganization_id", departmentConfig.getReorganization() != null ? departmentConfig.getReorganization().getId() : null);
+        params.addValue("reorg_inn", departmentConfig.getReorgInn());
+        params.addValue("reorg_kpp", departmentConfig.getReorgKpp());
+        params.addValue("signatory_id", departmentConfig.getSignatoryMark() != null ? departmentConfig.getSignatoryMark().getId() : null);
+        params.addValue("signatory_surname", departmentConfig.getSignatorySurName());
+        params.addValue("signatory_firstname", departmentConfig.getSignatoryFirstName());
+        params.addValue("signatory_lastname", departmentConfig.getSignatoryLastName());
+        params.addValue("approve_doc_name", departmentConfig.getApproveDocName());
+        params.addValue("approve_org_name", departmentConfig.getApproveOrgName());
+        getNamedParameterJdbcTemplate().update("" +
+                        "insert into department_config_test(id, kpp, oktmo_id, start_date, end_date, department_id, tax_organ_code, present_place_id, name,\n" +
+                        "   phone, reorganization_id, reorg_inn, reorg_kpp, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name)" +
+                        "values (seq_department_config.nextval, :kpp, :oktmo_id, :start_date, :end_date, :department_id, :tax_organ_code, :present_place_id, :name,\n" +
+                        "   :phone, :reorganization_id, :reorg_inn, :reorg_kpp, :signatory_id, :signatory_surname, :signatory_firstname, :signatory_lastname, :approve_doc_name, :approve_org_name)",
+                params, keyHolder, new String[]{"ID"});
+        departmentConfig.setId(keyHolder.getKey().longValue());
+    }
+
+    @Override
+    public void update(DepartmentConfig departmentConfig) {
+        Assert.notNull(departmentConfig.getId());
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("id", departmentConfig.getId());
+        params.addValue("kpp", departmentConfig.getKpp());
+        params.addValue("oktmo_id", departmentConfig.getOktmo() != null ? departmentConfig.getOktmo().getId() : null);
+        params.addValue("start_date", departmentConfig.getStartDate());
+        params.addValue("end_date", departmentConfig.getEndDate());
+        params.addValue("department_id", departmentConfig.getDepartment() != null ? departmentConfig.getDepartment().getId() : null);
+        params.addValue("tax_organ_code", departmentConfig.getTaxOrganCode());
+        params.addValue("present_place_id", departmentConfig.getPresentPlace() != null ? departmentConfig.getPresentPlace().getId() : null);
+        params.addValue("name", departmentConfig.getName());
+        params.addValue("phone", departmentConfig.getPhone());
+        params.addValue("reorganization_id", departmentConfig.getReorganization() != null ? departmentConfig.getReorganization().getId() : null);
+        params.addValue("reorg_inn", departmentConfig.getReorgInn());
+        params.addValue("reorg_kpp", departmentConfig.getReorgKpp());
+        params.addValue("signatory_id", departmentConfig.getSignatoryMark() != null ? departmentConfig.getSignatoryMark().getId() : null);
+        params.addValue("signatory_surname", departmentConfig.getSignatorySurName());
+        params.addValue("signatory_firstname", departmentConfig.getSignatoryFirstName());
+        params.addValue("signatory_lastname", departmentConfig.getSignatoryLastName());
+        params.addValue("approve_doc_name", departmentConfig.getApproveDocName());
+        params.addValue("approve_org_name", departmentConfig.getApproveOrgName());
+        getNamedParameterJdbcTemplate().update("" +
+                        "update department_config_test\n" +
+                        "set kpp = :kpp, oktmo_id = :oktmo_id, start_date = :start_date, end_date = :end_date, department_id = :department_id, tax_organ_code = :tax_organ_code, " +
+                        "present_place_id = :present_place_id, name = :name, phone = :phone, reorganization_id = :reorganization_id, reorg_inn = :reorg_inn, reorg_kpp = :reorg_kpp, " +
+                        "signatory_id = :signatory_id, signatory_surname = :signatory_surname, signatory_firstname = :signatory_firstname, signatory_lastname = :signatory_lastname, " +
+                        "approve_doc_name = :approve_doc_name, approve_org_name = :approve_org_name\n" +
+                        "where id = :id",
+                params);
+    }
+
+    @Override
+    public void deleteById(long id) {
+        getJdbcTemplate().update("delete from department_config_test where id = ?", id);
+    }
+
+    @Override
+    public void deleteByDepartmentId(int departmentId) {
+        getJdbcTemplate().update("delete from department_config_test where department_id = ?", departmentId);
+    }
+
+    @Override
+    public void updateStartDate(long id, Date date) {
+        getJdbcTemplate().update("update department_config_test set start_date = ? where id = ?", date, id);
+    }
+
+    @Override
+    public void updateEndDate(long id, Date date) {
+        getJdbcTemplate().update("update department_config_test set end_date = ? where id = ?", date, id);
     }
 }
