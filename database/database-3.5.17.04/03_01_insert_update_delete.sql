@@ -123,3 +123,27 @@ BEGIN
 
 END;
 /
+
+-- 3.5-ytrofimov-19 - https://jira.aplana.com/browse/SBRFNDFL-7175 Реализовать запись в историю изменений ОНФ информацию о замене "состояние ЭД" и прикладывании файла
+declare 
+  v_task_name varchar2(128):='insert_update_delete block #5 - merge into event';  
+begin
+	merge into event a using
+	(select 10002 as id, 'Прикрепление файла ответа от ФНС' as name from dual
+	) b
+	on (a.id=b.id)
+	when not matched then
+		insert (id, name)
+		values (b.id, b.name);
+	
+	CASE SQL%ROWCOUNT 
+	WHEN 0 THEN dbms_output.put_line(v_task_name||'[WARNING]:'||' No changes was done');
+	ELSE dbms_output.put_line(v_task_name||'[INFO]:'||' Success');
+	END CASE; 
+EXCEPTION
+  when OTHERS then
+    dbms_output.put_line(v_task_name||'[FATAL]:'||sqlerrm);		
+end;
+/
+COMMIT;
+
