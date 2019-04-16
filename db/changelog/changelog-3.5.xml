@@ -558,4 +558,12 @@
 		</sql>
 	</changeSet>
 
+    <!--https://jira.aplana.com/browse/SBRFNDFL-7364 -->
+	<changeSet id="3.5-ytrofimov-20" author="ytrofimov">
+		<update tableName="ref_book_attribute">
+			<column name="max_length" value="2000"/>
+			<where>ref_book_id = 933 and alias = 'NAME'</where>
+		</update>
+	</changeSet>
+
 </databaseChangeLog>
