@@ -551,4 +551,11 @@
                  splitStatements="false"/>
     </changeSet>
 
+	<!--https://jira.aplana.com/browse/SBRFNDFL-7175 Реализовать запись в историю изменений ОНФ информацию о замене "состояние ЭД" и прикладывании файла-->
+	<changeSet id="3.5-ytrofimov-19" author="ytrofimov">
+		<sql>
+			insert into event(id, name) values(10002, 'Прикрепление файла ответа от ФНС');
+		</sql>
+	</changeSet>
+
 </databaseChangeLog>
