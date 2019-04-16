@@ -228,7 +228,9 @@ class Import extends AbstractScriptClass {
             def ndflPerson = createNdflPerson(row)
             ndflPersonRows << ndflPerson
         }
-        checkRequisitesEquality(ndflPersonRows)
+        Map<Long, NdflPerson> persistedPersonsById = ndflPersonService.findNdflPersonWithOperations(declarationData.id)
+                .collectEntries { [it.id, it] }
+        checkRequisitesEquality(ndflPersonRows, persistedPersonsById)
         for (NdflPerson mergingPerson : ndflPersonRows) {
             merge(ndflPersons, mergingPerson)
         }
@@ -245,9 +247,6 @@ class Import extends AbstractScriptClass {
             Collections.sort(ndflPerson.deductions, NdflPersonDeduction.getComparator(ndflPerson))
             Collections.sort(ndflPerson.prepayments, NdflPersonPrepayment.getComparator(ndflPerson))
         }
-
-        Map<Long, NdflPerson> persistedPersonsById = ndflPersonService.findNdflPersonWithOperations(declarationData.id)
-                .collectEntries { [it.id, it] }
 
         // Если в НФ нет данных, то создаем новые из ТФ
         if (persistedPersonsById.isEmpty()) {
@@ -1264,7 +1263,7 @@ class Import extends AbstractScriptClass {
      * связанных с одной строкой Раздела 1, ранее загруженной в ПНФ
      * @param ndflPersonList список всех объектов раздела 1
      */
-    void checkRequisitesEquality(List<NdflPerson> ndflPersonList) {
+    void checkRequisitesEquality(List<NdflPerson> ndflPersonList, Map<Long, NdflPerson> persistedPersonsById) {
         Map<Long, List<NdflPerson>> ndflPersonsGroupedByImportid = [:]
         for (NdflPerson ndflPerson : ndflPersonList) {
             if (ndflPerson.importId != null) {
@@ -1278,7 +1277,9 @@ class Import extends AbstractScriptClass {
         }
         for (List<NdflPerson> ndflPersonGroup : ndflPersonsGroupedByImportid.values()) {
             if (!requisitesEquals(ndflPersonGroup)) {
-                logRequisitesComparisionError(ndflPersonGroup.rowIndex, ndflPersonGroup.get(0).importId)
+                NdflPerson filePerson = ndflPersonGroup.get(0)
+                NdflPerson persistedPerson = persistedPersonsById.get(filePerson.importId)
+                logRequisitesComparisionError(persistedPerson ?: filePerson, ndflPersonGroup*.rowIndex, filePerson.importId)
             }
         }
     }
@@ -1305,9 +1306,10 @@ class Import extends AbstractScriptClass {
      * @param fileRowNums список номеров строк некорректных реквизитов из файла
      * @param id идентификатор объекта NdflPerson
      */
-    void logRequisitesComparisionError(List<Integer> fileRowNums, long id) {
-        logger.error("Ошибка при загрузке файла \"${fileName}\". Указаны некорректные значения реквизитов для строк файла: " +
-                "\"${fileRowNums.join(", ")}\" для идентификатора строки Раздела 1: \"${id}\".")
+    void logRequisitesComparisionError(NdflPerson person, List<Integer> fileRowNums, long id) {
+        logger.errorExp("Лист \"РНУ НДФЛ\". Строки: \"${fileRowNums.join(", ")}\". Значения реквизитов ФЛ (столбцы 2 - 23) отличаются между собой, " +
+                "хотя должны полностью совпадать. ФЛ: ${person.fullName}, ИНП: ${person.inp}, идентификатор строки Раздела 1: \"${id}\".",
+                "Не совпадают реквизиты одного ФЛ, указанные в разных строках", "${person.fullName}, ИНП: ${person.inp}")
     }
 
     /**
