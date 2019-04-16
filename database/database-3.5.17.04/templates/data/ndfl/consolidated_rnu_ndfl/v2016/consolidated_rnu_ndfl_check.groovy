@@ -16,6 +16,7 @@ import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment
 import com.aplana.sbrf.taxaccounting.model.refbook.IdDoc
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAsnu
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
 import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPerson
 import com.aplana.sbrf.taxaccounting.model.util.BaseWeightCalculator
@@ -29,6 +30,7 @@ import com.aplana.sbrf.taxaccounting.script.service.DepartmentService
 import com.aplana.sbrf.taxaccounting.script.service.FiasRefBookService
 import com.aplana.sbrf.taxaccounting.script.service.NdflPersonService
 import com.aplana.sbrf.taxaccounting.script.service.PersonService
+import com.aplana.sbrf.taxaccounting.script.service.RefBookService
 import com.aplana.sbrf.taxaccounting.script.service.ReportPeriodService
 import com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils
 import com.aplana.sbrf.taxaccounting.utils.SimpleDateUtils
@@ -54,6 +56,7 @@ class Check extends AbstractScriptClass {
     DepartmentReportPeriodService departmentReportPeriodService
     RefBookFactory refBookFactory
     PersonService personService
+    RefBookService refBookService
 
     // Сервис для получения рабочих дней
     DateConditionWorkDay dateConditionWorkDay
@@ -169,6 +172,9 @@ class Check extends AbstractScriptClass {
     // Сведения о доходах и НДФЛ
     List<NdflPersonIncome> ndflPersonIncomeList
 
+    //Кэш Асну
+    Map<Long, RefBookAsnu> asnuCache = [:]
+
     boolean section_2_15_fatal
     boolean citizenship_fatal
     boolean valueCondition_fatal
@@ -213,6 +219,9 @@ class Check extends AbstractScriptClass {
         }
         if (scriptClass.getBinding().hasVariable("personService")) {
             this.personService = (PersonService) scriptClass.getProperty("personService")
+        }
+        if (scriptClass.getBinding().hasVariable("refBookService")) {
+            this.refBookService = (RefBookService) scriptClass.getProperty("refBookService")
         }
     }
 
@@ -1889,10 +1898,16 @@ class Check extends AbstractScriptClass {
                 // - "Раздел 2. Графа 10" = "Раздел 3. Графа 12" проверяемой строки (Сумма дохода)
                 // - "Раздел 2. Графа 15" = "Раздел 3. Графа 15" проверяемой строки (Дата применения вычета)
                 // - "Раздел 2. Графа 12" заполнена
-                def incomeExists = allIncomesOfOperation.find {
-                    it.incomeAccruedDate == ndflPersonDeduction.incomeAccrued && it.incomeCode == ndflPersonDeduction.incomeCode &&
-                            it.incomeAccruedSumm == ndflPersonDeduction.incomeSumm && it.taxDate == ndflPersonDeduction.periodCurrDate &&
-                            it.totalDeductionsSumm != null
+                // Если выполняется хотя бы одно из условий:
+                // КодАСНУ не равна ни одному из значений: 1000; 1001; 1002
+                // Дата, указанная в "Раздел 3.Графа 15" не является последним календарным днём месяца
+                def incomeExists = allIncomesOfOperation.find {NdflPersonIncome income ->
+                    String asnuCode = getRefAsnu().get(income.asnuId).code
+
+                    income.incomeAccruedDate == ndflPersonDeduction.incomeAccrued && income.incomeCode == ndflPersonDeduction.incomeCode &&
+                            income.incomeAccruedSumm == ndflPersonDeduction.incomeSumm && income.taxDate == ndflPersonDeduction.periodCurrDate &&
+                            income.totalDeductionsSumm != null &&
+                            (!["1000", "1001", "1002"].contains(asnuCode) || !isLastMonthDay(ndflPersonDeduction.getPeriodCurrDate()))
                 } != null
                 if (!incomeExists) {
                     String errMsg = "В разделе 2 отсутствует соответствующая строка начисления, содержащая информацию о вычете, с параметрами " +
@@ -2977,6 +2992,36 @@ class Check extends AbstractScriptClass {
      */
     Map<Long, Map<String, RefBookValue>> getRefOktmoByIds(List<Long> ids) {
         return getProvider(RefBook.Id.OKTMO.id).getRecordData(ids)
+    }
+
+    /**
+     * Получить "АСНУ"
+     * @return
+     */
+    Map<Long, RefBookAsnu> getRefAsnu() {
+        if (asnuCache.isEmpty()) {
+            List<RefBookAsnu> asnuList = refBookService.findAllAsnu()
+            asnuList.each { RefBookAsnu asnu ->
+                Long asnuId = (Long) asnu?.id
+                asnuCache.put(asnuId, asnu)
+            }
+        }
+        return asnuCache
+    }
+
+    /**
+     * Является ди дата последним календарным днем месяца
+     * @param date проверяемая дата
+     * @return
+     */
+    boolean isLastMonthDay(Date date) {
+        if (!date) return false
+        Calendar calendar = Calendar.getInstance()
+        calendar.setTime(date)
+        int currentMonth = calendar.get(Calendar.MONTH)
+        calendar.add(calendar.DATE, 1)
+        int comparedMonth = calendar.get(Calendar.MONTH)
+        return currentMonth != comparedMonth
     }
 
     void departmentParamException(int departmentId, int reportPeriodId) {
