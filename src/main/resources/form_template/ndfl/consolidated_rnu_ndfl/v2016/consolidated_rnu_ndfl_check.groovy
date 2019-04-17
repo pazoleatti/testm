@@ -1901,15 +1901,17 @@ class Check extends AbstractScriptClass {
                 // Если выполняется хотя бы одно из условий:
                 // КодАСНУ не равна ни одному из значений: 1000; 1001; 1002
                 // Дата, указанная в "Раздел 3.Графа 15" не является последним календарным днём месяца
-                def incomeExists = allIncomesOfOperation.find {NdflPersonIncome income ->
+                List<NdflPersonIncome> incomeExists = allIncomesOfOperation.findAll {NdflPersonIncome income ->
                     String asnuCode = getRefAsnu().get(income.asnuId).code
 
                     income.incomeAccruedDate == ndflPersonDeduction.incomeAccrued && income.incomeCode == ndflPersonDeduction.incomeCode &&
-                            income.incomeAccruedSumm == ndflPersonDeduction.incomeSumm && income.taxDate == ndflPersonDeduction.periodCurrDate &&
-                            income.totalDeductionsSumm != null &&
+                            income.incomeAccruedSumm == ndflPersonDeduction.incomeSumm && income.totalDeductionsSumm != null &&
                             (!["1000", "1001", "1002"].contains(asnuCode) || !isLastMonthDay(ndflPersonDeduction.getPeriodCurrDate()))
-                } != null
-                if (!incomeExists) {
+                }
+
+                if (!incomeExists.isEmpty() && incomeExists.find {NdflPersonIncome income ->
+                    income.taxDate == ndflPersonDeduction.periodCurrDate
+                } == null) {
                     String errMsg = "В разделе 2 отсутствует соответствующая строка начисления, содержащая информацию о вычете, с параметрами " +
                             "\"ID операции\": $ndflPersonDeduction.operationId, \"Дата начисления\": ${formatDate(ndflPersonDeduction.incomeAccrued)}, " +
                             "\"Код дохода\": $ndflPersonDeduction.incomeCode, \"Сумма начисленного дохода\": $ndflPersonDeduction.incomeSumm, " +
