@@ -397,7 +397,7 @@ class DepartmentConfigScript extends AbstractScriptClass {
                     logIncorrectTypeError("Дата")
                 }
             }
-            savedDepartmentConfigs.add(departmentConfig)
+            return null
         }
 
         String getKpp() {
