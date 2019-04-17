@@ -2514,11 +2514,22 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
     List<String> deductionTypeCache = []
 
     /**
+     * Данные о периоде из справочника
+     */
+    Map<String, RefBookValue> getReportPeriodFromRefBook() {
+        def refBookPeriod = getProvider(RefBook.Id.PERIOD_CODE.id)
+        return refBookPeriod.getRecordData(reportPeriod.dictTaxPeriodId)
+    }
+
+    /**
      * Получить дату начала отчетного периода
      * @return
      */
     Date getReportPeriodStartDate() {
-        if (periodStartDate == null) {
+        def periodInfo = getReportPeriodFromRefBook()
+        if (periodInfo) {
+            return toReportPeriodDate(periodInfo.START_DATE.dateValue)
+        } else if (!periodStartDate) {
             periodStartDate = reportPeriodService.getStartDate(declarationData.reportPeriodId)?.time
         }
         return periodStartDate
@@ -2529,7 +2540,10 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
      * @return
      */
     Date getReportPeriodCalendarStartDate() {
-        if (periodCalendarStartDate == null) {
+        def periodInfo = getReportPeriodFromRefBook()
+        if (periodInfo) {
+            return toReportPeriodDate(periodInfo.CALENDAR_START_DATE.dateValue)
+        } else if (periodCalendarStartDate == null) {
             periodCalendarStartDate = reportPeriodService.getCalendarStartDate(declarationData.reportPeriodId)?.time
         }
         return periodCalendarStartDate
@@ -2540,10 +2554,20 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
      * @return
      */
     Date getReportPeriodEndDate() {
-        if (periodEndDate == null) {
+        def periodInfo = getReportPeriodFromRefBook()
+        if (periodInfo) {
+            return toReportPeriodDate(periodInfo.END_DATE.dateValue)
+        } else if (periodEndDate == null) {
             periodEndDate = reportPeriodService.getEndDate(declarationData.reportPeriodId)?.time
         }
         return periodEndDate
+    }
+
+    Date toReportPeriodDate(Date refDate) {
+        Calendar date = Calendar.getInstance();
+        date.setTime(refDate)
+        date[Calendar.YEAR] = reportPeriod.taxPeriod.year
+        return date.getTime()
     }
 
     /**
@@ -2581,7 +2605,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
      */
     PagingResult<Map<String, RefBookValue>> getRefBook(long refBookId) {
         // Передаем как аргумент только срок действия версии справочника
-        PagingResult<Map<String, RefBookValue>> refBookList = getProvider(refBookId).getRecordsVersion(getPeriodStartDate(), getReportPeriodEndDate(), null, null)
+        PagingResult<Map<String, RefBookValue>> refBookList = getProvider(refBookId).getRecordsVersion(getReportPeriodStartDate(), getReportPeriodEndDate(), null, null)
         if (refBookList == null) {
             throw new Exception("Ошибка при получении записей справочника " + refBookId)
         }
@@ -3214,7 +3238,7 @@ class ExportDeclarationDataSheetFiller implements SheetFiller {
 
             for (List<NdflPersonIncome> entry : incomesGroupedByOperationId.values()) {
                 int rowCounter = 0
-                entry.each {NdflPersonIncome income ->
+                entry.each { NdflPersonIncome income ->
                     List<NdflPersonDeduction> matchedDeductions = np.deductions.findAll { NdflPersonDeduction deduction ->
                         deduction.operationId == income.operationId &&
                                 income.incomeAccruedDate == deduction.incomeAccrued &&
@@ -3223,14 +3247,14 @@ class ExportDeclarationDataSheetFiller implements SheetFiller {
                                 income.taxDate == deduction.periodCurrDate
                     }
                     if (income.totalDeductionsSumm && !matchedDeductions.isEmpty()) {
-                        matchedDeductions.eachWithIndex {NdflPersonDeduction deduction, int index ->
+                        matchedDeductions.eachWithIndex { NdflPersonDeduction deduction, int index ->
                             ExcelTemplateRow row = new ExcelTemplateRow()
                             if (index == 0) {
                                 row.setNdflPersonIncome(income)
                                 row.setNdflPersonDeduction(deduction)
                                 np.deductions.remove(deduction)
                                 Iterator<NdflPersonPrepayment> prepaymentIterator = np.prepayments.iterator()
-                                while(prepaymentIterator.hasNext()) {
+                                while (prepaymentIterator.hasNext()) {
                                     NdflPersonPrepayment prepayment = prepaymentIterator.next()
                                     if (prepayment.operationId == entry.get(0).operationId) {
                                         row.setNdflPersonPrepayment(prepayment)
@@ -3242,7 +3266,7 @@ class ExportDeclarationDataSheetFiller implements SheetFiller {
                                 row.setNdflPersonDeduction(deduction)
                                 np.deductions.remove(deduction)
                                 Iterator<NdflPersonPrepayment> prepaymentIterator = np.prepayments.iterator()
-                                while(prepaymentIterator.hasNext()) {
+                                while (prepaymentIterator.hasNext()) {
                                     NdflPersonPrepayment prepayment = prepaymentIterator.next()
                                     if (prepayment.operationId == entry.get(0).operationId) {
                                         row.setNdflPersonPrepayment(prepayment)
@@ -3258,7 +3282,7 @@ class ExportDeclarationDataSheetFiller implements SheetFiller {
                         ExcelTemplateRow row = new ExcelTemplateRow()
                         row.setNdflPersonIncome(income)
                         Iterator<NdflPersonPrepayment> prepaymentIterator = np.prepayments.iterator()
-                        while(prepaymentIterator.hasNext()) {
+                        while (prepaymentIterator.hasNext()) {
                             NdflPersonPrepayment prepayment = prepaymentIterator.next()
                             if (prepayment.operationId == entry.get(0).operationId) {
                                 row.setNdflPersonPrepayment(prepayment)
@@ -3271,14 +3295,14 @@ class ExportDeclarationDataSheetFiller implements SheetFiller {
                     }
                 }
                 Iterator<NdflPersonDeduction> deductionIterator = np.deductions.iterator()
-                while(deductionIterator.hasNext()) {
+                while (deductionIterator.hasNext()) {
                     NdflPersonDeduction deduction = deductionIterator.next()
                     if (deduction.operationId == entry.get(0).operationId) {
                         ExcelTemplateRow row = new ExcelTemplateRow()
                         row.setNdflPersonDeduction(deduction)
                         deductionIterator.remove()
                         Iterator<NdflPersonPrepayment> prepaymentIterator = np.prepayments.iterator()
-                        while(prepaymentIterator.hasNext()) {
+                        while (prepaymentIterator.hasNext()) {
                             NdflPersonPrepayment prepayment = prepaymentIterator.next()
                             if (prepayment.operationId == entry.get(0).operationId) {
                                 row.setNdflPersonPrepayment(prepayment)
@@ -3291,7 +3315,7 @@ class ExportDeclarationDataSheetFiller implements SheetFiller {
                     }
                 }
                 Iterator<NdflPersonPrepayment> prepaymentIterator = np.prepayments.iterator()
-                while(prepaymentIterator.hasNext()) {
+                while (prepaymentIterator.hasNext()) {
                     NdflPersonPrepayment prepayment = prepaymentIterator.next()
                     if (prepayment.operationId == entry.get(0).operationId) {
                         ExcelTemplateRow row = new ExcelTemplateRow()
