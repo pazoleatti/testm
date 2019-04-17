@@ -133,13 +133,13 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
                             DeclarationData declarationData, String reason, Logger logger) {
         if (logger != null) {
             Department department = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
-            logger.error("Не выполнена операция \"%s\" для налоговой формы: № %d, Период: \"%s, %s %s\", Подразделение: \"%s\". " +
+            logger.error("Не выполнена операция \"%s\" для налоговой формы: № %d, Период: \"%s, %s%s\", Подразделение: \"%s\". " +
                             "Причина: %s.",
                     operationName,
                     declarationData.getId(),
                     departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(),
                     departmentReportPeriod.getReportPeriod().getName(),
-                    departmentReportPeriod.getCorrectionDate() != null ? "корр. " + new SimpleDateFormat("dd.MM.yyyy").format(departmentReportPeriod.getCorrectionDate()) : "",
+                    departmentReportPeriod.getCorrectionDate() != null ? " (корр. " + new SimpleDateFormat("dd.MM.yyyy").format(departmentReportPeriod.getCorrectionDate()) + ")" : "",
                     department.getName(),
                     reason);
         }
@@ -602,7 +602,7 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
                         targetDomainObject.getId(),
                         departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(),
                         departmentReportPeriod.getReportPeriod().getName(),
-                        departmentReportPeriod.getCorrectionDate() != null ? " корр. " + FastDateFormat.getInstance("dd.MM.yyyy").format(departmentReportPeriod.getCorrectionDate()) : "",
+                        departmentReportPeriod.getCorrectionDate() != null ? " (корр. " + FastDateFormat.getInstance("dd.MM.yyyy").format(departmentReportPeriod.getCorrectionDate()) + ")" : "",
                         department.getName());
                 logger.error("%s Причина: " + StringUtils.join(causes, ", "), errorCommonPart);
             }
@@ -696,21 +696,17 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
             if (!(canView && hasRoles)) {
                 errMsgs.add("недостаточно прав (обратитесь к администратору)");
             }
-            if (!(targetDomainObject.getState() == State.ACCEPTED)) {
-                errMsgs.add("операция \"" + AsyncTaskType.UPDATE_DOC_STATE.getDescription() + "\" не допустима для форм в состоянии \"" +
-                        targetDomainObject.getState().getTitle() + "\"");
-            }
             if (template.getDeclarationFormKind() == DeclarationFormKind.REPORTS && errMsgs.isEmpty()) {
                 return true;
             } else {
                 if (logger != null) {
                     logger.error("Не выполнена операция \"%s\" для налоговой формы: " +
-                                    "№ %s, Период: \"%s, %s %s\", Подразделение: \"%s\". Причина: %s",
+                                    "№ %s, Период: \"%s, %s%s\", Подразделение: \"%s\". Причина: %s",
                             AsyncTaskType.UPDATE_DOC_STATE.getDescription(),
                             targetDomainObject.getId(),
                             departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(),
                             reportPeriodType.getName(),
-                            departmentReportPeriod.getCorrectionDate() != null ? " корр. " + FastDateFormat.getInstance("dd.MM.yyyy").format(departmentReportPeriod.getCorrectionDate()) : "",
+                            departmentReportPeriod.getCorrectionDate() != null ? " (корр. " + FastDateFormat.getInstance("dd.MM.yyyy").format(departmentReportPeriod.getCorrectionDate()) + ")" : "",
                             department.getName(),
                             StringUtils.join(errMsgs, ", "));
                 }
