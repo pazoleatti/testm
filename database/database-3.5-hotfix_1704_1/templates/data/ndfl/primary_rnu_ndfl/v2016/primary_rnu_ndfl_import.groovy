@@ -12,6 +12,7 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
 import com.aplana.sbrf.taxaccounting.script.SharedConstants
 import com.aplana.sbrf.taxaccounting.script.service.*
+import form_template.ndfl.primary_rnu_ndfl.v2016.Import.Cell
 
 import java.text.SimpleDateFormat
 
@@ -148,16 +149,6 @@ class Import extends AbstractScriptClass {
 
     List<Long> ndflPersonImportIdCache = []
 
-    /**
-     * Идентификаторы вычетов, ячейки которых незаполнены, сгруппированные по идентификатору раздела 1
-     */
-    Map<Long, List<Long>> emptyDeductionsIds = [:]
-
-    /**
-     * Идентификаторы авансмов, ячейки которых незаполнены, сгруппированные по идентификатору раздела 1
-     */
-    Map<Long, List<Long>> emptyPrepaymentsIds = [:]
-
     Import(scriptClass) {
         //noinspection GroovyAssignabilityCheck
         super(scriptClass)
@@ -258,9 +249,7 @@ class Import extends AbstractScriptClass {
             def ndflPerson = createNdflPerson(row)
             ndflPersonRows << ndflPerson
         }
-        Map<Long, NdflPerson> persistedPersonsById = ndflPersonService.findNdflPersonWithOperations(declarationData.id)
-                .collectEntries { [it.id, it] }
-        checkRequisitesEquality(ndflPersonRows, persistedPersonsById)
+        checkRequisitesEquality(ndflPersonRows)
         for (NdflPerson mergingPerson : ndflPersonRows) {
             merge(ndflPersons, mergingPerson)
         }
@@ -277,6 +266,9 @@ class Import extends AbstractScriptClass {
             Collections.sort(ndflPerson.deductions, NdflPersonDeduction.getComparator(ndflPerson))
             Collections.sort(ndflPerson.prepayments, NdflPersonPrepayment.getComparator(ndflPerson))
         }
+
+        Map<Long, NdflPerson> persistedPersonsById = ndflPersonService.findNdflPersonWithOperations(declarationData.id)
+                .collectEntries { [it.id, it] }
 
         // Если в НФ нет данных, то создаем новые из ТФ
         if (persistedPersonsById.isEmpty()) {
@@ -893,22 +885,10 @@ class Import extends AbstractScriptClass {
 
         if (!row.isEmpty(46..59)) {
             ndflPerson.deductions.add(createDeduction(row, deductionImportId))
-        } else if (deductionImportId){
-            if (emptyDeductionsIds.containsKey(ndflPerson.importId)) {
-                emptyDeductionsIds.get(ndflPerson.importId) << deductionImportId
-            } else {
-                emptyDeductionsIds.put(ndflPerson.importId, [deductionImportId])
-            }
         }
 
         if (!row.isEmpty(60..64)) {
             ndflPerson.prepayments.add(createPrepayment(row, prepaymentImportId))
-        } else if (prepaymentImportId){
-            if (emptyPrepaymentsIds.containsKey(ndflPerson.importId)) {
-                emptyPrepaymentsIds.get(ndflPerson.importId) << prepaymentImportId
-            } else {
-                emptyPrepaymentsIds.put(ndflPerson.importId, [prepaymentImportId])
-            }
         }
 
         return ndflPerson
@@ -1305,7 +1285,7 @@ class Import extends AbstractScriptClass {
      * связанных с одной строкой Раздела 1, ранее загруженной в ПНФ
      * @param ndflPersonList список всех объектов раздела 1
      */
-    void checkRequisitesEquality(List<NdflPerson> ndflPersonList, Map<Long, NdflPerson> persistedPersonsById) {
+    void checkRequisitesEquality(List<NdflPerson> ndflPersonList) {
         Map<Long, List<NdflPerson>> ndflPersonsGroupedByImportid = [:]
         for (NdflPerson ndflPerson : ndflPersonList) {
             if (ndflPerson.importId != null) {
@@ -1319,9 +1299,7 @@ class Import extends AbstractScriptClass {
         }
         for (List<NdflPerson> ndflPersonGroup : ndflPersonsGroupedByImportid.values()) {
             if (!requisitesEquals(ndflPersonGroup)) {
-                NdflPerson filePerson = ndflPersonGroup.get(0)
-                NdflPerson persistedPerson = persistedPersonsById.get(filePerson.importId)
-                logRequisitesComparisionError(persistedPerson ?: filePerson, ndflPersonGroup*.rowIndex, filePerson.importId)
+                logRequisitesComparisionError(ndflPersonGroup.rowIndex, ndflPersonGroup.get(0).importId)
             }
         }
     }
@@ -1348,10 +1326,9 @@ class Import extends AbstractScriptClass {
      * @param fileRowNums список номеров строк некорректных реквизитов из файла
      * @param id идентификатор объекта NdflPerson
      */
-    void logRequisitesComparisionError(NdflPerson person, List<Integer> fileRowNums, long id) {
-        logger.errorExp("Лист \"РНУ НДФЛ\". Строки: \"${fileRowNums.join(", ")}\". Значения реквизитов ФЛ (столбцы 2 - 23) отличаются между собой, " +
-                "хотя должны полностью совпадать. ФЛ: ${person.fullName}, ИНП: ${person.inp}, идентификатор строки Раздела 1: \"${id}\".",
-                "Не совпадают реквизиты одного ФЛ, указанные в разных строках", "${person.fullName}, ИНП: ${person.inp}")
+    void logRequisitesComparisionError(List<Integer> fileRowNums, long id) {
+        logger.error("Ошибка при загрузке файла \"${fileName}\". Указаны некорректные значения реквизитов для строк файла: " +
+                "\"${fileRowNums.join(", ")}\" для идентификатора строки Раздела 1: \"${id}\".")
     }
 
     /**
@@ -1434,13 +1411,7 @@ class Import extends AbstractScriptClass {
             rowsCount += (personIncomesCount + personDeductionsCount + personPrepaymentCount)
             incomesIdList.removeAll(incomeImportIdList)
             deductionsIdList.removeAll(deductionImportIdList)
-            if (emptyDeductionsIds.containsKey(person.id)) {
-                deductionsIdList.addAll(emptyDeductionsIds.get(person.id))
-            }
             prepaymentsIdList.removeAll(prepaymentImportIdList)
-            if (emptyPrepaymentsIds.containsKey(person.id)) {
-                prepaymentsIdList.addAll(emptyPrepaymentsIds.get(person.id))
-            }
             int personIncomesRemovedCount = incomesIdList.size()
             int personDeductionsRemovedCount = deductionsIdList.size()
             int personPrepaymentsRemovedCount = prepaymentsIdList.size()
