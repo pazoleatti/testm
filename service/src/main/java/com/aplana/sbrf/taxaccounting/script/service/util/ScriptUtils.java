@@ -832,7 +832,7 @@ public final class ScriptUtils {
         List<String> errorMessages = new ArrayList<>();
 
         if (value != null && !value.isEmpty()) {
-            if (citizenship.equals(COUNTRY_CODE_RUSSIA)) {
+            if (citizenship != null && citizenship.equals(COUNTRY_CODE_RUSSIA)) {
                 // для российских проверяем на кириллицу
                 if (!checkFormat(value, "^[а-яА-ЯёЁ -]+")) {
                     errorMessages.add("Значение параметра \"" + attrName + "\" (\"" + value +
