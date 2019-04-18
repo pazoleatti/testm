@@ -5,7 +5,7 @@
                                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
 
 	<!--https://jira.aplana.com/browse/SBRFNDFL-6265 Реализовать изменения порядка сортировки в отчете "Детализация..."-->
-	<changeSet id="3.5-dnovikov-1" author="dnovikov" runAlways="true">
+	<changeSet id="3.5-dnovikov-1" author="dnovikov">
 		<update tableName="DECLARATION_TEMPLATE">
 			<column name="CREATE_SCRIPT" valueClobFile="templates-3.5/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl.groovy"/>
 			<where>declaration_type_id = 100</where>
@@ -17,7 +17,7 @@
 	</changeSet>
 
 	<!--https://jira.aplana.com/browse/SBRFNDFL-6451 Реализовать установку блокировок на формы источники в процессе выполнения консолидации-->
-	<changeSet id="3.5-ytrofimov-1" author="ytrofimov" runAlways="true">
+	<changeSet id="3.5-ytrofimov-1" author="ytrofimov">
 		<update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
 			<column name="script" valueClobFile="templates-3.5/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl_calculate.groovy"/>
 			<where>DECLARATION_TEMPLATE_ID = 101 and EVENT_ID = 3</where>
@@ -37,7 +37,7 @@
 	</changeSet>
 
 	<!--https://jira.aplana.com/browse/SBRFNDFL-6368 "null - (null) null" в сообщении на событие изменения ДУЛ в отчётности через Идентификацию-->
-	<changeSet id="3.5-dnovikov-3" author="dnovikov" runAlways="true">
+	<changeSet id="3.5-dnovikov-3" author="dnovikov">
 		<update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
 			<column name="script" valueClobFile="templates-3.5/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_calculate.groovy"/>
 			<where>DECLARATION_TEMPLATE_ID = 100 and EVENT_ID = 3</where>
@@ -66,7 +66,7 @@
 	</changeSet>
 
 	<!-- https://jira.aplana.com/browse/SBRFNDFL-6527 Новое значение не указано при редактировании ПНФ с помощью ТФ Excel -->
-	<changeSet id="3.5-ishevchuk-2" author="ishevchuk" runAlways="true">
+	<changeSet id="3.5-ishevchuk-2" author="ishevchuk">
 		<update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
 			<column name="script" valueClobFile="templates-3.5/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_import.groovy"/>
 			<where>DECLARATION_TEMPLATE_ID = 100 and EVENT_ID = 7</where>
@@ -96,7 +96,7 @@
 	</changeSet>
 
 	<!-- https://jira.aplana.com/browse/SBRFNDFL-6543 Ошибка исполнения [36] при проверке ПНФ с параметром Раздел1.гражданство = "000" -->
-	<changeSet id="3.5-ishevchuk-3" author="ishevchuk" runAlways="true">
+	<changeSet id="3.5-ishevchuk-3" author="ishevchuk">
 		<update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
 			<column name="script" valueClobFile="templates-3.5/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_check.groovy"/>
 			<where>DECLARATION_TEMPLATE_ID = 100 and EVENT_ID = 5</where>
@@ -162,7 +162,7 @@
 	</changeSet>
 
 	<!--https://jira.aplana.com/browse/SBRFNDFL-6545 Текст сообщения отличается от постановки для ошибки при создании ОНФ-->
-	<changeSet id="3.5-ishevchuk-4" author="ishevchuk" runAlways="true">
+	<changeSet id="3.5-ishevchuk-4" author="ishevchuk">
 		<update tableName="DECLARATION_TEMPLATE">
 			<column name="CREATE_SCRIPT" valueClobFile="templates-3.5/ndfl/report_2ndfl_1/v2016/report_2ndfl.groovy"/>
 			<where>declaration_type_id = 102</where>
@@ -185,7 +185,7 @@
 		</sql>
 	</changeSet>
 
-	<changeSet id="3.5-ishevchuk-5" author="ishevchuk" runAlways="true">
+	<changeSet id="3.5-ishevchuk-5" author="ishevchuk">
 		<update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
 			<column name="script" valueClobFile="templates-3.5/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl_check.groovy"/>
 			<where>DECLARATION_TEMPLATE_ID = 101 and EVENT_ID = 5</where>
@@ -225,7 +225,7 @@
     </changeSet>
 
 	<!--https://jira.aplana.com/browse/SBRFNDFL-6640 Ошибка исполнения [39]: No signature of method при загрузке ТФ-->
-	<changeSet id="3.5-ytrofimov-7" author="ytrofimov" runAlways="true">
+	<changeSet id="3.5-ytrofimov-7" author="ytrofimov">
 		<update tableName="BLOB_DATA">
 			<column name="data"
 					valueBlobFile="templates-3.5/refbook/declaration_type.groovy"/>
@@ -234,7 +234,7 @@
 	</changeSet>
 
 	<!--https://jira.aplana.com/browse/SBRFNDFL-6552 Сортировка РНУ реализована не по постановке-->
-	<changeSet id="3.5-ytrofimov-8" author="ytrofimov" runAlways="true">
+	<changeSet id="3.5-ytrofimov-8" author="ytrofimov">
 		<update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
 			<column name="script" valueClobFile="templates-3.5/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl_update_persons_data.groovy"/>
 			<where>DECLARATION_TEMPLATE_ID = 101 and EVENT_ID = 11</where>
@@ -250,7 +250,7 @@
 		</update>
 	</changeSet>
 
-	<changeSet id="3.5-dnovikov-11" author="dnovikov" runAlways="true">
+	<changeSet id="3.5-dnovikov-11" author="dnovikov">
 		<update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
 			<column name="script" valueClobFile="templates-3.5/ndfl/report_2ndfl_1/v2016/report_2ndfll_check.groovy"/>
 			<where>DECLARATION_TEMPLATE_ID = 102 and EVENT_ID = 5</where>
@@ -329,7 +329,7 @@
 		</sql>
 	</changeSet>
 	<!--https://jira.aplana.com/browse/SBRFNDFL-6560 Реализовать изменения в алгоритм формирования печатного представления 2-НДФЛ (1 и 2)-->
-	<changeSet id="3.5-ytrofimov-9" author="ytrofimov" runAlways="true">
+	<changeSet id="3.5-ytrofimov-9" author="ytrofimov">
 		<update tableName="BLOB_DATA">
 			<column name="data" valueBlobFile="templates-3.5/ndfl/report_2ndfl_1/v2016/ndfl_2_report_by_person_page_base.pdf"/>
 			<where>id = '79c363f8-52f7-4fa0-94bd-27c693f5cfd9'</where>
@@ -337,7 +337,7 @@
 	</changeSet>
 
 	<!--https://jira.aplana.com/browse/SBRFNDFL-6560 Реализовать изменения в алгоритм формирования печатного представления 2-НДФЛ (1 и 2)-->
-	<changeSet id="3.5-ytrofimov-10" author="ytrofimov" runAlways="true">
+	<changeSet id="3.5-ytrofimov-10" author="ytrofimov">
 		<update tableName="BLOB_DATA">
 			<column name="data" valueBlobFile="templates-3.5/ndfl/report_2ndfl_1/v2016/ndfl_2_report_by_person_page_application.pdf"/>
 			<where>id = '3a8afe75-a882-4ecb-9bd2-46920d12803d'</where>
@@ -437,7 +437,7 @@
 		</insert>
 	</changeSet>
 
-	<changeSet id="3.5-dnovikov-14" author="dnovikov" runAlways="true">
+	<changeSet id="3.5-dnovikov-14" author="dnovikov">
 		<update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
 			<column name="script" valueClobFile="templates-3.5/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_update_persons_data.groovy"/>
 			<where>DECLARATION_TEMPLATE_ID = 100 and EVENT_ID = 11</where>
@@ -512,7 +512,7 @@
                  splitStatements="false"/>
     </changeSet>
 
-	<changeSet id="3.5-dnovikov-15" author="dnovikov" runAlways="true">
+	<changeSet id="3.5-dnovikov-15" author="dnovikov">
 		<update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
 			<column name="script" valueClobFile="templates-3.5/ndfl/report_6ndfl/v2016/report_6ndfl_check.groovy"/>
 			<where>DECLARATION_TEMPLATE_ID = 103 and EVENT_ID = 5</where>
@@ -520,7 +520,7 @@
 	</changeSet>
 
 	<!--https://jira.aplana.com/browse/SBRFNDFL-6873 Ошибка NULL при загрузке файла первичной загрузки ФЛ с пустым атрибутом номер ДУЛ-->
-	<changeSet id="3.5-ytrofimov-17" author="ytrofimov" runAlways="true">
+	<changeSet id="3.5-ytrofimov-17" author="ytrofimov">
 		<update tableName="BLOB_DATA">
 			<column name="data"
 					valueBlobFile="templates-3.5/refbook/person.groovy"/>
