@@ -1,36 +1,18 @@
 package form_template.ndfl.primary_rnu_ndfl.v2016
 
 import com.aplana.sbrf.taxaccounting.AbstractScriptClass
-import com.aplana.sbrf.taxaccounting.model.DeclarationCheckCode
-import com.aplana.sbrf.taxaccounting.model.DeclarationData
-import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.FormDataKind
-import com.aplana.sbrf.taxaccounting.model.PagingResult
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod
+import com.aplana.sbrf.taxaccounting.model.*
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment
-import com.aplana.sbrf.taxaccounting.model.refbook.IdDoc
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAsnu
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
-import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPerson
+import com.aplana.sbrf.taxaccounting.model.refbook.*
 import com.aplana.sbrf.taxaccounting.model.util.BaseWeightCalculator
 import com.aplana.sbrf.taxaccounting.model.util.Pair
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
 import com.aplana.sbrf.taxaccounting.script.SharedConstants
-import com.aplana.sbrf.taxaccounting.script.service.CalendarService
-import com.aplana.sbrf.taxaccounting.script.service.DeclarationService
-import com.aplana.sbrf.taxaccounting.script.service.DepartmentReportPeriodService
-import com.aplana.sbrf.taxaccounting.script.service.DepartmentService
-import com.aplana.sbrf.taxaccounting.script.service.FiasRefBookService
-import com.aplana.sbrf.taxaccounting.script.service.NdflPersonService
-import com.aplana.sbrf.taxaccounting.script.service.PersonService
-import com.aplana.sbrf.taxaccounting.script.service.RefBookService
-import com.aplana.sbrf.taxaccounting.script.service.ReportPeriodService
+import com.aplana.sbrf.taxaccounting.script.service.*
 import com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils
 import com.aplana.sbrf.taxaccounting.utils.SimpleDateUtils
 import groovy.transform.EqualsAndHashCode
@@ -1508,7 +1490,9 @@ class Check extends AbstractScriptClass {
                                             LOG_TYPE_2_16, fioAndInpAndOperId, pathError, errMsg)
                                 }
                             } else {
-                                def groupKey = { NdflPersonIncome income -> personsCache.get(income.ndflPersonId).inp + "_" + income.kpp + "_" + income.oktmo }
+                                def groupKey = { NdflPersonIncome income ->
+                                    personsCache.get(income.ndflPersonId).inp + "_" + income.kpp + "_" + income.oktmo + "_" + income.incomeAccruedDate?.getAt(Calendar.YEAR)
+                                }
                                 // Группы сортировки, вычисляем 1 раз для всех строк
                                 if (incomesByPersonIdForCol16Sec2Check == null) {
                                     // отбираем все строки формы с заполненной графой 16 и у которых одновременно: 1) Р.2.Гр.14 = «13». 2) Р.2.Гр.4 ≠ «1010».
@@ -1863,7 +1847,7 @@ class Check extends AbstractScriptClass {
                 // Если выполняется хотя бы одно из условий:
                 // КодАСНУ не равна ни одному из значений: 1000; 1001; 1002
                 // Дата, указанная в "Раздел 3.Графа 15" не является последним календарным днём месяца
-                List<NdflPersonIncome> incomeExists = allIncomesOfOperation.findAll {NdflPersonIncome income ->
+                List<NdflPersonIncome> incomeExists = allIncomesOfOperation.findAll { NdflPersonIncome income ->
                     String asnuCode = getRefAsnu().get(income.asnuId).code
 
                     income.incomeAccruedDate == ndflPersonDeduction.incomeAccrued && income.incomeCode == ndflPersonDeduction.incomeCode &&
@@ -1871,7 +1855,7 @@ class Check extends AbstractScriptClass {
                             (!["1000", "1001", "1002"].contains(asnuCode) || !isLastMonthDay(ndflPersonDeduction.getPeriodCurrDate()))
                 }
 
-                if (!incomeExists.isEmpty() && incomeExists.find {NdflPersonIncome income ->
+                if (!incomeExists.isEmpty() && incomeExists.find { NdflPersonIncome income ->
                     income.taxDate == ndflPersonDeduction.periodCurrDate
                 } == null) {
                     String errMsg = "В разделе 2 отсутствует соответствующая строка начисления, содержащая информацию о вычете, с параметрами " +
