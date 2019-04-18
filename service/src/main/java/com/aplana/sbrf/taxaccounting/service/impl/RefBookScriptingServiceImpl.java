@@ -28,6 +28,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -68,6 +69,8 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
     private TransactionHelper tx;
     @Autowired
     private AuditService auditService;
+    @Autowired
+    private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
     private final static String SCRIPT_PATH_PREFIX = "../src/main/resources/refbook";
 
@@ -182,6 +185,7 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
         bindings.put("userInfo", userInfo);
         bindings.put("refBookFactory", refBookFactory);
         bindings.put("commonRefBookService", commonRefBookService);
+        bindings.put("namedParameterJdbcTemplate", namedParameterJdbcTemplate);
 
         String applicationVersion = "ФП «НДФЛ»";
         applicationVersion += " " + applicationInfo.getVersion();

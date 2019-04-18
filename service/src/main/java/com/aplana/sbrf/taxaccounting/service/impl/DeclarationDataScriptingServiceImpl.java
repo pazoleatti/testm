@@ -14,6 +14,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import javax.script.Bindings;
@@ -39,6 +40,8 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
     private ApplicationInfo applicationInfo;
     @Autowired
     private TransactionHelper tx;
+	@Autowired
+	private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
 	private final static String SCRIPT_PATH_PREFIX = "../src/main/resources/form_template";
 
@@ -130,6 +133,7 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
 		b.put("formDataEvent", event);
 		b.put("logger", logger);
         b.put("userInfo", userInfo);
+        b.put("namedParameterJdbcTemplate", namedParameterJdbcTemplate);
         if (declarationData != null) {
 			b.put("declarationData", declarationData);
 		}
