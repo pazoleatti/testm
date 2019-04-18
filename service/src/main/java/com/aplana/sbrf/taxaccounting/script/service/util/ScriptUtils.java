@@ -241,26 +241,27 @@ public final class ScriptUtils {
             throw new IllegalArgumentException("Начальный индекс не должен быть равен null");
         }
 
-        OPCPackage pkg = OPCPackage.open(file.getAbsolutePath(), PackageAccess.READ);
-        XSSFReader r = new XSSFReader(pkg);
-        SharedStringsTable sst = r.getSharedStringsTable();
-        XMLReader parser = XMLReaderFactory.createXMLReader();
-        StylesTable styles = r.getStylesTable();
-        ContentHandler handler = new MultiHeaderSheetWorkbookHandler(sst, styles, allValues, headerValues, headerStartValue, headerRowCount, paramsMap);
-        parser.setContentHandler(handler);
-        Iterator<InputStream> sheets = r.getSheetsData();
-        int i = 0;
-        while (sheets.hasNext()) {
-            if (i >= startSheetIndex) {
-                if (endSheetIndex == null || endSheetIndex <= i) {
-                    InputStream sheet = sheets.next();
-                    InputSource sheetSource = new InputSource(sheet);
-                    parser.parse(sheetSource);
+        try (OPCPackage pkg = OPCPackage.open(file.getAbsolutePath(), PackageAccess.READ)) {
+            XSSFReader r = new XSSFReader(pkg);
+            SharedStringsTable sst = r.getSharedStringsTable();
+            XMLReader parser = XMLReaderFactory.createXMLReader();
+            StylesTable styles = r.getStylesTable();
+            ContentHandler handler = new MultiHeaderSheetWorkbookHandler(sst, styles, allValues, headerValues, headerStartValue, headerRowCount, paramsMap);
+            parser.setContentHandler(handler);
+            Iterator<InputStream> sheets = r.getSheetsData();
+            int i = 0;
+            while (sheets.hasNext()) {
+                if (i >= startSheetIndex) {
+                    if (endSheetIndex == null || endSheetIndex <= i) {
+                        InputStream sheet = sheets.next();
+                        InputSource sheetSource = new InputSource(sheet);
+                        parser.parse(sheetSource);
+                    }
+                } else {
+                    sheets.next();
                 }
-            } else {
-                sheets.next();
+                i++;
             }
-            i++;
         }
     }
 
