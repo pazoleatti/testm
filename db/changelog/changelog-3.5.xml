@@ -566,14 +566,4 @@
 		</update>
 	</changeSet>
 
-    <!--https://jira.aplana.com/browse/SBRFNDFL-7396 - Триггер на блокировки при консолидации-->
-    <changeSet id="3.5-amandzyak-10" author="amandzyak">
-        <sqlFile dbms="oracle"
-                 encoding="utf8"
-                 endDelimiter=""
-                 path="/scripts/create_trigger_LOCK_DATA_BEFORE_INS.sql"
-                 relativeToChangelogFile="true"
-                 splitStatements="false"/>
-    </changeSet>
-
 </databaseChangeLog>
