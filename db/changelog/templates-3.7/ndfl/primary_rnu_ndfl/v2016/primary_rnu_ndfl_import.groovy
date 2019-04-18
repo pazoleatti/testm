@@ -171,6 +171,7 @@ class Import extends AbstractScriptClass {
         this.refBookPersonService = (RefBookPersonService) scriptClass.getProperty("refBookPersonService")
 
         reportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId).reportPeriod
+        correctReportPeriod()
         department = departmentService.get(declarationData.departmentId)
         declarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId)
         asnuName = getAsnuName()
@@ -178,6 +179,26 @@ class Import extends AbstractScriptClass {
         incomeCodes = getRefIncomeCodes()
         incomeTypeMap = getRefIncomeTypes()
         deductionCodes = getRefDeductionCodes()
+    }
+
+    void correctReportPeriod() {
+        def record = refBookFactory.getDataProvider(RefBook.Id.PERIOD_CODE.getId()).getRecordData(reportPeriod.dictTaxPeriodId)
+        if (record) {
+            def refStartDate = record.START_DATE.dateValue
+            def refCalendarStartDate = record.CALENDAR_START_DATE.dateValue
+            def refEndDate = record.END_DATE.dateValue
+
+            reportPeriod.startDate = toReportPeriodDate(refStartDate)
+            reportPeriod.calendarStartDate = toReportPeriodDate(refCalendarStartDate)
+            reportPeriod.endDate = toReportPeriodDate(refEndDate)
+        }
+    }
+
+    Date toReportPeriodDate(Date refDate) {
+        Calendar date = Calendar.getInstance();
+        date.setTime(refDate)
+        date[Calendar.YEAR] = reportPeriod.taxPeriod.year
+        return date.getTime()
     }
 
     @Override
@@ -1152,7 +1173,7 @@ class Import extends AbstractScriptClass {
 
         for (List<NdflPersonIncomeExt> incomesGroup : incomesGroupedByOperationId.values()) {
             boolean checkPassed = isIncomeDatesInPeriod(incomesGroup)
-            if(!checkPassed) {
+            if (!checkPassed) {
                 logger.error("Для ФЛ: \"${person.fullName}\", ИНП: \"${person.inp ?: "_"}\" операция \"${incomesGroup[0].operationId}\" " +
                         "не загружена в Налоговую форму №: \"${declarationData.id}\", Период: " +
                         "\"${reportPeriod.taxPeriod.year}, ${reportPeriod.name}\", Подразделение: \"${department.name}\", Вид: \"${declarationTemplate.name}\"" +

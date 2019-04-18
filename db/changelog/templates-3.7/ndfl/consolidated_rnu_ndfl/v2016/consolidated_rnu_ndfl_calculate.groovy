@@ -27,6 +27,7 @@ class Calculate extends AbstractScriptClass {
 
     NdflPersonService ndflPersonService
     DeclarationData declarationData
+    Department department
     RefBookFactory refBookFactory
     ReportPeriodService reportPeriodService
     DepartmentService departmentService
@@ -50,8 +51,14 @@ class Calculate extends AbstractScriptClass {
         if (scriptClass.getBinding().hasVariable("ndflPersonService")) {
             this.ndflPersonService = (NdflPersonService) scriptClass.getProperty("ndflPersonService")
         }
+        if (scriptClass.getBinding().hasVariable("departmentService")) {
+            this.departmentService = (DepartmentService) scriptClass.getProperty("departmentService")
+        }
         if (scriptClass.getBinding().hasVariable("declarationData")) {
             this.declarationData = (DeclarationData) scriptClass.getProperty("declarationData")
+            if (this.declarationData?.departmentId) {
+                this.department = departmentService.get(this.declarationData.departmentId)
+            }
         }
         if (scriptClass.getBinding().hasVariable("refBookFactory")) {
             this.refBookFactory = (RefBookFactory) scriptClass.getProperty("refBookFactory")
@@ -61,9 +68,6 @@ class Calculate extends AbstractScriptClass {
         }
         if (scriptClass.getBinding().hasVariable("declarationService")) {
             this.declarationService = (DeclarationService) scriptClass.getProperty("declarationService")
-        }
-        if (scriptClass.getBinding().hasVariable("departmentService")) {
-            this.departmentService = (DepartmentService) scriptClass.getProperty("departmentService")
         }
         if (scriptClass.getBinding().hasVariable("sourceService")) {
             this.sourceService = (SourceService) scriptClass.getProperty("sourceService")
@@ -595,6 +599,16 @@ class Calculate extends AbstractScriptClass {
         sourceService.deleteDeclarationConsolidateInfo(declarationData.id)
         sourceService.addDeclarationConsolidationInfo(declarationData.id, allSourcesIdList)
 
+        Set<Long> allPrimariesExceptAccepted = []
+        def tbWithChildren = departmentService.getAllChildren(declarationData.departmentId)
+        for (def department : tbWithChildren) {
+            def departmentPnfs = declarationService.findAllDeclarationData(DeclarationType.NDFL_PRIMARY, department.id, reportPeriod.id)
+            for (def departmentPnf : departmentPnfs) {
+                if (!allSourcesIdList.contains(departmentPnf.id)) {
+                    allPrimariesExceptAccepted.add(departmentPnf.id)
+                }
+            }
+        }
         for (Long sourceId : acceptedSources.get(Boolean.TRUE)) {
             ScriptUtils.checkInterrupted()
             DeclarationData source = declarationService.getDeclarationData(sourceId)
@@ -648,6 +662,12 @@ class Calculate extends AbstractScriptClass {
                         notAcceptedTbDepartments.get(department),
                         notAcceptedSourcesByTb.get(department)?.join(", "))
             }
+        }
+
+        if (allPrimariesExceptAccepted) {
+            logger.info("ПНФ из ТБ: \"${department.name}\" (и дочерних подразделений) не использованы в консолидации, так как не содержат операций, " +
+                    "попадающих в период «${reportPeriod.taxPeriod.year}, ${reportPeriod.name}» и содержащих КПП/ОКТМО относящихся к указанному ТБ: " +
+                    "${allPrimariesExceptAccepted.join(", ")} (всего ${allPrimariesExceptAccepted.size()})")
         }
 
     }
