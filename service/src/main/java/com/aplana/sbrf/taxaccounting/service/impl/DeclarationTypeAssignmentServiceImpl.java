@@ -115,7 +115,7 @@ public class DeclarationTypeAssignmentServiceImpl implements DeclarationTypeAssi
 
                 // Существующих назначений не найдено, назначить
                 if (canAssign) {
-                    // Создать дочерним подразделениям отчетные периоды, которых у них нет, но есть у ПАО "Сбербанк"
+                    // Создать дочерним подразделениям отчетные периоды, которых у них нет
                     List<Integer> childrenDepartmentIdList = departmentService.getAllChildrenIds(depId);
                     for (Integer childrenDepartmentId : childrenDepartmentIdList) {
                         addAllReportPeriodsToDepartment(childrenDepartmentId);
@@ -181,8 +181,7 @@ public class DeclarationTypeAssignmentServiceImpl implements DeclarationTypeAssi
     }
 
     /**
-     * Создание отчетных периодов для подразделения. Создаются все периоды, которые есть у останых подразделений,
-     * например, у ПАО "Сбербанк", но которых нет у заданного подразделения
+     * Для заданного подразделения создаются все периоды, которые есть ТБ, но нет в заданном
      *
      * @param depId ID подразделения
      */
@@ -192,20 +191,15 @@ public class DeclarationTypeAssignmentServiceImpl implements DeclarationTypeAssi
         filter.setDepartmentIdList(Arrays.asList(depId));
         List<DepartmentReportPeriod> depDrpList = departmentReportPeriodService.fetchAllByFilter(filter);
 
-        // Поиск периодов ПАО "Сбербанк"
+        // Поиск периодов тербанка
         DepartmentReportPeriodFilter filterAll = new DepartmentReportPeriodFilter();
         Department depTB = departmentService.getParentTB(depId);
         filterAll.setDepartmentIdList(Arrays.asList(depTB.getId()));
         List<DepartmentReportPeriod> tbDrpList = departmentReportPeriodService.fetchAllByFilter(filterAll);
 
-        // Список отчетных периодов подразделения для добавления заданному подразделению
-        // Строится на основе списка периодов ПАО "Сбербанк", из него исключаются те периоды,
-        // которые уже есть у заданного подразделения
+        // Все периоды которые есть у ТБ, но нет у текущего, поэтому создаём
         List<DepartmentReportPeriod> drpForCreate = new LinkedList<>(tbDrpList);
 
-        // Удаление периодов, имеющихся у заданного подразеления. Чтобы не создавалось то, что уже существует
-        // Перебираются все периоды ПАО "Сбербанк", если у заданного подразделения находится равный ему период,
-        // то он удаляется из списка периодов для создания
         for (DepartmentReportPeriod bankDrp : tbDrpList) {
             for (DepartmentReportPeriod depDrp : depDrpList) {
                 if (periodsAreEqual(depDrp, bankDrp)) {
