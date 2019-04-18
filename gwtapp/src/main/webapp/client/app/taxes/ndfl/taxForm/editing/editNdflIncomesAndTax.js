@@ -14,11 +14,11 @@
             "$modalInstance", '$logPanel', "$filter", "APP_CONSTANTS", '$shareData', '$dialogs', 'ndflIncomesAndTax',
             function ($scope, $rootScope, $http, $state, $stateParams, $modalInstance, $logPanel, $filter, APP_CONSTANTS, $shareData, $dialogs, ndflIncomesAndTax) {
 
-                // Формат положительного числа /20.2/
-                $scope.patternNumber20_2 = /^([0-9]{1,20})([.][0-9]{1,2})?$/;
-                // Форматы целых положительных чисел с ограничением по числу цифр
-                $scope.patternNumber20 = /^[0-9]{1,20}$/;
-                $scope.patternNumber15 = /^[0-9]{1,15}$/;
+                // Формат числа /20.2/
+                $scope.patternNumber20_2 = /^[+-]?([0-9]{1,20})([.][0-9]{1,2})?$/;
+                // Форматы целых чисел с ограничением по числу цифр
+                $scope.patternNumber20 = /^[+-]?[0-9]{1,20}$/;
+                $scope.patternNumber15 = /^[+-]?[0-9]{1,15}$/;
 
                 // Инициализация чисто для удобства работы с полями в коде
                 $scope.row = {
