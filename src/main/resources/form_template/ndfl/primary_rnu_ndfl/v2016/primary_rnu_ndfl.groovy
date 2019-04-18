@@ -194,6 +194,8 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
     final String RNU_NDFL_PERSON_ALL_DB = "rnu_ndfl_person_all_db.xlsx"
     final String REPORT_XLSX = "report.xlsx"
 
+    static SXSSFWorkbook sxssfWorkbook
+
     /**
      * Получить дату которая используется в качестве версии записей справочника
      * @return дата используемая в качестве даты версии справочника
@@ -1909,11 +1911,9 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
 
         SheetFillerContext context = createExportDeclarationDataSheetFillerContext()
 
-        XSSFWorkbook xssfWorkbook = createExportDeclarationDataWorkbook(context)
+        XSSFWorkbook xssfWorkbook = new XSSFWorkbook(scriptSpecificReportHolder.fileInputStream)
 
-        Workbook sxssfWorkbook = new SXSSFWorkbook(xssfWorkbook, 100, true)
-
-        new ExportDeclarationDataSheetFiller().fillSheet(sxssfWorkbook, context)
+        new ExportDeclarationDataSheetFiller().fillSheet(xssfWorkbook, context)
         OutputStream writer = scriptSpecificReportHolder.getFileOutputStream()
         sxssfWorkbook.write(writer)
         scriptSpecificReportHolder.setFileName(createExportDeclarationDataToExcelFileName())
@@ -1944,6 +1944,12 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
      */
     SheetFillerContext createExportDeclarationDataSheetFillerContext() {
         List<NdflPerson> ndflPersonList = ndflPersonService.findNdflPerson(declarationData.id)
+        Collections.sort(ndflPersonList, new Comparator<NdflPerson>() {
+            @Override
+            int compare(NdflPerson o1, NdflPerson o2) {
+                return o1.rowNum <=> o2.rowNum
+            }
+        })
         List<NdflPersonIncome> ndflPersonIncomeList = ndflPersonService.findNdflPersonIncome(declarationData.id)
         List<NdflPersonDeduction> ndflPersonDeductionList = ndflPersonService.findNdflPersonDeduction(declarationData.id)
         List<NdflPersonPrepayment> ndflPersonPrepaymentList = ndflPersonService.findNdflPersonPrepayment(declarationData.id)
@@ -1958,28 +1964,6 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
             context.getIdNdflPersonMap().get(ndflPersonPrepayment.ndflPersonId).prepayments << ndflPersonPrepayment
         }
         return context
-    }
-
-    /**
-     * Создает книгу и листы книги для выгрузки данных РНУ НДФЛ в Excel
-     * @param context данные выгружаемой НФ на основе которых создаются листы
-     * @return объект книги
-     */
-    XSSFWorkbook createExportDeclarationDataWorkbook(SheetFillerContext context) {
-        int counter = 2
-        int sheetIndex = 1
-        XSSFWorkbook workbook = new XSSFWorkbook(scriptSpecificReportHolder.fileInputStream)
-        for (NdflPerson ndflPerson : context.getNdflPersonList()) {
-            int maxOperationSize = [ndflPerson.incomes.size(), ndflPerson.deductions.size(), ndflPerson.prepayments.size()].max()
-            counter += maxOperationSize
-            if (counter > 1_000_000) {
-                counter = 2
-                sheetIndex++
-                workbook.cloneSheet(1)
-                workbook.setSheetName(sheetIndex, "РНУ НДФЛ (" + (sheetIndex - 1) + ")")
-            }
-        }
-        return workbook
     }
 
     //------------------ Import Data ----------------------
@@ -2530,11 +2514,22 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
     List<String> deductionTypeCache = []
 
     /**
+     * Данные о периоде из справочника
+     */
+    Map<String, RefBookValue> getReportPeriodFromRefBook() {
+        def refBookPeriod = getProvider(RefBook.Id.PERIOD_CODE.id)
+        return refBookPeriod.getRecordData(reportPeriod.dictTaxPeriodId)
+    }
+
+    /**
      * Получить дату начала отчетного периода
      * @return
      */
     Date getReportPeriodStartDate() {
-        if (periodStartDate == null) {
+        def periodInfo = getReportPeriodFromRefBook()
+        if (periodInfo) {
+            return toReportPeriodDate(periodInfo.START_DATE.dateValue)
+        } else if (!periodStartDate) {
             periodStartDate = reportPeriodService.getStartDate(declarationData.reportPeriodId)?.time
         }
         return periodStartDate
@@ -2545,7 +2540,10 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
      * @return
      */
     Date getReportPeriodCalendarStartDate() {
-        if (periodCalendarStartDate == null) {
+        def periodInfo = getReportPeriodFromRefBook()
+        if (periodInfo) {
+            return toReportPeriodDate(periodInfo.CALENDAR_START_DATE.dateValue)
+        } else if (periodCalendarStartDate == null) {
             periodCalendarStartDate = reportPeriodService.getCalendarStartDate(declarationData.reportPeriodId)?.time
         }
         return periodCalendarStartDate
@@ -2556,10 +2554,20 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
      * @return
      */
     Date getReportPeriodEndDate() {
-        if (periodEndDate == null) {
+        def periodInfo = getReportPeriodFromRefBook()
+        if (periodInfo) {
+            return toReportPeriodDate(periodInfo.END_DATE.dateValue)
+        } else if (periodEndDate == null) {
             periodEndDate = reportPeriodService.getEndDate(declarationData.reportPeriodId)?.time
         }
         return periodEndDate
+    }
+
+    Date toReportPeriodDate(Date refDate) {
+        Calendar date = Calendar.getInstance();
+        date.setTime(refDate)
+        date[Calendar.YEAR] = reportPeriod.taxPeriod.year
+        return date.getTime()
     }
 
     /**
@@ -2597,7 +2605,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
      */
     PagingResult<Map<String, RefBookValue>> getRefBook(long refBookId) {
         // Передаем как аргумент только срок действия версии справочника
-        PagingResult<Map<String, RefBookValue>> refBookList = getProvider(refBookId).getRecordsVersion(getPeriodStartDate(), getReportPeriodEndDate(), null, null)
+        PagingResult<Map<String, RefBookValue>> refBookList = getProvider(refBookId).getRecordsVersion(getReportPeriodStartDate(), getReportPeriodEndDate(), null, null)
         if (refBookList == null) {
             throw new Exception("Ошибка при получении записей справочника " + refBookId)
         }
@@ -3181,35 +3189,23 @@ class ExportDeclarationDataSheetFiller implements SheetFiller {
     void fillSheet(Workbook wb, SheetFillerContext context) {
         // Сдвиг начальной позиции строки на размер шапки таблицы
         final int OFFSET = 2
-        // Счетчик заполненных строк
-        int counter = OFFSET
         // Указатель на индекс позиции строки
         int pointer = OFFSET
         // Максимальное количество строк для заполнеиния на одном листе
         final int MAX_ROWS = 1_000_000
         // Используемый формат даты
         final String DATE_FORMAT = SharedConstants.DATE_FORMAT
-        // Индекс листа
-        int sheetIndex = 1
-        Sheet sheet = wb.getSheetAt(sheetIndex)
         Styler styler = new Styler(wb)
         CellStyle centeredStyle = styler.createVerticalByTopHorizontalByCenter()
         CellStyle centeredStyleDate = styler.createVerticalByTopHorizontalByCenterDate()
         CellStyle textCenteredStyle = styler.createBorderStyleCenterAlignedTypeText()
         CellStyle numberCenteredStyle = styler.createBorderStyleCenterAlignedTypeNumber()
+
+        List<Map<NdflPerson, List<ExcelTemplateRow>>> excelData = []
+        Map<NdflPerson, List<ExcelTemplateRow>> sheetData = [:]
+        int sheetRowsCounter = OFFSET
         for (NdflPerson np : context.getNdflPersonList()) {
-            ScriptUtils.checkInterrupted()
-            // определяем для физлица какой вид операций имеет наибольшее количество строк (доход, вычет, аванс)
-            int maxOperationSize = [np.incomes.size(), np.deductions.size(), np.prepayments.size()].max()
-            // Определяем сколько строк будет заполнено на листе после окончания заполнения для текущего физлица
-            counter += maxOperationSize
-            // если количество заполненных строк будет больше допустимого, тогда начинаем заполнять следующий лист
-            if (counter > MAX_ROWS) {
-                counter = OFFSET + maxOperationSize
-                pointer = OFFSET
-                sheetIndex++
-                sheet = wb.getSheetAt(sheetIndex - 1)
-            }
+            List<ExcelTemplateRow> ndflPersonRows = []
             // Сортировка каждого вида операции по № пп
             Collections.sort(np.incomes, new Comparator<NdflPersonIncome>() {
                 @Override
@@ -3229,262 +3225,387 @@ class ExportDeclarationDataSheetFiller implements SheetFiller {
                     return o1.rowNum <=> o2.rowNum
                 }
             })
-            // Для каждого физлица формируем  количество строк равное максимальному количеству строк из каждого вида операций
-            for (int i = 0; i < maxOperationSize; i++) {
-                StringBuilder cell0Value = new StringBuilder(np.id.toString())
-                cell0Value.append("_")
-                Row row = sheet.createRow(pointer)
-                // Заполненние данными из раздела "Реквизиты"
-                Cell cell_0 = row.createCell(0)
-                cell_0.setCellStyle(centeredStyle)
-                Cell cell_1 = row.createCell(1)
-                cell_1.setCellStyle(centeredStyle)
-                cell_1.setCellType(Cell.CELL_TYPE_STRING)
-                if (i < np.incomes.size()) {
-                    cell_1.setCellValue(np.incomes.get(i).rowNum != null ? np.incomes.get(i).rowNum.toString() : "")
+
+            Map<String, List<NdflPersonIncome>> incomesGroupedByOperationId = [:]
+            for (NdflPersonIncome income : np.incomes) {
+                List<NdflPersonIncome> group = incomesGroupedByOperationId.get(income.operationId)
+                if (!group) {
+                    incomesGroupedByOperationId.put(income.operationId, [income])
+                } else {
+                    group << income
                 }
-                Cell cell_2 = row.createCell(2)
-                cell_2.setCellStyle(centeredStyle)
-                cell_2.setCellValue(np.getInp() != null ? np.getInp() : "")
-                Cell cell_3 = row.createCell(3)
-                cell_3.setCellStyle(centeredStyle)
-                cell_3.setCellValue(np.getLastName() != null ? np.getLastName() : "")
-                Cell cell_4 = row.createCell(4)
-                cell_4.setCellStyle(centeredStyle)
-                cell_4.setCellValue(np.getFirstName() != null ? np.getFirstName() : "")
-                Cell cell_5 = row.createCell(5)
-                cell_5.setCellStyle(centeredStyle)
-                cell_5.setCellValue(np.getMiddleName() != null ? np.getMiddleName() : "")
-                Cell cell_6 = row.createCell(6)
-                cell_6.setCellStyle(centeredStyleDate)
-                cell_6.setCellValue(np.birthDay?.format(DATE_FORMAT) ?: "")
-                Cell cell_7 = row.createCell(7)
-                cell_7.setCellStyle(centeredStyle)
-                cell_7.setCellValue(np.getCitizenship() != null ? np.getCitizenship() : "")
-                Cell cell_8 = row.createCell(8)
-                cell_8.setCellStyle(centeredStyle)
-                cell_8.setCellValue(np.getInnNp() != null ? np.getInnNp() : "")
-                Cell cell_9 = row.createCell(9)
-                cell_9.setCellStyle(centeredStyle)
-                cell_9.setCellValue(np.getInnForeign() != null ? np.getInnForeign() : "")
-                Cell cell_10 = row.createCell(10)
-                cell_10.setCellStyle(centeredStyle)
-                cell_10.setCellValue(np.getIdDocType() != null ? np.getIdDocType() : "")
-                Cell cell_11 = row.createCell(11)
-                cell_11.setCellStyle(centeredStyle)
-                cell_11.setCellValue(np.getIdDocNumber() != null ? np.getIdDocNumber() : "")
-                Cell cell_12 = row.createCell(12)
-                cell_12.setCellStyle(centeredStyle)
-                cell_12.setCellValue(np.getStatus() != null ? np.getStatus() : "")
-                Cell cell_13 = row.createCell(13)
-                cell_13.setCellStyle(textCenteredStyle)
-                cell_13.setCellValue(np.getRegionCode() != null ? np.getRegionCode() : "")
-                Cell cell_14 = row.createCell(14)
-                cell_14.setCellStyle(centeredStyle)
-                cell_14.setCellValue(np.getPostIndex() != null ? np.getPostIndex() : "")
-                Cell cell_15 = row.createCell(15)
-                cell_15.setCellStyle(centeredStyle)
-                cell_15.setCellValue(np.getArea() != null ? np.getArea() : "")
-                Cell cell_16 = row.createCell(16)
-                cell_16.setCellStyle(centeredStyle)
-                cell_16.setCellValue(np.getCity() != null ? np.getCity() : "")
-                Cell cell_17 = row.createCell(17)
-                cell_17.setCellStyle(centeredStyle)
-                cell_17.setCellValue(np.getLocality() != null ? np.getLocality() : "")
-                Cell cell_18 = row.createCell(18)
-                cell_18.setCellStyle(centeredStyle)
-                cell_18.setCellValue(np.getStreet() != null ? np.getStreet() : "")
-                Cell cell_19 = row.createCell(19)
-                cell_19.setCellStyle(centeredStyle)
-                cell_19.setCellValue(np.getHouse() != null ? np.getHouse() : "")
-                Cell cell_20 = row.createCell(20)
-                cell_20.setCellStyle(centeredStyle)
-                cell_20.setCellValue(np.getBuilding() != null ? np.getBuilding() : "")
-                Cell cell_21 = row.createCell(21)
-                cell_21.setCellStyle(centeredStyle)
-                cell_21.setCellValue(np.getFlat() != null ? np.getFlat() : "")
-                Cell cell_22 = row.createCell(22)
-                cell_22.setCellStyle(centeredStyle)
-                cell_22.setCellValue(np.snils != null ? np.snils : "")
-                // Заполнение данными из раздела "Сведения о доходах"
-                Cell cell_23 = row.createCell(23)
-                cell_23.setCellStyle(textCenteredStyle)
-                Cell cell_24 = row.createCell(24)
-                cell_24.setCellStyle(centeredStyle)
-                Cell cell_25 = row.createCell(25)
-                cell_25.setCellStyle(textCenteredStyle)
-                Cell cell_26 = row.createCell(26)
-                cell_26.setCellStyle(centeredStyleDate)
-                Cell cell_27 = row.createCell(27)
-                cell_27.setCellStyle(centeredStyleDate)
-                Cell cell_28 = row.createCell(28)
-                cell_28.setCellStyle(textCenteredStyle)
-                Cell cell_29 = row.createCell(29)
-                cell_29.setCellStyle(textCenteredStyle)
-                Cell cell_30 = row.createCell(30)
-                cell_30.setCellStyle(numberCenteredStyle)
-                Cell cell_31 = row.createCell(31)
-                cell_31.setCellStyle(numberCenteredStyle)
-                Cell cell_32 = row.createCell(32)
-                cell_32.setCellStyle(numberCenteredStyle)
-                Cell cell_33 = row.createCell(33)
-                cell_33.setCellStyle(numberCenteredStyle)
-                Cell cell_34 = row.createCell(34)
-                cell_34.setCellStyle(centeredStyle)
-                Cell cell_35 = row.createCell(35)
-                cell_35.setCellStyle(centeredStyleDate)
-                Cell cell_36 = row.createCell(36)
-                cell_36.setCellStyle(numberCenteredStyle)
-                Cell cell_37 = row.createCell(37)
-                cell_37.setCellStyle(numberCenteredStyle)
-                Cell cell_38 = row.createCell(38)
-                cell_38.setCellStyle(numberCenteredStyle)
-                Cell cell_39 = row.createCell(39)
-                cell_39.setCellStyle(numberCenteredStyle)
-                Cell cell_40 = row.createCell(40)
-                cell_40.setCellStyle(numberCenteredStyle)
-                Cell cell_41 = row.createCell(41)
-                Cell cell_42 = row.createCell(42)
-                cell_42.setCellStyle(centeredStyleDate)
-                Cell cell_43 = row.createCell(43)
-                cell_43.setCellStyle(centeredStyle)
-                Cell cell_44 = row.createCell(44)
-                cell_44.setCellStyle(numberCenteredStyle)
-                if (i < np.incomes.size()) {
-                    NdflPersonIncome npi = np.incomes.get(i)
-                    cell0Value.append(npi.id.toString())
-                    cell_23.setCellValue(npi.getOperationId() != null ? npi.getOperationId() : "")
-                    cell_24.setCellValue(npi.getIncomeCode() != null ? npi.getIncomeCode() : "")
-                    cell_25.setCellValue(npi.getIncomeType() != null ? npi.getIncomeType() : "")
-                    cell_26.setCellValue(npi.incomeAccruedDate?.format(DATE_FORMAT) ?: "")
-                    cell_27.setCellValue(npi.incomePayoutDate?.format(DATE_FORMAT) ?: "")
-                    cell_28.setCellValue(npi.getKpp() != null ? npi.getKpp() : "")
-                    cell_29.setCellValue(npi.getOktmo() != null ? npi.getOktmo() : "")
-                    if (npi.incomeAccruedSumm != null) {
-                        cell_30.setCellValue(npi.incomeAccruedSumm.doubleValue())
+            }
+
+            for (List<NdflPersonIncome> entry : incomesGroupedByOperationId.values()) {
+                int rowCounter = 0
+                entry.each { NdflPersonIncome income ->
+                    List<NdflPersonDeduction> matchedDeductions = np.deductions.findAll { NdflPersonDeduction deduction ->
+                        deduction.operationId == income.operationId &&
+                                income.incomeAccruedDate == deduction.incomeAccrued &&
+                                income.incomeCode == deduction.incomeCode &&
+                                income.incomeAccruedSumm == deduction.incomeSumm &&
+                                income.taxDate == deduction.periodCurrDate
                     }
-                    if (npi.incomePayoutSumm != null) {
-                        cell_31.setCellValue(npi.incomePayoutSumm.doubleValue())
-                    }
-                    if (npi.totalDeductionsSumm != null) {
-                        cell_32.setCellValue(npi.totalDeductionsSumm.doubleValue())
-                    }
-                    if (npi.taxBase != null) {
-                        cell_33.setCellValue(npi.taxBase.doubleValue())
-                    }
-                    if (npi.taxRate != null) {
-                        cell_34.setCellValue(npi.taxRate)
-                    }
-                    cell_35.setCellValue(npi.taxDate?.format(DATE_FORMAT) ?: "")
-                    if (npi.calculatedTax != null) {
-                        cell_36.setCellValue(npi.calculatedTax.doubleValue())
-                    }
-                    if (npi.withholdingTax != null) {
-                        cell_37.setCellValue(npi.withholdingTax.doubleValue())
-                    }
-                    if (npi.notHoldingTax != null) {
-                        cell_38.setCellValue(npi.notHoldingTax.doubleValue())
-                    }
-                    if (npi.overholdingTax != null) {
-                        cell_39.setCellValue(npi.overholdingTax.doubleValue())
-                    }
-                    if (npi.refoundTax != null) {
-                        cell_40.setCellValue(npi.refoundTax.doubleValue())
-                    }
-                    if (npi.taxTransferDate?.format(SharedConstants.DATE_FORMAT) == SharedConstants.DATE_ZERO_AS_DATE) {
-                        cell_41.setCellStyle(centeredStyle)
-                        cell_41.setCellValue(SharedConstants.DATE_ZERO_AS_STRING)
+                    if (income.totalDeductionsSumm && !matchedDeductions.isEmpty()) {
+                        matchedDeductions.eachWithIndex { NdflPersonDeduction deduction, int index ->
+                            ExcelTemplateRow row = new ExcelTemplateRow()
+                            if (index == 0) {
+                                row.setNdflPersonIncome(income)
+                                row.setNdflPersonDeduction(deduction)
+                                np.deductions.remove(deduction)
+                                Iterator<NdflPersonPrepayment> prepaymentIterator = np.prepayments.iterator()
+                                while (prepaymentIterator.hasNext()) {
+                                    NdflPersonPrepayment prepayment = prepaymentIterator.next()
+                                    if (prepayment.operationId == entry.get(0).operationId) {
+                                        row.setNdflPersonPrepayment(prepayment)
+                                        prepaymentIterator.remove()
+                                        break
+                                    }
+                                }
+                            } else {
+                                row.setNdflPersonDeduction(deduction)
+                                np.deductions.remove(deduction)
+                                Iterator<NdflPersonPrepayment> prepaymentIterator = np.prepayments.iterator()
+                                while (prepaymentIterator.hasNext()) {
+                                    NdflPersonPrepayment prepayment = prepaymentIterator.next()
+                                    if (prepayment.operationId == entry.get(0).operationId) {
+                                        row.setNdflPersonPrepayment(prepayment)
+                                        prepaymentIterator.remove()
+                                        break
+                                    }
+                                }
+                            }
+                            ndflPersonRows << row
+                            rowCounter++
+                        }
                     } else {
-                        cell_41.setCellStyle(centeredStyleDate)
-                        cell_41.setCellValue(npi.taxTransferDate?.format(DATE_FORMAT) ?: "")
-                    }
-                    cell_42.setCellValue(npi.paymentDate?.format(DATE_FORMAT) ?: "")
-                    cell_43.setCellValue(npi.getPaymentNumber() != null ? npi.getPaymentNumber() : "")
-                    if (npi.taxSumm != null) {
-                        cell_44.setCellValue(npi.taxSumm.intValue())
-                    }
-                }
-                cell0Value.append("_")
-                // Заполнение данными из раздела "Сведения о вычетах"
-                Cell cell_45 = row.createCell(45)
-                cell_45.setCellStyle(centeredStyle)
-                Cell cell_46 = row.createCell(46)
-                cell_46.setCellStyle(centeredStyle)
-                Cell cell_47 = row.createCell(47)
-                cell_47.setCellStyle(centeredStyleDate)
-                Cell cell_48 = row.createCell(48)
-                cell_48.setCellStyle(centeredStyle)
-                Cell cell_49 = row.createCell(49)
-                cell_49.setCellStyle(centeredStyle)
-                Cell cell_50 = row.createCell(50)
-                cell_50.setCellStyle(numberCenteredStyle)
-                Cell cell_51 = row.createCell(51)
-                cell_51.setCellStyle(textCenteredStyle)
-                Cell cell_52 = row.createCell(52)
-                cell_52.setCellStyle(centeredStyleDate)
-                Cell cell_53 = row.createCell(53)
-                cell_53.setCellStyle(centeredStyle)
-                Cell cell_54 = row.createCell(54)
-                cell_54.setCellStyle(numberCenteredStyle)
-                Cell cell_55 = row.createCell(55)
-                cell_55.setCellStyle(centeredStyleDate)
-                Cell cell_56 = row.createCell(56)
-                cell_56.setCellStyle(numberCenteredStyle)
-                Cell cell_57 = row.createCell(57)
-                cell_57.setCellStyle(centeredStyleDate)
-                Cell cell_58 = row.createCell(58)
-                cell_58.setCellStyle(numberCenteredStyle)
-                if (i < np.deductions.size()) {
-                    NdflPersonDeduction npd = np.deductions.get(i)
-                    cell0Value.append(npd.id.toString())
-                    cell_45.setCellValue(npd.getTypeCode() != null ? npd.getTypeCode() : "")
-                    cell_46.setCellValue(npd.getNotifType() != null ? npd.getNotifType() : "")
-                    cell_47.setCellValue(npd.notifDate?.format(DATE_FORMAT) ?: "")
-                    cell_48.setCellValue(npd.getNotifNum() != null ? npd.getNotifNum() : "")
-                    cell_49.setCellValue(npd.getNotifSource() != null ? npd.getNotifSource() : "")
-                    if (npd.notifSumm != null) {
-                        cell_50.setCellValue(npd.notifSumm.doubleValue())
-                    }
-                    cell_51.setCellValue(npd.getOperationId() != null ? npd.getOperationId() : "")
-                    cell_52.setCellValue(npd.incomeAccrued?.format(DATE_FORMAT) ?: "")
-                    cell_53.setCellValue(npd.getIncomeCode() != null ? npd.getIncomeCode() : "")
-                    if (npd.incomeSumm != null) {
-                        cell_54.setCellValue(npd.incomeSumm.doubleValue())
-                    }
-                    cell_55.setCellValue(npd.periodPrevDate?.format(DATE_FORMAT) ?: "")
-                    if (npd.periodPrevSumm != null) {
-                        cell_56.setCellValue(npd.periodPrevSumm.doubleValue())
-                    }
-                    cell_57.setCellValue(npd.periodCurrDate?.format(DATE_FORMAT) ?: "")
-                    if (npd.periodCurrSumm != null) {
-                        cell_58.setCellValue(npd.periodCurrSumm.doubleValue())
+                        ExcelTemplateRow row = new ExcelTemplateRow()
+                        row.setNdflPersonIncome(income)
+                        Iterator<NdflPersonPrepayment> prepaymentIterator = np.prepayments.iterator()
+                        while (prepaymentIterator.hasNext()) {
+                            NdflPersonPrepayment prepayment = prepaymentIterator.next()
+                            if (prepayment.operationId == entry.get(0).operationId) {
+                                row.setNdflPersonPrepayment(prepayment)
+                                prepaymentIterator.remove()
+                                break
+                            }
+                        }
+                        ndflPersonRows << row
+                        rowCounter++
                     }
                 }
-                cell0Value.append("_")
-                // Заполнение данными из раздела "Сведения об авансах"
-                Cell cell_59 = row.createCell(59)
-                cell_59.setCellStyle(textCenteredStyle)
-                Cell cell_60 = row.createCell(60)
-                cell_60.setCellStyle(numberCenteredStyle)
-                Cell cell_61 = row.createCell(61)
-                cell_61.setCellStyle(centeredStyle)
-                Cell cell_62 = row.createCell(62)
-                cell_62.setCellStyle(centeredStyleDate)
-                Cell cell_63 = row.createCell(63)
-                cell_63.setCellStyle(centeredStyle)
-                if (i < np.prepayments.size()) {
-                    NdflPersonPrepayment npp = np.prepayments.get(i)
-                    cell0Value.append(npp.id.toString())
-                    cell_59.setCellValue(npp.getOperationId() != null ? npp.getOperationId() : "")
-                    if (npp.summ != null) {
-                        cell_60.setCellValue(npp.summ.doubleValue())
+                Iterator<NdflPersonDeduction> deductionIterator = np.deductions.iterator()
+                while (deductionIterator.hasNext()) {
+                    NdflPersonDeduction deduction = deductionIterator.next()
+                    if (deduction.operationId == entry.get(0).operationId) {
+                        ExcelTemplateRow row = new ExcelTemplateRow()
+                        row.setNdflPersonDeduction(deduction)
+                        deductionIterator.remove()
+                        Iterator<NdflPersonPrepayment> prepaymentIterator = np.prepayments.iterator()
+                        while (prepaymentIterator.hasNext()) {
+                            NdflPersonPrepayment prepayment = prepaymentIterator.next()
+                            if (prepayment.operationId == entry.get(0).operationId) {
+                                row.setNdflPersonPrepayment(prepayment)
+                                prepaymentIterator.remove()
+                                break
+                            }
+                        }
+                        ndflPersonRows << row
+                        rowCounter++
                     }
-                    cell_61.setCellValue(npp.getNotifNum() != null ? npp.getNotifNum() : "")
-                    cell_62.setCellValue(npp.notifDate?.format(DATE_FORMAT) ?: "")
-                    cell_63.setCellValue(npp.getNotifSource() != null ? npp.getNotifSource() : "")
                 }
-                cell_0.setCellValue(cell0Value.toString())
-                pointer++
+                Iterator<NdflPersonPrepayment> prepaymentIterator = np.prepayments.iterator()
+                while (prepaymentIterator.hasNext()) {
+                    NdflPersonPrepayment prepayment = prepaymentIterator.next()
+                    if (prepayment.operationId == entry.get(0).operationId) {
+                        ExcelTemplateRow row = new ExcelTemplateRow()
+                        row.setNdflPersonPrepayment(prepayment)
+                        prepaymentIterator.remove()
+                        ndflPersonRows << row
+                        rowCounter++
+                    }
+                }
+            }
+            if ((ndflPersonRows.size() + sheetRowsCounter) <= MAX_ROWS) {
+                sheetData.put(np, ndflPersonRows)
+                sheetRowsCounter += ndflPersonRows.size()
+            } else {
+                excelData << sheetData
+                sheetData = [:]
+                sheetData.put(np, ndflPersonRows)
+                sheetRowsCounter = ndflPersonRows.size()
+            }
+        }
+        excelData << sheetData
+        for (int i = 2; i <= excelData.size(); i++) {
+            wb.cloneSheet(1)
+            wb.setSheetName(i, "РНУ НДФЛ (" + (i - 1) + ")")
+        }
+        PrimaryRnuNdfl.sxssfWorkbook = new SXSSFWorkbook(wb as XSSFWorkbook, 100, true)
+        int sheetIndex = 1
+        for (Map<NdflPerson, List<ExcelTemplateRow>> currSheetData : excelData) {
+            sheetIndex++
+            Sheet sheet = PrimaryRnuNdfl.sxssfWorkbook.getSheetAt(sheetIndex - 1)
+            pointer = OFFSET
+            for (Map.Entry<NdflPerson, List<ExcelTemplateRow>> entry : currSheetData) {
+                NdflPerson np = entry.getKey()
+                for (ExcelTemplateRow rowData : entry.getValue()) {
+                    StringBuilder cell0Value = new StringBuilder(np.id.toString())
+                    cell0Value.append("_")
+                    Row row = sheet.createRow(pointer)
+                    // Заполненние данными из раздела "Реквизиты"
+                    Cell cell_0 = row.createCell(0)
+                    cell_0.setCellStyle(centeredStyle)
+                    Cell cell_1 = row.createCell(1)
+                    cell_1.setCellStyle(centeredStyle)
+                    cell_1.setCellType(Cell.CELL_TYPE_STRING)
+                    if (rowData.ndflPersonIncome) {
+                        cell_1.setCellValue(rowData.ndflPersonIncome?.rowNum != null ? rowData.ndflPersonIncome?.rowNum?.toString() : "")
+                    }
+                    Cell cell_2 = row.createCell(2)
+                    cell_2.setCellStyle(textCenteredStyle)
+                    cell_2.setCellValue(np.getInp() != null ? np.getInp() : "")
+                    Cell cell_3 = row.createCell(3)
+                    cell_3.setCellStyle(centeredStyle)
+                    cell_3.setCellValue(np.getLastName() != null ? np.getLastName() : "")
+                    Cell cell_4 = row.createCell(4)
+                    cell_4.setCellStyle(centeredStyle)
+                    cell_4.setCellValue(np.getFirstName() != null ? np.getFirstName() : "")
+                    Cell cell_5 = row.createCell(5)
+                    cell_5.setCellStyle(centeredStyle)
+                    cell_5.setCellValue(np.getMiddleName() != null ? np.getMiddleName() : "")
+                    Cell cell_6 = row.createCell(6)
+                    cell_6.setCellStyle(centeredStyleDate)
+                    cell_6.setCellValue(np.birthDay?.format(DATE_FORMAT) ?: "")
+                    Cell cell_7 = row.createCell(7)
+                    cell_7.setCellStyle(textCenteredStyle)
+                    cell_7.setCellValue(np.getCitizenship() != null ? np.getCitizenship() : "")
+                    Cell cell_8 = row.createCell(8)
+                    cell_8.setCellStyle(textCenteredStyle)
+                    cell_8.setCellValue(np.getInnNp() != null ? np.getInnNp() : "")
+                    Cell cell_9 = row.createCell(9)
+                    cell_9.setCellStyle(textCenteredStyle)
+                    cell_9.setCellValue(np.getInnForeign() != null ? np.getInnForeign() : "")
+                    Cell cell_10 = row.createCell(10)
+                    cell_10.setCellStyle(textCenteredStyle)
+                    cell_10.setCellValue(np.getIdDocType() != null ? np.getIdDocType() : "")
+                    Cell cell_11 = row.createCell(11)
+                    cell_11.setCellStyle(textCenteredStyle)
+                    cell_11.setCellValue(np.getIdDocNumber() != null ? np.getIdDocNumber() : "")
+                    Cell cell_12 = row.createCell(12)
+                    cell_12.setCellStyle(centeredStyle)
+                    cell_12.setCellValue(np.getStatus() != null ? np.getStatus() : "")
+                    Cell cell_13 = row.createCell(13)
+                    cell_13.setCellStyle(textCenteredStyle)
+                    cell_13.setCellValue(np.getRegionCode() != null ? np.getRegionCode() : "")
+                    Cell cell_14 = row.createCell(14)
+                    cell_14.setCellStyle(textCenteredStyle)
+                    cell_14.setCellValue(np.getPostIndex() != null ? np.getPostIndex() : "")
+                    Cell cell_15 = row.createCell(15)
+                    cell_15.setCellStyle(textCenteredStyle)
+                    cell_15.setCellValue(np.getArea() != null ? np.getArea() : "")
+                    Cell cell_16 = row.createCell(16)
+                    cell_16.setCellStyle(textCenteredStyle)
+                    cell_16.setCellValue(np.getCity() != null ? np.getCity() : "")
+                    Cell cell_17 = row.createCell(17)
+                    cell_17.setCellStyle(textCenteredStyle)
+                    cell_17.setCellValue(np.getLocality() != null ? np.getLocality() : "")
+                    Cell cell_18 = row.createCell(18)
+                    cell_18.setCellStyle(textCenteredStyle)
+                    cell_18.setCellValue(np.getStreet() != null ? np.getStreet() : "")
+                    Cell cell_19 = row.createCell(19)
+                    cell_19.setCellStyle(textCenteredStyle)
+                    cell_19.setCellValue(np.getHouse() != null ? np.getHouse() : "")
+                    Cell cell_20 = row.createCell(20)
+                    cell_20.setCellStyle(textCenteredStyle)
+                    cell_20.setCellValue(np.getBuilding() != null ? np.getBuilding() : "")
+                    Cell cell_21 = row.createCell(21)
+                    cell_21.setCellStyle(textCenteredStyle)
+                    cell_21.setCellValue(np.getFlat() != null ? np.getFlat() : "")
+                    Cell cell_22 = row.createCell(22)
+                    cell_22.setCellStyle(textCenteredStyle)
+                    cell_22.setCellValue(np.snils != null ? np.snils : "")
+                    // Заполнение данными из раздела "Сведения о доходах"
+                    Cell cell_23 = row.createCell(23)
+                    cell_23.setCellStyle(textCenteredStyle)
+                    Cell cell_24 = row.createCell(24)
+                    cell_24.setCellStyle(textCenteredStyle)
+                    Cell cell_25 = row.createCell(25)
+                    cell_25.setCellStyle(textCenteredStyle)
+                    Cell cell_26 = row.createCell(26)
+                    cell_26.setCellStyle(centeredStyleDate)
+                    Cell cell_27 = row.createCell(27)
+                    cell_27.setCellStyle(centeredStyleDate)
+                    Cell cell_28 = row.createCell(28)
+                    cell_28.setCellStyle(textCenteredStyle)
+                    Cell cell_29 = row.createCell(29)
+                    cell_29.setCellStyle(textCenteredStyle)
+                    Cell cell_30 = row.createCell(30)
+                    cell_30.setCellStyle(numberCenteredStyle)
+                    Cell cell_31 = row.createCell(31)
+                    cell_31.setCellStyle(numberCenteredStyle)
+                    Cell cell_32 = row.createCell(32)
+                    cell_32.setCellStyle(numberCenteredStyle)
+                    Cell cell_33 = row.createCell(33)
+                    cell_33.setCellStyle(numberCenteredStyle)
+                    Cell cell_34 = row.createCell(34)
+                    cell_34.setCellStyle(centeredStyle)
+                    Cell cell_35 = row.createCell(35)
+                    cell_35.setCellStyle(centeredStyleDate)
+                    Cell cell_36 = row.createCell(36)
+                    cell_36.setCellStyle(numberCenteredStyle)
+                    Cell cell_37 = row.createCell(37)
+                    cell_37.setCellStyle(numberCenteredStyle)
+                    Cell cell_38 = row.createCell(38)
+                    cell_38.setCellStyle(numberCenteredStyle)
+                    Cell cell_39 = row.createCell(39)
+                    cell_39.setCellStyle(numberCenteredStyle)
+                    Cell cell_40 = row.createCell(40)
+                    cell_40.setCellStyle(numberCenteredStyle)
+                    Cell cell_41 = row.createCell(41)
+                    cell_41.setCellStyle(centeredStyle)
+                    Cell cell_42 = row.createCell(42)
+                    cell_42.setCellStyle(centeredStyleDate)
+                    Cell cell_43 = row.createCell(43)
+                    cell_43.setCellStyle(textCenteredStyle)
+                    Cell cell_44 = row.createCell(44)
+                    cell_44.setCellStyle(numberCenteredStyle)
+                    if (rowData.ndflPersonIncome) {
+                        NdflPersonIncome npi = rowData.ndflPersonIncome
+                        cell0Value.append(npi.id.toString())
+                        cell_23.setCellValue(npi.getOperationId() != null ? npi.getOperationId() : "")
+                        cell_24.setCellValue(npi.getIncomeCode() != null ? npi.getIncomeCode() : "")
+                        cell_25.setCellValue(npi.getIncomeType() != null ? npi.getIncomeType() : "")
+                        cell_26.setCellValue(npi.incomeAccruedDate?.format(DATE_FORMAT) ?: "")
+                        cell_27.setCellValue(npi.incomePayoutDate?.format(DATE_FORMAT) ?: "")
+                        cell_28.setCellValue(npi.getKpp() != null ? npi.getKpp() : "")
+                        cell_29.setCellValue(npi.getOktmo() != null ? npi.getOktmo() : "")
+                        if (npi.incomeAccruedSumm != null) {
+                            cell_30.setCellValue(npi.incomeAccruedSumm.doubleValue())
+                        }
+                        if (npi.incomePayoutSumm != null) {
+                            cell_31.setCellValue(npi.incomePayoutSumm.doubleValue())
+                        }
+                        if (npi.totalDeductionsSumm != null) {
+                            cell_32.setCellValue(npi.totalDeductionsSumm.doubleValue())
+                        }
+                        if (npi.taxBase != null) {
+                            cell_33.setCellValue(npi.taxBase.doubleValue())
+                        }
+                        if (npi.taxRate != null) {
+                            cell_34.setCellValue(npi.taxRate)
+                        }
+                        cell_35.setCellValue(npi.taxDate?.format(DATE_FORMAT) ?: "")
+                        if (npi.calculatedTax != null) {
+                            cell_36.setCellValue(npi.calculatedTax.doubleValue())
+                        }
+                        if (npi.withholdingTax != null) {
+                            cell_37.setCellValue(npi.withholdingTax.doubleValue())
+                        }
+                        if (npi.notHoldingTax != null) {
+                            cell_38.setCellValue(npi.notHoldingTax.doubleValue())
+                        }
+                        if (npi.overholdingTax != null) {
+                            cell_39.setCellValue(npi.overholdingTax.doubleValue())
+                        }
+                        if (npi.refoundTax != null) {
+                            cell_40.setCellValue(npi.refoundTax.doubleValue())
+                        }
+                        if (npi.taxTransferDate?.format(SharedConstants.DATE_FORMAT) == SharedConstants.DATE_ZERO_AS_DATE) {
+                            cell_41.setCellStyle(centeredStyle)
+                            cell_41.setCellValue(SharedConstants.DATE_ZERO_AS_STRING)
+                        } else {
+                            cell_41.setCellStyle(centeredStyleDate)
+                            cell_41.setCellValue(npi.taxTransferDate?.format(DATE_FORMAT) ?: "")
+                        }
+                        cell_42.setCellValue(npi.paymentDate?.format(DATE_FORMAT) ?: "")
+                        cell_43.setCellValue(npi.getPaymentNumber() != null ? npi.getPaymentNumber() : "")
+                        if (npi.taxSumm != null) {
+                            cell_44.setCellValue(npi.taxSumm.intValue())
+                        }
+                    }
+                    cell0Value.append("_")
+                    // Заполнение данными из раздела "Сведения о вычетах"
+                    Cell cell_45 = row.createCell(45)
+                    cell_45.setCellStyle(textCenteredStyle)
+                    Cell cell_46 = row.createCell(46)
+                    cell_46.setCellStyle(centeredStyle)
+                    Cell cell_47 = row.createCell(47)
+                    cell_47.setCellStyle(centeredStyleDate)
+                    Cell cell_48 = row.createCell(48)
+                    cell_48.setCellStyle(textCenteredStyle)
+                    Cell cell_49 = row.createCell(49)
+                    cell_49.setCellStyle(textCenteredStyle)
+                    Cell cell_50 = row.createCell(50)
+                    cell_50.setCellStyle(numberCenteredStyle)
+                    Cell cell_51 = row.createCell(51)
+                    cell_51.setCellStyle(textCenteredStyle)
+                    Cell cell_52 = row.createCell(52)
+                    cell_52.setCellStyle(centeredStyleDate)
+                    Cell cell_53 = row.createCell(53)
+                    cell_53.setCellStyle(textCenteredStyle)
+                    Cell cell_54 = row.createCell(54)
+                    cell_54.setCellStyle(numberCenteredStyle)
+                    Cell cell_55 = row.createCell(55)
+                    cell_55.setCellStyle(centeredStyleDate)
+                    Cell cell_56 = row.createCell(56)
+                    cell_56.setCellStyle(numberCenteredStyle)
+                    Cell cell_57 = row.createCell(57)
+                    cell_57.setCellStyle(centeredStyleDate)
+                    Cell cell_58 = row.createCell(58)
+                    cell_58.setCellStyle(numberCenteredStyle)
+                    if (rowData.ndflPersonDeduction) {
+                        NdflPersonDeduction npd = rowData.ndflPersonDeduction
+                        cell0Value.append(npd.id.toString())
+                        cell_45.setCellValue(npd.getTypeCode() != null ? npd.getTypeCode() : "")
+                        cell_46.setCellValue(npd.getNotifType() != null ? npd.getNotifType() : "")
+                        cell_47.setCellValue(npd.notifDate?.format(DATE_FORMAT) ?: "")
+                        cell_48.setCellValue(npd.getNotifNum() != null ? npd.getNotifNum() : "")
+                        cell_49.setCellValue(npd.getNotifSource() != null ? npd.getNotifSource() : "")
+                        if (npd.notifSumm != null) {
+                            cell_50.setCellValue(npd.notifSumm.doubleValue())
+                        }
+                        cell_51.setCellValue(npd.getOperationId() != null ? npd.getOperationId() : "")
+                        cell_52.setCellValue(npd.incomeAccrued?.format(DATE_FORMAT) ?: "")
+                        cell_53.setCellValue(npd.getIncomeCode() != null ? npd.getIncomeCode() : "")
+                        if (npd.incomeSumm != null) {
+                            cell_54.setCellValue(npd.incomeSumm.doubleValue())
+                        }
+                        cell_55.setCellValue(npd.periodPrevDate?.format(DATE_FORMAT) ?: "")
+                        if (npd.periodPrevSumm != null) {
+                            cell_56.setCellValue(npd.periodPrevSumm.doubleValue())
+                        }
+                        cell_57.setCellValue(npd.periodCurrDate?.format(DATE_FORMAT) ?: "")
+                        if (npd.periodCurrSumm != null) {
+                            cell_58.setCellValue(npd.periodCurrSumm.doubleValue())
+                        }
+                    }
+                    cell0Value.append("_")
+                    // Заполнение данными из раздела "Сведения об авансах"
+                    Cell cell_59 = row.createCell(59)
+                    cell_59.setCellStyle(textCenteredStyle)
+                    Cell cell_60 = row.createCell(60)
+                    cell_60.setCellStyle(numberCenteredStyle)
+                    Cell cell_61 = row.createCell(61)
+                    cell_61.setCellStyle(textCenteredStyle)
+                    Cell cell_62 = row.createCell(62)
+                    cell_62.setCellStyle(centeredStyleDate)
+                    Cell cell_63 = row.createCell(63)
+                    cell_63.setCellStyle(textCenteredStyle)
+                    if (rowData.ndflPersonPrepayment) {
+                        NdflPersonPrepayment npp = rowData.ndflPersonPrepayment
+                        cell0Value.append(npp.id.toString())
+                        cell_59.setCellValue(npp.getOperationId() != null ? npp.getOperationId() : "")
+                        if (npp.summ != null) {
+                            cell_60.setCellValue(npp.summ.doubleValue())
+                        }
+                        cell_61.setCellValue(npp.getNotifNum() != null ? npp.getNotifNum() : "")
+                        cell_62.setCellValue(npp.notifDate?.format(DATE_FORMAT) ?: "")
+                        cell_63.setCellValue(npp.getNotifSource() != null ? npp.getNotifSource() : "")
+                    }
+                    cell_0.setCellValue(cell0Value.toString())
+                    pointer++
+                }
             }
         }
     }
@@ -3778,4 +3899,14 @@ class Styler {
         boldFont.setBold(true)
         return boldFont
     }
+}
+
+/**
+ * Класс соответсвующий данным одной строки из шаблона выгрузки в Excel
+ */
+class ExcelTemplateRow {
+    NdflPerson ndflPerson
+    NdflPersonIncome ndflPersonIncome
+    NdflPersonDeduction ndflPersonDeduction
+    NdflPersonPrepayment ndflPersonPrepayment
 }

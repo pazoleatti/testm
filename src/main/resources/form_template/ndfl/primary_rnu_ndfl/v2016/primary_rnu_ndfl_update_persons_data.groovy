@@ -105,126 +105,125 @@ class UpdatePersonsData extends AbstractScriptClass {
                 logger.warn("Невозможно обновить запись: ${createPersonInfo(declarationDataPerson)}. Причина: \"Для связанного физического лица в Реестре физических лиц отсутствует актуальная запись о физическом лице\"")
                 continue
             }
-            String personInfo
+            String personInfo = createPersonInfo(declarationDataPerson)
             List<String> updateInfo = []
             boolean updated = false
             if (refBookPerson.inp != declarationDataPerson.inp && declarationTemplate.declarationFormKind == DeclarationFormKind.CONSOLIDATED) {
-                    updateInfo << createUpdateInfo(SharedConstants.INP_FULL, declarationDataPerson.inp ?: "", refBookPerson.inp ?: "_")
+                    updateInfo << createUpdateInfo(SharedConstants.INP_FULL, declarationDataPerson.inp ?: "_", refBookPerson.inp ?: "_")
                     declarationDataPerson.inp = refBookPerson.inp
                     updated = true
             }
             if (refBookPerson.lastName != declarationDataPerson.lastName) {
-                    updateInfo << createUpdateInfo(SharedConstants.LAST_NAME_FULL, declarationDataPerson.lastName ?: "", refBookPerson.lastName ?: "_")
+                    updateInfo << createUpdateInfo(SharedConstants.LAST_NAME_FULL, declarationDataPerson.lastName ?: "_", refBookPerson.lastName ?: "_")
                     declarationDataPerson.lastName = refBookPerson.lastName
                     updated = true
             }
             if (refBookPerson.firstName != declarationDataPerson.firstName) {
-                    updateInfo << createUpdateInfo(SharedConstants.FIRST_NAME_FULL, declarationDataPerson.firstName ?: "", refBookPerson.firstName ?: "_")
+                    updateInfo << createUpdateInfo(SharedConstants.FIRST_NAME_FULL, declarationDataPerson.firstName ?: "_", refBookPerson.firstName ?: "_")
                     declarationDataPerson.firstName = refBookPerson.firstName
                     updated = true
             }
             if (refBookPerson.middleName != declarationDataPerson.middleName) {
-                    updateInfo << createUpdateInfo(SharedConstants.MIDDLE_NAME_FULL, declarationDataPerson.middleName ?: "", refBookPerson.middleName ?: "_")
+                    updateInfo << createUpdateInfo(SharedConstants.MIDDLE_NAME_FULL, declarationDataPerson.middleName ?: "_", refBookPerson.middleName ?: "_")
                     declarationDataPerson.middleName = refBookPerson.middleName
                     updated = true
             }
             if (refBookPerson.birthDay != declarationDataPerson.birthDay) {
-                    updateInfo << createUpdateInfo(SharedConstants.BIRTH_DAY_FULL, declarationDataPerson.birthDay ? declarationDataPerson.birthDay.format(SharedConstants.DATE_FORMAT) : "", refBookPerson.birthDay ? refBookPerson.birthDay.format(SharedConstants.DATE_FORMAT) : "_")
+                    updateInfo << createUpdateInfo(SharedConstants.BIRTH_DAY_FULL, declarationDataPerson.birthDay ? declarationDataPerson.birthDay.format(SharedConstants.DATE_FORMAT) : "_", refBookPerson.birthDay ? refBookPerson.birthDay.format(SharedConstants.DATE_FORMAT) : "_")
                     declarationDataPerson.birthDay = refBookPerson.birthDay
                     updated = true
             }
             if (refBookPerson.citizenship != declarationDataPerson.citizenship) {
-                    updateInfo << createUpdateInfo(SharedConstants.CITIZENSHIP_FULL, declarationDataPerson.citizenship ?: "", refBookPerson.citizenship ?: "_")
+                    updateInfo << createUpdateInfo(SharedConstants.CITIZENSHIP_FULL, declarationDataPerson.citizenship ?: "_", refBookPerson.citizenship ?: "_")
                     declarationDataPerson.citizenship = refBookPerson.citizenship
                     updated = true
             }
             if (refBookPerson.innNp != declarationDataPerson.innNp) {
-                    updateInfo << createUpdateInfo(SharedConstants.INN_FULL, declarationDataPerson.innNp ?: "", refBookPerson.innNp ?: "_")
+                    updateInfo << createUpdateInfo(SharedConstants.INN_FULL, declarationDataPerson.innNp ?: "_", refBookPerson.innNp ?: "_")
                     declarationDataPerson.innNp = refBookPerson.innNp
                     updated = true
             }
             if (refBookPerson.innForeign != declarationDataPerson.innForeign) {
-                    updateInfo << createUpdateInfo(SharedConstants.INN_FOREIGN_FULL, declarationDataPerson.innForeign ?: "", refBookPerson.innForeign ?: "_")
+                    updateInfo << createUpdateInfo(SharedConstants.INN_FOREIGN_FULL, declarationDataPerson.innForeign ?: "_", refBookPerson.innForeign ?: "_")
                     declarationDataPerson.innForeign = refBookPerson.innForeign
                     updated = true
             }
             if (refBookPerson.idDocType != declarationDataPerson.idDocType) {
-                    updateInfo << createUpdateInfo(SharedConstants.ID_DOC_TYPE_FULL, declarationDataPerson.idDocType ?: "", refBookPerson.idDocType ?: "")
+                    updateInfo << createUpdateInfo(SharedConstants.ID_DOC_TYPE_FULL, declarationDataPerson.idDocType ?: "_", refBookPerson.idDocType ?: "_")
                     declarationDataPerson.idDocType = refBookPerson.idDocType
                     updated = true
             }
             if (refBookPerson.idDocNumber != declarationDataPerson.idDocNumber) {
-                    updateInfo << createUpdateInfo(SharedConstants.ID_DOC_NUMBER_FULL, declarationDataPerson.idDocNumber ?: "", refBookPerson.idDocNumber ?: "_")
+                    updateInfo << createUpdateInfo(SharedConstants.ID_DOC_NUMBER_FULL, declarationDataPerson.idDocNumber ?: "_", refBookPerson.idDocNumber ?: "_")
                     declarationDataPerson.idDocNumber = refBookPerson.idDocNumber
                     updated = true
             }
             if (refBookPerson.status != declarationDataPerson.status) {
-                    updateInfo << createUpdateInfo(SharedConstants.STATUS_FULL, declarationDataPerson.status ?: "", refBookPerson.status ?: "_")
+                    updateInfo << createUpdateInfo(SharedConstants.STATUS_FULL, declarationDataPerson.status ?: "_", refBookPerson.status ?: "_")
                     declarationDataPerson.status = refBookPerson.status
                     updated = true
             }
             if (refBookPerson.regionCode != declarationDataPerson.regionCode) {
-                    updateInfo << createUpdateInfo(SharedConstants.REGION_CODE_FULL, declarationDataPerson.regionCode ?: "", refBookPerson.regionCode ?: "_")
+                    updateInfo << createUpdateInfo(SharedConstants.REGION_CODE_FULL, declarationDataPerson.regionCode ?: "_", refBookPerson.regionCode ?: "_")
                     declarationDataPerson.regionCode = refBookPerson.regionCode
                     updated = true
             }
             if (refBookPerson.postIndex != declarationDataPerson.postIndex) {
-                    updateInfo << createUpdateInfo(SharedConstants.POST_INDEX_FULL, declarationDataPerson.postIndex ?: "", refBookPerson.postIndex ?: "_")
+                    updateInfo << createUpdateInfo(SharedConstants.POST_INDEX_FULL, declarationDataPerson.postIndex ?: "_", refBookPerson.postIndex ?: "_")
                     declarationDataPerson.postIndex = refBookPerson.postIndex
                     updated = true
             }
             if (refBookPerson.area != declarationDataPerson.area) {
-                    updateInfo << createUpdateInfo(SharedConstants.AREA_FULL, declarationDataPerson.area ?: "", refBookPerson.area ?: "_")
+                    updateInfo << createUpdateInfo(SharedConstants.AREA_FULL, declarationDataPerson.area ?: "_", refBookPerson.area ?: "_")
                     declarationDataPerson.area = refBookPerson.area
                     updated = true
             }
             if (refBookPerson.city != declarationDataPerson.city) {
-                    updateInfo << createUpdateInfo(SharedConstants.CITY_FULL, declarationDataPerson.city ?: "", refBookPerson.city ?: "_")
+                    updateInfo << createUpdateInfo(SharedConstants.CITY_FULL, declarationDataPerson.city ?: "_", refBookPerson.city ?: "_")
                     declarationDataPerson.city = refBookPerson.city
                     updated = true
             }
             if (refBookPerson.locality != declarationDataPerson.locality) {
-                    updateInfo << createUpdateInfo(SharedConstants.LOCALITY_FULL, declarationDataPerson.locality ?: "", refBookPerson.locality ?: "_")
+                    updateInfo << createUpdateInfo(SharedConstants.LOCALITY_FULL, declarationDataPerson.locality ?: "_", refBookPerson.locality ?: "_")
                     declarationDataPerson.locality = refBookPerson.locality
                     updated = true
             }
             if (refBookPerson.street != declarationDataPerson.street) {
-                    updateInfo << createUpdateInfo(SharedConstants.STREET_FULL, declarationDataPerson.street ?: "", refBookPerson.street ?: "_")
+                    updateInfo << createUpdateInfo(SharedConstants.STREET_FULL, declarationDataPerson.street ?: "_", refBookPerson.street ?: "_")
                     declarationDataPerson.street = refBookPerson.street
                     updated = true
             }
             if (refBookPerson.house != declarationDataPerson.house) {
-                    updateInfo << createUpdateInfo(SharedConstants.HOUSE_FULL, declarationDataPerson.house ?: "", refBookPerson.house ?: "_")
+                    updateInfo << createUpdateInfo(SharedConstants.HOUSE_FULL, declarationDataPerson.house ?: "_", refBookPerson.house ?: "_")
                     declarationDataPerson.house = refBookPerson.house
                     updated = true
             }
             if (refBookPerson.building != declarationDataPerson.building) {
-                    updateInfo << createUpdateInfo(SharedConstants.BUILDING_FULL, declarationDataPerson.building ?: "", refBookPerson.building ?: "_")
+                    updateInfo << createUpdateInfo(SharedConstants.BUILDING_FULL, declarationDataPerson.building ?: "_", refBookPerson.building ?: "_")
                     declarationDataPerson.building = refBookPerson.building
                     updated = true
             }
             if (refBookPerson.flat != declarationDataPerson.flat) {
-                    updateInfo << createUpdateInfo(SharedConstants.FLAT_FULL, declarationDataPerson.flat ?: "", refBookPerson.flat ?: "_")
+                    updateInfo << createUpdateInfo(SharedConstants.FLAT_FULL, declarationDataPerson.flat ?: "_", refBookPerson.flat ?: "_")
                     declarationDataPerson.flat = refBookPerson.flat
                     updated = true
             }
             if (refBookPerson.snils != declarationDataPerson.snils) {
-                    updateInfo << createUpdateInfo(SharedConstants.SNILS_FULL, declarationDataPerson.snils ?: "", refBookPerson.snils ?: "_")
+                    updateInfo << createUpdateInfo(SharedConstants.SNILS_FULL, declarationDataPerson.snils ?: "_", refBookPerson.snils ?: "_")
                     declarationDataPerson.snils = refBookPerson.snils
                     updated = true
             }
             if (refBookPerson.countryCode != declarationDataPerson.countryCode) {
-                    updateInfo << createUpdateInfo(SharedConstants.COUNTRY_CODE_FULL, declarationDataPerson.countryCode ?: "", refBookPerson.countryCode ?: "_")
+                    updateInfo << createUpdateInfo(SharedConstants.COUNTRY_CODE_FULL, declarationDataPerson.countryCode ?: "_", refBookPerson.countryCode ?: "_")
                     declarationDataPerson.countryCode = refBookPerson.countryCode
                     updated = true
             }
             if (refBookPerson.address != declarationDataPerson.address) {
-                    updateInfo << createUpdateInfo(SharedConstants.ADDRESS_FULL, declarationDataPerson.address ?: "", refBookPerson.address ?: "_")
+                    updateInfo << createUpdateInfo(SharedConstants.ADDRESS_FULL, declarationDataPerson.address ?: "_", refBookPerson.address ?: "_")
                     declarationDataPerson.address = refBookPerson.address
                     updated = true
             }
             if (updated) {
-                personInfo = createPersonInfo(declarationDataPerson)
                 logs << createLogMessage(personInfo, updateInfo)
                 declarationDataPerson.modifiedDate = new Date()
                 declarationDataPerson.modifiedBy = "${userInfo.getUser().getName()} (${userInfo.getUser().getLogin()})"
@@ -306,8 +305,8 @@ class UpdatePersonsData extends AbstractScriptClass {
         String dul = (person.idDocType ?: "") + ", " + (person.idDocNumber ?: "")
         return String.format("(%s, ИНП: %s, ДУЛ: %s)",
                 fio,
-                person.inp,
-                dul)
+                person.inp ? person.inp : "\"_\"",
+                dul != ", " ? dul : "\"_\"")
     }
 
     /**
