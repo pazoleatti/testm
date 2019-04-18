@@ -167,18 +167,17 @@ public class DepartmentConfigServiceImpl implements DepartmentConfigService {
         List<DepartmentConfig> relatedDepartmentConfigs = findAllByKppAndOktmo(departmentConfig.getKpp(), departmentConfig.getOktmo().getCode());
         checkDepartmentConfig(departmentConfig, relatedDepartmentConfigs);
 
-        if (!departmentConfig.getKpp().equals(departmentConfigBeforeUpdate.getKpp()) ||
-                !departmentConfig.getOktmo().getCode().equals(departmentConfigBeforeUpdate.getOktmo().getCode())) {
-            DepartmentConfig prev = departmentConfigDao.findPrevById(departmentConfig.getId());
-            if (prev != null) {
-                DepartmentConfig next = departmentConfigDao.findNextById(departmentConfig.getId());
-                departmentConfigDao.updateEndDate(prev.getId(), next == null ? null : addDays(next.getStartDate(), -1));
+        DepartmentConfig prevOld = departmentConfigDao.findPrevById(departmentConfig.getId());
+        departmentConfigDao.update(departmentConfig);
+        if (prevOld != null) {
+            DepartmentConfig newNextOfPrevOld = departmentConfigDao.findNextById(prevOld.getId());
+            if (newNextOfPrevOld != null) {
+                departmentConfigDao.updateEndDate(prevOld.getId(), addDays(newNextOfPrevOld.getStartDate(), -1));
             }
         }
-        departmentConfigDao.update(departmentConfig);
-        DepartmentConfig prev = departmentConfigDao.findPrevById(departmentConfig.getId());
-        if (prev != null) {
-            departmentConfigDao.updateEndDate(prev.getId(), addDays(departmentConfig.getStartDate(), -1));
+        DepartmentConfig prevNew = departmentConfigDao.findPrevById(departmentConfig.getId());
+        if (prevNew != null) {
+            departmentConfigDao.updateEndDate(prevNew.getId(), addDays(departmentConfig.getStartDate(), -1));
         }
         if (departmentConfig.getEndDate() != null && !departmentConfig.getEndDate().equals(departmentConfigBeforeUpdate.getEndDate())) {
             DepartmentConfig next = departmentConfigDao.findNextById(departmentConfig.getId());

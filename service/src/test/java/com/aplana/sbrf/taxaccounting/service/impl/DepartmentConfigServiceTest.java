@@ -217,6 +217,23 @@ public class DepartmentConfigServiceTest {
         check();
     }
 
+    // Можем среднюю запись перенести на последнюю позицию
+    @Test
+    public void updateMiddleToFirstVersion() {
+        departmentConfigService.update(departmentConfigs.get(1).toBuilder().startDate(newDate(1, 1, 2017)).endDate(newDate(31, 12, 2017)).build(), logger);
+        check();
+    }
+
+    // Можем среднюю запись перенести на первую позицию
+    @Test
+    public void updateMiddleToLastVersion() {
+        // сначала нужно закрыть последнюю версию!?
+        departmentConfigs.get(departmentConfigs.size() - 1).endDate(newDate(31, 12, 2020));
+
+        departmentConfigService.update(departmentConfigs.get(1).toBuilder().startDate(newDate(1, 1, 2021)).endDate(null).build(), logger);
+        check();
+    }
+
     // Можем изменять любое поле кроме КПП/ОКТМО у средней версии
     @Test
     public void updateOfMiddleVersion() {
