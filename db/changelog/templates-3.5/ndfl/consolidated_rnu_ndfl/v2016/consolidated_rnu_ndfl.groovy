@@ -58,6 +58,7 @@ import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.text.SimpleDateFormat
 
+import static com.aplana.sbrf.taxaccounting.script.SharedConstants.DATE_ZERO_AS_STRING
 import static com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils.formatDate
 import static form_template.ndfl.consolidated_rnu_ndfl.v2016.ConsolidatedRnuNdfl.DataFormatEnum.*
 
@@ -87,7 +88,7 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
     BlobDataService blobDataService
     RefBookService refBookService
     boolean adjustNegativeValues
-    List<String> kppList
+    Set<String> kppList
     Date dateFrom, dateTo
     Date date = new Date()
 
@@ -1615,7 +1616,7 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
         dateFrom = params.dateFrom
         dateTo = params.dateTo
         adjustNegativeValues = params.adjustNegativeValues
-        kppList = params.kppList
+        kppList = params.kppList?.toSet()
     }
 
     /**
@@ -1623,93 +1624,22 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
      * !Код скопирован из скрипта report_6ndfl.groovy
      */
     @TypeChecked(TypeCheckingMode.SKIP)
-    List<Ndfl2_6Row> collectRowsFor2_6NdflDataReport(List<NdflPersonIncome> ndflPersonIncomeList) {
+    List<Ndfl2_6Row> collectRowsFor2_6NdflDataReport(List<NdflPersonIncome> incomes) {
         List<Ndfl2_6Row> rows = []
-        // Необходимо сгруппировать доходы по ИдОперации для поиска даты начисления
-        def pairOperationIdMap = ndflPersonIncomeList.groupBy { it.operationId }
+        IncomeList incomeList = new IncomeList(incomes)
 
-        // Список содержащий данные для формирования раздела 2
-        Map<Section2Key, Section2> section2Data = [:]
-
-        // Определяем строки для заполнения раздела 2
-        for (NdflPersonIncome ndflPersonIncome : ndflPersonIncomeList) {
-            if (ndflPersonIncome.incomePayoutDate != null && ndflPersonIncome.taxTransferDate != null
-                    && (reportPeriod.startDate <= ndflPersonIncome.taxTransferDate && reportPeriod.endDate >= ndflPersonIncome.taxTransferDate)) {
-                List<Date> incomeAccruedDateList = []
-                for (NdflPersonIncome incomeGrouped : pairOperationIdMap.get(ndflPersonIncome.operationId)) {
-                    if (incomeGrouped.incomeAccruedDate != null) {
-                        incomeAccruedDateList << incomeGrouped.incomeAccruedDate
-                    }
-                }
-                def accruedDate = incomeAccruedDateList.isEmpty() ? ndflPersonIncome.incomePayoutDate : Collections.min(incomeAccruedDateList)
-                def key = new Section2Key(accruedDate, ndflPersonIncome.taxDate, ndflPersonIncome.taxTransferDate)
-
-                if (!section2Data.containsKey(key)) {
-                    section2Data.put(key, new Section2())
-                }
-                section2Data.get(key).withholdingRows.add(ndflPersonIncome)
-            }
+        def section2Block = new Section2Block(incomeList)
+        if (declarationData.isAdjustNegativeValues()) {
+            section2Block.adjustNegativeValues()
         }
-
-        for (def section2Item : section2Data.values()) {
-            section2Item.incomeSum = 0
-            section2Item.withholdingTaxSum = 0
-            for (def income : section2Item.withholdingRows) {
-                section2Item.incomeSum += income.incomePayoutSumm ?: 0
-                section2Item.withholdingTaxSum += income.withholdingTax ?: 0
-            }
-        }
-
-        BigDecimal minusIncome = 0
-        BigDecimal minusWithholding = 0
-        if (!section2Data.isEmpty()) {
-            for (def section2Entry : section2Data.entrySet()) {
-                def value = section2Entry.value
-
-                // Корректировка отрицательных значений
-                if (adjustNegativeValues) {
-                    if (value.incomeSum > 0) {
-                        def tmp = value.incomeSum
-                        value.incomeSum += minusIncome
-                        minusIncome += tmp
-                        if (minusIncome > 0) {
-                            minusIncome = 0
-                        }
-                    } else {
-                        minusIncome += value.incomeSum
-                    }
-                    if (value.withholdingTaxSum > 0) {
-                        def tmp = value.withholdingTaxSum
-                        value.withholdingTaxSum += minusWithholding
-                        minusWithholding += tmp
-                        if (minusWithholding > 0) {
-                            minusWithholding = 0
-                        }
-                    } else {
-                        minusWithholding += value.withholdingTaxSum
-                    }
-
-                    if (value.incomeSum < 0) {
-                        value.incomeSum = 0
-                    }
-                    if (value.withholdingTaxSum < 0) {
-                        value.withholdingTaxSum = 0
-                    }
-                }
-
-                // Исключение из списка строки, для которых СуммаФактическогоДохода =0 И СуммаУдержанногоНалога =0
-                // ИЛИ СрокПеречисленияНалога НЕ принадлежит последним 3 месяцам отчетного периода
-                if ((section2Entry.value.incomeSum || section2Entry.value.withholdingTaxSum) &&
-                        (dateFrom <= section2Entry.key.taxTransferDate && section2Entry.key.taxTransferDate <= dateTo)) {
-                    def row = new Ndfl2_6Row()
-                    row.incomeDate = section2Entry.key.virtuallyReceivedIncomeDate
-                    row.witholdingDate = section2Entry.key.witholdingDate
-                    row.taxTransferDate = section2Entry.key.taxTransferDate
-                    row.incomeSum = value.incomeSum
-                    row.withholdingTaxSum = value.withholdingTaxSum
-                    rows.add(row)
-                }
-            }
+        for (def section2Row : section2Block) {
+            def row = new Ndfl2_6Row()
+            row.incomeDate = section2Row.incomeDate
+            row.witholdingDate = section2Row.taxDate
+            row.taxTransferDate = section2Row.taxTransferDate
+            row.incomeSum = section2Row.incomeSum
+            row.withholdingTaxSum = section2Row.withholdingTaxSum
+            rows.add(row)
         }
         return rows
     }
@@ -1735,49 +1665,182 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
     }
 
     /**
-     * Класс содержащий данные неоходимые для формирования раздела 2 формы 6НДФЛ
+     * Элемент Файл.Документ.НДФЛ6.ДохНал из xml (БлокРаздела2)
      */
-    class Section2 {
+    class Section2Block implements Iterable<Section2Row> {
+        Map<Section2Key, Section2Row> rowsByKey = [:]
+        // Отрицательная сумма дохода, оставшаяся после корректировки отрицательных значений
+        BigDecimal negativeIncome = new BigDecimal(0)
+        // Отрицательная сумма налога, оставшаяся после корректировки отрицательных значений
+        BigDecimal negativeWithholding = new BigDecimal(0)
+
+        Collection<Section2Row> getRows() {
+            return rowsByKey.values()
+        }
+
+        Section2Block(IncomeList incomeList) {
+            def incomesByOperationId = incomeList.groupByOperationId()
+            for (NdflPersonIncome income : incomeList) {
+                if (income.incomePayoutDate != null && (
+                        isBelongToSelectedPeriod(income.taxTransferDate) ||
+                                isZeroDate(income.taxTransferDate) && isBelongToSelectedPeriod(income.taxDate)
+                )) {
+                    List<Date> incomeAccruedDateList = []
+                    for (NdflPersonIncome incomeGrouped : incomesByOperationId.get(income.operationId)) {
+                        if (incomeGrouped.incomeAccruedDate != null) {
+                            incomeAccruedDateList << incomeGrouped.incomeAccruedDate
+                        }
+                    }
+                    def accruedDate = incomeAccruedDateList.isEmpty() ? income.incomePayoutDate : Collections.min(incomeAccruedDateList)
+                    def key = new Section2Key(accruedDate, income.taxDate, income.taxTransferDate)
+
+                    if (!rowsByKey.containsKey(key)) {
+                        rowsByKey.put(key, new Section2Row(key))
+                    }
+                    rowsByKey.get(key).withholdingRows.add(income)
+                }
+            }
+
+            for (def row : rows) {
+                row.incomeSum = 0
+                row.withholdingTaxSum = 0
+                for (def income : row.withholdingRows) {
+                    row.incomeSum += income.incomePayoutSumm ?: 0
+                    row.withholdingTaxSum += income.withholdingTax ?: 0
+                }
+            }
+            rowsByKey = rowsByKey.sort { Map.Entry<Section2Key, Section2Row> a, Map.Entry<Section2Key, Section2Row> b ->
+                a.key.taxDate <=> b.key.taxDate ?: a.key.taxTransferDate <=> b.key.taxTransferDate ?:
+                        a.key.incomeDate <=> b.key.incomeDate
+            }
+        }
+
+        /**
+         * Корректировка отрицательных значений
+         */
+        void adjustNegativeValues() {
+            def rows = rows.sort(false) { Section2Row a, Section2Row b ->
+                a.taxDate <=> b.taxDate ?: (sign(a.incomeSum) != sign(b.incomeSum) ? a.incomeSum <=> b.incomeSum : b.incomeSum <=> a.incomeSum) ?:
+                        a.key.taxTransferDate <=> b.key.taxTransferDate ?: a.key.incomeDate <=> b.key.incomeDate
+            }
+            for (def row : rows) {
+                if (row.incomeSum > 0) {
+                    def tmp = row.incomeSum
+                    row.incomeSum += negativeIncome
+                    negativeIncome += tmp
+                    if (negativeIncome > 0) {
+                        negativeIncome = 0
+                    }
+                } else {
+                    negativeIncome += row.incomeSum
+                }
+
+                if (row.incomeSum < 0) {
+                    row.incomeSum = 0
+                }
+            }
+            rows = rows.sort(false) { Section2Row a, Section2Row b ->
+                a.taxDate <=> b.taxDate ?: (sign(a.withholdingTaxSum) != sign(b.withholdingTaxSum) ? a.withholdingTaxSum <=> b.withholdingTaxSum : b.withholdingTaxSum <=> a.withholdingTaxSum) ?:
+                        a.key.taxTransferDate <=> b.key.taxTransferDate ?: a.key.incomeDate <=> b.key.incomeDate
+            }
+            for (def row : rows) {
+                if (row.withholdingTaxSum > 0) {
+                    def tmp = row.withholdingTaxSum
+                    row.withholdingTaxSum += negativeWithholding
+                    negativeWithholding += tmp
+                    if (negativeWithholding > 0) {
+                        negativeWithholding = 0
+                    }
+                } else {
+                    negativeWithholding += row.withholdingTaxSum
+                }
+
+                if (row.withholdingTaxSum < 0) {
+                    row.withholdingTaxSum = 0
+                }
+            }
+        }
+
+        int sign(BigDecimal d) {
+            return d < 0 ? -1 : 1
+        }
+
+        @Override
+        Iterator<Section2Row> iterator() {
+            return rows.iterator()
+        }
+
+        boolean isEmpty() {
+            return rows.isEmpty()
+        }
+    }
+
+    /**
+     * Элемент Файл.Документ.НДФЛ6.ДохНал.СумДата из xml (в постановке СтрокаБлокаРаздела2)
+     */
+    @ToString(includePackage = false)
+    class Section2Row {
+        @Delegate
+        Section2Key key
         // Строки удержания налога
         List<NdflPersonIncome> withholdingRows = []
         BigDecimal incomeSum
         BigDecimal withholdingTaxSum
+
+        Section2Row(Section2Key key) {
+            this.key = key
+        }
     }
 
+    @EqualsAndHashCode
+    @ToString(includePackage = false)
     class Section2Key {
         // Дата Фактического Получения Дохода
-        Date virtuallyReceivedIncomeDate
+        Date incomeDate
         // Дата Удержания Налога
-        Date witholdingDate
+        Date taxDate
         // Срок Перечисления Налога
         Date taxTransferDate
 
-        Section2Key(Date virtuallyReceivedIncomeDate, Date witholdingDate, Date taxTransferDate) {
-            this.virtuallyReceivedIncomeDate = virtuallyReceivedIncomeDate
-            this.witholdingDate = witholdingDate
+        Section2Key(Date incomeDate, Date taxDate, Date taxTransferDate) {
+            this.incomeDate = incomeDate
+            this.taxDate = taxDate
             this.taxTransferDate = taxTransferDate
         }
+    }
 
-        boolean equals(o) {
-            if (this.is(o)) return true
-            if (getClass() != o.class) return false
+    /**
+     * Список строк дохода и всякие группировки, чтобы лишний раз не группировать
+     */
+    class IncomeList extends ArrayList<NdflPersonIncome> {
+        Map<String, List<NdflPersonIncome>> incomesByOperationId
+        Map<Integer, List<NdflPersonIncome>> incomesByRate
 
-            Section2Key that = (Section2Key) o
-
-            if (taxTransferDate != that.taxTransferDate) return false
-            if (virtuallyReceivedIncomeDate != that.virtuallyReceivedIncomeDate) return false
-            if (witholdingDate != that.witholdingDate) return false
-
-            return true
+        IncomeList(List<NdflPersonIncome> incomes) {
+            super(incomes)
         }
 
-        int hashCode() {
-            int result
-            result = (virtuallyReceivedIncomeDate != null ? virtuallyReceivedIncomeDate.hashCode() : 0)
-            result = 31 * result + (witholdingDate != null ? witholdingDate.hashCode() : 0)
-            result = 31 * result + (taxTransferDate != null ? taxTransferDate.hashCode() : 0)
-            return result
+        Map<String, List<NdflPersonIncome>> groupByOperationId() {
+            if (!incomesByOperationId) {
+                incomesByOperationId = this.groupBy { it.operationId }
+            }
+            return incomesByOperationId
         }
+
+        Map<Integer, List<NdflPersonIncome>> groupByTaxRate() {
+            if (!incomesByRate) {
+                incomesByRate = this.groupBy { it.taxRate }
+            }
+            return incomesByRate
+        }
+    }
+
+    boolean isBelongToSelectedPeriod(Date date) {
+        return date != null && (dateFrom <= date && date <= dateTo)
+    }
+
+    boolean isZeroDate(Date date) {
+        return formatDate(date) == SharedConstants.DATE_ZERO_AS_DATE
     }
 
     /**
@@ -1864,7 +1927,7 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
                 createCell(++colIndex, dataRow.oktmo, oktmoStyle)
                 createCell(++colIndex, dataRow.incomeDate, incomeDateStyle)
                 createCell(++colIndex, dataRow.witholdingDate, witholdingDateStyle)
-                createCell(++colIndex, dataRow.taxTransferDate, taxTransferDateStyle)
+                createCell(++colIndex, isZeroDate(dataRow.taxTransferDate) ? DATE_ZERO_AS_STRING : formatDate(dataRow.taxTransferDate), taxTransferDateStyle)
                 createCell(++colIndex, dataRow.incomeSum, incomeSumStyle)
                 createCell(++colIndex, dataRow.withholdingTaxSum, withholdingTaxSumStyle)
             }
