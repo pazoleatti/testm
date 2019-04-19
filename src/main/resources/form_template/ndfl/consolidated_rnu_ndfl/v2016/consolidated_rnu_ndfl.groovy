@@ -31,6 +31,7 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
 import com.aplana.sbrf.taxaccounting.script.SharedConstants
 import com.aplana.sbrf.taxaccounting.script.dao.BlobDataService
+import com.aplana.sbrf.taxaccounting.script.service.DeclarationService
 import com.aplana.sbrf.taxaccounting.script.service.DepartmentReportPeriodService
 import com.aplana.sbrf.taxaccounting.script.service.DepartmentService
 import com.aplana.sbrf.taxaccounting.script.service.NdflPersonService
@@ -76,6 +77,7 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
     DepartmentReportPeriod departmentReportPeriod
     ReportPeriod reportPeriod
     NdflPersonService ndflPersonService
+    DeclarationService declarationService;
     RefBookFactory refBookFactory
     ReportPeriodService reportPeriodService
     DepartmentService departmentService
@@ -93,11 +95,12 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
     Date date = new Date()
 
     @TypeChecked(TypeCheckingMode.SKIP)
-    public ConsolidatedRnuNdfl(scriptClass) {
+    ConsolidatedRnuNdfl(scriptClass) {
         super(scriptClass)
         if (scriptClass.getBinding().hasVariable("departmentReportPeriodService")) {
             this.departmentReportPeriodService = (DepartmentReportPeriodService) scriptClass.getProperty("departmentReportPeriodService");
         }
+        this.declarationService = (DeclarationService) getSafeProperty("declarationService");
         if (scriptClass.getBinding().hasVariable("declarationData")) {
             this.declarationData = (DeclarationData) scriptClass.getProperty("declarationData")
             this.declarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId)
@@ -420,7 +423,7 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
         SheetFillerContext context = new SheetFillerContext(ndflPersonList, ndflPersonIncomeList)
         Workbook sxssfWorkbook = new SXSSFWorkbook(getSpecialReportTemplate(REPORT_XLSX), 100, true)
         sxssfWorkbook.setSheetName(0, "Реестр")
-        SheetFillerFactory.getSheetFiller(5).fillSheet(sxssfWorkbook, context)
+        new SheetFillerFactory().getSheetFiller(5).fillSheet(sxssfWorkbook, context)
 
         OutputStream writer = null
         try {
@@ -610,15 +613,15 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
 
             Workbook xssfWorkbook = getSpecialReportTemplate(RNU_NDFL_PERSON_ALL_DB)
 
-            SheetFillerFactory.getSheetFiller(0).fillSheet(xssfWorkbook, context)
+            new SheetFillerFactory().getSheetFiller(0).fillSheet(xssfWorkbook, context)
 
-            SheetFillerFactory.getSheetFiller(1).fillSheet(xssfWorkbook, context)
+            new SheetFillerFactory().getSheetFiller(1).fillSheet(xssfWorkbook, context)
 
-            SheetFillerFactory.getSheetFiller(2).fillSheet(xssfWorkbook, context)
+            new SheetFillerFactory().getSheetFiller(2).fillSheet(xssfWorkbook, context)
 
-            SheetFillerFactory.getSheetFiller(3).fillSheet(xssfWorkbook, context)
+            new SheetFillerFactory().getSheetFiller(3).fillSheet(xssfWorkbook, context)
 
-            SheetFillerFactory.getSheetFiller(4).fillSheet(xssfWorkbook, context)
+            new SheetFillerFactory().getSheetFiller(4).fillSheet(xssfWorkbook, context)
 
             OutputStream writer = null
             try {
@@ -659,17 +662,17 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
 
         Workbook xssfWorkbook = getSpecialReportTemplate(RNU_NDFL_PERSON_ALL_DB)
 
-        SheetFillerFactory.getSheetFiller(0).fillSheet(xssfWorkbook, context)
+        new SheetFillerFactory().getSheetFiller(0).fillSheet(xssfWorkbook, context)
 
         Workbook sxssfWorkbook = new SXSSFWorkbook(xssfWorkbook, 100, true)
 
-        SheetFillerFactory.getSheetFiller(1).fillSheet(sxssfWorkbook, context)
+        new SheetFillerFactory().getSheetFiller(1).fillSheet(sxssfWorkbook, context)
 
-        SheetFillerFactory.getSheetFiller(2).fillSheet(sxssfWorkbook, context)
+        new SheetFillerFactory().getSheetFiller(2).fillSheet(sxssfWorkbook, context)
 
-        SheetFillerFactory.getSheetFiller(3).fillSheet(sxssfWorkbook, context)
+        new SheetFillerFactory().getSheetFiller(3).fillSheet(sxssfWorkbook, context)
 
-        SheetFillerFactory.getSheetFiller(4).fillSheet(sxssfWorkbook, context)
+        new SheetFillerFactory().getSheetFiller(4).fillSheet(sxssfWorkbook, context)
 
         OutputStream writer = null
         try {
@@ -2069,6 +2072,31 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
             }
         }
     }
+
+
+
+    /**
+     * Фабрика для получения экземплярая SheetFiller по индексу листа
+     */
+    class SheetFillerFactory {
+        SheetFiller getSheetFiller(int sheetIndex) {
+            switch (sheetIndex) {
+                case 0:
+                    return new TitleSheetFiller()
+                case 1:
+                    return new RequisitesSheetFiller()
+                case 2:
+                    return new IncomesSheetFiller()
+                case 3:
+                    return new DeductionsSheetFiller()
+                case 4:
+                    return new PrepaymentSheetFiller()
+                case 5:
+                    return new ReportXlsxSheetFiller(ndflPersonService, declarationService, departmentService)
+                default: return null
+            }
+        }
+    }
 }
 
 /**
@@ -2158,30 +2186,6 @@ public class SheetFillerContext {
  */
 interface SheetFiller {
     void fillSheet(Workbook wb, SheetFillerContext context);
-}
-
-/**
- * Фабрика для получения экземплярая SheetFiller по индексу листа
- */
-@TypeChecked
-class SheetFillerFactory {
-    public static SheetFiller getSheetFiller(int sheetIndex) {
-        switch (sheetIndex) {
-            case 0:
-                return new TitleSheetFiller()
-            case 1:
-                return new RequisitesSheetFiller()
-            case 2:
-                return new IncomesSheetFiller()
-            case 3:
-                return new DeductionsSheetFiller()
-            case 4:
-                return new PrepaymentSheetFiller()
-            case 5:
-                return new ReportXlsxSheetFiller()
-            default: return null
-        }
-    }
 }
 
 /**
@@ -2567,23 +2571,36 @@ class PrepaymentSheetFiller implements SheetFiller {
 @TypeChecked
 class ReportXlsxSheetFiller implements SheetFiller {
 
-    class KppOktmoPair {
+    NdflPersonService ndflPersonService
+    DeclarationService declarationService
+    DepartmentService departmentService
+
+    ReportXlsxSheetFiller(NdflPersonService ndflPersonService, DeclarationService declarationService, DepartmentService departmentService) {
+        this.ndflPersonService = ndflPersonService
+        this.declarationService = declarationService
+        this.departmentService = departmentService
+    }
+
+    class XlsxReportRowKey {
         String kpp
         String oktmo
+        Department primaryTB
 
-        KppOktmoPair(String kpp, String oktmo) {
+        XlsxReportRowKey(String kpp, String oktmo, Department primaryTB) {
             this.kpp = kpp
             this.oktmo = oktmo
+            this.primaryTB = primaryTB
         }
 
         boolean equals(o) {
             if (this.is(o)) return true
             if (getClass() != o.class) return false
 
-            KppOktmoPair that = (KppOktmoPair) o
+            XlsxReportRowKey that = (XlsxReportRowKey) o
 
             if (kpp != that.kpp) return false
             if (oktmo != that.oktmo) return false
+            if (primaryTB?.id != that.primaryTB?.id) return false
 
             return true
         }
@@ -2592,6 +2609,7 @@ class ReportXlsxSheetFiller implements SheetFiller {
             int result
             result = (kpp != null ? kpp.hashCode() : 0)
             result = 31 * result + (oktmo != null ? oktmo.hashCode() : 0)
+            result = 31 * result + (primaryTB != null ? primaryTB.id.hashCode() : 0)
             return result
         }
     }
@@ -2632,9 +2650,8 @@ class ReportXlsxSheetFiller implements SheetFiller {
 
     @Override
     void fillSheet(Workbook wb, SheetFillerContext context) {
-        List<NdflPersonIncome> ndflPersonIncomeList = context.getNdflPersonIncomeList();
-        List<NdflPerson> ndflPersonList = context.getNdflPersonList()
-        Map<KppOktmoPair, FlIncomeData> flIncomeDataMap = new HashMap<>()
+        List<NdflPersonIncome> ndflPersonIncomeList = context.getNdflPersonIncomeList()
+        Map<XlsxReportRowKey, FlIncomeData> flIncomeDataMap = new HashMap<>()
         Sheet sheet = wb.getSheetAt(0);
         Integer rowNumber = 3;
         Integer ppNumber = 1
@@ -2644,23 +2661,24 @@ class ReportXlsxSheetFiller implements SheetFiller {
         CellStyle textLeftStyle = styler.createBorderStyleLeftAlignedTypeText()
         FlIncomeData summaryFlIncomeData = new FlIncomeData(new HashSet<Long>(), new BigDecimal(0).setScale(2), new BigDecimal(0).setScale(2))
         for (NdflPersonIncome npi in ndflPersonIncomeList) {
-            KppOktmoPair kppOktmoPair = new KppOktmoPair(npi.kpp, npi.oktmo)
-            if (flIncomeDataMap.get(kppOktmoPair) == null) {
-                flIncomeDataMap.put(kppOktmoPair, new FlIncomeData(new HashSet<Long>(), new BigDecimal(0).setScale(2), new BigDecimal(0).setScale(2)))
+            Department primaryTB = getPrimaryTB(npi)
+            XlsxReportRowKey rowKey = new XlsxReportRowKey(npi.kpp, npi.oktmo, primaryTB)
+            if (flIncomeDataMap.get(rowKey) == null) {
+                flIncomeDataMap.put(rowKey, new FlIncomeData(new HashSet<Long>(), new BigDecimal(0).setScale(2), new BigDecimal(0).setScale(2)))
             }
-            FlIncomeData flIncomeData = flIncomeDataMap.get(kppOktmoPair)
+            FlIncomeData flIncomeData = flIncomeDataMap.get(rowKey)
             flIncomeData.personIdSet.add(npi.ndflPersonId)
             flIncomeData.incomeAccruedSumm = npi.incomeAccruedSumm ? flIncomeData.incomeAccruedSumm.add(npi.incomeAccruedSumm) : flIncomeData.incomeAccruedSumm
             flIncomeData.calculatedTax = npi.calculatedTax ? flIncomeData.calculatedTax.add(npi.calculatedTax) : flIncomeData.calculatedTax
-            flIncomeDataMap.put(kppOktmoPair, flIncomeData)
+            flIncomeDataMap.put(rowKey, flIncomeData)
 
             summaryFlIncomeData.personIdSet.add(npi.ndflPersonId)
             summaryFlIncomeData.incomeAccruedSumm = npi.incomeAccruedSumm ? summaryFlIncomeData.incomeAccruedSumm.add(npi.incomeAccruedSumm) : summaryFlIncomeData.incomeAccruedSumm
             summaryFlIncomeData.calculatedTax = npi.calculatedTax ? summaryFlIncomeData.calculatedTax.add(npi.calculatedTax) : summaryFlIncomeData.calculatedTax
         }
 
-        for (KppOktmoPair kppOktmoPair : flIncomeDataMap.keySet()) {
-            FlIncomeData flIncomeData = flIncomeDataMap.get(kppOktmoPair)
+        for (XlsxReportRowKey reportRowKey : flIncomeDataMap.keySet()) {
+            FlIncomeData flIncomeData = flIncomeDataMap.get(reportRowKey)
             ScriptUtils.checkInterrupted();
             Row row = sheet.createRow(rowNumber);
             Cell cell1 = row.createCell(1);
@@ -2668,10 +2686,10 @@ class ReportXlsxSheetFiller implements SheetFiller {
             cell1.setCellValue(ppNumber);
             Cell cell2 = row.createCell(2);
             cell2.setCellStyle(textLeftStyle)
-            cell2.setCellValue(kppOktmoPair.kpp);
+            cell2.setCellValue(reportRowKey.kpp);
             Cell cell3 = row.createCell(3);
             cell3.setCellStyle(textLeftStyle)
-            cell3.setCellValue(kppOktmoPair.oktmo);
+            cell3.setCellValue(reportRowKey.oktmo);
             Cell cell4 = row.createCell(4);
             cell4.setCellStyle(textRightStyle)
             cell4.setCellValue(flIncomeData.personIdSet.size());
@@ -2681,6 +2699,9 @@ class ReportXlsxSheetFiller implements SheetFiller {
             Cell cell6 = row.createCell(6);
             cell6.setCellStyle(textRightStyle)
             cell6.setCellValue(flIncomeData.calculatedTax?.toString());
+            Cell cell7 = row.createCell(7);
+            cell7.setCellStyle(textCenteredStyle)
+            cell7.setCellValue(reportRowKey.primaryTB?.name);
             rowNumber++
             ppNumber++
         }
@@ -2705,7 +2726,20 @@ class ReportXlsxSheetFiller implements SheetFiller {
         Cell cell6 = row.createCell(6)
         cell6.setCellStyle(textRightStyle)
         cell6.setCellValue(summaryFlIncomeData.calculatedTax.toString())
+        Cell cell7 = row.createCell(7)
+        cell7.setCellStyle(textRightStyle)
+        cell7.setCellValue("")
 
+    }
+
+    Department getPrimaryTB(NdflPersonIncome income) {
+        if (income.sourceId) {
+            NdflPersonIncome primaryIncome = ndflPersonService.getIncome(income.sourceId)
+            NdflPerson primaryPerson = ndflPersonService.get(primaryIncome.ndflPersonId)
+            DeclarationData primaryDeclaration = declarationService.getDeclarationData(primaryPerson.declarationDataId)
+            return departmentService.getParentTB(primaryDeclaration.departmentId)
+        }
+        return null
     }
 }
 
