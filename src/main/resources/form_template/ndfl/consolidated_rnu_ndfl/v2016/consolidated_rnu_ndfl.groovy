@@ -2701,7 +2701,7 @@ class ReportXlsxSheetFiller implements SheetFiller {
             cell6.setCellValue(flIncomeData.calculatedTax?.toString());
             Cell cell7 = row.createCell(7);
             cell7.setCellStyle(textCenteredStyle)
-            cell7.setCellValue(reportRowKey.primaryTB?.name);
+            cell7.setCellValue(reportRowKey.primaryTB?.name ?: "");
             rowNumber++
             ppNumber++
         }
