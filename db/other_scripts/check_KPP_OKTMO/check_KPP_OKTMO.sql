@@ -56,7 +56,7 @@ and det.oktmo(+) = npi.oktmo
 where 
 (detail_id is null)
 or
-(detail_id is not null and (trunc(start_date) <= trunc(sysdate, 'Y') and trunc(nvl(end_date, sysdate+1)) < add_months(trunc(sysdate, 'Y'), 3)-1))
+(detail_id is not null and (trunc(start_date) <= trunc(sysdate, 'Y') and trunc(nvl(end_date, sysdate+1)) < add_months(trunc(sysdate, 'Y'), 3)))
 )
 order by kpp, oktmo, declaration_data_id;
 
