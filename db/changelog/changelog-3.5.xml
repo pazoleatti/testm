@@ -551,13 +551,6 @@
                  splitStatements="false"/>
     </changeSet>
 
-	<!--https://jira.aplana.com/browse/SBRFNDFL-7175 Реализовать запись в историю изменений ОНФ информацию о замене "состояние ЭД" и прикладывании файла-->
-	<changeSet id="3.5-ytrofimov-19" author="ytrofimov">
-		<sql>
-			insert into event(id, name) values(10002, 'Прикрепление файла ответа от ФНС');
-		</sql>
-	</changeSet>
-
     <!--https://jira.aplana.com/browse/SBRFNDFL-7364 -->
 	<changeSet id="3.5-ytrofimov-20" author="ytrofimov">
 		<update tableName="ref_book_attribute">
@@ -581,5 +574,12 @@
             <where>DECLARATION_TEMPLATE_ID=101 and BLOB_DATA_ID='4b85f92c-7fd0-4d67-834d-e61g34684336'</where>
         </update>
     </changeSet>
+
+	<changeSet id="3.5-dnovikov-19" author="dnovikov">
+		<update tableName="blob_data">
+			<column name="data" valueBlobFile="templates-3.5/ndfl/consolidated_rnu_ndfl/v2016/report.xlsx"/>
+			<where>id = '7833e689-c60b-4a1b-98be-b181079d0c29'</where>
+		</update>
+	</changeSet>
 
 </databaseChangeLog>
