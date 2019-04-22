@@ -71,6 +71,7 @@
 		</update>
 	</changeSet>
 
+	<!--https://jira.aplana.com/browse/SBRFNDFL-5679 - рефакторинг настроек подразделений, новая таблица-->
 	<changeSet id="3.7-dnovikov-7" author="dnovikov">
 		<sql>
 			CREATE TABLE department_config_test (
@@ -127,6 +128,7 @@
 		</sql>
 	</changeSet>
 
+	<!--https://jira.aplana.com/browse/SBRFNDFL-5679 - рефакторинг настроек подразделений, перекидываем данные в новую таблицу-->
 	<changeSet id="3.7-dnovikov-8" author="dnovikov">
 		<sql>
 			insert into department_config_test
@@ -142,6 +144,7 @@
 		</sql>
 	</changeSet>
 
+	<!--https://jira.aplana.com/browse/SBRFNDFL-5679 - рефакторинг настроек подразделений, сиквенс-->
 	<changeSet id="3.7-dnovikov-9" author="dnovikov">
 		<sql splitStatements="false">
 			declare
@@ -153,6 +156,7 @@
 		</sql>
 	</changeSet>
 
+	<!--https://jira.aplana.com/browse/SBRFNDFL-5679 - рефакторинг настроек подразделений, индексы-->
 	<changeSet id="3.7-dnovikov-10" author="dnovikov">
 		<sql>
 			create unique index dep_conf_kpp_ok_st_end_uidx on department_config_test(kpp, oktmo_id, start_date, end_date);
