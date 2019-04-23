@@ -20,3 +20,4 @@ NAME
 )
 begindata
  101|101|01.01.2016|0|2|2|b8406636-beb1-41d8-8f8a-cf4971309962||templates/data/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl.groovy|РНУ_НДФЛ (консолидированная)|
+ 100|100|01.01.2016|0|3|2|bf172465-20b7-4ce2-ac43-5482ad310c08|58adc3c2-66a0-4f11-98a2-defe682a092f|templates/data/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl.groovy|РНУ_НДФЛ (первичная)|
