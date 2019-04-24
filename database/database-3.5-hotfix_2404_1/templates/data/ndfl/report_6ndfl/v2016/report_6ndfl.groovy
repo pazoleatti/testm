@@ -266,8 +266,10 @@ class Report6Ndfl extends AbstractScriptClass {
                             ОбобщПоказAttrs.put("ВозврНалИт", section2Block.СуммаВНкРаспределению)
                         } else {
                             ОбобщПоказAttrs.put("ВозврНалИт", 0)
-                            section2Block.adjustRefundTax(incomeList)
                         }
+                    }
+                    if (!section2Block.isEmpty()) {
+                        section2Block.adjustRefundTax(incomeList)
                     }
                     ОбобщПоказ(ОбобщПоказAttrs) {
                         generalBlock.rows.eachWithIndex { row, index ->
