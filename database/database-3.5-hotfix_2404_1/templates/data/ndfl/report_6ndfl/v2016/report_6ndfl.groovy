@@ -254,6 +254,14 @@ class Report6Ndfl extends AbstractScriptClass {
                 }
                 НДФЛ6() {
                     def section2Block = new Section2Block(incomeList)
+                    if (!section2Block.isEmpty()) {
+                        section2Block.adjustRefundTax(incomeList)
+                    }
+                    if (declarationData.isAdjustNegativeValues()) {
+                        section2Block.adjustNegativeValues()
+                        declarationData.negativeIncome = section2Block.negativeIncome.abs()
+                        declarationData.negativeTax = section2Block.negativeWithholding.abs()
+                    }
                     def generalBlock = new GeneralBlock(incomeList, section2Block)
                     def ОбобщПоказAttrs = [КолФЛДоход  : generalBlock.personCount,
                                            УдержНалИт  : generalBlock.incomeWithholdingTotal,
@@ -267,9 +275,6 @@ class Report6Ndfl extends AbstractScriptClass {
                         } else {
                             ОбобщПоказAttrs.put("ВозврНалИт", 0)
                         }
-                    }
-                    if (!section2Block.isEmpty()) {
-                        section2Block.adjustRefundTax(incomeList)
                     }
                     ОбобщПоказ(ОбобщПоказAttrs) {
                         generalBlock.rows.eachWithIndex { row, index ->
@@ -286,12 +291,6 @@ class Report6Ndfl extends AbstractScriptClass {
                             }
                             СумСтавка(СумСтавкаAttrs) {}
                         }
-                    }
-
-                    if (declarationData.isAdjustNegativeValues()) {
-                        section2Block.adjustNegativeValues()
-                        declarationData.negativeIncome = section2Block.negativeIncome.abs()
-                        declarationData.negativeTax = section2Block.negativeWithholding.abs()
                     }
                     section2Block = section2Block.findAll { it.incomeSum || it.withholdingTaxSum }
                     declarationData.negativeSumsSign = declarationData.isAdjustNegativeValues() && section2Block.isEmpty() ? NegativeSumsSign.FROM_PREV_FORM : NegativeSumsSign.FROM_CURRENT_FORM
