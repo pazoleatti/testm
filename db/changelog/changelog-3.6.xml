@@ -106,4 +106,36 @@
         </update>
     </changeSet>
 
+    <changeSet id="3.6-ytrofimov-6" author="ytrofimov" runAlways="true">
+        <update tableName="BLOB_DATA">
+            <column name="data"
+                    valueBlobFile="templates-3.6/ndfl/report_6ndfl/v2016/UO_OTCH_1_097_00_05_05_01.xsd"/>
+            <where>id in (select bd.id from declaration_template_file dtf left join blob_data bd on dtf.BLOB_DATA_ID = bd.ID where dtf.DECLARATION_TEMPLATE_ID = 103 and bd.NAME = 'UO_OTCH_1_097_00_05_05_01.xsd')</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="3.6-ytrofimov-7" author="ytrofimov" runAlways="true">
+        <update tableName="BLOB_DATA">
+            <column name="data"
+                    valueBlobFile="templates-3.6/ndfl/report_6ndfl/v2016/KV_OTCH_1_095_00_05_04_01.xsd"/>
+            <where>id in (select bd.id from declaration_template_file dtf left join blob_data bd on dtf.BLOB_DATA_ID = bd.ID where dtf.DECLARATION_TEMPLATE_ID = 103 and bd.NAME = 'KV_OTCH_1_095_00_05_04_01.xsd')</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="3.6-ytrofimov-8" author="ytrofimov" runAlways="true">
+        <update tableName="BLOB_DATA">
+            <column name="data"
+                    valueBlobFile="templates-3.6/ndfl/report_6ndfl/v2016/IV_OTCH_1_098_00_05_04_01.xsd"/>
+            <where>id in (select bd.id from declaration_template_file dtf left join blob_data bd on dtf.BLOB_DATA_ID = bd.ID where dtf.DECLARATION_TEMPLATE_ID = 103 and bd.NAME = 'IV_OTCH_1_098_00_05_04_01.xsd')</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="3.6-ytrofimov-9" author="ytrofimov" runAlways="true">
+        <update tableName="BLOB_DATA">
+            <column name="data"
+                    valueBlobFile="templates-3.6/ndfl/report_6ndfl/v2016/UU_OTCH_1_087_00_05_07_01.xsd"/>
+            <where>id in (select bd.id from declaration_template_file dtf left join blob_data bd on dtf.BLOB_DATA_ID = bd.ID where dtf.DECLARATION_TEMPLATE_ID = 103 and bd.NAME = 'UU_OTCH_1_087_00_05_07_01.xsd')</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>
