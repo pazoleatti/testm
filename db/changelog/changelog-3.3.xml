@@ -13,14 +13,14 @@
         </insert>
     </changeSet>
 
-    <changeSet id="3.3-dnovikov-2" author="dnovikov" runAlways="true">
+    <changeSet id="3.3-dnovikov-2" author="dnovikov">
         <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
             <column name="script" valueClobFile="templates-3.3/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl_calculate.groovy"/>
             <where>DECLARATION_TEMPLATE_ID = 101 and EVENT_ID = 3</where>
         </update>
     </changeSet>
 
-    <changeSet id="3.3-snazin-1" author="snazin" runAlways="true">
+    <changeSet id="3.3-snazin-1" author="snazin">
         <update tableName="DECLARATION_TEMPLATE">
             <column name="CREATE_SCRIPT" valueClobFile="templates-3.3/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl.groovy"/>
             <where>declaration_type_id = 100</where>
@@ -172,7 +172,7 @@
         </sql>
     </changeSet>
 
-    <changeSet id="3.3-dnovikov-4" author="dnovikov" runAlways="true">
+    <changeSet id="3.3-dnovikov-4" author="dnovikov">
         <update tableName="DECLARATION_TEMPLATE">
             <column name="CREATE_SCRIPT" valueClobFile="templates-3.3/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl.groovy"/>
             <where>declaration_type_id = 101</where>
@@ -189,7 +189,7 @@
 		</sql>
 	</changeSet>
 
-	<changeSet id="3.3-snazin-2" author="snazin" runAlways="true">
+	<changeSet id="3.3-snazin-2" author="snazin">
 		<update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
 			<column name="script" valueClobFile="templates-3.3/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_move_accepted_to_created.groovy"/>
 			<where>DECLARATION_TEMPLATE_ID = 100 and EVENT_ID = 106</where>
@@ -205,7 +205,7 @@
 		</insert>
 	</changeSet>
 
-	<changeSet id="3.3-snazin-4" author="snazin" runAlways="true">
+	<changeSet id="3.3-snazin-4" author="snazin">
 		<update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
 			<column name="script" valueClobFile="templates-3.3/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl_move_accepted_to_created.groovy"/>
 			<where>DECLARATION_TEMPLATE_ID = 101 and EVENT_ID = 106</where>
@@ -244,7 +244,7 @@
 		</sql>
 	</changeSet>
 
-	<changeSet id="3.3-dnovikov-9" author="dnovikov" runAlways="true">
+	<changeSet id="3.3-dnovikov-9" author="dnovikov">
 		<update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
 			<column name="script" valueClobFile="templates-3.3/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_check.groovy"/>
 			<where>DECLARATION_TEMPLATE_ID = 100 and EVENT_ID = 5</where>
@@ -255,14 +255,14 @@
 		</update>
 	</changeSet>
 
-	<changeSet id="3.3-dnovikov-10" author="dnovikov" runAlways="true">
+	<changeSet id="3.3-dnovikov-10" author="dnovikov">
 		<update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
 			<column name="script" valueClobFile="templates-3.3/ndfl/report_6ndfl/v2016/report_6ndfl_check.groovy"/>
 			<where>DECLARATION_TEMPLATE_ID = 103 and EVENT_ID = 5</where>
 		</update>
 	</changeSet>
 
-	<changeSet id="3.3-dnovikov-11" author="dnovikov" runAlways="true">
+	<changeSet id="3.3-dnovikov-11" author="dnovikov">
 		<update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
 			<column name="script" valueClobFile="templates-3.3/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_import.groovy"/>
 			<where>DECLARATION_TEMPLATE_ID = 100 and EVENT_ID = 7</where>
@@ -287,7 +287,7 @@
 		</insert>
 	</changeSet>
 
-	<changeSet id="3.3-snazin-6" author="snazin" runAlways="true">
+	<changeSet id="3.3-snazin-6" author="snazin">
 		<update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
 			<column name="script" valueClobFile="templates-3.3/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_delete.groovy"/>
 			<where>DECLARATION_TEMPLATE_ID = 100 and EVENT_ID = 2</where>
