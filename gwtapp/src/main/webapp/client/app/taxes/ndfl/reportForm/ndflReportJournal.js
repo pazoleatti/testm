@@ -335,7 +335,7 @@
                  */
                 $scope.updateDocStateByFilter = function () {
                     $aplanaModal.open({
-                        title: $filter('translate')('title.creatingReport'),
+                        title: $filter('translate')('title.updateDocState'),
                         templateUrl: 'client/app/taxes/ndfl/reportForm/updateDocStateModal.html',
                         controller: 'UpdateDocStateCtrl',
                         windowClass: 'modal600'

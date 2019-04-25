@@ -528,4 +528,58 @@
 		</update>
 	</changeSet>
 
+	<changeSet id="3.5-dnovikov-16" author="dnovikov">
+		<sql>
+			alter table REF_BOOK_INCOME_KIND modify name varchar2(255 char);
+		</sql>
+	</changeSet>
+
+	<!--https://jira.aplana.com/browse/SBRFNDFL-7269 Изменить размерность поля "Наименование" в Справочнике Виды дохода, добавить новые виды доходов в справочник-->
+	<changeSet id="3.5-ytrofimov-18" author="ytrofimov">
+		<sql>
+			alter table REF_BOOK_INCOME_KIND modify name varchar2(2000 char);
+		</sql>
+	</changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-7321 - Добавление видов доходов в справочник.-->
+    <changeSet id="3.5-amandzyak-9" author="amandzyak">
+        <sqlFile dbms="oracle"
+                 encoding="utf8"
+                 endDelimiter=""
+                 path="/scripts/update-ref_book_income_kind.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-7364 -->
+	<changeSet id="3.5-ytrofimov-20" author="ytrofimov">
+		<update tableName="ref_book_attribute">
+			<column name="max_length" value="2000"/>
+			<where>ref_book_id = 933 and alias = 'NAME'</where>
+		</update>
+	</changeSet>
+
+    <changeSet id="3.5-dnovikov-17" author="dnovikov">
+        <insert tableName="blob_data">
+            <column name="id" value="7833e689-c60b-4a1b-98be-b181079d0c29"/>
+            <column name="name" value="report.xlsx"/>
+            <column name="data" valueBlobFile="templates-3.5/ndfl/consolidated_rnu_ndfl/v2016/report.xlsx"/>
+            <column name="creation_date" valueDate="2019-04-19"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="3.5-dnovikov-18" author="dnovikov">
+        <update tableName="declaration_template_file">
+            <column name="BLOB_DATA_ID" value="7833e689-c60b-4a1b-98be-b181079d0c29"/>
+            <where>DECLARATION_TEMPLATE_ID=101 and BLOB_DATA_ID='4b85f92c-7fd0-4d67-834d-e61g34684336'</where>
+        </update>
+    </changeSet>
+
+	<changeSet id="3.5-dnovikov-19" author="dnovikov">
+		<update tableName="blob_data">
+			<column name="data" valueBlobFile="templates-3.5/ndfl/consolidated_rnu_ndfl/v2016/report.xlsx"/>
+			<where>id = '7833e689-c60b-4a1b-98be-b181079d0c29'</where>
+		</update>
+	</changeSet>
+
 </databaseChangeLog>

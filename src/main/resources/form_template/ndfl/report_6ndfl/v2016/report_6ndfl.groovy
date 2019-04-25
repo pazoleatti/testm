@@ -33,6 +33,7 @@ import org.apache.commons.io.IOUtils
 import org.apache.commons.lang3.StringUtils
 import org.apache.poi.ss.usermodel.CellStyle
 import org.apache.poi.xssf.usermodel.*
+import org.joda.time.LocalDate
 
 import java.nio.charset.Charset
 
@@ -50,6 +51,7 @@ class Report6Ndfl extends AbstractScriptClass {
     DeclarationTemplate declarationTemplate
     DepartmentReportPeriod departmentReportPeriod
     ReportPeriod reportPeriod
+    String periodCode
     Department department
     NdflPersonService ndflPersonService
     RefBookFactory refBookFactory
@@ -74,13 +76,6 @@ class Report6Ndfl extends AbstractScriptClass {
         this.reportPeriodService = (ReportPeriodService) getSafeProperty("reportPeriodService")
         this.departmentService = (DepartmentService) getSafeProperty("departmentService")
         this.reportPeriodService = (ReportPeriodService) getSafeProperty("reportPeriodService")
-        this.declarationData = (DeclarationData) getSafeProperty("declarationData")
-        if (this.declarationData) {
-            this.declarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId)
-            this.departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
-            this.department = departmentService.get(departmentReportPeriod.departmentId)
-            this.reportPeriod = this.departmentReportPeriod.reportPeriod
-        }
         this.ndflPersonService = (NdflPersonService) getSafeProperty("ndflPersonService")
         this.departmentConfigService = (DepartmentConfigService) getSafeProperty("departmentConfigService")
         this.sourceService = (SourceService) getSafeProperty("sourceService")
@@ -90,6 +85,15 @@ class Report6Ndfl extends AbstractScriptClass {
         this.blobDataService = (BlobDataService) getSafeProperty("blobDataServiceDaoImpl")
         this.declarationLocker = (DeclarationLocker) getSafeProperty("declarationLocker")
         this.lockDataService = (LockDataService) getSafeProperty("lockDataService")
+
+        this.declarationData = (DeclarationData) getSafeProperty("declarationData")
+        if (this.declarationData) {
+            this.declarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId)
+            this.departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
+            this.department = departmentService.get(departmentReportPeriod.departmentId)
+            this.reportPeriod = this.departmentReportPeriod.reportPeriod
+            this.periodCode = refBookService.getRecordData(RefBook.Id.PERIOD_CODE.getId(), reportPeriod.dictTaxPeriodId)?.CODE?.stringValue
+        }
 
         this.scriptSpecificReportHolder = (ScriptSpecificDeclarationDataReportHolder) getSafeProperty("scriptSpecificReportHolder")
         this.applicationVersion = (String) getSafeProperty("applicationVersion")
@@ -157,7 +161,8 @@ class Report6Ndfl extends AbstractScriptClass {
     }
 
     @TypeChecked(TypeCheckingMode.SKIP)
-    Xml buildXml(DepartmentConfig departmentConfig, List<NdflPersonIncome> incomes, def writer) {
+    Xml buildXml(DepartmentConfig departmentConfig, List<NdflPersonIncome> incomes,
+                 def writer) {
         ScriptUtils.checkInterrupted()
         Xml xml = new Xml()
         def incomeList = new IncomeList(incomes)
@@ -239,8 +244,16 @@ class Report6Ndfl extends AbstractScriptClass {
                     }
                 }
                 НДФЛ6() {
-                    GeneralBlock generalBlock = new GeneralBlock(incomeList)
                     def section2Block = new Section2Block(incomeList)
+                    if (!section2Block.isEmpty()) {
+                        section2Block.adjustRefundTax(incomeList)
+                    }
+                    if (declarationData.isAdjustNegativeValues()) {
+                        section2Block.adjustNegativeValues()
+                        declarationData.negativeIncome = section2Block.negativeIncome.abs()
+                        declarationData.negativeTax = section2Block.negativeWithholding.abs()
+                    }
+                    def generalBlock = new GeneralBlock(incomeList, section2Block)
                     def ОбобщПоказAttrs = [КолФЛДоход  : generalBlock.personCount,
                                            УдержНалИт  : generalBlock.incomeWithholdingTotal,
                                            НеУдержНалИт: generalBlock.incomeNotHoldingTotal] as Map<String, Object>
@@ -248,11 +261,10 @@ class Report6Ndfl extends AbstractScriptClass {
                     if (declarationData.taxRefundReflectionMode == TaxRefundReflectionMode.NORMAL) {
                         ОбобщПоказAttrs.put("ВозврНалИт", generalBlock.refoundTotal)
                     } else if (declarationData.taxRefundReflectionMode == TaxRefundReflectionMode.AS_NEGATIVE_WITHHOLDING_TAX) {
-                        def refundTax = section2Block.adjustRefundTax(incomeList)
-                        if (refundTax == null) {
-                            ОбобщПоказAttrs.put("ВозврНалИт", 0)
+                        if (section2Block.isEmpty()) {
+                            ОбобщПоказAttrs.put("ВозврНалИт", section2Block.СуммаВНкРаспределению)
                         } else {
-                            ОбобщПоказAttrs.put("ВозврНалИт", refundTax)
+                            ОбобщПоказAttrs.put("ВозврНалИт", 0)
                         }
                     }
                     ОбобщПоказ(ОбобщПоказAttrs) {
@@ -270,12 +282,6 @@ class Report6Ndfl extends AbstractScriptClass {
                             }
                             СумСтавка(СумСтавкаAttrs) {}
                         }
-                    }
-
-                    if (declarationData.isAdjustNegativeValues()) {
-                        section2Block.adjustNegativeValues()
-                        declarationData.negativeIncome = section2Block.negativeIncome.abs()
-                        declarationData.negativeTax = section2Block.negativeWithholding.abs()
                     }
                     section2Block = section2Block.findAll { it.incomeSum || it.withholdingTaxSum }
                     declarationData.negativeSumsSign = declarationData.isAdjustNegativeValues() && section2Block.isEmpty() ? NegativeSumsSign.FROM_PREV_FORM : NegativeSumsSign.FROM_CURRENT_FORM
@@ -954,6 +960,15 @@ class Report6Ndfl extends AbstractScriptClass {
         return date != null && (reportPeriod.calendarStartDate <= date && date <= reportPeriod.endDate)
     }
 
+    Date janStart = new LocalDate(2019, 1, 1).toDate()
+    Date janEnd = new LocalDate(2019, 2, 5).toDate()
+    /**
+     * Принадлежит периоду, в котором возвращенный налог будет принудительно распределяться по разделу 2 из 6-НДФЛ
+     */
+    boolean isBelongToJanuaryPeriod(Date date) {
+        return date != null && (janStart <= date && date <= janEnd)
+    }
+
     /**
      * Список строк дохода и всякие группировки, чтобы лишний раз не группировать
      */
@@ -995,7 +1010,7 @@ class Report6Ndfl extends AbstractScriptClass {
         // Строки раздела, общие данные по ставкке
         List<GeneralBlockRow> rows = []
 
-        GeneralBlock(IncomeList incomeList) {
+        GeneralBlock(IncomeList incomeList, Section2Block section2Block) {
             Set<Long> personIds = []
             for (def income : incomeList) {
                 if (isBelongToPeriod(income.incomeAccruedDate) && income.incomeAccruedSumm > 0) {
@@ -1014,8 +1029,13 @@ class Report6Ndfl extends AbstractScriptClass {
                 if (isBelongToPeriod(income.incomeAccruedDate) || isBelongToPeriod(income.incomePayoutDate)) {
                     incomeNotHoldingTaxSum += (income.notHoldingTax ?: 0)
                     incomeOverholdingTaxSum += (income.overholdingTax ?: 0)
-                    refoundTotal += (income.refoundTax ?: 0)
+                    if (!isBelongToJanuaryPeriod(income.taxDate)) {
+                        refoundTotal += (income.refoundTax ?: 0)
+                    }
                 }
+            }
+            if (!section2Block.isEmpty()) {
+                incomeWithholdingTotal = incomeWithholdingTotal - (section2Block.СуммаВНкРаспределению - section2Block.negativeWithholding.abs())
             }
             if (incomeNotHoldingTaxSum > incomeOverholdingTaxSum) {
                 incomeNotHoldingTotal = incomeNotHoldingTaxSum - incomeOverholdingTaxSum
@@ -1092,6 +1112,8 @@ class Report6Ndfl extends AbstractScriptClass {
         BigDecimal negativeIncome = new BigDecimal(0)
         // Отрицательная сумма налога, оставшаяся после корректировки отрицательных значений
         BigDecimal negativeWithholding = new BigDecimal(0)
+        // СуммаВНкРаспределению
+        Long СуммаВНкРаспределению = 0L
 
         Collection<Section2Row> getRows() {
             return rowsByKey.values()
@@ -1128,6 +1150,11 @@ class Report6Ndfl extends AbstractScriptClass {
                     row.withholdingTaxSum += income.withholdingTax ?: 0
                 }
             }
+            for (def income : incomeList) {
+                if (isRefundIncome(income)) {
+                    СуммаВНкРаспределению += income.refoundTax
+                }
+            }
             rowsByKey = rowsByKey.sort { Map.Entry<Section2Key, Section2Row> a, Map.Entry<Section2Key, Section2Row> b ->
                 a.key.taxDate <=> b.key.taxDate ?: a.key.taxTransferDate <=> b.key.taxTransferDate ?:
                         a.key.incomeDate <=> b.key.incomeDate
@@ -1135,20 +1162,23 @@ class Report6Ndfl extends AbstractScriptClass {
         }
 
         /**
-         * Распределяет возвращенный налог по блокам Раздела2, если блоков Раздела2 нет, то возвращяет сумму возвращенного налога
+         * Определение строк с возвращенным налогом
          */
-        Long adjustRefundTax(IncomeList incomeList) {
-            Long refoundTaxSum = null
+        boolean isRefundIncome(NdflPersonIncome income) {
+            return (reportPeriod.taxPeriod.year == 2019 && periodCode == "21" && isBelongToJanuaryPeriod(income.taxDate) ||
+                    declarationData.taxRefundReflectionMode == TaxRefundReflectionMode.AS_NEGATIVE_WITHHOLDING_TAX && isBelongToCalendarPeriod(income.taxDate)) &&
+                    income.refoundTax
+        }
+
+        /**
+         * Распределяет возвращенный налог по блокам Раздела2
+         */
+        void adjustRefundTax(IncomeList incomeList) {
             for (def income : incomeList) {
-                if (isBelongToCalendarPeriod(income.taxDate) && income.refoundTax != null) {
-                    if (!rows.isEmpty()) {
-                        adjustRefundTax(income)
-                    } else {
-                        refoundTaxSum = (refoundTaxSum ?: 0) + income.refoundTax
-                    }
+                if (isRefundIncome(income)) {
+                    adjustRefundTax(income)
                 }
             }
-            return refoundTaxSum
         }
 
         void adjustRefundTax(NdflPersonIncome income) {
