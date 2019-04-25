@@ -16,6 +16,7 @@ import com.aplana.sbrf.taxaccounting.script.service.*
 import com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataService
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService
+import com.aplana.sbrf.taxaccounting.service.LogBusinessService
 import com.aplana.sbrf.taxaccounting.service.impl.TAAbstractScriptingServiceImpl
 import groovy.transform.TypeChecked
 import groovy.transform.TypeCheckingMode
@@ -60,6 +61,7 @@ class DeclarationType extends AbstractScriptClass {
     OutputStream outputStream
     int reportYear
     NdflPersonService ndflPersonService
+    LogBusinessService logBusinessService
     String version
 
     private DeclarationType() {
@@ -119,6 +121,9 @@ class DeclarationType extends AbstractScriptClass {
         }
         if (scriptClass.getBinding().hasVariable("version")) {
             this.version = (String) scriptClass.getProperty("version")
+        }
+        if (scriptClass.getBinding().hasVariable("logBusinessService")) {
+            this.logBusinessService = (LogBusinessService) scriptClass.getProperty("logBusinessService")
         }
     }
 
@@ -630,9 +635,9 @@ class DeclarationType extends AbstractScriptClass {
         return result
     }
 
-/**
- * Загрузка ответов ФНС 2 и 6 НДФЛ
- */
+    /**
+     * Загрузка ответов ФНС 2 и 6 НДФЛ
+     */
     def importNdflResponse() {
         // Прочитать Имя отчетного файла из файла ответа
         Map<Object, Object> ndfl2ContentMap = [:]
@@ -825,7 +830,9 @@ class DeclarationType extends AbstractScriptClass {
         Date fileDate = null
 
         if (isNdfl6Response(UploadFileName)) {
-            fileDate = Date.parse("yyyyMMdd", UploadFileName.substring(56, 64))
+            String[] fileNameParts = UploadFileName.split("_")
+            String date = fileNameParts[fileNameParts.length - 2]
+            fileDate = Date.parse("yyyyMMdd", date)
         } else if (isNdfl2ResponseReestr(UploadFileName)) {
             fileDate = Date.parse("dd.MM.yyyy", ndfl2ContentReestrMap.get(NDFL2_REGISTER_DATE) as String)
         } else if (isNdfl2ResponseProt(UploadFileName)) {
@@ -833,6 +840,9 @@ class DeclarationType extends AbstractScriptClass {
         }
 
         // Сохранение файла ответа в форме
+
+        logBusinessService.logFormEvent(declarationData.id, FormDataEvent.ATTACH_RESPONSE_FILE, UploadFileName, userInfo ?: declarationService.getSystemUserInfo())
+
         def fileUuid = blobDataServiceDaoImpl.create(dataFile, UploadFileName, new Date())
         def createUser = declarationService.getSystemUserInfo().getUser()
         def fileTypeSaveId = fileTypeProvider.getUniqueRecordIds(new Date(), "CODE = ${AttachFileType.INCOMING_FROM_FNS.code}").get(0)
@@ -891,7 +901,10 @@ class DeclarationType extends AbstractScriptClass {
             if (nextKnd != null) {
                 def docStateProvider = refBookFactory.getDataProvider(RefBook.Id.DOC_STATE.getId())
                 def docStateId = docStateProvider.getUniqueRecordIds(new Date(), "KND = '${nextKnd}'").get(0)
-                declarationService.setDocStateId(declarationData.id, docStateId)
+                if (declarationData.docStateId != docStateId) {
+                    logBusinessService.logFormEvent(declarationData.id, FormDataEvent.CHANGE_STATUS_ED, "Изменено \"Состояние ЭД\"  на основании обработки файла ответа от ФНС", userInfo ?: declarationService.getSystemUserInfo())
+                    declarationService.setDocStateId(declarationData.id, docStateId)
+                }
             }
         }
         declarationService.createPdfReport(logger, declarationData, userInfo)
@@ -1118,7 +1131,7 @@ class DeclarationType extends AbstractScriptClass {
             }
 
             // Проверка не загружен ли уже такой файл в систему
-            if (UploadFileName != null && !UploadFileName.isEmpty()) {
+            if (UploadFileName) {
                 DeclarationDataFilter declarationFilter = new DeclarationDataFilter()
 
                 declarationFilter.setFileName(UploadFileName)

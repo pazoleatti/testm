@@ -263,17 +263,27 @@ class Calculate extends AbstractScriptClass {
                 }
             }
 
-            if (transitionalRows && declarationData.getKnfType() == RefBookKnfType.BY_NONHOLDING_TAX) {
-                BigDecimal НачисленныйНалогПоОперации = (BigDecimal) transitionalRows.values().sum { NdflPersonIncome income -> income.calculatedTax ?: 0 } ?: 0
-                BigDecimal УдержанныйНалогПоОперации = (BigDecimal) transitionalRows.values().sum { NdflPersonIncome income -> income.withholdingTax ?: 0 } ?: 0
-                BigDecimal НеУдержанныйНалогПоОперации = (BigDecimal) transitionalRows.values().sum { NdflPersonIncome income -> income.notHoldingTax ?: 0 } ?: 0
-                BigDecimal ИзлишнеУдержанныйНалогПоОперации = (BigDecimal) transitionalRows.values().sum { NdflPersonIncome income -> income.overholdingTax ?: 0 } ?: 0
-                if (НачисленныйНалогПоОперации == УдержанныйНалогПоОперации && НеУдержанныйНалогПоОперации == ИзлишнеУдержанныйНалогПоОперации) {
-                    continue
-                }
-            }
             for (List<ConsolidationIncome> passedIncomes : transitionalRows.values()) {
                 pickedRows.addAll(passedIncomes)
+            }
+        }
+
+        if (pickedRows && declarationData.getKnfType() == RefBookKnfType.BY_NONHOLDING_TAX) {
+            Map<String, List<ConsolidationIncome>> incomesByInp = pickedRows.groupBy { it.inp }
+            for (def personIncomes : incomesByInp.values()) {
+                BigDecimal НачисленныйНалогПоОперации = 0
+                BigDecimal УдержанныйНалогПоОперации = 0
+                BigDecimal НеУдержанныйНалогПоОперации = 0
+                BigDecimal ИзлишнеУдержанныйНалогПоОперации = 0
+                for (def income : personIncomes) {
+                    НачисленныйНалогПоОперации += income.calculatedTax ?: 0
+                    УдержанныйНалогПоОперации += income.withholdingTax ?: 0
+                    НеУдержанныйНалогПоОперации += income.notHoldingTax ?: 0
+                    ИзлишнеУдержанныйНалогПоОперации += income.overholdingTax ?: 0
+                }
+                if (НачисленныйНалогПоОперации <= УдержанныйНалогПоОперации && НеУдержанныйНалогПоОперации <= ИзлишнеУдержанныйНалогПоОперации) {
+                    pickedRows.removeAll(personIncomes)
+                }
             }
         }
 

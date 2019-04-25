@@ -6,11 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment
-import com.aplana.sbrf.taxaccounting.model.refbook.IdDoc
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAsnu
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
-import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPerson
+import com.aplana.sbrf.taxaccounting.model.refbook.*
 import com.aplana.sbrf.taxaccounting.model.util.BaseWeightCalculator
 import com.aplana.sbrf.taxaccounting.model.util.Pair
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
@@ -114,7 +110,7 @@ class Check extends AbstractScriptClass {
     final String LOG_TYPE_2_18_19 = "\"НДФЛ не удержанный\"/\"НДФЛ излишне удержанный\" рассчитан некорректно"
     final String LOG_TYPE_2_21 = "\"Срок перечисления в бюджет\" указан некорректно"
     final String LOG_TYPE_3_7 = "\"Код источника подтверждающего документа\" указан некорректно"
-    final String LOG_TYPE_3_10 = "\"Дата начисленного дохода\" указана некорректно"
+    final String LOG_TYPE_3_10 = "Строка вычета не соответствует строке начисления"
     final String LOG_TYPE_3_15 = "\"Дата применения вычета в текущем периоде\" не входит в текущий отчетный период"
     final String LOG_TYPE_3_11 = "\"Код начисленного дохода\" указан некорректно"
     final String LOG_TYPE_3_16 = "\"Сумма применения вычета\" указана некорректно"
@@ -1517,7 +1513,9 @@ class Check extends AbstractScriptClass {
                                             LOG_TYPE_2_16, fioAndInpAndOperId, pathError, errMsg)
                                 }
                             } else {
-                                def groupKey = { NdflPersonIncome income -> personsCache.get(income.ndflPersonId).inp + "_" + income.kpp + "_" + income.oktmo }
+                                def groupKey = { NdflPersonIncome income ->
+                                    personsCache.get(income.ndflPersonId).inp + "_" + income.kpp + "_" + income.oktmo + "_" + income.incomeAccruedDate?.getAt(Calendar.YEAR)
+                                }
                                 // Группы сортировки, вычисляем 1 раз для всех строк
                                 if (incomesByPersonIdForCol16Sec2Check == null) {
                                     // отбираем все строки формы с заполненной графой 16 и у которых одновременно: 1) Р.2.Гр.14 = «13». 2) Р.2.Гр.4 ≠ «1010».
@@ -1872,15 +1870,17 @@ class Check extends AbstractScriptClass {
                 // Если выполняется хотя бы одно из условий:
                 // КодАСНУ не равна ни одному из значений: 1000; 1001; 1002
                 // Дата, указанная в "Раздел 3.Графа 15" не является последним календарным днём месяца
-                def incomeExists = allIncomesOfOperation.find {NdflPersonIncome income ->
+                List<NdflPersonIncome> incomeExists = allIncomesOfOperation.findAll { NdflPersonIncome income ->
                     String asnuCode = getRefAsnu().get(income.asnuId).code
 
                     income.incomeAccruedDate == ndflPersonDeduction.incomeAccrued && income.incomeCode == ndflPersonDeduction.incomeCode &&
-                            income.incomeAccruedSumm == ndflPersonDeduction.incomeSumm && income.taxDate == ndflPersonDeduction.periodCurrDate &&
-                            income.totalDeductionsSumm != null &&
+                            income.incomeAccruedSumm == ndflPersonDeduction.incomeSumm && income.totalDeductionsSumm != null &&
                             (!["1000", "1001", "1002"].contains(asnuCode) || !isLastMonthDay(ndflPersonDeduction.getPeriodCurrDate()))
-                } != null
-                if (!incomeExists) {
+                }
+
+                if (!incomeExists.isEmpty() && incomeExists.find { NdflPersonIncome income ->
+                    income.taxDate == ndflPersonDeduction.periodCurrDate
+                } == null) {
                     String errMsg = "В разделе 2 отсутствует соответствующая строка начисления, содержащая информацию о вычете, с параметрами " +
                             "\"ID операции\": $ndflPersonDeduction.operationId, \"Дата начисления\": ${formatDate(ndflPersonDeduction.incomeAccrued)}, " +
                             "\"Код дохода\": $ndflPersonDeduction.incomeCode, \"Сумма начисленного дохода\": $ndflPersonDeduction.incomeSumm, " +

@@ -1,7 +1,8 @@
-package form_template.ndfl.primary_rnu_ndfl.v2016
+package form_template.ndfl.consolidated_rnu_ndfl.v2016
 
 import com.aplana.sbrf.taxaccounting.AbstractScriptClass
 import com.aplana.sbrf.taxaccounting.model.*
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome
@@ -11,9 +12,9 @@ import com.aplana.sbrf.taxaccounting.model.util.BaseWeightCalculator
 import com.aplana.sbrf.taxaccounting.model.util.Pair
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
-import com.aplana.sbrf.taxaccounting.script.SharedConstants
 import com.aplana.sbrf.taxaccounting.script.service.*
 import com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils
+import com.aplana.sbrf.taxaccounting.service.refbook.DepartmentConfigService
 import com.aplana.sbrf.taxaccounting.utils.SimpleDateUtils
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.TypeChecked
@@ -28,6 +29,7 @@ class Check extends AbstractScriptClass {
     NdflPersonService ndflPersonService
     DeclarationData declarationData
     DepartmentReportPeriod departmentReportPeriod
+    Department department
     ReportPeriod reportPeriod
     DepartmentService departmentService
     CalendarService calendarService
@@ -36,6 +38,7 @@ class Check extends AbstractScriptClass {
     DepartmentReportPeriodService departmentReportPeriodService
     RefBookFactory refBookFactory
     PersonService personService
+    DepartmentConfigService departmentConfigService
     RefBookService refBookService
 
     // Сервис для получения рабочих дней
@@ -61,6 +64,7 @@ class Check extends AbstractScriptClass {
     final String R_INCOME_TYPE = "Виды дохода"
     final String R_TYPE_CODE = "Коды видов вычетов"
     final String R_NOTIF_SOURCE = "Налоговые инспекции"
+    final String R_DETAIL = "Настройки подразделений"
 
     final String TEMPLATE_PERSON_FL = "%s, ИНП: %s"
     final String TEMPLATE_PERSON_FL_OPER = "%s, ИНП: %s, ID операции: %s"
@@ -140,7 +144,7 @@ class Check extends AbstractScriptClass {
     // Кэш провайдеров cправочников
     Map<Long, RefBookDataProvider> providerCache = [:]
 
-    final FormDataKind FORM_DATA_KIND = FormDataKind.PRIMARY
+    final FormDataKind FORM_DATA_KIND = FormDataKind.CONSOLIDATED
 
     // Дата окончания отчетного периода
     Date periodEndDate = null
@@ -179,6 +183,7 @@ class Check extends AbstractScriptClass {
             declarationData = (DeclarationData) scriptClass.getProperty("declarationData")
             departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
             reportPeriod = departmentReportPeriod.reportPeriod
+            department = departmentService.get(departmentReportPeriod.getDepartmentId())
         }
         if (scriptClass.getBinding().hasVariable("refBookFactory")) {
             this.refBookFactory = (RefBookFactory) scriptClass.getProperty("refBookFactory")
@@ -197,6 +202,9 @@ class Check extends AbstractScriptClass {
         }
         if (scriptClass.getBinding().hasVariable("personService")) {
             this.personService = (PersonService) scriptClass.getProperty("personService")
+        }
+        if (scriptClass.getBinding().hasVariable("departmentConfigService")) {
+            this.departmentConfigService = (DepartmentConfigService) scriptClass.getProperty("departmentConfigService")
         }
         if (scriptClass.getBinding().hasVariable("refBookService")) {
             this.refBookService = (RefBookService) scriptClass.getProperty("refBookService")
@@ -250,7 +258,7 @@ class Check extends AbstractScriptClass {
                 ScriptUtils.checkInterrupted()
 
                 // Общие проверки
-                checkDataCommon(ndflPersonList, ndflPersonIncomeList, personMap)
+                checkDataCommon(ndflPersonList, ndflPersonIncomeList)
 
                 ScriptUtils.checkInterrupted()
 
@@ -297,16 +305,8 @@ class Check extends AbstractScriptClass {
     void fillNdflPersonFLMap(List<NdflPerson> ndflPersonList, Map<Long, RegistryPerson> personMap) {
         for (def ndflPerson : ndflPersonList) {
             NdflPersonFL ndflPersonFL
-            if (FORM_DATA_KIND == FormDataKind.PRIMARY) {
-                // РНУ-НДФЛ первичная
-                String fio = (ndflPerson.lastName ?: "") + " " + (ndflPerson.firstName ?: "") + " " + (ndflPerson.middleName ?: "")
-                ndflPersonFL = new NdflPersonFL(fio, ndflPerson.inp ?: "")
-            } else {
-                // РНУ-НДФЛ консолидированная
-                RegistryPerson personRecord = personMap.get(ndflPerson.recordId)
-                String fio = (personRecord.lastName ?: "") + " " + (personRecord.firstName ?: "") + " " + (personRecord.middleName ?: "")
-                ndflPersonFL = new NdflPersonFL(fio, ndflPerson.recordId.toString())
-            }
+            String fio = (ndflPerson.lastName ?: "") + " " + (ndflPerson.firstName ?: "") + " " + (ndflPerson.middleName ?: "")
+            ndflPersonFL = new NdflPersonFL(fio, ndflPerson.inp ?: "")
             ndflPersonFLMap.put(ndflPerson.id, ndflPersonFL)
         }
     }
@@ -388,15 +388,12 @@ class Check extends AbstractScriptClass {
 
             // Проверка отключена в рамках https://jira.aplana.com/browse/SBRFNDFL-7256
             /*long tIsExistsAddress = System.currentTimeMillis()
-
-
             if (!isPersonAddressEmpty(ndflPerson)) {
                 String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
-                if (ndflPerson.postIndex != null && !ndflPerson.postIndex.matches("[0-9]{6}")) {
+                if (!(ndflPerson.postIndex != null && ndflPerson.postIndex.matches("[0-9]{6}"))) {
                     logFiasIndexError(fioAndInp, pathError, "Индекс", ndflPerson.postIndex)
                 }
             }
-
             timeIsExistsAddress += System.currentTimeMillis() - tIsExistsAddress*/
 
             // Спр2 Гражданство (Обязательное поле)
@@ -441,7 +438,7 @@ class Check extends AbstractScriptClass {
 
                 if (!personRecord) {
                     String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
-                    logger.errorExp("%s. %s.", " Отсутствует актуальная версия связанного ФЛ", fioAndInp, pathError,
+                    logger.errorExp("%s. %s.", "Не установлена ссылка на запись Реестра физических лиц", fioAndInp, pathError,
                             "Для физического лица из (Реестра физических лиц) определенного по установленной ссылке " +
                                     "отсутствует актуальная на настоящий момент времени версия")
                 } else {
@@ -484,6 +481,7 @@ class Check extends AbstractScriptClass {
                                     String.format(LOG_TYPE_PERSON_MSG, "ИНП", ndflPerson.inp ?: ""))
                         }
                     }
+
                     // Спр13 Дата рождения (Обязательное поле)
                     if (personRecord.birthDate != null && !personRecord.birthDate.equals(ndflPerson?.birthDay)) {
                         String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
@@ -492,7 +490,7 @@ class Check extends AbstractScriptClass {
                     }
 
                     // Спр14 Гражданство (Обязательное поле)
-                    if (ndflPerson.citizenship != null && !ndflPerson.citizenship.equals(personRecord.citizenship?.code)) {
+                    if (ndflPerson.citizenship != null && !ndflPerson.citizenship.equals(personRecord.citizenship.code)) {
                         String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                         logger.warnExp("%s. %s.", "Код гражданства не соответствует Реестру физических лиц", fioAndInp, pathError,
                                 String.format(LOG_TYPE_PERSON_MSG, C_CITIZENSHIP, ndflPerson.citizenship ?: ""))
@@ -541,8 +539,8 @@ class Check extends AbstractScriptClass {
                         }
                     }
 
-                    // Спр18 Статус налогоплательщика
-                    if (ndflPerson.status != personRecord.taxPayerState?.code) {
+                    // Спр18 Статус налогоплательщика (Обязательное поле)
+                    if (ndflPerson.status != null && !ndflPerson.status.equals(personRecord.taxPayerState.code)) {
                         String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                         logger.warnExp("%s. %s.", "Статус налогоплательщика не соответствует Реестру физических лиц", fioAndInp, pathError,
                                 String.format(LOG_TYPE_PERSON_MSG, C_STATUS, ndflPerson.status ?: ""))
@@ -550,7 +548,7 @@ class Check extends AbstractScriptClass {
                 }
             }
         }
-        logForDebug("Проверки на соответствие справочникам / " + T_PERSON_NAME + " (" + (System.currentTimeMillis() - time) + " мс)")
+        logForDebug("Проверки на соответствие справочникам / '${T_PERSON_NAME}' (" + (System.currentTimeMillis() - time) + " мс)")
 
         /*logForDebug("Проверки на соответствие справочникам / Проверка существования адреса (" + timeIsExistsAddress + " мс)")*/
 
@@ -587,7 +585,7 @@ class Check extends AbstractScriptClass {
 
                 Доход.Вид.Код (Графа 4) - (Необязательное поле)
                 incomeCodeMap <REF_BOOK_INCOME_TYPE.ID, REF_BOOK_INCOME_TYPE>
-                 */
+             */
                 if (ndflPersonIncome.incomeType && ndflPersonIncome.incomeCode) {
                     List<Map<String, RefBookValue>> incomeTypeRowList = incomeTypeMap.get(ndflPersonIncome.incomeType)
                     if (incomeTypeRowList == null || incomeTypeRowList.isEmpty()) {
@@ -684,13 +682,29 @@ class Check extends AbstractScriptClass {
     /**
      * Общие проверки
      */
-    def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndflPersonIncomeList, Map<Long, RegistryPerson> personMap) {
+    def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndflPersonIncomeList) {
         long time = System.currentTimeMillis()
         long timeTotal = time
 
         logForDebug("Общие проверки: инициализация (" + (System.currentTimeMillis() - time) + " мс)")
 
         time = System.currentTimeMillis()
+
+        // Общ15 Консолидированная форма не пуста
+        String strCorrPeriod = (departmentReportPeriod.correctionDate) ?
+                ", с датой сдачи корректировки ${departmentReportPeriod.correctionDate.format("dd.MM.yyyy")}" : ""
+        def strPeriod = departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + ", " + departmentReportPeriod.getReportPeriod().getName() + strCorrPeriod
+
+        if (!ndflPersonList && !ndflPersonIncomeList) {
+            logger.errorExp("Консолидированная форма ${declarationData.id}, ${department.name}, ${strPeriod} не содержит данных, принятие формы невозможно",
+                    "Консолидированная форма не пуста", "")
+        } else if (!ndflPersonList) {
+            logger.errorExp("Консолидированная форма ${declarationData.id}, ${department.name}, ${strPeriod} не содержит данных в разделе 1: \"Реквизиты\", принятие формы невозможно",
+                    "Консолидированная форма не пуста", "")
+        } else if (!ndflPersonIncomeList) {
+            logger.errorExp("Консолидированная форма ${declarationData.id}, ${department.name}, ${strPeriod} не содержит данных в разделе 2: \"Сведения о доходах и НДФЛ\", принятие формы невозможно",
+                    "Консолидированная форма не пуста", "")
+        }
 
         for (NdflPerson ndflPerson : ndflPersonList) {
 
@@ -699,12 +713,19 @@ class Check extends AbstractScriptClass {
             NdflPersonFL ndflPersonFL = ndflPersonFLMap.get(ndflPerson.id)
             String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [ndflPersonFL.fio, ndflPersonFL.inp])
 
-            // Общ1 Корректность ИНН
+            // Общ1 Корректность ИНН (Необязательное поле)
             if (ndflPerson.citizenship == "643") {
                 if (ndflPerson.innNp == null) {
                     String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                     logger.warnExp("%s. %s.", "\"ИНН\" не указан", fioAndInp, pathError,
                             "Значение гр. \"ИНН в РФ\" не указано.")
+                } else {
+                    String checkInn = ScriptUtils.checkInn(ndflPerson.innNp)
+                    if (checkInn != null) {
+                        String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
+                        logger.warnExp("%s. %s.", "\"ИНН\" не соответствует формату", fioAndInp, pathError,
+                                checkInn)
+                    }
                 }
             }
 
@@ -737,11 +758,10 @@ class Check extends AbstractScriptClass {
             }
 
             if (checkIdDocType && checkIdDocNumber) {
-                String checkDul = ScriptUtils.checkDul(ndflPerson.idDocType, ndflPerson.idDocNumber, "ДУЛ Номер")
-                if (checkDul != null) {
+                String errorMsg = ScriptUtils.checkDul(ndflPerson.idDocType, ndflPerson.idDocNumber, "ДУЛ Номер")
+                if (errorMsg != null) {
                     String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
-                    logger.warnExp("%s. %s.", "\"ДУЛ\" не соответствует формату", fioAndInp, pathError,
-                            checkDul)
+                    logger.warnExp("%s. %s.", "\"ДУЛ\" не соответствует формату", fioAndInp, pathError, errorMsg)
                 }
             }
 
@@ -758,6 +778,12 @@ class Check extends AbstractScriptClass {
         logForDebug("Общие проверки / '${T_PERSON_NAME}' (" + (System.currentTimeMillis() - time) + " мс)")
 
         time = System.currentTimeMillis()
+        def actualKppOktmoPairsByDepartmentId = departmentConfigService.findAllKppOktmoPairs(declarationData.id, declarationData.departmentId, declarationData.reportPeriodId).toSet()
+        def actualKppOktmoPairs = departmentConfigService.findAllKppOktmoPairs(declarationData.id, null, declarationData.reportPeriodId).toSet()
+        long departmentConfigTime = System.currentTimeMillis() - time
+        time = System.currentTimeMillis()
+        Department department = departmentService.get(declarationData.departmentId)
+
         // Общ7 Наличие или отсутствие значения в графе в зависимости от условий
         List<ColumnFillConditionData> columnFillConditionDataList = []
         //1 Раздел 2. Графа 4 должна быть заполнена, если заполнена хотя бы одна из граф: "Раздел 2. Графа 10" ИЛИ "Раздел 2. Графа 11"
@@ -956,9 +982,36 @@ class Check extends AbstractScriptClass {
                                 fioAndInpAndOperId, pathError, columnFillConditionData.conditionMessage)
                     }
                 }
+
+                long departmentConfigTimePart = System.currentTimeMillis()
+                // Общ10 Соответствие КПП и ОКТМО Тербанку
+                if (ndflPersonIncome.kpp && ndflPersonIncome.oktmo && !actualKppOktmoPairsByDepartmentId.contains(new KppOktmoPair(ndflPersonIncome.kpp, ndflPersonIncome.oktmo))) {
+                    String errMsg = String.format("Значение гр. \"%s\" (\"%s\"), \"%s\" (\"%s\") отсутствует в справочнике \"%s\" для \"%s\"",
+                            C_KPP, ndflPersonIncome.kpp ?: "",
+                            C_OKTMO, ndflPersonIncome.oktmo ?: "",
+                            R_DETAIL,
+                            department ? department.name : ""
+                    )
+                    String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
+                    logger.warnExp("%s. %s.", "\"КПП\" и \"ОКТМО\" не соответствуют Тербанку", fioAndInpAndOperId, pathError,
+                            errMsg)
+                }
+
+                // Общ11 Существование настроек подразделения для КПП-ОКТМО
+                if (ndflPersonIncome.kpp && ndflPersonIncome.oktmo && !actualKppOktmoPairs.contains(new KppOktmoPair(ndflPersonIncome.kpp, ndflPersonIncome.oktmo))) {
+                    String errMsg = "Ни для одного из ТБ не найдено ни одной настройки подразделения с КПП = \"$ndflPersonIncome.kpp\", ОКТМО= \"$ndflPersonIncome.oktmo\", " +
+                            "которая была бы актуальная на настоящий момент, либо актуальна в периоде \"$reportPeriod.taxPeriod.year, $reportPeriod.name\". " +
+                            "По этому сочетанию КПП-ОКТМО не будут сформированы отчетные формы для отправки в ФНС"
+                    String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
+                    logger.warnExp("%s. %s.", "\"КПП\" и \"ОКТМО\" отсутствует в настройках подразделений", fioAndInpAndOperId, pathError,
+                            errMsg)
+                }
+                departmentConfigTime += (System.currentTimeMillis() - departmentConfigTimePart)
             }
         }
         ScriptUtils.checkInterrupted()
+
+        logForDebug("Общие проверки / Соответствие настройкам подразделений (" + departmentConfigTime + " мс)")
         logForDebug("Общие проверки / " + T_PERSON_INCOME_NAME + " (" + (System.currentTimeMillis() - time) + " мс)")
 
         time = System.currentTimeMillis()
@@ -1031,7 +1084,7 @@ class Check extends AbstractScriptClass {
         dateConditionDataList << new DateConditionData(["1530", "1531", "1532", "1533", "1535", "1536", "1537", "1539",
                                                         "1541", "1542", "1544", "1546", "1548", "1551", "1552", "1553", "1554"],
                 ["04"], new LastYearWorkDay(),
-                "Значение гр. \"%s\" (\"%s\") должно быть равно последнему рабочему дню года, за который был начислен доход (%4\$s), " +
+                "Значение гр. \"%s\" (\"%s\") должно быть равно последнему рабочему календарному дню года, за который был начислен доход (%4\$s), " +
                         "для Кода дохода = \"%6\$s\" и Признака дохода = \"%8\$s\"")
 
         // 7. Последний календарный день месяца
@@ -1557,14 +1610,13 @@ class Check extends AbstractScriptClass {
                                             s3 = s3.add(ndflPersonPrepayment.summ)
                                         }
                                     }
-
                                     // ОКРУГЛ (S1 x Р.2.Гр.14 / 100)
                                     BigDecimal var1 = ScriptUtils.round(s1 * (ndflPersonIncome.taxRate ?: 0) / 100)
                                     // где ВычисленноеЗначениеНалога = ОКРУГЛ (S1 x Р.2.Гр.14 / 100) - S2 - S3
                                     BigDecimal ВычисленноеЗначениеНалога = var1 - s2 - s3
 
-                                    // Для ПНФ: | Р.2.Гр.16 – ВычисленноеЗначениеНалога | <= 1
-                                    if (!((ndflPersonIncome.calculatedTax - ВычисленноеЗначениеНалога).abs() <= 1)) {
+                                    // Для КНФ: | Р.2.Гр.16 – ВычисленноеЗначениеНалога | < 1
+                                    if (!((ndflPersonIncome.calculatedTax - ВычисленноеЗначениеНалога).abs() < 1)) {
                                         String errMsg = String.format("Значение налога исчисленного в гр. 16 (%s р) не совпадает с расчетным (%s р)",
                                                 ndflPersonIncome.calculatedTax, ВычисленноеЗначениеНалога)
                                         String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
@@ -1578,114 +1630,114 @@ class Check extends AbstractScriptClass {
                     }
 
                     /* todo Убрал проверку Заполнения Раздела 2 Графы 17, в SBRFNDFL-3997 её доработают
-                    // СведДох6 НДФЛ.Расчет.Сумма.Удержанный (Графа 17)
-                    if (!ndflPersonIncome.isDummy() && ndflPersonIncome.withholdingTax != null && ndflPersonIncome.withholdingTax != 0) {
-                        // СведДох7.1
-                        if ((["2520", "2720", "2740", "2750", "2790", "4800"].contains(ndflPersonIncome.incomeCode) && ndflPersonIncome.incomeType == "13")
-                                || (["1530", "1531", "1532", "1533", "1535", "1536", "1537", "1539", "1541", "1542", "1543", "1544",
-                                     "1545", "1546", "1547", "1548", "1549", "1551", "1552", "1554"].contains(ndflPersonIncome.incomeCode) && ndflPersonIncome.incomeType == "02")
-                                && (ndflPersonIncome.overholdingTax == null || ndflPersonIncome.overholdingTax == 0)
-                        ) {
-                            // «Графа 17 Раздел 2» = «Графа 16 Раздел 2» = «Графа 24 Раздел 2»
-                            if (!(ndflPersonIncome.withholdingTax == ndflPersonIncome.calculatedTax
-                                    && ndflPersonIncome.withholdingTax == ndflPersonIncome.taxSumm ?: 0)) {
-                                String errMsg = String.format("Значение гр. \"%s\" (\"%s\") должно быть равно значениям гр. \"%s\" (\"%s\") и гр. \"%s\" (\"%s\")",
-                                        C_WITHHOLDING_TAX, ndflPersonIncome.withholdingTax ?: 0,
-                                        C_CALCULATED_TAX, ndflPersonIncome.calculatedTax ?: 0,
-                                        C_TAX_SUMM, ndflPersonIncome.taxSumm ?: 0
-                                )
-                                String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
-                                logger.logCheck("%s. %s.",
-                                        declarationService.isCheckFatal(DeclarationCheckCode.RNU_SECTION_2_17, declarationData.declarationTemplateId),
-                                        LOG_TYPE_2_17, fioAndInpAndOperId, pathError, errMsg)
-                            }
-                        } else if (((["2520", "2720", "2740", "2750", "2790", "4800"].contains(ndflPersonIncome.incomeCode) && ndflPersonIncome.incomeType == "13")
-                                || (["1530", "1531", "1532", "1533", "1535", "1536", "1537", "1539", "1541", "1542", "1543", "1544",
-                                     "1545", "1546", "1547", "1548", "1549", "1551", "1552", "1554"].contains(ndflPersonIncome.incomeCode) && ndflPersonIncome.incomeType != "02"))
-                                && ndflPersonIncome.overholdingTax > 0
-                        ) {
-                            // «Графа 17 Раздел 2» = («Графа 16 Раздел 2» + «Графа 16 Раздел 2» предыдущей записи) = «Графа 24 Раздел 2» и «Графа 17 Раздел 2» <= ((«Графа 13 Раздел 2» - «Графа 16 Раздел 2») × 50%)
-                            List<NdflPersonIncome> ndflPersonIncomeCurrentList = ndflPersonIncomeCache.get(ndflPersonIncome.ndflPersonId) ?: new ArrayList<NdflPersonIncome>()
-                            NdflPersonIncome ndflPersonIncomePreview = null
-                            if (!ndflPersonIncomeCurrentList.isEmpty()) {
-                                for (NdflPersonIncome ndflPersonIncomeCurrent in ndflPersonIncomeCurrentList) {
-                                    if (ndflPersonIncomeCurrent.incomeAccruedDate <= ndflPersonIncome.incomeAccruedDate &&
-                                            (ndflPersonIncomePreview == null || ndflPersonIncomePreview.incomeAccruedDate < ndflPersonIncomeCurrent.incomeAccruedDate)) {
-                                        ndflPersonIncomePreview = ndflPersonIncomeCurrent
-                                    }
+                // СведДох6 НДФЛ.Расчет.Сумма.Удержанный (Графа 17)
+                if (!ndflPersonIncome.isDummy() && ndflPersonIncome.withholdingTax != null && ndflPersonIncome.withholdingTax != 0) {
+                    // СведДох7.1
+                    if ((["2520", "2720", "2740", "2750", "2790", "4800"].contains(ndflPersonIncome.incomeCode) && ndflPersonIncome.incomeType == "13")
+                            || (["1530", "1531", "1532", "1533", "1535", "1536", "1537", "1539", "1541", "1542", "1543", "1544",
+                                 "1545", "1546", "1547", "1548", "1549", "1551", "1552", "1554"].contains(ndflPersonIncome.incomeCode) && ndflPersonIncome.incomeType == "02")
+                            && (ndflPersonIncome.overholdingTax == null || ndflPersonIncome.overholdingTax == 0)
+                    ) {
+                        // «Графа 17 Раздел 2» = «Графа 16 Раздел 2» = «Графа 24 Раздел 2»
+                        if (!(ndflPersonIncome.withholdingTax == ndflPersonIncome.calculatedTax
+                                && ndflPersonIncome.withholdingTax == ndflPersonIncome.taxSumm ?: 0)) {
+                            String errMsg = String.format("Значение гр. \"%s\" (\"%s\") должно быть равно значениям гр. \"%s\" (\"%s\") и гр. \"%s\" (\"%s\")",
+                                    C_WITHHOLDING_TAX, ndflPersonIncome.withholdingTax ?: 0,
+                                    C_CALCULATED_TAX, ndflPersonIncome.calculatedTax ?: 0,
+                                    C_TAX_SUMM, ndflPersonIncome.taxSumm ?: 0
+                            )
+                            String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
+                            logger.logCheck("%s. %s.",
+                                    declarationService.isCheckFatal(DeclarationCheckCode.RNU_SECTION_2_17, declarationData.declarationTemplateId),
+                                    LOG_TYPE_2_17, fioAndInpAndOperId, pathError, errMsg)
+                        }
+                    } else if (((["2520", "2720", "2740", "2750", "2790", "4800"].contains(ndflPersonIncome.incomeCode) && ndflPersonIncome.incomeType == "13")
+                            || (["1530", "1531", "1532", "1533", "1535", "1536", "1537", "1539", "1541", "1542", "1543", "1544",
+                                 "1545", "1546", "1547", "1548", "1549", "1551", "1552", "1554"].contains(ndflPersonIncome.incomeCode) && ndflPersonIncome.incomeType != "02"))
+                            && ndflPersonIncome.overholdingTax > 0
+                    ) {
+                        // «Графа 17 Раздел 2» = («Графа 16 Раздел 2» + «Графа 16 Раздел 2» предыдущей записи) = «Графа 24 Раздел 2» и «Графа 17 Раздел 2» <= ((«Графа 13 Раздел 2» - «Графа 16 Раздел 2») × 50%)
+                        List<NdflPersonIncome> ndflPersonIncomeCurrentList = ndflPersonIncomeCache.get(ndflPersonIncome.ndflPersonId) ?: new ArrayList<NdflPersonIncome>()
+                        NdflPersonIncome ndflPersonIncomePreview = null
+                        if (!ndflPersonIncomeCurrentList.isEmpty()) {
+                            for (NdflPersonIncome ndflPersonIncomeCurrent in ndflPersonIncomeCurrentList) {
+                                if (ndflPersonIncomeCurrent.incomeAccruedDate <= ndflPersonIncome.incomeAccruedDate &&
+                                        (ndflPersonIncomePreview == null || ndflPersonIncomePreview.incomeAccruedDate < ndflPersonIncomeCurrent.incomeAccruedDate)) {
+                                    ndflPersonIncomePreview = ndflPersonIncomeCurrent
                                 }
                             }
-                            if (!(ndflPersonIncome.withholdingTax == (ndflPersonIncome.calculatedTax ?: 0) + (ndflPersonIncomePreview.calculatedTax ?: 0))) {
-                                String errMsg = String.format("Значение гр. \"%s\" (\"%s\") должно быть равно сумме значений гр. \"%s\" (\"%s\") и гр. \"%s\" (\"%s\") предыдущей записи",
-                                        C_WITHHOLDING_TAX, ndflPersonIncome.withholdingTax ?: 0,
-                                        C_CALCULATED_TAX, ndflPersonIncome.calculatedTax ?: 0,
-                                        C_CALCULATED_TAX, ndflPersonIncomePreview.calculatedTax ?: 0
-                                )
-                                String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
-                                logger.logCheck("%s. %s.",
-                                        declarationService.isCheckFatal(DeclarationCheckCode.RNU_SECTION_2_17, declarationData.declarationTemplateId),
-                                        LOG_TYPE_2_17, fioAndInpAndOperId, pathError, errMsg)
-                            }
-                            if (!(ndflPersonIncome.withholdingTax == ndflPersonIncome.taxSumm ?: 0)) {
-                                String errMsg = String.format("Значение гр. \"%s\" (\"%s\") должно быть равно значению гр. \"%s\" (\"%s\")",
-                                        C_WITHHOLDING_TAX, ndflPersonIncome.withholdingTax ?: 0,
-                                        C_TAX_SUMM, ndflPersonIncome.taxSumm ?: 0
-                                )
-                                String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
-                                logger.logCheck("%s. %s.",
-                                        declarationService.isCheckFatal(DeclarationCheckCode.RNU_SECTION_2_17, declarationData.declarationTemplateId),
-                                        LOG_TYPE_2_17, fioAndInpAndOperId, pathError, errMsg)
-                            }
-                            if (!(ndflPersonIncome.withholdingTax <= (ScriptUtils.round(ndflPersonIncome.taxBase ?: 0, 0) - ndflPersonIncome.calculatedTax ?: 0) * 0.50)) {
-                                String errMsg = String.format("Значение гр. \"%s\" (\"%s\") не должно превышать 50%% от разности значение гр. \"%s\" (\"%s\") и гр. \"%s\" (\"%s\")",
-                                        C_WITHHOLDING_TAX, ndflPersonIncome.withholdingTax ?: 0,
-                                        C_TAX_BASE, ndflPersonIncome.taxBase ?: 0,
-                                        C_CALCULATED_TAX, ndflPersonIncome.calculatedTax ?: 0
-                                )
-                                String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
-                                logger.logCheck("%s. %s.",
-                                        declarationService.isCheckFatal(DeclarationCheckCode.RNU_SECTION_2_17, declarationData.declarationTemplateId),
-                                        LOG_TYPE_2_17, fioAndInpAndOperId, pathError, errMsg)
-                            }
-                        } else if ((["2520", "2720", "2740", "2750", "2790", "4800"].contains(ndflPersonIncome.incomeCode) && ndflPersonIncome.incomeType == "14")
-                                || (["1530", "1531", "1532", "1533", "1535", "1536", "1537", "1539", "1541", "1542", "1544", "1545",
-                                     "1546", "1547", "1548", "1549", "1551", "1552", "1554"].contains(ndflPersonIncome.incomeCode) && ndflPersonIncome.incomeType == "02")
-                        ) {
-                            if (!(ndflPersonIncome.withholdingTax == 0 || ndflPersonIncome.withholdingTax == null)) {
-                                String errMsg = String.format("Значение гр. \"%s\" (\"%s\") должно быть равно \"0\"",
-                                        C_WITHHOLDING_TAX, ndflPersonIncome.withholdingTax ?: 0
-                                )
-                                String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
-                                logger.logCheck("%s. %s.",
-                                        declarationService.isCheckFatal(DeclarationCheckCode.RNU_SECTION_2_17, declarationData.declarationTemplateId),
-                                        LOG_TYPE_2_17, fioAndInpAndOperId, pathError, errMsg)
-                            }
-                        } else if (!(ndflPersonIncome.incomeCode != null)) {
-                            if (!(ndflPersonIncome.withholdingTax != ndflPersonIncome.taxSumm ?: 0)) {
-                                String errMsg = String.format("Значение гр. \"%s\" (\"%s\") должно быть равно значению гр. \"%s\" (\"%s\")",
-                                        C_WITHHOLDING_TAX, ndflPersonIncome.withholdingTax ?: 0,
-                                        C_TAX_SUMM, ndflPersonIncome.taxSumm ?: 0
-                                )
-                                String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
-                                logger.logCheck("%s. %s.",
-                                        declarationService.isCheckFatal(DeclarationCheckCode.RNU_SECTION_2_17, declarationData.declarationTemplateId),
-                                        LOG_TYPE_2_17, fioAndInpAndOperId, pathError, errMsg)
-                            }
                         }
-                    }*/
+                        if (!(ndflPersonIncome.withholdingTax == (ndflPersonIncome.calculatedTax ?: 0) + (ndflPersonIncomePreview.calculatedTax ?: 0))) {
+                            String errMsg = String.format("Значение гр. \"%s\" (\"%s\") должно быть равно сумме значений гр. \"%s\" (\"%s\") и гр. \"%s\" (\"%s\") предыдущей записи",
+                                    C_WITHHOLDING_TAX, ndflPersonIncome.withholdingTax ?: 0,
+                                    C_CALCULATED_TAX, ndflPersonIncome.calculatedTax ?: 0,
+                                    C_CALCULATED_TAX, ndflPersonIncomePreview.calculatedTax ?: 0
+                            )
+                            String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
+                            logger.logCheck("%s. %s.",
+                                    declarationService.isCheckFatal(DeclarationCheckCode.RNU_SECTION_2_17, declarationData.declarationTemplateId),
+                                    LOG_TYPE_2_17, fioAndInpAndOperId, pathError, errMsg)
+                        }
+                        if (!(ndflPersonIncome.withholdingTax == ndflPersonIncome.taxSumm ?: 0)) {
+                            String errMsg = String.format("Значение гр. \"%s\" (\"%s\") должно быть равно значению гр. \"%s\" (\"%s\")",
+                                    C_WITHHOLDING_TAX, ndflPersonIncome.withholdingTax ?: 0,
+                                    C_TAX_SUMM, ndflPersonIncome.taxSumm ?: 0
+                            )
+                            String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
+                            logger.logCheck("%s. %s.",
+                                    declarationService.isCheckFatal(DeclarationCheckCode.RNU_SECTION_2_17, declarationData.declarationTemplateId),
+                                    LOG_TYPE_2_17, fioAndInpAndOperId, pathError, errMsg)
+                        }
+                        if (!(ndflPersonIncome.withholdingTax <= (ScriptUtils.round(ndflPersonIncome.taxBase ?: 0, 0) - ndflPersonIncome.calculatedTax ?: 0) * 0.50)) {
+                            String errMsg = String.format("Значение гр. \"%s\" (\"%s\") не должно превышать 50%% от разности значение гр. \"%s\" (\"%s\") и гр. \"%s\" (\"%s\")",
+                                    C_WITHHOLDING_TAX, ndflPersonIncome.withholdingTax ?: 0,
+                                    C_TAX_BASE, ndflPersonIncome.taxBase ?: 0,
+                                    C_CALCULATED_TAX, ndflPersonIncome.calculatedTax ?: 0
+                            )
+                            String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
+                            logger.logCheck("%s. %s.",
+                                    declarationService.isCheckFatal(DeclarationCheckCode.RNU_SECTION_2_17, declarationData.declarationTemplateId),
+                                    LOG_TYPE_2_17, fioAndInpAndOperId, pathError, errMsg)
+                        }
+                    } else if ((["2520", "2720", "2740", "2750", "2790", "4800"].contains(ndflPersonIncome.incomeCode) && ndflPersonIncome.incomeType == "14")
+                            || (["1530", "1531", "1532", "1533", "1535", "1536", "1537", "1539", "1541", "1542", "1544", "1545",
+                                 "1546", "1547", "1548", "1549", "1551", "1552", "1554"].contains(ndflPersonIncome.incomeCode) && ndflPersonIncome.incomeType == "02")
+                    ) {
+                        if (!(ndflPersonIncome.withholdingTax == 0 || ndflPersonIncome.withholdingTax == null)) {
+                            String errMsg = String.format("Значение гр. \"%s\" (\"%s\") должно быть равно \"0\"",
+                                    C_WITHHOLDING_TAX, ndflPersonIncome.withholdingTax ?: 0
+                            )
+                            String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
+                            logger.logCheck("%s. %s.",
+                                    declarationService.isCheckFatal(DeclarationCheckCode.RNU_SECTION_2_17, declarationData.declarationTemplateId),
+                                    LOG_TYPE_2_17, fioAndInpAndOperId, pathError, errMsg)
+                        }
+                    } else if (!(ndflPersonIncome.incomeCode != null)) {
+                        if (!(ndflPersonIncome.withholdingTax != ndflPersonIncome.taxSumm ?: 0)) {
+                            String errMsg = String.format("Значение гр. \"%s\" (\"%s\") должно быть равно значению гр. \"%s\" (\"%s\")",
+                                    C_WITHHOLDING_TAX, ndflPersonIncome.withholdingTax ?: 0,
+                                    C_TAX_SUMM, ndflPersonIncome.taxSumm ?: 0
+                            )
+                            String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
+                            logger.logCheck("%s. %s.",
+                                    declarationService.isCheckFatal(DeclarationCheckCode.RNU_SECTION_2_17, declarationData.declarationTemplateId),
+                                    LOG_TYPE_2_17, fioAndInpAndOperId, pathError, errMsg)
+                        }
+                    }
+                }*/
 
                     // СведДох9 НДФЛ.Расчет.Сумма.Возвращенный налогоплательщику (Графа 20)
                     // Проверка не должна выполняться.
                     /*if (!ndflPersonIncome.isDummy() && ndflPersonIncome.refoundTax != null && ndflPersonIncome.refoundTax > 0) {
-                        if (!(refoundTaxSum <= overholdingTaxSum)) {
-                            String errMsg = String.format("Сумма значений гр. \"%s\" (\"%s\") не должна превышать сумму значений гр.\"%s\" (\"%s\") для всех строк одной операции",
-                                    C_REFOUND_TAX, refoundTaxSum ?: "0",
-                                    C_OVERHOLDING_TAX, overholdingTaxSum ?: "0"
-                            )
-                            String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
-                            logger.errorExp("%s. %s.", LOG_TYPE_2_20, fioAndInpAndOperId, pathError, errMsg)
-                        }
-                    }*/
+                    if (!(refoundTaxSum <= overholdingTaxSum)) {
+                        String errMsg = String.format("Сумма значений гр. \"%s\" (\"%s\") не должна превышать сумму значений гр.\"%s\" (\"%s\") для всех строк одной операции",
+                                C_REFOUND_TAX, refoundTaxSum ?: "0",
+                                C_OVERHOLDING_TAX, overholdingTaxSum ?: "0"
+                        )
+                        String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
+                        logger.errorExp("%s. %s.", LOG_TYPE_2_20, fioAndInpAndOperId, pathError, errMsg)
+                    }
+                }*/
 
                     // СведДох10 НДФЛ.Перечисление в бюджет.Срок (Графа 21)
                     if (!ndflPersonIncome.isDummy() && ndflPersonIncome.incomePayoutDate != null && ndflPersonIncome.taxTransferDate != null) {
@@ -1774,6 +1826,10 @@ class Check extends AbstractScriptClass {
 
     /**
      * Проверки Сведения о вычетах
+     * @param ndflPersonList
+     * @param ndflPersonIncomeList
+     * @param ndflPersonDeductionList
+     * @param personMap
      */
     def checkDataDeduction(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndflPersonIncomeList,
                            List<NdflPersonDeduction> ndflPersonDeductionList, Map<Long, RegistryPerson> personMap) {
@@ -1791,7 +1847,6 @@ class Check extends AbstractScriptClass {
 
         Map<Long, Map<String, List<NdflPersonIncome>>> incomesByPersonIdAndOperationId =
                 ndflPersonIncomeList.groupBy({ NdflPersonIncome it -> it.ndflPersonId }, { NdflPersonIncome it -> it.operationId })
-
         def col16CheckDeductionGroups_1 = ndflPersonDeductionList.findAll {
             it.notifType == "2"
         }.groupBy {
@@ -1980,6 +2035,24 @@ class Check extends AbstractScriptClass {
             }
         }
         return true
+    }
+
+    class CheckData {
+        String msgFirst
+        String msgLast
+        boolean fatal
+
+        CheckData(String msgFirst, String msgLast) {
+            this.msgFirst = msgFirst
+            this.msgLast = msgLast
+            this.fatal = false
+        }
+
+        CheckData(String msgFirst, String msgLast, boolean fatal) {
+            this.msgFirst = msgFirst
+            this.msgLast = msgLast
+            this.fatal = fatal
+        }
     }
 
     class NdflPersonFL {
@@ -2173,72 +2246,73 @@ class Check extends AbstractScriptClass {
             return ndflPersonIncome.refoundTax != null
         }
     }
-    /**
-     * Проверка: "Раздел 2. Графы 21 заполнена"
-     */
+/**
+ * Проверка: "Раздел 2. Графы 21 заполнена"
+ */
     class Column21Fill implements ColumnFillConditionChecker {
         @Override
         boolean check(NdflPersonIncome ndflPersonIncome) {
             return ndflPersonIncome.taxTransferDate != null
         }
     }
-    /**
-     * Проверка: "Раздел 2. Графы 21 НЕ заполнена"
-     */
+/**
+ * Проверка: "Раздел 2. Графы 21 НЕ заполнена"
+ */
     class Column21NotFill implements ColumnFillConditionChecker {
         @Override
         boolean check(NdflPersonIncome ndflPersonIncome) {
             return ndflPersonIncome.taxTransferDate == null
         }
     }
-    /**
-     * Проверка: "Раздел 2. Графы 7, 11 ИЛИ 22, 23, 24 заполнены"
-     */
+/**
+ * Проверка: "Раздел 2. Графы 7, 11 ИЛИ 22, 23, 24 заполнены"
+ */
     class Column7And11Or22And23And24Fill implements ColumnFillConditionChecker {
         @Override
         boolean check(NdflPersonIncome ndflPersonIncome) {
-            return (new Column7And11Fill().check(ndflPersonIncome)) || (new Column22And23And24Fill().check(ndflPersonIncome))
+            return (ndflPersonIncome.incomePayoutDate != null && !ScriptUtils.isEmpty(ndflPersonIncome.incomePayoutSumm)) ||
+                    (ndflPersonIncome.paymentDate != null && !ScriptUtils.isEmpty(ndflPersonIncome.paymentNumber) && !ScriptUtils.isEmpty(ndflPersonIncome.taxSumm))
         }
     }
-    /**
-     * Проверка: "Раздел 2. Графы 7, 11 И 22, 23, 24 НЕ заполнены"
-     */
+/**
+ * Проверка: "Раздел 2. Графы 7, 11 И 22, 23, 24 НЕ заполнены"
+ */
     class Column7And11And22And23And24NotFill implements ColumnFillConditionChecker {
         @Override
         boolean check(NdflPersonIncome ndflPersonIncome) {
             return !(new Column7And11Fill().check(ndflPersonIncome)) && (new Column22And23And24NotFill().check(ndflPersonIncome))
         }
     }
-    /**
-     * Проверка: "Раздел 2. Графы 22, 23, 24 НЕ заполнены"
-     */
+/**
+ * Проверка: "Раздел 2. Графы 22, 23, 24 НЕ заполнены"
+ */
     class Column22And23And24NotFill implements ColumnFillConditionChecker {
         @Override
         boolean check(NdflPersonIncome ndflPersonIncome) {
             return ndflPersonIncome.paymentDate == null && ScriptUtils.isEmpty(ndflPersonIncome.paymentNumber) && ndflPersonIncome.taxSumm == null
         }
     }
-    /**
-     * Проверка: "Раздел 2. Графы 22, 23, 24 заполнены"
-     */
+/**
+ * Проверка: "Раздел 2. Графы 22, 23, 24 заполнены"
+ */
     class Column22And23And24Fill implements ColumnFillConditionChecker {
         @Override
         boolean check(NdflPersonIncome ndflPersonIncome) {
             return ndflPersonIncome.paymentDate != null && !ScriptUtils.isEmpty(ndflPersonIncome.paymentNumber) && ndflPersonIncome.taxSumm != null
         }
     }
-    /**
-     * 	Должны быть либо заполнены все 3 Графы 22, 23, 24, либо ни одна их них
-     */
+/**
+ * 	Должны быть либо заполнены все 3 Графы 22, 23, 24, либо ни одна из них
+ */
     class Column22And23And24FillOrColumn22And23And24NotFill implements ColumnFillConditionChecker {
         @Override
         boolean check(NdflPersonIncome ndflPersonIncome) {
-            return (new Column22And23And24NotFill().check(ndflPersonIncome)) || (new Column22And23And24Fill().check(ndflPersonIncome))
+            return new Column22And23And24NotFill().check(ndflPersonIncome) || new Column22And23And24Fill().check(ndflPersonIncome)
         }
     }
-    /**
-     * 	Всегда возвращает true
-     */
+/**
+ * 	Всегда возвращает true
+ */
     class ColumnTrueFillOrNotFill implements ColumnFillConditionChecker {
         @Override
         boolean check(NdflPersonIncome ndflPersonIncome) {
@@ -2340,18 +2414,6 @@ class Check extends AbstractScriptClass {
      * Используется для проверки НДФЛ.Перечисление в бюджет.Срок (Графа 21)
      */
     abstract class TaxTransferDateConditionChecker implements DateConditionCheckerForBudget {
-
-        /**
-         * "Дата перечисления в бюджет" может иметь значение "00.00.0000", для этого форматируем её этим способом.
-         */
-        static String formatTaxTransferDate(Date taxTransferDate) {
-            String dateString = taxTransferDate.format(SharedConstants.DATE_FORMAT)
-            if (dateString == SharedConstants.DATE_ZERO_AS_DATE) {
-                return SharedConstants.DATE_ZERO_AS_STRING
-            } else {
-                return dateString
-            }
-        }
     }
 
     interface DateConditionChecker {
@@ -2467,7 +2529,7 @@ class Check extends AbstractScriptClass {
             }
 
             return String.format("Значение гр. \"Срок перечисления в бюджет\" (%s) должно быть равно значению гр. \"Дата выплаты дохода\" (%s) + 1 рабочий день. Корректное значение срока перечисления в бюджет: %s",
-                    formatTaxTransferDate(checkedIncome.taxTransferDate),
+                    ScriptUtils.formatDate(checkedIncome.taxTransferDate),
                     ScriptUtils.formatDate(checkedIncome.incomePayoutDate),
                     ScriptUtils.formatDate(calendar7.getTime()))
         }
@@ -2487,7 +2549,7 @@ class Check extends AbstractScriptClass {
                 return null
             }
             return String.format("Значение гр. \"Срок перечисления в бюджет\" (%s) должно быть равно значению гр. \"Дата выплаты дохода\" (%s) + 30 календарных дней. Если дата попадает на выходной день, то дата переносится на следующий рабочий день. Корректное значение срока перечисления в бюджет: %s",
-                    formatTaxTransferDate(checkedIncome.taxTransferDate),
+                    ScriptUtils.formatDate(checkedIncome.taxTransferDate),
                     ScriptUtils.formatDate(checkedIncome.incomePayoutDate),
                     ScriptUtils.formatDate(incomePayoutPlus30CalendarDaysWorkingDay))
         }
@@ -2520,7 +2582,7 @@ class Check extends AbstractScriptClass {
             }
             return String.format("Значение гр. \"Срок перечисления в бюджет\" (%s) должно быть равно последнему календарному дню месяца, указанного в гр.\"Дата выплаты дохода\" (%s). " +
                     "Если дата попадает на выходной день, то дата переносится на следующий рабочий день. Корректное значение срока перечисления в бюджет: %s",
-                    formatTaxTransferDate(checkedIncome.taxTransferDate),
+                    ScriptUtils.formatDate(checkedIncome.taxTransferDate),
                     ScriptUtils.formatDate(checkedIncome.incomePayoutDate),
                     ScriptUtils.formatDate(calendar7.getTime()))
         }
@@ -2543,7 +2605,7 @@ class Check extends AbstractScriptClass {
             zeroDate.set(1901, Calendar.JANUARY, 1)
             if (matchedIncomes.isEmpty() && checkedIncome.taxTransferDate != SimpleDateUtils.toStartOfDay(zeroDate.getTime())) {
                 return String.format("Значение гр. \"Срок перечисления в бюджет\" (%s) должно быть равно значению (00.00.0000), так как не найдена строка выплаты, у которой \"Признак дохода\" не равен 02 или 14",
-                        formatTaxTransferDate(checkedIncome.taxTransferDate))
+                        ScriptUtils.formatDate(checkedIncome.taxTransferDate))
             } else if (matchedIncomes.isEmpty()) {
                 return null
             } else {
@@ -2559,8 +2621,8 @@ class Check extends AbstractScriptClass {
                     return null
                 } else {
                     return String.format("Значение гр. \"Срок перечисления в бюджет\" (%s) должно быть равно значению гр. \"Срок перечисления в бюджет\" (%s) строки выплаты, у которой \"Признак дохода\" не равен 02 или 14",
-                            formatTaxTransferDate(checkedIncome.taxTransferDate),
-                            formatTaxTransferDate(matchedIncomes.get(0).taxTransferDate))
+                            ScriptUtils.formatDate(checkedIncome.taxTransferDate),
+                            ScriptUtils.formatDate(matchedIncomes.get(0).taxTransferDate))
                 }
             }
 
@@ -2580,7 +2642,7 @@ class Check extends AbstractScriptClass {
                 return null
             }
             return String.format("Значение гр. \"Срок перечисления в бюджет\" (%s) должно быть равно последнему календарному дню месяца, следующего за годом указанным в гр. \"Дата выплаты дохода\" (%s). Если дата попадает на выходной день, то она переносится на следующий рабочий день. Корректное значение срока перечисления в бюджет: %s",
-                    formatTaxTransferDate(checkedIncome.taxTransferDate),
+                    ScriptUtils.formatDate(checkedIncome.taxTransferDate),
                     ScriptUtils.formatDate(checkedIncome.incomePayoutDate),
                     ScriptUtils.formatDate(referenceValue))
         }
@@ -2622,8 +2684,8 @@ class Check extends AbstractScriptClass {
 
     Map<Long, String> getRefDocumentTypeCode() {
         if (documentTypeCodeCache.size() == 0) {
-            Map<Long, Map<String, RefBookValue>> refBookList = getRefDocumentType()
-            refBookList.each { Long id, Map<String, RefBookValue> refBookValueMap ->
+            def refBookList = getRefDocumentType()
+            refBookList.each { id, refBookValueMap ->
                 documentTypeCodeCache.put(id, refBookValueMap?.get("CODE")?.getStringValue())
             }
         }
@@ -2636,7 +2698,7 @@ class Check extends AbstractScriptClass {
      */
     Map<Long, String> getRefTaxpayerStatusCode() {
         if (taxpayerStatusCodeCache.size() == 0) {
-            PagingResult<Map<String, RefBookValue>> refBookMap = getRefBook(RefBook.Id.TAXPAYER_STATUS.getId())
+            List<Map<String, RefBookValue>> refBookMap = getRefBookAll(RefBook.Id.TAXPAYER_STATUS.getId())
             refBookMap.each { Map<String, RefBookValue> refBook ->
                 taxpayerStatusCodeCache.put((Long) refBook?.id?.numberValue, refBook?.CODE?.stringValue)
             }
@@ -2650,7 +2712,7 @@ class Check extends AbstractScriptClass {
      */
     Map<Long, Map<String, RefBookValue>> getRefIncomeCode() {
         // Map<REF_BOOK_INCOME_TYPE.ID, REF_BOOK_INCOME_TYPE>
-        Map<Long, Map<String, RefBookValue>> mapResult = [:]
+        def mapResult = [:]
         PagingResult<Map<String, RefBookValue>> refBookMap = getRefBook(RefBook.Id.INCOME_CODE.id)
         refBookMap.each { Map<String, RefBookValue> refBook ->
             mapResult.put((Long) refBook?.id?.numberValue, refBook)
@@ -2802,20 +2864,6 @@ class Check extends AbstractScriptClass {
     }
 
     /**
-     * Получить записи справочника по его идентификатору в отчётном периоде
-     * @param refBookId - идентификатор справочника
-     * @return - список записей справочника
-     */
-    PagingResult<Map<String, RefBookValue>> getRefBook(long refBookId) {
-        // Передаем как аргумент только срок действия версии справочника
-        PagingResult<Map<String, RefBookValue>> refBookList = getProvider(refBookId).getRecordsVersion(getReportPeriodStartDate(), getReportPeriodEndDate(), null, null)
-        if (refBookList == null || refBookList.size() == 0) {
-            throw new Exception("Ошибка при получении записей справочника " + refBookId)
-        }
-        return refBookList
-    }
-
-    /**
      * Получение провайдера с использованием кеширования.
      * @param providerId
      * @return
@@ -2828,16 +2876,50 @@ class Check extends AbstractScriptClass {
     }
 
     /**
+     * Получить все записи справочника по его идентификатору
+     * @param refBookId - идентификатор справочника
+     * @return - список всех версий всех записей справочника
+     */
+    List<Map<String, RefBookValue>> getRefBookAll(long refBookId) {
+        def recordData = getProvider(refBookId).getRecordDataWhere("1 = 1")
+        def refBookList = []
+        if (recordData != null) {
+            recordData.each { key, value ->
+                refBookList.add(value)
+            }
+        }
+
+        if (refBookList.size() == 0) {
+            throw new ServiceException("Ошибка при получении записей справочника " + refBookId)
+        }
+        return refBookList
+    }
+
+    /**
      * Получить "Виды документов"
      */
     Map<Long, Map<String, RefBookValue>> getRefDocumentType() {
         if (documentTypeCache.size() == 0) {
-            PagingResult<Map<String, RefBookValue>> refBookList = getRefBook(RefBook.Id.DOCUMENT_CODES.getId())
+            List<Map<String, RefBookValue>> refBookList = getRefBookAll(RefBook.Id.DOCUMENT_CODES.getId())
             refBookList.each { Map<String, RefBookValue> refBook ->
                 documentTypeCache.put((Long) refBook?.id?.numberValue, refBook)
             }
         }
         return documentTypeCache
+    }
+
+    /**
+     * Получить записи справочника по его идентификатору в отчётном периоде
+     * @param refBookId - идентификатор справочника
+     * @return - список записей справочника
+     */
+    PagingResult<Map<String, RefBookValue>> getRefBook(Long refBookId) {
+        // Передаем как аргумент только срок действия версии справочника
+        PagingResult<Map<String, RefBookValue>> refBookList = getProvider(refBookId).getRecordsVersion(getReportPeriodStartDate(), getReportPeriodEndDate(), null, null)
+        if (refBookList == null || refBookList.size() == 0) {
+            throw new ServiceException("Ошибка при получении записей справочника " + refBookId)
+        }
+        return refBookList
     }
 
     /**
@@ -2856,6 +2938,24 @@ class Check extends AbstractScriptClass {
         return refBookMap
     }
 
+    /**
+     * Получить все записи справочника по его идентификатору и коллекции идентификаторов записей справочника
+     * @param refBookId - идентификатор справочника
+     * @param recordIds - коллекция идентификаторов записей справочника
+     * @return - возвращает мапу
+     */
+    Map<Long, Map<String, RefBookValue>> getRefBookByRecordIds(Long refBookId, List<Long> recordIds) {
+        Map<Long, Map<String, RefBookValue>> refBookMap = [:]
+        recordIds.collate(1000).each { List<Long> item ->
+            if (!item.isEmpty()) {
+                refBookMap.putAll(getProvider(refBookId).getRecordData(item))
+            }
+        }
+        if (refBookMap == null || refBookMap.size() == 0) {
+            throw new ScriptException("Ошибка при получении записей справочника " + refBookId)
+        }
+        return refBookMap
+    }
     /**
      * Получить "АСНУ"
      * @return
@@ -2885,39 +2985,6 @@ class Check extends AbstractScriptClass {
         int comparedMonth = calendar.get(Calendar.MONTH)
         return currentMonth != comparedMonth
     }
-
-    /**
-     * Получить все записи справочника по его идентификатору и коллекции идентификаторов записей справочника
-     * @param refBookId - идентификатор справочника
-     * @param recordIds - коллекция идентификаторов записей справочника
-     * @return - возвращает мапу
-     */
-    Map<Long, Map<String, RefBookValue>> getRefBookByRecordIds(long refBookId, List<Long> recordIds) {
-        Map<Long, Map<String, RefBookValue>> refBookMap = getProvider(refBookId).getRecordData(recordIds)
-        if (refBookMap == null || refBookMap.size() == 0) {
-            throw new ScriptException("Ошибка при получении записей справочника " + refBookId)
-        }
-        return refBookMap
-    }
-
-    class CheckData {
-        String msgFirst
-        String msgLast
-        boolean fatal
-
-        CheckData(String msgFirst, String msgLast) {
-            this.msgFirst = msgFirst
-            this.msgLast = msgLast
-            this.fatal = false
-        }
-
-        CheckData(String msgFirst, String msgLast, boolean fatal) {
-            this.msgFirst = msgFirst
-            this.msgLast = msgLast
-            this.fatal = fatal
-        }
-    }
-
     @EqualsAndHashCode
     class Col16CheckDeductionGroup_1Key {
         Long ndflPersonId
