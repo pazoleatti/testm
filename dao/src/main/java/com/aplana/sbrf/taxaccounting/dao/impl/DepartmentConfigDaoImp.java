@@ -101,7 +101,7 @@ public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentCon
                 "  join report_period rp on rp.id = :reportPeriodId\n" +
                 "  join ref_book_oktmo oktmo on oktmo.id = dc.oktmo_id\n" +
                 "  where oktmo.id = dc.oktmo_id and (:departmentId is null or dc.department_id = :departmentId) and (\n" +
-                "    dc.start_date <= to_date(:relevanceDate, 'dd.mm.yyyy') and (dc.end_date is null or to_date(:relevanceDate, 'dd.mm.yyyy') <= dc.end_date)\n" +
+                "    dc.start_date <= to_date(:relevanceDate, 'DD.MM.YYYY') and (dc.end_date is null or to_date(:relevanceDate, 'DD.MM.YYYY') <= dc.end_date)\n" +
                 "    or (dc.start_date <= rp.end_date and (dc.end_date is null or rp.start_date <= dc.end_date)\n" +
                 "      and (:departmentId is null or not exists (select * from department_config_test where kpp = dc.kpp and oktmo_id = dc.oktmo_id and start_date > dc.start_date and department_id != :departmentId))\n" +
                 "    )\n" +
