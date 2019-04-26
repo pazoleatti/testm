@@ -195,4 +195,11 @@
 		</update>
 	</changeSet>
 
+	<!--https://jira.aplana.com/browse/SBRFNDFL-6590 - удалил старый отчет-->
+	<changeSet id="3.7-dnovikov-11" author="dnovikov">
+		<sql>
+			delete from async_task_type where id = 35;
+		</sql>
+	</changeSet>
+
 </databaseChangeLog>

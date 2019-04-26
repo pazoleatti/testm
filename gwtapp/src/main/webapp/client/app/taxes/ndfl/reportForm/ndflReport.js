@@ -146,7 +146,6 @@
                                     $scope.availablePdf = data.availablePdf;
                                     $scope.availableReports = data.downloadXmlAvailable;
                                     $scope.availableXlsxReport = data.downloadXlsxAvailable;
-                                    $scope.availableDeptNoticeDoc = data.downloadDeptNoticeAvailable;
                                     if (!$scope.pdfLoaded && data.availablePdf) {
                                         $http({
                                             method: "GET",
@@ -287,26 +286,6 @@
                                 return {
                                     declarationDataId: $scope.declarationDataId,
                                     reportType: APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.REPORT_2NDFL
-                                };
-                            }
-                        }
-                    });
-                };
-
-                /**
-                 * @description Формирование отчета "Уведомление о задолженности"
-                 */
-                $scope.createDeptNotice = function () {
-                    $aplanaModal.open({
-                        title: $filter('translate')('reportPersonFace.deptNotice'),
-                        templateUrl: 'client/app/taxes/ndfl/reportForm/reportNdflPersonFace.html',
-                        controller: 'reportNdflPersonFaceFormCtrl',
-                        windowClass: 'modal1200',
-                        resolve: {
-                            $shareData: function () {
-                                return {
-                                    declarationDataId: $scope.declarationDataId,
-                                    reportType: APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.DEPT_NOTICE
                                 };
                             }
                         }
@@ -459,9 +438,6 @@
                 };
                 $scope.downloadPdf = function () {
                     $window.open("controller/rest/declarationData/" + $stateParams.declarationDataId + "/pdf", '_blank');
-                };
-                $scope.downloadDeptNoticeDoc = function () {
-                    $window.open("controller/rest/declarationData/" + $stateParams.declarationDataId + "/deptNoticeDoc", '_blank');
                 };
             }]);
 }());

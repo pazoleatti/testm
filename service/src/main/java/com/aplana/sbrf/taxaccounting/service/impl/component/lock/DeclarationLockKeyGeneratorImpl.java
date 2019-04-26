@@ -31,8 +31,6 @@ public class DeclarationLockKeyGeneratorImpl implements DeclarationDataLockKeyGe
             return String.format("EXCEL_TEMPLATE_DECLARATION_%s", declarationDataId);
         else if (operationType.equals(OperationType.PDF_DEC))
             return String.format("DECLARATION_DATA_%s_PDF", declarationDataId);
-        else if (operationType.equals(OperationType.DEPT_NOTICE_DEC))
-            return String.format("DECLARATION_DATA_%s_DEPT_NOTICE", declarationDataId);
         else if (operationType.equals(OperationType.RETURN_DECLARATION))
             return String.format("DECLARATION_DATA_%s_RETURN_DECLARATION", declarationDataId);
         else if (operationType.equals(OperationType.EDIT))

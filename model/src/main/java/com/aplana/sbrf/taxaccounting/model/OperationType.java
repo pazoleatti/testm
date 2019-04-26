@@ -25,7 +25,6 @@ public enum OperationType {
     DECLARATION_2NDFL2(28L, "Формирование ОНФ 2НДФЛ 2"),
     DECLARATION_6NDFL(28L, "Формирование ОНФ 6НДФЛ"),
     PDF_DEC(7L, "Предварительный просмотр налоговой формы"),
-    DEPT_NOTICE_DEC(35L, "Формирование уведомления о задолженности"),
     EXPORT_REPORTS(41L, "Выгрузка отчетности"),
     RETURN_DECLARATION(null, "Возврат формы из подготовлена/принята в создана"),
     EDIT(null, "Редактирование строки налоговой формы"),
@@ -61,7 +60,6 @@ public enum OperationType {
             case SubreportAliasConstants.RNU_NDFL_2_6_DATA_XLSX_REPORT: return RNU_NDFL_2_6_DATA_XLSX_REPORT;
             case SubreportAliasConstants.REPORT_2NDFL1: return REPORT_2NDFL1;
             case SubreportAliasConstants.REPORT_2NDFL2: return REPORT_2NDFL2;
-            case SubreportAliasConstants.DEPT_NOTICE_DEC: return DEPT_NOTICE_DEC;
             default: throw new IllegalArgumentException("unknown subreport alias " + subreportAlias);
         }
     }

@@ -122,25 +122,6 @@
         }])
 
         /**
-         * @description Поиск лиц для формирования персонального РНУ НДФЛ по физическому лицу
-         */
-        .factory('RnuPerson', ['$resource', function ($resource) {
-            return $resource('controller/rest/getListPerson/rnuPerson/:rnuPersons?projection=:projection', {}, {
-                query: {method: 'GET', isArray: false, cache: false}
-            });
-        }])
-
-        /**
-         * @description Формирование рну ндфл
-         */
-        .factory('RnuPersonDocument', ['$resource', function ($resource) {
-            return $resource('/actions/declarationData/declarationDataId}/rnuDoc?projection=:projection', {}, {
-                query: {method: 'GET', isArray: false, cache: false},
-                querySource: {method: 'GET', isArray: true, cache: false}
-            });
-        }])
-
-        /**
          * @description Планировщик задач - Список задач
          */
         .factory('schedulerTaskResource', ['$resource', function ($resource) {

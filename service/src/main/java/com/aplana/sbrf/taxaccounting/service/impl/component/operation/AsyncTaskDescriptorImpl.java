@@ -115,8 +115,6 @@ public class AsyncTaskDescriptorImpl implements AsyncTaskDescriptor {
             return createReportsAsyncTaskDescriptor.createDescription(departmentReportPeriodId, declarationTypeId);
         else if (operationType.equals(OperationType.EXPORT_REPORTS))
             return declarationDataReportingMultiModeAsyncTaskDescriptor.createDescription(declarationDataIds, "Выгрузка отчетности");
-        else if (operationType.equals(OperationType.DEPT_NOTICE_DEC))
-            return specReportByPersonDescriptor.createDescription(declarationDataId, subreportParamValues, "Уведомление о задолженности");
         else if (operationType.equals(OperationType.LOAD_TRANSPORT_FILE))
             return transportFileAsyncTaskDescriptor.createDescription(fileName);
         else if (operationType.equals(OperationType.UPDATE_DOC_STATE))

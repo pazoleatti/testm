@@ -17,7 +17,6 @@ public enum AsyncTaskType {
     PDF_DEC(2, "PDF", "Создание формы предварительного просмотра. %s", 7L),
     SPECIFIC_REPORT_DEC(4, "SPECIFIC", "Формирование отчета \"%s\" %s", 26L),
     EXCEL_TEMPLATE_DEC(13, "EXCEL_TEMPLATE_DECLARATION", "Выгрузка данных налоговой формы в виде шаблона ТФ (Excel)", 31L),
-    DEPT_NOTICE_DEC(16, "DEPT_NOTICE", "Формирование \"Уведомление о задолженности\"", 35L),
     IMPORT_DECLARATION_EXCEL(14, "ImportDecExcel", "Загрузка данных в ПНФ РНУ НДФЛ", 30L),
     IMPORT_REF_BOOK_XML(15, "ImportRefBookXml", "Загрузка данных в справочник \"%s\" из xml", 33L),
     LOAD_TRANSPORT_FILE(12, "LoadTF", "Импорт транспортного файла", 12L),

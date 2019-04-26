@@ -179,16 +179,6 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     }
 
     @Override
-    public List<NdflPersonIncome> findNdflPersonIncomeConsolidatedRNU2Ndfl(long declarationDataId, String kpp, String oktmo) {
-        return ndflPersonDao.fetchNdflPersonIncomeConsolidatedRNU2Ndfl(declarationDataId, kpp, oktmo);
-    }
-
-    @Override
-    public List<NdflPersonIncome> findNdflPersonIncomeConsolidatedRNU6Ndfl(long declarationDataId, String kpp, String oktmo) {
-        return ndflPersonDao.fetchNdflPersonIncomeConsolidatedRNU6Ndfl(declarationDataId, kpp, oktmo);
-    }
-
-    @Override
     public List<NdflPersonDeduction> findDeductionsByNdflPersonAndOperation(long ndflPersonId, String operationId) {
         return ndflPersonDao.fetchNdflPersonDeductionByNdflPersonAndOperation(ndflPersonId, operationId);
     }

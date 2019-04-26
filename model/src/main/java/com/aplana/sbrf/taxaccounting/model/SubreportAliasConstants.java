@@ -16,7 +16,6 @@ public class SubreportAliasConstants {
     public static final String REPORT_KPP_OKTMO = "report_kpp_oktmo"; // Реестр сформированной отчетности
     public static final String REPORT_2NDFL1 = "report_2ndfl1"; // 2-НДФЛ (1) по физическому лицу
     public static final String REPORT_2NDFL2 = "report_2ndfl2"; // 2-НДФЛ (2) по физическому лицу
-    public static final String DEPT_NOTICE_DEC = "dept_notice_dec";
 
     /** Константы псевдонимов для параметров спецотчетов */
     public static final String ID_DOC_NUMBER = "idDocNumber"; // № ДУЛ

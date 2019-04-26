@@ -54,8 +54,6 @@ public class DeclarationDataKeyLockDescriptorImpl implements DeclarationDataKeyL
         else if (operationType.equals(OperationType.EXCEL_TEMPLATE_DEC))
             return createBaseDescription(declarationDataId);
         else if (operationType.equals(OperationType.PDF_DEC)) return createExtendDescription(declarationDataId);
-        else if (operationType.equals(OperationType.DEPT_NOTICE_DEC))
-            return createExtendDescription(declarationDataId);
         else if (operationType.equals(OperationType.RETURN_DECLARATION))
             return createBaseDescription(declarationDataId);
         else if (operationType.equals(OperationType.EDIT)) return createBaseDescription(declarationDataId);

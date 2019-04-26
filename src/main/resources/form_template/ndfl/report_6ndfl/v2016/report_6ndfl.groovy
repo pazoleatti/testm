@@ -3,8 +3,6 @@ package form_template.ndfl.report_6ndfl.v2016
 import com.aplana.sbrf.taxaccounting.AbstractScriptClass
 import com.aplana.sbrf.taxaccounting.model.*
 import com.aplana.sbrf.taxaccounting.model.log.Logger
-import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson
-import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment
 import com.aplana.sbrf.taxaccounting.model.refbook.DepartmentConfig
@@ -12,7 +10,6 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDocState
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
 import com.aplana.sbrf.taxaccounting.model.util.Pair
-import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
 import com.aplana.sbrf.taxaccounting.script.SharedConstants
 import com.aplana.sbrf.taxaccounting.script.dao.BlobDataService
@@ -102,7 +99,7 @@ class Report6Ndfl extends AbstractScriptClass {
     }
 
     @Override
-    public void run() {
+    void run() {
         switch (formDataEvent) {
             case FormDataEvent.CREATE_FORMS: // создание экземпляра
                 println "!CREATE_FORMS!"
@@ -114,23 +111,11 @@ class Report6Ndfl extends AbstractScriptClass {
         }
     }
 
-    // Коды, определяющие налоговый (отчётный) период
-    final long REF_BOOK_PERIOD_CODE_ID = RefBook.Id.PERIOD_CODE.id
-
-    final long REPORT_PERIOD_TYPE_ID = 8
-
     final String DATE_FORMAT_UNDERLINE = "yyyyMMdd"
-    final String DATE_FORMAT_FULL = "yyyy-MM-dd_HH-mm-ss"
     final String OUTCOMING_ATTACH_FILE_TYPE = "Исходящий в ФНС"
-
-    // Кэш провайдеров
-    Map<Long, RefBookDataProvider> providerCache = [:]
 
     // Кэш для справочников
     Map<String, Map<String, RefBookValue>> refBookCache = [:]
-
-    // Мапа где ключ идентификатор NdflPerson, значение NdflPerson соответствующий идентификатору
-    Map<Long, NdflPerson> ndflpersonFromRNUPrimary = [:]
 
     /************************************* СОЗДАНИЕ XML *****************************************************************/
     Xml buildXml(DepartmentConfig departmentConfig, List<NdflPersonIncome> incomes) {
@@ -174,7 +159,7 @@ class Report6Ndfl extends AbstractScriptClass {
         def kodNoProm = configurationParamModel?.get(ConfigurationParam.NO_CODE)?.get(0)?.get(0)
 
         // Код периода
-        def periodCode = getRefBookValue(REF_BOOK_PERIOD_CODE_ID, reportPeriod?.dictTaxPeriodId)?.CODE?.stringValue
+        def periodCode = getRefBookValue(RefBook.Id.PERIOD_CODE.id, reportPeriod?.dictTaxPeriodId)?.CODE?.stringValue
 
         String strCorrPeriod = getCorrectionDateExpression(departmentReportPeriod)
         def errMsg = sprintf("Не удалось создать форму %s, за %s, подразделение: %s, КПП: %s, ОКТМО: %s.",
@@ -327,21 +312,6 @@ class Report6Ndfl extends AbstractScriptClass {
     }
 
     /**
-     * Вычисляет сумму фиксированного авансового платежа
-     * @param prepayments список объектов авансов для которых вычисляется сумма
-     * @return сумма фиксированного авансового платежа
-     */
-    BigDecimal calculateSumOfPrepayments(List<NdflPersonPrepayment> prepayments) {
-        BigDecimal toReturn = new BigDecimal(0)
-        prepayments.each { NdflPersonPrepayment item ->
-            if (item.summ != null) {
-                toReturn = toReturn.add(item.summ)
-            }
-        }
-        return toReturn
-    }
-
-    /**
      * Генерация значения атрибута ИдФайл R_T_A_K_O_GGGGMMDD_N
      * R_T - NO_NDFL6
      * A - идентификатор получателя, которому направляется файл обмена;
@@ -387,19 +357,6 @@ class Report6Ndfl extends AbstractScriptClass {
         } else {
             return periodCode
         }
-    }
-
-    /**
-     * Получение провайдера с использованием кеширования.
-     * @param providerId
-     * @return
-     */
-    RefBookDataProvider getProvider(Long providerId) {
-        if (!providerCache.containsKey(providerId)) {
-            RefBookDataProvider provider = refBookFactory.getDataProvider(providerId)
-            providerCache.put(providerId, provider)
-        }
-        return providerCache.get(providerId)
     }
 
     /**
@@ -636,7 +593,7 @@ class Report6Ndfl extends AbstractScriptClass {
         }
     }
 
-    /************************************* ОБЩИЕ МЕТОДЫ** *****************************************************************/
+    /************************************* ОБЩИЕ МЕТОДЫ *******************************************************************/
 
     String formatPeriod(DepartmentReportPeriod departmentReportPeriod) {
         String corrStr = getCorrectionDateExpression(departmentReportPeriod)
@@ -648,294 +605,6 @@ class Report6Ndfl extends AbstractScriptClass {
      */
     String getCorrectionDateExpression(DepartmentReportPeriod departmentReportPeriod) {
         return departmentReportPeriod.correctionDate == null ? "" : " с датой сдачи корректировки ${departmentReportPeriod.correctionDate.format("dd.MM.yyyy")}"
-    }
-
-    /**
-     * Получить все записи справочника по его идентификатору
-     * @param refBookId - идентификатор справочника
-     * @return - возвращает лист
-     */
-    List<Map<String, RefBookValue>> getRefBook(Long refBookId) {
-        // Передаем как аргумент только срок действия версии справочника
-        List<Map<String, RefBookValue>> refBookList = getProvider(refBookId).getRecords(reportPeriod.endDate, null, null, null)
-        if (refBookList == null || refBookList.size() == 0) {
-            throw new Exception("Ошибка при получении записей справочника " + refBookId)
-        }
-        return refBookList
-    }
-    /************************************* СПЕЦОТЧЕТ **********************************************************************/
-
-    final String ALIAS_PRIMARY_RNU_W_ERRORS = "primary_rnu_w_errors"
-
-    final String TRANSPORT_FILE_TEMPLATE = "ТФ"
-
-    /**
-     * Создать Спецотчет Первичные РНУ с ошибками
-     * @return
-     */
-    def createPrimaryRnuWithErrors() {
-        // Сведения о доходах из КНФ, которая является источником для входящей ОНФ и записи в реестре справок соответствующим доходам физлицам имеют ошибки
-        List<NdflPersonIncome> ndflPersonIncomeFromRNUConsolidatedList = ndflPersonService.findNdflPersonIncomeConsolidatedRNU6Ndfl(declarationData.id, declarationData.kpp, declarationData.oktmo)
-        // Сведения о вычетах имеющие такой же operationId как и сведения о доходах
-        List<NdflPersonDeduction> ndflPersonDeductionFromRNUConsolidatedList = []
-        // Сведения об авансах имеющие такой же operationId как и сведения о доходах
-        List<NdflPersonPrepayment> ndflPersonPrepaymentFromRNUConsolidatedList = []
-
-        ndflPersonIncomeFromRNUConsolidatedList.each {
-            ScriptUtils.checkInterrupted()
-            ndflPersonDeductionFromRNUConsolidatedList.addAll(ndflPersonService.findDeductionsByNdflPersonAndOperation(it.ndflPersonId, it.operationId))
-            ndflPersonPrepaymentFromRNUConsolidatedList.addAll(ndflPersonService.findPrepaymentsByNdflPersonAndOperation(it.ndflPersonId, it.operationId))
-        }
-
-        ndflPersonIncomeFromRNUConsolidatedList.each {
-            ScriptUtils.checkInterrupted()
-            NdflPersonIncome ndflPersonIncomePrimary = ndflPersonService.getIncome(it.sourceId)
-            NdflPerson ndflPersonPrimary = initNdflPersonPrimary(ndflPersonIncomePrimary.ndflPersonId)
-            ndflPersonPrimary.incomes.add(ndflPersonIncomePrimary)
-        }
-
-        ndflPersonDeductionFromRNUConsolidatedList.each {
-            ScriptUtils.checkInterrupted()
-            NdflPersonDeduction ndflPersonDeductionPrimary = ndflPersonService.getDeduction(it.sourceId)
-            NdflPerson ndflPersonPrimary = initNdflPersonPrimary(ndflPersonDeductionPrimary.ndflPersonId)
-            ndflPersonPrimary.deductions.add(ndflPersonDeductionPrimary)
-        }
-
-        ndflPersonPrepaymentFromRNUConsolidatedList.each {
-            ScriptUtils.checkInterrupted()
-            NdflPersonPrepayment ndflPersonPrepaymentPrimary = ndflPersonService.getPrepayment(it.sourceId)
-            NdflPerson ndflPersonPrimary = initNdflPersonPrimary(ndflPersonPrepaymentPrimary.ndflPersonId)
-            ndflPersonPrimary.prepayments.add(ndflPersonPrepaymentPrimary)
-        }
-        fillPrimaryRnuWithErrors()
-    }
-
-    /**
-     * Заполнение печатного представления спецотчета "Первичные РНУ с ошибками"
-     * @return
-     */
-    def fillPrimaryRnuWithErrors() {
-        OutputStream writer = scriptSpecificReportHolder.getFileOutputStream()
-        XSSFWorkbook workbook = getSpecialReportTemplate()
-        fillGeneralData(workbook)
-        fillPrimaryRnuNDFLWithErrorsTable(workbook)
-        workbook.write(writer)
-        writer.close()
-        StringBuilder fileName = new StringBuilder("Первичные_РНУ_с_ошибками_").append(declarationData.id).append("_").append(new Date().format(DATE_FORMAT_FULL)).append(".xlsx")
-        scriptSpecificReportHolder
-                .setFileName(fileName.toString())
-    }
-
-    /**
-     * Заполнение шапки Спецотчета Первичные РНУ с ошибками
-     */
-    def fillGeneralData(XSSFWorkbook workbook) {
-        XSSFSheet sheet = workbook.getSheetAt(0)
-        XSSFCellStyle style = makeStyleLeftAligned(workbook)
-        // Вид отчетности
-        String declarationTypeName = declarationTemplate.type.name
-        String note = declarationData.note
-        // Период
-        int year = departmentReportPeriod.reportPeriod.taxPeriod.year
-        String periodName = getProvider(REPORT_PERIOD_TYPE_ID)
-                .getRecords(reportPeriod.endDate, null, "ID = ${departmentReportPeriod.reportPeriod.dictTaxPeriodId}".toString(), null).get(0).NAME.value
-        // Территориальный банк
-        String departmentName = department.name
-        // КПП
-        String kpp = declarationData.kpp
-        //	Дата сдачи корректировки
-        String dateDelivery = departmentReportPeriod.correctionDate?.format(SharedConstants.DATE_FORMAT)
-        // ОКТМО
-        String oktmo = declarationData.oktmo
-        // Код НО (конечный)
-        String taxOrganCode = declarationData.taxOrganCode
-        // Дата формирования
-        String currentDate = new Date().format(SharedConstants.DATE_FORMAT, TimeZone.getTimeZone('Europe/Moscow'))
-
-        XSSFCell cell1 = sheet.getRow(2).createCell(1)
-
-        cell1.setCellValue(StringUtils.defaultString(declarationTypeName) + " " + StringUtils.defaultString(note))
-        cell1.setCellStyle(style)
-        XSSFCell cell2 = sheet.getRow(3).createCell(1)
-        cell2.setCellValue(year + ":" + StringUtils.defaultString(periodName))
-        cell2.setCellStyle(style)
-        XSSFCell cell3 = sheet.getRow(4).createCell(1)
-        cell3.setCellValue(dateDelivery)
-        cell3.setCellStyle(style)
-        XSSFCell cell4 = sheet.getRow(5).createCell(1)
-        cell4.setCellValue(departmentName)
-        cell4.setCellStyle(style)
-        XSSFCell cell5 = sheet.getRow(6).createCell(1)
-        cell5.setCellValue(kpp)
-        cell5.setCellStyle(style)
-        XSSFCell cell6 = sheet.getRow(7).createCell(1)
-        cell6.setCellValue(oktmo)
-        cell6.setCellStyle(style)
-        XSSFCell cell7 = sheet.getRow(8).createCell(1)
-        cell7.setCellValue(taxOrganCode)
-        cell7.setCellStyle(style)
-        XSSFCell cell8 = sheet.getRow(2).createCell(11)
-        cell8.setCellValue(currentDate)
-        cell8.setCellStyle(style)
-    }
-
-    NdflPerson initNdflPersonPrimary(Long ndflPersonId) {
-        NdflPerson ndflPersonPrimary = ndflpersonFromRNUPrimary.get(ndflPersonId)
-        if (ndflPersonPrimary == null) {
-            ndflPersonPrimary = ndflPersonService.get(ndflPersonId)
-            ndflPersonPrimary.incomes.clear()
-            ndflPersonPrimary.deductions.clear()
-            ndflPersonPrimary.prepayments.clear()
-            ndflpersonFromRNUPrimary.put(ndflPersonId, ndflPersonPrimary)
-        }
-        return ndflPersonPrimary
-    }
-
-    /**
-     * Заполнить таблицу Спецотчета Первичные РНУ с ошибками
-     * @param workbook
-     * @return
-     */
-    def fillPrimaryRnuNDFLWithErrorsTable(final XSSFWorkbook workbook) {
-        XSSFSheet sheet = workbook.getSheetAt(0)
-        def startIndex = 12
-        ndflpersonFromRNUPrimary.values().each { ndflPerson ->
-            ndflPerson.incomes.each { income ->
-                ScriptUtils.checkInterrupted()
-                fillPrimaryRnuNDFLWithErrorsRow(workbook, ndflPerson, income, "Свед о дох", startIndex)
-                startIndex++
-            }
-        }
-    }
-
-    /**
-     * Заполнение строки для таблицы Спецотчета Первичные РНУ с ошибками
-     * @param workbook
-     * @param ndflPerson
-     * @param operation операция отражающая доход, вычет или аванс
-     * @param sectionName Название раздела, в котором содержится операция
-     * @param index текущий индекс строки таблицы
-     * @return
-     */
-    def fillPrimaryRnuNDFLWithErrorsRow(
-            final XSSFWorkbook workbook, NdflPerson ndflPerson, NdflPersonIncome operation, String sectionName, int index) {
-        XSSFSheet sheet = workbook.getSheetAt(0)
-        XSSFRow row = sheet.createRow(index)
-        XSSFCellStyle styleLeftAligned = makeStyleLeftAligned(workbook)
-        styleLeftAligned = thinBorderStyle(styleLeftAligned)
-        XSSFCellStyle styleCenterAligned = makeStyleCenterAligned(workbook)
-        styleCenterAligned = thinBorderStyle(styleCenterAligned)
-        styleCenterAligned.setDataFormat(ScriptUtils.createXlsDateFormat(workbook))
-        // Первичная НФ
-        DeclarationData primaryRnuDeclarationData = declarationService.getDeclarationData(ndflPerson.declarationDataId)
-        DeclarationDataFile primaryRnuDeclarationDataFile = declarationService.findFilesWithSpecificType(ndflPerson.declarationDataId, TRANSPORT_FILE_TEMPLATE).get(0)
-        DepartmentReportPeriod rnuDepartmentReportPeriod = departmentReportPeriodService.get(primaryRnuDeclarationData.departmentReportPeriodId)
-        Department department = departmentService.get(rnuDepartmentReportPeriod.departmentId)
-        // Период
-        int year = rnuDepartmentReportPeriod.reportPeriod.taxPeriod.year
-        String periodName = getProvider(REPORT_PERIOD_TYPE_ID)
-                .getRecords(rnuDepartmentReportPeriod.reportPeriod.endDate, null, "ID = ${rnuDepartmentReportPeriod.reportPeriod.dictTaxPeriodId}".toString(), null).get(0).NAME.stringValue
-        // Подразделение
-        String departmentName = department.shortName
-        // АСНУ
-        String asnu = getProvider(RefBook.Id.ASNU.getId()).getRecords(this.reportPeriod.endDate, null, "ID = ${primaryRnuDeclarationData.asnuId}".toString(), null).get(0).NAME.stringValue
-        // Имя ТФ
-        String transportFileName = primaryRnuDeclarationDataFile.fileName
-        // Загрузил ТФ
-        String userName = primaryRnuDeclarationDataFile.userName
-        // Дата загрузки ТФ
-        Date uploadDate = primaryRnuDeclarationDataFile.date
-        // Строка с ошибкой.Строка
-        String rowNum = operation.rowNum.toString()
-        // Строка с ошибкой.ID операции
-        String operationId = operation.operationId.toString()
-        // 	Физическое лицо, к которому относится ошибочная строка. Документ
-        String idDocNumber = ndflPerson.idDocNumber
-        // Физическое лицо, к которому относится ошибочная строка. ФИО
-        String lastname = ndflPerson.lastName != null ? ndflPerson.lastName + " " : ""
-        String firstname = ndflPerson.firstName != null ? ndflPerson.firstName + " " : ""
-        String middlename = ndflPerson.middleName != null ? ndflPerson.middleName : ""
-        String fio = lastname + firstname + middlename
-        // Физическое лицо, к которому относится ошибочная строка. Дата рождения
-        Date birthDay = ndflPerson.birthDay
-
-        XSSFCell cell1 = row.createCell(0)
-        cell1.setCellValue(periodName + ":" + year)
-        cell1.setCellStyle(styleCenterAligned)
-        XSSFCell cell2 = row.createCell(1)
-        cell2.setCellValue(departmentName)
-        cell2.setCellStyle(styleLeftAligned)
-        XSSFCell cell3 = row.createCell(2)
-        cell3.setCellValue(asnu)
-        cell3.setCellStyle(styleCenterAligned)
-        XSSFCell cell4 = row.createCell(3)
-        cell4.setCellValue(transportFileName)
-        cell4.setCellStyle(styleLeftAligned)
-        XSSFCell cell5 = row.createCell(4)
-        cell5.setCellValue(userName)
-        cell5.setCellStyle(styleCenterAligned)
-        XSSFCell cell6 = row.createCell(5)
-        cell6.setCellValue(uploadDate)
-        cell6.setCellStyle(styleCenterAligned)
-        XSSFCell cell7 = row.createCell(6)
-        cell7.setCellValue(sectionName)
-        cell7.setCellStyle(styleCenterAligned)
-        XSSFCell cell8 = row.createCell(7)
-        cell8.setCellValue(rowNum)
-        cell8.setCellStyle(styleCenterAligned)
-        XSSFCell cell9 = row.createCell(8)
-        cell9.setCellValue(operationId)
-        cell9.setCellStyle(styleCenterAligned)
-        XSSFCell cell10 = row.createCell(9)
-        cell10.setCellValue(idDocNumber)
-        cell10.setCellStyle(styleCenterAligned)
-        XSSFCell cell11 = row.createCell(10)
-        cell11.setCellValue(fio)
-        cell11.setCellStyle(styleCenterAligned)
-        XSSFCell cell12 = row.createCell(11)
-        cell12.setCellValue(birthDay)
-        cell12.setCellStyle(styleCenterAligned)
-    }
-
-    // Находит в базе данных шаблон спецотчета по физическому лицу и возвращает его
-    XSSFWorkbook getSpecialReportTemplate() {
-        def blobData = blobDataService.get(scriptSpecificReportHolder.getDeclarationSubreport().getBlobDataId())
-        new XSSFWorkbook(blobData.getInputStream())
-    }
-
-    /**
-     * Создать стиль ячейки с выравниваем слева
-     * @param workbook
-     * @return
-     */
-    XSSFCellStyle makeStyleLeftAligned(XSSFWorkbook workbook) {
-        XSSFCellStyle style = workbook.createCellStyle()
-        style.setAlignment(CellStyle.ALIGN_LEFT)
-        return style
-    }
-
-    /**
-     * Создать стиль ячейки с выравниваем по центру
-     * @param workbook
-     * @return
-     */
-    XSSFCellStyle makeStyleCenterAligned(XSSFWorkbook workbook) {
-        XSSFCellStyle style = workbook.createCellStyle()
-        style.setAlignment(CellStyle.ALIGN_CENTER)
-        return style
-    }
-
-    /**
-     * Добавляет к стилю ячейки тонкие границы
-     * @param style
-     * @return
-     */
-    XSSFCellStyle thinBorderStyle(final XSSFCellStyle style) {
-        style.setBorderTop(CellStyle.BORDER_THIN)
-        style.setBorderBottom(CellStyle.BORDER_THIN)
-        style.setBorderLeft(CellStyle.BORDER_THIN)
-        style.setBorderRight(CellStyle.BORDER_THIN)
-        return style
     }
 
     boolean isZeroDate(Date date) {
@@ -1086,6 +755,21 @@ class Report6Ndfl extends AbstractScriptClass {
                     }
                 }
             }
+        }
+
+        /**
+         * Вычисляет сумму фиксированного авансового платежа
+         * @param prepayments список объектов авансов для которых вычисляется сумма
+         * @return сумма фиксированного авансового платежа
+         */
+        BigDecimal calculateSumOfPrepayments(List<NdflPersonPrepayment> prepayments) {
+            BigDecimal toReturn = new BigDecimal(0)
+            prepayments.each { NdflPersonPrepayment item ->
+                if (item.summ != null) {
+                    toReturn = toReturn.add(item.summ)
+                }
+            }
+            return toReturn
         }
     }
 

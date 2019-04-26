@@ -88,11 +88,11 @@ public class DeclarationLockerImpl implements DeclarationLocker {
             OperationType.IDENTIFY_PERSON, OperationType.ACCEPT_DEC, OperationType.IMPORT_DECLARATION_EXCEL,
             OperationType.RETURN_DECLARATION);
 
-    private static final Set<OperationType> SET_EDIT_FILE__PDF__EXPORT_REPORTS__REPORT_2NDFL1__REPORT_2NDFL2__DEPT_NOTICE = ImmutableSet.of(OperationType.DELETE_DEC);
+    private static final Set<OperationType> SET_EDIT_FILE__PDF__EXPORT_REPORTS__REPORT_2NDFL1__REPORT_2NDFL2 = ImmutableSet.of(OperationType.DELETE_DEC);
 
     private static final Set<OperationType> SET_DELETE = ImmutableSet.of(
             OperationType.ACCEPT_DEC, OperationType.CHECK_DEC, OperationType.CONSOLIDATE,
-            OperationType.DELETE_DEC, OperationType.DEPT_NOTICE_DEC, OperationType.EDIT, OperationType.EDIT_FILE,
+            OperationType.DELETE_DEC, OperationType.EDIT, OperationType.EDIT_FILE,
             OperationType.IDENTIFY_PERSON, OperationType.LOAD_TRANSPORT_FILE, OperationType.PDF_DEC,
             OperationType.REPORT_2NDFL1, OperationType.REPORT_2NDFL2, OperationType.REPORT_KPP_OKTMO,
             OperationType.RETURN_DECLARATION, OperationType.RNU_NDFL_2_6_DATA_XLSX_REPORT,
@@ -179,15 +179,13 @@ public class DeclarationLockerImpl implements DeclarationLocker {
         else if (operationType.equals(OperationType.EXCEL_TEMPLATE_DEC))
             return doCheckAndLock(declarationDataIdList, operationType, SET_EXCEL_TEMPLATE, userInfo, logger);
         else if (operationType.equals(OperationType.PDF_DEC))
-            return doCheckAndLock(declarationDataIdList, operationType, SET_EDIT_FILE__PDF__EXPORT_REPORTS__REPORT_2NDFL1__REPORT_2NDFL2__DEPT_NOTICE, userInfo, logger);
-        else if (operationType.equals(OperationType.DEPT_NOTICE_DEC))
-            return doCheckAndLock(declarationDataIdList, operationType, SET_EDIT_FILE__PDF__EXPORT_REPORTS__REPORT_2NDFL1__REPORT_2NDFL2__DEPT_NOTICE, userInfo, logger);
+            return doCheckAndLock(declarationDataIdList, operationType, SET_EDIT_FILE__PDF__EXPORT_REPORTS__REPORT_2NDFL1__REPORT_2NDFL2, userInfo, logger);
         else if (operationType.equals(OperationType.RETURN_DECLARATION))
             return doCheckAndLock(declarationDataIdList, operationType, SET_CHECK__ACCEPT__TOCREATE, userInfo, logger);
         else if (operationType.equals(OperationType.EDIT))
             return doCheckAndLock(declarationDataIdList, operationType, SET_EDIT, userInfo, logger);
         else if (operationType.equals(OperationType.EDIT_FILE))
-            return doCheckAndLock(declarationDataIdList, operationType, SET_EDIT_FILE__PDF__EXPORT_REPORTS__REPORT_2NDFL1__REPORT_2NDFL2__DEPT_NOTICE, userInfo, logger);
+            return doCheckAndLock(declarationDataIdList, operationType, SET_EDIT_FILE__PDF__EXPORT_REPORTS__REPORT_2NDFL1__REPORT_2NDFL2, userInfo, logger);
         else if (operationType.equals(OperationType.RNU_NDFL_PERSON_DB))
             return doCheckAndLock(declarationDataIdList, operationType, SET_SPEC_REPORT, userInfo, logger);
         else if (operationType.equals(OperationType.RNU_NDFL_PERSON_ALL_DB))
@@ -205,9 +203,9 @@ public class DeclarationLockerImpl implements DeclarationLocker {
         else if (operationType.equals(OperationType.RNU_NDFL_2_6_DATA_TXT_REPORT))
             return doCheckAndLock(declarationDataIdList, operationType, SET_SPEC_REPORT, userInfo, logger);
         else if (operationType.equals(OperationType.REPORT_2NDFL1))
-            return doCheckAndLock(declarationDataIdList, operationType, SET_EDIT_FILE__PDF__EXPORT_REPORTS__REPORT_2NDFL1__REPORT_2NDFL2__DEPT_NOTICE, userInfo, logger);
+            return doCheckAndLock(declarationDataIdList, operationType, SET_EDIT_FILE__PDF__EXPORT_REPORTS__REPORT_2NDFL1__REPORT_2NDFL2, userInfo, logger);
         else if (operationType.equals(OperationType.REPORT_2NDFL2))
-            return doCheckAndLock(declarationDataIdList, operationType, SET_EDIT_FILE__PDF__EXPORT_REPORTS__REPORT_2NDFL1__REPORT_2NDFL2__DEPT_NOTICE, userInfo, logger);
+            return doCheckAndLock(declarationDataIdList, operationType, SET_EDIT_FILE__PDF__EXPORT_REPORTS__REPORT_2NDFL1__REPORT_2NDFL2, userInfo, logger);
         else if (operationType.equals(OperationType.DECLARATION_2NDFL1)) {
             return doCheckAndLock(declarationDataIdList, operationType, SET_REPORT_KPP_OKTMO__2NDFL1__2NDFL2__6NDFL, userInfo, logger);
         } else if (operationType.equals(OperationType.DECLARATION_2NDFL2)) {
@@ -215,7 +213,7 @@ public class DeclarationLockerImpl implements DeclarationLocker {
         } else if (operationType.equals(OperationType.DECLARATION_6NDFL)) {
             return doCheckAndLock(declarationDataIdList, operationType, SET_REPORT_KPP_OKTMO__2NDFL1__2NDFL2__6NDFL, userInfo, logger);
         } else if (operationType.equals(OperationType.EXPORT_REPORTS)) {
-            return doCheckAndLock(declarationDataIdList, operationType, SET_EDIT_FILE__PDF__EXPORT_REPORTS__REPORT_2NDFL1__REPORT_2NDFL2__DEPT_NOTICE, userInfo, logger);
+            return doCheckAndLock(declarationDataIdList, operationType, SET_EDIT_FILE__PDF__EXPORT_REPORTS__REPORT_2NDFL1__REPORT_2NDFL2, userInfo, logger);
         } else if (operationType.equals(OperationType.UPDATE_DOC_STATE)) {
             return doCheckAndLock(declarationDataIdList, operationType, SET_UPDATE_DOC_STATE, userInfo, logger);
         } else

@@ -1176,52 +1176,6 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     @Override
-    public List<NdflPersonIncome> fetchNdflPersonIncomeConsolidatedRNU2Ndfl(long declarationDataId, String kpp, String oktmo) {
-        String oktmoNull = null;
-        if (oktmo == null) {
-            oktmoNull = "npi.OKTMO is null";
-        } else {
-            oktmoNull = "npi.OKTMO = :oktmo";
-        }
-        String query = "select rba.name as asnu_name, " + createColumns(NdflPersonIncome.COLUMNS, "npi") + ", null inp " +
-                "from NDFL_PERSON_INCOME npi " +
-                " left join ref_book_asnu rba on npi.asnu_id = rba.id " +
-                "where npi.KPP = :kpp and " + oktmoNull + " and npi.NDFL_PERSON_ID in " +
-                "(select np.id from NDFL_PERSON np where np.PERSON_ID in (select nr.person_id from NDFL_REFERENCES nr " +
-                "where nr.DECLARATION_DATA_ID = :declarationDataId and nr.ERRTEXT is not null) " +
-                "and np.DECLARATION_DATA_ID in (select dd.id from declaration_data dd " +
-                "inner join DECLARATION_DATA_CONSOLIDATION ddc on dd.id = ddc.SOURCE_DECLARATION_DATA_ID " +
-                "where ddc.TARGET_DECLARATION_DATA_ID = :declarationDataId))";
-        MapSqlParameterSource params = new MapSqlParameterSource();
-        params.addValue("declarationDataId", declarationDataId)
-                .addValue("kpp", kpp)
-                .addValue("oktmo", oktmo);
-        return getNamedParameterJdbcTemplate().query(query, params, new NdflPersonDaoImpl.NdflPersonIncomeRowMapper());
-    }
-
-    @Override
-    public List<NdflPersonIncome> fetchNdflPersonIncomeConsolidatedRNU6Ndfl(long declarationDataId, String kpp, String oktmo) {
-        String oktmoNull = null;
-        if (oktmo == null) {
-            oktmoNull = "npi.OKTMO is null";
-        } else {
-            oktmoNull = "npi.OKTMO = :oktmo";
-        }
-        String query = "select rba.name as asnu_name, " + createColumns(NdflPersonIncome.COLUMNS, "npi") + ", null inp " +
-                "from NDFL_PERSON_INCOME npi " +
-                " left join ref_book_asnu rba on npi.asnu_id = rba.id " +
-                "where npi.KPP = :kpp and " + oktmoNull + " and npi.NDFL_PERSON_ID in " +
-                "(select np.id from NDFL_PERSON np where np.DECLARATION_DATA_ID in (select dd.id from declaration_data dd " +
-                "inner join DECLARATION_DATA_CONSOLIDATION ddc on dd.id = ddc.SOURCE_DECLARATION_DATA_ID " +
-                "where ddc.TARGET_DECLARATION_DATA_ID = :declarationDataId))";
-        MapSqlParameterSource params = new MapSqlParameterSource();
-        params.addValue("declarationDataId", declarationDataId)
-                .addValue("kpp", kpp)
-                .addValue("oktmo", oktmo);
-        return getNamedParameterJdbcTemplate().query(query, params, new NdflPersonDaoImpl.NdflPersonIncomeRowMapper());
-    }
-
-    @Override
     public List<NdflPersonDeduction> fetchNdflPersonDeductionByNdflPersonAndOperation(long ndflPersonId, String operationId) {
         String sql = "select rba.NAME as asnu_name, " + createColumns(NdflPersonDeduction.COLUMNS, "npd") + ", null inp " +
                 "from NDFL_PERSON_DEDUCTION npd " +

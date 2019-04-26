@@ -690,17 +690,6 @@ public interface DeclarationDataService {
     void performUpdatePersonsData(Long declarationDataId, Logger logger, TAUserInfo userInfo);
 
     /**
-     * Создает doc отчет "Уведомление о задолженности"
-     *
-     * @param declarationData налоговая форма
-     * @param selectedPerson  выбранное ФЛ, для которого будет создан отчет
-     * @param userInfo        пользователь запустивший задачу
-     * @param logger          логгер
-     * @return uuid созданного отчета
-     */
-    String createDocReportByPerson(DeclarationData declarationData, DataRow<Cell> selectedPerson, TAUserInfo userInfo, Logger logger);
-
-    /**
      * Загрузить файл налоговой формы на сервер.
      *
      * @param fileInputStream   поток данных файла

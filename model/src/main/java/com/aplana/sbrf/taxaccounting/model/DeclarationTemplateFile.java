@@ -15,10 +15,6 @@ public class DeclarationTemplateFile implements Serializable {
      */
     public static final String TF_TEMPLATE = "excel_template_dec.xlsx";
     /**
-     * Уведомление о задолженности для 2-НДФЛ
-     */
-    public static final String DEPT_NOTICE_DOC_TEMPLATE = "dept_notice.doc";
-    /**
      * Приложение 11 задолженности по налогу
      */
     public static final String APPLICATION11_NDFL_DEBT_TEMPLATE = "app11_ndfl_debt.docx";

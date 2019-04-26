@@ -255,26 +255,6 @@ public interface NdflPersonDao {
     List<NdflPersonPrepayment> fetchNdflPersonPrepaymentByNdflPerson(long ndflPersonId);
 
     /**
-     * Найти доходы из КНФ которая является источником для ОНФ 2-НДФЛ
-     *
-     * @param declarationDataId идентификатор ОНФ для которой необходимо найти строки из КНФ
-     * @param kpp               КПП ОНФ
-     * @param oktmo             ОКТМО ОНФ
-     * @return список объектов доходов
-     */
-    List<NdflPersonIncome> fetchNdflPersonIncomeConsolidatedRNU2Ndfl(long declarationDataId, String kpp, String oktmo);
-
-    /**
-     * Найти доходы из КНФ которая является источником для ОНФ 6-НДФЛ
-     *
-     * @param declarationDataId идентификатор ОНФ для которой необходимо найти строки из КНФ
-     * @param kpp               КПП ОНФ
-     * @param oktmo             ОКТМО ОНФ
-     * @return список объектов доходов
-     */
-    List<NdflPersonIncome> fetchNdflPersonIncomeConsolidatedRNU6Ndfl(long declarationDataId, String kpp, String oktmo);
-
-    /**
      * Найти вычеты для определенной операции
      *
      * @param ndflPersonId идентификатор физического лица

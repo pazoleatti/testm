@@ -2053,7 +2053,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     return (long) ndflPersonDao.getNdflPersonCount(declarationDataId);
                 }
             case SPECIFIC_REPORT_DEC:
-            case DEPT_NOTICE_DEC:
                 Map<String, Object> exchangeParams = new HashMap<String, Object>();
                 ScriptTaskComplexityHolder taskComplexityHolder = new ScriptTaskComplexityHolder();
                 taskComplexityHolder.setAlias(reportType.getReportAlias());
@@ -2477,11 +2476,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         if (declarationTemplate.getType().getId() == DeclarationType.NDFL_2_1) {
             alias = SubreportAliasConstants.REPORT_2NDFL1;
         } else if (declarationTemplate.getType().getId() == DeclarationType.NDFL_2_2) {
-            if (action.getType().equalsIgnoreCase(SubreportAliasConstants.DEPT_NOTICE_DEC)) {
-                alias = SubreportAliasConstants.DEPT_NOTICE_DEC;
-            } else {
-                alias = SubreportAliasConstants.REPORT_2NDFL2;
-            }
+            alias = SubreportAliasConstants.REPORT_2NDFL2;
         }
 
         Logger logger = new Logger();
@@ -2529,11 +2524,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             if (declarationTemplate.getType().getId() == DeclarationType.NDFL_2_1) {
                 alias = SubreportAliasConstants.REPORT_2NDFL1;
             } else if (declarationTemplate.getType().getId() == DeclarationType.NDFL_2_2) {
-                if (action.getType().equalsIgnoreCase(SubreportAliasConstants.DEPT_NOTICE_DEC)) {
-                    alias = action.getType();
-                } else {
-                    alias = SubreportAliasConstants.REPORT_2NDFL2;
-                }
+                alias = SubreportAliasConstants.REPORT_2NDFL2;
             }
             DeclarationDataReportType ddReportType = DeclarationDataReportType.SPECIFIC_REPORT_DEC;
             ddReportType.setSubreport(declarationTemplateService.getSubreportByAlias(declarationData.getDeclarationTemplateId(), alias.toLowerCase()));
@@ -2966,28 +2957,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         Logger scriptLogger = new Logger();
         declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.UPDATE_PERSONS_DATA, scriptLogger, null);
         logger.getEntries().addAll(scriptLogger.getEntries());
-    }
-
-    @Override
-    public String createDocReportByPerson(DeclarationData declarationData, DataRow<Cell> selectedPerson, TAUserInfo userInfo, Logger logger) {
-        try (InputStream inputStream = declarationTemplateDao.getTemplateFileContent(declarationData.getDeclarationTemplateId(), DeclarationTemplateFile.DEPT_NOTICE_DOC_TEMPLATE)) {
-            Map<String, Object> params = new HashMap<>();
-            params.put("selectedPerson", selectedPerson);
-            params.put("templateInputStream", inputStream);
-            BlobData blobDataOut = new BlobData();
-            params.put("blobDataOut", blobDataOut);
-
-            if (!declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.BUILD_DOC, logger, params)) {
-                throw new ServiceException();
-            }
-
-            if (logger.containsLevel(LogLevel.ERROR)) {
-                throw new ServiceException();
-            }
-            return blobDataService.create(blobDataOut.getInputStream(), blobDataOut.getName());
-        } catch (IOException e) {
-            throw new ServiceException(e.getMessage(), e);
-        }
     }
 
     @Override
