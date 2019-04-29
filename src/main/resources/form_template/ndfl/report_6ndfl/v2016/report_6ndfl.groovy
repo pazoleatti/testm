@@ -99,7 +99,6 @@ class Report6Ndfl extends AbstractScriptClass {
     void run() {
         switch (formDataEvent) {
             case FormDataEvent.CREATE_FORMS: // создание экземпляра
-                println "!CREATE_FORMS!"
                 createReportForms()
                 break
             case FormDataEvent.PRE_CREATE_REPORTS:

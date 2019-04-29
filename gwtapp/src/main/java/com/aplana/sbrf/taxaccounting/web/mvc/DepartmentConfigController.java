@@ -17,13 +17,10 @@ import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 import com.aplana.sbrf.taxaccounting.model.result.ImportDepartmentConfigsResult;
 import com.aplana.sbrf.taxaccounting.permissions.DepartmentConfigPermission;
 import com.aplana.sbrf.taxaccounting.permissions.DepartmentConfigPermissionSetter;
-import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.refbook.DepartmentConfigService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedList;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedResourceAssembler;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -43,12 +40,9 @@ import java.util.List;
  */
 @RestController
 public class DepartmentConfigController {
-    protected static final Log LOG = LogFactory.getLog(DepartmentConfigController.class);
 
     @Autowired
     private DepartmentConfigService departmentConfigService;
-    @Autowired
-    private LogEntryService logEntryService;
     @Autowired
     private SecurityService securityService;
     @Autowired
@@ -73,11 +67,11 @@ public class DepartmentConfigController {
      * @return возвращает список настроек подразделений
      */
     @GetMapping(value = "/rest/departmentConfig")
-    public JqgridPagedList<DepartmentConfig> fetchDepartmentConfig(@RequestParam DepartmentConfigsFilter filter, @RequestParam PagingParams pagingParams) {
+    public JqgridPagedList<DepartmentConfig> findPageByFilter(@RequestParam DepartmentConfigsFilter filter, @RequestParam PagingParams pagingParams) {
         if (filter.getDepartmentId() == null) {
             return new JqgridPagedList<>();
         }
-        PagingResult<DepartmentConfig> result = departmentConfigService.findAllByFilter(filter, pagingParams);
+        PagingResult<DepartmentConfig> result = departmentConfigService.findPageByFilter(filter, pagingParams);
 
         setDepartmentConfigsPermission(result);
 

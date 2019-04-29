@@ -74,8 +74,8 @@ public class DepartmentConfigServiceImpl implements DepartmentConfigService {
     }
 
     @Override
-    public PagingResult<DepartmentConfig> findAllByFilter(DepartmentConfigsFilter filter, PagingParams pagingParams) {
-        return departmentConfigDao.findAllByFilter(filter, pagingParams);
+    public PagingResult<DepartmentConfig> findPageByFilter(DepartmentConfigsFilter filter, PagingParams pagingParams) {
+        return departmentConfigDao.findPageByFilter(filter, pagingParams);
     }
 
     @Override
@@ -125,7 +125,7 @@ public class DepartmentConfigServiceImpl implements DepartmentConfigService {
     @Override
     @Transactional
     public void create(DepartmentConfig departmentConfig, Logger logger) {
-        LOG.info("createForGui: kpp=" + departmentConfig.getKpp() + ", oktmo=" + departmentConfig.getOktmo().getCode());
+        LOG.info("create: " + departmentConfig);
         List<DepartmentConfig> relatedDepartmentConfigs = findAllByKppAndOktmo(departmentConfig.getKpp(), departmentConfig.getOktmo().getCode());
         checkDepartmentConfig(departmentConfig, relatedDepartmentConfigs);
 

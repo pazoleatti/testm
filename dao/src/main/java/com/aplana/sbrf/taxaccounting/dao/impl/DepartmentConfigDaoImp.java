@@ -123,7 +123,7 @@ public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentCon
     }
 
     @Override
-    public PagingResult<DepartmentConfig> findAllByFilter(DepartmentConfigsFilter filter, PagingParams pagingParams) {
+    public PagingResult<DepartmentConfig> findPageByFilter(DepartmentConfigsFilter filter, PagingParams pagingParams) {
         NamedParameterSql parameterSql = createSelectByFilter(filter);
         String baseSql = parameterSql.getSql();
 

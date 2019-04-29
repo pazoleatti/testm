@@ -57,7 +57,7 @@ public class DepartmentConfigDaoTest {
 
     @Test
     public void findAllByFilterTest1() {
-        List<DepartmentConfig> departmentConfigs = departmentConfigDao.findAllByFilter(DepartmentConfigsFilter.builder()
+        List<DepartmentConfig> departmentConfigs = departmentConfigDao.findPageByFilter(DepartmentConfigsFilter.builder()
                 .departmentId(2).build(), PagingParams.getInstance(1, 10, "kpp", "desc"));
         assertThat(departmentConfigs, hasSize(9));
 
@@ -70,7 +70,7 @@ public class DepartmentConfigDaoTest {
 
     @Test
     public void findAllByFilterTest2() {
-        List<DepartmentConfig> departmentConfigs = departmentConfigDao.findAllByFilter(DepartmentConfigsFilter.builder()
+        List<DepartmentConfig> departmentConfigs = departmentConfigDao.findPageByFilter(DepartmentConfigsFilter.builder()
                         .departmentId(2).kpp("03").oktmo("1").taxOrganCode("05")
                         .relevanceDate(newDate(1, 1, 2019)).build(),
                 PagingParams.getInstance(1, 100));
@@ -80,7 +80,7 @@ public class DepartmentConfigDaoTest {
 
     @Test
     public void findAllByFilterTest3() {
-        List<DepartmentConfig> departmentConfigs = departmentConfigDao.findAllByFilter(DepartmentConfigsFilter.builder()
+        List<DepartmentConfig> departmentConfigs = departmentConfigDao.findPageByFilter(DepartmentConfigsFilter.builder()
                 .departmentId(2).build(), PagingParams.getInstance(2, 4));
         assertThat(departmentConfigs, hasSize(4));
     }
