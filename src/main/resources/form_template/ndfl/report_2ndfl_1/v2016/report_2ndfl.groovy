@@ -40,8 +40,6 @@ import org.apache.pdfbox.pdmodel.font.PDFont
 import org.apache.pdfbox.pdmodel.font.PDType0Font
 import org.apache.pdfbox.pdmodel.interactive.form.PDAcroForm
 import org.apache.pdfbox.pdmodel.interactive.form.PDField
-import org.apache.poi.ss.usermodel.CellStyle
-import org.apache.poi.xssf.usermodel.*
 
 import java.nio.charset.Charset
 
@@ -777,7 +775,7 @@ class Report2Ndfl extends AbstractScriptClass {
                         saveFileInfo(xml.xmlFile, xml.fileName)
                         zipFile = ZipUtils.archive(xml.xmlFile, xml.fileName + ".xml")
                         String uuid = blobDataService.create(zipFile, xml.fileName + ".zip", currDate)
-                        reportService.attachReportToDeclaration(declarationData.id, uuid, DeclarationDataReportType.XML_DEC)
+                        reportService.attachReportToDeclaration(declarationData.id, uuid, DeclarationReportType.XML_DEC)
                         // Добавление информации о источнике созданной отчетной формы.
                         sourceService.addDeclarationConsolidationInfo(declarationData.id, singletonList(sourceKnf.id))
 

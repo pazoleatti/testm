@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.ReportDao;
-import com.aplana.sbrf.taxaccounting.model.DeclarationDataReportType;
+import com.aplana.sbrf.taxaccounting.model.DeclarationReportType;
 import com.aplana.sbrf.taxaccounting.service.ReportService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -21,18 +21,18 @@ public class ReportServiceImpl implements ReportService {
     private ReportDao reportDao;
 
     @Override
-    public void attachReportToDeclaration(long declarationDataId, String blobDataId, DeclarationDataReportType type) {
+    public void attachReportToDeclaration(long declarationDataId, String blobDataId, DeclarationReportType type) {
         reportDao.createDec(declarationDataId, blobDataId, type);
     }
 
     @Override
-    public String getReportFileUuid(long declarationDataId, DeclarationDataReportType type) {
+    public String getReportFileUuid(long declarationDataId, DeclarationReportType type) {
         return reportDao.getDec(declarationDataId, type);
     }
 
     @Override
     @PreAuthorize("hasPermission(#declarationDataId, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).VIEW)")
-    public String getReportFileUuidSafe(long declarationDataId, DeclarationDataReportType type) {
+    public String getReportFileUuidSafe(long declarationDataId, DeclarationReportType type) {
         return reportDao.getDec(declarationDataId, type);
     }
 
@@ -42,12 +42,12 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public void deleteByDeclarationAndType(long declarationDataId, DeclarationDataReportType type) {
+    public void deleteByDeclarationAndType(long declarationDataId, DeclarationReportType type) {
         reportDao.deleteDec(declarationDataId, type);
     }
 
     @Override
-    public void deleteDec(Collection<Long> declarationDataId, List<DeclarationDataReportType> ddReportTypes) {
+    public void deleteDec(Collection<Long> declarationDataId, List<DeclarationReportType> ddReportTypes) {
         if (isNotEmpty(ddReportTypes)) {
             reportDao.deleteDec(declarationDataId, ddReportTypes);
         }

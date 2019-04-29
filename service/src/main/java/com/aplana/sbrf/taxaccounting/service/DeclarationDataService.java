@@ -85,14 +85,14 @@ public interface DeclarationDataService {
      *
      * @return uuid записи с данными из таблицы BLOB_DATA
      */
-    String createSpecificReport(Logger logger, DeclarationData declarationData, DeclarationDataReportType ddReportType, Map<String, Object> subreportParamValues, Map<String, String> viewParamValues, DataRow<Cell> selectedRecord, TAUserInfo userInfo, LockStateLogger stateLogger);
+    String createSpecificReport(Logger logger, DeclarationData declarationData, DeclarationReportType ddReportType, Map<String, Object> subreportParamValues, Map<String, String> viewParamValues, DataRow<Cell> selectedRecord, TAUserInfo userInfo, LockStateLogger stateLogger);
 
     /**
      * Подготовить данные для спец. отчета
      *
      * @return предварительные результаты для формирования спец. отчета
      */
-    PrepareSpecificReportResult prepareSpecificReport(Logger logger, DeclarationData declarationData, DeclarationDataReportType ddReportType, Map<String, Object> subreportParamValues, TAUserInfo userInfo);
+    PrepareSpecificReportResult prepareSpecificReport(Logger logger, DeclarationData declarationData, DeclarationReportType ddReportType, Map<String, Object> subreportParamValues, TAUserInfo userInfo);
 
     /**
      * Получить форму по id.
@@ -408,7 +408,7 @@ public interface DeclarationDataService {
      * @param ids         идентификаторы деклараций
      * @param reportTypes типы отчетов, которые надо удалить
      */
-    void cleanBlobs(Collection<Long> ids, List<DeclarationDataReportType> reportTypes);
+    void cleanBlobs(Collection<Long> ids, List<DeclarationReportType> reportTypes);
 
     /**
      * Формирование jasper-отчета

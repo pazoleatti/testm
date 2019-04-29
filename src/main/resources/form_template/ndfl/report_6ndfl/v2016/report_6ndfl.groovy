@@ -27,9 +27,6 @@ import groovy.transform.TypeCheckingMode
 import groovy.xml.MarkupBuilder
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.IOUtils
-import org.apache.commons.lang3.StringUtils
-import org.apache.poi.ss.usermodel.CellStyle
-import org.apache.poi.xssf.usermodel.*
 import org.joda.time.LocalDate
 
 import java.nio.charset.Charset
@@ -431,7 +428,7 @@ class Report6Ndfl extends AbstractScriptClass {
                         saveFileInfo(xml.xmlFile, xml.date, xml.fileName)
                         zipFile = ZipUtils.archive(xml.xmlFile, xml.fileName + ".xml")
                         String uuid = blobDataService.create(zipFile, xml.fileName + ".zip", xml.date)
-                        reportService.attachReportToDeclaration(declarationData.id, uuid, DeclarationDataReportType.XML_DEC)
+                        reportService.attachReportToDeclaration(declarationData.id, uuid, DeclarationReportType.XML_DEC)
                         // Добавление информации о источнике созданной отчетной формы.
                         sourceService.addDeclarationConsolidationInfo(declarationData.id, singletonList(sourceKnf.id))
 
