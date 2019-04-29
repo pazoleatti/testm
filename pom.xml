@@ -25,6 +25,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <jetty.version>6.1H.22</jetty.version>
         <springframework.version>4.3.0.RELEASE</springframework.version>
+        <javaxjms.version>1.1-rev-1</javaxjms.version>
+        <activemq.version>5.10.2</activemq.version>
         <springsecurity.version>3.2.3.RELEASE</springsecurity.version>
         <org.aspectj.version>1.8.0</org.aspectj.version>
         <groovy.version>2.4.5</groovy.version>
@@ -136,6 +138,17 @@
                 <artifactId>spring-aspects</artifactId>
                 <version>${springframework.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-jms</artifactId>
+                <version>${springframework.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-oxm</artifactId>
+                <version>${springframework.version}</version>
+            </dependency>
+
 
             <!-- AspectJ -->
             <dependency>
@@ -428,6 +441,29 @@
                 <artifactId>reflections</artifactId>
                 <version>0.9.10</version>
             </dependency>
+
+            <!--JMS-->
+            <dependency>
+                <groupId>javax.jms</groupId>
+                <artifactId>javax.jms-api</artifactId>
+                <version>2.0.1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.activemq</groupId>
+                <artifactId>activemq-client</artifactId>
+                <version>${activemq.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.activemq</groupId>
+                <artifactId>activemq-broker</artifactId>
+                <version>${activemq.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.activemq</groupId>
+                <artifactId>activemq-spring</artifactId>
+                <version>${activemq.version}</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 

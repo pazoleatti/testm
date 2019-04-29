@@ -2,8 +2,6 @@ package com.aplana.sbrf.taxaccounting.model;
 
 /**
  * Сущность, для которой применяются права доступа.
- *
- * @author <a href="mailto:ogalkin@aplana.com>Олег Галкин</a>
  */
 public interface SecuredEntity {
     /**

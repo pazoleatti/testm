@@ -11,4 +11,6 @@
     <context:component-scan base-package="com.aplana.sbrf.taxaccounting.refbook.impl"/>
     <context:component-scan base-package="com.aplana.sbrf.taxaccounting.async"/>
     <context:component-scan base-package="com.aplana.sbrf.taxaccounting.async.task"/>
+    <context:component-scan base-package="com.aplana.sbrf.taxaccounting.service.jms"/>
+    <context:component-scan base-package="com.aplana.sbrf.taxaccounting.service.jms.transport.impl"/>
 </beans>

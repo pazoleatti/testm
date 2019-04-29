@@ -1,8 +1,13 @@
 package com.aplana.sbrf.taxaccounting.model;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
 /**
  * Перечисление групп параметров приложения
  */
+@Getter
+@AllArgsConstructor
 public enum ConfigurationParamGroup {
 
     /**
@@ -18,22 +23,9 @@ public enum ConfigurationParamGroup {
      */
     COMMON_PARAM("Общие параметры", 4);
 
-    private String caption;
-    private int index;
-
-    private ConfigurationParamGroup(String caption, int index) {
-        this.caption = caption;
-        this.index = index;
-    }
-
     /**
      * Имя параметра
      */
-    public String getCaption() {
-        return caption;
-    }
-
-    public int getIndex() {
-        return index;
-    }
+    private String caption;
+    private int index;
 }
