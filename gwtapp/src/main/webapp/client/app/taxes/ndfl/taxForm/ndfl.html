@@ -16,12 +16,6 @@
                     <span data-translate-once="link.ndfl.reporting"></span>
                 </div>
                 <ul class="dropdown-menu" role="menu" aria-labelledby="single-button">
-                    <li role="menuitem"
-                        ng-show="!declarationData.manuallyCreated && availableReports && declarationData.declarationType === APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_PRIMARY.id">
-                        <div class="row menuitem">
-                            <a ng-click="downloadXml()">{{::'link.ndfl.reporting.uploadXml' | translate}}</a>
-                        </div>
-                    </li>
                     <li role="menuitem">
                         <div class="row menuitem">
                             <a ng-click="createReportXlsx()" ng-show="declarationData.hasNdflPersons">
@@ -36,7 +30,7 @@
                     </li>
                     <li role="menuitem">
                         <div class="row menuitem">
-                            <a ng-click="createReport()" ng-show="declarationData.hasNdflPersons">
+                            <a ng-click="createRnuNdflByPersonReport()" ng-show="declarationData.hasNdflPersons">
                                 {{::'link.ndfl.reporting.formForFL' | translate}}</a>
                             <div ng-show="!declarationData.hasNdflPersons">
                                 {{::'link.ndfl.reporting.formForFL' | translate}}
@@ -45,12 +39,12 @@
                     </li>
                     <li role="menuitem">
                         <div class="row menuitem">
-                            <a ng-click="createReportAllRnu()" ng-show="declarationData.hasNdflPersons">
+                            <a ng-click="createRnuNdflByAllPersonsReport()" ng-show="declarationData.hasNdflPersons">
                                 {{::'link.ndfl.reporting.formForFLs' | translate}}</a>
                             <div ng-show="!declarationData.hasNdflPersons">
                                 {{::'link.ndfl.reporting.formForFLs' | translate}}
                             </div>
-                            <a ng-click="downloadSpecific()"
+                            <a ng-click="downloadRnuNdflByAllPersonsReport()"
                                ng-show="availableRnuNdflPersonAllDb && declarationData.hasNdflPersons">
                                 {{::'link.ndfl.reporting.download' | translate}}</a>
                         </div>
@@ -118,7 +112,7 @@
                     <li role="menuitem"
                         ng-show="declarationData.declarationType === APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_CONSOLIDATED.id">
                         <div class="row menuitem">
-                            <a ng-click="createPairKppOktmo(false)" ng-show="declarationData.hasNdflPersons">
+                            <a ng-click="createPairKppOktmo()" ng-show="declarationData.hasNdflPersons">
                                 {{::'link.ndfl.reporting.formForKppOktmo' | translate}}</a>
                             <div ng-show="!declarationData.hasNdflPersons">
                                 {{::'link.ndfl.reporting.formForKppOktmo' | translate}}

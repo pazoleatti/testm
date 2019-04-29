@@ -4,7 +4,7 @@
     /**
      * @description Модуль для работы с формой "Отчетность"
      */
-    angular.module('app.ndflReportJournal', ['ui.router', 'app.createReport', 'app.updateDocStateModal'])
+    angular.module('app.ndflReportJournal', ['ui.router', 'app.createReportForm', 'app.updateDocStateModal'])
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('ndflReportJournal', {
                 url: '/taxes/ndflReportJournal',
@@ -57,8 +57,8 @@
                 $scope.createReport = function () {
                     $aplanaModal.open({
                         title: $filter('translate')('title.creatingReport'),
-                        templateUrl: 'client/app/taxes/ndfl/reportForm/createReport.html',
-                        controller: 'createReportCtrl',
+                        templateUrl: 'client/app/taxes/ndfl/reportForm/createReportForm.html',
+                        controller: 'createReportFormCtrl',
                         windowClass: 'modal600',
                         resolve: {
                             $shareData: function () {
@@ -283,7 +283,7 @@
                 $scope.downloadReportsByAccepted = function () {
                     $http({
                         method: "POST",
-                        url: "controller/actions/declarationData/downloadReportsByFilter",
+                        url: "controller/actions/declarationData/exportReportFormsByFilter",
                         params: {
                             filter: JSON.stringify({
                                 formStates: [APP_CONSTANTS.STATE.ACCEPTED.id],
@@ -303,7 +303,7 @@
                 $scope.downloadReportsByFilter = function () {
                     $http({
                         method: "POST",
-                        url: "controller/actions/declarationData/downloadReportsByFilter",
+                        url: "controller/actions/declarationData/exportReportFormsByFilter",
                         params: {
                             filter: JSON.stringify(getFilter())
                         }
@@ -321,7 +321,7 @@
                     var selectedItems = $scope.ndflReportJournalGrid.value;
                     $http({
                         method: "POST",
-                        url: "controller/actions/declarationData/downloadReports",
+                        url: "controller/actions/declarationData/exportReportForms",
                         data: $filter('idExtractor')(selectedItems, 'declarationDataId')
                     }).then(function (response) {
                         if (response.data && response.data.uuid && response.data.uuid !== null) {

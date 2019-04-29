@@ -4,12 +4,12 @@
     /**
      * @description Модуль для создания отчетности
      */
-    angular.module('app.createReport', ['app.constants', 'app.rest', 'app.formatters'])
+    angular.module('app.createReportForm', ['app.constants', 'app.rest', 'app.formatters'])
 
     /**
      * @description Контроллер окна "Создание отчетности"
      */
-        .controller('createReportCtrl', [
+        .controller('createReportFormCtrl', [
             '$http', '$scope', '$rootScope', '$filter', '$dialogs', '$modalInstance', 'APP_CONSTANTS', '$shareData', '$webStorage',
             function ($http, $scope, $rootScope, $filter, $dialogs, $modalInstance, APP_CONSTANTS, $shareData, $webStorage) {
 
@@ -66,7 +66,7 @@
                     }
                     $http({
                         method: "POST",
-                        url: "controller/actions/declarationData/createReport",
+                        url: "controller/actions/declarationData/createReportForm",
                         data: params
                     }).then(function (response) {
                         $modalInstance.close(response);

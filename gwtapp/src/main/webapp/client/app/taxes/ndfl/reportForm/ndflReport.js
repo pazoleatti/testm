@@ -66,11 +66,11 @@
         .controller('ndflReportCtrl', [
             '$scope', '$timeout', '$window', '$stateParams', 'ShowToDoDialog', '$http', 'DeclarationDataResource',
             '$filter', '$logPanel', '$dialogs', '$rootScope', 'RefBookValuesResource', 'APP_CONSTANTS', '$state',
-            '$interval', 'acceptDeclarationData', 'createReport', 'getPageImage', 'checkDeclarationData',
+            '$interval', 'acceptDeclarationData', 'getPageImage', 'checkDeclarationData',
             'moveToCreatedDeclarationData', '$aplanaModal',
             function ($scope, $timeout, $window, $stateParams, $showToDoDialog, $http, DeclarationDataResource, $filter,
                       $logPanel, $dialogs, $rootScope, RefBookValuesResource, APP_CONSTANTS, $state, $interval,
-                      acceptDeclarationData, createReport, getPageImage, checkDeclarationData,
+                      acceptDeclarationData, getPageImage, checkDeclarationData,
                       moveToCreatedDeclarationData, $aplanaModal) {
 
                 if ($stateParams.uuid) {
@@ -272,9 +272,9 @@
                 };
 
                 /**
-                 * @description Событие, которое возникает по нажатию на кнопку "Формирование отчетов"
+                 * @description Формирование спецотчета по физ лицу для 2-НДФЛ
                  */
-                $scope.createReport = function () {
+                $scope.createReportNdflByPersonReport = function () {
                     var title = $scope.declarationData.declarationType === APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_1.id ? $filter('translate')('reportPersonFace.title') : $filter('translate')('reportPersonFace.title2');
                     $aplanaModal.open({
                         title: title,
@@ -378,10 +378,8 @@
 
                 /**
                  * @description Событие которое возникает при нажатии на кнопку "Показать"
-                 * @param force
-                 * @param create
                  */
-                $scope.createPdf = function (force, create) {
+                $scope.createPdf = function () {
                     $scope.pdfMessage = "Область предварительного просмотра. Расчет налоговой формы выполнен. Идет формирование формы предварительного просмотра";
                     $scope.pdfLoading = true;
                     $http({

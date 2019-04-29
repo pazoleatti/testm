@@ -9,9 +9,8 @@
      * @description Контроллер формы создания отчета 2-НДФЛ по физическому лицу
      */
         .controller('reportNdflPersonFaceFormCtrl', ['$scope', '$modalInstance', '$shareData', '$filter',
-            '$dialogs', 'APP_CONSTANTS', '$logPanel', 'prepareSpecificReport', 'createReport',
-            function ($scope, $modalInstance, $shareData, $filter, $dialogs, APP_CONSTANTS, $logPanel,
-                      prepareSpecificReport, createReport) {
+            '$dialogs', 'APP_CONSTANTS', '$logPanel', '$http',
+            function ($scope, $modalInstance, $shareData, $filter, $dialogs, APP_CONSTANTS, $logPanel, $http) {
 
 
                 $scope.searchFilter = {
@@ -160,7 +159,10 @@
 
                     $scope.showInfo = false;
 
-                    prepareSpecificReport.doOperation({
+                    $http({
+                        method: "POST",
+                        url: "controller/rest/declarationData/prepareSpecificReport",
+                        data: {
                             declarationDataId: $shareData.declarationDataId,
                             type: 'report_2ndfl2',
                             subreportParamValues: {
@@ -173,64 +175,66 @@
                                 fromBirthDay: $scope.searchFilter.params.dateFrom,
                                 toBirthDay: $scope.searchFilter.params.dateTo
                             }
-                        },
-                        function (response) {
-                            // Очищаем грид от данных
-                            $scope.reportNdflGrid.ctrl.getGrid().jqGrid('clearGridData');
-                            var availableDataRows = response.prepareSpecificReportResult.countAvailableDataRows;
-                            $scope.infoText = $filter('translate')('reportPersonFace.info.numberOfFoundEntries') + availableDataRows + ".";
+                        }
+                    }).then(function (response) {
+                        // Очищаем грид от данных
+                        $scope.reportNdflGrid.ctrl.getGrid().jqGrid('clearGridData');
+                        var availableDataRows = response.data.prepareSpecificReportResult.countAvailableDataRows;
+                        $scope.infoText = $filter('translate')('reportPersonFace.info.numberOfFoundEntries') + availableDataRows + ".";
+                        $scope.showInfo = true;
+                        var resultSize = response.data.prepareSpecificReportResult.dataRows.length;
+                        if (resultSize === 0) {
+                            var messageParts = [];
+                            for (var param in $scope.searchFilter.params) {
+                                switch (param) {
+                                    case 'dateTo':
+                                        messageParts.push($scope.searchFilter.params[param].format("dd.mm.yyyy"));
+                                        break;
+                                    case 'dateFrom':
+                                        messageParts.push($scope.searchFilter.params[param].format("dd.mm.yyyy"));
+                                        break;
+                                    default:
+                                        messageParts.push($scope.searchFilter.params[param]);
+                                }
+                            }
+                            return;
+                        }
+                        if (resultSize < availableDataRows) {
+                            $scope.infoText = $filter('translate')('reportPersonFace.info.found') +
+                                availableDataRows + $filter('translate')('reportPersonFace.info.entriesShowed') +
+                                resultSize + $filter('translate')('reportPersonFace.info.needSearchClarify');
                             $scope.showInfo = true;
-                            var resultSize = response.prepareSpecificReportResult.dataRows.length;
-                            if (resultSize === 0) {
-                                var messageParts = [];
-                                for (var param in $scope.searchFilter.params) {
-                                    switch (param) {
-                                        case 'dateTo':
-                                            messageParts.push($scope.searchFilter.params[param].format("dd.mm.yyyy"));
-                                            break;
-                                        case 'dateFrom':
-                                            messageParts.push($scope.searchFilter.params[param].format("dd.mm.yyyy"));
-                                            break;
-                                        default:
-                                            messageParts.push($scope.searchFilter.params[param]);
-                                    }
-                                }
-                                return;
+                        }
+                        if (!gridInitiated) {
+                            var columns = response.data.prepareSpecificReportResult.tableColumns;
+                            var i = 0;
+                            for (; i < columns.length; i++) {
+                                $scope.colNames.push(columns[i].name);
+                                $scope.colModel.push({
+                                    name: columns[i].alias,
+                                    index: columns[i].alias,
+                                    width: columns[i].width * 10,
+                                    key: columns[i].alias === 'pNumSpravka'
+                                });
                             }
-                            if (resultSize < availableDataRows) {
-                                $scope.infoText = $filter('translate')('reportPersonFace.info.found') +
-                                    availableDataRows + $filter('translate')('reportPersonFace.info.entriesShowed') +
-                                    resultSize + $filter('translate')('reportPersonFace.info.needSearchClarify');
-                                $scope.showInfo = true;
-                            }
-                            if (!gridInitiated) {
-                                var columns = response.prepareSpecificReportResult.tableColumns;
-                                var i = 0;
-                                for (; i < columns.length; i++) {
-                                    $scope.colNames.push(columns[i].name);
-                                    $scope.colModel.push({
-                                        name: columns[i].alias,
-                                        index: columns[i].alias,
-                                        width: columns[i].width * 10,
-                                        key: columns[i].alias === 'pNumSpravka'
-                                    });
-                                }
 
-                                $scope.reportNdflGrid.ctrl.rebuildGrid();
-                                gridInitiated = true;
-                            }
-                            $scope.reportNdflGrid.ctrl.refreshGridData(response.prepareSpecificReportResult.dataRows);
+                            $scope.reportNdflGrid.ctrl.rebuildGrid();
+                            gridInitiated = true;
+                        }
+                        $scope.reportNdflGrid.ctrl.refreshGridData(response.data.prepareSpecificReportResult.dataRows);
 
-                            $scope.enabledGrid = true;
-                        });
+                        $scope.enabledGrid = true;
+                    });
                 };
 
                 /**
                  * @description Сформировать спецотчет
                  */
                 $scope.createSubreport = function () {
-                    createReport.query({
-                            declarationDataId: $shareData.declarationDataId,
+                    $http({
+                        method: "POST",
+                        url: "controller/actions/declarationData/" + $shareData.declarationDataId + "/reportNdflByPerson",
+                        data: {
                             type: $shareData.reportType,
                             selectedRow: $scope.reportNdflGrid.value[0],
                             subreportParamValues: {
@@ -239,10 +243,11 @@
                                 middleName: $scope.reportNdflGrid.value[0].middleName,
                                 inn: $scope.reportNdflGrid.value[0].innNp
                             }
-                        },
+                        }
+                    }).then(
                         function (response) {
-                            if (response.uuid && response.uuid !== null) {
-                                $logPanel.open('log-panel-container', response.uuid);
+                            if (response.data.uuid && response.data.uuid !== null) {
+                                $logPanel.open('log-panel-container', response.data.uuid);
                             }
                             $modalInstance.close();
                         }

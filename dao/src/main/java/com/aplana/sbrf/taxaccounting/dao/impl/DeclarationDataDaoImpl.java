@@ -843,38 +843,6 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
     }
 
     @Override
-    public List<Pair<String, String>> findNotPresentedPairKppOktmo(Long declarationDataId) {
-        String sql = "select distinct npi.kpp, npi.oktmo " +
-                "from ndfl_person_income npi " +
-                "join ndfl_person np on npi.ndfl_person_id = np.id " +
-                "join declaration_data dd on np.declaration_data_id = dd.ID " +
-                "join department_report_period drp on dd.department_report_period_id = drp.id " +
-                "join report_period rp on drp.report_period_id = rp.ID " +
-                "where dd.id = :declarationDataId " +
-                "and (npi.kpp, npi.oktmo) " +
-                "not in (" +
-                "   select rnd.kpp, ro.code " +
-                "   from (select t.*, lead(t.version) over(partition by t.record_id order by version) - interval '1' DAY version_end from ref_book_ndfl_detail t where status != -1) rnd " +
-                "   join ref_book_oktmo ro on ro.id = rnd.oktmo " +
-                "   where rnd.status = 0 and rnd.version <= rp.end_date and (rnd.version_end is null or rp.end_date <= rnd.version_end)" +
-                ")";
-        MapSqlParameterSource params = new MapSqlParameterSource();
-        params.addValue("declarationDataId", declarationDataId);
-        try {
-            return getNamedParameterJdbcTemplate().query(sql, params, new RowMapper<Pair<String, String>>() {
-                @Override
-                public Pair<String, String> mapRow(ResultSet resultSet, int i) throws SQLException {
-                    String kpp = resultSet.getString("kpp");
-                    String oktmo = resultSet.getString("oktmo");
-                    return new Pair<>(kpp, oktmo);
-                }
-            });
-        } catch (EmptyResultDataAccessException e) {
-            return new ArrayList<>();
-        }
-    }
-
-    @Override
     public boolean existDeclarationData(DeclarationData declarationData) {
         JdbcTemplate jt = getJdbcTemplate();
         int countOfExisted = 0;

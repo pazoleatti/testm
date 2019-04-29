@@ -51,7 +51,7 @@ public class SpecificReportDeclarationDataAsyncTask extends AbstractDeclarationA
         userInfo.setUser(userService.getUser(taskData.getUserId()));
 
         DeclarationData declarationData = declarationDataService.get(declarationDataId, userInfo);
-        DeclarationDataReportType ddReportType = DeclarationDataReportType.getDDReportTypeByName(alias);
+        DeclarationDataReportType ddReportType = DeclarationDataReportType.createSpecificReport();
         ddReportType.setSubreport(declarationTemplateService.getSubreportByAlias(declarationData.getDeclarationTemplateId(), alias));
         params.put("ddReportType", ddReportType);
 
@@ -108,15 +108,6 @@ public class SpecificReportDeclarationDataAsyncTask extends AbstractDeclarationA
     }
 
     @Override
-    protected DeclarationDataReportType getDeclarationDataReportType(TAUserInfo userInfo, Map<String, Object> params) {
-        String alias = (String) params.get("alias");
-        DeclarationData declarationData = getDeclaration(userInfo, params);
-        DeclarationDataReportType ddReportType = DeclarationDataReportType.getDDReportTypeByName(alias);
-        ddReportType.setSubreport(declarationTemplateService.getSubreportByAlias(declarationData.getDeclarationTemplateId(), alias));
-        return ddReportType;
-    }
-
-    @Override
     protected String getErrorMsg(AsyncTaskData taskData, boolean unexpected) {
         String errorsText = (String) taskData.getParams().get("errorsText");
         // Для ожидаемых исключений выводим в оповещение текст из errorsText, сфомрмированный из логов
@@ -170,17 +161,6 @@ public class SpecificReportDeclarationDataAsyncTask extends AbstractDeclarationA
      */
     private String getDeclarationDescription(AsyncTaskData taskData) {
         return getDeclarationDescription(taskData.getUserId(), taskData.getParams());
-    }
-
-    @Override
-    public String createDescription(TAUserInfo userInfo, Map<String, Object> params) {
-        String alias = (String) params.get("alias");
-        DeclarationData declarationData = getDeclaration(userInfo, params);
-        DeclarationDataReportType ddReportType = DeclarationDataReportType.getDDReportTypeByName(alias);
-        ddReportType.setSubreport(declarationTemplateService.getSubreportByAlias(declarationData.getDeclarationTemplateId(), alias));
-
-        long declarationDataId = (Long) params.get("declarationDataId");
-        return String.format(ddReportType.getReportType().getDescription(), ddReportType.getSubreport().getName(), declarationDataService.getDeclarationFullName(declarationDataId, ddReportType));
     }
 
 }

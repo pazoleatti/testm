@@ -150,14 +150,14 @@ public class AsyncManagerImpl implements AsyncManager {
                     checkParams(params);
                 }
                 // Получение и проверка класса обработчика задачи
-                AsyncTask task = getAsyncTaskBean(taskType.getAsyncTaskTypeId());
+                AsyncTask task = getAsyncTaskBean(taskType.getId());
                 String description = task.createDescription(user, params);
                 if (queue == null) {
                     queue = task.defineTaskLimit(description, user, params);
                 }
                 // Сохранение в очереди асинхронных задач - запись в БД
                 String priorityNode = applicationInfo.isProductionMode() ? null : serverInfo.getServerName();
-                AsyncTaskData taskData = asyncTaskDao.create(taskType.getAsyncTaskTypeId(), user.getUser().getId(), description, queue, priorityNode, AsyncTaskGroupFactory.getTaskGroup(taskType), params);
+                AsyncTaskData taskData = asyncTaskDao.create(taskType.getId(), user.getUser().getId(), description, queue, priorityNode, AsyncTaskGroupFactory.getTaskGroup(taskType), params);
                 lockDataService.bindTask(lockKey, taskData.getId());
 
                 LOG.info(String.format("Task with id %s was put in queue %s. Task type: %s, priority node: %s",
@@ -257,7 +257,7 @@ public class AsyncManagerImpl implements AsyncManager {
                 List<String> keys = new ArrayList<>();
                 String description = asyncTaskDescriptor.createDescription(params, operationType);
                 try {
-                    task = getAsyncTaskBean(operationType.getAsyncTaskTypeId());
+                    task = getAsyncTaskBean(operationType.getAsyncTaskType().getId());
                     if (task instanceof AsyncTaskExecutePossibilityVerifier) {
                         AsyncTaskExecutePossibilityVerifier verifier = (AsyncTaskExecutePossibilityVerifier) task;
                         if (!verifier.canExecuteByLimit()) {
@@ -278,8 +278,8 @@ public class AsyncManagerImpl implements AsyncManager {
 
                         // Сохранение в очереди асинхронных задач - запись в БД
                         String priorityNode = applicationInfo.isProductionMode() ? null : serverInfo.getServerName();
-                        AsyncTaskType asyncTaskType = AsyncTaskType.getByAsyncTaskTypeId(operationType.getAsyncTaskTypeId());
-                        taskData = asyncTaskDao.create(operationType.getAsyncTaskTypeId(), user.getUser().getId(), description, queue, priorityNode, AsyncTaskGroupFactory.getTaskGroup(asyncTaskType), params);
+                        AsyncTaskType asyncTaskType = AsyncTaskType.getByAsyncTaskTypeId(operationType.getAsyncTaskType().getId());
+                        taskData = asyncTaskDao.create(operationType.getAsyncTaskType().getId(), user.getUser().getId(), description, queue, priorityNode, AsyncTaskGroupFactory.getTaskGroup(asyncTaskType), params);
 
                         lockDataService.bindTaskToMultiKeys(keys, taskData.getId());
                         logger.info("Задача %s поставлена в очередь на исполнение", description);
@@ -319,13 +319,13 @@ public class AsyncManagerImpl implements AsyncManager {
                     if (MapUtils.isNotEmpty(params)) {
                         checkParams(params);
                     }
-                    AsyncTask task = getAsyncTaskBean(operationType.getAsyncTaskTypeId());
+                    AsyncTask task = getAsyncTaskBean(operationType.getAsyncTaskType().getId());
                     //Постановка новой задачи в очередь
                     AsyncQueue queue = task.defineTaskLimit(taskDescription, user, params);
                     // Сохранение в очереди асинхронных задач - запись в БД
                     String priorityNode = applicationInfo.isProductionMode() ? null : serverInfo.getServerName();
-                    AsyncTaskType asyncTaskType = AsyncTaskType.getByAsyncTaskTypeId(operationType.getAsyncTaskTypeId());
-                    taskData = asyncTaskDao.create(operationType.getAsyncTaskTypeId(), user.getUser().getId(), taskDescription, queue, priorityNode, AsyncTaskGroupFactory.getTaskGroup(asyncTaskType), params);
+                    AsyncTaskType asyncTaskType = AsyncTaskType.getByAsyncTaskTypeId(operationType.getAsyncTaskType().getId());
+                    taskData = asyncTaskDao.create(operationType.getAsyncTaskType().getId(), user.getUser().getId(), taskDescription, queue, priorityNode, AsyncTaskGroupFactory.getTaskGroup(asyncTaskType), params);
                     logger.info("Задача \"%s\" поставлена в очередь на исполнение", taskDescription);
                     LOG.info(String.format("Task with id %s was put in queue %s. Task type: %s, priority node: %s",
                             taskData.getId(), queue.name(), asyncTaskType.getId(), priorityNode));

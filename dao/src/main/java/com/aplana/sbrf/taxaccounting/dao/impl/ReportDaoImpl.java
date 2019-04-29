@@ -44,7 +44,7 @@ public class ReportDaoImpl extends AbstractDao implements ReportDao {
                                         "INSERT INTO DECLARATION_REPORT (DECLARATION_DATA_ID, BLOB_DATA_ID, TYPE, SUBREPORT_ID) VALUES (?,?,?,?)");
                         ps.setLong(1, declarationDataId);
                         ps.setString(2, blobDataId);
-                        ps.setLong(3, type.getReportType().getId());
+                        ps.setLong(3, type.getId());
                         ps.setLong(4, type.getSubreport().getId());
                         return ps;
                     } else {
@@ -53,7 +53,7 @@ public class ReportDaoImpl extends AbstractDao implements ReportDao {
                                         "INSERT INTO DECLARATION_REPORT (DECLARATION_DATA_ID, BLOB_DATA_ID, TYPE, SUBREPORT_ID) VALUES (?,?,?,null)");
                         ps.setLong(1, declarationDataId);
                         ps.setString(2, blobDataId);
-                        ps.setLong(3, type.getReportType().getId());
+                        ps.setLong(3, type.getId());
                         return ps;
                     }
                 }
@@ -71,7 +71,7 @@ public class ReportDaoImpl extends AbstractDao implements ReportDao {
             ps.appendQuery("SELECT BLOB_DATA_ID FROM DECLARATION_REPORT " +
                     "WHERE DECLARATION_DATA_ID = ? AND TYPE = ?");
             ps.addParam(declarationDataId);
-            ps.addParam(type.getReportType().getId());
+            ps.addParam(type.getId());
             if (type.getSubreport() != null) {
                 ps.appendQuery("AND SUBREPORT_ID = ?");
                 ps.addParam(type.getSubreport().getId());
@@ -112,7 +112,7 @@ public class ReportDaoImpl extends AbstractDao implements ReportDao {
         try {
             MapSqlParameterSource params = new MapSqlParameterSource();
             params.addValue("declarationDataId", declarationDataId);
-            params.addValue("type", type.getReportType().getId());
+            params.addValue("type", type.getId());
             if (type.getSubreport() != null) {
                 params.addValue("subreportId", type.getSubreport().getId());
             }
@@ -142,7 +142,7 @@ public class ReportDaoImpl extends AbstractDao implements ReportDao {
         try {
             List<Integer> types = new ArrayList<>();
             for (DeclarationDataReportType type : ddReportTypes) {
-                types.add(type.getReportType().getId());
+                types.add(type.getId());
             }
             String sql = String.format("DELETE FROM DECLARATION_REPORT WHERE %s and %s",
                     SqlUtils.transformToSqlInStatement("DECLARATION_DATA_ID", declarationDataIds),
@@ -184,7 +184,7 @@ public class ReportDaoImpl extends AbstractDao implements ReportDao {
         try {
             MapSqlParameterSource params = new MapSqlParameterSource();
             params.addValue("declarationDataId", declarationDataId);
-            params.addValue("type", DeclarationDataReportType.XML_DEC.getReportType().getId());
+            params.addValue("type", DeclarationDataReportType.XML_DEC.getId());
             getNamedParameterJdbcTemplate().update(
                     "DELETE FROM DECLARATION_REPORT WHERE DECLARATION_DATA_ID = :declarationDataId AND TYPE <> :type", params);
         } catch (DataAccessException e) {

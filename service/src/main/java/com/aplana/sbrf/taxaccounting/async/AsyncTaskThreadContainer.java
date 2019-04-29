@@ -125,7 +125,7 @@ public class AsyncTaskThreadContainer implements DisposableBean {
                                     MDC.put("processId", String.format("AsyncTaskId=%s ", taskData.getId()));
                                     //Запускаем выполнение бина-обработчика задачи в новом потоке
                                     LOG.info("Task started: " + taskData);
-                                    final AsyncTask task = asyncManager.getAsyncTaskBean(taskData.getType().getAsyncTaskTypeId());
+                                    final AsyncTask task = asyncManager.getAsyncTaskBean(taskData.getType().getId());
                                     final Map<String, String> mdcContext = MDC.getCopyOfContextMap();
                                     MDC.setContextMap(mdcContext);
                                     //Запускаем задачу под нужным пользователем

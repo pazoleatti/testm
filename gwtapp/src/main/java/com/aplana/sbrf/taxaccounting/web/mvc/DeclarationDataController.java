@@ -182,7 +182,7 @@ public class DeclarationDataController {
     public void downloadDeclarationSpecific(@PathVariable String alias, @PathVariable long declarationDataId, HttpServletResponse response)
             throws IOException {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        DeclarationDataReportType ddReportType = DeclarationDataReportType.getDDReportTypeByName(alias);
+        DeclarationDataReportType ddReportType = DeclarationDataReportType.createSpecificReport();
         DeclarationData declaration = declarationService.get(declarationDataId, userInfo);
         ddReportType.setSubreport(declarationTemplateService.getSubreportByAlias(declaration.getDeclarationTemplateId(), alias));
 
@@ -288,18 +288,6 @@ public class DeclarationDataController {
     }
 
     /**
-     * Формирует шаблон ТФ (Excel) для формы
-     *
-     * @param declarationDataId Идентификатор налоговой формы
-     * @return Результат запуска задачи
-     */
-    @PostMapping(value = "/actions/declarationData/{declarationDataId}/excelTemplate")
-    public String createExcelTemplate(@PathVariable int declarationDataId) {
-        TAUserInfo userInfo = securityService.currentUserInfo();
-        return declarationService.createTaskToCreateExcelTemplate(declarationDataId, userInfo);
-    }
-
-    /**
      * Импорт данных из excel в форму
      *
      * @param declarationDataId Идентификатор налоговой формы
@@ -331,13 +319,13 @@ public class DeclarationDataController {
     }
 
     /**
-     * Создание отчётности
+     * Создание отчетной формы
      *
      * @param action параметры создания отчетности
      * @return модель {@link CreateDeclarationReportResult}, в которой содержаться данные результате операции создания
      */
-    @PostMapping(value = "/actions/declarationData/createReport")
-    public ActionResult createReport(@RequestBody CreateReportFormsAction action) {
+    @PostMapping(value = "/actions/declarationData/createReportForm")
+    public ActionResult createReportForm(@RequestBody CreateReportFormsAction action) {
         return declarationService.createReportsCreateTask(action, securityService.currentUserInfo());
     }
 
@@ -530,53 +518,6 @@ public class DeclarationDataController {
     }
 
     /**
-     * Формирование рну ндфл для отдельного физ лица`
-     *
-     * @param declarationDataId идентификатор декларации
-     * @param ndflPersonId      идентификатор данных о физическом лице {@link com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson}
-     * @return источники и приемники декларации
-     */
-    @PostMapping(value = "/actions/declarationData/{declarationDataId}/rnuDoc")
-    public String createReportRnu(@PathVariable("declarationDataId") long declarationDataId, @RequestParam long ndflPersonId) {
-        TAUserInfo userInfo = securityService.currentUserInfo();
-        Map<String, Object> reportParams = new HashMap<>();
-        reportParams.put("PERSON_ID", ndflPersonId);
-        return declarationService.createTaskToCreateSpecificReport(declarationDataId, SubreportAliasConstants.RNU_NDFL_PERSON_DB, reportParams, userInfo);
-    }
-
-    /**
-     * Формирование рну ндфл для всех физ лиц
-     *
-     * @param declarationDataId идентификатор декларации
-     */
-    @PostMapping(value = "/actions/declarationData/{declarationDataId}/specific/{alias}")
-    public String createSpecificReport(@PathVariable("declarationDataId") long declarationDataId, @PathVariable String alias,
-                                       @RequestBody(required = false) Ndfl2_6DataReportParams params) {
-        TAUserInfo userInfo = securityService.currentUserInfo();
-        Map<String, Object> reportParams = new HashMap<>();
-        reportParams.put("params", params);
-        return declarationService.createTaskToCreateSpecificReport(declarationDataId, alias, reportParams, userInfo);
-    }
-
-    @PostMapping(value = "/actions/declarationData/{declarationDataId}/pdf")
-    public String createPdfReport(@PathVariable("declarationDataId") long declarationDataId) {
-        TAUserInfo userInfo = securityService.currentUserInfo();
-        return declarationService.createPdfTask(userInfo, declarationDataId);
-    }
-
-    /**
-     * Формирование отчета в xlsx
-     *
-     * @param declarationDataId идентификатор декларации
-     * @return информация о создании отчета
-     */
-    @PostMapping(value = "/actions/declarationData/{declarationDataId}/reportXsls")
-    public String createDeclarationReportXlsx(@PathVariable("declarationDataId") long declarationDataId) {
-        TAUserInfo userInfo = securityService.currentUserInfo();
-        return declarationService.createTaskToCreateReportXlsx(userInfo, declarationDataId);
-    }
-
-    /**
      * Установить блокировку на раздел "Файлы и комментарии" формы.
      *
      * @param declarationDataId идентификатор декларации
@@ -660,8 +601,8 @@ public class DeclarationDataController {
     /**
      * Выгрузка отчетности по списку ид форм
      */
-    @PostMapping(value = "/actions/declarationData/downloadReports")
-    public ActionResult downloadReports(@RequestBody List<Long> declarationDataIds) {
+    @PostMapping(value = "/actions/declarationData/exportReportForms")
+    public ActionResult exportReportForms(@RequestBody List<Long> declarationDataIds) {
         TAUserInfo userInfo = securityService.currentUserInfo();
         return declarationService.asyncExportReports(declarationDataIds, userInfo);
     }
@@ -669,8 +610,8 @@ public class DeclarationDataController {
     /**
      * Выгрузка отчетности по фильтру
      */
-    @PostMapping(value = "/actions/declarationData/downloadReportsByFilter")
-    public ActionResult downloadReportsByFilter(@RequestParam DeclarationDataFilter filter) {
+    @PostMapping(value = "/actions/declarationData/exportReportFormsByFilter")
+    public ActionResult exportReportFormsByFilter(@RequestParam DeclarationDataFilter filter) {
         TAUserInfo userInfo = securityService.currentUserInfo();
         return declarationService.asyncExportReports(filter, userInfo);
     }
@@ -694,11 +635,11 @@ public class DeclarationDataController {
     }
 
     /**
-     * Создание отчетов и спецотчетов
+     * Формирование спецотчета по физ лицу для 2-НДФЛ
      */
-    @PostMapping(value = "/rest/createReport", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ActionResult createReport(@RequestBody CreateReportAction action) {
-        return declarationService.createReportForReportDD(securityService.currentUserInfo(), action);
+    @PostMapping(value = "/actions/declarationData/{declarationDataId}/reportNdflByPerson")
+    public ActionResult createReportNdflByPersonReport(@PathVariable("declarationDataId") long declarationDataId, @RequestBody CreateReportAction action) {
+        return declarationService.createReportNdflByPersonReport(declarationDataId, action, securityService.currentUserInfo());
     }
 
     /**
@@ -814,6 +755,65 @@ public class DeclarationDataController {
     @GetMapping("/actions/checkRowsEditCountParam")
     public ActionResult checkRowsEditCountParam(@RequestParam int count) {
         return declarationService.checkRowsEditCountParam(count);
+    }
+
+    /**
+     * Формирование отчета в xlsx
+     *
+     * @param declarationDataId идентификатор декларации
+     * @return информация о создании отчета
+     */
+    @PostMapping(value = "/actions/declarationData/{declarationDataId}/reportXsls")
+    public String createDeclarationReportXlsx(@PathVariable("declarationDataId") long declarationDataId) {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        return declarationService.createTaskToCreateReportXlsx(userInfo, declarationDataId);
+    }
+
+    /**
+     * Формирование спецотчета по физ лицу для РНУ НДФЛ
+     *
+     * @param declarationDataId идентификатор декларации
+     * @param ndflPersonId      идентификатор данных о физическом лице {@link com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson}
+     * @return источники и приемники декларации
+     */
+    @PostMapping(value = "/actions/declarationData/{declarationDataId}/rnuNdflByPerson")
+    public String createRnuNdflByPersonReport(@PathVariable("declarationDataId") long declarationDataId, @RequestParam long ndflPersonId) {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        Map<String, Object> reportParams = new HashMap<>();
+        reportParams.put("PERSON_ID", ndflPersonId);
+        return declarationService.createTaskToCreateSpecificReport(declarationDataId, SubreportAliasConstants.RNU_NDFL_PERSON_DB, reportParams, userInfo);
+    }
+
+    /**
+     * Формирование спецотчета
+     *
+     * @param declarationDataId идентификатор декларации
+     */
+    @PostMapping(value = "/actions/declarationData/{declarationDataId}/specific/{alias}")
+    public String createSpecificReport(@PathVariable("declarationDataId") long declarationDataId, @PathVariable String alias,
+                                       @RequestBody(required = false) Ndfl2_6DataReportParams params) {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        Map<String, Object> reportParams = new HashMap<>();
+        reportParams.put("params", params);
+        return declarationService.createTaskToCreateSpecificReport(declarationDataId, alias, reportParams, userInfo);
+    }
+
+    /**
+     * Формирует шаблон ТФ (Excel) для формы
+     *
+     * @param declarationDataId Идентификатор налоговой формы
+     * @return Результат запуска задачи
+     */
+    @PostMapping(value = "/actions/declarationData/{declarationDataId}/excelTemplate")
+    public String createExcelTemplate(@PathVariable int declarationDataId) {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        return declarationService.createTaskToCreateExcelTemplate(declarationDataId, userInfo);
+    }
+
+    @PostMapping(value = "/actions/declarationData/{declarationDataId}/pdf")
+    public String createPdfReport(@PathVariable("declarationDataId") long declarationDataId) {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        return declarationService.createPdfTask(userInfo, declarationDataId);
     }
 
 

@@ -240,11 +240,6 @@ public interface DeclarationDataDao extends PermissionDao {
     List<DeclarationData> find(int declarationTemplate, int departmentReportPeriodId, String taxOrganCode, String kpp, String oktmo);
 
     /**
-     * Находит все пары КПП/ОКТМО которых нет в справочнике Подразделений, но которые представлены у операций относящихся к НФ
-     */
-    List<Pair<String, String>> findNotPresentedPairKppOktmo(Long declarationDataId);
-
-    /**
      * Проверяет существование НФ по критериям в зависимости от ее вида
      */
     boolean existDeclarationData(DeclarationData declarationData);

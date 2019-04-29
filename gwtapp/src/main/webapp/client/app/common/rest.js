@@ -202,17 +202,6 @@
         }])
 
         /**
-         * @description Запуск асинхронной задачи по созданию отчетности
-         */
-        .factory('createReport', ['$resource', function ($resource) {
-            return $resource('controller/rest/createReport', {}, {
-                query: {
-                    method: 'POST'
-                }
-            });
-        }])
-
-        /**
          * @description Получить изображение страницы pdf отчета
          */
         .factory('getPageImage', ['$resource', function ($resource) {
@@ -245,15 +234,6 @@
         .factory('moveToCreatedDeclarationData', ['$resource', function ($resource) {
             return $resource('controller/rest/declarationData/:declarationDataId/moveToCreated', {declarationDataId: '@declarationDataId'}, {
                 query: {method: 'POST'}
-            });
-        }])
-
-        /**
-         * @description Подготовить данные для спецотчета
-         */
-        .factory('prepareSpecificReport', ['$resource', function ($resource) {
-            return $resource('controller/rest/declarationData/prepareSpecificReport', {}, {
-                doOperation: {method: 'POST'}
             });
         }])
 

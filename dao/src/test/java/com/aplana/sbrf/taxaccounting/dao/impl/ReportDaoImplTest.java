@@ -4,7 +4,6 @@ import com.aplana.sbrf.taxaccounting.dao.BlobDataDao;
 import com.aplana.sbrf.taxaccounting.dao.ReportDao;
 import com.aplana.sbrf.taxaccounting.model.BlobData;
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataReportType;
-import com.aplana.sbrf.taxaccounting.model.AsyncTaskType;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,40 +33,35 @@ public class ReportDaoImplTest {
 
     @Test
     public void getDec() {
-        DeclarationDataReportType type = new DeclarationDataReportType(AsyncTaskType.PDF_DEC, null);
-        String id = reportDao.getDec(3, type);
+        String id = reportDao.getDec(3, PDF_DEC);
         assertEquals("uuid_6", id);
     }
 
     @Test
     @Transactional(readOnly = false)
     public void deleteDecTest1() {
-        DeclarationDataReportType type = new DeclarationDataReportType(AsyncTaskType.PDF_DEC, null);
-
-        String id = reportDao.getDec(1, type);
+        String id = reportDao.getDec(1, PDF_DEC);
         assertEquals("uuid_3", id);
-        id = reportDao.getDec(2, type);
+        id = reportDao.getDec(2, PDF_DEC);
         assertEquals("uuid_6", id);
 
         reportDao.deleteDec(Arrays.asList(1l, 2l));
 
-        id = reportDao.getDec(1, type);
+        id = reportDao.getDec(1, PDF_DEC);
         assertEquals(null, id);
-        id = reportDao.getDec(2, type);
+        id = reportDao.getDec(2, PDF_DEC);
         assertEquals(null, id);
     }
 
     @Test
     @Transactional(readOnly = false)
     public void test_deleteAllByDeclarationId() {
-        DeclarationDataReportType type = new DeclarationDataReportType(AsyncTaskType.PDF_DEC, null);
-
-        String id = reportDao.getDec(3, type);
+        String id = reportDao.getDec(3, PDF_DEC);
         assertEquals("uuid_6", id);
 
         reportDao.deleteAllByDeclarationId(3L);
 
-        id = reportDao.getDec(3, type);
+        id = reportDao.getDec(3, PDF_DEC);
         assertNull(id);
     }
 
@@ -90,37 +84,32 @@ public class ReportDaoImplTest {
     @Test
     @Transactional(readOnly = false)
     public void deleteDecTest3() {
-        DeclarationDataReportType type = new DeclarationDataReportType(AsyncTaskType.EXCEL_DEC, null);
-
         reportDao.deleteDec(Arrays.asList(1l, 2l), Arrays.asList(EXCEL_DEC, XML_DEC));
 
-        String id = reportDao.getDec(1, type);
+        String id = reportDao.getDec(1, EXCEL_DEC);
         assertEquals(null, id);
-        id = reportDao.getDec(2, type);
+        id = reportDao.getDec(2, EXCEL_DEC);
         assertEquals(null, id);
     }
 
     @Test
     @Transactional(readOnly = false)
     public void deleteDecTest4() {
-        DeclarationDataReportType type = new DeclarationDataReportType(AsyncTaskType.EXCEL_DEC, null);
-
         reportDao.deleteDec(1l, EXCEL_DEC);
 
-        String id = reportDao.getDec(1, type);
+        String id = reportDao.getDec(1, EXCEL_DEC);
         assertEquals(null, id);
     }
 
     @Test
     @Transactional(readOnly = false)
     public void deleteDecTest5() {
-        DeclarationDataReportType type = new DeclarationDataReportType(AsyncTaskType.EXCEL_DEC, null);
-        String id = reportDao.getDec(1, type);
+        String id = reportDao.getDec(1, EXCEL_DEC);
         assertEquals("uuid_1", id);
 
         reportDao.deleteDec("uuid_1");
 
-        id = reportDao.getDec(1, type);
+        id = reportDao.getDec(1, EXCEL_DEC);
         assertEquals(null, id);
     }
 

@@ -7,9 +7,7 @@ import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.script.service.DeclarationService;
-import com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.component.lock.locker.DeclarationLocker;
 import groovy.lang.Closure;
@@ -21,7 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -32,7 +29,6 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -270,7 +266,7 @@ public class DeclarationServiceImpl implements DeclarationService {
 
     @Override
     public void createPdfReport(Logger logger, DeclarationData declarationData, TAUserInfo userInfo) {
-        deleteReport(declarationData.getId(), Arrays.asList(DeclarationDataReportType.PDF_DEC, DeclarationDataReportType.JASPER_DEC));
+        deleteReport(declarationData.getId(), Arrays.asList(DeclarationDataReportType.PDF_DEC));
         declarationDataService.setPdfDataBlobs(logger, declarationData, userInfo, new LockStateLogger() {
             @Override
             public void updateState(AsyncTaskState state) {
@@ -296,60 +292,10 @@ public class DeclarationServiceImpl implements DeclarationService {
     }
 
     @Override
-    public List<Pair<String, String>> findNotPresentedPairKppOktmo(Long declarationDataId) {
-        return declarationDataDao.findNotPresentedPairKppOktmo(declarationDataId);
-    }
-
-    @Override
-    public String generateAsyncTaskKey(long declarationDataId, DeclarationDataReportType type) {
-        return declarationDataService.generateAsyncTaskKey(declarationDataId, type);
-    }
-
-    @Override
-    @Transactional
-    public List<Pair<Long, DeclarationDataReportType>> deleteForms(int declarationTypeId, int departmentReportPeriodId, List<Pair<String, String>> kppOktmoPairs, Logger logger, TAUserInfo userInfo) {
-        List<Pair<Long, DeclarationDataReportType>> result = new ArrayList<>();
-
-        // Список ранее созданных отчетных форм
-        List<DeclarationData> deletedDeclarationDataList = declarationDataDao.findAllByTypeIdAndPeriodIdAndKppOktmoPairs(declarationTypeId, departmentReportPeriodId, kppOktmoPairs);
-        // Список блокировок на удаление форм
-        List<LockData> lockList = new ArrayList<>();
-        try {
-            for (DeclarationData deletedDeclarationData : deletedDeclarationDataList) {
-                Logger localLogger = new Logger();
-                LockData deleteLock = declarationLocker.establishLock(deletedDeclarationData.getId(), OperationType.DELETE_DEC, userInfo, localLogger);
-                if (deleteLock != null) {
-                    lockList.add(deleteLock);
-                } else {
-                    result.add(new Pair<>(deletedDeclarationData.getId(), DeclarationDataReportType.DELETE_DEC));
-                }
-            }
-            if (result.size() == 0) {
-                for (DeclarationData deletedDeclarationData : deletedDeclarationDataList) {
-                    ScriptUtils.checkInterrupted();
-                    try {
-                        delete(deletedDeclarationData.getId(), userInfo);
-                    } catch (ServiceException e) {
-                        LOG.error(e);
-                        result.add(new Pair<>(deletedDeclarationData.getId(), DeclarationDataReportType.DELETE_DEC));
-                        break;
-                    }
-                }
-            }
-        } finally {
-            // удаляем блокировки
-            for (LockData lockData : lockList) {
-                lockDataService.unlock(lockData.getKey(), lockData.getUserId());
-            }
-        }
-        return result;
-    }
-
-    @Override
     public void delete(long declarationDataId, TAUserInfo userInfo) {
         if (declarationDataDao.existDeclarationData(declarationDataId)) {
             declarationDataDao.setStatus(declarationDataId, State.CREATED);
-            declarationDataService.deleteSync(declarationDataId, userInfo, false);
+            declarationDataService.deleteSync(declarationDataId, userInfo);
         }
     }
 
@@ -357,11 +303,6 @@ public class DeclarationServiceImpl implements DeclarationService {
     @Override
     public void check(Logger logger, long declarationDataId, TAUserInfo userInfo, LockStateLogger lockStateLogger) {
         declarationDataService.check(logger, declarationDataId, userInfo, lockStateLogger);
-    }
-
-    @Override
-    public String getDeclarationFullName(long declarationId, DeclarationDataReportType ddReportType, String... args) {
-        return declarationDataService.getDeclarationFullName(declarationId, ddReportType);
     }
 
     @Override

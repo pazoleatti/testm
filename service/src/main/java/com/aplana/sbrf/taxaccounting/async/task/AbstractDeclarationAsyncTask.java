@@ -40,9 +40,8 @@ public abstract class AbstractDeclarationAsyncTask extends AbstractAsyncTask {
     @Override
     public AsyncQueue checkTaskLimit(String taskDescription, TAUserInfo userInfo, Map<String, Object> params, Logger logger) throws AsyncTaskException {
         DeclarationData declarationData = getDeclaration(userInfo, params);
-        DeclarationDataReportType ddReportType = getDeclarationDataReportType(userInfo, params);
 
-        Long value = declarationDataService.getValueForCheckLimit(userInfo, declarationData.getId(), ddReportType);
+        Long value = declarationDataService.getValueForCheckLimit(userInfo, declarationData.getId(), getAsyncTaskType(), params);
         if (value == null) {
             throw new AsyncTaskException(new ServiceLoggerException("Налоговая форма не сформирована", null));
         }
@@ -52,10 +51,6 @@ public abstract class AbstractDeclarationAsyncTask extends AbstractAsyncTask {
 
     protected String getTaskLimitMsg(Long value, Map<String, Object> params) {
         return String.format("xml файл налоговой формы имеет слишком большой размер(%s Кбайт)!", value);
-    }
-
-    protected DeclarationDataReportType getDeclarationDataReportType(TAUserInfo userInfo, Map<String, Object> params) {
-        return DeclarationDataReportType.getDDReportTypeByReportType(getAsyncTaskType());
     }
 
     protected final String getDeclarationDescription(int userId, Map<String, Object> params) {
@@ -83,6 +78,11 @@ public abstract class AbstractDeclarationAsyncTask extends AbstractAsyncTask {
     protected final DeclarationData getDeclaration(TAUserInfo userInfo, Map<String, Object> params) {
         long declarationDataId = (Long) params.get("declarationDataId");
         return declarationDataService.get(declarationDataId, userInfo);
+    }
+
+    @Override
+    public String createDescription(TAUserInfo userInfo, Map<String, Object> params) {
+        throw new UnsupportedOperationException();
     }
 
     private String getCorrectionDateString(DepartmentReportPeriod reportPeriod) {

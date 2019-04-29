@@ -325,7 +325,8 @@ public class DeclarationDataServiceImplTest {
         DeclarationSubreport declarationSubreport = new DeclarationSubreport();
         declarationSubreport.setName("report name");
         declarationSubreport.setAlias("specific1");
-        DeclarationDataReportType specificReport = new DeclarationDataReportType(AsyncTaskType.SPECIFIC_REPORT_DEC, declarationSubreport);
+        DeclarationDataReportType specificReport = DeclarationDataReportType.createSpecificReport();
+        specificReport.setSubreport(declarationSubreport);
 
         TAUserInfo userInfo = new TAUserInfo();
         TAUser user = new TAUser();
@@ -395,7 +396,7 @@ public class DeclarationDataServiceImplTest {
         });
 
         assertEquals(strings.size(), 1);
-        assertEquals(strings.get(0), specificReport.getReportAlias());
+        assertEquals(strings.get(0), specificReport.getSubreport().getAlias());
     }
 
     //@Test
@@ -428,14 +429,14 @@ public class DeclarationDataServiceImplTest {
         });
         ReflectionTestUtils.setField(declarationDataService, "declarationDataScriptingService", declarationDataScriptingService);
 
-        assertEquals(new Long(2L), declarationDataService.getValueForCheckLimit(userInfo, declarationData.getId(), DeclarationDataReportType.PDF_DEC));
-        assertEquals(new Long(2L), declarationDataService.getValueForCheckLimit(userInfo, declarationData.getId(), DeclarationDataReportType.EXCEL_DEC));
-        assertEquals(new Long(2L), declarationDataService.getValueForCheckLimit(userInfo, declarationData.getId(), DeclarationDataReportType.ACCEPT_DEC));
-        assertEquals(new Long(2L), declarationDataService.getValueForCheckLimit(userInfo, declarationData.getId(), DeclarationDataReportType.CHECK_DEC));
-        assertEquals(new Long(2L), declarationDataService.getValueForCheckLimit(userInfo, declarationData.getId(), DeclarationDataReportType.XML_DEC));
-        assertEquals(new Long(10L), declarationDataService.getValueForCheckLimit(userInfo, declarationData.getId(), new DeclarationDataReportType(AsyncTaskType.SPECIFIC_REPORT_DEC, new DeclarationSubreport() {{
-            setAlias("alias1");
-        }})));
+        assertEquals(new Long(2L), declarationDataService.getValueForCheckLimit(userInfo, declarationData.getId(), AsyncTaskType.PDF_DEC, null));
+        assertEquals(new Long(2L), declarationDataService.getValueForCheckLimit(userInfo, declarationData.getId(), AsyncTaskType.EXCEL_DEC, null));
+        assertEquals(new Long(2L), declarationDataService.getValueForCheckLimit(userInfo, declarationData.getId(), AsyncTaskType.ACCEPT_DEC, null));
+        assertEquals(new Long(2L), declarationDataService.getValueForCheckLimit(userInfo, declarationData.getId(), AsyncTaskType.CHECK_DEC, null));
+        assertEquals(new Long(2L), declarationDataService.getValueForCheckLimit(userInfo, declarationData.getId(), AsyncTaskType.XML_DEC, null));
+        Map<String, Object> params = new HashMap<>();
+        params.put("alias", "alias1");
+        assertEquals(new Long(10L), declarationDataService.getValueForCheckLimit(userInfo, declarationData.getId(), AsyncTaskType.SPECIFIC_REPORT_DEC, params));
     }
 
     @Test

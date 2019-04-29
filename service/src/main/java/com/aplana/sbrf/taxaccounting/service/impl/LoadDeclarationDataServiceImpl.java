@@ -143,8 +143,8 @@ public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataSer
     }
 
     private void setLock(DeclarationData declaration, TAUser user) {
-        String asyncTaskKey = declarationDataService.generateAsyncTaskKey(declaration.getId(), DeclarationDataReportType.IMPORT_TF_DEC);
-        String declarationFullName = declarationDataService.getDeclarationFullName(declaration.getId(), DeclarationDataReportType.IMPORT_TF_DEC);
+        String asyncTaskKey = declarationDataService.generateAsyncTaskKey(declaration.getId(), AsyncTaskType.IMPORT_TF_DEC);
+        String declarationFullName = declarationDataService.getDeclarationFullName(declaration.getId(), AsyncTaskType.IMPORT_TF_DEC);
 
         LockData lockData = lockDataService.lock(asyncTaskKey, user.getId(), declarationFullName);
         if (lockData != null) {
@@ -183,7 +183,7 @@ public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataSer
     }
 
     private void unlock(DeclarationData declaration, TAUser user) {
-        String asyncTaskKey = declarationDataService.generateAsyncTaskKey(declaration.getId(), DeclarationDataReportType.IMPORT_TF_DEC);
+        String asyncTaskKey = declarationDataService.generateAsyncTaskKey(declaration.getId(), AsyncTaskType.IMPORT_TF_DEC);
         lockDataService.unlock(asyncTaskKey, user.getId());
     }
 }

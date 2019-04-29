@@ -46,7 +46,6 @@ public class AsyncTaskDescriptorImpl implements AsyncTaskDescriptor {
         Long declarationDataId = null;
         Integer departmentReportPeriodId = null;
         Integer declarationTypeId = null;
-        Map<String, Object> subreportParamValues = null;
         String fileName = null;
         List<Long> declarationDataIds = null;
         String dates = "";
@@ -58,9 +57,6 @@ public class AsyncTaskDescriptorImpl implements AsyncTaskDescriptor {
         }
         if (params.containsKey("declarationTypeId")) {
             declarationTypeId = (Integer) params.get("declarationTypeId");
-        }
-        if (params.containsKey("subreportParamValues")) {
-            subreportParamValues = (Map<String, Object>) params.get("subreportParamValues");
         }
         if (params.containsKey("fileName")) {
             fileName = (String) params.get("fileName");

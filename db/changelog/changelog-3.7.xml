@@ -202,4 +202,11 @@
 		</sql>
 	</changeSet>
 
+	<!--https://jira.aplana.com/browse/SBRFNDFL-6590 - удалил скрипт для старого отчета-->
+	<changeSet id="3.7-dnovikov-12" author="dnovikov">
+		<sql>
+			delete from DECL_TEMPLATE_EVENT_SCRIPT where id = 18;
+		</sql>
+	</changeSet>
+
 </databaseChangeLog>

@@ -46,12 +46,6 @@ public class UpdatePersonsDataAsyncTask extends AbstractDeclarationAsyncTask {
     }
 
     @Override
-    public String createDescription(TAUserInfo userInfo, Map<String, Object> params) {
-        long declarationDataId = (Long) params.get("declarationDataId");
-        return declarationDataService.getDeclarationFullName(declarationDataId, getDeclarationDataReportType(userInfo, params));
-    }
-
-    @Override
     protected String getNotificationMsg(AsyncTaskData taskData) {
         return String.format("Завершено обновление данных ФЛ налоговой формы: %s." ,
                 getDeclarationDescription(taskData.getUserId(), taskData.getParams()));

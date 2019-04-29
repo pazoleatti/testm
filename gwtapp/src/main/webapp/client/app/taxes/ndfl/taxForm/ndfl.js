@@ -350,9 +350,9 @@
                 };
 
                 /**
-                 * @description Событие, которое возникает по нажатию на кнопку "Формирование отчетов"
+                 * @description Формирование рну ндфл для отдельного физ лица
                  */
-                $scope.createReport = function () {
+                $scope.createRnuNdflByPersonReport = function () {
                     $aplanaModal.open({
                         title: $filter('translate')('rnuPersonFace.title'),
                         templateUrl: 'client/app/taxes/ndfl/taxForm/rnuNdflPersonFace.html',
@@ -443,6 +443,7 @@
                         }
                     });
                 }
+
                 // Метод снятия блокировки с редактирования формы.
                 function unlockEdit() {
                     $http({
@@ -697,36 +698,37 @@
                     });
                 };
 
-                $scope.downloadXml = function () {
-                    $window.open("controller/rest/declarationData/" + $stateParams.declarationDataId + "/xml", '_blank');
-                };
                 $scope.downloadXlsx = function () {
                     $window.open("controller/rest/declarationData/" + $stateParams.declarationDataId + "/xlsx", '_blank');
                 };
-                $scope.downloadSpecific = function () {
-                    $window.open("controller/rest/declarationData/" + $stateParams.declarationDataId + "/specific/" + APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.RNU_NDFL_PERSON_ALL_DB, '_blank');
+                $scope.downloadRnuNdflByAllPersonsReport = function () {
+                    downloadSpecificReport(APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.RNU_NDFL_PERSON_ALL_DB);
                 };
                 $scope.downloadRateReport = function () {
-                    $window.open("controller/rest/declarationData/" + $stateParams.declarationDataId + "/specific/" + APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.RNU_RATE_REPORT, '_blank');
+                    downloadSpecificReport(APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.RNU_RATE_REPORT);
                 };
                 $scope.downloadPaymentReport = function () {
-                    $window.open("controller/rest/declarationData/" + $stateParams.declarationDataId + "/specific/" + APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.RNU_PAYMENT_REPORT, '_blank');
+                    downloadSpecificReport(APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.RNU_PAYMENT_REPORT);
                 };
                 $scope.downloadNdflDetailReport = function () {
-                    $window.open("controller/rest/declarationData/" + $stateParams.declarationDataId + "/specific/" + APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.RNU_NDFL_DETAIL_REPORT, '_blank');
+                    downloadSpecificReport(APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.RNU_NDFL_DETAIL_REPORT);
                 };
                 $scope.downloadNdfl2_6DataXlsxReport = function () {
-                    $window.open("controller/rest/declarationData/" + $stateParams.declarationDataId + "/specific/" + APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.RNU_NDFL_2_6_DATA_XLSX_REPORT, '_blank');
+                    downloadSpecificReport(APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.RNU_NDFL_2_6_DATA_XLSX_REPORT);
                 };
                 $scope.downloadNdfl2_6DataTxtReport = function () {
-                    $window.open("controller/rest/declarationData/" + $stateParams.declarationDataId + "/specific/" + APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.RNU_NDFL_2_6_DATA_TXT_REPORT, '_blank');
+                    downloadSpecificReport(APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.RNU_NDFL_2_6_DATA_TXT_REPORT);
                 };
                 $scope.downloadPairKppOktmo = function () {
-                    $window.open("controller/rest/declarationData/" + $stateParams.declarationDataId + "/specific/" + APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.REPORT_KPP_OKTMO, '_blank');
+                    downloadSpecificReport(APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.REPORT_KPP_OKTMO);
                 };
                 $scope.downloadExcelTemplate = function () {
                     $window.open("controller/rest/declarationData/" + $stateParams.declarationDataId + "/excelTemplate", '_blank');
                 };
+
+                function downloadSpecificReport(reportCode) {
+                    $window.open("controller/rest/declarationData/" + $stateParams.declarationDataId + "/specific/" + reportCode, '_blank');
+                }
 
                 $scope.createReportXlsx = function () {
                     $http({
@@ -742,52 +744,42 @@
                 /**
                  * формирование спецотчета "РНУ НДФЛ по всем ФЛ"
                  */
-                $scope.createReportAllRnu = function () {
-                    $http({
-                        method: "POST",
-                        url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/specific/" + APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.RNU_NDFL_PERSON_ALL_DB
-                    }).success(function (response) {
-                        if (response) {
-                            $logPanel.open('log-panel-container', response);
-                        }
-                    });
+                $scope.createRnuNdflByAllPersonsReport = function () {
+                    $scope.createSpecificReport(APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.RNU_NDFL_PERSON_ALL_DB);
                 };
 
                 /**
                  * Создание спецотчета "Отчет Карманниковой: Отчет в разрезе ставок"
                  */
                 $scope.createRateReport = function () {
-                    $http({
-                        method: "POST",
-                        url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/specific/" + APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.RNU_RATE_REPORT
-                    }).success(function (response) {
-                        if (response) {
-                            $logPanel.open('log-panel-container', response);
-                        }
-                    });
+                    $scope.createSpecificReport(APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.RNU_RATE_REPORT);
                 };
 
                 /**
                  * Создание спецотчета "Отчет Карманниковой: Отчет в разрезе платёжных поручений"
                  */
                 $scope.createPaymentReport = function () {
-                    $http({
-                        method: "POST",
-                        url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/specific/" + APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.RNU_PAYMENT_REPORT
-                    }).success(function (response) {
-                        if (response) {
-                            $logPanel.open('log-panel-container', response);
-                        }
-                    });
+                    $scope.createSpecificReport(APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.RNU_PAYMENT_REPORT);
                 };
 
                 /**
                  * Создание спецотчета "Отчет Карманниковой: Отчет в разрезе платёжных поручений"
                  */
                 $scope.createNdflDetailReport = function () {
+                    $scope.createSpecificReport(APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.RNU_NDFL_DETAIL_REPORT);
+                };
+
+                /**+
+                 * Создание спецотчета "Реестр сформированной отчетности"
+                 */
+                $scope.createPairKppOktmo = function () {
+                    $scope.createSpecificReport(APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.REPORT_KPP_OKTMO);
+                };
+
+                $scope.createSpecificReport = function (reportCode) {
                     $http({
                         method: "POST",
-                        url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/specific/" + APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.RNU_NDFL_DETAIL_REPORT
+                        url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/specific/" + reportCode
                     }).success(function (response) {
                         if (response) {
                             $logPanel.open('log-panel-container', response);
@@ -823,20 +815,6 @@
                     });
                 };
 
-                /**+
-                 * Создание спецотчета "Реестр сформированной отчетности"
-                 */
-                $scope.createPairKppOktmo = function () {
-                    $http({
-                        method: "POST",
-                        url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/specific/" + APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.REPORT_KPP_OKTMO
-                    }).success(function (response) {
-                        if (response) {
-                            $logPanel.open('log-panel-container', response);
-                        }
-                    });
-                };
-
                 /**
                  * Формирует запрос на создание шаблона Excel-файла для загрузки
                  */
@@ -860,8 +838,8 @@
                 $scope.createNdflReport = function () {
                     $aplanaModal.open({
                         title: $filter('translate')('title.creatingReport'),
-                        templateUrl: 'client/app/taxes/ndfl/reportForm/createReport.html',
-                        controller: 'createReportCtrl',
+                        templateUrl: 'client/app/taxes/ndfl/reportForm/createReportForm.html',
+                        controller: 'createReportFormCtrl',
                         windowClass: 'modal600',
                         resolve: {
                             $shareData: function () {

@@ -99,7 +99,7 @@ public abstract class AbstractAsyncTask implements AsyncTask {
      * @throws AsyncTaskException в случае, если проверка не была пройдена
      */
     protected AsyncQueue checkTask(Long value, String taskName, String msg) throws AsyncTaskException {
-        AsyncTaskTypeData taskTypeData = asyncTaskTypeDao.findById(getAsyncTaskType().getAsyncTaskTypeId());
+        AsyncTaskTypeData taskTypeData = asyncTaskTypeDao.findById(getAsyncTaskType().getId());
         if (taskTypeData == null) {
             throw new AsyncTaskException(String.format("Cannot find task parameters for \"%s\"", taskName));
         }

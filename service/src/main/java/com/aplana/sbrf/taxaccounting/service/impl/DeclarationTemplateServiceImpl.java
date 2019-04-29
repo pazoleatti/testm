@@ -305,8 +305,8 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
 
         for (Long dataId : declarationDataService.getFormDataListInActualPeriodByTemplate(template.getId(), template.getVersion())) {
             DeclarationData data = declarationDataDao.get(dataId);
-            String decKeyPDF = declarationDataService.generateAsyncTaskKey(dataId, DeclarationDataReportType.PDF_DEC);
-            String decKeyXLSM = declarationDataService.generateAsyncTaskKey(dataId, DeclarationDataReportType.EXCEL_DEC);
+            String decKeyPDF = declarationDataService.generateAsyncTaskKey(dataId, AsyncTaskType.PDF_DEC);
+            String decKeyXLSM = declarationDataService.generateAsyncTaskKey(dataId, AsyncTaskType.EXCEL_DEC);
             ReportPeriod rp = periodService.fetchReportPeriod(data.getReportPeriodId());
             DepartmentReportPeriod drp = departmentReportPeriodService.fetchOne(data.getDepartmentReportPeriodId());
 
@@ -367,8 +367,8 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
         HashSet<Long> lockDataIds = new HashSet<>();
         DeclarationTemplate template = declarationTemplateDao.get(dtId);
         for (Long dataId : declarationDataService.getFormDataListInActualPeriodByTemplate(template.getId(), template.getVersion())) {
-            String decKeyPDF = declarationDataService.generateAsyncTaskKey(dataId, DeclarationDataReportType.PDF_DEC);
-            String decKeyXLSM = declarationDataService.generateAsyncTaskKey(dataId, DeclarationDataReportType.EXCEL_DEC);
+            String decKeyPDF = declarationDataService.generateAsyncTaskKey(dataId, AsyncTaskType.PDF_DEC);
+            String decKeyXLSM = declarationDataService.generateAsyncTaskKey(dataId, AsyncTaskType.EXCEL_DEC);
             if (lockDataService.lockExists(decKeyPDF) || lockDataService.lockExists(decKeyXLSM)) {
                 lockDataIds.add(dataId);
             }
@@ -723,8 +723,8 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
                 getDataIdsThatUseJrxml(declarationTemplateId),
                 Arrays.asList(DeclarationDataReportType.EXCEL_DEC, DeclarationDataReportType.PDF_DEC, DeclarationDataReportType.JASPER_DEC));
         for (Long id : getLockDataIdsThatUseJrxml(declarationTemplateId)) {
-            String keyPDF = declarationDataService.generateAsyncTaskKey(id, DeclarationDataReportType.PDF_DEC);
-            String keyEXCEL = declarationDataService.generateAsyncTaskKey(id, DeclarationDataReportType.EXCEL_DEC);
+            String keyPDF = declarationDataService.generateAsyncTaskKey(id, AsyncTaskType.PDF_DEC);
+            String keyEXCEL = declarationDataService.generateAsyncTaskKey(id, AsyncTaskType.EXCEL_DEC);
             asyncManager.interruptTask(keyPDF, userInfo, TaskInterruptCause.DECLARATION_TEMPLATE_JRXML_CHANGE);
             asyncManager.interruptTask(keyEXCEL, userInfo, TaskInterruptCause.DECLARATION_TEMPLATE_JRXML_CHANGE);
         }
@@ -895,7 +895,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
         List<Long> ddIds = declarationDataService.getFormDataListInActualPeriodByTemplate(declarationTemplate.getId(), declarationTemplate.getVersion());
         for (long declarationId : ddIds) {
             // Отменяем задачи формирования спец отчетов/удаляем спец отчеты
-            declarationDataService.interruptAsyncTask(declarationId, user, AsyncTaskType.UPDATE_TEMPLATE_DEC, TaskInterruptCause.DECLARATION_TEMPLATE_UPDATE);
+            //declarationDataService.interruptAsyncTask(declarationId, user, AsyncTaskType.UPDATE_TEMPLATE_DEC, TaskInterruptCause.DECLARATION_TEMPLATE_UPDATE);
         }
 
         declarationTemplateService.save(declarationTemplate, user);

@@ -118,12 +118,10 @@ public interface DeclarationDataService {
 
     /**
      * Удаление налоговой формы без использования асинхронной задачи
-     *
-     * @param declarationDataId идентификатор НФ
+     *  @param declarationDataId идентификатор НФ
      * @param userInfo          информация о пользователе, выполняющего действие
-     * @param createLock        флаг указывающий создавать ли блокировку
      */
-    void deleteSync(long declarationDataId, TAUserInfo userInfo, boolean createLock);
+    void deleteSync(long declarationDataId, TAUserInfo userInfo);
 
     /**
      * Удалить все налоговые формы из списка
@@ -361,7 +359,7 @@ public interface DeclarationDataService {
      *
      * @return код блокировки
      */
-    String generateAsyncTaskKey(long declarationDataId, DeclarationDataReportType type);
+    String generateAsyncTaskKey(long declarationDataId, AsyncTaskType asyncTaskType);
 
     /**
      * Заблокировать налоговую форму
@@ -382,16 +380,16 @@ public interface DeclarationDataService {
 
     void findDDIdsByRangeInReportPeriod(int decTemplateId, Date startDate, Date endDate, Logger logger);
 
-    Long getValueForCheckLimit(TAUserInfo userInfo, long declarationDataId, DeclarationDataReportType reportType);
+    Long getValueForCheckLimit(TAUserInfo userInfo, long declarationDataId, AsyncTaskType asyncTaskType, Map<String, Object> params);
 
     /**
      * Возвращает полное название декларации с указанием подразделения, периода и прочего
      *
      * @param declarationId идентификатор декларации
-     * @param ddReportType  тип отчета. Может быть null
+     * @param asyncTaskType  тип отчета. Может быть null
      * @return название
      */
-    String getDeclarationFullName(long declarationId, DeclarationDataReportType ddReportType, String... args);
+    String getDeclarationFullName(long declarationId, AsyncTaskType asyncTaskType, String... args);
 
     /**
      * Возвращает полное название декларации с указанием подразделения, периода и прочего
@@ -402,13 +400,6 @@ public interface DeclarationDataService {
      * @return название
      */
     String getDeclarationFullName(int declarationTypeId, int departmentReportPeriodId, AsyncTaskType taskType);
-
-    /**
-     * Отмена операции, по которым требуется удалить блокировку(+удаление отчетов)
-     *
-     * @param cause причина остановки задачи
-     */
-    void interruptAsyncTask(long declarationDataId, TAUserInfo userInfo, AsyncTaskType reportType, TaskInterruptCause cause);
 
     /**
      * Метод для очитски blob-ов у деклараций.
@@ -571,11 +562,13 @@ public interface DeclarationDataService {
     /**
      * Создание отчета для отчетной НФ
      *
-     * @param userInfo информация о пользователе
+     *
+     * @param declarationDataId
      * @param action   объект с параметрами для создания отчета для отчетной налоговой формы
+     * @param userInfo информация о пользователе
      * @return результат создания задачи
      */
-    ActionResult createReportForReportDD(TAUserInfo userInfo, CreateReportAction action);
+    ActionResult createReportNdflByPersonReport(long declarationDataId, CreateReportAction action, TAUserInfo userInfo);
 
     /**
      * Подготовка данных для спецотчета

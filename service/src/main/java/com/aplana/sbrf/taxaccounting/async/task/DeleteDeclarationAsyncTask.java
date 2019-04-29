@@ -5,8 +5,6 @@ import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.model.AsyncTaskData;
 import com.aplana.sbrf.taxaccounting.model.AsyncTaskType;
 import com.aplana.sbrf.taxaccounting.model.DeclarationData;
-import com.aplana.sbrf.taxaccounting.model.DeclarationDataReportType;
-import com.aplana.sbrf.taxaccounting.model.DeclarationSubreport;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.LockData;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
@@ -26,7 +24,6 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -80,7 +77,7 @@ public class DeleteDeclarationAsyncTask extends AbstractDeclarationAsyncTask {
                 return new BusinessLogicResult(false, null);
             }
 
-            deleteReport(declarationDataId, userInfo, false, TaskInterruptCause.DECLARATION_DELETE);
+            deleteReport(declarationDataId, userInfo, TaskInterruptCause.DECLARATION_DELETE);
             declarationDataDao.delete(declarationDataId);
 
             auditService.add(FormDataEvent.DELETE, userInfo, declarationData, "Налоговая форма удалена", null);
@@ -117,38 +114,19 @@ public class DeleteDeclarationAsyncTask extends AbstractDeclarationAsyncTask {
         }
     }
 
-    @Override
-    public String createDescription(TAUserInfo userInfo, Map<String, Object> params) {
-        long declarationDataId = (Long) params.get("declarationDataId");
-        return String.format(getAsyncTaskType().getDescription(),
-                declarationDataService.getDeclarationFullName(declarationDataId, getDeclarationDataReportType(userInfo, params)));
-    }
-
     /**
      * Удаление отчетов и блокировок на задачи формирования отчетов связанных с декларациями
-     *
-     * @param declarationDataId идентификатор декларации
+     *  @param declarationDataId идентификатор декларации
      * @param userInfo          информация пользователя
      * @param cause             причина остановки задачи
      */
-    private void deleteReport(long declarationDataId, TAUserInfo userInfo, boolean isCalc, TaskInterruptCause cause) {
-        DeclarationDataReportType[] ddReportTypes = {DeclarationDataReportType.XML_DEC, DeclarationDataReportType.PDF_DEC, DeclarationDataReportType.EXCEL_DEC, DeclarationDataReportType.CHECK_DEC, DeclarationDataReportType.ACCEPT_DEC};
-        for (DeclarationDataReportType ddReportType : ddReportTypes) {
-            if (ddReportType.isSubreport()) {
-                DeclarationData declarationData = declarationDataDao.get(declarationDataId);
-                List<DeclarationSubreport> subreports = declarationTemplateService.get(declarationData.getDeclarationTemplateId()).getSubreports();
-                for (DeclarationSubreport subreport : subreports) {
-                    ddReportType.setSubreport(subreport);
-                    LockData lock = lockDataService.findLock(declarationDataService.generateAsyncTaskKey(declarationDataId, ddReportType));
-                    if (lock != null) {
-                        asyncManager.interruptTask(lock.getTaskId(), userInfo, cause);
-                    }
-                }
-            } else if (!isCalc || !DeclarationDataReportType.XML_DEC.equals(ddReportType)) {
-                LockData lock = lockDataService.findLock(declarationDataService.generateAsyncTaskKey(declarationDataId, ddReportType));
-                if (lock != null) {
-                    asyncManager.interruptTask(lock.getTaskId(), userInfo, cause);
-                }
+    private void deleteReport(long declarationDataId, TAUserInfo userInfo, TaskInterruptCause cause) {
+        // TODO не работает как надо из-за generateAsyncTaskKey
+        AsyncTaskType[] asyncTaskTypes = {AsyncTaskType.XML_DEC, AsyncTaskType.PDF_DEC, AsyncTaskType.EXCEL_DEC, AsyncTaskType.CHECK_DEC, AsyncTaskType.ACCEPT_DEC};
+        for (AsyncTaskType asyncTaskType : asyncTaskTypes) {
+            LockData lock = lockDataService.findLock(declarationDataService.generateAsyncTaskKey(declarationDataId, asyncTaskType));
+            if (lock != null) {
+                asyncManager.interruptTask(lock.getTaskId(), userInfo, cause);
             }
         }
         reportService.deleteAllByDeclarationId(declarationDataId);

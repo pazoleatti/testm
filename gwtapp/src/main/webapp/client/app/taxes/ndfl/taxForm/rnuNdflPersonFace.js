@@ -103,7 +103,7 @@
                 $scope.formationRNU = function () {
                     $http({
                         method: "POST",
-                        url: "controller/actions/declarationData/" + $shareData.declarationDataId + "/rnuDoc",
+                        url: "controller/actions/declarationData/" + $shareData.declarationDataId + "/rnuNdflByPerson",
                         params: {
                             ndflPersonId: $scope.rnuNdflGrid.value[0].id
                         }

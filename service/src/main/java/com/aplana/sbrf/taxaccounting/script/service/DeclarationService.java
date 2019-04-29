@@ -244,28 +244,6 @@ public interface DeclarationService {
     List<DeclarationData> find(int declarationTemplate, int departmentReportPeriodId, String taxOrganCode, String kpp, String oktmo);
 
     /**
-     * Находит все пары КПП/ОКТМО которых нет в справочнике Подразделений, но которые представлены у  операций относящихся к НФ
-     */
-    List<Pair<String, String>> findNotPresentedPairKppOktmo(Long declarationDataId);
-
-    /**
-     * Генерация ключа блокировки для асинхронных задач по НФ
-     *
-     * @return код блокировки
-     */
-    String generateAsyncTaskKey(long declarationDataId, DeclarationDataReportType type);
-
-    /**
-     * Удаляет все формы заданного вида в заданном отчетном периоде
-     *
-     * @param declarationTypeId        вид НФ
-     * @param departmentReportPeriodId отчетный период
-     * @param kppOktmoPairs            пары КПП/ОКТМО, по которым нужно удалять формы
-     * @return если удаление прошло успешно, то возвращает пустой список, иначе список Pair<id-формы, типа блокировки>, по которым существует блокировка или произошла ошибка удаления
-     */
-    List<Pair<Long, DeclarationDataReportType>> deleteForms(int declarationTypeId, int departmentReportPeriodId, List<Pair<String, String>> kppOktmoPairs, Logger logger, TAUserInfo userInfo);
-
-    /**
      * Удаляет форму
      *
      * @param declarationDataId идентификатор формы
@@ -282,15 +260,6 @@ public interface DeclarationService {
      * @throws AccessDeniedException если у пользователя не хватает прав на удаление
      */
     void check(Logger logger, long declarationDataId, TAUserInfo userInfo, LockStateLogger lockStateLogger);
-
-    /**
-     * Возвращает полное название декларации с указанием подразделения, периода и прочего
-     *
-     * @param declarationId идентификатор декларации
-     * @param ddReportType  тип отчета. Может быть null
-     * @return название
-     */
-    String getDeclarationFullName(long declarationId, DeclarationDataReportType ddReportType, String... args);
 
     /**
      * Возвращает признак фатальности проверки внутри формы по ее коду
