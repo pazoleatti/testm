@@ -31,7 +31,10 @@ public class TransportMessageDaoImpl extends AbstractDao implements TransportMes
             "   tm.receiver_subsystem_id receiver_id, receiver.code receiver_code, receiver.name receiver_name, receiver.short_name receiver_short_name, \n" +
             "   tm.blob_id, blob_data.name blob_name, tm.source_file_name, \n" +
             "   tm.initiator_user_id user_id, u.login user_login, u.name user_name,  \n" +
-            "   tm.explanation, tm.declaration_id, department.id department_id, department.name department_name \n" +
+            "   tm.explanation, tm.declaration_id, department.id department_id, department.name department_name, \n" +
+            "   case \n" +
+            "       when tm.body is not null then 1 else 0 \n" +
+            "   end as has_body \n" +
             "from transport_message tm \n" +
             "left join vw_subsystem_syn sender on tm.sender_subsystem_id = sender.id \n" +
             "left join vw_subsystem_syn receiver on tm.receiver_subsystem_id = receiver.id \n" +
@@ -147,6 +150,7 @@ public class TransportMessageDaoImpl extends AbstractDao implements TransportMes
             message.setSourceFileName(rs.getString("source_file_name"));
             message.setExplanation(rs.getString("explanation"));
             message.setDeclarationId(SqlUtils.getLong(rs, "declaration_id"));
+            message.setHasBody(rs.getBoolean("has_body"));
 
             // Данные о файле
             BlobDto blob = new BlobDto();

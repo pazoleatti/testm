@@ -10,7 +10,11 @@
             function ($scope, $filter, $http, $aplanaModal, transportMessageResource, APP_CONSTANTS) {
 
                 $scope.searchFilter = {
-                    params: {}
+                    params: {
+                        senderSubsystem: {},
+                        receiverSubsystem: {},
+                        contentTypes: {}
+                    }
                 };
 
                 /**
@@ -112,9 +116,8 @@
                                 index: 'messageUuid',
                                 width: 250
                             }, {
-                                name: 'id',
-                                index: 'id',
-                                formatter: $filter('tmDocumentLink'),
+                                name: 'bodyFileName',
+                                formatter: $filter('tmBodyFileLinkFormatter'),
                                 width: 250
                             }, {
                                 name: 'blob',

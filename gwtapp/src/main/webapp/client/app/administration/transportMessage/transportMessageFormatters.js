@@ -31,9 +31,10 @@
             }
         })
 
-        .filter('tmDocumentLink', function () {
-            return function (id) {
-                return 'TaxMessageTechDocument_' + id + '.xml';
+        .filter('tmBodyFileLinkFormatter', function () {
+            return function (fileName, options) {
+                if (!fileName) return '';
+                return '<a target="_self" href="/controller/rest/transportMessages/' + options.rowId + '/bodyFile">' + fileName + '</a>';
             }
         })
 

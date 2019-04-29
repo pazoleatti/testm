@@ -7,10 +7,12 @@ import com.aplana.sbrf.taxaccounting.model.messaging.TransportMessage;
 import com.aplana.sbrf.taxaccounting.model.messaging.TransportMessageFilter;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.TransportMessageService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -75,5 +77,29 @@ public class TransportMessageController {
             return;
         }
         ResponseUtils.createBlobResponse(request, response, file);
+    }
+
+    /**
+     * Выгрузка файла из Транспортного сообщения.
+     */
+    @GetMapping("rest/transportMessages/{messageId}/bodyFile")
+    public void downloadTransportMessageBodyFile(@PathVariable Long messageId,
+                                                 HttpServletRequest request,
+                                                 HttpServletResponse response) throws IOException {
+        TransportMessage message = transportMessageService.findById(messageId);
+        if (message == null || !message.hasBody()) {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            return;
+        }
+        String messageBody = transportMessageService.findMessageBodyById(messageId);
+        if (StringUtils.isEmpty(messageBody)) {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            return;
+        }
+        ResponseUtils.createBlobHeaders(request, response, message.getBodyFileName());
+        ServletOutputStream out = response.getOutputStream();
+        out.print(messageBody);
+        out.flush();
+        out.close();
     }
 }

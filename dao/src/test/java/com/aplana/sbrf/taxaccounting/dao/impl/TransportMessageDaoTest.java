@@ -58,6 +58,20 @@ public class TransportMessageDaoTest {
         assertThat(body).isEqualTo("<xml></xml>");
     }
 
+
+    @Test
+    public void test_hasBody_onExistent() {
+        TransportMessage message = transportMessageDao.findById(1L);
+        assertThat(message.hasBody()).isTrue();
+    }
+
+    @Test
+    public void test_hasBody_onNonExistent() {
+        TransportMessage message = transportMessageDao.findById(2L);
+        assertThat(message.hasBody()).isFalse();
+    }
+
+
     @Test
     public void test_findByFilter_onNull() {
         List<TransportMessage> result = transportMessageDao.findByFilter(null);

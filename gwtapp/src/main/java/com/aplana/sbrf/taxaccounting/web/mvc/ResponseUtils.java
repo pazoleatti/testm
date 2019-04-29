@@ -49,7 +49,7 @@ class ResponseUtils {
      * @param originalFileName название файла
      * @throws UnsupportedEncodingException UnsupportedEncodingException
      */
-    static private void createBlobHeaders(HttpServletRequest request, HttpServletResponse response, String originalFileName) throws UnsupportedEncodingException {
+    static void createBlobHeaders(HttpServletRequest request, HttpServletResponse response, String originalFileName) throws UnsupportedEncodingException {
         String userAgent = request.getHeader("User-Agent").toLowerCase();
         String fileName = URLEncoder.encode(originalFileName, ENCODING).replaceAll("\\+", "%20");
         String fileNameAttr = "filename=";
