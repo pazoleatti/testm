@@ -65,7 +65,7 @@ public class TransportMessageDaoImpl extends AbstractDao implements TransportMes
     }
 
     @Override
-    public List<TransportMessage> findByFilter(TransportMessageFilter filter) {
+    public List<TransportMessage> findByFilter(TransportMessageFilter filter, PagingParams pagingParams) {
 
         List<String> conditions = new ArrayList<>();
         MapSqlParameterSource params = new MapSqlParameterSource();
@@ -130,6 +130,10 @@ public class TransportMessageDaoImpl extends AbstractDao implements TransportMes
             sql = SELECT_TRANSPORT_MESSAGE + " where \n" + StringUtils.join(conditions, " \n and ");
         } else {
             sql = SELECT_TRANSPORT_MESSAGE;
+        }
+
+        if (pagingParams != null) {
+            sql = pagingParams.wrapQuery(sql, params);
         }
 
         return getNamedParameterJdbcTemplate().query(sql, params, new TransportMessageMapper());

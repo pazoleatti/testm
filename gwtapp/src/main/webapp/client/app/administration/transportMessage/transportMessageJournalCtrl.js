@@ -77,15 +77,15 @@
                                 formatter: $filter('dateTimeFormatter')
                             }, {
                                 name: 'senderSubsystem',
-                                index: 'senderSubsystem',
+                                index: 'sender_id',
                                 formatter: $filter('idNameFormatter')
                             }, {
                                 name: 'receiverSubsystem',
-                                index: 'receiverSubsystem',
+                                index: 'receiver_id',
                                 formatter: $filter('idNameFormatter')
                             }, {
                                 name: 'initiatorUser',
-                                index: 'initiatorUser',
+                                index: 'user_name',
                                 formatter: $filter('userFormatter'),
                                 width: 200
                             }, {
@@ -100,28 +100,29 @@
                                 width: 120
                             }, {
                                 name: 'contentType',
-                                index: 'contentType',
+                                index: 'content_type',
                                 formatter: $filter('tmContentTypeFormatter'),
                                 width: 200
                             }, {
                                 name: 'declarationId',
-                                index: 'declarationId',
+                                index: 'declaration_id',
                                 formatter: $filter('tmNdflReportLinkFormatter')
                             }, {
                                 name: 'department',
-                                index: 'departmentIds',
+                                index: 'department_name',
                                 formatter: $filter('nameFormatter')
                             }, {
                                 name: 'messageUuid',
-                                index: 'messageUuid',
+                                index: 'message_uuid',
                                 width: 250
                             }, {
                                 name: 'bodyFileName',
+                                index: 'has_body',
                                 formatter: $filter('tmBodyFileLinkFormatter'),
                                 width: 250
                             }, {
                                 name: 'blob',
-                                index: 'blobName',
+                                index: 'blob_name',
                                 width: 250,
                                 formatter: $filter('tmFileLinkFormatter')
                             }

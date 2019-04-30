@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.TransportMessageDao;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.messaging.TransportMessage;
 import com.aplana.sbrf.taxaccounting.model.messaging.TransportMessageFilter;
 import com.aplana.sbrf.taxaccounting.service.TransportMessageService;
@@ -27,7 +28,7 @@ public class TransportMessageServiceImpl implements TransportMessageService {
     }
 
     @Override
-    public List<TransportMessage> findByFilter(TransportMessageFilter filter) {
-        return transportMessageDao.findByFilter(filter);
+    public List<TransportMessage> findByFilter(TransportMessageFilter filter, PagingParams pagingParams) {
+        return transportMessageDao.findByFilter(filter, pagingParams);
     }
 }

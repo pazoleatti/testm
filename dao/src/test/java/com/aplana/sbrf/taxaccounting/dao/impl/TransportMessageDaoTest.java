@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.TransportMessageDao;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.messaging.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -28,13 +29,14 @@ public class TransportMessageDaoTest {
     private TransportMessageDao transportMessageDao;
 
     private TransportMessageFilter filter = new TransportMessageFilter();
+    private PagingParams pagingParams = new PagingParams();
 
     /**
      * Возникали ошибки при сериализации в json, добавил этот тест.
      */
     @Test
     public void test_resultCanBeUsedForJson() throws JsonProcessingException {
-        List<TransportMessage> result = transportMessageDao.findByFilter(null);
+        List<TransportMessage> result = transportMessageDao.findByFilter(null, null);
         assertThat(result).isNotEmpty();
 
         ObjectMapper mapper = new ObjectMapper();
@@ -74,20 +76,20 @@ public class TransportMessageDaoTest {
 
     @Test
     public void test_findByFilter_onNull() {
-        List<TransportMessage> result = transportMessageDao.findByFilter(null);
+        List<TransportMessage> result = transportMessageDao.findByFilter(null, pagingParams);
         assertThat(result).hasSize(FULL_TABLE_SIZE);
     }
 
     @Test
     public void test_findByFilter_onEmpty() {
-        List<TransportMessage> result = transportMessageDao.findByFilter(filter);
+        List<TransportMessage> result = transportMessageDao.findByFilter(filter, pagingParams);
         assertThat(result).hasSize(FULL_TABLE_SIZE);
     }
 
     @Test
     public void test_findByFilter_byId() {
         filter.setId("1");
-        List<TransportMessage> result = transportMessageDao.findByFilter(filter);
+        List<TransportMessage> result = transportMessageDao.findByFilter(filter, pagingParams);
         assertThat(result)
                 .isNotEmpty()
                 .hasSize(1)
@@ -97,7 +99,7 @@ public class TransportMessageDaoTest {
     @Test
     public void test_findByFilter_byStateIds() {
         filter.setStateIds(Arrays.asList(1, 2));
-        List<TransportMessage> result = transportMessageDao.findByFilter(filter);
+        List<TransportMessage> result = transportMessageDao.findByFilter(filter, pagingParams);
         assertThat(result)
                 .isNotEmpty()
                 .extracting("state")
@@ -107,7 +109,7 @@ public class TransportMessageDaoTest {
     @Test
     public void test_findByFilter_byTypeId() {
         filter.setTypeId(0);
-        List<TransportMessage> result = transportMessageDao.findByFilter(filter);
+        List<TransportMessage> result = transportMessageDao.findByFilter(filter, pagingParams);
         assertThat(result)
                 .isNotEmpty()
                 .extracting("type")
@@ -117,7 +119,7 @@ public class TransportMessageDaoTest {
     @Test
     public void test_findByFilter_byMessageUuid() {
         filter.setMessageUuid("bc12");
-        List<TransportMessage> result = transportMessageDao.findByFilter(filter);
+        List<TransportMessage> result = transportMessageDao.findByFilter(filter, pagingParams);
         assertThat(result)
                 .isNotEmpty()
                 .hasSize(2);
@@ -128,7 +130,7 @@ public class TransportMessageDaoTest {
     @Test
     public void test_findByFilter_byDeclarationId() {
         filter.setDeclarationId("1");
-        List<TransportMessage> result = transportMessageDao.findByFilter(filter);
+        List<TransportMessage> result = transportMessageDao.findByFilter(filter, pagingParams);
         assertThat(result)
                 .isNotEmpty()
                 .hasSize(1)
@@ -139,7 +141,7 @@ public class TransportMessageDaoTest {
     @Test
     public void test_findByFilter_byDepartmentId() {
         filter.setDepartmentIds(Arrays.asList(1, 2));
-        List<TransportMessage> result = transportMessageDao.findByFilter(filter);
+        List<TransportMessage> result = transportMessageDao.findByFilter(filter, pagingParams);
         assertThat(result)
                 .isNotEmpty()
                 .hasSize(1)
@@ -151,7 +153,7 @@ public class TransportMessageDaoTest {
     @Test
     public void test_findByFilter_byFileName() {
         filter.setFileName("name_1");
-        List<TransportMessage> result = transportMessageDao.findByFilter(filter);
+        List<TransportMessage> result = transportMessageDao.findByFilter(filter, pagingParams);
         assertThat(result)
                 .isNotEmpty()
                 .hasSize(1)

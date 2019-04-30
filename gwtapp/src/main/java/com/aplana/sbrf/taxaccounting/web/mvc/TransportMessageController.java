@@ -39,8 +39,9 @@ public class TransportMessageController {
      * Выгрузка Транспортных сообщений по фильтру и с пагинацией.
      */
     @GetMapping("/rest/transportMessages")
-    public List<TransportMessage> getMessagesByFilter(@RequestParam(required = false) TransportMessageFilter filter) {
-        return transportMessageService.findByFilter(filter);
+    public List<TransportMessage> getMessagesByFilter(@RequestParam(required = false) TransportMessageFilter filter,
+                                                      @RequestParam(required = false) PagingParams pagingParams) {
+        return transportMessageService.findByFilter(filter, pagingParams);
     }
 
     /**
