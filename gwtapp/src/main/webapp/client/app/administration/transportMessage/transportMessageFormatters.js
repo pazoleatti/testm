@@ -34,14 +34,14 @@
         .filter('tmBodyFileLinkFormatter', function () {
             return function (fileName, options) {
                 if (!fileName) return '';
-                return '<a target="_self" href="/controller/rest/transportMessages/' + options.rowId + '/bodyFile">' + fileName + '</a>';
+                return '<a target="_self" href="controller/rest/transportMessages/' + options.rowId + '/bodyFile">' + fileName + '</a>';
             }
         })
 
         .filter('tmFileLinkFormatter', function () {
             return function (file, options) {
                 if (!file || !file.name) return '';
-                return '<a target="_self" href="/controller/rest/transportMessages/' + options.rowId + '/file">' + file.name + '</a>'
+                return '<a target="_self" href="controller/rest/transportMessages/' + options.rowId + '/file">' + file.name + '</a>'
             }
         })
 }());
