@@ -978,9 +978,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     public void deleteSync(long id, TAUserInfo userInfo) {
         LOG.info(String.format("DeclarationDataServiceImpl.deleteSync by %s. id: %s",
                 userInfo, id));
+        DeclarationData declarationData = get(id);
         deleteReport(id, userInfo, TaskInterruptCause.DECLARATION_DELETE);
         declarationDataDao.delete(id);
-        DeclarationData declarationData = get(id);
         auditService.add(FormDataEvent.DELETE, userInfo, declarationData, "Налоговая форма удалена", null);
     }
 
