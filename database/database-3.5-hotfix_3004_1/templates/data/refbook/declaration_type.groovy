@@ -257,7 +257,7 @@ class DeclarationType extends AbstractScriptClass {
     final String NDFL2_UO_FILE_ATTR = "ИмяОбрабФайла"
     final String NDFL2_IV_FILE_TAG = "СвИзвещВ"
     final String NDFL2_IV_FILE_ATTR = "ИмяОбрабФайла"
-    final String NDFL2_UU_FILE_TAG = "СвКвит"
+    final String NDFL2_UU_FILE_TAG = "ОбщСвУвед"
     final String NDFL2_UU_FILE_ATTR = "ИмяОбрабФайла"
     final String NDFL2_1 = "2 НДФЛ (1)"
     final String NDFL2_2 = "2 НДФЛ (2)"
@@ -587,7 +587,7 @@ class DeclarationType extends AbstractScriptClass {
         }
 
         if (UploadFileName.startsWith(ANSWER_PATTERN_NDFL_2)) {
-            handler = new SAXHandler('ИмяОбрабФайла', 'ВыявлНарФайл')
+            handler = new SAXHandler('ИмяОбрабФайла', NDFL2_UO_FILE_TAG)
         }
 
         if (UploadFileName.startsWith(ANSWER_PATTERN_NDFL_3)) {
@@ -596,7 +596,7 @@ class DeclarationType extends AbstractScriptClass {
         }
 
         if (UploadFileName.startsWith(ANSWER_PATTERN_NDFL_4)) {
-            handler = new SAXHandler('ИмяОбрабФайла', 'ВыявлОшФайл')
+            handler = new SAXHandler('ИмяОбрабФайла', NDFL2_UU_FILE_TAG)
         }
 
         InputStream inputStream = null
