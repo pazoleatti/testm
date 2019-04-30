@@ -10,11 +10,7 @@
             function ($scope, $filter, $http, $aplanaModal, transportMessageResource, APP_CONSTANTS) {
 
                 $scope.searchFilter = {
-                    params: {
-                        senderSubsystem: {},
-                        receiverSubsystem: {},
-                        contentTypes: {}
-                    }
+                    params: {}
                 };
 
                 /**
