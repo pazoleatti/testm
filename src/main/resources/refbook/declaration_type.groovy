@@ -262,6 +262,7 @@ class DeclarationType extends AbstractScriptClass {
     final String NDFL2_1 = "2 НДФЛ (1)"
     final String NDFL2_2 = "2 НДФЛ (2)"
     final String NDFL6 = "6 НДФЛ"
+    final String NDFL6_FILENAME_PREFIX = "NO_NDFL6_"
 
     final KND_ACCEPT = 1166002 // Принят
     final KND_REFUSE = 1166006 // Отклонен
@@ -344,21 +345,24 @@ class DeclarationType extends AbstractScriptClass {
 /**
  * Возвращает имя отчетного файла для 6НДФЛ
  */
-    def getFileName(Map<String, Map<String, String>> contentMap, String fileName) {
+    def getFileName(Map<String, Map<String, List<String>>> contentMap, String fileName) {
         if (fileName.startsWith(ANSWER_PATTERN_NDFL_1)) {
-            return contentMap.get(NDFL2_KV_FILE_TAG).get(NDFL2_KV_FILE_ATTR)
+            Map<String, List<String>> names = contentMap.get(NDFL2_KV_FILE_TAG)
+            return names.get(NDFL2_KV_FILE_ATTR).find {String name -> name.startsWith(NDFL6_FILENAME_PREFIX)}
         }
 
         if (fileName.startsWith(ANSWER_PATTERN_NDFL_2)) {
-            return contentMap.get(NDFL2_UO_FILE_TAG).get(NDFL2_UO_FILE_ATTR)
+            Map<String, List<String>> names = contentMap.get(NDFL2_UO_FILE_TAG)
+            return names.get(NDFL2_UO_FILE_ATTR).find {String name -> name.startsWith(NDFL6_FILENAME_PREFIX)}
         }
 
         if (fileName.startsWith(ANSWER_PATTERN_NDFL_3)) {
-            return contentMap.get(NDFL2_IV_FILE_TAG).get(NDFL2_IV_FILE_ATTR)
+            return contentMap.get(NDFL2_IV_FILE_TAG).get(NDFL2_IV_FILE_ATTR).get(0)
         }
 
         if (fileName.startsWith(ANSWER_PATTERN_NDFL_4)) {
-            return contentMap.get(NDFL2_UU_FILE_TAG).get(NDFL2_UU_FILE_ATTR)
+            Map<String, List<String>> names = contentMap.get(NDFL2_UU_FILE_TAG)
+            return names.get(NDFL2_UU_FILE_ATTR).find {String name -> name.startsWith(NDFL6_FILENAME_PREFIX)}
         }
 
         return null
@@ -573,7 +577,7 @@ class DeclarationType extends AbstractScriptClass {
 /**
  * Чтение содержание файла 6 НДФЛ
  */
-    Map<String, Map<String, String>> readNdfl6ResponseContent() {
+    Map<String, Map<String, List<String>>> readNdfl6ResponseContent() {
         def sett = [:]
 
         SAXHandler handler = null
@@ -617,18 +621,19 @@ class DeclarationType extends AbstractScriptClass {
             IOUtils.closeQuietly(inputStream)
         }
 
-        Map<String, Map<String, String>> result = [:]
-        Map<String, String> value = [:]
+        Map<String, Map<String, List<String>>> result = [:]
+        Map<String, List<String>> value = [:]
         if (UploadFileName.startsWith(ANSWER_PATTERN_NDFL_1)) {
-            value.put(NDFL2_KV_FILE_ATTR, handler.nodeValueList.size() > 0 ? handler.nodeValueList.get(0) : null)
+            value.put(NDFL2_KV_FILE_ATTR, handler.nodeValueList.size() > 0 ? handler.nodeValueList : null)
             result.put(NDFL2_KV_FILE_TAG, value)
         } else if (UploadFileName.startsWith(ANSWER_PATTERN_NDFL_2)) {
-            value.put(NDFL2_UO_FILE_ATTR, handler.nodeValueList.size() > 0 ? handler.nodeValueList.get(0) : null)
+            value.put(NDFL2_UO_FILE_ATTR, handler.nodeValueList.size() > 0 ? handler.nodeValueList : null)
             result.put(NDFL2_UO_FILE_TAG, value)
         } else if (UploadFileName.startsWith(ANSWER_PATTERN_NDFL_3)) {
-            result = handler.getAttrValues()
+            value.put(NDFL2_IV_FILE_ATTR, [handler.getAttrValues().get(NDFL2_IV_FILE_TAG).get(NDFL2_IV_FILE_ATTR)])
+            result.put(NDFL2_IV_FILE_TAG, value)
         } else if (UploadFileName.startsWith(ANSWER_PATTERN_NDFL_4)) {
-            value.put(NDFL2_UU_FILE_ATTR, handler.nodeValueList.size() > 0 ? handler.nodeValueList.get(0) : null)
+            value.put(NDFL2_UU_FILE_ATTR, handler.nodeValueList.size() > 0 ? handler.nodeValueList : null)
             result.put(NDFL2_UU_FILE_TAG, value)
         }
 
@@ -659,7 +664,7 @@ class DeclarationType extends AbstractScriptClass {
                 reportFileName = (String) ndfl2ContentReestrMap.get(NDFL2_TO_FILE)
             }
         } else {
-            Map<String, Map<String, String>> ndfl6Content = readNdfl6ResponseContent()
+            Map<String, Map<String, List<String>>> ndfl6Content = readNdfl6ResponseContent()
 
             if (ndfl6Content == null) {
                 return
