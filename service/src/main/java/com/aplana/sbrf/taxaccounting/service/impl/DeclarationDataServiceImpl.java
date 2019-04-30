@@ -635,7 +635,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     Map<String, Object> params = new HashMap<>();
                     params.put("declarationDataId", declarationDataId);
                     params.put("docDate", new Date());
-                    asyncManager.createTask(OperationType.IDENTIFY_PERSON, getStandardDeclarationDescription(declarationDataId), userInfo, params, logger);
+                    asyncManager.createTask(OperationType.IDENTIFY_PERSON, userInfo, params, logger);
                 } else {
                     makeNotificationForAccessDenied(logger);
                 }
@@ -663,7 +663,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 Map<String, Object> params = new HashMap<>();
                 params.put("declarationDataId", declarationDataId);
                 params.put("docDate", new Date());
-                asyncManager.createTask(OperationType.CONSOLIDATE, getStandardDeclarationDescription(declarationDataId), userInfo, params, logger);
+                asyncManager.createTask(OperationType.CONSOLIDATE, userInfo, params, logger);
             } else {
                 makeNotificationForAccessDenied(logger);
             }
@@ -749,7 +749,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                         "com.aplana.sbrf.taxaccounting.permissions.logging.TargetIdAndLogger", DeclarationDataPermission.CHECK)) {
                     Map<String, Object> params = new HashMap<>();
                     params.put("declarationDataId", declarationDataId);
-                    asyncManager.createTask(OperationType.CHECK_DEC, getStandardDeclarationDescription(declarationDataId), userInfo, params, logger);
+                    asyncManager.createTask(OperationType.CHECK_DEC, userInfo, params, logger);
                 } else {
                     makeNotificationForAccessDenied(logger);
                 }
@@ -904,7 +904,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             params.put("subreportParamValues", reportParams);
         }
 
-        asyncManager.createTask(OperationType.getOperationTypeBySubreport(alias), getStandardDeclarationDescription(declarationDataId), userInfo, params, logger);
+        asyncManager.createTask(OperationType.getOperationTypeBySubreport(alias), userInfo, params, logger);
 
         return logEntryService.save(logger.getEntries());
     }
@@ -920,7 +920,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         Map<String, Object> params = new HashMap<>();
         params.put("declarationDataId", declarationDataId);
 
-        asyncManager.createTask(OperationType.EXCEL_DEC, getStandardDeclarationDescription(declarationDataId), userInfo, params, logger);
+        asyncManager.createTask(OperationType.EXCEL_DEC, userInfo, params, logger);
 
         return logEntryService.save(logger.getEntries());
     }
@@ -978,9 +978,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     public void deleteSync(long id, TAUserInfo userInfo) {
         LOG.info(String.format("DeclarationDataServiceImpl.deleteSync by %s. id: %s",
                 userInfo, id));
+        DeclarationData declarationData = get(id);
         deleteReport(id, userInfo, TaskInterruptCause.DECLARATION_DELETE);
         declarationDataDao.delete(id);
-        DeclarationData declarationData = get(id);
         auditService.add(FormDataEvent.DELETE, userInfo, declarationData, "Налоговая форма удалена", null);
     }
 
@@ -1015,7 +1015,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     "com.aplana.sbrf.taxaccounting.permissions.logging.TargetIdAndLogger", DeclarationDataPermission.DELETE)) {
                 Map<String, Object> params = new HashMap<>();
                 params.put("declarationDataId", declarationId);
-                asyncManager.createTask(OperationType.DELETE_DEC, getStandardDeclarationDescription(declarationId), userInfo, params, logger);
+                asyncManager.createTask(OperationType.DELETE_DEC, userInfo, params, logger);
             } else {
                 makeNotificationForAccessDenied(logger);
             }
@@ -1070,7 +1070,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                         "com.aplana.sbrf.taxaccounting.permissions.logging.TargetIdAndLogger", DeclarationDataPermission.ACCEPTED)) {
                     Map<String, Object> params = new HashMap<>();
                     params.put("declarationDataId", declarationDataId);
-                    asyncManager.createTask(OperationType.ACCEPT_DEC, getStandardDeclarationDescription(declarationDataId), userInfo, params, logger);
+                    asyncManager.createTask(OperationType.ACCEPT_DEC, userInfo, params, logger);
                 } else {
                     makeNotificationForAccessDenied(logger);
                 }
@@ -2109,7 +2109,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             taskParams.put("departmentReportPeriodId", knf.getDepartmentReportPeriodId());
             taskParams.put("params", params);
             asyncManager.createTask(OperationType.getOperationByDeclarationTypeId(action.getDeclarationTypeId()),
-                    getStandardDeclarationDescription(knf.getId()),
                     userInfo, taskParams, logger);
 
         }
@@ -2179,7 +2178,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         } else {
             Map<String, Object> params = new HashMap<>();
             params.put("declarationDataIds", declarationDataIds);
-            asyncManager.createTask(OperationType.EXPORT_REPORTS, "Выгрузка отчетности", userInfo, params, logger);
+            asyncManager.createTask(OperationType.EXPORT_REPORTS, userInfo, params, logger);
         }
         return new ActionResult(logEntryService.save(logger.getEntries()));
     }
@@ -2296,10 +2295,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             Map<String, Object> params = new HashMap<>();
             params.put("declarationDataIds", declarationDataIds);
             params.put("docStateId", docStateId);
-            //TODO временная заглушка будет исправлено в 3.4 по завершении аналитиками https://jira.aplana.com/browse/SBRFNDFL-6455
-            String description = "";
-
-            asyncManager.createTask(OperationType.UPDATE_DOC_STATE, description, userInfo, params, logger);
+            asyncManager.createTask(OperationType.UPDATE_DOC_STATE, userInfo, params, logger);
         }
         return new ActionResult(logEntryService.save(logger.getEntries()));
     }
@@ -2332,6 +2328,30 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 logger.getEntries().addAll(localLogger.getEntries());
             }
         }
+    }
+
+    @Override
+    public ActionResult createTaskToSendEdo(DeclarationDataFilter filter, TAUserInfo userInfo) {
+        List<Long> declarationDataIdList = declarationDataDao.findAllIdsByFilter(filter);
+        return createTaskToSendEdo(declarationDataIdList, userInfo);
+    }
+
+    @Override
+    public ActionResult createTaskToSendEdo(List<Long> declarationDataIds, TAUserInfo userInfo) {
+        Logger logger = new Logger();
+        if (declarationDataIds.isEmpty()) {
+            logger.error("По заданым параметрам не найдено ни одной формы");
+        } else {
+            Map<String, Object> params = new HashMap<>();
+            params.put("declarationDataIds", declarationDataIds);
+            asyncManager.createTask(OperationType.SEND_EDO, userInfo, params, logger);
+        }
+        return new ActionResult(logEntryService.save(logger.getEntries()));
+    }
+
+    @Override
+    public void sendEdo(List<Long> declarationDataIds, TAUserInfo userInfo, Logger logger) {
+
     }
 
     @Override
@@ -2372,7 +2392,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             DataRow<Cell> dataRow = new DataRow<>(cellList);
             params.put("selectedRecord", dataRow);
         }
-        asyncManager.createTask(OperationType.getOperationTypeBySubreport(alias), getStandardDeclarationDescription(declarationDataId), userInfo, params, logger);
+        asyncManager.createTask(OperationType.getOperationTypeBySubreport(alias), userInfo, params, logger);
         result.setUuid(logEntryService.save(logger.getEntries()));
         return result;
     }
@@ -2431,7 +2451,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         Map<String, Object> params = new HashMap<>();
         params.put("declarationDataId", declarationDataId);
 
-        asyncManager.createTask(OperationType.EXCEL_TEMPLATE_DEC, getStandardDeclarationDescription(declarationDataId), userInfo, params, logger);
+        asyncManager.createTask(OperationType.EXCEL_TEMPLATE_DEC, userInfo, params, logger);
 
         return logEntryService.save(logger.getEntries());
     }
@@ -2481,7 +2501,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         params.put("blobDataId", uuid);
         params.put("fileName", fileName);
         params.put("fileSize", fileSize);
-        asyncManager.createTask(OperationType.IMPORT_DECLARATION_EXCEL, getStandardDeclarationDescription(declarationDataId), userInfo, params, logger);
+        asyncManager.createTask(OperationType.IMPORT_DECLARATION_EXCEL, userInfo, params, logger);
         result.setUuid(logEntryService.save(logger.getEntries()));
         return result;
     }
@@ -2815,7 +2835,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         if (ndflPersonService.getNdflPersonCount(declarationDataId) > 0) {
             Map<String, Object> params = new HashMap<>();
             params.put("declarationDataId", declarationDataId);
-            asyncManager.createTask(OperationType.UPDATE_PERSONS_DATA, getStandardDeclarationDescription(declarationDataId), userInfo, params, logger);
+            asyncManager.createTask(OperationType.UPDATE_PERSONS_DATA, userInfo, params, logger);
         }
         return logEntryService.save(logger.getEntries());
     }
@@ -2865,7 +2885,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         Map<String, Object> params = new HashMap<>();
         params.put("declarationDataId", declarationDataId);
         params.put("extendedDescription", createExtendDescription(declarationDataId));
-        asyncManager.createTask(OperationType.PDF_DEC, getStandardDeclarationDescription(declarationDataId), userInfo, params, logger);
+        asyncManager.createTask(OperationType.PDF_DEC, userInfo, params, logger);
 
         return logEntryService.save(logger.getEntries());
     }

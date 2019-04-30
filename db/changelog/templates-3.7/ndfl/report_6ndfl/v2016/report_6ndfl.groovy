@@ -258,9 +258,6 @@ class Report6Ndfl extends AbstractScriptClass {
                                                   ИсчислНал   : row.calculatedTaxSum,
                                                   ИсчислНалДив: row.calculatedTaxSumForDividend,
                                                   АвансПлат   : row.prepaymentsSum] as Map<String, Object>
-                            if (isForSpecificReport) {
-                                СумСтавкаAttrs.put("НомСтр", index + 1)
-                            }
                             СумСтавка(СумСтавкаAttrs) {}
                         }
                     }
