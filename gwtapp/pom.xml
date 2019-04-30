@@ -656,5 +656,19 @@
                 </plugins>
             </build>
         </profile>
+        <profile>
+            <id>jms</id>
+            <properties>
+                <enable.jms.start></enable.jms.start>
+                <enable.jms.end></enable.jms.end>
+            </properties>
+        </profile>
+        <profile>
+            <id>nojms</id>
+            <properties>
+                <enable.jms.start>&lt;!--</enable.jms.start>
+                <enable.jms.end>--&gt;</enable.jms.end>
+            </properties>
+        </profile>
     </profiles>
 </project>

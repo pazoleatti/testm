@@ -1,11 +1,12 @@
 package com.aplana.sbrf.taxaccounting.service.jms;
 
+import com.aplana.sbrf.taxaccounting.AndProfileCondition;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
-import org.springframework.core.env.Environment;
 import org.springframework.jms.annotation.EnableJms;
 import org.springframework.jms.config.DefaultJmsListenerContainerFactory;
 import org.springframework.jms.config.JmsListenerContainerFactory;
@@ -21,7 +22,8 @@ import javax.naming.NamingException;
 
 @Configuration
 @Import(JmsBaseConfig.class)
-@Profile(value = "production")
+@Conditional(AndProfileCondition.class)
+@Profile({"production", "jms"})
 @EnableJms
 public class JmsProdConfig {
 

@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.jms.transport.impl;
 
 import com.aplana.sbrf.taxaccounting.service.jms.JmsBaseConfig;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.jms.config.JmsListenerEndpointRegistry;
 import org.springframework.messaging.Message;
@@ -9,6 +10,7 @@ import org.springframework.messaging.Message;
 /**
  * Получатель сообщений.
  */
+@Profile("jms")
 public class BaseMessageReceiver {
 
     @Autowired

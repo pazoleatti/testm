@@ -18,7 +18,7 @@
 	</context-param>
 	<context-param>
 		<param-name>spring.profiles.active</param-name>
-		<param-value>production</param-value>
+		<param-value>production${enable.jms.start}, jms${enable.jms.end}</param-value>
 	</context-param>
 	<!-- Creates the Spring Container shared by all Servlets and Filters -->
 	<listener>
@@ -126,6 +126,7 @@
 		<res-type>javax.sql.DataSource</res-type>
 		<res-auth>Container</res-auth>
 	</resource-ref>
+	${enable.jms.start}
 	<resource-ref>
 		<description />
 		<res-ref-name>jms/FundConnectionFactory</res-ref-name>
@@ -147,6 +148,7 @@
 		<res-auth>Container</res-auth>
 		<res-sharing-scope>Shareable</res-sharing-scope>
 	</resource-ref>
+	${enable.jms.end}
 
 	<security-role>
 		<description>Все аутентифицированные пользователи</description>	

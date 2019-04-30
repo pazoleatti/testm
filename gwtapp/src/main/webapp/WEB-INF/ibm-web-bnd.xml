@@ -8,7 +8,9 @@
 	<virtual-host name="default_host" />
 
     <resource-ref name="jdbc/TaxAccDS" binding-name="jdbc/TaxAccDS${releasePostfix}"/>
+	${enable.jms.start}
 	<resource-ref name="jms/FundConnectionFactory" binding-name="jms/FundConnectionFactory" />
 	<resource-ref name="jms/FundFromNdflSubsystemQueue" binding-name="jms/FundFromNdflSubsystemQueue" />
 	<resource-ref name="jms/FundToNdflSubsystemQueue" binding-name="jms/FundToNdflSubsystemQueue" />
+	${enable.jms.end}
 </web-bnd>
