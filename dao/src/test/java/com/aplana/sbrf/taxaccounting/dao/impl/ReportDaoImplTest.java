@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 import com.aplana.sbrf.taxaccounting.dao.BlobDataDao;
 import com.aplana.sbrf.taxaccounting.dao.ReportDao;
 import com.aplana.sbrf.taxaccounting.model.BlobData;
-import com.aplana.sbrf.taxaccounting.model.DeclarationDataReportType;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +15,7 @@ import java.io.ByteArrayInputStream;
 import java.util.Arrays;
 import java.util.UUID;
 
-import static com.aplana.sbrf.taxaccounting.model.DeclarationDataReportType.*;
+import static com.aplana.sbrf.taxaccounting.model.DeclarationReportType.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 

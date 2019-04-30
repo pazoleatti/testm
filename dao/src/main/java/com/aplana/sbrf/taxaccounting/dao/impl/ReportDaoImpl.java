@@ -2,7 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.ReportDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
-import com.aplana.sbrf.taxaccounting.model.DeclarationDataReportType;
+import com.aplana.sbrf.taxaccounting.model.DeclarationReportType;
 import com.aplana.sbrf.taxaccounting.model.PreparedStatementData;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import org.apache.commons.logging.Log;
@@ -31,7 +31,7 @@ public class ReportDaoImpl extends AbstractDao implements ReportDao {
     private static final Log LOG = LogFactory.getLog(ReportDaoImpl.class);
 
     @Override
-    public void createDec(final long declarationDataId, final String blobDataId, final DeclarationDataReportType type) {
+    public void createDec(final long declarationDataId, final String blobDataId, final DeclarationReportType type) {
         try {
             PreparedStatementCreator psc = new PreparedStatementCreator() {
                 @Override
@@ -65,7 +65,7 @@ public class ReportDaoImpl extends AbstractDao implements ReportDao {
     }
 
     @Override
-    public String getDec(final long declarationDataId, final DeclarationDataReportType type) {
+    public String getDec(final long declarationDataId, final DeclarationReportType type) {
         try {
             PreparedStatementData ps = new PreparedStatementData();
             ps.appendQuery("SELECT BLOB_DATA_ID FROM DECLARATION_REPORT " +
@@ -108,7 +108,7 @@ public class ReportDaoImpl extends AbstractDao implements ReportDao {
     }
 
     @Override
-    public void deleteDec(long declarationDataId, DeclarationDataReportType type) {
+    public void deleteDec(long declarationDataId, DeclarationReportType type) {
         try {
             MapSqlParameterSource params = new MapSqlParameterSource();
             params.addValue("declarationDataId", declarationDataId);
@@ -138,10 +138,10 @@ public class ReportDaoImpl extends AbstractDao implements ReportDao {
     }
 
     @Override
-    public void deleteDec(Collection<Long> declarationDataIds, List<DeclarationDataReportType> ddReportTypes) {
+    public void deleteDec(Collection<Long> declarationDataIds, List<DeclarationReportType> ddReportTypes) {
         try {
             List<Integer> types = new ArrayList<>();
-            for (DeclarationDataReportType type : ddReportTypes) {
+            for (DeclarationReportType type : ddReportTypes) {
                 types.add(type.getId());
             }
             String sql = String.format("DELETE FROM DECLARATION_REPORT WHERE %s and %s",
@@ -184,7 +184,7 @@ public class ReportDaoImpl extends AbstractDao implements ReportDao {
         try {
             MapSqlParameterSource params = new MapSqlParameterSource();
             params.addValue("declarationDataId", declarationDataId);
-            params.addValue("type", DeclarationDataReportType.XML_DEC.getId());
+            params.addValue("type", DeclarationReportType.XML_DEC.getId());
             getNamedParameterJdbcTemplate().update(
                     "DELETE FROM DECLARATION_REPORT WHERE DECLARATION_DATA_ID = :declarationDataId AND TYPE <> :type", params);
         } catch (DataAccessException e) {

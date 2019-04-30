@@ -2,7 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.model.BlobData;
 import com.aplana.sbrf.taxaccounting.model.DeclarationData;
-import com.aplana.sbrf.taxaccounting.model.DeclarationDataReportType;
+import com.aplana.sbrf.taxaccounting.model.DeclarationReportType;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.TAInterruptedException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
@@ -238,7 +238,7 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
 
     private boolean isValid(DeclarationData data, Logger logger, String fileName, String xsdBlobDataId, long timeout) {
 
-        BlobData xmlBlob = blobDataService.get(reportService.getReportFileUuidSafe(data.getId(), DeclarationDataReportType.XML_DEC));
+        BlobData xmlBlob = blobDataService.get(reportService.getReportFileUuidSafe(data.getId(), DeclarationReportType.XML_DEC));
         File xmlFileBD = null;
         try {
             String xmlFileName = xmlBlob.getName().substring(0, xmlBlob.getName().lastIndexOf('.'));

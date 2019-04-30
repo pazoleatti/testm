@@ -916,7 +916,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
         Logger logger = new Logger();
 
-        reportService.deleteByDeclarationAndType(declarationDataId, DeclarationDataReportType.EXCEL_DEC);
+        reportService.deleteByDeclarationAndType(declarationDataId, DeclarationReportType.EXCEL_DEC);
         Map<String, Object> params = new HashMap<>();
         params.put("declarationDataId", declarationDataId);
 
@@ -931,14 +931,14 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         if (!existDeclarationData(declarationDataId)) {
             reportAvailableResult.setDeclarationDataExist(false);
         } else {
-            reportAvailableResult.setReportAvailable(DeclarationDataReportType.EXCEL_DEC.getCode(), reportService.getReportFileUuid(declarationDataId, DeclarationDataReportType.EXCEL_DEC) != null);
-            reportAvailableResult.setReportAvailable(DeclarationDataReportType.XML_DEC.getCode(), reportService.getReportFileUuid(declarationDataId, DeclarationDataReportType.XML_DEC) != null);
-            reportAvailableResult.setReportAvailable(DeclarationDataReportType.EXCEL_TEMPLATE_DEC.getCode(), reportService.getReportFileUuid(declarationDataId, DeclarationDataReportType.EXCEL_TEMPLATE_DEC) != null);
+            reportAvailableResult.setReportAvailable(DeclarationReportType.EXCEL_DEC.getCode(), reportService.getReportFileUuid(declarationDataId, DeclarationReportType.EXCEL_DEC) != null);
+            reportAvailableResult.setReportAvailable(DeclarationReportType.XML_DEC.getCode(), reportService.getReportFileUuid(declarationDataId, DeclarationReportType.XML_DEC) != null);
+            reportAvailableResult.setReportAvailable(DeclarationReportType.EXCEL_TEMPLATE_DEC.getCode(), reportService.getReportFileUuid(declarationDataId, DeclarationReportType.EXCEL_TEMPLATE_DEC) != null);
 
             DeclarationData declaration = get(declarationDataId, userInfo);
             List<DeclarationSubreport> subreports = declarationTemplateService.get(declaration.getDeclarationTemplateId()).getSubreports();
             for (DeclarationSubreport subreport : subreports) {
-                reportAvailableResult.setReportAvailable(subreport.getAlias(), reportService.getReportFileUuid(declarationDataId, DeclarationDataReportType.createSpecificReport(subreport)) != null);
+                reportAvailableResult.setReportAvailable(subreport.getAlias(), reportService.getReportFileUuid(declarationDataId, DeclarationReportType.createSpecificReport(subreport)) != null);
             }
         }
         return reportAvailableResult;
@@ -950,9 +950,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         if (!existDeclarationData(declarationDataId)) {
             result.setDeclarationDataExist(false);
         } else {
-            result.setAvailablePdf(reportService.getReportFileUuid(declarationDataId, DeclarationDataReportType.PDF_DEC) != null);
-            result.setDownloadXlsxAvailable(reportService.getReportFileUuid(declarationDataId, DeclarationDataReportType.EXCEL_DEC) != null);
-            result.setDownloadXmlAvailable(reportService.getReportFileUuid(declarationDataId, DeclarationDataReportType.XML_DEC) != null);
+            result.setAvailablePdf(reportService.getReportFileUuid(declarationDataId, DeclarationReportType.PDF_DEC) != null);
+            result.setDownloadXlsxAvailable(reportService.getReportFileUuid(declarationDataId, DeclarationReportType.EXCEL_DEC) != null);
+            result.setDownloadXmlAvailable(reportService.getReportFileUuid(declarationDataId, DeclarationReportType.XML_DEC) != null);
         }
         return result;
     }
@@ -1217,7 +1217,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     @PreAuthorize("hasPermission(#declarationId, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).VIEW)")
     public InputStream getXmlDataAsStream(long declarationId, TAUserInfo userInfo) {
-        String xmlUuid = reportService.getReportFileUuidSafe(declarationId, DeclarationDataReportType.XML_DEC);
+        String xmlUuid = reportService.getReportFileUuidSafe(declarationId, DeclarationReportType.XML_DEC);
         if (xmlUuid == null) {
             return null;
         }
@@ -1226,7 +1226,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     public String getXmlDataFileName(long declarationDataId, TAUserInfo userInfo) {
-        String xmlUuid = reportService.getReportFileUuidSafe(declarationDataId, DeclarationDataReportType.XML_DEC);
+        String xmlUuid = reportService.getReportFileUuidSafe(declarationDataId, DeclarationReportType.XML_DEC);
         if (xmlUuid != null) {
             BlobData blobData = blobDataService.get(xmlUuid);
             return blobData.getName();
@@ -1236,7 +1236,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     public Date getXmlDataDocDate(long declarationDataId, TAUserInfo userInfo) {
-        String xmlUuid = reportService.getReportFileUuidSafe(declarationDataId, DeclarationDataReportType.XML_DEC);
+        String xmlUuid = reportService.getReportFileUuidSafe(declarationDataId, DeclarationReportType.XML_DEC);
         if (xmlUuid != null) {
             BlobData blobData = blobDataService.get(xmlUuid);
             return blobData.getCreationDate();
@@ -1246,7 +1246,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     private void getXlsxData(long id, File xlsxFile, TAUserInfo userInfo, LockStateLogger stateLogger) {
         DeclarationData declarationData = declarationDataDao.get(id);
-        String uuid = reportService.getReportFileUuidSafe(declarationData.getId(), DeclarationDataReportType.JASPER_DEC);
+        String uuid = reportService.getReportFileUuidSafe(declarationData.getId(), DeclarationReportType.JASPER_DEC);
         JasperPrint jasperPrint;
         JRSwapFile jrSwapFile = null;
         try {
@@ -1297,7 +1297,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     @PreAuthorize("hasPermission(#declarationId, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).VIEW)")
     public InputStream getPdfDataAsStream(long declarationId, TAUserInfo userInfo) {
-        String pdfUuid = reportService.getReportFileUuidSafe(declarationId, DeclarationDataReportType.PDF_DEC);
+        String pdfUuid = reportService.getReportFileUuidSafe(declarationId, DeclarationReportType.PDF_DEC);
         if (pdfUuid == null) {
             return null;
         }
@@ -1345,7 +1345,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     private JasperPrint createJasperReport(DeclarationData declarationData, JRSwapFile jrSwapFile, TAUserInfo userInfo) {
         LOG.info(String.format("DeclarationDataServiceImpl.createJasperReport by %s. declarationData: %s",
                 userInfo, declarationData));
-        String xmlUuid = reportService.getReportFileUuidSafe(declarationData.getId(), DeclarationDataReportType.XML_DEC);
+        String xmlUuid = reportService.getReportFileUuidSafe(declarationData.getId(), DeclarationReportType.XML_DEC);
         InputStream zipXml = blobDataService.get(xmlUuid).getInputStream();
         try {
             if (zipXml != null) {
@@ -1373,10 +1373,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     public void setPdfDataBlobs(Logger logger,
                                 DeclarationData declarationData, TAUserInfo userInfo, LockStateLogger stateLogger) {
         LOG.info(String.format("Удаление старых отчетов налоговой формы %s", declarationData.getId()));
-        reportService.deleteDec(Arrays.asList(declarationData.getId()), Arrays.asList(DeclarationDataReportType.PDF_DEC, DeclarationDataReportType.JASPER_DEC));
+        reportService.deleteDec(Arrays.asList(declarationData.getId()), Arrays.asList(DeclarationReportType.PDF_DEC, DeclarationReportType.JASPER_DEC));
         LOG.info(String.format("Получение данных налоговой формы %s", declarationData.getId()));
         stateLogger.updateState(AsyncTaskState.GET_FORM_DATA);
-        String xmlUuid = reportService.getReportFileUuidSafe(declarationData.getId(), DeclarationDataReportType.XML_DEC);
+        String xmlUuid = reportService.getReportFileUuidSafe(declarationData.getId(), DeclarationReportType.XML_DEC);
         if (xmlUuid != null) {
             File pdfFile = null;
             JRSwapFile jrSwapFile = new JRSwapFile(System.getProperty("java.io.tmpdir"), 1024, 100);
@@ -1400,13 +1400,13 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 LOG.info(String.format("Сохранение PDF-файла в базе данных для налоговой формы %s", declarationData.getId()));
                 stateLogger.updateState(AsyncTaskState.SAVING_PDF);
                 String fileName = createPdfFileName(declarationData.getId(), userInfo);
-                reportService.attachReportToDeclaration(declarationData.getId(), blobDataService.create(pdfFile.getPath(), fileName), DeclarationDataReportType.PDF_DEC);
+                reportService.attachReportToDeclaration(declarationData.getId(), blobDataService.create(pdfFile.getPath(), fileName), DeclarationReportType.PDF_DEC);
 
                 // не сохраняем jasper-отчет, если есть XLSX-отчет
-                if (reportService.getReportFileUuidSafe(declarationData.getId(), DeclarationDataReportType.EXCEL_DEC) == null) {
+                if (reportService.getReportFileUuidSafe(declarationData.getId(), DeclarationReportType.EXCEL_DEC) == null) {
                     LOG.info(String.format("Сохранение Jasper-макета в базе данных для налоговой формы %s", declarationData.getId()));
                     stateLogger.updateState(AsyncTaskState.SAVING_JASPER);
-                    reportService.attachReportToDeclaration(declarationData.getId(), saveJPBlobData(jasperPrint), DeclarationDataReportType.JASPER_DEC);
+                    reportService.attachReportToDeclaration(declarationData.getId(), saveJPBlobData(jasperPrint), DeclarationReportType.JASPER_DEC);
                 }
             } catch (IOException e) {
                 throw new ServiceException(e.getLocalizedMessage(), e);
@@ -1422,7 +1422,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    public String createSpecificReport(Logger logger, DeclarationData declarationData, DeclarationDataReportType ddReportType, Map<String, Object> subreportParamValues, Map<String, String> viewParamValues, DataRow<Cell> selectedRecord, TAUserInfo userInfo, LockStateLogger stateLogger) {
+    public String createSpecificReport(Logger logger, DeclarationData declarationData, DeclarationReportType ddReportType, Map<String, Object> subreportParamValues, Map<String, String> viewParamValues, DataRow<Cell> selectedRecord, TAUserInfo userInfo, LockStateLogger stateLogger) {
         LOG.info(String.format("DeclarationDataServiceImpl.createSpecificReport by %s. declarationData: %s; ddReportType: %s; subreportParamValues: %s; viewParamValues: %s; selectedRecord: %s",
                 userInfo, declarationData, ddReportType, subreportParamValues, viewParamValues, selectedRecord));
         Map<String, Object> params = new HashMap<>();
@@ -1473,7 +1473,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    public PrepareSpecificReportResult prepareSpecificReport(Logger logger, DeclarationData declarationData, DeclarationDataReportType ddReportType, Map<String, Object> subreportParamValues, TAUserInfo userInfo) {
+    public PrepareSpecificReportResult prepareSpecificReport(Logger logger, DeclarationData declarationData, DeclarationReportType ddReportType, Map<String, Object> subreportParamValues, TAUserInfo userInfo) {
         LOG.info(String.format("DeclarationDataServiceImpl.prepareSpecificReport by %s. declarationData: %s; ddReportType: %s; subreportParamValues: %s",
                 userInfo, declarationData, ddReportType, subreportParamValues));
         Map<String, Object> params = new HashMap<String, Object>();
@@ -1548,7 +1548,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 LOG.info(String.format("Сохранение XLSX в базе данных для налоговой формы %s", declarationData.getId()));
                 stateLogger.updateState(AsyncTaskState.SAVING_XLSX);
 
-                reportService.deleteDec(Arrays.asList(declarationData.getId()), Arrays.asList(DeclarationDataReportType.JASPER_DEC));
+                reportService.deleteDec(Arrays.asList(declarationData.getId()), Arrays.asList(DeclarationReportType.JASPER_DEC));
                 return blobDataService.create(xlsxFile.getPath(), getXmlDataFileName(declarationData.getId(), userInfo).replace("zip", "xlsx"));
             } catch (IOException e) {
                 throw new ServiceException("Ошибка при формировании временного файла для XLSX", e);
@@ -1771,7 +1771,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     @Transactional
-    public void cleanBlobs(Collection<Long> ids, List<DeclarationDataReportType> reportTypes) {
+    public void cleanBlobs(Collection<Long> ids, List<DeclarationReportType> reportTypes) {
         if (ids.isEmpty()) {
             return;
         }
@@ -2396,7 +2396,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             } else if (declarationTemplate.getType().getId() == DeclarationType.NDFL_2_2) {
                 alias = SubreportAliasConstants.REPORT_2NDFL2;
             }
-            DeclarationDataReportType ddReportType = DeclarationDataReportType.SPECIFIC_REPORT_DEC;
+            DeclarationReportType ddReportType = DeclarationReportType.SPECIFIC_REPORT_DEC;
             ddReportType.setSubreport(declarationTemplateService.getSubreportByAlias(declarationData.getDeclarationTemplateId(), alias.toLowerCase()));
 
             Map<String, Object> subreportParamValues = null;
@@ -2555,7 +2555,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         try {
             ndflPersonDao.updateOneNdflIncome(personIncome, taUserInfo);
             reportService.deleteDec(singletonList(declarationDataId),
-                    Arrays.asList(DeclarationDataReportType.SPECIFIC_REPORT_DEC, DeclarationDataReportType.EXCEL_DEC));
+                    Arrays.asList(DeclarationReportType.SPECIFIC_REPORT_DEC, DeclarationReportType.EXCEL_DEC));
             List<Long> changedPersonIds = updateAdditionalSortParams(personIncome.getNdflPersonId(), personIncome.getOperationId());
             sortPersonRows(changedPersonIds);
         } catch (Exception e) {
@@ -2637,7 +2637,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             if (isAnyDateChanged) {
                 reportService.deleteDec(
                         singletonList(declarationDataId),
-                        Arrays.asList(DeclarationDataReportType.SPECIFIC_REPORT_DEC, DeclarationDataReportType.EXCEL_DEC)
+                        Arrays.asList(DeclarationReportType.SPECIFIC_REPORT_DEC, DeclarationReportType.EXCEL_DEC)
                 );
             }
 
@@ -2766,7 +2766,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         try {
             ndflPersonDao.updateOneNdflDeduction(personDeduction, taUserInfo);
             reportService.deleteDec(singletonList(declarationDataId),
-                    Arrays.asList(DeclarationDataReportType.SPECIFIC_REPORT_DEC, DeclarationDataReportType.EXCEL_DEC));
+                    Arrays.asList(DeclarationReportType.SPECIFIC_REPORT_DEC, DeclarationReportType.EXCEL_DEC));
             NdflPerson ndflPerson = ndflPersonDao.findById(personDeduction.getNdflPersonId());
             Collections.sort(ndflPerson.getDeductions(), NdflPersonDeduction.getComparator(ndflPerson));
             ndflPersonDao.updateDeductions(updateRowNum(ndflPerson.getDeductions()));
@@ -2783,7 +2783,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         try {
             ndflPersonDao.updateOneNdflPrepayment(personPrepayment, taUserInfo);
             reportService.deleteDec(singletonList(declarationDataId),
-                    Arrays.asList(DeclarationDataReportType.SPECIFIC_REPORT_DEC, DeclarationDataReportType.EXCEL_DEC));
+                    Arrays.asList(DeclarationReportType.SPECIFIC_REPORT_DEC, DeclarationReportType.EXCEL_DEC));
             NdflPerson ndflPerson = ndflPersonDao.findById(personPrepayment.getNdflPersonId());
             Collections.sort(ndflPerson.getPrepayments(), NdflPersonPrepayment.getComparator(ndflPerson));
             ndflPersonDao.updatePrepayments(updateRowNum(ndflPerson.getPrepayments()));

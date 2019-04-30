@@ -266,7 +266,7 @@ public class DeclarationServiceImpl implements DeclarationService {
 
     @Override
     public void createPdfReport(Logger logger, DeclarationData declarationData, TAUserInfo userInfo) {
-        deleteReport(declarationData.getId(), Arrays.asList(DeclarationDataReportType.PDF_DEC));
+        deleteReport(declarationData.getId(), Arrays.asList(DeclarationReportType.PDF_DEC));
         declarationDataService.setPdfDataBlobs(logger, declarationData, userInfo, new LockStateLogger() {
             @Override
             public void updateState(AsyncTaskState state) {
@@ -276,7 +276,7 @@ public class DeclarationServiceImpl implements DeclarationService {
     }
 
     // Удаляет отчеты заданных типов
-    private void deleteReport(long declarationDataId, List<DeclarationDataReportType> declarationDataReportTypeList) {
+    private void deleteReport(long declarationDataId, List<DeclarationReportType> declarationDataReportTypeList) {
         reportService.deleteDec(Collections.singletonList(declarationDataId), declarationDataReportTypeList);
     }
 

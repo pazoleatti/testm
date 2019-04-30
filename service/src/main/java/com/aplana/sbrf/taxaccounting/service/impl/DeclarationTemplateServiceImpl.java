@@ -321,7 +321,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
                     data.getKpp() != null ? ", КПП " + data.getKpp() : ""
             );
 
-            if (reportDao.getDec(dataId, DeclarationDataReportType.PDF_DEC) != null || reportDao.getDec(dataId, DeclarationDataReportType.EXCEL_DEC) != null) {
+            if (reportDao.getDec(dataId, DeclarationReportType.PDF_DEC) != null || reportDao.getDec(dataId, DeclarationReportType.EXCEL_DEC) != null) {
                 existDec.add(message);
             } else if (lockDataService.lockExists(decKeyPDF) || lockDataService.lockExists(decKeyXLSM)) {
                 existInLockDec.add(message);
@@ -352,8 +352,8 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
         HashSet<Long> dataIds = new HashSet<>();
         DeclarationTemplate template = declarationTemplateDao.get(dtId);
         for (Long dataId : declarationDataService.getFormDataListInActualPeriodByTemplate(template.getId(), template.getVersion())) {
-            if (reportDao.getDec(dataId, DeclarationDataReportType.PDF_DEC) != null
-                    || reportDao.getDec(dataId, DeclarationDataReportType.EXCEL_DEC) != null) {
+            if (reportDao.getDec(dataId, DeclarationReportType.PDF_DEC) != null
+                    || reportDao.getDec(dataId, DeclarationReportType.EXCEL_DEC) != null) {
                 dataIds.add(dataId);
             }
         }
@@ -721,7 +721,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
         LOG.info(String.format("DeclarationTemplateServiceImpl.deleteJrxmlReports. declarationTemplateId: %s", declarationTemplateId));
         declarationDataService.cleanBlobs(
                 getDataIdsThatUseJrxml(declarationTemplateId),
-                Arrays.asList(DeclarationDataReportType.EXCEL_DEC, DeclarationDataReportType.PDF_DEC, DeclarationDataReportType.JASPER_DEC));
+                Arrays.asList(DeclarationReportType.EXCEL_DEC, DeclarationReportType.PDF_DEC, DeclarationReportType.JASPER_DEC));
         for (Long id : getLockDataIdsThatUseJrxml(declarationTemplateId)) {
             String keyPDF = declarationDataService.generateAsyncTaskKey(id, AsyncTaskType.PDF_DEC);
             String keyEXCEL = declarationDataService.generateAsyncTaskKey(id, AsyncTaskType.EXCEL_DEC);

@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao;
 
-import com.aplana.sbrf.taxaccounting.model.DeclarationDataReportType;
+import com.aplana.sbrf.taxaccounting.model.DeclarationReportType;
 
 import java.util.Collection;
 import java.util.List;
@@ -16,7 +16,7 @@ public interface ReportDao {
      * @param blobDataId        идентификатор блоба
      * @param type              тип отчета
      */
-    void createDec(long declarationDataId, String blobDataId, DeclarationDataReportType type);
+    void createDec(long declarationDataId, String blobDataId, DeclarationReportType type);
 
     /**
      * Получение записи об отчете декларации
@@ -25,7 +25,7 @@ public interface ReportDao {
      * @param type              тип отчета
      * @return uuid идентификатор блоба
      */
-    String getDec(long declarationDataId, DeclarationDataReportType type);
+    String getDec(long declarationDataId, DeclarationReportType type);
 
     /**
      * Удаление всех отчетов по id декларации
@@ -47,7 +47,7 @@ public interface ReportDao {
      * @param declarationDataId идентификатор декларации
      * @param type              тип отчета
      */
-    void deleteDec(long declarationDataId, DeclarationDataReportType type);
+    void deleteDec(long declarationDataId, DeclarationReportType type);
 
     /**
      * Удаляет спецотчет налоговой формы
@@ -63,7 +63,7 @@ public interface ReportDao {
      * @param declarationDataIds идентификаторы декларации
      * @param ddReportTypes      типы отчета
      */
-    void deleteDec(Collection<Long> declarationDataIds, List<DeclarationDataReportType> ddReportTypes);
+    void deleteDec(Collection<Long> declarationDataIds, List<DeclarationReportType> ddReportTypes);
 
     /**
      * Удаление отчета по uuid
@@ -80,7 +80,7 @@ public interface ReportDao {
     int clean();
 
     /**
-     * Удаление отчетов деклараций по id, кроме {@link DeclarationDataReportType#XML_DEC}
+     * Удаление отчетов деклараций по id, кроме {@link DeclarationReportType#XML_DEC}
      *
      * @param declarationDataId идентификатор декларации
      */

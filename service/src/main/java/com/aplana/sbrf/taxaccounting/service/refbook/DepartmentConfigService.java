@@ -3,11 +3,11 @@ package com.aplana.sbrf.taxaccounting.service.refbook;
 import com.aplana.sbrf.taxaccounting.model.BlobData;
 import com.aplana.sbrf.taxaccounting.model.DeclarationData;
 import com.aplana.sbrf.taxaccounting.model.KppOktmoPair;
+import com.aplana.sbrf.taxaccounting.model.KppOktmoPairFilter;
 import com.aplana.sbrf.taxaccounting.model.KppSelect;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.ReportFormCreationKppOktmoPair;
-import com.aplana.sbrf.taxaccounting.model.KppOktmoPairFilter;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.action.DepartmentConfigsFilter;
 import com.aplana.sbrf.taxaccounting.model.action.ImportDepartmentConfigsAction;
@@ -61,7 +61,7 @@ public interface DepartmentConfigService {
      * @param pagingParams параметры пагиинации
      * @return список объектов содержащих данные о настройках подразделений
      */
-    PagingResult<DepartmentConfig> findAllByFilter(DepartmentConfigsFilter filter, PagingParams pagingParams);
+    PagingResult<DepartmentConfig> findPageByFilter(DepartmentConfigsFilter filter, PagingParams pagingParams);
 
     /**
      * Возвращяет все пары КПП/ОКТМО из формы и настройки подразделений, которые актуальны на текущую дату или пересекаются с периодом формы,
@@ -109,9 +109,10 @@ public interface DepartmentConfigService {
     int countByFilter(DepartmentConfigsFilter filter);
 
     /**
-     * Создаёт настройку подразделений
+     * Создаёт настройку подразделений с проверкой прав и дополнительной обработкой ошибок. Используется из GUI
      *
      * @param departmentConfig настройка подразделений
+     * @return {@link ActionResult}
      */
     ActionResult createForGui(DepartmentConfig departmentConfig);
 
@@ -125,9 +126,10 @@ public interface DepartmentConfigService {
     void create(DepartmentConfig departmentConfig, Logger logger);
 
     /**
-     * Изменяет настройку подразделений
+     * Изменяет настройку подразделений с проверкой прав и дополнительной обработкой ошибок. Используется из GUI
      *
      * @param departmentConfig настройка подразделений
+     * @return {@link ActionResult}
      */
     ActionResult updateForGui(DepartmentConfig departmentConfig);
 
@@ -141,9 +143,10 @@ public interface DepartmentConfigService {
     void update(DepartmentConfig departmentConfig, Logger logger);
 
     /**
-     * Удаляет настройки подразделений по отдельности, пропуская те, на которых произошла ошибка
+     * Удаляет настройки подразделений с проверкой прав и по отдельности, пропуская те, на которых произошла ошибка. Используется из GUI
      *
      * @param ids список id записи настроек подразделений
+     * @return {@link ActionResult}
      */
     ActionResult deleteForGui(List<Long> ids);
 

@@ -74,7 +74,7 @@ public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataSer
             String fileUuid = archiveAndSaveFile(xmlTransportFile, xmlFileName);
 
             // Добавляем ТФ к отчётам декларации, таблица declaration_report
-            reportService.attachReportToDeclaration(declarationId, fileUuid, DeclarationDataReportType.XML_DEC);
+            reportService.attachReportToDeclaration(declarationId, fileUuid, DeclarationReportType.XML_DEC);
             // Добавляем ТФ к файлам декларации, таблица declaration_data_file
             attachFileToDeclaration(fileUuid, declaration, user);
 

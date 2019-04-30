@@ -184,8 +184,8 @@ public class DeclarationDataServiceImplTest {
         long declarationDataId1 = 1, declarationDataId2 = 2;
         TAUserInfo userInfo = new TAUserInfo();
 
-        when(reportService.getReportFileUuidSafe(declarationDataId1, DeclarationDataReportType.XML_DEC)).thenReturn(uuid1);
-        when(reportService.getReportFileUuidSafe(declarationDataId2, DeclarationDataReportType.XML_DEC)).thenReturn(uuid2);
+        when(reportService.getReportFileUuidSafe(declarationDataId1, DeclarationReportType.XML_DEC)).thenReturn(uuid1);
+        when(reportService.getReportFileUuidSafe(declarationDataId2, DeclarationReportType.XML_DEC)).thenReturn(uuid2);
         ReflectionTestUtils.setField(declarationDataService, "reportService", reportService);
 
         assertEquals(expectedDate, declarationDataService.getXmlDataDocDate(declarationDataId1, userInfo));
@@ -258,7 +258,7 @@ public class DeclarationDataServiceImplTest {
         when(departmentService.getDepartment(declarationData.getDepartmentId())).thenReturn(department);
         when(departmentService.getDepartment(2)).thenReturn(department);
         when(declarationDataDao.get(declarationData.getId())).thenReturn(declarationData);
-        when(reportService.getReportFileUuidSafe(anyLong(), Matchers.<DeclarationDataReportType>anyObject())).thenReturn(UUID.randomUUID().toString());
+        when(reportService.getReportFileUuidSafe(anyLong(), Matchers.<DeclarationReportType>anyObject())).thenReturn(UUID.randomUUID().toString());
         when(declarationTemplateService.get(declarationData.getDeclarationTemplateId())).thenReturn(declarationTemplate);
         when(periodService.fetchReportPeriod(declarationData.getReportPeriodId())).thenReturn(reportPeriod);
 
@@ -325,7 +325,7 @@ public class DeclarationDataServiceImplTest {
         DeclarationSubreport declarationSubreport = new DeclarationSubreport();
         declarationSubreport.setName("report name");
         declarationSubreport.setAlias("specific1");
-        DeclarationDataReportType specificReport = DeclarationDataReportType.createSpecificReport();
+        DeclarationReportType specificReport = DeclarationReportType.createSpecificReport();
         specificReport.setSubreport(declarationSubreport);
 
         TAUserInfo userInfo = new TAUserInfo();
@@ -411,7 +411,7 @@ public class DeclarationDataServiceImplTest {
         declarationData.setId(1L);
 
         when(declarationDataDao.get(declarationData.getId())).thenReturn(declarationData);
-        when(reportService.getReportFileUuidSafe(declarationData.getId(), DeclarationDataReportType.XML_DEC)).thenReturn("uuid1");
+        when(reportService.getReportFileUuidSafe(declarationData.getId(), DeclarationReportType.XML_DEC)).thenReturn("uuid1");
 
         BlobDataService blobDataService = mock(BlobDataService.class);
         when(blobDataService.getLength("uuid1")).thenReturn(1200L);

@@ -504,7 +504,7 @@ public class PrintingServiceImpl implements PrintingService {
     public String generateExcelDepartmentConfigs(int departmentId) {
         DepartmentConfigsFilter filter = new DepartmentConfigsFilter();
         filter.setDepartmentId(departmentId);
-        List<DepartmentConfig> departmentConfigs = departmentConfigService.findAllByFilter(filter, null);
+        List<DepartmentConfig> departmentConfigs = departmentConfigService.findPageByFilter(filter, null);
         Department department = departmentService.getDepartment(filter.getDepartmentId());
         DepartmentConfigsReportBuilder reportBuilder = new DepartmentConfigsReportBuilder(departmentConfigs, department);
         String reportPath = null;

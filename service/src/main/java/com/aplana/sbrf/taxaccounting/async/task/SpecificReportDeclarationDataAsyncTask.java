@@ -51,7 +51,7 @@ public class SpecificReportDeclarationDataAsyncTask extends AbstractDeclarationA
         userInfo.setUser(userService.getUser(taskData.getUserId()));
 
         DeclarationData declarationData = declarationDataService.get(declarationDataId, userInfo);
-        DeclarationDataReportType ddReportType = DeclarationDataReportType.createSpecificReport();
+        DeclarationReportType ddReportType = DeclarationReportType.createSpecificReport();
         ddReportType.setSubreport(declarationTemplateService.getSubreportByAlias(declarationData.getDeclarationTemplateId(), alias));
         params.put("ddReportType", ddReportType);
 
@@ -124,7 +124,7 @@ public class SpecificReportDeclarationDataAsyncTask extends AbstractDeclarationA
 
     @Override
     protected String getNotificationMsg(AsyncTaskData taskData) {
-        DeclarationDataReportType ddReportType = (DeclarationDataReportType) taskData.getParams().get("ddReportType");
+        DeclarationReportType ddReportType = (DeclarationReportType) taskData.getParams().get("ddReportType");
         String reportName = getReportName(taskData);
         String declarationDescription = getDeclarationDescription(taskData);
         if (ddReportType.getSubreport().getAlias().equals(SubreportAliasConstants.RNU_NDFL_2_6_DATA_XLSX_REPORT) ||

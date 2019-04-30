@@ -54,7 +54,7 @@ public interface DepartmentConfigDao extends PermissionDao {
      * @param pagingParams параметры пагиинации
      * @return список объектов содержащих данные о настройках подразделений
      */
-    PagingResult<DepartmentConfig> findAllByFilter(DepartmentConfigsFilter filter, PagingParams pagingParams);
+    PagingResult<DepartmentConfig> findPageByFilter(DepartmentConfigsFilter filter, PagingParams pagingParams);
 
     /**
      * Возвращяет кол-во записей настроек подразделений по фильтру

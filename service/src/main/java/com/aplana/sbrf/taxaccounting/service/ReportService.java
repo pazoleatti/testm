@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service;
 
-import com.aplana.sbrf.taxaccounting.model.DeclarationDataReportType;
+import com.aplana.sbrf.taxaccounting.model.DeclarationReportType;
 
 import java.util.Collection;
 import java.util.List;
@@ -17,7 +17,7 @@ public interface ReportService {
      * @param blobDataId        идентификатор блоба
      * @param type              тип отчета
      */
-    void attachReportToDeclaration(long declarationDataId, String blobDataId, DeclarationDataReportType type);
+    void attachReportToDeclaration(long declarationDataId, String blobDataId, DeclarationReportType type);
 
     /**
      * Получение записи об отчете декларации
@@ -26,16 +26,16 @@ public interface ReportService {
      * @param type              тип отчета
      * @return uuid идентификатор блоба
      */
-    String getReportFileUuid(long declarationDataId, DeclarationDataReportType type);
+    String getReportFileUuid(long declarationDataId, DeclarationReportType type);
 
     /**
-     * То же что {@link #getReportFileUuid(long, DeclarationDataReportType)}, но с проверкой прав
+     * То же что {@link #getReportFileUuid(long, DeclarationReportType)}, но с проверкой прав
      *
      * @param declarationDataId идентификатор декларации
      * @param type              тип отчета
      * @return uuid идентификатор блоба
      */
-    String getReportFileUuidSafe(long declarationDataId, DeclarationDataReportType type);
+    String getReportFileUuidSafe(long declarationDataId, DeclarationReportType type);
 
     /**
      * Удаление всех отчетов по id декларации
@@ -50,7 +50,7 @@ public interface ReportService {
      * @param declarationDataId идентификатор декларации
      * @param type              тип отчета
      */
-    void deleteByDeclarationAndType(long declarationDataId, DeclarationDataReportType type);
+    void deleteByDeclarationAndType(long declarationDataId, DeclarationReportType type);
 
     /**
      * Удаляет отчет декларации по типу
@@ -58,7 +58,7 @@ public interface ReportService {
      * @param declarationDataIds идентификаторы декларации
      * @param reportTypes        типы отчета
      */
-    void deleteDec(Collection<Long> declarationDataIds, List<DeclarationDataReportType> reportTypes);
+    void deleteDec(Collection<Long> declarationDataIds, List<DeclarationReportType> reportTypes);
 
     /**
      * Удаление отчета по uuid
@@ -68,7 +68,7 @@ public interface ReportService {
     void deleteDec(String uuid);
 
     /**
-     * Удаление отчетов декларации по id, кроме {@link DeclarationDataReportType#XML_DEC}
+     * Удаление отчетов декларации по id, кроме {@link DeclarationReportType#XML_DEC}
      *
      * @param declarationDataId идентификатор декларации
      */
