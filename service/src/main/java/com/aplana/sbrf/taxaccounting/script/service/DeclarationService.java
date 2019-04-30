@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.script.service;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.service.ScriptExposed;
 import groovy.lang.Closure;
@@ -236,7 +235,7 @@ public interface DeclarationService {
     /**
      * Найти данные по файлам НФ имеющие указаныый тип
      */
-    List<DeclarationDataFile> findFilesWithSpecificType(Long declarationDataId, String fileTypeName);
+    List<DeclarationDataFile> findAllFilesByDeclarationIdAndType(Long declarationDataId, AttachFileType fileType);
 
     /**
      * Найти НФ по типу, периоду, и значениям Налоговый орган, КПП, ОКТМО

@@ -22,7 +22,7 @@ class LocksRelations {
     /**
      * Кол-во всех блокировок (см. нумерацию в постановке).
      */
-    static final int LOCKS_COUNT = 29;
+    static final int LOCKS_COUNT = 30;
 
     // Все возможные виды блокировок, в значениях ID заменен на значение DECLARATION_ID (даже для TEMPLATE, т.к. при вызове один алгоритм)
     private static final String DECLARATION_DATA_ID_IMPORT_TF_DECLARATION = "DECLARATION_DATA_1_IMPORT_TF_DECLARATION";
@@ -54,6 +54,7 @@ class LocksRelations {
     private static final String DECLARATION_TEMPLATE_ID_2NDFL2 = "DECLARATION_TEMPLATE_1_2NDFL2";
     private static final String DECLARATION_TEMPLATE_ID_6NDFL = "DECLARATION_TEMPLATE_1_6NDFL";
     private static final String DECLARATION_DATA_ID_CHANGE_STATUS = "DECLARATION_DATA_1_CHANGE_STATUS";
+    private static final String DECLARATION_DATA_ID_SEND_EDO = "DECLARATION_DATA_1_SEND_EDO";
 
     /**
      * Массив из всех блокировок
@@ -88,6 +89,7 @@ class LocksRelations {
             DECLARATION_TEMPLATE_ID_2NDFL2,
             DECLARATION_TEMPLATE_ID_6NDFL,
             DECLARATION_DATA_ID_CHANGE_STATUS,
+            DECLARATION_DATA_ID_SEND_EDO
     };
 
     /**
@@ -127,6 +129,7 @@ class LocksRelations {
         OPERATION_BY_LOCK.put(DECLARATION_TEMPLATE_ID_6NDFL, OperationType.DECLARATION_6NDFL);
         OPERATION_BY_LOCK.put(EXPORT_REPORTS_ID, OperationType.EXPORT_REPORTS);
         OPERATION_BY_LOCK.put(DECLARATION_DATA_ID_CHANGE_STATUS, OperationType.UPDATE_DOC_STATE);
+        OPERATION_BY_LOCK.put(DECLARATION_DATA_ID_SEND_EDO, OperationType.SEND_EDO);
     }
 
     /**
@@ -308,7 +311,8 @@ class LocksRelations {
                         DECLARATION_DATA_ID_IMPORT_TF_DECLARATION,
                         DECLARATION_DATA_ID_UPDATE_PERSONS_DATA,
                         IMPORT_DECLARATION_EXCEL_ID,
-                        DECLARATION_DATA_ID_CHANGE_STATUS
+                        DECLARATION_DATA_ID_CHANGE_STATUS,
+                        DECLARATION_DATA_ID_SEND_EDO
                 )
         );
 
@@ -362,7 +366,8 @@ class LocksRelations {
                         EXCEL_TEMPLATE_DECLARATION_ID,
                         EXPORT_REPORTS_ID,
                         IMPORT_DECLARATION_EXCEL_ID,
-                        DECLARATION_DATA_ID_CHANGE_STATUS
+                        DECLARATION_DATA_ID_CHANGE_STATUS,
+                        DECLARATION_DATA_ID_SEND_EDO
                 )
         );
 
@@ -552,7 +557,17 @@ class LocksRelations {
                         DECLARATION_DATA_ID_ACCEPT_DECLARATION,
                         DECLARATION_DATA_ID_CHECK_DECLARATION,
                         DECLARATION_DATA_ID_DELETE_DECLARATION,
-                        DECLARATION_DATA_ID_RETURN_DECLARATION
+                        DECLARATION_DATA_ID_RETURN_DECLARATION,
+                        DECLARATION_DATA_ID_SEND_EDO
+                )
+        );
+
+        CONFLICTING_LOCKS.put(
+                DECLARATION_DATA_ID_SEND_EDO,
+                Arrays.asList(
+                        DECLARATION_DATA_ID_DELETE_DECLARATION,
+                        DECLARATION_DATA_ID_RETURN_DECLARATION,
+                        DECLARATION_DATA_ID_CHANGE_STATUS
                 )
         );
     }

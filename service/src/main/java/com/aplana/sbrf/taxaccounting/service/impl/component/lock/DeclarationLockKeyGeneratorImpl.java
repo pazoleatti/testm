@@ -67,6 +67,8 @@ public class DeclarationLockKeyGeneratorImpl implements DeclarationDataLockKeyGe
             return String.format("EXPORT_REPORTS_%s", declarationDataId);
         else if (operationType.equals(OperationType.UPDATE_DOC_STATE))
             return String.format("DECLARATION_DATA_%s_CHANGE_STATUS", declarationDataId);
+        else if (operationType.equals(OperationType.SEND_EDO))
+            return String.format("DECLARATION_DATA_%s_SEND_EDO", declarationDataId);
         else
             throw new IllegalArgumentException("Unknown operationType type!");
     }

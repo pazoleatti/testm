@@ -420,6 +420,21 @@
                 };
 
                 /**
+                 * @description Отправить в ЭДО
+                 */
+                $scope.sendEdo = function () {
+                    $http({
+                        method: "POST",
+                        url: "controller/actions/declarationData/sendEdo",
+                        data: [$stateParams.declarationDataId]
+                    }).then(function (response) {
+                        if (response.data && response.data.uuid) {
+                            $logPanel.open('log-panel-container', response.data.uuid);
+                        }
+                    });
+                };
+
+                /**
                  * @description Обработка события, которое возникает при нажании на ссылку "Источники"
                  */
                 $scope.showSourcesClick = function () {

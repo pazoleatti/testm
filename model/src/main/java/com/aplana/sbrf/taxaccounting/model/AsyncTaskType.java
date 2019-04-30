@@ -13,6 +13,7 @@ public enum AsyncTaskType {
     PDF_DEC(7L, "PDF", "Создание формы предварительного просмотра. %s"),
     IDENTIFY_PERSON(8L, "IDENTIFY_PERSON", "Идентификация ФЛ %s"),
     CONSOLIDATE(9L, "CONSOLIDATE", "Расчет НФ. %s"),
+    SEND_EDO(10L, "SEND_EDO", "Отправка ЭД в ЭДО"),
     LOAD_TRANSPORT_FILE(12L, "LoadTF", "Импорт транспортного файла"),
     LOAD_ALL_TRANSPORT_DATA(13L, "LoadAllTransporData", "Импорт из каталога загрузки"),
     CHECK_DEC(14L, "CHECK_DECLARATION", "Проверка формы"),

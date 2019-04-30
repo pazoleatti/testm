@@ -16,6 +16,7 @@ public enum OperationType {
     PDF_DEC(AsyncTaskType.PDF_DEC, "Предварительный просмотр налоговой формы"),
     IDENTIFY_PERSON(AsyncTaskType.IDENTIFY_PERSON, "Идентификация ФЛ"),
     CONSOLIDATE(AsyncTaskType.CONSOLIDATE, "Консолидация данных в налоговую форму"),
+    SEND_EDO(AsyncTaskType.SEND_EDO, "Отправка ЭД в ЭДО"),
     CHECK_DEC(AsyncTaskType.CHECK_DEC, "Проверка налоговой формы"),
     ACCEPT_DEC(AsyncTaskType.ACCEPT_DEC, "Принятие налоговой формы"),
     LOAD_TRANSPORT_FILE(AsyncTaskType.LOAD_TRANSPORT_FILE, "Загрузка данных из ТФ xml"),

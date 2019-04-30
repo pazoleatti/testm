@@ -73,13 +73,12 @@ public interface AsyncManager {
      * взаимоисключающие блокировки. Если сделать реализацию synchronized, то для одного узла исключится такая ситуация.
      *
      * @param operationType              тип задачи
-     * @param operationObjectDescription описание объекта по которому создается задача
      * @param user                       пользователь, от имени которого была запущена задача
      * @param params                     кастомные параметры задачи
      * @param logger                     логгер
      * @return удалось ли запланировать асинхронную задачу
      */
-    Boolean createTask(final OperationType operationType, String operationObjectDescription, final TAUserInfo user, final Map<String, Object> params, final Logger logger);
+    Boolean createTask(final OperationType operationType, final TAUserInfo user, final Map<String, Object> params, final Logger logger);
 
     /**
      * Создание асинхронной задачи без блокировок.

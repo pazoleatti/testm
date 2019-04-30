@@ -54,10 +54,10 @@ public interface DeclarationDataFileDao extends PermissionDao {
     /**
      * Найти данные по файлам НФ имеющие указаный тип
      * @param declarationDataId идентификатор налоговой формы
-     * @param fileTypeName      название типа
+     * @param fileType      название типа
      * @return список объектов хранящих информацию о файлах налоговой формы
      */
-    List<DeclarationDataFile> fetchByAttachFileTypeName(Long declarationDataId, String fileTypeName);
+    List<DeclarationDataFile> findAllByDeclarationIdAndType(Long declarationDataId, AttachFileType fileType);
 
     /**
      * Проверяет по первичному ключу существование записи

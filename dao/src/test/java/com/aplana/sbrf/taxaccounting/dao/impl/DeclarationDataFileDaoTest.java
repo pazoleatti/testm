@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -187,6 +188,12 @@ public class DeclarationDataFileDaoTest {
     @Test
     public void testFindFileWithMaxWeight() {
         declarationDataFileDao.fetchWithMaxWeight(-1L);
+    }
+
+    @Test
+    public void testFindAllByDeclarationIdAndType() {
+        assertThat(declarationDataFileDao.findAllByDeclarationIdAndType(1L, AttachFileType.TRANSPORT_FILE), hasSize(2));
+        assertThat(declarationDataFileDao.findAllByDeclarationIdAndType(1L, AttachFileType.OUTGOING_TO_FNS), hasSize(1));
     }
 
     @Test

@@ -246,7 +246,7 @@ public class AsyncManagerImpl implements AsyncManager {
     }
 
     @Override
-    public synchronized Boolean createTask(final OperationType operationType, final String operationObjectDescription, final TAUserInfo user, final Map<String, Object> params, final Logger logger) {
+    public synchronized Boolean createTask(final OperationType operationType, final TAUserInfo user, final Map<String, Object> params, final Logger logger) {
         LOG.info(String.format("AsyncManagerImpl.executeTask by %s. taskType: %s; params: %s", user, operationType, params));
         return tx.executeInNewTransaction(new TransactionLogic<Boolean>() {
             @Override

@@ -282,8 +282,8 @@ public class DeclarationServiceImpl implements DeclarationService {
 
 
     @Override
-    public List<DeclarationDataFile> findFilesWithSpecificType(Long declarationDataId, String fileTypeName) {
-        return declarationDataFileDao.fetchByAttachFileTypeName(declarationDataId, fileTypeName);
+    public List<DeclarationDataFile> findAllFilesByDeclarationIdAndType(Long declarationDataId, AttachFileType fileType) {
+        return declarationDataFileDao.findAllByDeclarationIdAndType(declarationDataId, fileType);
     }
 
     @Override

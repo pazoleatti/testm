@@ -318,11 +318,11 @@
                  * @description Выгрузить отчетность по фильтру по выбранным формам
                  */
                 $scope.downloadReportsBySelected = function () {
-                    var selectedItems = $scope.ndflReportJournalGrid.value;
+                    var selectedRows = $scope.ndflReportJournalGrid.value;
                     $http({
                         method: "POST",
                         url: "controller/actions/declarationData/exportReportForms",
-                        data: $filter('idExtractor')(selectedItems, 'declarationDataId')
+                        data: $filter('idExtractor')(selectedRows, 'declarationDataId')
                     }).then(function (response) {
                         if (response.data && response.data.uuid && response.data.uuid !== null) {
                             $logPanel.open('log-panel-container', response.data.uuid);
@@ -358,7 +358,7 @@
                 };
 
                 /**
-                 * @description Выгрузить отчетность по фильтру по выбранным формам
+                 * @description Выгрузить отчетность по выбранным формам
                  */
                 $scope.updateDocStateBySelected = function () {
                     $aplanaModal.open({
@@ -368,11 +368,11 @@
                         windowClass: 'modal600'
                     }).result.then(function (docState) {
                         if (docState) {
-                            var selectedItems = $scope.ndflReportJournalGrid.value;
+                            var selectedRows = $scope.ndflReportJournalGrid.value;
                             $http({
                                 method: "POST",
                                 url: "controller/actions/declarationData/updateDocState",
-                                data: $filter('idExtractor')(selectedItems, 'declarationDataId'),
+                                data: $filter('idExtractor')(selectedRows, 'declarationDataId'),
                                 params: {
                                     docStateId: docState.id
                                 }
@@ -381,6 +381,39 @@
                                     $logPanel.open('log-panel-container', response.data.uuid);
                                 }
                             });
+                        }
+                    });
+                };
+
+                /**
+                 * @description Отправить в ЭДО по фильтру
+                 */
+                $scope.updateDocStateByFilter = function () {
+                    $http({
+                        method: "POST",
+                        url: "controller/actions/declarationData/sendEdoByFilter",
+                        params: {
+                            filter: JSON.stringify(getFilter())
+                        }
+                    }).then(function (response) {
+                        if (response.data && response.data.uuid) {
+                            $logPanel.open('log-panel-container', response.data.uuid);
+                        }
+                    });
+                };
+
+                /**
+                 * @description Отправить в ЭДО по выбранным формам
+                 */
+                $scope.updateDocStateBySelected = function () {
+                    var selectedRows = $scope.ndflReportJournalGrid.value;
+                    $http({
+                        method: "POST",
+                        url: "controller/actions/declarationData/sendEdo",
+                        data: $filter('idExtractor')(selectedRows, 'declarationDataId')
+                    }).then(function (response) {
+                        if (response.data && response.data.uuid) {
+                            $logPanel.open('log-panel-container', response.data.uuid);
                         }
                     });
                 };

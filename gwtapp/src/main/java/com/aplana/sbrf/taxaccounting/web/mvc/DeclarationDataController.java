@@ -635,6 +635,24 @@ public class DeclarationDataController {
     }
 
     /**
+     * Отправить в ЭДО по списку ид форм
+     */
+    @PostMapping(value = "/actions/declarationData/sendEdo")
+    public ActionResult sendEdo(@RequestBody List<Long> declarationDataIds) {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        return declarationService.createTaskToSendEdo(declarationDataIds, userInfo);
+    }
+
+    /**
+     * Отправить в ЭДО по фильтру форм
+     */
+    @PostMapping(value = "/actions/declarationData/sendEdoByFilter")
+    public ActionResult sendEdoByFilter(@RequestParam DeclarationDataFilter filter) {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        return declarationService.createTaskToSendEdo(filter, userInfo);
+    }
+
+    /**
      * Формирование спецотчета по физ лицу для 2-НДФЛ
      */
     @PostMapping(value = "/actions/declarationData/{declarationDataId}/reportNdflByPerson")

@@ -221,22 +221,17 @@ public class DeclarationDataFileDaoImpl extends AbstractDao implements Declarati
     }
 
     @Override
-    public List<DeclarationDataFile> fetchByAttachFileTypeName(Long declarationDataId, String fileTypeName) {
-        String query = "select " +
-                "declaration_data_id, blob_data_id, user_name, user_department_name, note, " +
-                "bd.creation_date file_creation_date, bd.name file_name, ft.name file_type_name, ft.id file_type_id " +
-                "from declaration_data_file " +
-                "left join blob_data bd on (bd.id = declaration_data_file.blob_data_id) " +
-                "left join ref_book_attach_file_type ft on (ft.id = declaration_data_file.file_type_id) " +
-                "where declaration_data_id = :declarationDataId and ft.name = :fileTypeName";
+    public List<DeclarationDataFile> findAllByDeclarationIdAndType(Long declarationDataId, AttachFileType fileType) {
+        String query = "select declaration_data_id, blob_data_id, user_name, user_department_name, note,\n" +
+                "  bd.creation_date file_creation_date, bd.name file_name, ft.name file_type_name, ft.id file_type_id\n" +
+                "from declaration_data_file\n" +
+                "join blob_data bd on bd.id = declaration_data_file.blob_data_id\n" +
+                "join ref_book_attach_file_type ft on ft.id = declaration_data_file.file_type_id\n" +
+                "where declaration_data_id = :declarationDataId and ft.code = :fileTypeCode";
         MapSqlParameterSource params = new MapSqlParameterSource();
-        params.addValue("declarationDataId", declarationDataId)
-                .addValue("fileTypeName", fileTypeName);
-        try {
-            return getNamedParameterJdbcTemplate().query(query, params, new DeclarationDataFilesMapper());
-        } catch (EmptyResultDataAccessException e) {
-            return new ArrayList<DeclarationDataFile>();
-        }
+        params.addValue("declarationDataId", declarationDataId);
+        params.addValue("fileTypeCode", fileType.getCode());
+        return getNamedParameterJdbcTemplate().query(query, params, new DeclarationDataFilesMapper());
     }
 
     @Override

@@ -147,7 +147,6 @@ class Report2Ndfl extends AbstractScriptClass {
     final String NDFL_REFERENCES_LASTNAME = "LASTNAME"
     final String NDFL_REFERENCES_BIRTHDAY = "BIRTHDAY"
     final String NDFL_REFERENCES_ERRTEXT = "ERRTEXT"
-    final String OUTCOMING_ATTACH_FILE_TYPE = "Исходящий в ФНС"
 
     /**
      * Создаёт xml-файл по настройке подразделений.
@@ -898,7 +897,7 @@ class Report2Ndfl extends AbstractScriptClass {
 
     void preCreateReports() {
         ScriptUtils.checkInterrupted()
-        List<DeclarationDataFile> declarationDataFileList = declarationService.findFilesWithSpecificType(declarationData.id, OUTCOMING_ATTACH_FILE_TYPE)
+        List<DeclarationDataFile> declarationDataFileList = declarationService.findAllFilesByDeclarationIdAndType(declarationData.id, AttachFileType.OUTGOING_TO_FNS)
         if (declarationDataFileList.size() != 1) {
             paramMap.put("successfullPreCreate", false)
         } else {

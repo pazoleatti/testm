@@ -62,11 +62,17 @@ public class DeclarationLockerImpl implements DeclarationLocker {
             OperationType.EXCEL_DEC, OperationType.EXCEL_TEMPLATE_DEC, OperationType.DECLARATION_2NDFL1, OperationType.DECLARATION_2NDFL2,
             OperationType.DECLARATION_6NDFL, OperationType.IMPORT_DECLARATION_EXCEL);
 
-    private static final Set<OperationType> SET_CHECK__ACCEPT__TOCREATE = ImmutableSet.of(
+    private static final Set<OperationType> SET_CHECK__ACCEPT = ImmutableSet.of(
             OperationType.ACCEPT_DEC, OperationType.CHECK_DEC,
             OperationType.CONSOLIDATE, OperationType.DELETE_DEC, OperationType.EDIT, OperationType.IDENTIFY_PERSON,
             OperationType.LOAD_TRANSPORT_FILE, OperationType.RETURN_DECLARATION,
             OperationType.UPDATE_PERSONS_DATA, OperationType.IMPORT_DECLARATION_EXCEL, OperationType.UPDATE_DOC_STATE);
+
+    private static final Set<OperationType> SET_RETURN_DECLARATION = ImmutableSet.of(
+            OperationType.ACCEPT_DEC, OperationType.CHECK_DEC,
+            OperationType.CONSOLIDATE, OperationType.DELETE_DEC, OperationType.EDIT, OperationType.IDENTIFY_PERSON,
+            OperationType.LOAD_TRANSPORT_FILE, OperationType.RETURN_DECLARATION,
+            OperationType.UPDATE_PERSONS_DATA, OperationType.IMPORT_DECLARATION_EXCEL, OperationType.UPDATE_DOC_STATE, OperationType.SEND_EDO);
 
 
     private static final Set<OperationType> SET_EDIT = ImmutableSet.of(
@@ -101,7 +107,7 @@ public class DeclarationLockerImpl implements DeclarationLocker {
             OperationType.RNU_PAYMENT_REPORT, OperationType.RNU_RATE_REPORT, OperationType.UPDATE_PERSONS_DATA,
             OperationType.EXCEL_DEC, OperationType.DECLARATION_2NDFL1, OperationType.DECLARATION_2NDFL2,
             OperationType.DECLARATION_6NDFL, OperationType.EXCEL_TEMPLATE_DEC, OperationType.EXPORT_REPORTS,
-            OperationType.IMPORT_DECLARATION_EXCEL, OperationType.UPDATE_DOC_STATE
+            OperationType.IMPORT_DECLARATION_EXCEL, OperationType.UPDATE_DOC_STATE, OperationType.SEND_EDO
     );
 
     private static final Set<OperationType> SET_XLSX = ImmutableSet.of(
@@ -119,7 +125,11 @@ public class DeclarationLockerImpl implements DeclarationLocker {
 
     private static final Set<OperationType> SET_UPDATE_DOC_STATE = ImmutableSet.of(
             OperationType.ACCEPT_DEC, OperationType.CHECK_DEC,
-            OperationType.DELETE_DEC, OperationType.RETURN_DECLARATION);
+            OperationType.DELETE_DEC, OperationType.RETURN_DECLARATION, OperationType.SEND_EDO);
+
+    private static final Set<OperationType> SET_SEND_EDO = ImmutableSet.of(
+            OperationType.DELETE_DEC, OperationType.RETURN_DECLARATION,
+            OperationType.UPDATE_DOC_STATE);
 
     // Зависимости
     private final DeclarationDataLockKeyGenerator simpleDeclarationDataLockKeyGenerator;
@@ -167,9 +177,9 @@ public class DeclarationLockerImpl implements DeclarationLocker {
         else if (operationType.equals(OperationType.UPDATE_PERSONS_DATA))
             return doCheckAndLock(declarationDataIdList, operationType, SET_UPDATE_PERSONS_DATA, userInfo, logger);
         else if (operationType.equals(OperationType.CHECK_DEC))
-            return doCheckAndLock(declarationDataIdList, operationType, SET_CHECK__ACCEPT__TOCREATE, userInfo, logger);
+            return doCheckAndLock(declarationDataIdList, operationType, SET_CHECK__ACCEPT, userInfo, logger);
         else if (operationType.equals(OperationType.ACCEPT_DEC))
-            return doCheckAndLock(declarationDataIdList, operationType, SET_CHECK__ACCEPT__TOCREATE, userInfo, logger);
+            return doCheckAndLock(declarationDataIdList, operationType, SET_CHECK__ACCEPT, userInfo, logger);
         else if (operationType.equals(OperationType.DELETE_DEC))
             return doCheckAndLock(declarationDataIdList, operationType, SET_DELETE, userInfo, logger);
         else if (operationType.equals(OperationType.CONSOLIDATE))
@@ -181,7 +191,7 @@ public class DeclarationLockerImpl implements DeclarationLocker {
         else if (operationType.equals(OperationType.PDF_DEC))
             return doCheckAndLock(declarationDataIdList, operationType, SET_EDIT_FILE__PDF__EXPORT_REPORTS__REPORT_2NDFL1__REPORT_2NDFL2, userInfo, logger);
         else if (operationType.equals(OperationType.RETURN_DECLARATION))
-            return doCheckAndLock(declarationDataIdList, operationType, SET_CHECK__ACCEPT__TOCREATE, userInfo, logger);
+            return doCheckAndLock(declarationDataIdList, operationType, SET_RETURN_DECLARATION, userInfo, logger);
         else if (operationType.equals(OperationType.EDIT))
             return doCheckAndLock(declarationDataIdList, operationType, SET_EDIT, userInfo, logger);
         else if (operationType.equals(OperationType.EDIT_FILE))
@@ -216,6 +226,8 @@ public class DeclarationLockerImpl implements DeclarationLocker {
             return doCheckAndLock(declarationDataIdList, operationType, SET_EDIT_FILE__PDF__EXPORT_REPORTS__REPORT_2NDFL1__REPORT_2NDFL2, userInfo, logger);
         } else if (operationType.equals(OperationType.UPDATE_DOC_STATE)) {
             return doCheckAndLock(declarationDataIdList, operationType, SET_UPDATE_DOC_STATE, userInfo, logger);
+        } else if (operationType.equals(OperationType.SEND_EDO)) {
+            return doCheckAndLock(declarationDataIdList, operationType, SET_SEND_EDO, userInfo, logger);
         } else
             throw new IllegalArgumentException("Unknown operationType type!");
     }

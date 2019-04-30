@@ -209,4 +209,13 @@
 		</sql>
 	</changeSet>
 
+	<!--https://jira.aplana.com/browse/SBRFNDFL-7164 - Новая ассинхронная задача отправить ЭД в ЭДО-->
+	<changeSet id="3.7-dnovikov-13" author="dnovikov">
+		<insert tableName="async_task_type">
+			<column name="id" value="10"/>
+			<column name="name" value="Отправка ЭД в ЭДО"/>
+			<column name="handler_bean" value="SendEdoAsyncTask"/>
+		</insert>
+	</changeSet>
+
 </databaseChangeLog>

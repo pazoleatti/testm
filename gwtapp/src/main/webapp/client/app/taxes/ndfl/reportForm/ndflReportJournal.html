@@ -66,11 +66,11 @@
                             </li>
                             <li role="menuitem">
                                 <a ng-class="ndflReportJournalGrid.ctrl.getCountRecords() > 0 ? '' : 'disabled'"
-                                   ng-click="downloadReportsByFilter()">{{::'ndflReportJournal.button.downloadReport.byFilter' | translate}}</a>
+                                   ng-click="downloadReportsByFilter()">{{::'ndflReportJournal.button.byFilter' | translate}}</a>
                             </li>
                             <li role="menuitem">
                                 <a ng-class="ndflReportJournalGrid.value.length > 0 ? '' : 'disabled'"
-                                   ng-click="downloadReportsBySelected()">{{::'ndflReportJournal.button.downloadReport.selected' | translate}}</a>
+                                   ng-click="downloadReportsBySelected()">{{::'ndflReportJournal.button.selected' | translate}}</a>
                             </li>
                         </ul>
                     </span>
@@ -85,11 +85,30 @@
                             aria-labelledby="update-doc-state-button">
                             <li role="menuitem">
                                 <a ng-class="ndflReportJournalGrid.ctrl.getCountRecords() > 0 ? '' : 'disabled'"
-                                   ng-click="updateDocStateByFilter()">{{::'ndflReportJournal.button.updateDocState.byFilter' | translate}}</a>
+                                   ng-click="updateDocStateByFilter()">{{::'ndflReportJournal.button.byFilter' | translate}}</a>
                             </li>
                             <li role="menuitem">
                                 <a ng-class="ndflReportJournalGrid.value.length > 0 ? '' : 'disabled'"
-                                   ng-click="updateDocStateBySelected()">{{::'ndflReportJournal.button.updateDocState.selected' | translate}}</a>
+                                   ng-click="updateDocStateBySelected()">{{::'ndflReportJournal.button.selected' | translate}}</a>
+                            </li>
+                        </ul>
+                    </span>
+                    <!--Отправить в ЭДО-->
+                    <span>
+                        <button id="send_edo-button" type="button" class="btn btn-default"
+                                data-bs-dropdown
+                                data-placement="bottom-left">
+                            <span data-translate-once="ndflReportJournal.button.sendEdo"></span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-block" role="menu"
+                            aria-labelledby="send_edo-button">
+                            <li role="menuitem">
+                                <a ng-class="ndflReportJournalGrid.ctrl.getCountRecords() > 0 ? '' : 'disabled'"
+                                   ng-click="sendEdoByFilter()">{{::'ndflReportJournal.button.byFilter' | translate}}</a>
+                            </li>
+                            <li role="menuitem">
+                                <a ng-class="ndflReportJournalGrid.value.length > 0 ? '' : 'disabled'"
+                                   ng-click="sendEdoBySelected()">{{::'ndflReportJournal.button.selected' | translate}}</a>
                             </li>
                         </ul>
                     </span>

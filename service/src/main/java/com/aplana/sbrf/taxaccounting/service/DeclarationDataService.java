@@ -40,10 +40,10 @@ public interface DeclarationDataService {
     /**
      * Создание декларации в заданном отчетном периоде подразделения
      *
-     * @param newDeclaration         данные формы
-     * @param logger                 объект журнала
-     * @param userInfo               информация о пользователе, выполняющего действие
-     * @param writeAudit             надо ли писать в ЖА
+     * @param newDeclaration данные формы
+     * @param logger         объект журнала
+     * @param userInfo       информация о пользователе, выполняющего действие
+     * @param writeAudit     надо ли писать в ЖА
      * @return идентификатор созданной декларации
      */
     Long createWithotChecks(DeclarationData newDeclaration, Logger logger, TAUserInfo userInfo, boolean writeAudit);
@@ -118,7 +118,8 @@ public interface DeclarationDataService {
 
     /**
      * Удаление налоговой формы без использования асинхронной задачи
-     *  @param declarationDataId идентификатор НФ
+     *
+     * @param declarationDataId идентификатор НФ
      * @param userInfo          информация о пользователе, выполняющего действие
      */
     void deleteSync(long declarationDataId, TAUserInfo userInfo);
@@ -386,7 +387,7 @@ public interface DeclarationDataService {
      * Возвращает полное название декларации с указанием подразделения, периода и прочего
      *
      * @param declarationId идентификатор декларации
-     * @param asyncTaskType  тип отчета. Может быть null
+     * @param asyncTaskType тип отчета. Может быть null
      * @return название
      */
     String getDeclarationFullName(long declarationId, AsyncTaskType asyncTaskType, String... args);
@@ -560,12 +561,38 @@ public interface DeclarationDataService {
     void updateDocState(List<Long> declarationDataIds, long docStateId, TAUserInfo userInfo, Logger logger);
 
     /**
+     * Запускает ассинхронную задачу на отправку в ЭДО форм по фильтру
+     *
+     * @param filter   фильтр, по которому выбираются формы
+     * @param userInfo пользователь запустивший операцию
+     * @return результат запуска задачи
+     */
+    ActionResult createTaskToSendEdo(DeclarationDataFilter filter, TAUserInfo userInfo);
+
+    /**
+     * Запускает ассинхронную задачу на отправку в ЭДО форм по списку ил
+     *
+     * @param declarationDataIds список ид форм
+     * @param userInfo           пользователь запустивший операцию
+     * @return результат запуска задачи
+     */
+    ActionResult createTaskToSendEdo(List<Long> declarationDataIds, TAUserInfo userInfo);
+
+    /**
+     * Отправляет данные ОНФ в ЭДО
+     *
+     * @param declarationDataIds список ид форм
+     * @param userInfo           пользователь запустивший операцию
+     * @param logger             логгер
+     */
+    void sendEdo(List<Long> declarationDataIds, TAUserInfo userInfo, Logger logger);
+
+    /**
      * Создание отчета для отчетной НФ
      *
-     *
      * @param declarationDataId
-     * @param action   объект с параметрами для создания отчета для отчетной налоговой формы
-     * @param userInfo информация о пользователе
+     * @param action            объект с параметрами для создания отчета для отчетной налоговой формы
+     * @param userInfo          информация о пользователе
      * @return результат создания задачи
      */
     ActionResult createReportNdflByPersonReport(long declarationDataId, CreateReportAction action, TAUserInfo userInfo);
@@ -719,6 +746,7 @@ public interface DeclarationDataService {
 
     /**
      * Проверка числа на соответствие параметру "Максимальное количество строк РНУ для массового изменения"
+     *
      * @param count проверяемое число
      * @return ActionResult со статусом и логами проверки
      */
