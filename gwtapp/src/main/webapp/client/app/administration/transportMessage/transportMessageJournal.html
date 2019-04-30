@@ -11,11 +11,11 @@
             <span data-ng-include="'client/app/administration/transportMessage/transportMessageJournalFilter.html'"></span>
 
             <div class="btn-toolbar" role="toolbar">
-                <!--Создать-->
+                <!-- Кнопка "Открыть" -->
                 <span>
                     <button type="button"
                             class="btn btn-default"
-                            data-ng-click="openMessage()"
+                            data-ng-click="openMessage(transportMessageGrid.value[0])"
                             data-ng-disabled="transportMessageGrid.value.length !== 1">
                         <span data-translate-once="button.open"></span>
                     </button>

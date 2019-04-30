@@ -129,20 +129,23 @@
                         viewrecords: true,
                         sortorder: "asc",
                         hidegrid: false,
-                        multiselect: true
+                        multiselect: true,
+                        ondblClickRow: function (rowId) {
+                            $scope.openMessage($scope.transportMessageGrid.ctrl.getRawData(rowId));
+                        }
                     }
                 };
 
-                $scope.openMessage = function () {
+                $scope.openMessage = function (row) {
                     $aplanaModal.open({
-                        title: 'Просмотр записи журнала сообщений',
+                        title: $filter('translate')('transportMessages.title.modal'),
                         templateUrl: 'client/app/administration/transportMessage/transportMessageWindow.html',
                         controller: 'transportMessageWindowCtrl',
                         windowClass: 'modal1200',
                         resolve: {
                             $shareData: function () {
                                 return {
-                                    message: $scope.transportMessageGrid.value[0]
+                                    message: row
                                 };
                             }
                         }

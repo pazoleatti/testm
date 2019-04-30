@@ -842,6 +842,7 @@
         "async.title.stateDate": "Дата изменения состояния",
 
         "transportMessages.title": "НДФЛ - Обмен с ФП АС Учет Налогов",
+        "transportMessages.title.modal": "Просмотр записи журнала сообщений",
         "transportMessages.title.declarationInfo": "Информация о форме, к которой относится сообщение",
         "transportMessages.title.messageInfo": "Информация о сообщении",
         "transportMessages.title.message": "Сообщение",
