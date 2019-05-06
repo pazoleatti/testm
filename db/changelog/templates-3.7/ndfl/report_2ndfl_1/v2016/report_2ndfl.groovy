@@ -40,8 +40,6 @@ import org.apache.pdfbox.pdmodel.font.PDFont
 import org.apache.pdfbox.pdmodel.font.PDType0Font
 import org.apache.pdfbox.pdmodel.interactive.form.PDAcroForm
 import org.apache.pdfbox.pdmodel.interactive.form.PDField
-import org.apache.poi.ss.usermodel.CellStyle
-import org.apache.poi.xssf.usermodel.*
 
 import java.nio.charset.Charset
 
@@ -149,7 +147,6 @@ class Report2Ndfl extends AbstractScriptClass {
     final String NDFL_REFERENCES_LASTNAME = "LASTNAME"
     final String NDFL_REFERENCES_BIRTHDAY = "BIRTHDAY"
     final String NDFL_REFERENCES_ERRTEXT = "ERRTEXT"
-    final String OUTCOMING_ATTACH_FILE_TYPE = "Исходящий в ФНС"
 
     /**
      * Создаёт xml-файл по настройке подразделений.
@@ -777,7 +774,7 @@ class Report2Ndfl extends AbstractScriptClass {
                         saveFileInfo(xml.xmlFile, xml.fileName)
                         zipFile = ZipUtils.archive(xml.xmlFile, xml.fileName + ".xml")
                         String uuid = blobDataService.create(zipFile, xml.fileName + ".zip", currDate)
-                        reportService.attachReportToDeclaration(declarationData.id, uuid, DeclarationDataReportType.XML_DEC)
+                        reportService.attachReportToDeclaration(declarationData.id, uuid, DeclarationReportType.XML_DEC)
                         // Добавление информации о источнике созданной отчетной формы.
                         sourceService.addDeclarationConsolidationInfo(declarationData.id, singletonList(sourceKnf.id))
 
@@ -900,7 +897,7 @@ class Report2Ndfl extends AbstractScriptClass {
 
     void preCreateReports() {
         ScriptUtils.checkInterrupted()
-        List<DeclarationDataFile> declarationDataFileList = declarationService.findFilesWithSpecificType(declarationData.id, OUTCOMING_ATTACH_FILE_TYPE)
+        List<DeclarationDataFile> declarationDataFileList = declarationService.findAllFilesByDeclarationIdAndType(declarationData.id, AttachFileType.OUTGOING_TO_FNS)
         if (declarationDataFileList.size() != 1) {
             paramMap.put("successfullPreCreate", false)
         } else {
