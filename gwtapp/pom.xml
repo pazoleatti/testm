@@ -420,6 +420,8 @@
                                             <inputDir>${basedir}/src/main/webapp/client/app</inputDir>
                                             <includes>
                                                 <include>/main/app.js</include>
+                                                <!-- объявление модуля должно предварять создаваемые в нём функции -->
+                                                <include>/administration/transportMessage/transportMessageModule.js</include>
                                                 <include>**/*.js</include>
                                             </includes>
                                         </aggregation>

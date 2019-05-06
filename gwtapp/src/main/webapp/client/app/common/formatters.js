@@ -19,8 +19,7 @@
                 }
                 if (!value.millis) {
                     return $filter('date')(value, 'dd.MM.yyyy');
-                }
-                else {
+                } else {
                     return $filter('date')(value.millis, 'dd.MM.yyyy');
                 }
             };
@@ -38,8 +37,7 @@
                 }
                 if (!value.millis) {
                     return $filter('date')(value, 'dd.MM');
-                }
-                else {
+                } else {
                     return $filter('date')(value.millis, 'dd.MM');
                 }
             };
@@ -58,8 +56,7 @@
                 }
                 if (!value.millis) {
                     return $filter('date')(value, 'dd.MM.yyyy HH:mm:ss', '+3');
-                }
-                else {
+                } else {
                     return $filter('date')(value.millis, 'dd.MM.yyyy HH:mm:ss', '+3');
                 }
             };
@@ -686,5 +683,31 @@
                 return APP_CONSTANTS.NEGATIVE_SUMS_SIGN[negativeSumsSign].name;
             };
         }])
+
+        /**
+         * @description Форматтер вида "(id) shortName"
+         */
+        .filter('idNameFormatter', function () {
+            return function (record) {
+                if (!record) return '';
+                if (!record.id && !record.name) return '';
+                if (!record.id) return record.name;
+                if (!record.name) return '(' + record.id + ')';
+                return "(" + record.id + ") " + record.name;
+            };
+        })
+
+        /**
+         * @description Формат имени пользователя: "Имя (Логин)"
+         */
+        .filter('userFormatter', function () {
+            return function (user) {
+                if (!user) return '';
+                if (!user.name && !user.login) return '';
+                if (!user.login) return user.name;
+                if (!user.name) return '(' + user.login + ')';
+                return user.name + ' (' + user.login + ')';
+            };
+        })
     ;
 }());

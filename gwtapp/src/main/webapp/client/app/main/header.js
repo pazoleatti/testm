@@ -122,6 +122,9 @@
                         }, {
                             name: $filter('translate')('menu.administration.asyncTaskList'),
                             href: $state.href('asyncTaskList')
+                        }, {
+                            name: $filter('translate')('menu.administration.transportMessageJournal'),
+                            href: $state.href('transportMessageJournal')
                         });
                     }
 
@@ -239,12 +242,14 @@
                     $scope.updateNotificationCount();
                     $scope.stop = $interval($scope.updateNotificationCount, 30000);
                 }
+
                 function cancelUpdateNotificationCountInterval() {
                     if (angular.isDefined($scope.stop)) {
                         $interval.cancel($scope.stop);
                         $scope.stop = undefined;
                     }
                 }
+
                 $scope.$on("AUTHORIZATION_EXPIRED", function () {
                     cancelUpdateNotificationCountInterval();
                 });

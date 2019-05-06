@@ -73,6 +73,7 @@ form {
   .row {
     margin: 10px 0;
   }
+
   .modal-body {
     .row {
       margin: 0 0 10px 0;
@@ -143,6 +144,7 @@ a {
 .navbar {
   margin-bottom: 0; /* Устраняем лишнее пространство межжу меню и основным содержимым*/
   min-height: 41px;
+
   .nav {
     li {
       a {
@@ -610,19 +612,24 @@ button.btn-back-to-list {
     display: flex;
     align-items: center;
   }
+
   .form-group label {
     margin: 0;
     padding: 0;
   }
+
   [class*='span'] {
     min-height: 0;
   }
+
   .form-group .form-group {
     margin-bottom: 0;
   }
+
   .row {
     margin-bottom: 0;
   }
+
   form {
     margin: 0 0 8px;
   }
@@ -821,18 +828,22 @@ hr {
   box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.3);
   border: none;
   border-radius: 0;
+
   .navbar-nav > li {
     height: 40px;
     margin-top: 0;
+
     div {
       padding: 0 10px;
     }
+
     &.dropdown {
       border: none;
       background: none;
       margin: 13px 0 0 0;
     }
   }
+
   .navbar-nav > li > a {
     color: @white;
     padding: 4.5px 14px !important;
@@ -842,9 +853,11 @@ hr {
     display: inline-block;
     border: none;
     font-weight: bold;
+
     &:hover {
       color: @white;
     }
+
     &.logout_link {
       width: 24px;
       height: 24px;
@@ -856,10 +869,12 @@ hr {
       cursor: pointer;
     }
   }
+
   .app-header-user-info {
     font-size: 11px;
     margin-top: 7px !important;
   }
+
   .new-message {
     width: 25px;
     height: 25px;
@@ -973,11 +988,13 @@ button.btn.btn-default.ng-binding {
   color: @white;
   background-color: @greenDark;
   border-color: @greenDark;
+
   &:focus, &.focus {
     background: #59bf57;
     color: hsla(0, 0%, 100%, .85);
     border-color: @greenDark;
   }
+
   &:active, &.active {
     background: #59bf57;
     color: hsla(0, 0%, 100%, .85);
@@ -1110,26 +1127,32 @@ button.btn.btn-default.ng-binding {
       margin: 0 -20px 0 30px;
     }
   }
+
   .control-label {
     widtH: 100%;
   }
+
   div [ui-view] {
     .controls {
       margin-top: 21px;
     }
   }
+
   .modal-body {
     .control-label {
       text-align: right;
     }
+
     .correction-message {
       width: 90%;
       padding-left: 20px;
     }
+
     .form-group {
       display: flex;
       margin-bottom: 0;
     }
+
     .field-wrapper {
       display: flex;
       align-items: center;
@@ -1636,11 +1659,13 @@ label[class="ng-binding"], label[class="w100 ng-binding"], label[class="w138 ng-
 .btn-group {
   .btn {
     font-size: 12px;
+
     .caret {
       margin-top: 0;
       margin-left: 9px;
     }
   }
+
   .dropdown-menu {
     font-size: 12px;
   }
@@ -1652,18 +1677,22 @@ label[class="ng-binding"], label[class="w100 ng-binding"], label[class="w138 ng-
     height: 26px;
     min-width: 0;
   }
+
   .cbr-picker-input {
     margin-right: 22px;
+
     input {
       padding: 2px 5px;
       border: solid 1px rgba(0, 0, 0, 0.2);
       border-right: none;
       border-radius: 0;
     }
+
     input:disabled {
       border: none;
     }
   }
+
   .btn-sm {
     height: 28px;
   }
@@ -1787,10 +1816,12 @@ label[class="ng-binding"], label[class="w100 ng-binding"], label[class="w138 ng-
 Добавил, т.к. так работает заметно лучше и быстрее, тем более при движении сплиттера панели уведомлений*/
 .flex-grid {
   &:extend(.flex-column);
+
   .field-content {
     flex: 1;
     overflow: hidden;
   }
+
   .ui-jqgrid {
     &:extend(.flex-column);
   }
@@ -1802,6 +1833,7 @@ label[class="ng-binding"], label[class="w100 ng-binding"], label[class="w138 ng-
 
   .ui-jqgrid-bdiv {
     &:extend(.flex-fill);
+
     table {
       overflow: visible;
     }
@@ -1855,27 +1887,34 @@ label[class="ng-binding"], label[class="w100 ng-binding"], label[class="w138 ng-
   .select2-container .select2-choice {
     height: auto;
   }
+
   .row-fluid [class*='span'] {
     min-height: 0;
   }
+
   .form-group {
     margin-bottom: 10px;
     display: flex;
     align-items: center;
   }
+
   .form-group label {
     margin: 0 0 1px;
     padding: 0;
   }
+
   [class*='span'] {
     min-height: 0;
   }
+
   .form-group .form-group {
     margin-bottom: 0;
   }
+
   .row {
     margin-bottom: 0;
   }
+
   form {
     margin: 0 0 8px;
   }
@@ -1886,5 +1925,33 @@ label[class="ng-binding"], label[class="w100 ng-binding"], label[class="w138 ng-
     float: right;
     white-space: nowrap;
     width: auto;
+  }
+}
+
+// окно просмотра Транспортного сообщения
+#transport-message-modal {
+
+  // сдвигаем ширину колонок вровень с другими
+  .row-fluid.shifted {
+
+    [class*="span"] {
+      margin-left: 1.1%;
+    }
+
+    [class*="span"]:first-child {
+      margin-left: 0;
+    }
+
+    .span2 {
+      width: 15.6%;
+    }
+
+    .span10 {
+      width: 83.3%;
+    }
+  }
+
+  textarea[readonly="readonly"] {
+    cursor: default;
   }
 }

@@ -1219,5 +1219,43 @@
                 };
             }
         ])
+
+        /**
+         * Контроллер для выбора подсистемы АС УН
+         */
+        .controller('SelectSubsystemCtrl', ['$scope', '$rootScope', 'APP_CONSTANTS', 'GetSelectOption',
+            function ($scope, $rootScope, APP_CONSTANTS, GetSelectOption) {
+                $scope.subsystemSelect = GetSelectOption.getAjaxSelectOptions(false, true, "controller/rest/subsystems", {}, {});
+            }
+        ])
+
+        /**
+         * Выбор по объектам вида id: name
+         */
+        .controller('SelectByKeyValueCtrl', ['$scope', 'APP_CONSTANTS', 'GetSelectOption', '$filter',
+            function ($scope, APP_CONSTANTS, GetSelectOption) {
+
+                $scope.initSingleSelect = function (map) {
+                    $scope.select = GetSelectOption.getBasicSingleSelectOptions(true);
+                    $scope.select.options.data.results = toArray(map);
+                };
+
+                $scope.initMultipleSelect = function (map) {
+                    $scope.select = GetSelectOption.getBasicMultipleSelectOptions(true);
+                    $scope.select.options.data.results = toArray(map);
+                };
+
+                function toArray(map) {
+                    var array = [];
+                    var keys = Object.keys(map);
+                    for (var i in keys) {
+                        var key = keys[i];
+                        var value = map[key];
+                        array.push({id: key, name: value});
+                    }
+                    return array;
+                }
+            }
+        ])
     ;
 }());

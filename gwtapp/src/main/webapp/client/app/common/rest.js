@@ -166,6 +166,15 @@
         }])
 
         /**
+         * @description Транспортные сообщения
+         */
+        .factory('transportMessageResource', ['$resource', function ($resource) {
+            return $resource('controller/rest/transportMessages', {}, {
+                query: {method: 'GET', isArray: true, cache: false}
+            });
+        }])
+
+        /**
          * @description Список пользователей
          */
         .factory('usersResource', ['$resource', function ($resource) {
@@ -392,7 +401,8 @@
         .factory('DepartmentConfigResource', ['$resource', function ($resource) {
             return $resource('controller/rest/departmentConfig', {}, {
                 query: {
-                    method: 'GET', isArray: false, cache: false}
+                    method: 'GET', isArray: false, cache: false
+                }
             });
         }])
 
