@@ -31,17 +31,24 @@
             }
         })
 
-        .filter('tmBodyFileLinkFormatter', function () {
+        .filter('tmGridBodyFileLinkFormatter', function () {
             return function (fileName, options) {
-                if (!fileName) return '';
+                if (!fileName || !options) return '';
                 return '<a target="_self" href="controller/rest/transportMessages/' + options.rowId + '/bodyFile">' + fileName + '</a>';
             }
         })
 
-        .filter('tmFileLinkFormatter', function () {
+        .filter('tmGridFileLinkFormatter', function () {
             return function (file, options) {
-                if (!file || !file.name) return '';
+                if (!file || !file.name || !options) return '';
                 return '<a target="_self" href="controller/rest/transportMessages/' + options.rowId + '/file">' + file.name + '</a>'
+            }
+        })
+
+        .filter('tmWindowFileLinkFormatter', function () {
+            return function (message) {
+                if (!message || !message.blob || !message.blob.name) return '';
+                return '<a target="_self" href="controller/rest/transportMessages/' + message.id + '/file">' + message.blob.name + '</a>'
             }
         })
 }());

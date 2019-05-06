@@ -113,13 +113,13 @@
                             }, {
                                 name: 'bodyFileName',
                                 index: 'has_body',
-                                formatter: $filter('tmBodyFileLinkFormatter'),
+                                formatter: $filter('tmGridBodyFileLinkFormatter'),
                                 width: 250
                             }, {
                                 name: 'blob',
                                 index: 'blob_name',
                                 width: 250,
-                                formatter: $filter('tmFileLinkFormatter')
+                                formatter: $filter('tmGridFileLinkFormatter')
                             }
                         ],
                         rowNum: APP_CONSTANTS.COMMON.PAGINATION[0],

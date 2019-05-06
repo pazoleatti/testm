@@ -84,7 +84,7 @@
     <!-- Файл вложения -->
     <div class="row-fluid shifted">
         <div class="span2 text-right">{{::'transportMessages.title.file' | translate}}:</div>
-        <div class="span10">{{message.blob.name}}</div>
+        <div class="span10" data-ng-bind-html="message | tmWindowFileLinkFormatter"></div>
     </div>
     <!-- Имя исходного файла -->
     <div class="row-fluid shifted">

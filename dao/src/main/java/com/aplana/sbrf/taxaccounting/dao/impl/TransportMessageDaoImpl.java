@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.dao.TransportMessageDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.messaging.*;
+import com.google.common.base.Joiner;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.intellij.lang.annotations.Language;
@@ -160,11 +161,13 @@ public class TransportMessageDaoImpl extends AbstractDao implements TransportMes
             message.setHasBody(rs.getBoolean("has_body"));
 
             // Данные о форме
+            String periodYear = rs.getString("period_year");
+            String periodName = rs.getString("period_name");
             DeclarationShortInfo declaration = DeclarationShortInfo.builder()
                     .id(SqlUtils.getLong(rs, "declaration_id"))
                     .departmentName(rs.getString("department_name"))
                     .typeName(rs.getString("declaration_type_name"))
-                    .reportPeriodName(rs.getString("period_year") + ", " + rs.getString("period_name"))
+                    .reportPeriodName(Joiner.on(", ").skipNulls().join(periodYear, periodName))
                     .build();
             message.setDeclaration(declaration);
 
