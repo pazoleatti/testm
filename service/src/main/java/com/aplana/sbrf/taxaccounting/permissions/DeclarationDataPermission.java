@@ -284,20 +284,16 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
         protected boolean isGrantedInternal(User currentUser, DeclarationData targetDomainObject, Logger logger) {
             DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.fetchOne(targetDomainObject.getDepartmentReportPeriodId());
             if (VIEW.isGranted(currentUser, targetDomainObject, logger)) {
-                if (targetDomainObject.getState() == State.CREATED || targetDomainObject.getState() == State.PREPARED) {
-                    if (PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER)) {
-                        DeclarationFormKind declarationKind = declarationTemplateDao.get(targetDomainObject.getDeclarationTemplateId()).getDeclarationFormKind();
-                        if (declarationKind == DeclarationFormKind.PRIMARY &&
-                                targetDomainObject.isManuallyCreated() &&
-                                targetDomainObject.getLastDataModifiedDate() == null) {
-                            return false;
-                        }
-                        return true;
-                    } else {
-                        logError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, ROLE_ERROR, logger);
+                if (PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER)) {
+                    DeclarationFormKind declarationKind = declarationTemplateDao.get(targetDomainObject.getDeclarationTemplateId()).getDeclarationFormKind();
+                    if (declarationKind == DeclarationFormKind.PRIMARY &&
+                            targetDomainObject.isManuallyCreated() &&
+                            targetDomainObject.getLastDataModifiedDate() == null) {
+                        return false;
                     }
+                    return true;
                 } else {
-                    logError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, String.format(STATE_ERROR, OPERATION_NAME, targetDomainObject.getState().getTitle()), logger);
+                    logError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, ROLE_ERROR, logger);
                 }
             } else {
                 logError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, ROLE_ERROR, logger);
