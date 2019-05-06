@@ -14,7 +14,7 @@ FOR c1 IN (
             pdp.name tb_name
             from 
             DEPARTMENT_REPORT_PERIOD pdrp,
-            TAX_UNSTABLE.DEPARTMENT pdp
+            DEPARTMENT pdp
             where 
             pdp.id = pdrp.department_id
             and pdp.type = 2 -- Тип подразделения = "Территориальный банк"
@@ -33,7 +33,7 @@ LOOP
                 declaration_data dd,
                 REF_BOOK_ASNU rba,
                 DEPARTMENT_REPORT_PERIOD drp,
-                TAX_UNSTABLE.DEPARTMENT dp
+                DEPARTMENT dp
                 where
                 dd.asnu_id = rba.id 
                 and rba.code=v_asnu -- Форма.АСНУ = АСНУ
