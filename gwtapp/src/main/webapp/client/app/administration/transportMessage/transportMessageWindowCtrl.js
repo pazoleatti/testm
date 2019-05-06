@@ -6,10 +6,16 @@
      */
     angular.module('app.transportMessage')
 
-        .controller('transportMessageWindowCtrl', ['$scope', '$shareData', '$modalInstance',
-            function ($scope, $shareData, $modalInstance) {
+        .controller('transportMessageWindowCtrl', ['$scope', '$http', '$shareData', '$modalInstance',
+            function ($scope, $http, $shareData, $modalInstance) {
 
                 $scope.message = $shareData.message;
+
+                // Запрос тела сообщения
+                $http.get('controller/rest/transportMessages/' + $shareData.message.id + '/body')
+                    .then(function (response) {
+                        $scope.message.body = response.data;
+                    });
 
                 /**
                  * Закрытие окна

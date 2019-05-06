@@ -53,14 +53,6 @@ public class TransportMessageController {
     }
 
     /**
-     * Выгрузка Транспортного сообщения по идентификатору.
-     */
-    @GetMapping("/rest/transportMessages/{messageId}/body")
-    public String getMessageBody(@PathVariable Long messageId) {
-        return transportMessageService.findMessageBodyById(messageId);
-    }
-
-    /**
      * Выгрузка файла из Транспортного сообщения.
      */
     @GetMapping("rest/transportMessages/{messageId}/file")
@@ -81,7 +73,15 @@ public class TransportMessageController {
     }
 
     /**
-     * Выгрузка файла из Транспортного сообщения.
+     * Выгрузка тела Транспортного сообщения.
+     */
+    @GetMapping("/rest/transportMessages/{messageId}/body")
+    public String getMessageBody(@PathVariable Long messageId) {
+        return transportMessageService.findMessageBodyById(messageId);
+    }
+
+    /**
+     * Выгрузка тела Транспортного сообщения в виде файла.
      */
     @GetMapping("rest/transportMessages/{messageId}/bodyFile")
     public void downloadTransportMessageBodyFile(@PathVariable Long messageId,

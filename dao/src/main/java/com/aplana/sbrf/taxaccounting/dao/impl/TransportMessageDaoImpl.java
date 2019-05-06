@@ -29,9 +29,11 @@ public class TransportMessageDaoImpl extends AbstractDao implements TransportMes
             "   tm.id, tm.message_uuid, tm.datetime, tm.type, tm.content_type, tm.state, \n" +
             "   tm.sender_subsystem_id sender_id, sender.code sender_code, sender.name sender_name, sender.short_name sender_short_name, \n" +
             "   tm.receiver_subsystem_id receiver_id, receiver.code receiver_code, receiver.name receiver_name, receiver.short_name receiver_short_name, \n" +
-            "   tm.blob_id, blob_data.name blob_name, tm.source_file_name, \n" +
+            "   tm.blob_id, blob_data.name blob_name, tm.source_file_name, tm.explanation, \n" +
             "   tm.initiator_user_id user_id, u.login user_login, u.name user_name,  \n" +
-            "   tm.explanation, tm.declaration_id, department.id department_id, department.name department_name, \n" +
+            "   tm.declaration_id, declaration_template.name declaration_type_name, \n" +
+            "   department.id department_id, department.name department_name, \n" +
+            "   extract(year from report_period.start_date) period_year, report_period.name period_name, \n" +
             "   case \n" +
             "       when tm.body is not null then 1 else 0 \n" +
             "   end as has_body \n" +
@@ -40,8 +42,10 @@ public class TransportMessageDaoImpl extends AbstractDao implements TransportMes
             "left join vw_subsystem_syn receiver on tm.receiver_subsystem_id = receiver.id \n" +
             "left join sec_user u on tm.initiator_user_id = u.id \n" +
             "left join declaration_data decl on tm.declaration_id = decl.id \n" +
+            "left join declaration_template on decl.declaration_template_id = declaration_template.id \n" +
             "left join department_report_period drp on decl.department_report_period_id = drp.id \n" +
             "left join department on drp.department_id = department.id \n" +
+            "left join report_period on drp.report_period_id = report_period.id \n" +
             "left join blob_data on tm.blob_id = blob_data.id \n";
 
     @Override
@@ -153,20 +157,22 @@ public class TransportMessageDaoImpl extends AbstractDao implements TransportMes
             message.setState(TransportMessageState.fromInt(rs.getInt("state")));
             message.setSourceFileName(rs.getString("source_file_name"));
             message.setExplanation(rs.getString("explanation"));
-            message.setDeclarationId(SqlUtils.getLong(rs, "declaration_id"));
             message.setHasBody(rs.getBoolean("has_body"));
+
+            // Данные о форме
+            DeclarationShortInfo declaration = DeclarationShortInfo.builder()
+                    .id(SqlUtils.getLong(rs, "declaration_id"))
+                    .departmentName(rs.getString("department_name"))
+                    .typeName(rs.getString("declaration_type_name"))
+                    .reportPeriodName(rs.getString("period_year") + ", " + rs.getString("period_name"))
+                    .build();
+            message.setDeclaration(declaration);
 
             // Данные о файле
             BlobDto blob = new BlobDto();
             blob.setUuid(rs.getString("blob_id"));
             blob.setName(rs.getString("blob_name"));
             message.setBlob(blob);
-
-            // Подразделение формы
-            DepartmentName department = new DepartmentName();
-            department.setId(SqlUtils.getInteger(rs, "department_id"));
-            department.setName(rs.getString("department_name"));
-            message.setDepartment(department);
 
             // Поле "Пользователь-инициатор"
             TAUser user = TAUser.builder()

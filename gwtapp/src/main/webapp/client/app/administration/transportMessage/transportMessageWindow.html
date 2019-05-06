@@ -1,22 +1,34 @@
-<div class="modal-body">
+<div id="transport-message-modal" class="modal-body">
 
     <!-- Информация о форме -->
     <legend>{{::'transportMessages.title.declarationInfo' | translate}}</legend>
     <div class="row-fluid">
         <div class="span6">
+            <!-- Номер формы -->
             <div class="row-fluid">
-                <div class="span4 text-right">{{::'title.formNumber' | translate}}:</div>
+                <div class="span4 text-right">{{::'transportMessages.title.declarationId' | translate}}:</div>
                 <div class="span8">
-                    <a data-ng-href="index.html#/taxes/ndfl/ndflReport/{{message.declarationId}}">
-                        {{message.declarationId}}
+                    <a data-ng-href="index.html#/taxes/ndfl/ndflReport/{{message.declaration.id}}">
+                        {{message.declaration.id}}
                     </a>
                 </div>
             </div>
+            <!-- Период формы -->
+            <div class="row-fluid">
+                <div class="span4 text-right">{{::'transportMessages.title.declarationPeriod' | translate}}:</div>
+                <div class="span8 strong">{{message.declaration.reportPeriodName}}</div>
+            </div>
         </div>
         <div class="span6">
+            <!-- Вид формы -->
+            <div class="row-fluid">
+                <div class="span4 text-right">{{::'transportMessages.title.declarationType' | translate}}:</div>
+                <div class="span8 strong">{{message.declaration.typeName}}</div>
+            </div>
+            <!-- Подразделение формы -->
             <div class="row-fluid">
                 <div class="span4 text-right">{{::'transportMessages.title.declarationDepartment' | translate}}:</div>
-                <div class="span8 strong">{{message.department.name}}</div>
+                <div class="span8 strong">{{message.declaration.departmentName}}</div>
             </div>
         </div>
     </div>
@@ -25,80 +37,93 @@
     <legend>{{::'transportMessages.title.messageInfo' | translate}}</legend>
     <div class="row-fluid">
         <div class="span6">
+            <!-- Номер сообщения -->
             <div class="row-fluid">
                 <div class="span4 text-right">{{::'transportMessages.title.id' | translate}}:</div>
                 <div class="span8 strong">{{message.id}}</div>
             </div>
+            <!-- Идентификатор сообщения -->
             <div class="row-fluid">
                 <div class="span4 text-right">{{::'transportMessages.title.uuid' | translate}}:</div>
                 <div class="span8 strong">{{message.messageUuid}}</div>
             </div>
+            <!-- Система-источник -->
             <div class="row-fluid">
                 <div class="span4 text-right">{{::'transportMessages.title.senderSubsystem' | translate}}:</div>
                 <div class="span8 strong">{{message.senderSubsystem | idNameFormatter}}</div>
             </div>
+            <!-- Система-получатель -->
             <div class="row-fluid">
                 <div class="span4 text-right">{{::'transportMessages.title.receiverSubsystem' | translate}}:</div>
                 <div class="span8 strong">{{message.receiverSubsystem | idNameFormatter}}</div>
             </div>
         </div>
         <div class="span6">
+            <!-- Тип сообщения -->
             <div class="row-fluid">
                 <div class="span4 text-right">{{::'transportMessages.title.type' | translate}}:</div>
                 <div class="span8 strong">{{message.type | tmTypeFormatter}}</div>
             </div>
+            <!-- Содержимое сообщения -->
             <div class="row-fluid">
                 <div class="span4 text-right">{{::'transportMessages.title.content' | translate}}:</div>
                 <div class="span8 strong">{{message.contentType | tmContentTypeFormatter}}</div>
             </div>
+            <!-- Статус сообщения -->
             <div class="row-fluid">
                 <div class="span4 text-right">{{::'transportMessages.title.state' | translate}}:</div>
                 <div class="span8 strong">{{message.state | tmStateFormatter}}</div>
             </div>
+            <!-- Дата сообщения -->
             <div class="row-fluid">
                 <div class="span4 text-right">{{::'transportMessages.title.date' | translate}}:</div>
                 <div class="span8 strong">{{message.dateTime | dateTimeFormatter}}</div>
             </div>
         </div>
     </div>
-    <div class="row-fluid">
-        <div class="span2 text-right" style="width: 15.6%;">{{::'transportMessages.title.file' | translate}}:</div>
-        <div class="span10" style="margin-left: 1.1%; width: 83.3%;">
-            {{message.blob.name}}
-        </div>
+    <!-- Файл вложения -->
+    <div class="row-fluid shifted">
+        <div class="span2 text-right">{{::'transportMessages.title.file' | translate}}:</div>
+        <div class="span10">{{message.blob.name}}</div>
     </div>
-    <div class="row-fluid">
-        <div class="span2 text-right" style="width: 15.6%;">{{::'transportMessages.title.sourceFileName' |
-            translate}}:
-        </div>
-        <div class="span10" style="margin-left: 1.1%; width: 83.3%;">
-            {{message.blob.name}}
-        </div>
+    <!-- Имя исходного файла -->
+    <div class="row-fluid shifted">
+        <div class="span2 text-right">{{::'transportMessages.title.sourceFileName' | translate}}:</div>
+        <div class="span10">{{message.sourceFileName}}</div>
     </div>
-    <div class="row-fluid">
-        <div class="span2 text-right" style="width: 15.6%;">{{::'transportMessages.title.user' | translate}}:</div>
-        <div class="span10 strong" style="margin-left: 1.1%; width: 83.3%;">
-            {{message.initiatorUser | userFormatter}}
-        </div>
+    <!-- Пользователь -->
+    <div class="row-fluid shifted">
+        <div class="span2 text-right">{{::'transportMessages.title.user' | translate}}:</div>
+        <div class="span10 strong">{{message.initiatorUser | userFormatter}}</div>
     </div>
-    <div class="row-fluid" style="margin-bottom: 10px;">
-        <div class="span2 text-right" style="width: 15.6%;">
+    <!-- Пояснение -->
+    <div class="row-fluid shifted" style="margin-bottom: 10px;">
+        <div class="span2 text-right">
             <label for="message-explanation">{{::'transportMessages.title.explanation' | translate}}:</label>
         </div>
-
-        <textarea id="message-explanation" rows="3" style="margin-left: 1.1%; width: 83.3%;"></textarea>
+        <textarea id="message-explanation"
+                  rows="3"
+                  class="span10"
+                  readonly="readonly"
+                  data-ng-model="message.explanation">
+        </textarea>
     </div>
-
-    <div class="row-fluid">
-        <div class="span2 text-right" style="width: 15.6%;">
+    <!-- Тело сообщения -->
+    <div class="row-fluid shifted">
+        <div class="span2 text-right">
             <label for="message-body">{{::'transportMessages.title.body' | translate}}:</label>
         </div>
-        <textarea id="message-body" rows="7" style="margin-left: 1.1%; width: 83.3%; cursor: default"
-                  readonly="readonly">{{message.body}}</textarea>
+        <textarea id="message-body"
+                  rows="7"
+                  class="span10"
+                  readonly="readonly"
+                  data-ng-model="message.body">
+        </textarea>
     </div>
 </div>
 
 <div class="modal-footer">
+    <!-- Кнопка "Закрыть" -->
     <button type="button" class="btn btn-default-nonBg iconed-btn" data-ng-click="close()">
         <span data-translate-once="button.close"></span>
         <span class="btn-icon-noneBg-close"></span>

@@ -67,14 +67,9 @@ public class TransportMessage {
      */
     private String explanation;
     /**
-     * ID формы, с которой связано сообщение.
+     * Краткая информация о форме, к которой привязано сообщение.
      */
-    @JsonSerialize(using = ToStringSerializer.class)
-    private Long declarationId;
-    /**
-     * Подразделение формы.
-     */
-    private DepartmentName department;
+    private DeclarationShortInfo declaration;
     /**
      * Имеется ли поле "body" в базе.
      */

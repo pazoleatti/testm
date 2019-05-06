@@ -134,7 +134,7 @@ public class TransportMessageDaoTest {
         assertThat(result)
                 .isNotEmpty()
                 .hasSize(1)
-                .extracting("declarationId")
+                .extracting("declaration.id")
                 .containsExactly(1L);
     }
 
@@ -145,9 +145,8 @@ public class TransportMessageDaoTest {
         assertThat(result)
                 .isNotEmpty()
                 .hasSize(1)
-                .extracting("department")
-                .extracting("id")
-                .containsExactly(1);
+                .extracting("declaration.departmentName")
+                .containsExactly("Банк");
     }
 
     @Test

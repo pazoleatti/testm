@@ -100,13 +100,12 @@
                                 formatter: $filter('tmContentTypeFormatter'),
                                 width: 200
                             }, {
-                                name: 'declarationId',
+                                name: 'declaration.id',
                                 index: 'declaration_id',
                                 formatter: $filter('tmNdflReportLinkFormatter')
                             }, {
-                                name: 'department',
-                                index: 'department_name',
-                                formatter: $filter('nameFormatter')
+                                name: 'declaration.departmentName',
+                                index: 'department_name'
                             }, {
                                 name: 'messageUuid',
                                 index: 'message_uuid',
