@@ -1697,3 +1697,54 @@ COMMENT ON COLUMN department_config_test.APPROVE_DOC_NAME IS 'Наименова
 COMMENT ON COLUMN department_config_test.APPROVE_ORG_NAME IS 'Наименование организации-представителя налогоплательщика';
 
 create sequence seq_department_config start with 10000;
+
+----------------------------------------------------------------------------------------------------------
+-- Справочник "Подсистемы АС УН"
+----------------------------------------------------------------------------------------------------------
+create table vw_subsystem_syn
+(
+  id         number(19)         not null,
+  code       varchar2(30 char)  not null,
+  name       varchar2(100 char) not null,
+  short_name varchar2(30 char)  not null,
+  mq_query   varchar2(50 char)
+);
+
+----------------------------------------------------------------------------------------------------------
+-- Транспортные сообщения
+----------------------------------------------------------------------------------------------------------
+create table transport_message
+(
+  id                    number(18) not null,
+  message_uuid          varchar2(36),
+  datetime              timestamp  not null,
+  type                  number(1)  not null,
+  sender_subsystem_id   number(19),
+  receiver_subsystem_id number(19) not null,
+  content_type          number(2)  not null,
+  state                 number(2)  not null,
+  body                  varchar2(4000),
+  blob_id               varchar2(36),
+  source_file_name      varchar2(255),
+  initiator_user_id     number(9)  not null,
+  explanation           varchar2(4000),
+  declaration_id        number(18)
+);
+
+comment on table transport_message is 'Транспортные сообщения для обмена между подсистемами АС УН';
+comment on column transport_message.id is 'Уникальный идентификатор сообщения';
+comment on column transport_message.message_uuid is 'Уникальный идентификатор UUID, указанный в теле xml-сообщения; используется для связывания сообщения и технологической квитанции';
+comment on column transport_message.datetime is 'Дата и время сообщения';
+comment on column transport_message.type is 'Направление движения сообщения (0 - исходящее, 1 - входящее)';
+comment on column transport_message.sender_subsystem_id is 'ID системы-отправителя';
+comment on column transport_message.receiver_subsystem_id is 'ID системы-получателя';
+comment on column transport_message.content_type is 'Тип данных в теле сообщения';
+comment on column transport_message.state is 'Статус обработки сообщения';
+comment on column transport_message.body is 'Тело сообщения';
+comment on column transport_message.blob_id is 'Файл, который передавался через папку обмена';
+comment on column transport_message.source_file_name is 'Имя исходного файла, который отправлялся в ФНС';
+comment on column transport_message.initiator_user_id is 'Инициатор создания сообщения (пользователь/система)';
+comment on column transport_message.explanation is 'Текст дополнительного пояснения';
+comment on column transport_message.declaration_id is 'Ссылка на форму, с которой связано сообщение';
+
+create sequence seq_transport_message start with 1 increment by 1;

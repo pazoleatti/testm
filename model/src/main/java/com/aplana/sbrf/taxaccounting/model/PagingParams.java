@@ -93,7 +93,7 @@ public class PagingParams implements Serializable {
     }
 
     /**
-     * Возвращяет true, если пагинация не задана и значит надо возвращять все записи с сортировкой, иначе - false
+     * Возвращает true, если пагинация не задана и значит надо возвращять все записи с сортировкой, иначе - false
      */
     public boolean isNoPaging() {
         return count == -1;

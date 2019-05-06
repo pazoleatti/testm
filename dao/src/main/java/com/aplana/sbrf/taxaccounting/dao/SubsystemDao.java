@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao;
 
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.Subsystem;
 
 /**
@@ -7,4 +8,5 @@ import com.aplana.sbrf.taxaccounting.model.Subsystem;
  */
 public interface SubsystemDao {
     Subsystem findById(long id);
+    PagingResult<Subsystem> findByName(String name);
 }

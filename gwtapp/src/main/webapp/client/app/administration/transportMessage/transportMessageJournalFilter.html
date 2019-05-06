@@ -1,0 +1,212 @@
+<div data-ng-controller="CommonFilterCtrl">
+    <div class="grid-filter">
+        <div data-aplana-collapse
+             data-is-collapsed="searchFilter.hideExtendedFilter"
+             data-label="'filterPanelLabel' | translate">
+            <form class="form-horizontal info-wrapper" role="form" style="display: flex;" novalidate>
+                <div class="row-fluid flex-fill">
+                    <div class="span4">
+                        <!-- Номер сообщения -->
+                        <div class="row-fluid form-group">
+                            <div class="span4">
+                                <label class="control-label">
+                                    {{::'transportMessages.title.id' | translate}}:
+                                </label>
+                            </div>
+                            <div class="span8">
+                                <input type="text"
+                                       class="form-control"
+                                       placeholder="{{'filter.placeholder.search' | translate}}"
+                                       data-ng-model="searchFilter.params.id"/>
+                            </div>
+                        </div>
+                        <!-- Статус сообщения -->
+                        <div class="row-fluid form-group">
+                            <div class="span4">
+                                <label class="control-label">
+                                    {{::'transportMessages.title.state' | translate}}:
+                                </label>
+                            </div>
+                            <div class="span8"
+                                 data-ng-controller="SelectByKeyValueCtrl"
+                                 data-ui-select2="select.options"
+                                 data-ng-init="initMultipleSelect(APP_CONSTANTS.TRANSPORT_MESSAGE_STATE)"
+                                 data-ng-model="searchFilter.params.states">
+                            </div>
+                        </div>
+                        <!-- Тип сообщения -->
+                        <div class="row-fluid form-group">
+                            <div class="span4">
+                                <label class="control-label">
+                                    {{::'transportMessages.title.type' | translate}}:
+                                </label>
+                            </div>
+                            <div class="span8"
+                                 data-ng-controller="SelectByKeyValueCtrl"
+                                 data-ui-select2="select.options"
+                                 data-ng-init="initSingleSelect(APP_CONSTANTS.TRANSPORT_MESSAGE_TYPE)"
+                                 data-ng-model="searchFilter.params.type">
+                            </div>
+                        </div>
+                        <!-- Идентификатор сообщения -->
+                        <div class="row-fluid form-group">
+                            <div class="span4">
+                                <label class="control-label">
+                                    {{::'transportMessages.title.uuid' | translate}}:
+                                </label>
+                            </div>
+                            <div class="span8">
+                                <input type="text"
+                                       class="form-control"
+                                       placeholder="{{'filter.placeholder.search' | translate}}"
+                                       data-ng-model="searchFilter.params.messageUuid"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="span4">
+                        <!-- Инициатор -->
+                        <div class="row-fluid form-group">
+                            <div class="span4">
+                                <label class="control-label">
+                                    {{::'transportMessages.title.initiator' | translate}}:
+                                </label>
+                            </div>
+                            <div class="span8">
+                                <input type="text"
+                                       class="form-control"
+                                       placeholder="{{'filter.placeholder.search' | translate}}"
+                                       data-ng-model="searchFilter.params.user"/>
+                            </div>
+                        </div>
+                        <!-- Система-источник -->
+                        <div class="row-fluid form-group">
+                            <div class="span4">
+                                <label class="control-label">
+                                    {{::'transportMessages.title.senderSubsystem' | translate}}:
+                                </label>
+                            </div>
+                            <div class="span8"
+                                 data-ng-controller="SelectSubsystemCtrl"
+                                 data-ui-select2="subsystemSelect.options"
+                                 data-ng-model="searchFilter.params.senderSubsystem">
+                            </div>
+                        </div>
+                        <!-- Система-получатель -->
+                        <div class="row-fluid form-group">
+                            <div class="span4">
+                                <label class="control-label">
+                                    {{::'transportMessages.title.receiverSubsystem' | translate}}:
+                                </label>
+                            </div>
+                            <div class="span8"
+                                 data-ng-controller="SelectSubsystemCtrl"
+                                 data-ui-select2="subsystemSelect.options"
+                                 data-ng-model="searchFilter.params.receiverSubsystem">
+                            </div>
+                        </div>
+                        <!-- Содержимое сообщения -->
+                        <div class="row-fluid form-group">
+                            <div class="span4">
+                                <label class="control-label">
+                                    {{::'transportMessages.title.body' | translate}}:
+                                </label>
+                            </div>
+                            <div data-ng-controller="SelectByKeyValueCtrl"
+                                 data-ui-select2="select.options"
+                                 data-ng-init="initMultipleSelect(APP_CONSTANTS.TRANSPORT_MESSAGE_CONTENT_TYPE)"
+                                 data-ng-model="searchFilter.params.contentTypes"
+                                 class="span8">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="span4">
+                        <!-- Подразделение формы -->
+                        <div class="row-fluid form-group">
+                            <div class="span4">
+                                <label class="control-label">
+                                    {{::'transportMessages.title.declarationDepartment' | translate}}:
+                                </label>
+                            </div>
+                            <div class="span8"
+                                 data-ng-controller="SelectDepartmentCtrl"
+                                 data-ui-select2="departmentsSelect.options"
+                                 data-ng-init="initSelectWithAllDepartments()"
+                                 data-ng-model="searchFilter.params.departmentIds">
+                            </div>
+                        </div>
+                        <!-- Номер формы -->
+                        <div class="row-fluid form-group">
+                            <div class="span4">
+                                <label class="control-label">
+                                    {{::'transportMessages.title.declarationId' | translate}}:
+                                </label>
+                            </div>
+                            <div class="span8">
+                                <input type="text"
+                                       class="form-control"
+                                       placeholder="{{'filter.placeholder.search' | translate}}"
+                                       data-ng-model="searchFilter.params.declarationId"/>
+                            </div>
+                        </div>
+                        <!-- Файл вложения -->
+                        <div class="row-fluid form-group">
+                            <div class="span4">
+                                <label class="control-label">
+                                    {{::'transportMessages.title.file' | translate}}:
+                                </label>
+                            </div>
+                            <div class="span8">
+                                <input type="text"
+                                       class="form-control"
+                                       placeholder="{{'filter.placeholder.search' | translate}}"
+                                       data-ng-model="searchFilter.params.fileName"/>
+                            </div>
+                        </div>
+                        <!-- Дата с -->
+                        <div class="row-fluid form-group">
+                            <div class="span4">
+                                <label class="control-label">
+                                    {{::'transportMessages.title.dateFrom' | translate}}:
+                                </label>
+                            </div>
+                            <div class="span4">
+                                <div data-aplana-datepicker-timepicker
+                                     data-ng-model="searchFilter.params.dateFrom">
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Дата по -->
+                        <div class="row-fluid form-group">
+                            <div class="span4">
+                                <label class="control-label">
+                                    {{::'transportMessages.title.dateTo' | translate}}:
+                                </label>
+                            </div>
+                            <div class="span4">
+                                <div data-aplana-datepicker-timepicker
+                                     data-ng-model="searchFilter.params.dateTo">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="vertical-btn-group" style="flex: 0 100px; padding-left: 20px">
+                    <!--Кнопка Найти-->
+                    <button type="button"
+                            class="btn btn-default"
+                            id="searchButton"
+                            data-ng-click="submitSearch()">
+                        <span data-translate-once="common.button.search"></span>
+                    </button>
+                    <!--Кнопка Сбросить-->
+                    <button type="button"
+                            class="btn btn-default"
+                            id="clearButton"
+                            data-ng-click="resetFilter()">
+                        <span data-translate-once="common.button.clear"></span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
