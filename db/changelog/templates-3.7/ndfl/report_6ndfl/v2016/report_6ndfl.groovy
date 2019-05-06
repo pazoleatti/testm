@@ -108,7 +108,6 @@ class Report6Ndfl extends AbstractScriptClass {
     }
 
     final String DATE_FORMAT_UNDERLINE = "yyyyMMdd"
-    final String OUTCOMING_ATTACH_FILE_TYPE = "Исходящий в ФНС"
 
     // Кэш для справочников
     Map<String, Map<String, RefBookValue>> refBookCache = [:]
@@ -578,7 +577,7 @@ class Report6Ndfl extends AbstractScriptClass {
 
     void preCreateReports() {
         ScriptUtils.checkInterrupted()
-        List<DeclarationDataFile> declarationDataFileList = declarationService.findFilesWithSpecificType(declarationData.id, OUTCOMING_ATTACH_FILE_TYPE)
+        List<DeclarationDataFile> declarationDataFileList = declarationService.findAllFilesByDeclarationIdAndType(declarationData.id, AttachFileType.OUTGOING_TO_FNS)
         if (declarationDataFileList.size() != 1) {
             paramMap.put("successfullPreCreate", false)
         } else {
