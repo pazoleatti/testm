@@ -42,7 +42,7 @@ LOOP
                 and drp.id = dd.department_report_period_id
                 and dp.id = drp.department_id
                 and dp.type <> 2 -- не ТБ
-                and dp.parent_id = c1.tb_department_id -- подразделение ТБ
+                and exists (select * from DEPARTMENT_CHILD_VIEW dcv where dcv.id = dp.id and dcv.parent_id = c1.tb_department_id)
                 and drp.report_period_id = c1.report_period_id
                 and drp.is_active = c1.is_active
                 and nvl(drp.correction_date, trunc(sysdate)) = c1.correction_date
