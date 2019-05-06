@@ -138,4 +138,76 @@
         </update>
     </changeSet>
 
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-7096 Реализовать работу с журналом обмена с ЭДО -->
+    <!-- https://conf.aplana.com/pages/viewpage.action?pageId=47141084 "Транспортное сообщение" -->
+    <changeSet id="3.6-snazin-3" author="snazin">
+        <createSequence sequenceName="seq_transport_message" startValue="1" incrementBy="1"/>
+        <rollback>
+            <dropSequence sequenceName="seq_transport_message"/>
+        </rollback>
+    </changeSet>
+    <changeSet id="3.6-snazin-4" author="snazin">
+        <createTable tableName="transport_message" remarks="Транспортные сообщения для обмена между подсистемами АС УН">
+            <column name="id" type="number(18)" remarks="Уникальный идентификатор сообщения">
+                <constraints primaryKey="true" primaryKeyName="transport_message_pk" nullable="false"/>
+            </column>
+
+            <column name="message_uuid"
+                    type="varchar2(36)"
+                    remarks="Уникальный идентификатор UUID, указанный в теле xml-сообщения; используется для связывания сообщения и технологической квитанции"/>
+
+            <column name="datetime" type="date" remarks="Дата и время сообщения">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="type" type="number(1)" remarks="Направление движения сообщения (0 - исходящее, 1 - входящее)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="sender_subsystem_id" type="number(19)" remarks="ID системы-отправителя"/>
+
+            <column name="receiver_subsystem_id" type="number(19)" remarks="ID системы-получателя">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="content_type" type="number(2)" remarks="Тип данных в теле сообщения">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="state" type="number(2)" remarks="Статус обработки сообщения">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="body" type="varchar2(4000)" remarks="Тело сообщения"/>
+
+            <column name="blob_id" type="varchar2(36)" remarks="Файл, который передавался через папку обмена">
+                <constraints references="blob_data(id)" foreignKeyName="tmess_blob_id_fk"/>
+            </column>
+
+            <column name="source_file_name" type="varchar2(255)"
+                    remarks="Имя исходного файла, который отправлялся в ФНС"/>
+
+            <column name="initiator_user_id" type="number(9)"
+                    remarks="Инициатор создания сообщения (пользователь/система)">
+                <constraints nullable="false" references="sec_user(id)" foreignKeyName="tmess_initiator_user_id_fk"/>
+            </column>
+
+            <column name="explanation" type="varchar2(4000)" remarks="Текст дополнительного пояснения"/>
+
+            <column name="declaration_id" type="number(18)" remarks="Ссылка на форму, с которой связано сообщение">
+                <constraints references="declaration_data(id)" foreignKeyName="tmess_declaration_id_fk"/>
+            </column>
+        </createTable>
+        <sql>
+            alter table transport_message
+            add constraint tmess_type_ck check (type in (0, 1))
+            add constraint tmess_content_type_ck check (content_type between 0 and 13)
+            add constraint tmess_state_ck check (state between 1 and 5)
+        </sql>
+
+        <rollback>
+            <dropTable tableName="transport_message"/>
+        </rollback>
+    </changeSet>
+
 </databaseChangeLog>

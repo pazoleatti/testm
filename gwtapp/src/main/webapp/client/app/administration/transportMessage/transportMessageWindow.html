@@ -1,0 +1,106 @@
+<div class="modal-body">
+
+    <!-- Информация о форме -->
+    <legend>{{::'transportMessages.title.declarationInfo' | translate}}</legend>
+    <div class="row-fluid">
+        <div class="span6">
+            <div class="row-fluid">
+                <div class="span4 text-right">{{::'title.formNumber' | translate}}:</div>
+                <div class="span8">
+                    <a data-ng-href="index.html#/taxes/ndfl/ndflReport/{{message.declarationId}}">
+                        {{message.declarationId}}
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="span6">
+            <div class="row-fluid">
+                <div class="span4 text-right">{{::'transportMessages.title.declarationDepartment' | translate}}:</div>
+                <div class="span8 strong">{{message.department.name}}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Информация о сообщении -->
+    <legend>{{::'transportMessages.title.messageInfo' | translate}}</legend>
+    <div class="row-fluid">
+        <div class="span6">
+            <div class="row-fluid">
+                <div class="span4 text-right">{{::'transportMessages.title.id' | translate}}:</div>
+                <div class="span8 strong">{{message.id}}</div>
+            </div>
+            <div class="row-fluid">
+                <div class="span4 text-right">{{::'transportMessages.title.uuid' | translate}}:</div>
+                <div class="span8 strong">{{message.messageUuid}}</div>
+            </div>
+            <div class="row-fluid">
+                <div class="span4 text-right">{{::'transportMessages.title.senderSubsystem' | translate}}:</div>
+                <div class="span8 strong">{{message.senderSubsystem | idNameFormatter}}</div>
+            </div>
+            <div class="row-fluid">
+                <div class="span4 text-right">{{::'transportMessages.title.receiverSubsystem' | translate}}:</div>
+                <div class="span8 strong">{{message.receiverSubsystem | idNameFormatter}}</div>
+            </div>
+        </div>
+        <div class="span6">
+            <div class="row-fluid">
+                <div class="span4 text-right">{{::'transportMessages.title.type' | translate}}:</div>
+                <div class="span8 strong">{{message.type | tmTypeFormatter}}</div>
+            </div>
+            <div class="row-fluid">
+                <div class="span4 text-right">{{::'transportMessages.title.content' | translate}}:</div>
+                <div class="span8 strong">{{message.contentType | tmContentTypeFormatter}}</div>
+            </div>
+            <div class="row-fluid">
+                <div class="span4 text-right">{{::'transportMessages.title.state' | translate}}:</div>
+                <div class="span8 strong">{{message.state | tmStateFormatter}}</div>
+            </div>
+            <div class="row-fluid">
+                <div class="span4 text-right">{{::'transportMessages.title.date' | translate}}:</div>
+                <div class="span8 strong">{{message.dateTime | dateTimeFormatter}}</div>
+            </div>
+        </div>
+    </div>
+    <div class="row-fluid">
+        <div class="span2 text-right" style="width: 15.6%;">{{::'transportMessages.title.file' | translate}}:</div>
+        <div class="span10" style="margin-left: 1.1%; width: 83.3%;">
+            {{message.blob.name}}
+        </div>
+    </div>
+    <div class="row-fluid">
+        <div class="span2 text-right" style="width: 15.6%;">{{::'transportMessages.title.sourceFileName' |
+            translate}}:
+        </div>
+        <div class="span10" style="margin-left: 1.1%; width: 83.3%;">
+            {{message.blob.name}}
+        </div>
+    </div>
+    <div class="row-fluid">
+        <div class="span2 text-right" style="width: 15.6%;">{{::'transportMessages.title.user' | translate}}:</div>
+        <div class="span10 strong" style="margin-left: 1.1%; width: 83.3%;">
+            {{message.initiatorUser | userFormatter}}
+        </div>
+    </div>
+    <div class="row-fluid" style="margin-bottom: 10px;">
+        <div class="span2 text-right" style="width: 15.6%;">
+            <label for="message-explanation">{{::'transportMessages.title.explanation' | translate}}:</label>
+        </div>
+
+        <textarea id="message-explanation" rows="3" style="margin-left: 1.1%; width: 83.3%;"></textarea>
+    </div>
+
+    <div class="row-fluid">
+        <div class="span2 text-right" style="width: 15.6%;">
+            <label for="message-body">{{::'transportMessages.title.body' | translate}}:</label>
+        </div>
+        <textarea id="message-body" rows="7" style="margin-left: 1.1%; width: 83.3%; cursor: default"
+                  readonly="readonly">{{message.body}}</textarea>
+    </div>
+</div>
+
+<div class="modal-footer">
+    <button type="button" class="btn btn-default-nonBg iconed-btn" data-ng-click="close()">
+        <span data-translate-once="button.close"></span>
+        <span class="btn-icon-noneBg-close"></span>
+    </button>
+</div>

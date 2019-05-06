@@ -1,0 +1,39 @@
+<div class="flex-column">
+    <div class="content-header">
+        <h1>{{::'transportMessages.title' | translate}}</h1>
+    </div>
+
+    <div id="transportMessageGridContainer"
+         class="container-grid box-shadow-block flex-fill flex-column"
+         style="overflow-y: auto;">
+        <div id="transportMessageGridTop" style="flex-shrink: 0;">
+            <!--Фильтр-->
+            <span data-ng-include="'client/app/administration/transportMessage/transportMessageJournalFilter.html'"></span>
+
+            <div class="btn-toolbar" role="toolbar">
+                <!--Создать-->
+                <span>
+                    <button type="button"
+                            class="btn btn-default"
+                            data-ng-click="openMessage()"
+                            data-ng-disabled="transportMessageGrid.value.length !== 1">
+                        <span data-translate-once="button.open"></span>
+                    </button>
+                </span>
+            </div>
+        </div>
+
+        <!-- Таблица -->
+        <div class="flex-grid flex-fill"
+             style="min-height: calc(100% - 100px);"
+             data-aplana-grid
+             data-grid-fill-space="true"
+             data-grid-fill-space-container-selector="#transportMessageGridContainer"
+             data-grid-fill-space-container-selector-top="#transportMessageGridTop"
+             data-grid-options="transportMessageGrid.options"
+             data-grid-ctrl="transportMessageGrid.ctrl"
+             data-ng-model="transportMessageGrid.value"
+             id="transportMessageTable">
+        </div>
+    </div>
+</div>
