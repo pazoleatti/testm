@@ -23,9 +23,9 @@ public class RefBookKnfType extends RefBookSimple<Integer> {
         this.name = name;
     }
 
-    public static RefBookKnfType ALL = new RefBookKnfType(1, "КНФ по всем данным");
-    public static RefBookKnfType BY_NONHOLDING_TAX = new RefBookKnfType(2, "КНФ по неудержанному налогу");
-    public static RefBookKnfType BY_KPP = new RefBookKnfType(3, "КНФ по обособленному подразделению");
-    public static RefBookKnfType BY_PERSON = new RefBookKnfType(4, "КНФ по ФЛ");
-    public static RefBookKnfType FOR_APP2 = new RefBookKnfType(5, "КНФ для Приложения 2");
+    public static final RefBookKnfType ALL = new RefBookKnfType(1, "КНФ по всем данным");
+    public static final RefBookKnfType BY_NONHOLDING_TAX = new RefBookKnfType(2, "КНФ по неудержанному налогу");
+    public static final RefBookKnfType BY_KPP = new RefBookKnfType(3, "КНФ по обособленному подразделению");
+    public static final RefBookKnfType BY_PERSON = new RefBookKnfType(4, "КНФ по ФЛ");
+    public static final RefBookKnfType FOR_APP2 = new RefBookKnfType(5, "КНФ для Приложения 2");
 }

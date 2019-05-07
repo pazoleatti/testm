@@ -55,19 +55,6 @@ public final class MessageGenerator {
         }
     }
 
-    public static String getFDMsg(String mainStr, String formTypeName, String kindName, String departmentName, Integer periodOrder, boolean manual, String reportPeriodName, Date correctionDate, String rpComparisonName){
-        return String.format(COMPLETE_FORM_STRINGS_ONLY,
-                mainStr,
-                kindName,
-                formTypeName,
-                departmentName,
-                reportPeriodName,
-                rpComparisonName != null && !rpComparisonName.isEmpty() ? String.format(COMPARISON_PERIOD, rpComparisonName) : "",
-                periodOrder != null ? String.format(MONTH,  Formats.getRussianMonthNameWithTier(periodOrder)): "",
-                correctionDate != null ? String.format(CORRECTION_DATE, SDF_DD_MM_YYYY.get().format(correctionDate)) : "",
-                VERSION.getVersion(correctionDate != null, manual, false, false)).trim();
-    }
-
     public static String getDDMsg(String mainStr, String decTypeName, String departmentName, DepartmentReportPeriod drp, String tax, String kpp){
         return String.format(COMPLETE_DECLARATION,
                 mainStr,

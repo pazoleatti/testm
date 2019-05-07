@@ -17,7 +17,7 @@ abstract class AbstractQueryBuilderComponent extends AbstractTreeListenerCompone
     /**
      * Максимальный размер строки
      */
-    public static int MAX_STRING_LENGTH = 2000;
+    private static final int MAX_STRING_LENGTH = 2000;
 
     @Override public void enterNobrakets(FilterTreeParser.NobraketsContext ctx) {
         if (ctx.link_type() != null){

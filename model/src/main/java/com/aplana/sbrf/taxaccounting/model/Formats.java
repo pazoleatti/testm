@@ -10,29 +10,15 @@ public enum Formats {
 	BOOLEAN    (6, "", ""), // формат для числовых атрибутов, чтобы их отображать в виде чек-боксов
 	DD_MM_YYYY_HH_MM_SS(7, "dd.MM.yyyy HH:mm:ss", "99.99.9999 99:99:99");
 
-	public static String[] months = new String[]{
-			"Январь",
-			"Февраль",
-			"Март",
-			"Апрель",
-			"Май",
-			"Июнь",
-			"Июль",
-			"Август",
-			"Сентябрь",
-			"Октябрь",
-			"Ноябрь",
-			"Декабрь"
-	};
+	private final int id;
+	private final String format;
+	private final String mask;
 
-	private Formats(int id, String format, String mask) {
+	Formats(int id, String format, String mask) {
 		this.id = id;
 		this.format = format;
 		this.mask = mask;
 	}
-	private final int id;
-	private final String format;
-	private final String mask;
 
 	public int getId() {
 		return id;
@@ -54,18 +40,4 @@ public enum Formats {
 		}
 		throw new IllegalArgumentException("Wrong format id: " + id);
 	}
-
-	public static String getRussianMonthName(int monthNum) {
-		return months[monthNum];
-
-	}
-
-    /**
-     * Возвращает название месяца
-     * @param monthNum номер месяца от 1 до 12
-     * @return
-     */
-    public static String getRussianMonthNameWithTier(int monthNum) {
-        return monthNum < 1 && monthNum > 12 ? "" : Formats.getRussianMonthName(monthNum - 1);
-    }
 }
