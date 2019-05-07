@@ -28,7 +28,7 @@
         <javaxjms.version>1.1-rev-1</javaxjms.version>
         <activemq.version>5.10.2</activemq.version>
         <springsecurity.version>3.2.3.RELEASE</springsecurity.version>
-        <org.aspectj.version>1.8.0</org.aspectj.version>
+        <org.aspectj.version>1.8.14</org.aspectj.version>
         <groovy.version>2.4.5</groovy.version>
         <jasperreports.version>5.0.1</jasperreports.version>
         <xalan.version>2.7.1</xalan.version>
@@ -553,9 +553,9 @@
                     </executions>
                 </plugin>
                 <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
+                    <groupId>org.sonarsource.scanner.maven</groupId>
                     <artifactId>sonar-maven-plugin</artifactId>
-                    <version>2.6</version>
+                    <version>3.6.0.1398</version>
                 </plugin>
                 <plugin>
                     <groupId>org.lesscss</groupId>
@@ -648,10 +648,10 @@
                 <activeByDefault>true</activeByDefault>
             </activation>
             <properties>
-                <sonar.jdbc.url>jdbc:h2:tcp://172.19.214.42:9092/sonar</sonar.jdbc.url>
-                <sonar.jdbc.username>sonar</sonar.jdbc.username>
-                <sonar.jdbc.password>sonar</sonar.jdbc.password>
-                <sonar.host.url>http://172.19.214.42:9000</sonar.host.url>
+                <sonar.projectKey>SBRFNDFL</sonar.projectKey>
+                <sonar.moduleKey>${artifactId}</sonar.moduleKey>
+                <sonar.login>d86d4e1f1897004be236534d03136d54ae12121d</sonar.login>
+                <sonar.host.url>https://sonarcube.aplana.com</sonar.host.url>
                 <sonar.exclusions>**/*.groovy</sonar.exclusions>
                 <!-- Sonar-JaCoCo properties -->
                 <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
