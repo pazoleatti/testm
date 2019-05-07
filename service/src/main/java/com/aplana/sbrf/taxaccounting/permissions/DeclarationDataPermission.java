@@ -5,9 +5,12 @@ import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDocState;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
+import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import com.aplana.sbrf.taxaccounting.utils.DepartmentReportPeriodFormatter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
@@ -40,6 +43,8 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
     protected DepartmentReportPeriodFormatter departmentReportPeriodFormatter;
     @Autowired
     protected PeriodService reportPeriodService;
+    @Autowired
+    protected CommonRefBookService commonRefBookService;
 
     private static final String KIND_ERROR = "операция \"%s\" не допустима для форм типа %s";
     private static final String ACTIVE_ERROR = "период формы закрыт";
@@ -395,29 +400,37 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
                 // Пользователь имеет права на просмотр формы
                 if (VIEW.isGranted(currentUser, targetDomainObject, logger)) {
 
-                    // Форма.Состояние = "Принята"
-                    if (targetDomainObject.getState() == State.ACCEPTED) {
+                    // Форма."Состояние ЭД" = "Не отправлен в ФНС"
+                    if (RefBookDocState.NOT_SENT.getId().equals(targetDomainObject.getDocStateId())) {
+                        // Форма.Состояние = "Принята"
+                        if (targetDomainObject.getState() == State.ACCEPTED) {
 
-                        // Пользователю назначена роль "Контролёр УНП (НДФЛ)" либо "Контролер НС (НДФЛ)"
-                        if (PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS)) {
-                            return true;
-                        } else {
-                            logError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, ROLE_ERROR, logger);
+                            // Пользователю назначена роль "Контролёр УНП (НДФЛ)" либо "Контролер НС (НДФЛ)"
+                            if (PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS)) {
+                                return true;
+                            } else {
+                                logError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, ROLE_ERROR, logger);
+                            }
                         }
-                    }
-                    // Форма.Состояние = "Подготовлена"
-                    else if (targetDomainObject.getState() == State.PREPARED) {
+                        // Форма.Состояние = "Подготовлена"
+                        else if (targetDomainObject.getState() == State.PREPARED) {
 
-                        // Пользователю назначена роль "Контролёр УНП (НДФЛ)" либо "Контролер НС (НДФЛ)" либо "Оператор (НДФЛ)"
-                        if (PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER)) {
-                            return true;
-                        } else {
-                            logError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, ROLE_ERROR, logger);
+                            // Пользователю назначена роль "Контролёр УНП (НДФЛ)" либо "Контролер НС (НДФЛ)" либо "Оператор (НДФЛ)"
+                            if (PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER)) {
+                                return true;
+                            } else {
+                                logError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, ROLE_ERROR, logger);
+                            }
+                        }
+                        else {
+                            logError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, String.format(STATE_ERROR, OPERATION_NAME, targetDomainObject.getState().getTitle()), logger);
                         }
                     }
                     else {
-                        logError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, String.format(STATE_ERROR, OPERATION_NAME, targetDomainObject.getState().getTitle()), logger);
+                        RefBookDocState docState = commonRefBookService.fetchRecord(RefBook.Id.DOC_STATE.getId(), targetDomainObject.getDocStateId());
+                        logError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, String.format(STATE_ERROR, OPERATION_NAME, docState == null ? "-" : docState.getName()), logger);
                     }
+
                 } else {
                     logError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, ROLE_ERROR, logger);
                 }
