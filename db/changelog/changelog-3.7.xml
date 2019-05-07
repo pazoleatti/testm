@@ -218,4 +218,12 @@
 		</insert>
 	</changeSet>
 
+	<!-- https://jira.aplana.com/browse/SBRFNDFL-7575 -->
+	<changeSet id="3.7-ishevchuk-1" author="ishevchuk">
+		<update tableName="blob_data">
+			<column name="data" valueBlobFile="templates-3.7/ndfl/primary_rnu_ndfl/v2016/excel_template_dec.xlsx"/>
+			<where>id='3b4eb6e0-3ce3-48ba-b8e5-0b9c9174b5fe'</where>
+		</update>
+	</changeSet>
+
 </databaseChangeLog>
