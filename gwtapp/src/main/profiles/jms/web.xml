@@ -18,7 +18,7 @@
 	</context-param>
 	<context-param>
 		<param-name>spring.profiles.active</param-name>
-		<param-value>production</param-value>
+		<param-value>production, jms</param-value>
 	</context-param>
 	<!-- Creates the Spring Container shared by all Servlets and Filters -->
 	<listener>
