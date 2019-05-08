@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDocState;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookFormType;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
@@ -20,6 +21,7 @@ import org.springframework.security.core.userdetails.User;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -118,6 +120,8 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
      * Право на редактирование строк формы
      */
     public static final Permission<DeclarationData> UPDATE_DOC_STATE = new UpdateDocStatePermission(1 << 14);
+
+    public static final Permission<DeclarationData> SEND_EDO = new SendEdoPermission(1 << 15);
 
     private static final String DATE_FORMAT = "dd.MM.yyyy";
 
@@ -721,6 +725,27 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
                 }
                 return false;
             }
+        }
+    }
+
+    public static final class SendEdoPermission extends DeclarationDataPermission {
+
+        public SendEdoPermission(long mask) {
+            super(mask);
+        }
+
+        @Override
+        protected boolean isGrantedInternal(User user, DeclarationData targetDomainObject, Logger logger) {
+           if (VIEW.isGranted(user, targetDomainObject, logger)) {
+               DeclarationTemplate declarationTemplate = declarationTemplateDao.get(targetDomainObject.getDeclarationTemplateId());
+               RefBookFormType refBookFormType = declarationTemplate.getFormType();
+               List<Long> suitableFormTypes = Arrays.asList(RefBookFormType.NDFL_2_1.getId(), RefBookFormType.NDFL_2_2.getId(), RefBookFormType.NDFL_6.getId());
+               if (suitableFormTypes.contains(refBookFormType.getId())) {
+                   List<Long> suitableDocStates = Arrays.asList(RefBookDocState.NOT_SENT.getId(), RefBookDocState.ERROR.getId(), RefBookDocState.SENT.getId());
+                   return suitableDocStates.contains(targetDomainObject.getDocStateId());
+               }
+           }
+           return false;
         }
     }
 }

@@ -2354,6 +2354,12 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     public void sendEdo(List<Long> declarationDataIds, TAUserInfo userInfo, Logger logger) {
         // TODO https://jira.aplana.com/browse/SBRFNDFL-7164
         for (long declarationId : declarationDataIds) {
+            if (permissionEvaluator.hasPermission(SecurityContextHolder.getContext().getAuthentication(),
+                    new TargetIdAndLogger(declarationId, logger),
+                    "com.aplana.sbrf.taxaccounting.permissions.logging.TargetIdAndLogger", DeclarationDataPermission.UPDATE_DOC_STATE)) {
+                declarationLocker.establishLock(declarationId, OperationType.SEND_EDO, userInfo, logger);
+            }
+
             logger.info("test: sendEdo ОНФ № " + declarationId);
         }
     }
