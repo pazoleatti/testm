@@ -2166,6 +2166,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     public ActionResult asyncExportReports(DeclarationDataFilter filter, TAUserInfo userInfo) {
+        setUpDeclarationFilter(filter, userInfo);
         List<Long> declarationDataIdList = declarationDataDao.findAllIdsByFilter(filter);
         return asyncExportReports(declarationDataIdList, userInfo);
     }
