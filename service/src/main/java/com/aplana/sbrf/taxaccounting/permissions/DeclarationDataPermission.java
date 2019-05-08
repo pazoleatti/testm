@@ -404,8 +404,8 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
                 // Пользователь имеет права на просмотр формы
                 if (VIEW.isGranted(currentUser, targetDomainObject, logger)) {
 
-                    // Форма."Состояние ЭД" = "Не отправлен в ФНС"
-                    if (RefBookDocState.NOT_SENT.getId().equals(targetDomainObject.getDocStateId())) {
+                    // Форма."Состояние ЭД" = "Не отправлен в ФНС", если Форма."Состояние ЭД" задано
+                    if (targetDomainObject.getDocStateId() == null || RefBookDocState.NOT_SENT.getId().equals(targetDomainObject.getDocStateId())) {
                         // Форма.Состояние = "Принята"
                         if (targetDomainObject.getState() == State.ACCEPTED) {
 
@@ -431,7 +431,10 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
                         }
                     }
                     else {
-                        RefBookDocState docState = commonRefBookService.fetchRecord(RefBook.Id.DOC_STATE.getId(), targetDomainObject.getDocStateId());
+                        RefBookDocState docState = null;
+                        if (targetDomainObject.getDocStateId() != null) {
+                            docState = commonRefBookService.fetchRecord(RefBook.Id.DOC_STATE.getId(), targetDomainObject.getDocStateId());
+                        }
                         logError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, String.format(STATE_ERROR, OPERATION_NAME, docState == null ? "-" : docState.getName()), logger);
                     }
 
