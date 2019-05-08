@@ -388,7 +388,7 @@
                 /**
                  * @description Отправить в ЭДО по фильтру
                  */
-                $scope.updateDocStateByFilter = function () {
+                $scope.sendEdoByFilter = function () {
                     $http({
                         method: "POST",
                         url: "controller/actions/declarationData/sendEdoByFilter",
@@ -405,7 +405,7 @@
                 /**
                  * @description Отправить в ЭДО по выбранным формам
                  */
-                $scope.updateDocStateBySelected = function () {
+                $scope.sendEdoBySelected = function () {
                     var selectedRows = $scope.ndflReportJournalGrid.value;
                     $http({
                         method: "POST",
