@@ -4,7 +4,6 @@ import com.aplana.sbrf.taxaccounting.model.DeclarationData;
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
-import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import com.aplana.sbrf.taxaccounting.service.component.operation.DeclarationDataReportingMultiModeAsyncTaskDescriptor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
@@ -20,7 +19,7 @@ public class DeclarationDataReportingMultiModeAsyncTaskDescriptorImpl implements
     private DeclarationDataService declarationDataService;
     private DeclarationTemplateService declarationTemplateService;
 
-    public DeclarationDataReportingMultiModeAsyncTaskDescriptorImpl(DeclarationDataService declarationDataService, DeclarationTemplateService declarationTemplateService, TAUserService taUserService) {
+    public DeclarationDataReportingMultiModeAsyncTaskDescriptorImpl(DeclarationDataService declarationDataService, DeclarationTemplateService declarationTemplateService) {
         this.declarationDataService = declarationDataService;
         this.declarationTemplateService = declarationTemplateService;
     }
@@ -29,12 +28,26 @@ public class DeclarationDataReportingMultiModeAsyncTaskDescriptorImpl implements
     public String createDescription(List<Long> declarationDataIds, String name) {
         Set<String> declarationDataTypes = new HashSet<>();
         for (Long declarationDataId : declarationDataIds) {
-            DeclarationData declarationData = declarationDataService.get(Collections.singletonList(declarationDataId)).get(0);
-            DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
-            declarationDataTypes.add(declarationTemplate.getType().getName());
+            List<DeclarationData> declarationDataList = declarationDataService.get(Collections.singletonList(declarationDataId));
+            if (!declarationDataList.isEmpty()) {
+                DeclarationData declarationData = declarationDataList.get(0);
+                if (declarationData != null) {
+                    DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
+                    if (declarationTemplate != null && declarationTemplate.getType() != null && declarationTemplate.getType().getName() != null) {
+                        declarationDataTypes.add(declarationTemplate.getType().getName());
+                    }
+                }
+            }
         }
-        return String.format("%s Виды форм: %s",
-                name,
-                StringUtils.join(declarationDataTypes, ", "));
+        String description;
+        if (declarationDataTypes.isEmpty()) {
+            description = name;
+        }
+        else {
+            description = String.format("%s Виды форм: %s",
+                    name,
+                    StringUtils.join(declarationDataTypes, ", "));
+        }
+        return description;
     }
 }
