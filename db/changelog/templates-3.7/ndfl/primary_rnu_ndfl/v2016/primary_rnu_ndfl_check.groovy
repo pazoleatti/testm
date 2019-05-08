@@ -742,11 +742,17 @@ class Check extends AbstractScriptClass {
             }
 
             if (checkIdDocType && checkIdDocNumber) {
-                String checkDul = ScriptUtils.checkDul(ndflPerson.idDocType, ndflPerson.idDocNumber, "ДУЛ Номер")
-                if (checkDul != null) {
+                String errorMsg = ScriptUtils.checkDul(ndflPerson.idDocType, ndflPerson.idDocNumber, "ДУЛ Номер")
+                if (errorMsg != null) {
                     String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
-                    logger.warnExp("%s. %s.", "\"ДУЛ\" не соответствует формату", fioAndInp, pathError,
-                            checkDul)
+                    String errorType
+                    if (errorMsg.contains("СССР")) {
+                        errorType = "В \"ДУЛ\" присутствуют реквизиты паспорта СССР"
+                    }
+                    else {
+                        errorType = "\"ДУЛ\" не соответствует формату"
+                    }
+                    logger.warnExp("%s. %s.", errorType, fioAndInp, pathError, errorMsg)
                 }
             }
 
