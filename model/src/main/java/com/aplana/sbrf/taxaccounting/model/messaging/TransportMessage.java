@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.model.messaging;
 
-import com.aplana.sbrf.taxaccounting.model.BlobDto;
-import com.aplana.sbrf.taxaccounting.model.DepartmentName;
-import com.aplana.sbrf.taxaccounting.model.Subsystem;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -53,7 +50,7 @@ public class TransportMessage {
     /**
      * Данные о файле, который передавался через папку обмена.
      */
-    private BlobDto blob;
+    private BlobData blob;
     /**
      * Имя исходного файла, который отправлялся в ФНС.
      */

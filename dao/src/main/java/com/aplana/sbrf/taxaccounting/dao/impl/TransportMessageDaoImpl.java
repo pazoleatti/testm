@@ -70,7 +70,7 @@ public class TransportMessageDaoImpl extends AbstractDao implements TransportMes
     }
 
     @Override
-    public List<TransportMessage> findByFilter(TransportMessageFilter filter, PagingParams pagingParams) {
+    public PagingResult<TransportMessage> findByFilter(TransportMessageFilter filter, PagingParams pagingParams) {
 
         List<String> conditions = new ArrayList<>();
         MapSqlParameterSource params = new MapSqlParameterSource();
@@ -137,11 +137,16 @@ public class TransportMessageDaoImpl extends AbstractDao implements TransportMes
             sql = SELECT_TRANSPORT_MESSAGE;
         }
 
+        String countSql = "select count(*) from (" + sql + ")";
+
         if (pagingParams != null) {
             sql = pagingParams.wrapQuery(sql, params);
         }
 
-        return getNamedParameterJdbcTemplate().query(sql, params, new TransportMessageMapper());
+        List<TransportMessage> messages = getNamedParameterJdbcTemplate().query(sql, params, new TransportMessageMapper());
+        int totalCount = getNamedParameterJdbcTemplate().queryForObject(countSql, params, Integer.class);
+
+        return new PagingResult<>(messages, totalCount);
     }
 
 
@@ -172,7 +177,7 @@ public class TransportMessageDaoImpl extends AbstractDao implements TransportMes
             message.setDeclaration(declaration);
 
             // Данные о файле
-            BlobDto blob = new BlobDto();
+            BlobData blob = new BlobData();
             blob.setUuid(rs.getString("blob_id"));
             blob.setName(rs.getString("blob_name"));
             message.setBlob(blob);

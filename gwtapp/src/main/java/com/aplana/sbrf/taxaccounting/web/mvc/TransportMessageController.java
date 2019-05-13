@@ -2,11 +2,14 @@ package com.aplana.sbrf.taxaccounting.web.mvc;
 
 import com.aplana.sbrf.taxaccounting.model.BlobData;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
 import com.aplana.sbrf.taxaccounting.model.messaging.TransportMessage;
 import com.aplana.sbrf.taxaccounting.model.messaging.TransportMessageFilter;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.TransportMessageService;
+import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedList;
+import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedResourceAssembler;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.ServletRequestDataBinder;
@@ -39,9 +42,10 @@ public class TransportMessageController {
      * Выгрузка Транспортных сообщений по фильтру и с пагинацией.
      */
     @GetMapping("/rest/transportMessages")
-    public List<TransportMessage> getMessagesByFilter(@RequestParam(required = false) TransportMessageFilter filter,
-                                                      @RequestParam(required = false) PagingParams pagingParams) {
-        return transportMessageService.findByFilter(filter, pagingParams);
+    public JqgridPagedList<TransportMessage> getMessagesByFilter(@RequestParam(required = false) TransportMessageFilter filter,
+                                                                 @RequestParam(required = false) PagingParams pagingParams) {
+        PagingResult<TransportMessage> messages = transportMessageService.findByFilter(filter, pagingParams);
+        return JqgridPagedResourceAssembler.buildPagedList(messages, pagingParams);
     }
 
     /**
