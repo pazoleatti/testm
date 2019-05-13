@@ -3,6 +3,7 @@ package form_template.ndfl.report_2ndfl_1.v2016
 import com.aplana.sbrf.taxaccounting.AbstractScriptClass
 import com.aplana.sbrf.taxaccounting.model.*
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.log.Logger
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction
@@ -770,6 +771,9 @@ class Report2Ndfl extends AbstractScriptClass {
                         createdForms.add(declarationData)
                         declarationData.fileName = xml.fileName
                         create(declarationData)
+                        if (logger.containsLevel(LogLevel.ERROR)) {
+                            continue
+                        }
                         saveNdflRefences(xml.ndflReferences, declarationData.id)
                         // Привязывание xml-файла к форме
                         saveFileInfo(xml.xmlFile, xml.fileName)
