@@ -22,6 +22,7 @@ import com.aplana.sbrf.taxaccounting.service.component.lock.locker.DeclarationLo
 import com.aplana.sbrf.taxaccounting.service.refbook.DepartmentConfigService
 import com.aplana.sbrf.taxaccounting.service.refbook.RefBookDeductionTypeService
 import com.aplana.sbrf.taxaccounting.utils.ZipUtils
+import groovy.io.PlatformLineWriter
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import groovy.transform.TypeChecked
@@ -218,7 +219,7 @@ class Report2Ndfl extends AbstractScriptClass {
         String priznak = definePriznak(departmentConfig)
         int nomSprCounter = 0
 
-        MarkupBuilder builder = new MarkupBuilder(writer)
+        MarkupBuilder builder = new MarkupBuilder(new PlatformLineWriter(writer))
         builder.setDoubleQuotes(true)
         builder.setOmitNullAttributes(true)
         builder.mkp.xmlDeclaration(version: "1.0", encoding: xmlCharset.name())

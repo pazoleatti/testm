@@ -20,6 +20,7 @@ import com.aplana.sbrf.taxaccounting.service.ReportService
 import com.aplana.sbrf.taxaccounting.service.component.lock.locker.DeclarationLocker
 import com.aplana.sbrf.taxaccounting.service.refbook.DepartmentConfigService
 import com.aplana.sbrf.taxaccounting.utils.ZipUtils
+import groovy.io.PlatformLineWriter
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import groovy.transform.TypeChecked
@@ -174,7 +175,7 @@ class Report6Ndfl extends AbstractScriptClass {
         // Текущая дата
         xml.date = new Date()
         xml.fileName = generateXmlFileId(departmentConfig, sberbankInnParam, declarationData.kpp, kodNoProm)
-        def builder = new MarkupBuilder(writer)
+        def builder = new MarkupBuilder(new PlatformLineWriter(writer))
         builder.setDoubleQuotes(true)
         builder.setOmitNullAttributes(true)
         builder.Файл(
