@@ -226,4 +226,40 @@
 		</update>
 	</changeSet>
 
+	<!--https://jira.aplana.com/browse/SBRFNDFL-7373 - Переименовать таблицу настроек подразделений и поправить вьюху-->
+	<changeSet id="3.7-dnovikov-14" author="dnovikov">
+		<sql>
+			drop table REF_BOOK_NDFL_OLD;
+		</sql>
+	</changeSet>
+	<changeSet id="3.7-dnovikov-15" author="dnovikov">
+		<sql>
+			drop synonym department_config;
+		</sql>
+	</changeSet>
+	<changeSet id="3.7-dnovikov-16" author="dnovikov">
+		<sql>
+			drop view vw_department_config;
+		</sql>
+	</changeSet>
+	<changeSet id="3.7-dnovikov-17" author="dnovikov">
+		<sql>
+			rename REF_BOOK_NDFL_DETAIL to REF_BOOK_NDFL_DETAIL_OLD;
+		</sql>
+	</changeSet>
+	<changeSet id="3.7-dnovikov-18" author="dnovikov">
+		<sql>
+			CREATE OR REPLACE FORCE VIEW VW_DEPART_KPP_OKTMO (DEP_ID, DEP_NAME, KPP, OKTMO) AS
+			select dep.id dep_id, dep.name dep_name, dc.kpp, oktmo.code oktmo
+			from department dep
+			join department_config dc on dc.department_id = dep.id
+			join ref_book_oktmo oktmo on oktmo.id = dc.oktmo_id;
+		</sql>
+	</changeSet>
+	<changeSet id="3.7-dnovikov-19" author="dnovikov">
+		<sql>
+			rename department_config_test to department_config;
+		</sql>
+	</changeSet>
+
 </databaseChangeLog>

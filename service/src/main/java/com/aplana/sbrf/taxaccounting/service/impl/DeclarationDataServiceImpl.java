@@ -31,6 +31,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDocState;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookKnfType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.result.*;
+import com.aplana.sbrf.taxaccounting.model.util.AppFileUtils;
 import com.aplana.sbrf.taxaccounting.model.util.DateUtils;
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 import com.aplana.sbrf.taxaccounting.permissions.BasePermissionEvaluator;
@@ -47,6 +48,8 @@ import com.aplana.sbrf.taxaccounting.service.impl.declaration.edit.incomedate.Ed
 import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import com.aplana.sbrf.taxaccounting.service.refbook.RefBookAsnuService;
 import com.aplana.sbrf.taxaccounting.utils.DepartmentReportPeriodFormatter;
+import com.aplana.sbrf.taxaccounting.utils.FileWrapper;
+import com.aplana.sbrf.taxaccounting.utils.ResourceUtils;
 import com.aplana.sbrf.taxaccounting.utils.ZipUtils;
 import com.google.common.collect.Lists;
 import net.sf.jasperreports.engine.JRException;
@@ -2361,6 +2364,40 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             }
 
             logger.info("test: sendEdo ОНФ № " + declarationId);
+            /*File tmpXmlFile = null;
+            try {
+                DeclarationData declarationData = get(declarationId);
+                List<DeclarationDataFile> outgoingToFnsDeclarationDataFiles = declarationDataFileDao.findAllByDeclarationIdAndType(declarationId, AttachFileType.OUTGOING_TO_FNS);
+                if (outgoingToFnsDeclarationDataFiles.size() > 1) {
+                    logger.error("В форме № " + declarationId + " найдено более 1 файла с типом \"" + AttachFileType.OUTGOING_TO_FNS.getTitle() + "\"");
+                } else if (outgoingToFnsDeclarationDataFiles.size() < 1) {
+                    logger.error("В форме № " + declarationId + " не найден файл с типом \"" + AttachFileType.OUTGOING_TO_FNS.getTitle() + "\"");
+                } else {
+                    DeclarationDataFile xmlDeclarationDataFile = outgoingToFnsDeclarationDataFiles.get(0);
+                    BlobData xmlBlobData = blobDataService.get(xmlDeclarationDataFile.getUuid());
+                    tmpXmlFile = File.createTempFile("", ".xml");
+                    try (OutputStream outputStream = new FileOutputStream(tmpXmlFile)) {
+                        IOUtils.copy(xmlBlobData.getInputStream(), outputStream);
+                    }
+                    if (validateXMLService.validate(declarationData, logger, tmpXmlFile, xmlBlobData.getName(), null)) {
+                        Configuration configuration = configurationService.fetchByEnum(ConfigurationParam.DOCUMENT_EXCHANGE_DIRECTORY);
+                        FileWrapper directory = ResourceUtils.getSharedResource(configuration.getValue());
+                        if (!directory.exists()) {
+                            logger.warn("Не удалось поместить файл ОНФ в папку обмена \"" + configuration.getValue() + "\"");
+                        } else {
+                            FileWrapper file = ResourceUtils.getSharedResource(configuration.getValue() + "/" + xmlBlobData.getName());
+                            try (InputStream inputStream = new FileInputStream(tmpXmlFile);
+                                 OutputStream outputStream = new FileOutputStream(file.getFile())) {
+                                IOUtils.copy(inputStream, outputStream);
+                            }
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                logger.error("Ошибка отправки в ЭДО файла \"\" по отчетной форме <ОписаниеФормы>. Причина: " + e.getMessage());
+            } finally {
+                AppFileUtils.deleteTmp(tmpXmlFile);
+            }*/
         }
     }
 

@@ -92,13 +92,13 @@ alter table ref_book_calendar add constraint chk_ref_book_cal_work check (ctype 
 alter table ref_book_asnu add constraint ref_book_asnu_chk_priority check(priority between 1 and 999);
 
 
-alter table department_config_test add constraint dep_conf_pk primary key (id);
-alter table department_config_test add constraint dep_conf_kpp_oktmo_st_date_uk unique (kpp, oktmo_id, start_date);
-alter table department_config_test add constraint dep_conf_oktmo_fk FOREIGN KEY (oktmo_id) REFERENCES REF_BOOK_OKTMO (ID);
-alter table department_config_test add constraint dep_conf_dep_fk FOREIGN KEY (DEPARTMENT_ID) REFERENCES DEPARTMENT (ID);
-alter table department_config_test add constraint dep_conf_present_place_fk FOREIGN KEY (present_place_id) REFERENCES REF_BOOK_PRESENT_PLACE (ID);
-alter table department_config_test add constraint dep_conf_reorg_fk FOREIGN KEY (reorganization_id) REFERENCES REF_BOOK_REORGANIZATION (ID);
-alter table department_config_test add constraint dep_conf_sign_mark_fk FOREIGN KEY (SIGNATORY_ID) REFERENCES REF_BOOK_SIGNATORY_MARK (ID);
+alter table department_config add constraint dep_conf_pk primary key (id);
+alter table department_config add constraint dep_conf_kpp_oktmo_st_date_uk unique (kpp, oktmo_id, start_date);
+alter table department_config add constraint dep_conf_oktmo_fk FOREIGN KEY (oktmo_id) REFERENCES REF_BOOK_OKTMO (ID);
+alter table department_config add constraint dep_conf_dep_fk FOREIGN KEY (DEPARTMENT_ID) REFERENCES DEPARTMENT (ID);
+alter table department_config add constraint dep_conf_present_place_fk FOREIGN KEY (present_place_id) REFERENCES REF_BOOK_PRESENT_PLACE (ID);
+alter table department_config add constraint dep_conf_reorg_fk FOREIGN KEY (reorganization_id) REFERENCES REF_BOOK_REORGANIZATION (ID);
+alter table department_config add constraint dep_conf_sign_mark_fk FOREIGN KEY (SIGNATORY_ID) REFERENCES REF_BOOK_SIGNATORY_MARK (ID);
 
 --unique
 --create unique index unq_ref_book_oktmo_code_vers on ref_book_oktmo(code,version);

@@ -1652,7 +1652,7 @@ comment on column ref_book_person_tb.tb_department_id is 'Ссылка на те
 comment on column ref_book_person_tb.import_date is 'Дата, показывающая, когда в Систему была загружена из даного ТБ последняя РНУ.';
 
 -----------------------------------------------------
-CREATE TABLE department_config_test (
+CREATE TABLE department_config (
   ID                  NUMBER(18) NOT NULL,
   KPP                 VARCHAR2(9 CHAR) NOT NULL,
   OKTMO_ID            NUMBER(18,0) NOT NULL,
@@ -1674,27 +1674,27 @@ CREATE TABLE department_config_test (
   APPROVE_DOC_NAME    VARCHAR2(120 CHAR),
   APPROVE_ORG_NAME    VARCHAR2(1000 CHAR)
 );
-COMMENT ON TABLE department_config_test IS 'Настройки подразделений';
-COMMENT ON COLUMN department_config_test.ID IS 'Уникальный идентификатор';
-COMMENT ON COLUMN department_config_test.KPP IS 'КПП';
-COMMENT ON COLUMN department_config_test.OKTMO_ID IS 'ОКТМО';
-COMMENT ON COLUMN department_config_test.start_date IS 'Дата начала актуальности';
-COMMENT ON COLUMN department_config_test.end_date IS 'Дата окончания актуальности';
-COMMENT ON COLUMN department_config_test.DEPARTMENT_ID IS 'Код обособленного подразделения';
-COMMENT ON COLUMN department_config_test.TAX_ORGAN_CODE IS 'Код налогового органа конечного';
-COMMENT ON COLUMN department_config_test.TAX_ORGAN_CODE_MID IS 'Код налогового органа промежуточного';
-COMMENT ON COLUMN department_config_test.present_place_id IS 'Место, по которому представляется документ.';
-COMMENT ON COLUMN department_config_test.NAME IS 'Наименование для титульного листа';
-COMMENT ON COLUMN department_config_test.PHONE IS 'Номер контактного телефона';
-COMMENT ON COLUMN department_config_test.reorganization_id IS 'Код формы реорганизации и ликвидации';
-COMMENT ON COLUMN department_config_test.REORG_INN IS 'ИНН реорганизованного обособленного подразделения';
-COMMENT ON COLUMN department_config_test.REORG_KPP IS 'КПП реорганизованного обособленного подразделения';
-COMMENT ON COLUMN department_config_test.SIGNATORY_ID IS 'признак лица, подписавшего документ';
-COMMENT ON COLUMN department_config_test.SIGNATORY_SURNAME IS 'Фамилия подписанта';
-COMMENT ON COLUMN department_config_test.SIGNATORY_FIRSTNAME IS 'Имя подписанта';
-COMMENT ON COLUMN department_config_test.SIGNATORY_LASTNAME IS 'Отчество подписанта';
-COMMENT ON COLUMN department_config_test.APPROVE_DOC_NAME IS 'Наименование документа, подтверждающего полномочия';
-COMMENT ON COLUMN department_config_test.APPROVE_ORG_NAME IS 'Наименование организации-представителя налогоплательщика';
+COMMENT ON TABLE department_config IS 'Настройки подразделений';
+COMMENT ON COLUMN department_config.ID IS 'Уникальный идентификатор';
+COMMENT ON COLUMN department_config.KPP IS 'КПП';
+COMMENT ON COLUMN department_config.OKTMO_ID IS 'ОКТМО';
+COMMENT ON COLUMN department_config.start_date IS 'Дата начала актуальности';
+COMMENT ON COLUMN department_config.end_date IS 'Дата окончания актуальности';
+COMMENT ON COLUMN department_config.DEPARTMENT_ID IS 'Код обособленного подразделения';
+COMMENT ON COLUMN department_config.TAX_ORGAN_CODE IS 'Код налогового органа конечного';
+COMMENT ON COLUMN department_config.TAX_ORGAN_CODE_MID IS 'Код налогового органа промежуточного';
+COMMENT ON COLUMN department_config.present_place_id IS 'Место, по которому представляется документ.';
+COMMENT ON COLUMN department_config.NAME IS 'Наименование для титульного листа';
+COMMENT ON COLUMN department_config.PHONE IS 'Номер контактного телефона';
+COMMENT ON COLUMN department_config.reorganization_id IS 'Код формы реорганизации и ликвидации';
+COMMENT ON COLUMN department_config.REORG_INN IS 'ИНН реорганизованного обособленного подразделения';
+COMMENT ON COLUMN department_config.REORG_KPP IS 'КПП реорганизованного обособленного подразделения';
+COMMENT ON COLUMN department_config.SIGNATORY_ID IS 'признак лица, подписавшего документ';
+COMMENT ON COLUMN department_config.SIGNATORY_SURNAME IS 'Фамилия подписанта';
+COMMENT ON COLUMN department_config.SIGNATORY_FIRSTNAME IS 'Имя подписанта';
+COMMENT ON COLUMN department_config.SIGNATORY_LASTNAME IS 'Отчество подписанта';
+COMMENT ON COLUMN department_config.APPROVE_DOC_NAME IS 'Наименование документа, подтверждающего полномочия';
+COMMENT ON COLUMN department_config.APPROVE_ORG_NAME IS 'Наименование организации-представителя налогоплательщика';
 
 create sequence seq_department_config start with 10000;
 

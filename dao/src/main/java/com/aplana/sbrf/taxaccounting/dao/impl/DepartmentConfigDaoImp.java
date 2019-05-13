@@ -51,12 +51,12 @@ public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentCon
      */
     private final static String ACTUAL_KPP_OKTMO_SELECT = "" +
             "  select dc.kpp, dc.oktmo_id, max(dc.start_date) start_date \n" +
-            "  from department_config_test dc\n" +
+            "  from department_config dc\n" +
             "  join report_period rp on rp.id = :reportPeriodId\n" +
             "  where (:departmentId is null or department_id = :departmentId) and (\n" +
             "    dc.start_date <= :relevanceDate and (dc.end_date is null or :relevanceDate <= dc.end_date)\n" +
             "    or dc.start_date <= rp.end_date and (dc.end_date is null or rp.start_date <= dc.end_date)\n" +
-            "       and (:departmentId is null or not exists (select * from department_config_test where kpp = dc.kpp and oktmo_id = dc.oktmo_id and start_date > dc.start_date and department_id != :departmentId))\n" +
+            "       and (:departmentId is null or not exists (select * from department_config where kpp = dc.kpp and oktmo_id = dc.oktmo_id and start_date > dc.start_date and department_id != :departmentId))\n" +
             "  )\n" +
             "  group by dc.kpp, dc.oktmo_id\n";
 
@@ -64,7 +64,7 @@ public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentCon
     public DepartmentConfig findById(long id) {
         try {
             return getJdbcTemplate().queryForObject("" +
-                    "select " + ALL_FIELDS + " from department_config_test dc\n" +
+                    "select " + ALL_FIELDS + " from department_config dc\n" +
                     ALL_FIELDS_JOINS +
                     "where dc.id = ?", new DepartmentConfigRowMapper(), id);
         } catch (EmptyResultDataAccessException e) {
@@ -80,7 +80,7 @@ public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentCon
     @Override
     public List<DepartmentConfig> findAllByDepartmentId(int departmentId) {
         return getJdbcTemplate().query("" +
-                "select " + ALL_FIELDS + " from department_config_test dc\n" +
+                "select " + ALL_FIELDS + " from department_config dc\n" +
                 ALL_FIELDS_JOINS +
                 "where department_id = ?", new DepartmentConfigRowMapper(), departmentId);
     }
@@ -97,13 +97,13 @@ public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentCon
                 "from ndfl_person np\n" +
                 "join ndfl_person_income npi on npi.ndfl_person_id = np.id\n" +
                 "where np.declaration_data_id = :declarationId and (npi.kpp, npi.oktmo) in (\n" +
-                "  select dc.kpp, oktmo.code from department_config_test dc\n" +
+                "  select dc.kpp, oktmo.code from department_config dc\n" +
                 "  join report_period rp on rp.id = :reportPeriodId\n" +
                 "  join ref_book_oktmo oktmo on oktmo.id = dc.oktmo_id\n" +
                 "  where oktmo.id = dc.oktmo_id and (:departmentId is null or dc.department_id = :departmentId) and (\n" +
                 "    dc.start_date <= to_date(:relevanceDate, 'DD.MM.YYYY') and (dc.end_date is null or to_date(:relevanceDate, 'DD.MM.YYYY') <= dc.end_date)\n" +
                 "    or (dc.start_date <= rp.end_date and (dc.end_date is null or rp.start_date <= dc.end_date)\n" +
-                "      and (:departmentId is null or not exists (select * from department_config_test where kpp = dc.kpp and oktmo_id = dc.oktmo_id and start_date > dc.start_date and department_id != :departmentId))\n" +
+                "      and (:departmentId is null or not exists (select * from department_config where kpp = dc.kpp and oktmo_id = dc.oktmo_id and start_date > dc.start_date and department_id != :departmentId))\n" +
                 "    )\n" +
                 "  )\n" +
                 ")", params, new RowMapper<KppOktmoPair>() {
@@ -117,7 +117,7 @@ public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentCon
     @Override
     public List<DepartmentConfig> findAllByKppAndOktmo(String kpp, String oktmo) {
         return getJdbcTemplate().query("" +
-                "select " + ALL_FIELDS + " from department_config_test dc\n" +
+                "select " + ALL_FIELDS + " from department_config dc\n" +
                 ALL_FIELDS_JOINS +
                 "where dc.kpp = ? and oktmo.code = ?", new DepartmentConfigRowMapper(), kpp, oktmo);
     }
@@ -157,7 +157,7 @@ public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentCon
         String sql = "select " +
                 (isSupportOver() ? "row_number() over (order by dc.kpp, oktmo.code, dc.tax_organ_code, dc.start_date) row_ord, " : " rownum row_ord, ") +
                 ALL_FIELDS +
-                "from department_config_test dc\n" +
+                "from department_config dc\n" +
                 ALL_FIELDS_JOINS +
                 "where 1=1\n";
         MapSqlParameterSource params = new MapSqlParameterSource();
@@ -190,8 +190,8 @@ public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentCon
         try {
             return getJdbcTemplate().queryForObject("" +
                             "with all_prev_vers as (\n" +
-                            "  select prev_dc.* from department_config_test prev_dc\n" +
-                            "  join department_config_test cur_dc on cur_dc.id = ?\n" +
+                            "  select prev_dc.* from department_config prev_dc\n" +
+                            "  join department_config cur_dc on cur_dc.id = ?\n" +
                             "  where prev_dc.kpp = cur_dc.kpp and prev_dc.oktmo_id = cur_dc.oktmo_id and prev_dc.start_date < cur_dc.start_date\n" +
                             "  order by prev_dc.start_date desc\n" +
                             ")\n" +
@@ -209,8 +209,8 @@ public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentCon
         try {
             return getJdbcTemplate().queryForObject("" +
                             "with all_next_vers as (\n" +
-                            "  select next_dc.* from department_config_test next_dc\n" +
-                            "  join department_config_test cur_dc on cur_dc.id = ?\n" +
+                            "  select next_dc.* from department_config next_dc\n" +
+                            "  join department_config cur_dc on cur_dc.id = ?\n" +
                             "  where next_dc.kpp = cur_dc.kpp and next_dc.oktmo_id = cur_dc.oktmo_id and next_dc.start_date > cur_dc.start_date\n" +
                             "  order by next_dc.start_date asc\n" +
                             ")\n" +
@@ -231,7 +231,7 @@ public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentCon
         return getNamedParameterJdbcTemplate().query("" +
                         "select dc.kpp, oktmo.code as oktmo " +
                         "from ( " +
-                        "  select * from department_config_test dc " +
+                        "  select * from department_config dc " +
                         "  where department_id in (:departmentIds) and (start_date <= :relevanceDate " +
                         "  and (end_date is null or :relevanceDate <= end_date)) " +
                         ") dc " +
@@ -248,7 +248,7 @@ public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentCon
     public PagingResult<KppSelect> findAllKppByDepartmentIdAndKppContaining(int departmentId, String kpp, PagingParams pagingParams) {
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("departmentId", departmentId);
-        String baseSelect = "select distinct kpp from department_config_test where department_id = :departmentId";
+        String baseSelect = "select distinct kpp from department_config where department_id = :departmentId";
         if (!isEmpty(kpp)) {
             baseSelect += " and kpp like '%' || :kpp || '%'";
             params.addValue("kpp", kpp);
@@ -282,7 +282,7 @@ public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentCon
         String baseSelect = "with actual_kpp_oktmo as (" + ACTUAL_KPP_OKTMO_SELECT + "),\n" +
                 "actual_department_config as (\n" +
                 "  select " + ALL_FIELDS +
-                "  from department_config_test dc\n" +
+                "  from department_config dc\n" +
                 "  join actual_kpp_oktmo kpp_oktmo on kpp_oktmo.kpp = dc.kpp and kpp_oktmo.oktmo_id = dc.oktmo_id and kpp_oktmo.start_date = dc.start_date\n" +
                 ALL_FIELDS_JOINS +
                 ")\n" +
@@ -321,7 +321,7 @@ public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentCon
         String withSelect = "with actual_kpp_oktmo as (" + ACTUAL_KPP_OKTMO_SELECT + "),\n" +
                 "actual_department_config as (\n" +
                 "  select dc.id, dc.kpp, oktmo.code oktmo_code, dc.start_date, dc.end_date\n" +
-                "  from department_config_test dc\n" +
+                "  from department_config dc\n" +
                 "  join actual_kpp_oktmo kpp_oktmo on kpp_oktmo.kpp = dc.kpp and kpp_oktmo.oktmo_id = dc.oktmo_id and kpp_oktmo.start_date = dc.start_date\n" +
                 "  join ref_book_oktmo oktmo on oktmo.id = dc.oktmo_id\n" +
                 ")\n";
@@ -400,7 +400,7 @@ public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentCon
         params.addValue("approve_doc_name", departmentConfig.getApproveDocName());
         params.addValue("approve_org_name", departmentConfig.getApproveOrgName());
         getNamedParameterJdbcTemplate().update("" +
-                        "insert into department_config_test(id, kpp, oktmo_id, start_date, end_date, department_id, tax_organ_code, present_place_id, name,\n" +
+                        "insert into department_config(id, kpp, oktmo_id, start_date, end_date, department_id, tax_organ_code, present_place_id, name,\n" +
                         "   phone, reorganization_id, reorg_inn, reorg_kpp, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name)" +
                         "values (seq_department_config.nextval, :kpp, :oktmo_id, :start_date, :end_date, :department_id, :tax_organ_code, :present_place_id, :name,\n" +
                         "   :phone, :reorganization_id, :reorg_inn, :reorg_kpp, :signatory_id, :signatory_surname, :signatory_firstname, :signatory_lastname, :approve_doc_name, :approve_org_name)",
@@ -432,7 +432,7 @@ public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentCon
         params.addValue("approve_doc_name", departmentConfig.getApproveDocName());
         params.addValue("approve_org_name", departmentConfig.getApproveOrgName());
         getNamedParameterJdbcTemplate().update("" +
-                        "update department_config_test\n" +
+                        "update department_config\n" +
                         "set kpp = :kpp, oktmo_id = :oktmo_id, start_date = :start_date, end_date = :end_date, department_id = :department_id, tax_organ_code = :tax_organ_code, " +
                         "present_place_id = :present_place_id, name = :name, phone = :phone, reorganization_id = :reorganization_id, reorg_inn = :reorg_inn, reorg_kpp = :reorg_kpp, " +
                         "signatory_id = :signatory_id, signatory_surname = :signatory_surname, signatory_firstname = :signatory_firstname, signatory_lastname = :signatory_lastname, " +
@@ -443,21 +443,21 @@ public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentCon
 
     @Override
     public void deleteById(long id) {
-        getJdbcTemplate().update("delete from department_config_test where id = ?", id);
+        getJdbcTemplate().update("delete from department_config where id = ?", id);
     }
 
     @Override
     public void deleteByDepartmentId(int departmentId) {
-        getJdbcTemplate().update("delete from department_config_test where department_id = ?", departmentId);
+        getJdbcTemplate().update("delete from department_config where department_id = ?", departmentId);
     }
 
     @Override
     public void updateStartDate(long id, Date date) {
-        getJdbcTemplate().update("update department_config_test set start_date = ? where id = ?", date, id);
+        getJdbcTemplate().update("update department_config set start_date = ? where id = ?", date, id);
     }
 
     @Override
     public void updateEndDate(long id, Date date) {
-        getJdbcTemplate().update("update department_config_test set end_date = ? where id = ?", date, id);
+        getJdbcTemplate().update("update department_config set end_date = ? where id = ?", date, id);
     }
 }
