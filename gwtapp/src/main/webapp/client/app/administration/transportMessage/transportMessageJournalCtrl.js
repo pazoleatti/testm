@@ -56,6 +56,7 @@
                             $filter('translate')('transportMessages.title.type'),
                             $filter('translate')('transportMessages.title.content'),
                             $filter('translate')('transportMessages.title.declarationId'),
+                            $filter('translate')('transportMessages.title.declarationType'),
                             $filter('translate')('title.department'),
                             $filter('translate')('transportMessages.title.uuid'),
                             $filter('translate')('transportMessages.title.message'),
@@ -103,6 +104,9 @@
                                 name: 'declaration.id',
                                 index: 'declaration_id',
                                 formatter: $filter('tmNdflReportLinkFormatter')
+                            }, {
+                                name: 'declaration.typeName',
+                                index: 'declaration_type_name'
                             }, {
                                 name: 'declaration.departmentName',
                                 index: 'department_name'

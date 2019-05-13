@@ -3,6 +3,7 @@ package form_template.ndfl.report_2ndfl_1.v2016
 import com.aplana.sbrf.taxaccounting.AbstractScriptClass
 import com.aplana.sbrf.taxaccounting.model.*
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.log.Logger
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction
@@ -22,6 +23,7 @@ import com.aplana.sbrf.taxaccounting.service.component.lock.locker.DeclarationLo
 import com.aplana.sbrf.taxaccounting.service.refbook.DepartmentConfigService
 import com.aplana.sbrf.taxaccounting.service.refbook.RefBookDeductionTypeService
 import com.aplana.sbrf.taxaccounting.utils.ZipUtils
+import groovy.io.PlatformLineWriter
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import groovy.transform.TypeChecked
@@ -218,7 +220,7 @@ class Report2Ndfl extends AbstractScriptClass {
         String priznak = definePriznak(departmentConfig)
         int nomSprCounter = 0
 
-        MarkupBuilder builder = new MarkupBuilder(writer)
+        MarkupBuilder builder = new MarkupBuilder(new PlatformLineWriter(writer))
         builder.setDoubleQuotes(true)
         builder.setOmitNullAttributes(true)
         builder.mkp.xmlDeclaration(version: "1.0", encoding: xmlCharset.name())
@@ -769,6 +771,9 @@ class Report2Ndfl extends AbstractScriptClass {
                         createdForms.add(declarationData)
                         declarationData.fileName = xml.fileName
                         create(declarationData)
+                        if (logger.containsLevel(LogLevel.ERROR)) {
+                            continue
+                        }
                         saveNdflRefences(xml.ndflReferences, declarationData.id)
                         // Привязывание xml-файла к форме
                         saveFileInfo(xml.xmlFile, xml.fileName)

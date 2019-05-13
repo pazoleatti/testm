@@ -2,14 +2,12 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.TransportMessageDao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.messaging.TransportMessage;
 import com.aplana.sbrf.taxaccounting.model.messaging.TransportMessageFilter;
 import com.aplana.sbrf.taxaccounting.service.TransportMessageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-
 
 @Service
 public class TransportMessageServiceImpl implements TransportMessageService {
@@ -28,7 +26,7 @@ public class TransportMessageServiceImpl implements TransportMessageService {
     }
 
     @Override
-    public List<TransportMessage> findByFilter(TransportMessageFilter filter, PagingParams pagingParams) {
+    public PagingResult<TransportMessage> findByFilter(TransportMessageFilter filter, PagingParams pagingParams) {
         return transportMessageDao.findByFilter(filter, pagingParams);
     }
 }

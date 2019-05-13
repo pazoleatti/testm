@@ -170,7 +170,7 @@
          */
         .factory('transportMessageResource', ['$resource', function ($resource) {
             return $resource('controller/rest/transportMessages', {}, {
-                query: {method: 'GET', isArray: true, cache: false}
+                query: {method: 'GET', isArray: false, cache: false}
             });
         }])
 
