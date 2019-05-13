@@ -256,9 +256,9 @@ public class ScriptUtilsTest {
         Assert.assertEquals("Значение гр. \"dulNumber\" (\"12 12345678\") не соответствует формату \"99 9999999\", где 9 - любая десятичная цифра (обязательная)", ScriptUtils.checkDul("09", "12 12345678", "dulNumber"));
         Assert.assertNull(ScriptUtils.checkDul("09", "!1@-2#1$ 2%3^4&5*6(7)", "dulNumber"));
 
-        Assert.assertEquals("Значение гр. \"dulNumber\" (\"АZ 1234567890\") не соответствует формату \"ББ-999 9999999\", где Б - любая русская заглавная буква, 9 - любая десятичная цифра (обязательная)", ScriptUtils.checkDul("19", "АZ 1234567890", "dulNumber"));
-        Assert.assertEquals("Значение гр. \"dulNumber\" (\"ББ 12345678901\") не соответствует формату \"ББ-999 9999999\", где Б - любая русская заглавная буква, 9 - любая десятичная цифра (обязательная)", ScriptUtils.checkDul("19", "ББ 12345678901", "dulNumber"));
-        Assert.assertNull(ScriptUtils.checkDul("19", "!Б@-Б#1$ 2%3^4&5*6(7)8-9=0/", "dulNumber"));
+        Assert.assertEquals("Значение гр. \"dulNumber\" (\"АZ 1234567\") не соответствует формату \"ББ 9999999\", где Б - любая русская заглавная буква, 9 - любая десятичная цифра (обязательная)", ScriptUtils.checkDul("19", "АZ 1234567", "dulNumber"));
+        Assert.assertEquals("Значение гр. \"dulNumber\" (\"ББ 12345678\") не соответствует формату \"ББ 9999999\", где Б - любая русская заглавная буква, 9 - любая десятичная цифра (обязательная)", ScriptUtils.checkDul("19", "ББ 12345678", "dulNumber"));
+        Assert.assertNull(ScriptUtils.checkDul("19", "АП 1234567", "dulNumber"));
 
         Assert.assertEquals("Значение гр. \"dulNumber\" (\"12 12345678\") не соответствует формату \"99 9999999\", где 9 - любая десятичная цифра (обязательная)", ScriptUtils.checkDul("22", "12 12345678", "dulNumber"));
         Assert.assertNull(ScriptUtils.checkDul("22", "!1@-2#1$ 2%3^4&5*6(7)", "dulNumber"));
