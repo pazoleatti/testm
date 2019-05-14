@@ -261,5 +261,12 @@
 			rename department_config_test to department_config;
 		</sql>
 	</changeSet>
+	<changeSet id="3.7-ishevchuk-2" author="ishevchuk">
+		<update tableName="BLOB_DATA">
+			<column name="data"
+					valueBlobFile="templates-3.7/ndfl/report_6ndfl/v2016/UU_OTCH_1_087_00_05_07_01.xsd"/>
+			<where>id in (select bd.id from declaration_template_file dtf left join blob_data bd on dtf.BLOB_DATA_ID = bd.ID where dtf.DECLARATION_TEMPLATE_ID = 103 and bd.NAME = 'UU_OTCH_1_087_00_05_07_01.xsd')</where>
+		</update>
+	</changeSet>
 
 </databaseChangeLog>
