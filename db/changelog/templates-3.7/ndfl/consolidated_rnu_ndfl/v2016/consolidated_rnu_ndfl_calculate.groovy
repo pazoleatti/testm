@@ -293,7 +293,7 @@ class Calculate extends AbstractScriptClass {
             Set<Long> unacceptedPnfIds = acceptedSources.get(Boolean.FALSE)
             if (acceptedPnfIds.isEmpty() && !unacceptedPnfIds.isEmpty()) {
                 unacceptedSources?.addAll(unacceptedPnfIds)
-                logger.error("Формы содержащие данные для включения в КНФ существуют, но все они находятся в состоянии \"Не принята\". Номера найденных ПНФ: %s", unacceptedPnfIds.join(", "))
+                logger.error("Формы, содержащие данные для включения в КНФ, существуют, но все они находятся в состоянии \"Не принята\". Номера найденных ПНФ: %s", unacceptedPnfIds.join(", "))
             } else {
                 logger.error("Не найдено ни одной ПНФ, содержащей данные для включения в КНФ")
             }
