@@ -62,9 +62,6 @@
                         <ul class="dropdown-menu dropdown-menu-block" role="menu"
                             aria-labelledby="download-reports-button">
                             <li role="menuitem">
-                                <a ng-click="downloadReportsByAccepted()">{{::'ndflReportJournal.button.downloadReport.allAccepted' | translate}}</a>
-                            </li>
-                            <li role="menuitem">
                                 <a ng-class="ndflReportJournalGrid.ctrl.getCountRecords() > 0 ? '' : 'disabled'"
                                    ng-click="downloadReportsByFilter()">{{::'ndflReportJournal.button.byFilter' | translate}}</a>
                             </li>

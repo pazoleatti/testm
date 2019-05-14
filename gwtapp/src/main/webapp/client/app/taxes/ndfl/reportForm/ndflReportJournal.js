@@ -280,26 +280,6 @@
                 /**
                  * @description Выгрузить отчетность по фильтру
                  */
-                $scope.downloadReportsByAccepted = function () {
-                    $http({
-                        method: "POST",
-                        url: "controller/actions/declarationData/exportReportFormsByFilter",
-                        params: {
-                            filter: JSON.stringify({
-                                formStates: [APP_CONSTANTS.STATE.ACCEPTED.id],
-                                formKindIds: [APP_CONSTANTS.NDFL_DECLARATION_KIND.REPORTS.id]
-                            })
-                        }
-                    }).then(function (response) {
-                        if (response.data && response.data.uuid && response.data.uuid !== null) {
-                            $logPanel.open('log-panel-container', response.data.uuid);
-                        }
-                    });
-                };
-
-                /**
-                 * @description Выгрузить отчетность по фильтру
-                 */
                 $scope.downloadReportsByFilter = function () {
                     $http({
                         method: "POST",

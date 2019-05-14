@@ -213,7 +213,6 @@
 
         "ndflReportJournal.button.createReport": "Создать отчетность",
         "ndflReportJournal.button.downloadReport": "Выгрузить",
-        "ndflReportJournal.button.downloadReport.allAccepted": "В состоянии «Принята»",
         "ndflReportJournal.button.byFilter": "Отобранные по фильтру",
         "ndflReportJournal.button.selected": "Выбранные на странице",
         "ndflReportJournal.button.updateDocState": "Изменить состояние ЭД",
