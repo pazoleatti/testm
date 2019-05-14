@@ -269,4 +269,35 @@
 		</update>
 	</changeSet>
 
+	<!--https://jira.aplana.com/browse/SBRFNDFL-7092 - Ссылка на протокол операций в истории изменений-->
+	<changeSet id="3.7-dnovikov-20" author="dnovikov">
+		<sql>
+			alter table log_business add log_id varchar2(36 byte);
+			alter table log_business add constraint log_business_fk_log_id foreign key (log_id) references log (id) on delete cascade;
+		</sql>
+	</changeSet>
+
+	<!--https://jira.aplana.com/browse/SBRFNDFL-7092 - Изменения событий-->
+	<changeSet id="3.7-dnovikov-21" author="dnovikov">
+		<sql>
+			update event set name = 'Создание' where id = 1;
+			update event set name = 'Удаление' where id = 2;
+			update event set name = 'Проверка' where id = 5;
+			update event set name = 'Обновление данных ФЛ' where id = 11;
+			update event set name = 'Изменение состояния ЭД' where id = 26;
+			update event set name = 'Возврат в Создана' where id = 106;
+			update event set name = 'Проверка' where id = 107;
+			update event set name = 'Принятие' where id = 109;
+			update event set name = 'Импорт из файла Excel' where id = 401;
+			update event set name = 'Загрузка файла ответа ФНС' where id = 10002;
+			insert into event(id, name) values(10003, 'Идентификация ФЛ');
+			insert into event(id, name) values(10004, 'Консолидация');
+			insert into event(id, name) values(10005, 'Создание из ТФ xml');
+			insert into event(id, name) values(10006, 'Редактирование строки РНУ НДФЛ');
+			insert into event(id, name) values(10007, 'Массовое редактирование дат');
+			insert into event(id, name) values(10008, 'Отправка в ЭДО');
+			insert into event(id, name) values(10009, 'Выгрузка для отправки в ФНС');
+		</sql>
+	</changeSet>
+
 </databaseChangeLog>

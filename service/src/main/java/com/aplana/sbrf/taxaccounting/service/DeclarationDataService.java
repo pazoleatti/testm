@@ -43,10 +43,10 @@ public interface DeclarationDataService {
      * @param newDeclaration данные формы
      * @param logger         объект журнала
      * @param userInfo       информация о пользователе, выполняющего действие
-     * @param writeAudit     надо ли писать в ЖА
+     * @param writeAudit
      * @return идентификатор созданной декларации
      */
-    Long createWithotChecks(DeclarationData newDeclaration, Logger logger, TAUserInfo userInfo, boolean writeAudit);
+    void createWithotChecks(DeclarationData newDeclaration, Logger logger, TAUserInfo userInfo, boolean writeAudit);
 
     /**
      * Идентифицировать ФЛ
@@ -652,7 +652,7 @@ public interface DeclarationDataService {
      * @param taUserInfo        пользователь, выполняющий изменения
      * @param personIncome      данные строки раздела 2
      */
-    void updateNdflIncomesAndTax(Long declarationDataId, TAUserInfo taUserInfo, NdflPersonIncomeDTO personIncome);
+    ActionResult updateNdflIncomesAndTax(Long declarationDataId, TAUserInfo taUserInfo, NdflPersonIncomeDTO personIncome);
 
     /**
      * Обновляет даты в строках раздела 2
@@ -668,19 +668,19 @@ public interface DeclarationDataService {
      * Обновляет данные строки для раздела 3 (Сведения о вычетах) и производит пересортировку данных
      *
      * @param declarationDataId идентификатор формы, строка которой редактируется
-     * @param taUserInfo        пользователь, выполняющий изменения
+     * @param userInfo          пользователь, выполняющий изменения
      * @param personDeduction   данные строки раздела 3
      */
-    void updateNdflDeduction(Long declarationDataId, TAUserInfo taUserInfo, NdflPersonDeductionDTO personDeduction);
+    ActionResult updateNdflDeduction(Long declarationDataId, TAUserInfo userInfo, NdflPersonDeductionDTO personDeduction);
 
     /**
      * Обновляет данные строки для раздела 4 (Сведения о доходах в виде авансовых платежей) и производит пересортировку данных
      *
      * @param declarationDataId идентификатор формы, строка которой редактируется
-     * @param taUserInfo        пользователь, выполняющий изменения
+     * @param userInfo          пользователь, выполняющий изменения
      * @param personPrepayment  данные строки раздела 4
      */
-    void updateNdflPrepayment(Long declarationDataId, TAUserInfo taUserInfo, NdflPersonPrepaymentDTO personPrepayment);
+    ActionResult updateNdflPrepayment(Long declarationDataId, TAUserInfo userInfo, NdflPersonPrepaymentDTO personPrepayment);
 
     /**
      * Создать имя Pdf отчета

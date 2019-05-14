@@ -406,7 +406,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
     }
 
     @Override
-    public long create(DeclarationData declarationData) {
+    public void create(DeclarationData declarationData) {
         Assert.isTrue(declarationData.getId() == null, "Произведена попытка перезаписать уже сохранённую налоговую форму!");
         Assert.isTrue(!existDeclarationData(declarationData), "Налоговая форма с заданными параметрами уже существует!");
 
@@ -446,7 +446,6 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             createDeclarationDataKppList(id, declarationData.getIncludedKpps());
         }
         declarationData.setId(id);
-        return id;
     }
 
     @Override

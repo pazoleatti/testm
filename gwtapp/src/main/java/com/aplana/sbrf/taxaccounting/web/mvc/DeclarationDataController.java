@@ -676,8 +676,8 @@ public class DeclarationDataController {
      * @param personIncome      измененные данные строки
      */
     @PostMapping(value = "/rest/declarationData/{declarationDataId}/editNdflIncomesAndTax", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public void editNdflIncomesAndTax(@PathVariable Long declarationDataId, @RequestBody NdflPersonIncomeDTO personIncome) {
-        declarationService.updateNdflIncomesAndTax(declarationDataId, securityService.currentUserInfo(), personIncome);
+    public ActionResult editNdflIncomesAndTax(@PathVariable Long declarationDataId, @RequestBody NdflPersonIncomeDTO personIncome) {
+        return declarationService.updateNdflIncomesAndTax(declarationDataId, securityService.currentUserInfo(), personIncome);
     }
 
     /**
@@ -687,8 +687,8 @@ public class DeclarationDataController {
      * @param personDeduction   измененные данные строки
      */
     @PostMapping(value = "/rest/declarationData/{declarationDataId}/editNdflDeduction", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public void editNdflDeduction(@PathVariable Long declarationDataId, @RequestBody NdflPersonDeductionDTO personDeduction) {
-        declarationService.updateNdflDeduction(declarationDataId, securityService.currentUserInfo(), personDeduction);
+    public ActionResult editNdflDeduction(@PathVariable Long declarationDataId, @RequestBody NdflPersonDeductionDTO personDeduction) {
+        return declarationService.updateNdflDeduction(declarationDataId, securityService.currentUserInfo(), personDeduction);
     }
 
     /**
@@ -698,8 +698,8 @@ public class DeclarationDataController {
      * @param personPrepayment  измененные данные строки
      */
     @PostMapping(value = "/rest/declarationData/{declarationDataId}/editNdflPrepayment", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public void editNdflPrepayment(@PathVariable Long declarationDataId, @RequestBody NdflPersonPrepaymentDTO personPrepayment) {
-        declarationService.updateNdflPrepayment(declarationDataId, securityService.currentUserInfo(), personPrepayment);
+    public ActionResult editNdflPrepayment(@PathVariable Long declarationDataId, @RequestBody NdflPersonPrepaymentDTO personPrepayment) {
+        return declarationService.updateNdflPrepayment(declarationDataId, securityService.currentUserInfo(), personPrepayment);
     }
 
     /**

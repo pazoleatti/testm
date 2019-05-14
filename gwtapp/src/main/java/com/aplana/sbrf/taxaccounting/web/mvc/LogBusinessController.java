@@ -45,7 +45,7 @@ public class LogBusinessController {
      * @return список изменений формы {@link LogBusiness}
      */
     @GetMapping(value = "/rest/logBusiness/{declarationId}", params = "projection=declarationBusinessLogs")
-    public JqgridPagedList<LogBusinessDTO> fetchDeclarationBusinessLogs(@PathVariable long declarationId, @RequestParam PagingParams pagingParams) {
+    public JqgridPagedList<LogBusinessDTO> findAllByDeclarationId(@PathVariable long declarationId, @RequestParam PagingParams pagingParams) {
         List<LogBusinessDTO> logBusinessList = logBusinessService.findAllByDeclarationId(declarationId, pagingParams);
         return JqgridPagedResourceAssembler.buildPagedList(
                 logBusinessList,
@@ -61,7 +61,7 @@ public class LogBusinessController {
      * @return список изменений декларации {@link LogBusiness}
      */
     @GetMapping(value = "/rest/logBusiness/{personId}", params = "projection=personBusinessLogs")
-    public JqgridPagedList<LogBusinessDTO> fetchPersonBusinessLogs(@PathVariable long personId, @RequestParam PagingParams pagingParams) {
+    public JqgridPagedList<LogBusinessDTO> findAllByPersonId(@PathVariable long personId, @RequestParam PagingParams pagingParams) {
         PagingResult<LogBusinessDTO> logBusinessPage = logBusinessService.findAllByPersonId(personId, pagingParams);
         return JqgridPagedResourceAssembler.buildPagedList(
                 logBusinessPage,

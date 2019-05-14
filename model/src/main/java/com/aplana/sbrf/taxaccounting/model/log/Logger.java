@@ -1,6 +1,8 @@
 package com.aplana.sbrf.taxaccounting.model.log;
 
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -15,29 +17,18 @@ import java.util.List;
  * {@link #warn(String, Object...)}, {@link #error(String, Object...)}
  * Вся информация, записываемая в журал будет дублироваться в журнал сервера приложений средствами Commons.Logging
  */
+@Getter
+@Setter
 public class Logger implements Serializable {
     private static final Log LOG = LogFactory.getLog(Logger.class);
+
+    // Идентификатор уведомления
+    private String logId;
+    // Список сообщений
     private List<LogEntry> entries = new ArrayList<>();
+
     //Добавили пока на пробу, поскольку необходимо логгирование в справочнике Подразделений
     private TAUserInfo taUserInfo;
-    //Основное сообщение об ошибке, которое выводится в диалог а не в лог панель
-    private String mainMsg;
-
-    public String getMainMsg() {
-        return mainMsg;
-    }
-
-    public void setMainMsg(String mainMsg) {
-        this.mainMsg = mainMsg;
-    }
-
-    public TAUserInfo getTaUserInfo() {
-        return taUserInfo;
-    }
-
-    public void setTaUserInfo(TAUserInfo taUserInfo) {
-        this.taUserInfo = taUserInfo;
-    }
 
     // Ограничение по длине для каждого сообщения об ошибке из Exception
     private static final int MAX_EXCEPTION_LOG_MESSAGE_LENGTH = 10000;
@@ -236,24 +227,11 @@ public class Logger implements Serializable {
     }
 
     /**
-     * Получить сообщения, записанные в журнал
-     *
-     * @return все сообщения, записанные в журнал в порядке их добавления
-     */
-    public List<LogEntry> getEntries() {
-        return entries;
-    }
-
-    /**
      * Получить последнюю запись.
      */
     public LogEntry getLastEntry() {
         if (entries.isEmpty()) return null;
         return entries.get(entries.size() - 1);
-    }
-
-    public void setEntries(List<LogEntry> entries) {
-        this.entries = entries;
     }
 
     /**

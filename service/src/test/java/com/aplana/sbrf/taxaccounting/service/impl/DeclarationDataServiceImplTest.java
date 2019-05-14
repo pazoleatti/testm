@@ -85,6 +85,8 @@ public class DeclarationDataServiceImplTest {
     DeclarationLocker declarationLocker;
     @Autowired
     ConfigurationService configurationService;
+    @Autowired
+    LogEntryService logEntryService;
 
     private static final SimpleDateFormat SDF = new SimpleDateFormat("dd.MM.yyyy");
 
@@ -488,6 +490,7 @@ public class DeclarationDataServiceImplTest {
         when(user.getId()).thenReturn(userId);
 
 
+        when(logEntryService.createLogger()).thenReturn(new Logger());
         when(declarationDataDao.get(declarationDataId)).thenReturn(declarationData);
         when(declarationDataDao.get(anyListOf(Long.class))).thenReturn(Collections.singletonList(declarationData));
 

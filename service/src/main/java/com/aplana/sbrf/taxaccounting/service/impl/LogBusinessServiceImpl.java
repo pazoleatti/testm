@@ -30,8 +30,8 @@ public class LogBusinessServiceImpl implements LogBusinessService {
 
     @Override
     @Transactional
-    public void logFormEvent(Long declarationId, FormDataEvent event, String note, TAUserInfo userInfo) {
-        LogBusiness log = makeLogBusiness(event, note, userInfo.getUser());
+    public void logFormEvent(Long declarationId, FormDataEvent event, String logId, String note, TAUserInfo userInfo) {
+        LogBusiness log = makeLogBusiness(event, logId, note, userInfo.getUser());
         log.setDeclarationDataId(declarationId);
         logBusinessDao.create(log);
     }
@@ -39,7 +39,7 @@ public class LogBusinessServiceImpl implements LogBusinessService {
     @Override
     @Transactional
     public void logPersonEvent(Long personId, FormDataEvent event, String note, TAUserInfo userInfo) {
-        LogBusiness log = makeLogBusiness(event, note, userInfo.getUser());
+        LogBusiness log = makeLogBusiness(event, null, note, userInfo.getUser());
         log.setPersonId(personId);
         logBusinessDao.create(log);
     }
@@ -65,11 +65,12 @@ public class LogBusinessServiceImpl implements LogBusinessService {
         return logBusinessDao.findAllByPersonId(personId, pagingParams);
     }
 
-    private LogBusiness makeLogBusiness(FormDataEvent event, String note, TAUser user) {
+    private LogBusiness makeLogBusiness(FormDataEvent event, String logId, String note, TAUser user) {
         LogBusiness log = new LogBusiness();
         log.setEventId(event.getCode());
         log.setUserLogin(user.getId() == TAUser.SYSTEM_USER_ID ? user.getName() : user.getLogin());
         log.setLogDate(new Date());
+        log.setLogId(logId);
         log.setNote(note);
         log.setUserDepartmentName(departmentService.getParentsHierarchyShortNames(user.getDepartmentId()));
 

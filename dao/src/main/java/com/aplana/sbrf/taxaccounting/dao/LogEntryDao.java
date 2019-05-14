@@ -17,6 +17,13 @@ import java.util.Map;
 public interface LogEntryDao {
 
     /**
+     * Удаляет все записи в логе по ид
+     *
+     * @param logId идентификатор лога
+     */
+    void deleteByLogId(String logId);
+
+    /**
      * Создание записей в логах
      *
      * @param logEntries список новых логов
@@ -37,7 +44,7 @@ public interface LogEntryDao {
      * Получение списка логов по идентификатору группы
      *
      * @param logId идентификатор группы логов
-     * @return  список логов
+     * @return список логов
      */
     List<LogEntry> fetch(@NotNull String logId);
 
@@ -69,7 +76,7 @@ public interface LogEntryDao {
      * Расчитывает количество сообщений на каждом уровне важности
      *
      * @param logId идентификатор группы логов
-     * @return  ключ - уровень важности, значение количество сообщений
+     * @return ключ - уровень важности, значение количество сообщений
      */
     Map<LogLevel, Integer> countLogLevel(@NotNull String logId);
 }

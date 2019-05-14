@@ -68,10 +68,9 @@ public interface DeclarationDataDao extends PermissionDao {
      * При попытке сохранить уже существующий объект (с непустым id) будет выброшен DaoException
      *
      * @param declarationData объект декларации
-     * @return идентификатор сохранённой записи
      * @throws com.aplana.sbrf.taxaccounting.model.exception.DaoException если передана декларация с непустым id
      */
-    long create(DeclarationData declarationData);
+    void create(DeclarationData declarationData);
 
     /**
      * Установить статус налоговой формы

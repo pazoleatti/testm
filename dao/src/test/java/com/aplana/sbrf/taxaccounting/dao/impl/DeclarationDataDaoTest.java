@@ -143,9 +143,9 @@ public class DeclarationDataDaoTest {
         d.setTaxOrganCode(taxOrganCode);
         d.setKpp(kpp);
 
-        long id = declarationDataDao.create(d);
+        declarationDataDao.create(d);
 
-        DeclarationData d2 = declarationDataDao.get(id);
+        DeclarationData d2 = declarationDataDao.get(d.getId());
         assertEquals(1, d2.getDeclarationTemplateId());
         assertEquals(220, d2.getDepartmentReportPeriodId().intValue());
         assertEquals(2, d2.getDepartmentId());

@@ -114,7 +114,7 @@ public abstract class AbstractAsyncTask implements AsyncTask {
     @Override
     public void execute(final AsyncTaskData taskData) {
         TimeZone.setDefault(TimeZone.getTimeZone("GMT+3"));
-        final Logger logger = new Logger();
+        final Logger logger = logEntryService.createLogger();
         final Date startDate = Calendar.getInstance().getTime();
 
         Configuration shotTimingConfiguration = configurationDao.fetchByEnum(ConfigurationParam.SHOW_TIMING);
@@ -175,7 +175,8 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                             }
 
                             // Публикация оповещений всем подписчикам
-                            sendNotifications(taskData, notification, logEntryService.save(logger.getEntries()), NotificationType.DEFAULT, null);
+                            logEntryService.save(logger);
+                            sendNotifications(taskData, notification, logger.getLogId(), NotificationType.DEFAULT, null);
                             return null;
                         }
                     });
@@ -197,7 +198,8 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                     asyncManager.updateState(taskData.getId(), AsyncTaskState.SAVING_MSGS);
                     String msg = taskStatus.isSuccess() ? getNotificationMsg(taskData) : getErrorMsg(taskData, taskStatus.isUnexpected());
                     logger.getEntries().add(0, new LogEntry(taskStatus.isSuccess() ? LogLevel.INFO : LogLevel.ERROR, msg));
-                    String uuid = logEntryService.save(logger.getEntries());
+                    logEntryService.save(logger);
+                    String uuid = logger.getLogId();
                     asyncManager.updateState(taskData.getId(), AsyncTaskState.SENDING_MSGS);
                     sendNotifications(taskData, msg, uuid, taskStatus.getNotificationType(), taskStatus.getReportId());
                     asyncManager.finishTask(taskData.getId());

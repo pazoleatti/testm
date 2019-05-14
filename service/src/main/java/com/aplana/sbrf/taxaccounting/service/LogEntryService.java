@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 
 import java.util.List;
 import java.util.Map;
@@ -29,9 +30,23 @@ public interface LogEntryService {
     List<LogEntry> getAll(String uuid);
 
     /**
+     * Создаёт пустой лог в БД для дальнейшего его заполнения через {@link #save(Logger)}
+     *
+     * @return логгер
+     */
+    Logger createLogger();
+
+    /**
+     * Сохраняет сообщения логгера. Можно вызывать несколько раз для одного и того же логгера.
+     *
+     * @return uuid сохраненного лога
+     */
+    String save(Logger logger);
+
+    /**
      * Сохранить LogEntry
      *
-     * @return uuid null, если ошибок нет
+     * @return uuid сохраненного лога. Null если логи пустые
      */
     String save(List<LogEntry> logEntry);
 

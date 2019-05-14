@@ -46,8 +46,15 @@ public class LogEntryDaoImpl extends AbstractDao implements LogEntryDao {
     }
 
     @Override
+    public void deleteByLogId(String logId) {
+        getJdbcTemplate().update("delete from log_entry where log_id = ?", logId);
+    }
+
+    @Override
     public void save(final List<LogEntry> logEntries, final String logId) {
-        saveShift(logEntries, logId, 0);
+        if (logEntries != null && !logEntries.isEmpty()) {
+            saveShift(logEntries, logId, 0);
+        }
     }
 
     @Override

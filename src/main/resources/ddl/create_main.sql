@@ -569,6 +569,7 @@ create table log_business (
   roles                varchar2(2000)  not null,
   declaration_data_id  number(9, 0),
   person_id            number(9, 0),
+  log_id               varchar2(36 byte),
   note                 varchar2(4000),
   user_department_name varchar2(4000) not null
 );

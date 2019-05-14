@@ -46,4 +46,8 @@ public class LogBusiness {
      * Описание события
      */
     private String note;
+    /**
+     * Идентификатор протокола операций
+     */
+    private String logId;
 }

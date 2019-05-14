@@ -122,6 +122,13 @@ public class LogEntryDaoTest {
         logEntryDao.fetch(UUID.randomUUID().toString().toLowerCase());
     }
 
+    @Test(expected = DaoException.class)
+    public void testDelete() {
+        List<LogEntry> logs = logEntryDao.fetch(UID_WITHOUT_LOG_ENTRY_3);
+        Assert.assertEquals(logs.size(), 4);
+        logEntryDao.deleteByLogId(UID_WITHOUT_LOG_ENTRY_3);
+    }
+
     @Test
     public void testMinOrder() {
         Assert.assertEquals(1, logEntryDao.minOrder(UID_WITH_LOG_ENTRY_4).intValue());

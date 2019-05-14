@@ -117,14 +117,12 @@ public interface DeclarationService {
 
     /**
      * Создание декларации в заданном отчетном периоде подразделения
-     *
-     * @param newDeclaration         данные формы
-     * @param logger                 объект журнала
-     * @param userInfo               информация о пользователе, выполняющего действие
-     * @param writeAudit             надо ли писать в ЖА
-     * @return идентификатор созданной декларации
+     *  @param newDeclaration данные формы
+     * @param logger         объект журнала
+     * @param userInfo       информация о пользователе, выполняющего действие
+     * @param writeAudit
      */
-    Long createWithoutChecks(DeclarationData newDeclaration, Logger logger, TAUserInfo userInfo, boolean writeAudit);
+    void createWithoutChecks(DeclarationData newDeclaration, Logger logger, TAUserInfo userInfo, boolean writeAudit);
 
     /**
      * Установить имя файла
@@ -295,8 +293,9 @@ public interface DeclarationService {
 
     /**
      * Получает файл из макета по его имени
+     *
      * @param declarationTemplateId идентификатор макета
-     * @param fileName название файла, приложенного к макету
+     * @param fileName              название файла, приложенного к макету
      * @return содержимое файла
      */
     InputStream getTemplateFileContent(int declarationTemplateId, String fileName);

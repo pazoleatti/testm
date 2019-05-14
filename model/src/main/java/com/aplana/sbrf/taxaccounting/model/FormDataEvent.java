@@ -13,16 +13,16 @@ import java.io.Serializable;
  * @author Vitalii Samolovskikh
  */
 public enum FormDataEvent implements Serializable {
-	CREATE(1, "Создать"),
-	DELETE(2, "Удалить"),
+	CREATE(1, "Создание"),
+	DELETE(2, "Удаление"),
 	CALCULATE(3, "Рассчитать"),
-	CHECK(5, "Проверить"),
+	CHECK(5, "Проверка"),
 	SAVE(6, "Обновление"),
 	IMPORT(7, "Импорт данных"),
 	GET_LEVEL0(8, "Получение данных"),
 	GET_LEVEL1(9, "Получение защищенных данных"),
 	DATA_MODIFYING(10, "Изменение данных"),
-	UPDATE_PERSONS_DATA(11, "Обновление данных ФЛ в КНФ"),
+	UPDATE_PERSONS_DATA(11, "Обновление данных ФЛ"),
     AFTER_CREATE(12, "После создания"),
     GET_SOURCES (14, "Получение источников-приемников"),
 	PREPARE_SPECIFIC_REPORT(15, "Подготовить данные для спец. отчета"),
@@ -38,7 +38,7 @@ public enum FormDataEvent implements Serializable {
     CREATE_REPORTS(24, "Сформировать отчетность"), // Вызывается не для экземпляра формы
 	AFTER_CALCULATE(25, "После рассчитать"),
 
-    CHANGE_STATUS_ED(26, "Изменить состояние ЭД"),
+    CHANGE_STATUS_ED(26, "Изменение состояния ЭД"),
 
     CREATE_EXCEL_REPORT(27, "Сформировать Excel отчет"),
 	CREATE_PDF_REPORT(28, "Сформировать PDF отчет"),
@@ -47,14 +47,14 @@ public enum FormDataEvent implements Serializable {
 	CREATE_APPLICATION_2(31, "Создание Приложения 2 к декларации НП"),
 
 	MOVE_CREATED_TO_ACCEPTED(105, "Принять из \"Создана\""),
-	MOVE_ACCEPTED_TO_CREATED(106, "Возврат в \"Создана\""),
-	MOVE_CREATED_TO_PREPARED(107, "Подготовить из \"Создана\""),
+	MOVE_ACCEPTED_TO_CREATED(106, "Возврат в Создана"),
+	MOVE_CREATED_TO_PREPARED(107, "Проверка"),
 	MOVE_PREPARED_TO_CREATED(108,  "Вернуть из \"Подготовлена\" в \"Создана\""),
-	MOVE_PREPARED_TO_ACCEPTED(109,  "Принять из \"Подготовлена\""),
+	ACCEPT(109,  "Принятие"),
 
 	ADD_ROW(301, "Добавить строку"),
 
-	IMPORT_TRANSPORT_FILE(401, "Импорт из транспортных файлов"),
+	IMPORT_TRANSPORT_FILE(401, "Импорт из файла Excel"),
     UPLOAD_TRANSPORT_FILE(402, "Загрузка транспортных файлов в каталог загрузки"),
 
     LOGIN(501, "Вход пользователя в Систему"),
@@ -82,8 +82,14 @@ public enum FormDataEvent implements Serializable {
 
 	CREATE_PERSON(10000, "Создание ФЛ"),
 	UPDATE_PERSON(10001, "Изменение данных ФЛ"),
-
-	ATTACH_RESPONSE_FILE(10002, "Прикрепление файла ответа от ФНС");
+	ATTACH_RESPONSE_FILE(10002, "Загрузка файла ответа ФНС"),
+	IDENTIFY(10003, "Идентификация ФЛ"),
+	CONSOLIDATE(10004, "Консолидация"),
+	CREATE_FROM_XML(10005, "Создание из ТФ xml"),
+	NDFL_EDIT(10006, "Редактирование строки РНУ НДФЛ"),
+	NDFL_DATES_EDIT(10007, "Массовое редактирование дат"),
+	SEND_EDO(10008, "Отправка в ЭДО"),
+	EXPORT_REPORT_FROMS(10009, "Выгрузка для отправки в ФНС");
 
 	private String title;
 	private int code;

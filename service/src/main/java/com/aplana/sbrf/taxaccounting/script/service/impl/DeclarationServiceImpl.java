@@ -189,8 +189,8 @@ public class DeclarationServiceImpl implements DeclarationService {
     }
 
     @Override
-    public Long createWithoutChecks(DeclarationData newDeclaration, Logger logger, TAUserInfo userInfo, boolean writeAudit) {
-        return declarationDataService.createWithotChecks(newDeclaration, logger, userInfo, writeAudit);
+    public void createWithoutChecks(DeclarationData newDeclaration, Logger logger, TAUserInfo userInfo, boolean writeAudit) {
+        declarationDataService.createWithotChecks(newDeclaration, logger, userInfo, writeAudit);
     }
 
     @Override

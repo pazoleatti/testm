@@ -17,13 +17,13 @@ public interface LogBusinessService {
 
     /**
      * Добавить информацию об логировании
-     *
-     * @param declarationId идентификатор формы
+     *  @param declarationId идентификатор формы
      * @param event         событие
+     * @param logId
      * @param note          текст
      * @param userInfo      информация о пользователе, инициирующего событие
      */
-    void logFormEvent(Long declarationId, FormDataEvent event, String note, TAUserInfo userInfo);
+    void logFormEvent(Long declarationId, FormDataEvent event, String logId, String note, TAUserInfo userInfo);
 
     /**
      * Добавить информацию об логировании

@@ -163,6 +163,7 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
         // Локальный логгер для импорта конкретного справочника
         Logger scriptLogger = new Logger();
         scriptLogger.setTaUserInfo(userInfo);
+        scriptLogger.setLogId(logger.getLogId());
 
         // Биндиг параметров для выполнения скрипта
         Bindings bindings = getScriptEngine().createBindings();

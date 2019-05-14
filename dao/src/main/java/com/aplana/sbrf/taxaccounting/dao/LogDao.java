@@ -8,6 +8,13 @@ package com.aplana.sbrf.taxaccounting.dao;
 public interface LogDao {
 
     /**
+     * Возвращяет признак наличия лога по ид
+     *
+     * @param id ид логов
+     */
+    boolean existsById(String id);
+
+    /**
      * Сохраняет группу логов
      *
      * @param logId уникальный идентификатор группы логов {@link java.util.UUID}
@@ -16,6 +23,7 @@ public interface LogDao {
 
     /**
      * Удаление записей, на которые нет ссылок из других таблиц и которые старше 24 часов
+     *
      * @return Количество удаленных запсией
      */
     int clean();

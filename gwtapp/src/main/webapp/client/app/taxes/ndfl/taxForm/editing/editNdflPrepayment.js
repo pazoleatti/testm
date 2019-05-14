@@ -37,7 +37,10 @@
                  */
                 $scope.save = function () {
                     ndflPrepayment.update({declarationDataId: $shareData.declarationId}, $scope.row,
-                        function () {
+                        function (result) {
+                            if (result && result.uuid) {
+                                $logPanel.open('log-panel-container', result.uuid);
+                            }
                             $modalInstance.close(true);
                         });
                 };

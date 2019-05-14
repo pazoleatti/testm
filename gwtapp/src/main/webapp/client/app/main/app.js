@@ -423,6 +423,7 @@
         "logBusiness.title.rolesUser": "Роли пользователя",
         "logBusiness.title.departmentUser": "Подразделение пользователя",
         "logBusiness.title.note": "Текст события",
+        "logBusiness.title.logId": "Протокол",
         "rnuPersonFace.title": "РНУ НДФЛ по физическому лицу",
         "rnuPersonFace.": "РНУ НДФЛ по физическому лицу",
         "rnuPersonFace.error.dateInterval": "Дата начала интервала должна быть меньше даты конца",
