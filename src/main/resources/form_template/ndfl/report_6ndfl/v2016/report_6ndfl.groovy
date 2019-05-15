@@ -418,12 +418,11 @@ class Report6Ndfl extends AbstractScriptClass {
                         it.docStateId == RefBookDocState.NOT_SENT.id && departmentReportPeriodService.get(it.departmentReportPeriodId).isActive()
                     }
                     if (deleteForms(formsToDelete)) {
-                        createdForms.add(declarationData)
                         declarationData.fileName = xml.fileName
-                        create(declarationData)
-                        if (logger.containsLevel(LogLevel.ERROR)) {
+                        if (!create(declarationData)) {
                             continue
                         }
+                        createdForms.add(declarationData)
                         // Привязывание xml-файла к форме
                         saveFileInfo(xml.xmlFile, xml.date, xml.fileName)
                         zipFile = ZipUtils.archive(xml.xmlFile, xml.fileName + ".xml")
@@ -446,13 +445,16 @@ class Report6Ndfl extends AbstractScriptClass {
         logger.info("Количество успешно созданных форм: %d. Не удалось создать форм: %d.", createdForms.size(), requiredToCreateCount - createdForms.size())
     }
 
-    void create(DeclarationData declaration) {
+    boolean create(DeclarationData declaration) {
+        ScriptUtils.checkInterrupted()
         Logger localLogger = new Logger()
+        localLogger.setLogId(logger.getLogId())
         try {
             declarationService.createWithoutChecks(declaration, localLogger, userInfo, true)
         } finally {
             logger.entries.addAll(localLogger.entries)
         }
+        return !localLogger.containsLevel(LogLevel.ERROR)
     }
 
     List<DepartmentConfig> getDepartmentConfigs() {
