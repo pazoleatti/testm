@@ -763,7 +763,7 @@ class Report2Ndfl extends AbstractScriptClass {
             File zipFile = null
             Xml xml = null
             try {
-                def kppOktmoOperations = operationsByKppOktmoPair[new KppOktmoPair(departmentConfig.kpp, departmentConfig.oktmo.code)]
+                def kppOktmoOperations = operationsByKppOktmoPair[new KppOktmoPair(departmentConfig.kpp, departmentConfig.oktmo.code)] ?: new ArrayList<Operation>()
                 xml = buildXml(departmentConfig, kppOktmoOperations)
                 if (xml) {
                     def formsToDelete = existingDeclarations
