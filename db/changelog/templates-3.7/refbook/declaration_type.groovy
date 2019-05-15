@@ -14,7 +14,6 @@ import com.aplana.sbrf.taxaccounting.script.SharedConstants
 import com.aplana.sbrf.taxaccounting.script.dao.BlobDataService
 import com.aplana.sbrf.taxaccounting.script.service.*
 import com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils
-import com.aplana.sbrf.taxaccounting.service.DeclarationDataService
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService
 import com.aplana.sbrf.taxaccounting.service.LogBusinessService
 import com.aplana.sbrf.taxaccounting.service.impl.TAAbstractScriptingServiceImpl
@@ -841,8 +840,6 @@ class DeclarationType extends AbstractScriptClass {
 
         // Сохранение файла ответа в форме
 
-        logBusinessService.logFormEvent(declarationData.id, FormDataEvent.ATTACH_RESPONSE_FILE, UploadFileName, userInfo ?: declarationService.getSystemUserInfo())
-
         def fileUuid = blobDataServiceDaoImpl.create(dataFile, UploadFileName, new Date())
         def createUser = declarationService.getSystemUserInfo().getUser()
         def fileTypeSaveId = fileTypeProvider.getUniqueRecordIds(new Date(), "CODE = ${AttachFileType.INCOMING_FROM_FNS.code}").get(0)
@@ -902,11 +899,14 @@ class DeclarationType extends AbstractScriptClass {
                 def docStateProvider = refBookFactory.getDataProvider(RefBook.Id.DOC_STATE.getId())
                 def docStateId = docStateProvider.getUniqueRecordIds(new Date(), "KND = '${nextKnd}'").get(0)
                 if (declarationData.docStateId != docStateId) {
-                    logBusinessService.logFormEvent(declarationData.id, FormDataEvent.CHANGE_STATUS_ED, "Изменено \"Состояние ЭД\"  на основании обработки файла ответа от ФНС", userInfo ?: declarationService.getSystemUserInfo())
                     declarationService.setDocStateId(declarationData.id, docStateId)
                 }
             }
         }
+
+        logBusinessService.logFormEvent(declarationData.id, FormDataEvent.ATTACH_RESPONSE_FILE, logger.getLogId(),
+                "Загружен файл ответа: $UploadFileName, для формы № $declarationData.id.", userInfo ?: declarationService.getSystemUserInfo())
+
         declarationService.createPdfReport(logger, declarationData, userInfo)
     }
 
@@ -1164,17 +1164,18 @@ class DeclarationType extends AbstractScriptClass {
             newDeclarationData.reportPeriodId = departmentReportPeriod.reportPeriod.id
             newDeclarationData.departmentId = departmentReportPeriod.departmentId
             newDeclarationData.state = State.CREATED
-            declarationDataId = declarationService.createWithoutChecks(newDeclarationData, logger, userInfo, true)
+            // в ЖА и историю не пишем, будет записано отдельно по окончании импорта файла
+            declarationService.createWithoutChecks(newDeclarationData, logger, userInfo, false)
             if (logger.containsLevel(LogLevel.ERROR)) {
                 return
             }
             // Запуск события скрипта для разбора полученного файла
-            DeclarationData createdDeclarationData = declarationService.getDeclarationData(declarationDataId)
+            DeclarationData createdDeclarationData = declarationService.getDeclarationData(newDeclarationData.id)
             declarationService.importXmlTransportFile(dataFile, UploadFileName, createdDeclarationData, userInfo, logger)
 
             if (!logger.containsLevel(LogLevel.ERROR)) {
                 msgBuilder.append("Выполнено создание налоговой формы: ")
-                        .append("№: \"").append(declarationDataId).append("\"")
+                        .append("№: \"").append(newDeclarationData.id).append("\"")
                         .append(", Период: \"").append(reportPeriod.getTaxPeriod().getYear() + " - " + reportPeriod.getName()).append("\"")
                         .append(getCorrectionDateString(departmentReportPeriod))
                         .append(", Подразделение: \"").append(formDepartment.getName()).append("\"")
