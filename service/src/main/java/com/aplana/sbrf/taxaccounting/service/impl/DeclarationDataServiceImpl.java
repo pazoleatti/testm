@@ -361,7 +361,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         declarationDataDao.create(newDeclaration);
 
         if (writeAudit) {
-            logBusinessService.logFormEvent(newDeclaration.getId(), FormDataEvent.CREATE, null, null, userInfo);
+            logBusinessService.logFormEvent(newDeclaration.getId(), FormDataEvent.CREATE, logger.getLogId(), null, userInfo);
             auditService.add(FormDataEvent.CREATE, userInfo, newDeclaration, "Налоговая форма создана", null);
         }
     }
