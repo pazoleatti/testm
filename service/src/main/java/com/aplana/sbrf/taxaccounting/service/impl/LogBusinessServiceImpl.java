@@ -45,16 +45,6 @@ public class LogBusinessServiceImpl implements LogBusinessService {
     }
 
     @Override
-    public Date getFormCreationDate(long declarationDataId) {
-        return logBusinessDao.getFormCreationDate(declarationDataId);
-    }
-
-    @Override
-    public String getFormCreationUserName(long declarationDataId) {
-        return logBusinessDao.getFormCreationUserName(declarationDataId);
-    }
-
-    @Override
     public List<LogBusinessDTO> findAllByDeclarationId(long declarationId, PagingParams pagingParams) {
         return logBusinessDao.findAllByDeclarationId(declarationId, pagingParams);
     }

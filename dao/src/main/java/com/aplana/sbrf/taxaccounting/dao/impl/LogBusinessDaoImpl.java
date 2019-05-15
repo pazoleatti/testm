@@ -62,34 +62,6 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
     }
 
     @Override
-    public Date getFormCreationDate(long formId) {
-        try {
-            return new Date(
-                    getJdbcTemplate().queryForObject(
-                            "select log_date from log_business where declaration_data_id = ? and event_id = ? ",
-                            new Object[]{formId, FormDataEvent.CREATE.getCode()}, Timestamp.class
-                    ).getTime()
-            );
-        } catch (EmptyResultDataAccessException e) {
-            return null;
-        }
-    }
-
-    @Override
-    public String getFormCreationUserName(long declarationId) {
-        try {
-            return getJdbcTemplate().queryForObject(
-                    "select nvl(u.name, lb.user_login) from log_business lb " +
-                            "left join sec_user u on u.login = lb.user_login " +
-                            "where declaration_data_id = ? and event_id = ? ",
-                    String.class, declarationId, FormDataEvent.CREATE.getCode()
-            );
-        } catch (EmptyResultDataAccessException e) {
-            return null;
-        }
-    }
-
-    @Override
     public void create(LogBusiness logBusiness) {
         Long id = logBusiness.getId();
         if (id == null) {

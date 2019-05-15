@@ -258,4 +258,12 @@ public interface DeclarationDataDao extends PermissionDao {
      * @param docStateId    ид состояния ЭД
      */
     void updateDocState(long declarationId, long docStateId);
+
+    /**
+     * Возвращяется дату создания формы
+     *
+     * @param declarationId ид формы
+     * @return дата создания формы
+     */
+    Date getCreatedDateById(long declarationId);
 }

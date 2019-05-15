@@ -74,20 +74,4 @@ public class LogBusinessDaoTest {
         assertEquals("Б - департамент", logBusinessDTO.getUserDepartmentName());
         assertEquals("the best note", logBusinessDTO.getNote());
     }
-
-    @Test
-    public void testGetUserLoginImportTf() {
-        LogBusiness logBusiness = new LogBusiness();
-        logBusiness.setId(5L);
-        logBusiness.setLogDate(new Date());
-        logBusiness.setDeclarationDataId(1L);
-        logBusiness.setEventId(401);
-        logBusiness.setUserLogin("controlBank");
-        logBusiness.setRoles("operator");
-        logBusiness.setUserDepartmentName("Б - департамент");
-        logBusiness.setNote("the best note");
-        logBusinessDao.create(logBusiness);
-
-        assertEquals("Контролёр Банка", logBusinessDao.getFormCreationUserName(1));
-    }
 }

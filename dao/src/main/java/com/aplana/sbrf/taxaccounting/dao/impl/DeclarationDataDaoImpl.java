@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
+import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
@@ -9,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
@@ -45,6 +47,9 @@ import static org.springframework.util.CollectionUtils.isEmpty;
 @Repository
 @Transactional
 public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDataDao {
+
+    @Autowired
+    private TAUserDao userDao;
 
     private static final Log LOG = LogFactory.getLog(DeclarationDataDaoImpl.class);
     private final static String FIND_DD_BY_RANGE_IN_RP =
@@ -881,12 +886,12 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         return countOfExisted > 0;
     }
 
-    private static final class DeclarationDataRowMapper implements RowMapper<DeclarationData> {
+    private final class DeclarationDataRowMapper implements RowMapper<DeclarationData> {
         final static String FIELDS = " dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.oktmo, dd.state, " +
                 "dd.department_report_period_id, dd.asnu_id, dd.file_name, dd.doc_state_id, dd.manually_created, " +
                 "dd.adjust_negative_values, drp.report_period_id, drp.department_id, dd.note, knf_type.id as knf_type_id, " +
                 "knf_type.name as knf_type_name, dd.last_data_modified, dd.correction_num, dd.tax_refund_reflection_mode, " +
-                "dd.negative_income, dd.negative_tax, dd.negative_sums_sign ";
+                "dd.negative_income, dd.negative_tax, dd.negative_sums_sign, dd.created_date, dd.created_by ";
 
         @Override
         public DeclarationData mapRow(ResultSet rs, int index) throws SQLException {
@@ -922,6 +927,8 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             d.setNegativeIncome(rs.getBigDecimal("negative_income"));
             d.setNegativeTax(rs.getBigDecimal("negative_tax"));
             d.setNegativeSumsSign(NegativeSumsSign.valueOf(SqlUtils.getInteger(rs, "negative_sums_sign")));
+            d.setCreatedDate(new Date(rs.getTimestamp("created_date").getTime()));
+            d.setCreatedBy(userDao.getUser(rs.getInt("created_by")));
             return d;
         }
     }
@@ -949,5 +956,12 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         getJdbcTemplate().update("update declaration_data set doc_state_id = ? " +
                         "where id = ?",
                 docStateId, declarationId);
+    }
+
+    @Override
+    public Date getCreatedDateById(long declarationId) {
+        return new Date(
+                getJdbcTemplate().queryForObject("select created_date from declaration_data where declaration_data_id = ?", Timestamp.class, declarationId).getTime()
+        );
     }
 }

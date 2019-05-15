@@ -685,7 +685,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             result.setActualDataDate(new Date());
             result.setAdjustNegativeValues(declaration.isAdjustNegativeValues());
             result.setHasNdflPersons(ndflPersonDao.ndflPersonExistsByDeclarationId(declarationDataId));
-            result.setCreationUserName(logBusinessService.getFormCreationUserName(declaration.getId()));
+            result.setCreationUserName(declaration.getCreatedBy().getName());
 
             DeclarationTemplate declarationTemplate = declarationTemplateService.get(declaration.getDeclarationTemplateId());
             result.setDeclarationFormKind(declarationTemplate.getDeclarationFormKind().getTitle());
@@ -709,7 +709,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 result.setKppList(declarationDataDao.getDeclarationDataKppList(declaration.getId()));
             }
 
-            result.setCreationDate(logBusinessService.getFormCreationDate(declaration.getId()));
+            result.setCreationDate(declaration.getCreatedDate());
             result.setKpp(declaration.getKpp());
             result.setOktmo(declaration.getOktmo());
             result.setTaxOrganCode(declaration.getTaxOrganCode());

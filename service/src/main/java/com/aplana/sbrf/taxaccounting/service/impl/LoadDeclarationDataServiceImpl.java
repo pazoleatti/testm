@@ -86,7 +86,7 @@ public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataSer
             }
 
             String note = "Форма создана из файла: " + xmlFileName;
-            logBusinessService.logFormEvent(declarationId, FormDataEvent.CREATE, logger.getLogId(), note, userInfo);
+            logBusinessService.logFormEvent(declarationId, FormDataEvent.CREATE_FROM_XML, logger.getLogId(), note, userInfo);
             auditService.add(FormDataEvent.IMPORT_TRANSPORT_FILE, userInfo, declaration, note, null);
         } finally {
             unlock(declaration, user);

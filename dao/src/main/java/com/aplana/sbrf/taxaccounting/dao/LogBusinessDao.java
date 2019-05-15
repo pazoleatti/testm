@@ -32,21 +32,6 @@ public interface LogBusinessDao {
     PagingResult<LogBusinessDTO> findAllByPersonId(long personId, PagingParams pagingParams);
 
     /**
-     * Получить дату создания налоговой формы
-     *
-     * @param formId идентификатор пользователя
-     * @return объект, представляющий дату принятия нф
-     */
-    Date getFormCreationDate(long formId);
-
-    /**
-     * Получить имя пользователя, загрузившего ТФ
-     *
-     * @param declarationDataId код декларации
-     */
-    String getFormCreationUserName(long declarationDataId);
-
-    /**
      * Создаёт запись истории событий
      *
      * @param logBusiness запись истории событий

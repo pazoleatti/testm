@@ -36,21 +36,6 @@ public interface LogBusinessService {
     void logPersonEvent(Long personId, FormDataEvent event, String note, TAUserInfo userInfo);
 
     /**
-     * Возвращает дату создания формы (по событию {@link FormDataEvent#CREATE})
-     *
-     * @param declarationDataId идентификатор формы
-     * @return дата созданий формы
-     */
-    Date getFormCreationDate(long declarationDataId);
-
-    /**
-     * Получить имя пользователя, загрузившего ТФ
-     *
-     * @param declarationDataId идентификатор формы
-     */
-    String getFormCreationUserName(long declarationDataId);
-
-    /**
      * Получить информацию об истории событий налоговой формы
      *
      * @param declarationId идентификатор формы

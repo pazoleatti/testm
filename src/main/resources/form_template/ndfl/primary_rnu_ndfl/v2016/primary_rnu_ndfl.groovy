@@ -40,7 +40,6 @@ import com.aplana.sbrf.taxaccounting.script.service.NdflPersonService
 import com.aplana.sbrf.taxaccounting.script.service.RefBookService
 import com.aplana.sbrf.taxaccounting.script.service.ReportPeriodService
 import com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils
-import com.aplana.sbrf.taxaccounting.service.LogBusinessService
 import groovy.transform.AutoClone
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
@@ -95,7 +94,6 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
     File dataFile
     BlobDataService blobDataService
     RefBookService refBookService
-    LogBusinessService logBusinessService
     List<NdflPerson> ndflPersonCache = new ArrayList<>()
     boolean adjustNegativeValues
     Set<String> kppList
@@ -153,9 +151,6 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         }
         if (scriptClass.getBinding().hasVariable("blobDataServiceDaoImpl")) {
             this.blobDataService = (BlobDataService) scriptClass.getProperty("blobDataServiceDaoImpl")
-        }
-        if (scriptClass.getBinding().hasVariable("logBusinessService")) {
-            this.logBusinessService = (LogBusinessService) scriptClass.getProperty("logBusinessService")
         }
     }
 
@@ -2040,7 +2035,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
                 "Дата начала отчетного периода: ${getReportPeriodStartDate().format(dateFormat)}, " +
                 "дата окончания: ${getReportPeriodEndDate().format(dateFormat)}")
 
-        formCreationDate = logBusinessService.getFormCreationDate(declarationData.id)
+        formCreationDate = declarationData.createdDate
 
         // Начинаем парсить файл
         File xmlTF = dataFile
@@ -2527,7 +2522,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
                 throw new NumberFormatException("Значение атрибута \"${xmlNode.name()}\": \"${xmlNode.text()}\" не является числом. Проверьте отсутствие пробелов, переводов строки, печатных символов в значении атрибута.")
             }
         } else {
-            return null
+            return (BigDecimal) null
         }
     }
 

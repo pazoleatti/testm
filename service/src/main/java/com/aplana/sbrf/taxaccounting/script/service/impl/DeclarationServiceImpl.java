@@ -312,7 +312,7 @@ public class DeclarationServiceImpl implements DeclarationService {
 
     @Override
     public Date getDeclarationDataCreationDate(Long declarationDataId) {
-        return logBusinessService.getFormCreationDate(declarationDataId);
+        return declarationDataDao.getCreatedDateById(declarationDataId);
     }
 
     @Override
