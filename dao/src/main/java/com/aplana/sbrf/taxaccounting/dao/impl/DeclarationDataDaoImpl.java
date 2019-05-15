@@ -281,8 +281,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         MapSqlParameterSource params = new MapSqlParameterSource();
         StringBuilder sql = new StringBuilder(
                 "select dd.id declarationDataId, dkind.name declarationKind, dtype.name declarationType, dep_fullpath.shortname department,\n" +
-                        "   asnu.name asnuName, knf_type.name knfTypeName, state.name state, dd.file_name fileName, log_b.log_date creationDate, " +
-                        "   nvl(su.name, log_b.user_login) creationUserName,\n" +
+                        "   asnu.name asnuName, knf_type.name knfTypeName, state.name state, dd.file_name fileName, dd.created_date creationDate, su.name creationUserName,\n" +
                         "   case when drp.correction_date is not null then" +
                         "       tp.year || ': ' || rp.name || ', корр. (' || to_char(drp.correction_date, 'DD.MM.YYYY') || ')'" +
                         "       else tp.year || ': ' || rp.name end as reportPeriod,\n" +
@@ -290,8 +289,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                         "from DECLARATION_DATA dd\n" +
                         "left join REF_BOOK_ASNU asnu on asnu.id = dd.asnu_id\n" +
                         "left join REF_BOOK_KNF_TYPE knf_type on knf_type.id = dd.knf_type_id\n" +
-                        "inner join LOG_BUSINESS log_b on log_b.DECLARATION_DATA_ID = dd.id and log_b.event_id = 1\n" +
-                        "left join SEC_USER su on su.login = log_b.user_login\n" +
+                        "inner join SEC_USER su on su.id = dd.created_by\n" +
                         "inner join DECLARATION_TEMPLATE dt on dt.id = dd.declaration_template_id\n" +
                         "inner join DECLARATION_TYPE dtype on dtype.id = dt.declaration_type_id\n" +
                         "inner join DECLARATION_KIND dkind on dkind.id = dt.form_kind\n" +
@@ -432,14 +430,15 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         params.addValue("negative_income", declarationData.getNegativeIncome());
         params.addValue("negative_tax", declarationData.getNegativeTax());
         params.addValue("negative_sums_sign", declarationData.getNegativeSumsSign() != null ? declarationData.getNegativeSumsSign().ordinal() : null);
+        params.addValue("created_by", declarationData.getCreatedBy().getId());
 
         getNamedParameterJdbcTemplate().update("" +
                         "insert into declaration_data (id, declaration_template_id, department_report_period_id, state, tax_organ_code, kpp, " +
                         "   oktmo, asnu_id, knf_type_id, note, file_name, doc_state_id, manually_created, last_data_modified, adjust_negative_values, " +
-                        "   correction_num, tax_refund_reflection_mode, negative_income, negative_tax, negative_sums_sign) " +
+                        "   correction_num, tax_refund_reflection_mode, negative_income, negative_tax, negative_sums_sign, created_by) " +
                         "values (:id, :declaration_template_id, :department_report_period_id, :state, :tax_organ_code, :kpp, " +
                         "   :oktmo, :asnu_id, :knf_type_id, :note, :file_name, :doc_state_id, :manually_created, :last_data_modified, :adjust_negative_values, " +
-                        "   :correction_num, :tax_refund_reflection_mode, :negative_income, :negative_tax, :negative_sums_sign)",
+                        "   :correction_num, :tax_refund_reflection_mode, :negative_income, :negative_tax, :negative_sums_sign, :created_by)",
                 params);
 
         if (declarationData.getKnfType() != null && declarationData.getKnfType().equals(RefBookKnfType.BY_KPP)) {
@@ -612,7 +611,8 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 .append(" dec.asnu_id as asnu_id, dec.file_name as file_name, dec.doc_state_id, dec.note,")
                 .append(" dectemplate.form_kind as form_kind, dectemplate.form_type as form_type,")
                 .append(" (select bd.creation_date from declaration_report dr left join blob_data bd on bd.id = dr.blob_data_id where dr.declaration_data_id = dec.id and dr.type = 1) as creation_date,")
-                .append(" (select ds.name from REF_BOOK_DOC_STATE ds where ds.id = dec.doc_state_id) as doc_state,").append(" (select lb.log_date from log_business lb where lb.event_id = ").append(FormDataEvent.CREATE.getCode()).append(" and lb.declaration_data_id = dec.id and rownum = 1) as decl_data_creation_date");
+                .append(" (select ds.name from REF_BOOK_DOC_STATE ds where ds.id = dec.doc_state_id) as doc_state,")
+                .append(" sysdate as decl_data_creation_date");
     }
 
     private void appendOrderByClause(StringBuilder sql, DeclarationDataSearchOrdering ordering, boolean ascSorting) {

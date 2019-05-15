@@ -2,15 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
-import com.aplana.sbrf.taxaccounting.model.BlobData;
-import com.aplana.sbrf.taxaccounting.model.DeclarationData;
-import com.aplana.sbrf.taxaccounting.model.DeclarationDataFilter;
-import com.aplana.sbrf.taxaccounting.model.DeclarationDataJournalItem;
-import com.aplana.sbrf.taxaccounting.model.DeclarationDataSearchOrdering;
-import com.aplana.sbrf.taxaccounting.model.DeclarationDataSearchResultItem;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.State;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.google.common.collect.Sets;
 import org.junit.Assert;
@@ -142,6 +134,7 @@ public class DeclarationDataDaoTest {
         d.setDepartmentReportPeriodId(220);
         d.setTaxOrganCode(taxOrganCode);
         d.setKpp(kpp);
+        d.setCreatedBy(createUser());
 
         declarationDataDao.create(d);
 
@@ -274,6 +267,7 @@ public class DeclarationDataDaoTest {
         declarationData.setKpp("123456789");
         declarationData.setTaxOrganCode("CD11");
         declarationData.setState(State.CREATED);
+        declarationData.setCreatedBy(createUser());
         declarationDataDao.create(declarationData);
 
         DeclarationData declaration = declarationDataDao.find(1, 102, "123456789", null, "CD12", null, null);
@@ -361,5 +355,11 @@ public class DeclarationDataDaoTest {
         assertEquals(Collections.emptyList(), declarationDataDao.getDeclarationDataKppList(1L));
         declarationDataDao.createDeclarationDataKppList(1L, Sets.newHashSet("1", "2", "3"));
         assertEquals(asList("1", "2", "3"), declarationDataDao.getDeclarationDataKppList(1L));
+    }
+
+    private TAUser createUser() {
+        TAUser user = new TAUser();
+        user.setId(1);
+        return user;
     }
 }

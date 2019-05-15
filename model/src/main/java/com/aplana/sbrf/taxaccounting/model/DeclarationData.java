@@ -110,6 +110,14 @@ public class DeclarationData extends IdentityObject<Long> implements SecuredEnti
      */
     private NegativeSumsSign negativeSumsSign;
     /**
+     * Дата создания формы
+     */
+    private Date createdDate;
+    /**
+     * Пользователь, создавший форму
+     */
+    private TAUser createdBy;
+    /**
      * Проверка статуса формы.
      */
     public boolean is(State checkedState) {

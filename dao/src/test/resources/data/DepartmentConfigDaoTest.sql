@@ -14,7 +14,7 @@ INSERT INTO state (id, name) VALUES (1, 'Создана');
 insert into department_report_period(id, department_id, report_period_id, is_active) values (2, 2, 2, 1);
 insert into declaration_type(id, name) values (1, 'type');
 insert into declaration_template(id, name, version, declaration_type_id, status) values (1, 'template', date '2013-01-01', 1, 2);
-insert into declaration_data(id, declaration_template_id, department_report_period_id) values (1, 1, 2);
+insert into declaration_data(id, declaration_template_id, department_report_period_id, created_by) values (1, 1, 2, 1);
 
 insert into ndfl_person(id, declaration_data_id) values(1, 1);
 insert into ndfl_person_income(id, ndfl_person_id, kpp, oktmo) values(1, 1, '000000001', '111');

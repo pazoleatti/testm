@@ -16,6 +16,7 @@
         <jdbc:script location="classpath:data/ReportPeriod.sql" encoding="UTF-8"/>
         <jdbc:script location="classpath:data/Department.sql" encoding="UTF-8"/>
         <jdbc:script location="classpath:data/DepartmentReportPeriod.sql" encoding="UTF-8"/>
+        <jdbc:script location="classpath:data/TAUser.sql" encoding="UTF-8"/>
         <jdbc:script location="classpath:data/NdflPerson.sql" encoding="UTF-8"/>
         <jdbc:script location="classpath:data/RefBookSimpleDaoPerson.sql" encoding="UTF-8"/>
         <jdbc:script location="classpath:data/RefBookDao.sql" encoding="UTF-8"/>

@@ -40,30 +40,30 @@ insert into department_report_period(id, department_id, report_period_id, is_act
 (2220, 2, 320, 1),
 (2230, 2, 330, 1);
 
-insert into declaration_data(id, declaration_template_id, department_report_period_id, state, tax_organ_code, kpp, note, asnu_id) values (1, 1, 102, 3, 'CD12', '123456789', 'Первичка по', 8);
-insert into declaration_data(id, declaration_template_id, department_report_period_id, state, asnu_id) values (2, 1, 204, 1, 8);
-insert into declaration_data(id, declaration_template_id, department_report_period_id, state, asnu_id) values (3, 1, 303, 3, 8);
-insert into declaration_data(id, declaration_template_id, department_report_period_id, state, asnu_id) values (4, 1, 401, 1, 8);
-insert into declaration_data(id, declaration_template_id, department_report_period_id, state, asnu_id) values (5, 1, 501, 3, 8);
-insert into declaration_data(id, declaration_template_id, department_report_period_id, state, asnu_id) values (7, 1, 605, 3, 8);
+insert into declaration_data(id, declaration_template_id, department_report_period_id, state, created_by, tax_organ_code, kpp, note, asnu_id) values (1, 1, 102, 3, 1, 'CD12', '123456789', 'Первичка по', 8);
+insert into declaration_data(id, declaration_template_id, department_report_period_id, state, created_by, asnu_id) values (2, 1, 204, 1, 1, 8);
+insert into declaration_data(id, declaration_template_id, department_report_period_id, state, created_by, asnu_id) values (3, 1, 303, 3, 1, 8);
+insert into declaration_data(id, declaration_template_id, department_report_period_id, state, created_by, asnu_id) values (4, 1, 401, 1, 1, 8);
+insert into declaration_data(id, declaration_template_id, department_report_period_id, state, created_by, asnu_id) values (5, 1, 501, 3, 1, 8);
+insert into declaration_data(id, declaration_template_id, department_report_period_id, state, created_by, asnu_id) values (7, 1, 605, 3, 1, 8);
 
-insert into declaration_data(id, declaration_template_id, department_report_period_id, state) values (100, 100, 1010, 3);
+insert into declaration_data(id, declaration_template_id, department_report_period_id, state, created_by) values (100, 100, 1010, 3, 1);
 
-insert into declaration_data(id, declaration_template_id, department_report_period_id, state, asnu_id) values (20161, 100, 1000, 3, 8);
-insert into declaration_data(id, declaration_template_id, department_report_period_id, state, asnu_id) values (20162, 100, 1010, 3, 8);
-insert into declaration_data(id, declaration_template_id, department_report_period_id, state, asnu_id) values (20163, 100, 1020, 3, 8);
-insert into declaration_data(id, declaration_template_id, department_report_period_id, state, asnu_id) values (201631, 101, 1020, 3, 8);
-insert into declaration_data(id, declaration_template_id, department_report_period_id, state, asnu_id) values (20164, 100, 1030, 3, 8);
+insert into declaration_data(id, declaration_template_id, department_report_period_id, state, created_by, asnu_id) values (20161, 100, 1000, 3, 1, 8);
+insert into declaration_data(id, declaration_template_id, department_report_period_id, state, created_by, asnu_id) values (20162, 100, 1010, 3, 1, 8);
+insert into declaration_data(id, declaration_template_id, department_report_period_id, state, created_by, asnu_id) values (20163, 100, 1020, 3, 1, 8);
+insert into declaration_data(id, declaration_template_id, department_report_period_id, state, created_by, asnu_id) values (201631, 101, 1020, 3, 1, 8);
+insert into declaration_data(id, declaration_template_id, department_report_period_id, state, created_by, asnu_id) values (20164, 100, 1030, 3, 1, 8);
 
-insert into declaration_data(id, declaration_template_id, department_report_period_id, state, asnu_id) values (20171, 100, 1000, 3, 8);
-insert into declaration_data(id, declaration_template_id, department_report_period_id, state, asnu_id) values (20172, 100, 1010, 3, 8);
-insert into declaration_data(id, declaration_template_id, department_report_period_id, state, asnu_id) values (20173, 100, 1020, 3, 8);
-insert into declaration_data(id, declaration_template_id, department_report_period_id, state, asnu_id) values (20174, 100, 1030, 3, 8);
+insert into declaration_data(id, declaration_template_id, department_report_period_id, state, created_by, asnu_id) values (20171, 100, 1000, 3, 1, 8);
+insert into declaration_data(id, declaration_template_id, department_report_period_id, state, created_by, asnu_id) values (20172, 100, 1010, 3, 1, 8);
+insert into declaration_data(id, declaration_template_id, department_report_period_id, state, created_by, asnu_id) values (20173, 100, 1020, 3, 1, 8);
+insert into declaration_data(id, declaration_template_id, department_report_period_id, state, created_by, asnu_id) values (20174, 100, 1030, 3, 1, 8);
 
-insert into declaration_data(id, declaration_template_id, department_report_period_id, state, asnu_id) values (20181, 100, 1000, 3, 8);
-insert into declaration_data(id, declaration_template_id, department_report_period_id, state, asnu_id) values (20182, 100, 1010, 3, 8);
+insert into declaration_data(id, declaration_template_id, department_report_period_id, state, created_by, asnu_id) values (20181, 100, 1000, 3, 1, 8);
+insert into declaration_data(id, declaration_template_id, department_report_period_id, state, created_by, asnu_id) values (20182, 100, 1010, 3, 1, 8);
 
-insert into declaration_data(id, declaration_template_id, department_report_period_id, state, asnu_id) values (50000, 100, 1010, 3, 8);
+insert into declaration_data(id, declaration_template_id, department_report_period_id, state, created_by, asnu_id) values (50000, 100, 1010, 3, 1, 8);
 
 insert into NDFL_PERSON (id, declaration_data_id, inp, FIRST_NAME, LAST_NAME, BIRTH_DAY, CITIZENSHIP, ID_DOC_TYPE, ID_DOC_NUMBER, STATUS, PERSON_ID, ASNU_ID) values
 (101, 1, '100500', 'Ivan', 'Ivanov', TO_DATE('01-01-1980', 'DD-MM-YYYY'), '001', '11', '0000', '1', 1, 8),

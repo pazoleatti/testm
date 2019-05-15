@@ -381,7 +381,9 @@ create table declaration_data (
   tax_refund_reflection_mode  number(1),
   negative_income             number(20,2),
   negative_tax                number(20,2),
-  negative_sums_sign          number(1)
+  negative_sums_sign          number(1),
+  created_date                date default sysdate not null,
+  created_by                  number(18) not null
 );
 
 comment on table declaration_data is 'Налоговые формы';
@@ -402,6 +404,8 @@ comment on column declaration_data.tax_refund_reflection_mode is 'Показыв
 comment on column declaration_data.negative_income is 'Нераспределенный отрицательный Доход';
 comment on column declaration_data.negative_tax is 'Нераспределенный отрицательный Налог';
 comment on column declaration_data.negative_sums_sign is 'Признак нераспределенных сумм (0 - из текущей формы, 1 - из предыдущей формы)';
+comment on column declaration_data.created_date is 'Дата создания формы';
+comment on column declaration_data.created_by is 'Ид пользователя, создавшего форму';
 
 create sequence seq_declaration_data start with 10000;
 ------------------------------------------------------------------------------------------------------------------------------------------
@@ -581,6 +585,7 @@ comment on column log_business.user_login is 'Логин пользовател�
 comment on column log_business.roles is 'Список ролей пользователя';
 comment on column log_business.declaration_data_id is 'Идентификатор формы';
 comment on column log_business.person_id is 'Идентификатор ФЛ';
+comment on column log_business.log_id is 'Ссылка на уведомления';
 comment on column log_business.note is 'Текст сообщения';
 comment on column log_business.user_department_name is 'Подразделение пользователя';
 

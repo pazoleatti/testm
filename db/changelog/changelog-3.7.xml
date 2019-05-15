@@ -300,4 +300,25 @@
 		</sql>
 	</changeSet>
 
+	<!--https://jira.aplana.com/browse/SBRFNDFL-7092 - Дата создания и создатель формы сделал по-нормальному-->
+	<changeSet id="3.7-dnovikov-22" author="dnovikov">
+		<sql>
+			alter table declaration_data add created_date date default sysdate;
+			alter table declaration_data add created_by number(18);
+			alter table declaration_data add constraint declaration_fk_created_by foreign key (created_by) references sec_user (id);
+			update declaration_data dd set
+			  created_date = nvl((select log_date from log_business where declaration_data_id = dd.id and event_id = 1), sysdate),
+			  created_by = nvl((
+			    select u.id from log_business lb
+			    join sec_user u on u.login = lb.user_login
+			    where lb.declaration_data_id = dd.id and lb.event_id = 1
+			  ), 0);
+			alter table declaration_data modify (created_date not null);
+			alter table declaration_data modify (created_by not null);
+			comment on column declaration_data.created_date is 'Дата создания формы';
+			comment on column declaration_data.created_by is 'Ид пользователя, создавшего форму';
+			comment on column log_business.log_id is 'Ссылка на уведомления';
+		</sql>
+	</changeSet>
+
 </databaseChangeLog>

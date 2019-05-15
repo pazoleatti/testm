@@ -20,7 +20,7 @@ insert into department_report_period (id, department_id, report_period_id, is_ac
 
 insert into declaration_template (id, name, version, declaration_type_id, form_kind, form_type)
 values (1, 'Налоговая форма 1', date '2014-01-01', 1, 3, 2);
-insert into declaration_data (id, declaration_template_id, department_report_period_id, state) values (1, 1, 1, 3);
+insert into declaration_data (id, declaration_template_id, department_report_period_id, state, created_by) values (1, 1, 1, 3, 1);
 insert into ref_book_person (id, record_id, last_name, first_name, middle_name, start_date, end_date, vip)
 values (1, 1, 'Иванов', 'Борис', 'Петрович', date '1975-04-15', null, 1);
 insert into log_business (id, log_date, event_id, user_login, roles, declaration_data_id, person_id, user_department_name, note)

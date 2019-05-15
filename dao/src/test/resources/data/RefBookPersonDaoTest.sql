@@ -139,10 +139,6 @@ update ref_book_id_doc set person_id = 2 where id = 3;
 --  Подразделения физ. лиц
 --------------------------------------------------------
 
-insert into department_type (id, name) values (2, 'Территориальный банк');
-
-insert into department (id, name, parent_id, type, is_active, code, garant_use, sunr_use) values (1, 'Байкальский банк', null, 2, 1, 4, 0, 0);
-insert into department (id, name, parent_id, type, is_active, code, garant_use, sunr_use) values (2, 'Волго-Вятский банк', null, 2, 1, 4, 0, 0);
 
 insert into ref_book_person_tb (id, record_id, version, status, person_id, tb_department_id) values(1, 1, date '2018-01-01', 0, 1, 1);
 insert into ref_book_person_tb (id, record_id, version, status, person_id, tb_department_id) values(2, 2, date '2018-01-01', 0, 1, 2);

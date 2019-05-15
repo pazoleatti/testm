@@ -366,6 +366,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 newDeclaration.setNegativeSumsSign(NegativeSumsSign.FROM_CURRENT_FORM);
             }
         }
+        newDeclaration.setCreatedBy(userInfo.getUser());
         declarationDataDao.create(newDeclaration);
 
         if (writeAudit) {
