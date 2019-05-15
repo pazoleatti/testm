@@ -296,26 +296,17 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     throw new ServiceLoggerException(("Налоговая форма не создана"), logEntryService.save(logger.getEntries()));
                 }
 
-                if (newDeclaration.isManuallyCreated() && declarationDataDao.existDeclarationData(newDeclaration)) {
+                if (declarationTemplate.getDeclarationFormKind().getId() == DeclarationFormKind.CONSOLIDATED.getId() &&
+                        newDeclaration.isManuallyCreated() && declarationDataDao.existDeclarationData(newDeclaration)) {
                     String strCorrPeriod = "";
                     if (departmentReportPeriod.getCorrectionDate() != null) {
                         SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
                         strCorrPeriod = ", с датой сдачи корректировки " + formatter.format(departmentReportPeriod.getCorrectionDate());
                     }
-                    String message = "";
-                    if (declarationTemplate.getDeclarationFormKind().getId() == DeclarationFormKind.PRIMARY.getId()) {
-                        String asnu = refBookAsnuService.fetchByIds(asList(newDeclaration.getAsnuId())).get(0).getName();
-                        message = String.format("Налоговая форма с заданными параметрами: Период: \"%s\", Подразделение: \"%s\", " +
-                                        " Вид налоговой формы: \"%s\", АСНУ: \"%s\" уже существует!",
-                                departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + ", " + departmentReportPeriod.getReportPeriod().getName() + strCorrPeriod,
-                                department.getName(), declarationTemplate.getDeclarationFormKind().getTitle(), asnu);
-                    }
-                    if (declarationTemplate.getDeclarationFormKind().getId() == DeclarationFormKind.CONSOLIDATED.getId()) {
-                        message = String.format("Налоговая форма с заданными параметрами: Период: \"%s\", Подразделение: \"%s\", " +
-                                        " Вид налоговой формы: \"%s\", Тип КНФ: \"%s\" уже существует!",
-                                departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + ", " + departmentReportPeriod.getReportPeriod().getName() + strCorrPeriod,
-                                department.getName(), declarationTemplate.getDeclarationFormKind().getName(), newDeclaration.getKnfType().getName());
-                    }
+                    String message = String.format("Налоговая форма с заданными параметрами: Период: \"%s\", Подразделение: \"%s\", " +
+                                    " Вид налоговой формы: \"%s\", Тип КНФ: \"%s\" уже существует!",
+                            departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + ", " + departmentReportPeriod.getReportPeriod().getName() + strCorrPeriod,
+                            department.getName(), declarationTemplate.getDeclarationFormKind().getName(), newDeclaration.getKnfType().getName());
                     logger.error(message);
                 }
                 doCreate(newDeclaration, declarationTemplate, logger, userInfo, true);

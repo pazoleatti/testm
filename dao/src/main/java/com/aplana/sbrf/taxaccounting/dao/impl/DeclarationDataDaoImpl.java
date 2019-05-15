@@ -411,7 +411,6 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
     @Override
     public void create(DeclarationData declarationData) {
         Assert.isTrue(declarationData.getId() == null, "Произведена попытка перезаписать уже сохранённую налоговую форму!");
-        Assert.isTrue(!existDeclarationData(declarationData), "Налоговая форма с заданными параметрами уже существует!");
 
         long id = generateId("seq_declaration_data", Long.class);
         MapSqlParameterSource params = new MapSqlParameterSource();
