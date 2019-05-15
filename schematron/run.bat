@@ -25,7 +25,7 @@ IF %errorlevel% EQU 0 (
   ECHO ----------------------
   ECHO Run: 12_1 Syntax3 SUCCESS
   ECHO ---------------------- 
-  %TARGET_NAME% "./sample/NO_NDS.12_1_1_0212345678020012345_20140331_1.xml" "./sample/NO_NDS.12_1_003_07_05_04_01.xsd" "NO_NDS.12_1_1_0212345678020012345_20140331_1"
+  %TARGET_NAME% "./sample/NO_NDS.12_1_1_0212345678020012345_20140331_1.xml" "./sample/NO_NDS.12_1_003_07_05_04_01.xsd" "NO_NDS.12_1_1_0212345678020012345_20140331_1.xml"
 )
 :end
 pause

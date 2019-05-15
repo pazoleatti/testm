@@ -28,7 +28,7 @@ class Program
             }
             string xmlFilePath = args[0];
             string xsdFilePath = args[1];
-            string xmlFileName = args.Length == 2 ? xmlFilePath : args[2] + ".xml";
+            string xmlFileName = args.Length == 2 ? xmlFilePath : args[2];
 
             var xmlStream = File.OpenRead(xmlFilePath);
             var schema = new XmlSchemaSet();
