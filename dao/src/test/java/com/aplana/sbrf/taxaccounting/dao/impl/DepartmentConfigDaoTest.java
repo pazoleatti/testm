@@ -58,7 +58,8 @@ public class DepartmentConfigDaoTest {
     @Test
     public void findAllByFilterTest1() {
         List<DepartmentConfig> departmentConfigs = departmentConfigDao.findPageByFilter(DepartmentConfigsFilter.builder()
-                .departmentId(2).build(), PagingParams.getInstance(1, 10, "kpp", "desc"));
+                        .departmentId(2).build(),
+                PagingParams.getInstance(1, 10, "kpp", "desc"));
         assertThat(departmentConfigs, hasSize(9));
 
         Set<String> kpps = new LinkedHashSet<>();
@@ -80,9 +81,18 @@ public class DepartmentConfigDaoTest {
 
     @Test
     public void findAllByFilterTest3() {
-        List<DepartmentConfig> departmentConfigs = departmentConfigDao.findPageByFilter(DepartmentConfigsFilter.builder()
-                .departmentId(2).build(), PagingParams.getInstance(2, 4));
-        assertThat(departmentConfigs, hasSize(4));
+        PagingResult<DepartmentConfig> departmentConfigPage = departmentConfigDao.findPageByFilter(DepartmentConfigsFilter.builder()
+                        .departmentId(2).build(),
+                PagingParams.getInstance(2, 4));
+        assertThat(departmentConfigPage, hasSize(4));
+        assertThat(departmentConfigPage.getTotalCount(), equalTo(9));
+    }
+
+    @Test
+    public void findAllByFilterTest4() {
+        List<DepartmentConfig> departmentConfigs = departmentConfigDao.findPageByFilter(DepartmentConfigsFilter.builder().build(),
+                PagingParams.getInstance(1, 100));
+        assertThat(departmentConfigs, hasSize(13));
     }
 
     @Test

@@ -68,9 +68,6 @@ public class DepartmentConfigController {
      */
     @GetMapping(value = "/rest/departmentConfig")
     public JqgridPagedList<DepartmentConfig> findPageByFilter(@RequestParam DepartmentConfigsFilter filter, @RequestParam PagingParams pagingParams) {
-        if (filter.getDepartmentId() == null) {
-            return new JqgridPagedList<>();
-        }
         PagingResult<DepartmentConfig> result = departmentConfigService.findPageByFilter(filter, pagingParams);
 
         setDepartmentConfigsPermission(result);

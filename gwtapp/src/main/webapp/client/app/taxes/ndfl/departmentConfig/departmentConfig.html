@@ -5,7 +5,7 @@
     <div class="container-grid box-shadow-block flex-fill flex-column" style="overflow-y: auto">
         <div id="departmentConfigTop">
             <!--Выгрузка-->
-            <div style="float: right; padding-top: 10px" ng-show="permissionChecker.check(user, APP_CONSTANTS.USER_PERMISSION.EXPORT_DEPARTMENT_CONFIG)">
+            <div style="float: right; padding-top: 10px" ng-show="searchFilter.params.department && permissionChecker.check(user, APP_CONSTANTS.USER_PERMISSION.EXPORT_DEPARTMENT_CONFIG)">
                 <img src='resources/img/unload-white-16.png'>
                 <a data-ng-click="exportDepartmentConfig()">{{'departmentConfig.export.excel' | translate}}</a>
             </div>

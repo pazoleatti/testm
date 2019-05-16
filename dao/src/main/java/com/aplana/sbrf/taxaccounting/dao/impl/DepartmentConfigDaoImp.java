@@ -140,7 +140,7 @@ public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentCon
             }
         });
 
-        int total = pagingParams == null ?
+        int total = pagingParams != null ?
                 getNamedParameterJdbcTemplate().queryForObject("select count(*) from (" + baseSql + ")", parameterSql.getParams(), Integer.class) :
                 departmentConfigs.size();
         return new PagingResult<>(departmentConfigs, total);
@@ -155,7 +155,7 @@ public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentCon
     private NamedParameterSql createSelectByFilter(DepartmentConfigsFilter filter) {
         //language=sql
         String sql = "select " +
-                (isSupportOver() ? "row_number() over (order by dc.kpp, oktmo.code, dc.tax_organ_code, dc.start_date) row_ord, " : " rownum row_ord, ") +
+                (isSupportOver() ? "row_number() over (order by dep.name, dc.kpp, oktmo.code, dc.tax_organ_code, dc.start_date) row_ord, " : " rownum row_ord, ") +
                 ALL_FIELDS +
                 "from department_config dc\n" +
                 ALL_FIELDS_JOINS +

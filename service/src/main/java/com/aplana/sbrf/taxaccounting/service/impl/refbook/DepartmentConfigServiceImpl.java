@@ -291,7 +291,7 @@ public class DepartmentConfigServiceImpl implements DepartmentConfigService {
                 user.hasRole(TARole.N_ROLE_CONTROL_NS) && userTbId == fileNameDepartmentId)) {
             throw new ServiceException("У вас отсутствуют права загрузки настроек подразделения " + departmentService.getDepartment(fileNameDepartmentId).getShortName() + ".");
         }
-        if (!action.isSkipDepartmentCheck() && fileNameDepartmentId != action.getDepartmentId()) {
+        if (action.getDepartmentId() != null && !action.isSkipDepartmentCheck() && fileNameDepartmentId != action.getDepartmentId()) {
             Department selectedDepartment = departmentService.getDepartment(action.getDepartmentId());
             result.setConfirmDepartmentCheck("Загружаемый файл содержит настройки подразделения \"" + fileNameDepartment.getShortName() + "\", " +
                     "хотя отображаются данные подразделения \"" + selectedDepartment.getShortName() + "\". " +

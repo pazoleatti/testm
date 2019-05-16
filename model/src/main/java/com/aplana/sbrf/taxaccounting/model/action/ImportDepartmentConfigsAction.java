@@ -12,7 +12,7 @@ import java.io.InputStream;
 @Setter
 public class ImportDepartmentConfigsAction {
     // выбранное подразделение в форме gui
-    private int departmentId;
+    private Integer departmentId;
     // пропускать проверку выбранного подразделения с подразделением, взятым из имени файла. Иначе будет подтверждающее окно
     private boolean skipDepartmentCheck;
     private InputStream inputStream;

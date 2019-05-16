@@ -40,7 +40,7 @@
                 }
 
                 function isFilterParamsEquals(params1, params2) {
-                    return params1.department.id === params2.department.id &&
+                    return (!params1.department && !params2.department || params1.department.id === params2.department.id) &&
                         params1.relevance.id === params2.relevance.id &&
                         params1.relevanceDate === params2.relevanceDate &&
                         (!params1.kpp && !params2.kpp || params1.kpp === params2.kpp) &&
@@ -279,7 +279,7 @@
                             data: {
                                 uploader: file,
                                 action: JSON.stringify({
-                                    departmentId: $scope.searchFilter.params.department.id,
+                                    departmentId: $scope.searchFilter.params.department ? $scope.searchFilter.params.department.id : undefined,
                                     skipDepartmentCheck: skipDepartmentCheck
                                 })
                             }
