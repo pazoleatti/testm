@@ -366,27 +366,24 @@ public interface NdflPersonDao {
 
     /**
      * Обновляет данные строки для раздела 2 (Сведения о доходах и НДФЛ)
-     *
-     * @param personIncome данные строки раздела 2
+     *  @param personIncome данные строки раздела 2
      * @param taUserInfo   пользователь, выполняющий изменения
      */
-    void updateOneNdflIncome(NdflPersonIncomeDTO personIncome, TAUserInfo taUserInfo);
+    void updateOneNdflIncome(NdflPersonIncome personIncome, TAUserInfo taUserInfo);
 
     /**
      * Обновляет данные строки для раздела 3 (Сведения о вычетах)
-     *
-     * @param personDeduction данные строки раздела 3
+     *  @param personDeduction данные строки раздела 3
      * @param taUserInfo      пользователь, выполняющий изменения
      */
-    void updateOneNdflDeduction(NdflPersonDeductionDTO personDeduction, TAUserInfo taUserInfo);
+    void updateOneNdflDeduction(NdflPersonDeduction personDeduction, TAUserInfo taUserInfo);
 
     /**
      * Обновляет данные строки для раздела 4 (Сведения о доходах в виде авансовых платежей)
-     *
-     * @param personPrepayment данные строки раздела 4
+     *  @param personPrepayment данные строки раздела 4
      * @param taUserInfo       пользователь, выполняющий изменения
      */
-    void updateOneNdflPrepayment(NdflPersonPrepaymentDTO personPrepayment, TAUserInfo taUserInfo);
+    void updateOneNdflPrepayment(NdflPersonPrepayment personPrepayment, TAUserInfo taUserInfo);
 
     /**
      * Найти идентификаторы операций в указанном диапазоне в алфавитном порядке

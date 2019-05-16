@@ -1881,7 +1881,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     @Override
-    public void updateOneNdflIncome(NdflPersonIncomeDTO personIncome, TAUserInfo taUserInfo) {
+    public void updateOneNdflIncome(NdflPersonIncome personIncome, TAUserInfo taUserInfo) {
         String sql = "UPDATE ndfl_person_income SET KPP = :kpp, OKTMO = :oktmo, INCOME_CODE = :incomeCode, INCOME_ACCRUED_DATE = :incomeAccruedDate, " +
                 "INCOME_ACCRUED_SUMM = :incomeAccruedSumm, INCOME_TYPE = :incomeType, INCOME_PAYOUT_DATE = :incomePayoutDate, INCOME_PAYOUT_SUMM = :incomePayoutSumm, " +
                 "TAX_BASE = :taxBase, TOTAL_DEDUCTIONS_SUMM = :totalDeductionsSumm, TAX_RATE = :taxRate, CALCULATED_TAX = :calculatedTax, WITHHOLDING_TAX = :withholdingTax, " +
@@ -1917,7 +1917,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     @Override
-    public void updateOneNdflDeduction(NdflPersonDeductionDTO personDeduction, TAUserInfo taUserInfo) {
+    public void updateOneNdflDeduction(NdflPersonDeduction personDeduction, TAUserInfo taUserInfo) {
         String sql = "UPDATE ndfl_person_deduction SET TYPE_CODE = :typeCode, NOTIF_TYPE = :notifType, NOTIF_NUM = :notifNum, NOTIF_SUMM = :notifSumm, " +
                 "NOTIF_SOURCE = :notifSource, NOTIF_DATE = :notifDate, INCOME_CODE = :incomeCode, INCOME_SUMM = :incomeSumm, INCOME_ACCRUED = :incomeAccrued, " +
                 "PERIOD_PREV_DATE = :periodPrevDate, PERIOD_PREV_SUMM = :periodPrevSumm, PERIOD_CURR_DATE = :periodCurrDate, PERIOD_CURR_SUMM = :periodCurrSumm, " +
@@ -1944,7 +1944,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     @Override
-    public void updateOneNdflPrepayment(NdflPersonPrepaymentDTO personPrepayment, TAUserInfo taUserInfo) {
+    public void updateOneNdflPrepayment(NdflPersonPrepayment personPrepayment, TAUserInfo taUserInfo) {
         String sql = "UPDATE ndfl_person_prepayment SET SUMM = :summ, NOTIF_NUM = :notifNum, NOTIF_SOURCE = :notifSource, " +
                 "NOTIF_DATE = :notifDate, MODIFIED_DATE = :modifyDate, MODIFIED_BY = :user WHERE id = :id";
         MapSqlParameterSource params = new MapSqlParameterSource();

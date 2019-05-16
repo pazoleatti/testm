@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.service.impl;
+package com.aplana.sbrf.taxaccounting.service.util;
 
 
 import com.aplana.sbrf.taxaccounting.model.IdentityObject;
@@ -25,7 +25,7 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 /**
  * Вспомогательный класс для формирования записи истории изменения ФЛ
  */
-class PersonChangeLogBuilder {
+public class PersonChangeLogBuilder {
 
     private List<String> changes = new ArrayList<>();
 

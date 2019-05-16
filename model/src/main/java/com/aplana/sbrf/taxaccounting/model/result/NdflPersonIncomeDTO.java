@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.model.result;
 
 import com.aplana.sbrf.taxaccounting.model.json.ISODateDeserializer;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflData;
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
@@ -122,34 +123,37 @@ public class NdflPersonIncomeDTO extends NdflData<Long> {
     // Значение имени пользователя из Справочника пользователей системы. Заполняется при редактировании данных НФ через загрузку Excel файла
     private String modifiedBy;
 
-    public NdflPersonIncomeDTO() {
-    }
-
-    public NdflPersonIncomeDTO(String incomeCode, String incomeType, Date incomeAccruedDate, Date incomePayoutDate, String oktmo, String kpp, BigDecimal incomeAccruedSumm, BigDecimal incomePayoutSumm, BigDecimal totalDeductionsSumm, BigDecimal taxBase, Integer taxRate, Date taxDate, BigDecimal calculatedTax, BigDecimal withholdingTax, BigDecimal notHoldingTax, BigDecimal overholdingTax, Long refoundTax, Date taxTransferDate, Date paymentDate, String paymentNumber, BigDecimal taxSumm, String operationId, Long sourceId, String rowNum, String inp) {
-        this.incomeCode = incomeCode;
-        this.incomeType = incomeType;
-        this.incomeAccruedDate = incomeAccruedDate;
-        this.incomePayoutDate = incomePayoutDate;
-        this.oktmo = oktmo;
-        this.kpp = kpp;
-        this.incomeAccruedSumm = incomeAccruedSumm;
-        this.incomePayoutSumm = incomePayoutSumm;
-        this.totalDeductionsSumm = totalDeductionsSumm;
-        this.taxBase = taxBase;
-        this.taxRate = taxRate;
-        this.taxDate = taxDate;
-        this.calculatedTax = calculatedTax;
-        this.withholdingTax = withholdingTax;
-        this.notHoldingTax = notHoldingTax;
-        this.overholdingTax = overholdingTax;
-        this.refoundTax = refoundTax;
-        this.taxTransferDate = taxTransferDate;
-        this.paymentDate = paymentDate;
-        this.paymentNumber = paymentNumber;
-        this.taxSumm = taxSumm;
-        this.operationId = operationId;
-        this.sourceId = sourceId;
-        this.rowNum = rowNum;
-        this.inp = inp;
+    public NdflPersonIncome toIncome() {
+        NdflPersonIncome income = new NdflPersonIncome();
+        income.setId(id);
+        income.setNdflPersonId(ndflPersonId);
+        income.setOperationId(operationId);
+        if (rowNum != null && !rowNum.isEmpty()) {
+            income.setRowNum(new BigDecimal(rowNum));
+        }
+        income.setIncomeCode(incomeCode);
+        income.setIncomeType(incomeType);
+        income.setIncomeAccruedDate(incomeAccruedDate);
+        income.setIncomePayoutDate(incomePayoutDate);
+        income.setOktmo(oktmo);
+        income.setKpp(kpp);
+        income.setIncomeAccruedSumm(incomeAccruedSumm);
+        income.setIncomePayoutSumm(incomePayoutSumm);
+        income.setTotalDeductionsSumm(totalDeductionsSumm);
+        income.setTaxBase(taxBase);
+        income.setTaxRate(taxRate);
+        income.setTaxDate(taxDate);
+        income.setCalculatedTax(calculatedTax);
+        income.setWithholdingTax(withholdingTax);
+        income.setNotHoldingTax(notHoldingTax);
+        income.setOverholdingTax(overholdingTax);
+        income.setRefoundTax(refoundTax);
+        income.setTaxTransferDate(taxTransferDate);
+        income.setPaymentDate(paymentDate);
+        income.setPaymentNumber(paymentNumber);
+        income.setTaxSumm(taxSumm);
+        income.setOperationId(operationId);
+        income.setSourceId(sourceId);
+        return income;
     }
 }

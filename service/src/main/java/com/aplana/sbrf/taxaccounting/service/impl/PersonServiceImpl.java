@@ -22,6 +22,7 @@ import com.aplana.sbrf.taxaccounting.service.LockDataService;
 import com.aplana.sbrf.taxaccounting.service.LogBusinessService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.PersonService;
+import com.aplana.sbrf.taxaccounting.service.util.PersonChangeLogBuilder;
 import com.aplana.sbrf.taxaccounting.utils.SimpleDateUtils;
 import com.google.common.base.Joiner;
 import com.google.common.base.Objects;

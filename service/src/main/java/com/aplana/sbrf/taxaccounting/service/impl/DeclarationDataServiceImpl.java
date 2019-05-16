@@ -39,6 +39,7 @@ import com.aplana.sbrf.taxaccounting.permissions.logging.TargetIdAndLogger;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.*;
+import com.aplana.sbrf.taxaccounting.service.util.NdflRowEditChangelogBuilder;
 import com.aplana.sbrf.taxaccounting.service.component.MoveToCreateFacade;
 import com.aplana.sbrf.taxaccounting.service.component.lock.locker.DeclarationLocker;
 import com.aplana.sbrf.taxaccounting.service.impl.declaration.edit.incomedate.DateEditor;
@@ -2607,17 +2608,26 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     @Transactional
     @PreAuthorize("hasPermission(#declarationDataId, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).EDIT)")
-    public ActionResult updateNdflIncomesAndTax(Long declarationDataId, TAUserInfo userInfo, NdflPersonIncomeDTO personIncome) {
+    public ActionResult updateNdflIncomesAndTax(Long declarationDataId, TAUserInfo userInfo, NdflPersonIncomeDTO incomeDTO) {
         try {
             Logger logger = logEntryService.createLogger();
+            NdflPersonIncome income = incomeDTO.toIncome();
 
-            ndflPersonDao.updateOneNdflIncome(personIncome, userInfo);
-            reportService.deleteDec(singletonList(declarationDataId), asList(DeclarationReportType.SPECIFIC_REPORT_DEC, DeclarationReportType.EXCEL_DEC));
-            List<Long> changedPersonIds = updateAdditionalSortParams(personIncome.getNdflPersonId(), personIncome.getOperationId());
-            sortPersonRows(changedPersonIds);
+            NdflPersonIncome incomeBeforeUpdate = ndflPersonDao.fetchOneNdflPersonIncome(income.getId());
+            NdflRowEditChangelogBuilder changelogBuilder = new NdflRowEditChangelogBuilder(declarationDataId, incomeBeforeUpdate, income);
+            if (changelogBuilder.hasChanges()) {
+                ndflPersonDao.updateOneNdflIncome(income, userInfo);
+                reportService.deleteDec(singletonList(declarationDataId), asList(DeclarationReportType.SPECIFIC_REPORT_DEC, DeclarationReportType.EXCEL_DEC));
+                List<Long> changedPersonIds = updateAdditionalSortParams(incomeDTO.getNdflPersonId(), incomeDTO.getOperationId());
+                sortPersonRows(changedPersonIds);
 
-            logger.info("Для формы № " + declarationDataId + " внесены изменения в Разделе 2 в строке № " + personIncome.getRowNum());
-            logBusinessService.logFormEvent(declarationDataId, FormDataEvent.NDFL_EDIT, logger.getLogId(), null, userInfo);
+                NdflPersonIncome incomeAfterUpdate = ndflPersonDao.fetchOneNdflPersonIncome(income.getId());
+                changelogBuilder.setRowNum(incomeAfterUpdate.getRowNum());
+                for (String message : changelogBuilder.build()) {
+                    logger.info(message);
+                }
+                logBusinessService.logFormEvent(declarationDataId, FormDataEvent.NDFL_EDIT, logger.getLogId(), null, userInfo);
+            }
             return new ActionResult(logEntryService.save(logger));
         } catch (Exception e) {
             String errorMessage = generateDeclarationEditErrorMsg(declarationDataId, e.getMessage());
@@ -2823,18 +2833,27 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     @Transactional
     @PreAuthorize("hasPermission(#declarationDataId, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).EDIT)")
-    public ActionResult updateNdflDeduction(Long declarationDataId, TAUserInfo userInfo, NdflPersonDeductionDTO personDeduction) {
+    public ActionResult updateNdflDeduction(Long declarationDataId, TAUserInfo userInfo, NdflPersonDeductionDTO personDeductionDTO) {
         try {
             Logger logger = logEntryService.createLogger();
+            NdflPersonDeduction deduction = personDeductionDTO.toDeduction();
 
-            ndflPersonDao.updateOneNdflDeduction(personDeduction, userInfo);
-            reportService.deleteDec(singletonList(declarationDataId), asList(DeclarationReportType.SPECIFIC_REPORT_DEC, DeclarationReportType.EXCEL_DEC));
-            NdflPerson ndflPerson = ndflPersonDao.findById(personDeduction.getNdflPersonId());
-            Collections.sort(ndflPerson.getDeductions(), NdflPersonDeduction.getComparator(ndflPerson));
-            ndflPersonDao.updateDeductions(updateRowNum(ndflPerson.getDeductions()));
+            NdflPersonDeduction deductionBeforeUpdate = ndflPersonDao.fetchOneNdflPersonDeduction(deduction.getId());
+            NdflRowEditChangelogBuilder changelogBuilder = new NdflRowEditChangelogBuilder(declarationDataId, deductionBeforeUpdate, deduction);
+            if (changelogBuilder.hasChanges()) {
+                ndflPersonDao.updateOneNdflDeduction(deduction, userInfo);
+                reportService.deleteDec(singletonList(declarationDataId), asList(DeclarationReportType.SPECIFIC_REPORT_DEC, DeclarationReportType.EXCEL_DEC));
+                NdflPerson ndflPerson = ndflPersonDao.findById(personDeductionDTO.getNdflPersonId());
+                Collections.sort(ndflPerson.getDeductions(), NdflPersonDeduction.getComparator(ndflPerson));
+                ndflPersonDao.updateDeductions(updateRowNum(ndflPerson.getDeductions()));
 
-            logger.info("Для формы № " + declarationDataId + " внесены изменения в Разделе 3 в строке № " + personDeduction.getRowNum());
-            logBusinessService.logFormEvent(declarationDataId, FormDataEvent.NDFL_EDIT, logger.getLogId(), null, userInfo);
+                NdflPersonDeduction deductionAfterUpdate = ndflPersonDao.fetchOneNdflPersonDeduction(deduction.getId());
+                changelogBuilder.setRowNum(deductionAfterUpdate.getRowNum());
+                for (String message : changelogBuilder.build()) {
+                    logger.info(message);
+                }
+                logBusinessService.logFormEvent(declarationDataId, FormDataEvent.NDFL_EDIT, logger.getLogId(), null, userInfo);
+            }
             return new ActionResult(logEntryService.save(logger));
         } catch (Exception e) {
             String errorMessage = generateDeclarationEditErrorMsg(declarationDataId, e.getMessage());
@@ -2845,18 +2864,27 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     @Transactional
     @PreAuthorize("hasPermission(#declarationDataId, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).EDIT)")
-    public ActionResult updateNdflPrepayment(Long declarationDataId, TAUserInfo userInfo, NdflPersonPrepaymentDTO personPrepayment) {
+    public ActionResult updateNdflPrepayment(Long declarationDataId, TAUserInfo userInfo, NdflPersonPrepaymentDTO personPrepaymentDTO) {
         try {
             Logger logger = logEntryService.createLogger();
+            NdflPersonPrepayment prepayment = personPrepaymentDTO.toPrepayment();
 
-            ndflPersonDao.updateOneNdflPrepayment(personPrepayment, userInfo);
-            reportService.deleteDec(singletonList(declarationDataId), asList(DeclarationReportType.SPECIFIC_REPORT_DEC, DeclarationReportType.EXCEL_DEC));
-            NdflPerson ndflPerson = ndflPersonDao.findById(personPrepayment.getNdflPersonId());
-            Collections.sort(ndflPerson.getPrepayments(), NdflPersonPrepayment.getComparator(ndflPerson));
-            ndflPersonDao.updatePrepayments(updateRowNum(ndflPerson.getPrepayments()));
+            NdflPersonPrepayment prepaymentBeforeUpdate = ndflPersonDao.fetchOneNdflPersonPrepayment(prepayment.getId());
+            NdflRowEditChangelogBuilder changelogBuilder = new NdflRowEditChangelogBuilder(declarationDataId, prepaymentBeforeUpdate, prepayment);
+            if (changelogBuilder.hasChanges()) {
+                ndflPersonDao.updateOneNdflPrepayment(prepayment, userInfo);
+                reportService.deleteDec(singletonList(declarationDataId), asList(DeclarationReportType.SPECIFIC_REPORT_DEC, DeclarationReportType.EXCEL_DEC));
+                NdflPerson ndflPerson = ndflPersonDao.findById(personPrepaymentDTO.getNdflPersonId());
+                Collections.sort(ndflPerson.getPrepayments(), NdflPersonPrepayment.getComparator(ndflPerson));
+                ndflPersonDao.updatePrepayments(updateRowNum(ndflPerson.getPrepayments()));
 
-            logger.info("Для формы № " + declarationDataId + " внесены изменения в Разделе 4 в строке № " + personPrepayment.getRowNum());
-            logBusinessService.logFormEvent(declarationDataId, FormDataEvent.NDFL_EDIT, logger.getLogId(), null, userInfo);
+                NdflPersonPrepayment prepaymentAfterUpdate = ndflPersonDao.fetchOneNdflPersonPrepayment(prepayment.getId());
+                changelogBuilder.setRowNum(prepaymentAfterUpdate.getRowNum());
+                for (String message : changelogBuilder.build()) {
+                    logger.info(message);
+                }
+                logBusinessService.logFormEvent(declarationDataId, FormDataEvent.NDFL_EDIT, logger.getLogId(), null, userInfo);
+            }
             return new ActionResult(logEntryService.save(logger));
         } catch (Exception e) {
             String errorMessage = generateDeclarationEditErrorMsg(declarationDataId, e.getMessage());

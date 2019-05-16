@@ -2,11 +2,19 @@ package com.aplana.sbrf.taxaccounting.model.result;
 
 import com.aplana.sbrf.taxaccounting.model.json.ISODateDeserializer;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflData;
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.util.Date;
 
+/**
+ * ДТО для данных раздела 4
+ */
+@Getter
+@Setter
 public class NdflPersonPrepaymentDTO extends NdflData<Long> {
 
     /**
@@ -48,105 +56,19 @@ public class NdflPersonPrepaymentDTO extends NdflData<Long> {
     // Значение имени пользователя из Справочника пользователей системы. Заполняется при редактировании данных НФ через загрузку Excel файла
     private String modifiedBy;
 
-    public NdflPersonPrepaymentDTO() {
-    }
-
-    public NdflPersonPrepaymentDTO(String operationId, Long sourceId, String rowNum, BigDecimal summ, String notifNum, Date notifDate, String notifSource, String inp) {
-        this.operationId = operationId;
-        this.sourceId = sourceId;
-        this.rowNum = rowNum;
-        this.summ = summ;
-        this.notifNum = notifNum;
-        this.notifDate = notifDate;
-        this.notifSource = notifSource;
-        this.inp = inp;
-    }
-
-    public String getOperationId() {
-        return operationId;
-    }
-
-    public void setOperationId(String operationId) {
-        this.operationId = operationId;
-    }
-
-    public Long getSourceId() {
-        return sourceId;
-    }
-
-    public void setSourceId(Long sourceId) {
-        this.sourceId = sourceId;
-    }
-
-    public String getRowNum() {
-        return rowNum;
-    }
-
-    public void setRowNum(String rowNum) {
-        this.rowNum = rowNum;
-    }
-
-    public BigDecimal getSumm() {
-        return summ;
-    }
-
-    public void setSumm(BigDecimal summ) {
-        this.summ = summ;
-    }
-
-    public String getNotifNum() {
-        return notifNum;
-    }
-
-    public void setNotifNum(String notifNum) {
-        this.notifNum = notifNum;
-    }
-
-    public Date getNotifDate() {
-        return notifDate;
-    }
-
-    public void setNotifDate(Date notifDate) {
-        this.notifDate = notifDate;
-    }
-
-    public String getNotifSource() {
-        return notifSource;
-    }
-
-    public void setNotifSource(String notifSource) {
-        this.notifSource = notifSource;
-    }
-
-    public String getInp() {
-        return inp;
-    }
-
-    public void setInp(String inp) {
-        this.inp = inp;
-    }
-
-    public Date getModifiedDate() {
-        return modifiedDate;
-    }
-
-    public void setModifiedDate(Date modifiedDate) {
-        this.modifiedDate = modifiedDate;
-    }
-
-    public String getModifiedBy() {
-        return modifiedBy;
-    }
-
-    public void setModifiedBy(String modifiedBy) {
-        this.modifiedBy = modifiedBy;
-    }
-
-    public Long getNdflPersonId() {
-        return ndflPersonId;
-    }
-
-    public void setNdflPersonId(Long ndflPersonId) {
-        this.ndflPersonId = ndflPersonId;
+    public NdflPersonPrepayment toPrepayment() {
+        NdflPersonPrepayment prepayment = new NdflPersonPrepayment();
+        prepayment.setId(id);
+        prepayment.setNdflPersonId(ndflPersonId);
+        prepayment.setOperationId(operationId);
+        if (rowNum != null && !rowNum.isEmpty()) {
+            prepayment.setRowNum(new BigDecimal(rowNum));
+        }
+        prepayment.setSourceId(sourceId);
+        prepayment.setSumm(summ);
+        prepayment.setNotifNum(notifNum);
+        prepayment.setNotifDate(notifDate);
+        prepayment.setNotifSource(notifSource);
+        return prepayment;
     }
 }

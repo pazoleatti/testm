@@ -2,11 +2,19 @@ package com.aplana.sbrf.taxaccounting.model.result;
 
 import com.aplana.sbrf.taxaccounting.model.json.ISODateDeserializer;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflData;
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.util.Date;
 
+/**
+ * ДТО для данных раздела 3
+ */
+@Getter
+@Setter
 public class NdflPersonDeductionDTO extends NdflData<Long> {
 
     /**
@@ -78,186 +86,28 @@ public class NdflPersonDeductionDTO extends NdflData<Long> {
     // Значение имени пользователя из Справочника пользователей системы. Заполняется при редактировании данных НФ через загрузку Excel файла
     private String modifiedBy;
 
-    public NdflPersonDeductionDTO() {
-    }
-
-    public NdflPersonDeductionDTO(String operationId, Long sourceId, String rowNum, String typeCode, String notifType, Date notifDate, String notifNum, String notifSource, BigDecimal notifSumm, Date incomeAccrued, String incomeCode, BigDecimal incomeSumm, Date periodPrevDate, BigDecimal periodPrevSumm, Date periodCurrDate, BigDecimal periodCurrSumm, String inp) {
-        this.operationId = operationId;
-        this.sourceId = sourceId;
-        this.rowNum = rowNum;
-        this.typeCode = typeCode;
-        this.notifType = notifType;
-        this.notifDate = notifDate;
-        this.notifNum = notifNum;
-        this.notifSource = notifSource;
-        this.notifSumm = notifSumm;
-        this.incomeAccrued = incomeAccrued;
-        this.incomeCode = incomeCode;
-        this.incomeSumm = incomeSumm;
-        this.periodPrevDate = periodPrevDate;
-        this.periodPrevSumm = periodPrevSumm;
-        this.periodCurrDate = periodCurrDate;
-        this.periodCurrSumm = periodCurrSumm;
-        this.inp = inp;
-    }
-
-    public String getOperationId() {
-        return operationId;
-    }
-
-    public void setOperationId(String operationId) {
-        this.operationId = operationId;
-    }
-
-    public Long getSourceId() {
-        return sourceId;
-    }
-
-    public void setSourceId(Long sourceId) {
-        this.sourceId = sourceId;
-    }
-
-    public String getRowNum() {
-        return rowNum;
-    }
-
-    public void setRowNum(String rowNum) {
-        this.rowNum = rowNum;
-    }
-
-    public String getTypeCode() {
-        return typeCode;
-    }
-
-    public void setTypeCode(String typeCode) {
-        this.typeCode = typeCode;
-    }
-
-    public String getNotifType() {
-        return notifType;
-    }
-
-    public void setNotifType(String notifType) {
-        this.notifType = notifType;
-    }
-
-    public Date getNotifDate() {
-        return notifDate;
-    }
-
-    public void setNotifDate(Date notifDate) {
-        this.notifDate = notifDate;
-    }
-
-    public String getNotifNum() {
-        return notifNum;
-    }
-
-    public void setNotifNum(String notifNum) {
-        this.notifNum = notifNum;
-    }
-
-    public String getNotifSource() {
-        return notifSource;
-    }
-
-    public void setNotifSource(String notifSource) {
-        this.notifSource = notifSource;
-    }
-
-    public BigDecimal getNotifSumm() {
-        return notifSumm;
-    }
-
-    public void setNotifSumm(BigDecimal notifSumm) {
-        this.notifSumm = notifSumm;
-    }
-
-    public Date getIncomeAccrued() {
-        return incomeAccrued;
-    }
-
-    public void setIncomeAccrued(Date incomeAccrued) {
-        this.incomeAccrued = incomeAccrued;
-    }
-
-    public String getIncomeCode() {
-        return incomeCode;
-    }
-
-    public void setIncomeCode(String incomeCode) {
-        this.incomeCode = incomeCode;
-    }
-
-    public BigDecimal getIncomeSumm() {
-        return incomeSumm;
-    }
-
-    public void setIncomeSumm(BigDecimal incomeSumm) {
-        this.incomeSumm = incomeSumm;
-    }
-
-    public Date getPeriodPrevDate() {
-        return periodPrevDate;
-    }
-
-    public void setPeriodPrevDate(Date periodPrevDate) {
-        this.periodPrevDate = periodPrevDate;
-    }
-
-    public BigDecimal getPeriodPrevSumm() {
-        return periodPrevSumm;
-    }
-
-    public void setPeriodPrevSumm(BigDecimal periodPrevSumm) {
-        this.periodPrevSumm = periodPrevSumm;
-    }
-
-    public Date getPeriodCurrDate() {
-        return periodCurrDate;
-    }
-
-    public void setPeriodCurrDate(Date periodCurrDate) {
-        this.periodCurrDate = periodCurrDate;
-    }
-
-    public BigDecimal getPeriodCurrSumm() {
-        return periodCurrSumm;
-    }
-
-    public void setPeriodCurrSumm(BigDecimal periodCurrSumm) {
-        this.periodCurrSumm = periodCurrSumm;
-    }
-
-    public String getInp() {
-        return inp;
-    }
-
-    public void setInp(String inp) {
-        this.inp = inp;
-    }
-
-    public Date getModifiedDate() {
-        return modifiedDate;
-    }
-
-    public void setModifiedDate(Date modifiedDate) {
-        this.modifiedDate = modifiedDate;
-    }
-
-    public String getModifiedBy() {
-        return modifiedBy;
-    }
-
-    public void setModifiedBy(String modifiedBy) {
-        this.modifiedBy = modifiedBy;
-    }
-
-    public Long getNdflPersonId() {
-        return ndflPersonId;
-    }
-
-    public void setNdflPersonId(Long ndflPersonId) {
-        this.ndflPersonId = ndflPersonId;
+    public NdflPersonDeduction toDeduction() {
+        NdflPersonDeduction deduction = new NdflPersonDeduction();
+        deduction.setId(id);
+        deduction.setNdflPersonId(ndflPersonId);
+        deduction.setOperationId(operationId);
+        if (rowNum != null && !rowNum.isEmpty()) {
+            deduction.setRowNum(new BigDecimal(rowNum));
+        }
+        deduction.setSourceId(sourceId);
+        deduction.setTypeCode(typeCode);
+        deduction.setNotifType(notifType);
+        deduction.setNotifDate(notifDate);
+        deduction.setNotifNum(notifNum);
+        deduction.setNotifSource(notifSource);
+        deduction.setNotifSumm(notifSumm);
+        deduction.setIncomeAccrued(incomeAccrued);
+        deduction.setIncomeCode(incomeCode);
+        deduction.setIncomeSumm(incomeSumm);
+        deduction.setPeriodPrevDate(periodPrevDate);
+        deduction.setPeriodPrevSumm(periodPrevSumm);
+        deduction.setPeriodCurrDate(periodCurrDate);
+        deduction.setPeriodCurrSumm(periodCurrSumm);
+        return deduction;
     }
 }
