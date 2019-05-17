@@ -170,9 +170,6 @@
                                 return null;
                             }
 
-                            if (viewValue === '00.00.0000') {
-                                viewValue = '01.01.1901';
-                            }
                             var parsedDate = dateParser.parse(viewValue, controller.$dateValue);
                             if (!parsedDate || isNaN(parsedDate.getTime())) {
                                 controller.$setValidity('date', false);
@@ -225,11 +222,7 @@
                         // viewValue -> element
                         controller.$render = function () {
                             if (!element.is(':focus')) {
-                                var viewValue = !controller.$dateValue || isNaN(controller.$dateValue.getTime()) ? '' : dateFilter(controller.$dateValue, scope.options.dateFormat);
-                                if (viewValue === '01.01.1901') {
-                                    viewValue = '00.00.0000';
-                                }
-                                element.val(viewValue);
+                                element.val(!controller.$dateValue || isNaN(controller.$dateValue.getTime()) ? '' : dateFilter(controller.$dateValue, scope.options.dateFormat));
                             }
                         };
 
