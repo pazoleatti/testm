@@ -114,19 +114,25 @@ class UpdatePersonsData extends AbstractScriptClass {
                     updated = true
             }
             if (refBookPerson.lastName != declarationDataPerson.lastName) {
+                if (refBookPerson.lastName == null || !refBookPerson.lastName.equalsIgnoreCase(declarationDataPerson.lastName)) {
                     updateInfo << createUpdateInfo(SharedConstants.LAST_NAME_FULL, declarationDataPerson.lastName ?: "_", refBookPerson.lastName ?: "_")
                     declarationDataPerson.lastName = refBookPerson.lastName
                     updated = true
+                }
             }
             if (refBookPerson.firstName != declarationDataPerson.firstName) {
+                if (refBookPerson.firstName == null || !refBookPerson.firstName.equalsIgnoreCase(declarationDataPerson.firstName)) {
                     updateInfo << createUpdateInfo(SharedConstants.FIRST_NAME_FULL, declarationDataPerson.firstName ?: "_", refBookPerson.firstName ?: "_")
                     declarationDataPerson.firstName = refBookPerson.firstName
                     updated = true
+                }
             }
             if (refBookPerson.middleName != declarationDataPerson.middleName) {
+                if (refBookPerson.middleName == null || !refBookPerson.middleName.equalsIgnoreCase(declarationDataPerson.middleName)) {
                     updateInfo << createUpdateInfo(SharedConstants.MIDDLE_NAME_FULL, declarationDataPerson.middleName ?: "_", refBookPerson.middleName ?: "_")
                     declarationDataPerson.middleName = refBookPerson.middleName
                     updated = true
+                }
             }
             if (refBookPerson.birthDay != declarationDataPerson.birthDay) {
                     updateInfo << createUpdateInfo(SharedConstants.BIRTH_DAY_FULL, declarationDataPerson.birthDay ? declarationDataPerson.birthDay.format(SharedConstants.DATE_FORMAT) : "_", refBookPerson.birthDay ? refBookPerson.birthDay.format(SharedConstants.DATE_FORMAT) : "_")
