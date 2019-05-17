@@ -1136,7 +1136,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                                 asnuClause);
 
                         logger.info(message);
-                        sendNotification(message, logEntryService.save(logger.getEntries()), userId);
+                        sendNotification(message, logEntryService.save(logger), userId);
                         logger.clear();
                     } else { // Не удалось установить блокировку
                         // Сообщение о причинах из алгоритма блокировки находится последним в logger
