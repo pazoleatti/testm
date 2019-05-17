@@ -296,6 +296,10 @@
                         deduction: $scope.searchFilter.params.deduction,
                         prepayment: $scope.searchFilter.params.prepayment
                     };
+                    if ($scope.searchFilter.disableTaxTransferDate) {
+                        filter.income.transferDateFrom = $filter('translate')('title.taxTransferDateZeroDate');
+                        filter.income.transferDateTo = $filter('translate')('title.taxTransferDateZeroDate');
+                    }
                     if (filter.income.urmList) {
                         filter.income.urmList = filter.income.urmList.map(function (urm) {
                             return urm.enumName;
