@@ -53,8 +53,21 @@ public class ExportReportsAsyncTask extends AbstractAsyncTask {
 
     @Override
     protected String getNotificationMsg(AsyncTaskData taskData) {
+        List<Long> declarationDataIdList = (List<Long>) taskData.getParams().get("declarationDataIds");
+        boolean allAccepted = true;
+        List<DeclarationData> declarations = declarationDataService.get(declarationDataIdList);
+        for (DeclarationData declaration : declarations) {
+            if (declaration.getState() != State.ACCEPTED) {
+                allAccepted = false;
+                break;
+            }
+        }
         BlobData blobData = blobDataService.get((String) taskData.getParams().get("reportId"));
-        return "Сформирован архив \"" + blobData.getName() + "\" c отчетными формами";
+        if (allAccepted) {
+            return "Сформирован архив \"" + blobData.getName() + "\" c отчетными формами";
+        } else {
+            return "Сформирован архив \"" + blobData.getName() + "\" c отчетными формами. Внимание в архиве есть не принятые отчетные формы!";
+        }
     }
 
     @Override
