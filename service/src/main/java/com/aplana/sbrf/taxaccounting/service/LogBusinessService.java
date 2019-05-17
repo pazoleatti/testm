@@ -1,12 +1,12 @@
 package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
+import com.aplana.sbrf.taxaccounting.model.LogBusiness;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.dto.LogBusinessDTO;
 
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -17,7 +17,8 @@ public interface LogBusinessService {
 
     /**
      * Добавить информацию об логировании
-     *  @param declarationId идентификатор формы
+     *
+     * @param declarationId идентификатор формы
      * @param event         событие
      * @param logId
      * @param note          текст
@@ -34,6 +35,13 @@ public interface LogBusinessService {
      * @param userInfo информация о пользователе, инициирующего событие
      */
     void logPersonEvent(Long personId, FormDataEvent event, String note, TAUserInfo userInfo);
+
+    /**
+     * Создаёт запись в историю
+     *
+     * @param logBusiness данные записи
+     */
+    void create(LogBusiness logBusiness);
 
     /**
      * Получить информацию об истории событий налоговой формы

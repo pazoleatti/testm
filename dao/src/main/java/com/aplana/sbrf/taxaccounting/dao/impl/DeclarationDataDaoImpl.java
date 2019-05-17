@@ -413,6 +413,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         Assert.isTrue(declarationData.getId() == null, "Произведена попытка перезаписать уже сохранённую налоговую форму!");
 
         long id = generateId("seq_declaration_data", Long.class);
+        declarationData.setCreatedDate(new Date());
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("id", id);
         params.addValue("declaration_template_id", declarationData.getDeclarationTemplateId());
@@ -434,15 +435,16 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         params.addValue("negative_income", declarationData.getNegativeIncome());
         params.addValue("negative_tax", declarationData.getNegativeTax());
         params.addValue("negative_sums_sign", declarationData.getNegativeSumsSign() != null ? declarationData.getNegativeSumsSign().ordinal() : null);
+        params.addValue("created_date", declarationData.getCreatedDate());
         params.addValue("created_by", declarationData.getCreatedBy().getId());
 
         getNamedParameterJdbcTemplate().update("" +
                         "insert into declaration_data (id, declaration_template_id, department_report_period_id, state, tax_organ_code, kpp, " +
                         "   oktmo, asnu_id, knf_type_id, note, file_name, doc_state_id, manually_created, last_data_modified, adjust_negative_values, " +
-                        "   correction_num, tax_refund_reflection_mode, negative_income, negative_tax, negative_sums_sign, created_by) " +
+                        "   correction_num, tax_refund_reflection_mode, negative_income, negative_tax, negative_sums_sign, created_date, created_by) " +
                         "values (:id, :declaration_template_id, :department_report_period_id, :state, :tax_organ_code, :kpp, " +
                         "   :oktmo, :asnu_id, :knf_type_id, :note, :file_name, :doc_state_id, :manually_created, :last_data_modified, :adjust_negative_values, " +
-                        "   :correction_num, :tax_refund_reflection_mode, :negative_income, :negative_tax, :negative_sums_sign, :created_by)",
+                        "   :correction_num, :tax_refund_reflection_mode, :negative_income, :negative_tax, :negative_sums_sign, :created_date, :created_by)",
                 params);
 
         if (declarationData.getKnfType() != null && declarationData.getKnfType().equals(RefBookKnfType.BY_KPP)) {
