@@ -22,6 +22,7 @@ public class NdflRowEditChangelogBuilder {
     private BigDecimal rowNum;
     private Map<String, String> valuesByFieldBefore;
     private Map<String, String> valuesByFieldAfter;
+    public String resultMessage;
     private List<String> changedFields = new ArrayList<>();
 
     public NdflRowEditChangelogBuilder(long declarationDataId, int section, BigDecimal rowNum) {
@@ -72,8 +73,9 @@ public class NdflRowEditChangelogBuilder {
     public List<String> build() {
         List<String> changelog = new ArrayList<>();
         if (!changedFields.isEmpty()) {
-            changelog.add(0, "Для формы № " + declarationDataId + " внесены изменения в Разделе " + section +
-                    " в строке № " + rowNum + ", измененные значения: " + joinFields(changedFields));
+            resultMessage = "Для формы № " + declarationDataId + " внесены изменения в Разделе " + section +
+                    " в строке № " + rowNum + ", измененные значения: " + joinFields(changedFields);
+            changelog.add(resultMessage);
             for (String fieldName : changedFields) {
                 String valueBefore = valuesByFieldBefore.get(fieldName);
                 String valueAfter = valuesByFieldAfter.get(fieldName);

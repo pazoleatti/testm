@@ -2628,6 +2628,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     logger.info(message);
                 }
                 logBusinessService.logFormEvent(declarationDataId, FormDataEvent.NDFL_EDIT, logger.getLogId(), null, userInfo);
+                sendNotification(changelogBuilder.resultMessage, logger.getLogId(), userInfo.getUser().getId());
             }
             return new ActionResult(logEntryService.save(logger));
         } catch (Exception e) {
