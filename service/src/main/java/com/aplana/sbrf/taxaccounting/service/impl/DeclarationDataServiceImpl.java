@@ -39,7 +39,6 @@ import com.aplana.sbrf.taxaccounting.permissions.logging.TargetIdAndLogger;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.*;
-import com.aplana.sbrf.taxaccounting.service.util.NdflRowEditChangelogBuilder;
 import com.aplana.sbrf.taxaccounting.service.component.MoveToCreateFacade;
 import com.aplana.sbrf.taxaccounting.service.component.lock.locker.DeclarationLocker;
 import com.aplana.sbrf.taxaccounting.service.impl.declaration.edit.incomedate.DateEditor;
@@ -47,6 +46,7 @@ import com.aplana.sbrf.taxaccounting.service.impl.declaration.edit.incomedate.Da
 import com.aplana.sbrf.taxaccounting.service.impl.declaration.edit.incomedate.EditableDateField;
 import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import com.aplana.sbrf.taxaccounting.service.refbook.RefBookAsnuService;
+import com.aplana.sbrf.taxaccounting.service.util.NdflRowEditChangelogBuilder;
 import com.aplana.sbrf.taxaccounting.utils.DepartmentReportPeriodFormatter;
 import com.aplana.sbrf.taxaccounting.utils.ZipUtils;
 import com.google.common.collect.Lists;
@@ -362,7 +362,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         declarationDataDao.create(newDeclaration);
 
         if (writeAudit) {
-            logBusinessService.logFormEvent(newDeclaration.getId(), FormDataEvent.CREATE, logger.getLogId(), null, userInfo);
+            logBusinessService.create(new LogBusiness().declarationDataId(newDeclaration.getId()).event(FormDataEvent.CREATE)
+                    .logId(logger.getLogId()).logDate(newDeclaration.getCreatedDate()).user(userInfo.getUser()));
             auditService.add(FormDataEvent.CREATE, userInfo, newDeclaration, "Налоговая форма создана", null);
         }
     }

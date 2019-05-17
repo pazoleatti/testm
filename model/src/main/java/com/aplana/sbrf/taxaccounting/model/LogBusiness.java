@@ -4,6 +4,7 @@ package com.aplana.sbrf.taxaccounting.model;
 import lombok.Data;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * Модельный класс для хранения истории изменений
@@ -21,19 +22,11 @@ public class LogBusiness {
     /**
      * Событие
      */
-    private int eventId;
+    private FormDataEvent event;
     /**
      * Логин пользователя, инициировавшего событие
      */
-    private String userLogin;
-    /**
-     * Роли пользователя
-     */
-    private String roles;
-    /**
-     * Подразделение пользователя
-     */
-    private String userDepartmentName;
+    private TAUser user;
     /**
      * Идентификатор формы, к которой относится запись истории событий
      */
@@ -50,4 +43,59 @@ public class LogBusiness {
      * Идентификатор протокола операций
      */
     private String logId;
+
+    public String getUserLogin() {
+        return user.getId() == TAUser.SYSTEM_USER_ID ? user.getName() : user.getLogin();
+    }
+
+    public String getRoles() {
+        StringBuilder roles = new StringBuilder();
+        if (user != null) {
+            List<TARole> taRoles = user.getRoles();
+            for (int i = 0; i < taRoles.size(); i++) {
+                roles.append(taRoles.get(i).getName());
+                if (i != taRoles.size() - 1) {
+                    roles.append(", ");
+                }
+            }
+        }
+        return roles.toString();
+    }
+
+    // Fluent setters
+
+    public LogBusiness logDate(Date logDate) {
+        this.logDate = logDate;
+        return this;
+    }
+
+    public LogBusiness event(FormDataEvent event) {
+        this.event = event;
+        return this;
+    }
+
+    public LogBusiness user(TAUser user) {
+        this.user = user;
+        return this;
+    }
+
+    public LogBusiness declarationDataId(Long declarationDataId) {
+        this.declarationDataId = declarationDataId;
+        return this;
+    }
+
+    public LogBusiness personId(Long personId) {
+        this.personId = personId;
+        return this;
+    }
+
+    public LogBusiness note(String note) {
+        this.note = note;
+        return this;
+    }
+
+    public LogBusiness logId(String logId) {
+        this.logId = logId;
+        return this;
+    }
 }

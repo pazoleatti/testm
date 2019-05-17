@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 
+import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.LogBusinessDao;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.LogBusiness;
@@ -8,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.dto.LogBusinessDTO;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.RowMapper;
@@ -22,6 +24,9 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Repository
 public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
+
+    @Autowired
+    private DepartmentDao departmentDao;
 
     private RowMapper logBusinessDTORowMapper = new BeanPropertyRowMapper<>(LogBusinessDTO.class);
 
@@ -70,12 +75,12 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("id", id);
         params.addValue("log_date", logBusiness.getLogDate());
-        params.addValue("event_id", logBusiness.getEventId());
+        params.addValue("event_id", logBusiness.getEvent().getCode());
         params.addValue("user_login", logBusiness.getUserLogin());
         params.addValue("roles", StringUtils.substring(logBusiness.getRoles(), 0, 1000));
         params.addValue("declaration_data_id", logBusiness.getDeclarationDataId());
         params.addValue("person_id", logBusiness.getPersonId());
-        params.addValue("user_department_name", logBusiness.getUserDepartmentName());
+        params.addValue("user_department_name", departmentDao.getParentsHierarchyShortNames(logBusiness.getUser().getDepartmentId()));
         params.addValue("note", StringUtils.substring(logBusiness.getNote(), 0, 2000));
         params.addValue("log_id", logBusiness.getLogId());
 

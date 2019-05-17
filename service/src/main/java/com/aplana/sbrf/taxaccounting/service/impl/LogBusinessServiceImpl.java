@@ -5,11 +5,9 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.LogBusiness;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.TARole;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.dto.LogBusinessDTO;
-import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.LogBusinessService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -25,8 +23,6 @@ public class LogBusinessServiceImpl implements LogBusinessService {
 
     @Autowired
     private LogBusinessDao logBusinessDao;
-    @Autowired
-    private DepartmentService departmentService;
 
     @Override
     @Transactional
@@ -45,6 +41,12 @@ public class LogBusinessServiceImpl implements LogBusinessService {
     }
 
     @Override
+    @Transactional
+    public void create(LogBusiness logBusiness) {
+        logBusinessDao.create(logBusiness);
+    }
+
+    @Override
     public List<LogBusinessDTO> findAllByDeclarationId(long declarationId, PagingParams pagingParams) {
         return logBusinessDao.findAllByDeclarationId(declarationId, pagingParams);
     }
@@ -57,22 +59,11 @@ public class LogBusinessServiceImpl implements LogBusinessService {
 
     private LogBusiness makeLogBusiness(FormDataEvent event, String logId, String note, TAUser user) {
         LogBusiness log = new LogBusiness();
-        log.setEventId(event.getCode());
-        log.setUserLogin(user.getId() == TAUser.SYSTEM_USER_ID ? user.getName() : user.getLogin());
+        log.setEvent(event);
+        log.setUser(user);
         log.setLogDate(new Date());
         log.setLogId(logId);
         log.setNote(note);
-        log.setUserDepartmentName(departmentService.getParentsHierarchyShortNames(user.getDepartmentId()));
-
-        StringBuilder roles = new StringBuilder();
-        List<TARole> taRoles = user.getRoles();
-        for (int i = 0; i < taRoles.size(); i++) {
-            roles.append(taRoles.get(i).getName());
-            if (i != taRoles.size() - 1) {
-                roles.append(", ");
-            }
-        }
-        log.setRoles(roles.toString());
         return log;
     }
 }
