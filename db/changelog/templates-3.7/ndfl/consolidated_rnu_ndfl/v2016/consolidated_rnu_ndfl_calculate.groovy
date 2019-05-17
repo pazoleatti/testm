@@ -582,15 +582,15 @@ class Calculate extends AbstractScriptClass {
         allSourcesIdList.addAll(acceptedSources.get(Boolean.FALSE))
 
         sourceService.deleteDeclarationConsolidateInfo(declarationData.id)
-        sourceService.addDeclarationConsolidationInfo(declarationData.id, allSourcesIdList)
+        sourceService.addDeclarationConsolidationInfo(declarationData.id, acceptedSources.get(Boolean.TRUE))
 
-        Set<Long> allPrimariesExceptAccepted = []
+        Set<Long> allPrimariesExceptSources = []
         def tbWithChildren = departmentService.getAllChildren(declarationData.departmentId)
         for (def department : tbWithChildren) {
             def departmentPnfs = declarationService.findAllDeclarationData(DeclarationType.NDFL_PRIMARY, department.id, reportPeriod.id)
             for (def departmentPnf : departmentPnfs) {
                 if (!allSourcesIdList.contains(departmentPnf.id)) {
-                    allPrimariesExceptAccepted.add(departmentPnf.id)
+                    allPrimariesExceptSources.add(departmentPnf.id)
                 }
             }
         }
@@ -649,10 +649,10 @@ class Calculate extends AbstractScriptClass {
             }
         }
 
-        if (allPrimariesExceptAccepted) {
+        if (allPrimariesExceptSources) {
             logger.info("ПНФ из ТБ: \"${department.name}\" (и дочерних подразделений) не использованы в консолидации, так как не содержат операций, " +
                     "попадающих в период «${reportPeriod.taxPeriod.year}, ${reportPeriod.name}» и содержащих КПП/ОКТМО относящихся к указанному ТБ: " +
-                    "${allPrimariesExceptAccepted.join(", ")} (всего ${allPrimariesExceptAccepted.size()})")
+                    "${allPrimariesExceptSources.join(", ")} (всего ${allPrimariesExceptSources.size()})")
         }
 
     }
