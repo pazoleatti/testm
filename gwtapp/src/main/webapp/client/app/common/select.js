@@ -608,8 +608,8 @@
                 /**
                  * @description Инициализировать список с загрузкой действующих доступных ТБ
                  */
-                $scope.initAvailableTBSelect = function (departmentModel) {
-                    $scope.departmentsSelect = GetSelectOption.getBasicSingleSelectOptions(true, true);
+                $scope.initAvailableTBSelect = function (departmentModel, allowClear) {
+                    $scope.departmentsSelect = GetSelectOption.getBasicSingleSelectOptions(!!allowClear, true);
                     loadActiveAvailableTBs(departmentModel);
                 };
 
