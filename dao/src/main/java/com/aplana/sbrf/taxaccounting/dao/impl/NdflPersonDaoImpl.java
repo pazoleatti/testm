@@ -165,11 +165,22 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
     @Override
     public PagingResult<NdflPersonIncomeDTO> fetchPersonIncomeByParameters(NdflFilter filter, PagingParams pagingParams) {
+        String alias = "";
+        if ("inp".equals(pagingParams.getProperty())) {
+            alias = "np.";
+        } else if ("name".equals(pagingParams.getProperty())) {
+            alias = "rba.";
+        } else {
+            alias = "npi.";
+        }
+        String orderBy = String.format("order by %s %s", alias.concat(FormatUtils.convertToUnderlineStyle(pagingParams.getProperty())), pagingParams.getDirection());
+        String rowNumber = isSupportOver() ? ", row_number() over (" + orderBy + ") rn " : "";
+
         StringBuilder queryBuilder = new StringBuilder(
-                "select np.inp, rba.name as asnu_name, " + createColumns(NdflPersonIncome.COLUMNS, "outer_npi") +
+                "select np.inp, rba.name as asnu_name, " + createColumns(NdflPersonIncome.COLUMNS, "npi") + rowNumber +
                         " from NDFL_PERSON np " +
-                        " inner join NDFL_PERSON_INCOME outer_npi on outer_npi.ndfl_person_id = np.id " +
-                        " left join ref_book_asnu rba on outer_npi.asnu_id = rba.id" +
+                        " inner join NDFL_PERSON_INCOME npi on npi.ndfl_person_id = np.id " +
+                        " left join ref_book_asnu rba on npi.asnu_id = rba.id" +
                         " where np.declaration_data_id = :declarationDataId ");
 
         MapSqlParameterSource params = new MapSqlParameterSource("declarationDataId", filter.getDeclarationDataId());
@@ -177,54 +188,36 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         queryBuilder.append(getWhereByFilter(params, filter.getPerson()));
         appendSqlLikeCondition("operation_id", filter.getIncome().getOperationId(), queryBuilder, params);
         if (filter.getIncome().getAsnu() != null && !filter.getIncome().getAsnu().isEmpty()) {
-            queryBuilder.append("and ").append(SqlUtils.transformToSqlInStatementById("outer_npi.asnu_id", filter.getIncome().getAsnu()));
+            queryBuilder.append("and ").append(SqlUtils.transformToSqlInStatementById("npi.asnu_id", filter.getIncome().getAsnu()));
         }
         String incomeFilter = getWhereByFilter(params, filter.getIncome());
         String deductionFilter = getWhereByFilter(params, filter.getDeduction());
         String prepaymentFilter = getWhereByFilter(params, filter.getPrepayment());
-        if (!incomeFilter.isEmpty() || !deductionFilter.isEmpty() || !prepaymentFilter.isEmpty()) {
+        if (!incomeFilter.isEmpty()) {
+            queryBuilder.append(incomeFilter);
+        }
+        if (!deductionFilter.isEmpty() || !prepaymentFilter.isEmpty()) {
             queryBuilder.append(" and (ndfl_person_id, operation_id) in (");
-            if (!incomeFilter.isEmpty()) {
-                queryBuilder.append("select ndfl_person_id, operation_id from NDFL_PERSON_INCOME npi where npi.id = outer_npi.id and npi.ndfl_person_id = np.id ")
-                        .append(incomeFilter);
-            }
             if (!deductionFilter.isEmpty()) {
-                queryBuilder.append(!incomeFilter.isEmpty() ? " INTERSECT " : "");
                 queryBuilder.append("select ndfl_person_id, operation_id from NDFL_PERSON_DEDUCTION npd where npd.ndfl_person_id = np.id ")
                         .append(deductionFilter);
             }
             if (!prepaymentFilter.isEmpty()) {
-                queryBuilder.append(!incomeFilter.isEmpty() || !deductionFilter.isEmpty() ? " INTERSECT " : "");
+                queryBuilder.append(!deductionFilter.isEmpty() ? " INTERSECT " : "");
                 queryBuilder.append("select ndfl_person_id, operation_id from NDFL_PERSON_PREPAYMENT npp where npp.ndfl_person_id = np.id ")
                         .append(prepaymentFilter);
             }
             queryBuilder.append(")");
         }
 
-        String alias = "";
-        switch (pagingParams.getProperty()) {
-            case "inp": {
-                alias = "np.";
-                break;
-            }
-            case "name": {
-                alias = "rba.";
-                break;
-            }
-            default: {
-                alias = "outer_npi.";
-            }
-        }
-
         String query = queryBuilder.toString();
-
-        queryBuilder.insert(0, "select * from (select a.*, rownum rn from(");
-        String endQuery = new Formatter().format("order by %s %s) a) where rn > :startIndex and rowNum <= :count",
-                alias.concat(FormatUtils.convertToUnderlineStyle(pagingParams.getProperty())),
-                pagingParams.getDirection())
-                .toString();
-
-        queryBuilder.append(endQuery);
+        if (isSupportOver()) {
+            queryBuilder.insert(0, "select * from (");
+            queryBuilder.append(orderBy).append(") where rn > :startIndex and rownum <= :count");
+        } else {
+            queryBuilder.insert(0, "select * from (select a.*, rownum rn from(");
+            queryBuilder.append(orderBy).append(") a) where rn > :startIndex and rownum <= :count");
+        }
         params.addValue("startIndex", pagingParams.getStartIndex())
                 .addValue("count", pagingParams.getCount());
 
@@ -303,11 +296,22 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
     @Override
     public PagingResult<NdflPersonDeductionDTO> fetchPersonDeductionByParameters(NdflFilter filter, PagingParams pagingParams) {
+        String alias = "";
+        if ("inp".equals(pagingParams.getProperty())) {
+            alias = "np.";
+        } else if ("name".equals(pagingParams.getProperty())) {
+            alias = "rba.";
+        } else {
+            alias = "npd.";
+        }
+        String orderBy = String.format("order by %s %s", alias.concat(FormatUtils.convertToUnderlineStyle(pagingParams.getProperty())), pagingParams.getDirection());
+        String rowNumber = isSupportOver() ? ", row_number() over (" + orderBy + ") rn " : "";
+
         StringBuilder queryBuilder = new StringBuilder(
-                "select np.inp, rba.name as asnu_name, " + createColumns(NdflPersonDeduction.COLUMNS, "outer_npd") +
+                "select np.inp, rba.name as asnu_name, " + createColumns(NdflPersonDeduction.COLUMNS, "npd") + rowNumber +
                         " from ndfl_person np " +
-                        " inner join ndfl_person_deduction outer_npd on outer_npd.ndfl_person_id = np.id " +
-                        " left join ref_book_asnu rba on outer_npd.asnu_id = rba.id" +
+                        " inner join ndfl_person_deduction npd on npd.ndfl_person_id = np.id " +
+                        " left join ref_book_asnu rba on npd.asnu_id = rba.id" +
                         " where np.declaration_data_id = :declarationDataId ");
 
         MapSqlParameterSource params = new MapSqlParameterSource("declarationDataId", filter.getDeclarationDataId());
@@ -315,57 +319,38 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         queryBuilder.append(getWhereByFilter(params, filter.getPerson()));
         appendSqlLikeCondition("operation_id", filter.getIncome().getOperationId(), queryBuilder, params);
         if (filter.getIncome().getAsnu() != null && !filter.getIncome().getAsnu().isEmpty()) {
-            queryBuilder.append("and ").append(SqlUtils.transformToSqlInStatementById("outer_npd.asnu_id", filter.getIncome().getAsnu()));
+            queryBuilder.append("and ").append(SqlUtils.transformToSqlInStatementById("npd.asnu_id", filter.getIncome().getAsnu()));
         }
         String incomeFilter = getWhereByFilter(params, filter.getIncome());
         String deductionFilter = getWhereByFilter(params, filter.getDeduction());
         String prepaymentFilter = getWhereByFilter(params, filter.getPrepayment());
-        if (!incomeFilter.isEmpty() || !deductionFilter.isEmpty() || !prepaymentFilter.isEmpty()) {
+        if (!deductionFilter.isEmpty()) {
+            queryBuilder.append(deductionFilter);
+        }
+        if (!incomeFilter.isEmpty() || !prepaymentFilter.isEmpty()) {
             queryBuilder.append(" and (ndfl_person_id, operation_id) in (");
             if (!incomeFilter.isEmpty()) {
                 queryBuilder.append("select ndfl_person_id, operation_id from NDFL_PERSON_INCOME npi where npi.ndfl_person_id = np.id ")
                         .append(incomeFilter);
             }
-            if (!deductionFilter.isEmpty()) {
-                queryBuilder.append(!incomeFilter.isEmpty() ? " INTERSECT " : "");
-                queryBuilder.append("select ndfl_person_id, operation_id from NDFL_PERSON_DEDUCTION npd where npd.id = outer_npd.id and npd.ndfl_person_id = np.id ")
-                        .append(deductionFilter);
-            }
             if (!prepaymentFilter.isEmpty()) {
-                queryBuilder.append(!incomeFilter.isEmpty() || !deductionFilter.isEmpty() ? " INTERSECT " : "");
+                queryBuilder.append(!incomeFilter.isEmpty() ? " INTERSECT " : "");
                 queryBuilder.append("select ndfl_person_id, operation_id from NDFL_PERSON_PREPAYMENT npp where npp.ndfl_person_id = np.id ")
                         .append(prepaymentFilter);
             }
             queryBuilder.append(")");
         }
 
-        String alias = "";
-        switch (pagingParams.getProperty()) {
-            case "inp": {
-                alias = "np.";
-                break;
-            }
-            case "name": {
-                alias = "rba.";
-                break;
-            }
-            default: {
-                alias = "outer_npd.";
-            }
-        }
-
         String query = queryBuilder.toString();
-
-        queryBuilder.insert(0, "select * from (select a.*, rownum rn from(");
-        String endQuery = new Formatter().format("order by %s %s) a) where rn > :startIndex and rownum <= :count",
-                alias.concat(FormatUtils.convertToUnderlineStyle(pagingParams.getProperty())),
-                pagingParams.getDirection())
-                .toString();
-
-        queryBuilder.append(endQuery);
+        if (isSupportOver()) {
+            queryBuilder.insert(0, "select * from (");
+            queryBuilder.append(orderBy).append(") where rn > :startIndex and rownum <= :count");
+        } else {
+            queryBuilder.insert(0, "select * from (select a.*, rownum rn from(");
+            queryBuilder.append(orderBy).append(") a) where rn > :startIndex and rownum <= :count");
+        }
         params.addValue("startIndex", pagingParams.getStartIndex())
                 .addValue("count", pagingParams.getCount());
-
 
         List<NdflPersonDeductionDTO> ndflPersonDeductionList = getNamedParameterJdbcTemplate().query(queryBuilder.toString(),
                 params, new RowMapper<NdflPersonDeductionDTO>() {
@@ -425,11 +410,22 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
     @Override
     public PagingResult<NdflPersonPrepaymentDTO> fetchPersonPrepaymentByParameters(NdflFilter filter, PagingParams pagingParams) {
+        String alias = "";
+        if ("inp".equals(pagingParams.getProperty())) {
+            alias = "np.";
+        } else if ("name".equals(pagingParams.getProperty())) {
+            alias = "rba.";
+        } else {
+            alias = "npp.";
+        }
+        String orderBy = String.format("order by %s %s", alias.concat(FormatUtils.convertToUnderlineStyle(pagingParams.getProperty())), pagingParams.getDirection());
+        String rowNumber = isSupportOver() ? ", row_number() over (" + orderBy + ") rn " : "";
+
         StringBuilder queryBuilder = new StringBuilder(
-                "select np.inp, rba.name as asnu_name, " + createColumns(NdflPersonPrepayment.COLUMNS, "outer_npp") +
+                "select np.inp, rba.name as asnu_name, " + createColumns(NdflPersonPrepayment.COLUMNS, "npp") + rowNumber +
                         " from ndfl_person np" +
-                        " inner join ndfl_person_prepayment outer_npp on outer_npp.ndfl_person_id = np.id " +
-                        " left join ref_book_asnu rba on outer_npp.asnu_id = rba.id" +
+                        " inner join ndfl_person_prepayment npp on npp.ndfl_person_id = np.id " +
+                        " left join ref_book_asnu rba on npp.asnu_id = rba.id" +
                         " where np.declaration_data_id = :declarationDataId ");
 
         MapSqlParameterSource params = new MapSqlParameterSource("declarationDataId", filter.getDeclarationDataId());
@@ -437,12 +433,15 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         queryBuilder.append(getWhereByFilter(params, filter.getPerson()));
         appendSqlLikeCondition("operation_id", filter.getIncome().getOperationId(), queryBuilder, params);
         if (filter.getIncome().getAsnu() != null && !filter.getIncome().getAsnu().isEmpty()) {
-            queryBuilder.append("and ").append(SqlUtils.transformToSqlInStatementById("outer_npp.asnu_id", filter.getIncome().getAsnu()));
+            queryBuilder.append("and ").append(SqlUtils.transformToSqlInStatementById("npp.asnu_id", filter.getIncome().getAsnu()));
         }
         String incomeFilter = getWhereByFilter(params, filter.getIncome());
         String deductionFilter = getWhereByFilter(params, filter.getDeduction());
         String prepaymentFilter = getWhereByFilter(params, filter.getPrepayment());
-        if (!incomeFilter.isEmpty() || !deductionFilter.isEmpty() || !prepaymentFilter.isEmpty()) {
+        if (!prepaymentFilter.isEmpty()) {
+            queryBuilder.append(prepaymentFilter);
+        }
+        if (!incomeFilter.isEmpty() || !deductionFilter.isEmpty()) {
             queryBuilder.append(" and (ndfl_person_id, operation_id) in (");
             if (!incomeFilter.isEmpty()) {
                 queryBuilder.append("select ndfl_person_id, operation_id from NDFL_PERSON_INCOME npi where npi.ndfl_person_id = np.id ")
@@ -453,38 +452,17 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                 queryBuilder.append("select ndfl_person_id, operation_id from NDFL_PERSON_DEDUCTION npd where npd.ndfl_person_id = np.id ")
                         .append(deductionFilter);
             }
-            if (!prepaymentFilter.isEmpty()) {
-                queryBuilder.append(!incomeFilter.isEmpty() || !deductionFilter.isEmpty() ? " INTERSECT " : "");
-                queryBuilder.append("select ndfl_person_id, operation_id from NDFL_PERSON_PREPAYMENT npp where npp.id = outer_npp.id and npp.ndfl_person_id = np.id ")
-                        .append(prepaymentFilter);
-            }
             queryBuilder.append(")");
         }
 
-        String alias = "";
-        switch (pagingParams.getProperty()) {
-            case "inp": {
-                alias = "np.";
-                break;
-            }
-            case "name": {
-                alias = "rba.";
-                break;
-            }
-            default: {
-                alias = "outer_npp.";
-            }
-        }
-
         String query = queryBuilder.toString();
-
-        queryBuilder.insert(0, "select * from (select a.*, rownum rn from(");
-        String endQuery = new Formatter().format("order by %s %s) a) where rn > :startIndex and rownum <= :count",
-                alias.concat(FormatUtils.convertToUnderlineStyle(pagingParams.getProperty())),
-                pagingParams.getDirection())
-                .toString();
-
-        queryBuilder.append(endQuery);
+        if (isSupportOver()) {
+            queryBuilder.insert(0, "select * from (");
+            queryBuilder.append(orderBy).append(") where rn > :startIndex and rownum <= :count");
+        } else {
+            queryBuilder.insert(0, "select * from (select a.*, rownum rn from(");
+            queryBuilder.append(orderBy).append(") a) where rn > :startIndex and rownum <= :count");
+        }
         params.addValue("startIndex", pagingParams.getStartIndex())
                 .addValue("count", pagingParams.getCount());
 
@@ -695,14 +673,10 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         }
 
         String alias = "";
-        switch (pagingParams.getProperty()) {
-            case "name": {
-                alias = "rba.";
-                break;
-            }
-            default: {
-                alias = "np.";
-            }
+        if ("name".equals(pagingParams.getProperty())) {
+            alias = "rba.";
+        } else {
+            alias = "np.";
         }
         String query = queryBuilder.toString();
 
@@ -1681,7 +1655,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
 
-    //>-------------------------<The DAO row mappers>-----------------------------<
+//>-------------------------<The DAO row mappers>-----------------------------<
 
     private static final class NdflPersonRowMapper implements RowMapper<NdflPerson> {
         @Override
@@ -2185,6 +2159,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
             return person;
         }
+
     }
 
     @Override
