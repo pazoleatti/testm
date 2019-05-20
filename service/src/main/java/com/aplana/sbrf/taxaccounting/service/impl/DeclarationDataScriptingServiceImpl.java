@@ -8,7 +8,6 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.utils.ApplicationInfo;
-import groovy.lang.Binding;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -96,11 +95,7 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
 		if (!canExecuteScript(script, event)) {
             return false;
         }
-        DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declarationData.getDeclarationTemplateId());
-		if (scriptFilePath == null) {
-			declarationTemplate.setCreateScript(script);
-		}
-        return executeScript(userInfo, declarationTemplate, declarationData, scriptFilePath, event, logger, exchangeParams);
+        return executeScript(userInfo, script, declarationData, scriptFilePath, event, logger, exchangeParams);
     }
 
     @Override
@@ -109,13 +104,13 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
         return tx.executeInNewReadOnlyTransaction(new TransactionLogic<Boolean>() {
             @Override
             public Boolean execute() {
-                return executeScript(userInfo, declarationTemplate, null, null, event, logger, exchangeParams);
+                return executeScript(userInfo, declarationTemplate.getCreateScript(), null, null, event, logger, exchangeParams);
             }
         });
     }
 
-    private boolean executeScript(TAUserInfo userInfo, DeclarationTemplate declarationTemplate, DeclarationData declarationData, String scriptFilePath, FormDataEvent event, Logger logger,
-                          Map<String, Object> exchangeParams) {
+    private boolean executeScript(TAUserInfo userInfo, String script, DeclarationData declarationData, String scriptFilePath, FormDataEvent event, Logger logger,
+								  Map<String, Object> exchangeParams) {
 		// Биндим параметры для выполнения скрипта
 		Bindings b = getScriptEngine().createBindings();
 
@@ -151,7 +146,7 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
 		}
 
 		if (scriptFilePath == null || applicationInfo.isProductionMode()) {
-			executeScript(b, declarationTemplate.getCreateScript(), logger);
+			executeScript(b, script, logger);
 		} else {
 			executeLocalScript(toBinding(b), scriptFilePath, logger);
 		}
