@@ -211,7 +211,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             queryBuilder.append(")");
         }
 
-        String query = queryBuilder.toString();
+        String query = queryBuilder.toString().replace(rowNumber, "");
         if (isSupportOver()) {
             queryBuilder.insert(0, "select * from (");
             queryBuilder.append(orderBy).append(") where rn > :startIndex and rownum <= :count");
@@ -342,7 +342,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             queryBuilder.append(")");
         }
 
-        String query = queryBuilder.toString();
+        String query = queryBuilder.toString().replace(rowNumber, "");
         if (isSupportOver()) {
             queryBuilder.insert(0, "select * from (");
             queryBuilder.append(orderBy).append(") where rn > :startIndex and rownum <= :count");
@@ -456,7 +456,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             queryBuilder.append(")");
         }
 
-        String query = queryBuilder.toString();
+        String query = queryBuilder.toString().replace(rowNumber, "");
         if (isSupportOver()) {
             queryBuilder.insert(0, "select * from (");
             queryBuilder.append(orderBy).append(") where rn > :startIndex and rownum <= :count");
