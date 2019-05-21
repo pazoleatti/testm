@@ -6,8 +6,9 @@
             <!-- "Параметр" для "Общие параметры"-->
             <tr data-ng-if="commonParamTabActive">
                 <td>
-                    <label class="control-label">{{::'commonParam.grid.columnName.code' |
-                        translate}}:</label>
+                    <label class="control-label">
+                        {{::'commonParam.grid.columnName.code' | translate}}:
+                    </label>
                 </td>
                 <td data-ng-if="isCreate">
                     <div data-aplana-field>
@@ -17,8 +18,8 @@
                              data-ng-model="commonParam.param"
                              data-required>
                         </div>
-                        <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
-                            translate}}
+                        <div data-aplana-validator data-key='required'>
+                            {{::'common.validation.required' | translate}}
                         </div>
                     </div>
                 </td>
@@ -31,8 +32,9 @@
             <!-- "Значение" для "Общие параметры" -->
             <tr data-ng-if="commonParamTabActive">
                 <td>
-                    <label class="control-label" for="commonParamValue">{{::'commonParam.grid.columnName.value' |
-                        translate}}:</label>
+                    <label class="control-label" for="commonParamValue">
+                        {{::'commonParam.grid.columnName.value' | translate}}:
+                    </label>
                 </td>
                 <td>
                     <div data-aplana-field>
@@ -44,11 +46,11 @@
                                data-required
                                style="width: 450px"
                         />
-                        <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
-                            translate}}
+                        <div data-aplana-validator data-key='required'>
+                            {{::'common.validation.required' | translate}}
                         </div>
-                        <div data-aplana-validator data-key='maxlength'>{{::'field.ndfl.tooLongMessage'
-                            |translate}} 500
+                        <div data-aplana-validator data-key='maxlength'>
+                            {{::'field.ndfl.tooLongMessage' |translate}} 500
                         </div>
                     </div>
                 </td>
@@ -57,20 +59,21 @@
             <!-- "Тип задания" для "Параметры асинхронных заданий"-->
             <tr data-ng-if="asyncParamTabActive">
                 <td>
-                    <label class="control-label">{{::'asyncParam.modal.field.taskType' |
-                        translate}}:</label>
+                    <label class="control-label">
+                        {{::'asyncParam.modal.field.taskType' | translate}}:
+                    </label>
                 </td>
                 <td data-ng-if="asyncParam.param.name">
                     <span data-ng-bind="asyncParam.param.name" style="white-space: pre-line"></span>
                 </td>
-
             </tr>
 
             <!-- "Вид ограничения" для "Параметры асинхронных заданий" -->
             <tr data-ng-if="asyncParamTabActive">
                 <td>
-                    <label class="control-label">{{::'asyncParam.modal.field.limitKind' |
-                        translate}}:</label>
+                    <label class="control-label">
+                        {{::'asyncParam.modal.field.limitKind' | translate}}:
+                    </label>
                 </td>
                 <td data-ng-if="asyncParam.param.limitKind">
                     <span data-ng-bind="asyncParam.param.limitKind"></span>
@@ -80,8 +83,9 @@
             <!-- "Значение параметра "Ограничение на выполнение задания"" для "Параметры асинхронных заданий" -->
             <tr data-ng-if="asyncParamTabActive">
                 <td>
-                    <label class="control-label" for="asyncParamTaskLimit">{{::'asyncParam.modal.field.taskLimit' |
-                        translate}}:</label>
+                    <label class="control-label" for="asyncParamTaskLimit">
+                        {{::'asyncParam.modal.field.taskLimit' | translate}}:
+                    </label>
                 </td>
                 <td>
                     <div data-aplana-field>
@@ -98,10 +102,11 @@
             <!-- "Значение параметра "Ограничение на выполнение задания в очереди быстрых заданий"" для "Параметры асинхронных заданий" -->
             <tr data-ng-if="asyncParamTabActive">
                 <td>
-                    <label class="control-label" style="width: 250px; white-space: pre-line"
-                           for="asyncParamShortQueueLimit">{{::'asyncParam.modal.field.shortQueueLimit'
-                        |
-                        translate}}:</label>
+                    <label class="control-label"
+                           style="width: 250px; white-space: pre-line"
+                           for="asyncParamShortQueueLimit">
+                        {{::'asyncParam.modal.field.shortQueueLimit' | translate}}:
+                    </label>
                 </td>
                 <td>
                     <div data-aplana-field>
@@ -118,8 +123,7 @@
             <!-- "Параметр" для "Электронная почта" -->
             <tr data-ng-if="emailParamTabActive">
                 <td>
-                    <label class="control-label">{{::'emailParam.field.code' |
-                        translate}}:</label>
+                    <label class="control-label">{{::'emailParam.field.code' | translate}}:</label>
                 </td>
                 <td>
                     <span data-ng-bind="emailParam.code"></span>
@@ -129,8 +133,9 @@
             <!-- "Значение" для "Электронная почта" -->
             <tr data-ng-if="emailParamTabActive">
                 <td>
-                    <label class="control-label" for="emailParamValue">{{::'emailParam.field.value' |
-                        translate}}:</label>
+                    <label class="control-label" for="emailParamValue">
+                        {{::'emailParam.field.value' | translate}}:
+                    </label>
                 </td>
                 <td>
                     <div data-aplana-field>
@@ -147,8 +152,9 @@
             <!-- "Описание" для "Электронная почта" -->
             <tr data-ng-if="emailParamTabActive">
                 <td>
-                    <label class="control-label">{{::'emailParam.field.description' |
-                        translate}}:</label>
+                    <label class="control-label">
+                        {{::'emailParam.field.description' | translate}}:
+                    </label>
                 </td>
                 <td>
                     <span data-ng-bind="emailParam.description"></span>
