@@ -11,6 +11,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.consolidation.ConsolidationIncome;
 import com.aplana.sbrf.taxaccounting.model.consolidation.ConsolidationSourceDataSearchFilter;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.model.filter.FilterCondition;
 import com.aplana.sbrf.taxaccounting.model.filter.NdflFilter;
 import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonDeductionFilter;
 import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonFilter;
@@ -745,6 +746,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         appendSqlDateBetweenCondition("npi.tax_transfer_date", filter.getTransferDateFrom(), filter.getTransferDateTo(), filterBuilder, params);
         appendSqlDateBetweenCondition("npi.payment_date", filter.getPaymentDateFrom(), filter.getPaymentDateTo(), filterBuilder, params);
         appendSqlLikeCondition("npi.payment_number", filter.getNumberPaymentOrder(), filterBuilder, params);
+        appendCondition("npi.refound_tax", filter.getTaxRefundCondition(), filterBuilder, params);
 
         if (!filter.getUrmList().isEmpty() && !filter.getUrmList().containsAll(asList(URM.values()))) {
             List<URM> urmList = filter.getUrmList();
@@ -833,6 +835,29 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             String paramName = column.replace('.', '_');
             queryBuilder.append("and ").append(column).append(" = :").append(paramName).append(" ");
             params.addValue(paramName, Integer.valueOf(value));
+        }
+    }
+
+    private void appendCondition(String column, FilterCondition condition, StringBuilder queryBuilder, MapSqlParameterSource params) {
+        if (condition != null) {
+            if (condition.getOperator() == FilterCondition.OperatorEnum.FILLED) {
+                queryBuilder.append("and ").append(column).append(" is not null ");
+            } else if (condition.getOperator() == FilterCondition.OperatorEnum.BLANK) {
+                queryBuilder.append("and ").append(column).append(" is null ");
+            }
+            if (condition.getArgument2() != null) {
+                String paramName = column.replace('.', '_');
+                if (condition.getOperator() == FilterCondition.OperatorEnum.HIGHER) {
+                    queryBuilder.append("and ").append(column).append(" > :").append(paramName).append(" ");
+                } else if (condition.getOperator() == FilterCondition.OperatorEnum.LOWER) {
+                    queryBuilder.append("and ").append(column).append(" < :").append(paramName).append(" ");
+                } else if (condition.getOperator() == FilterCondition.OperatorEnum.EQUAL) {
+                    queryBuilder.append("and ").append(column).append(" = :").append(paramName).append(" ");
+                } else if (condition.getOperator() == FilterCondition.OperatorEnum.UNEQUAL) {
+                    queryBuilder.append("and ").append(column).append(" != :").append(paramName).append(" ");
+                }
+                params.addValue(paramName, condition.getArgument2());
+            }
         }
     }
 

@@ -697,7 +697,9 @@ button.btn.btn-default.ng-binding {
   .form-control {
     padding: 1px 5px;
     min-height: 25px;
-    box-shadow: inset 2px 2px 0 0 #fff;
+    &:not([disabled]) {
+      box-shadow: inset 2px 2px 0 0 #fff;
+    }
     &:focus {
       background-color: #fff;
       border: solid 1px #6ec151;

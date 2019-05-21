@@ -254,7 +254,12 @@
 
                 $scope.searchFilter = {
                     ajaxFilter: [],
-                    params: {person: {}, income: {}, deduction: {}, prepayment: {}},
+                    params: {
+                        person: {},
+                        income: {taxRefundCondition: {condition: true}},
+                        deduction: {},
+                        prepayment: {}
+                    },
                     filterName: 'ndflFilterForDec' + $stateParams.declarationDataId
                 };
 
@@ -271,10 +276,21 @@
                         isEmpty($scope.ndflFilter.deduction) && isEmpty($scope.ndflFilter.prepayment));
                 };
 
+                // Стирает значение если выбран унарный оператор
+                $scope.$watch('searchFilter.params.income.taxRefundCondition.operator', function () {
+                    if ($scope.searchFilter.params.income.taxRefundCondition.operator && $scope.searchFilter.params.income.taxRefundCondition.operator.unary) {
+                        $scope.searchFilter.params.income.taxRefundCondition.argument2 = undefined;
+                    }
+                });
+                // Возвращяет признак того, что объект незаполнен
                 function isEmpty(object) {
                     return Object.keys(object).every(function (key) {
-                        return !object[key];
+                        return !object[key] || object[key].condition && isFilterConditionEmpty(object[key]) || angular.isObject(object[key]) && isEmpty(object[key]);
                     });
+                }
+                // Возвращяет признак того, что объект, задающий условие для фильтрации, незаполнен
+                function isFilterConditionEmpty(filterCondition) {
+                    return !filterCondition.operator || !filterCondition.operator.unary && !filterCondition.argument2;
                 }
 
                 /**
@@ -282,7 +298,12 @@
                  */
                 $scope.searchFilter.resetFilterParams = function () {
                     /* очистка всех инпутов на форме */
-                    $scope.searchFilter.params = {person: {}, income: {}, deduction: {}, prepayment: {}};
+                    $scope.searchFilter.params = {
+                        person: {},
+                        income: {taxRefundCondition: {condition: true}},
+                        deduction: {},
+                        prepayment: {}
+                    };
                 };
 
                 /**
@@ -304,6 +325,11 @@
                         filter.income.urmList = filter.income.urmList.map(function (urm) {
                             return urm.enumName;
                         });
+                    }
+                    if (!isFilterConditionEmpty(filter.income.taxRefundCondition)) {
+                        filter.income.taxRefundCondition.operator = filter.income.taxRefundCondition.operator.enumName;
+                    } else {
+                        filter.income.taxRefundCondition.operator = undefined;
                     }
                     return filter;
                 }

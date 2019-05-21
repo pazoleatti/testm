@@ -93,6 +93,10 @@ public class NdflPersonIncomeFilter {
      * Номер платежного поручения
      */
     private String numberPaymentOrder;
+    /**
+     * Условие для возвращенного налога
+     */
+    private FilterCondition taxRefundCondition;
 
     /**
      * Данные УРМ

@@ -359,6 +359,14 @@
                 3: "Отправлено",
                 4: "Получено",
                 5: "Дубликат"
+            },
+            OPERATOR: {
+                FILLED: {id: 1, name: 'Заполнено', enumName: 'FILLED', unary: true},
+                BLANK: {id: 2, name: 'Не заполнено', enumName: 'BLANK', unary: true},
+                HIGHER: {id: 3, name: 'Больше', enumName: 'HIGHER'},
+                LOWER: {id: 4, name: 'Меньше', enumName: 'LOWER'},
+                EQUAL: {id: 5, name: 'Равно', enumName: 'EQUAL'},
+                UNEQUAL: {id: 6, name: 'Не равно', enumName: 'UNEQUAL'}
             }
         });
 }());

@@ -1,5 +1,5 @@
 <div data-aplana-collapse data-label="'ndfl.filter.incomes' | translate">
-    <div class="ndfl-subfilter row-fluid">
+    <div class="ndfl-subfilter nowrap-select row-fluid">
         <div class="span4">
             <!--ID операции-->
             <div class="row-fluid form-group">
@@ -163,6 +163,29 @@
                            placeholder="{{'filter.placeholder.search' | translate}}"
                            type="text" class="form-control"
                            title="{{searchFilter.params.income.numberPaymentOrder}}"/>
+                </div>
+            </div>
+            <!--Возвращенный налог-->
+            <div class="row-fluid form-group">
+                <div class="span4">
+                    <label class="control-label" style="min-width: 113px;">
+                        {{::'title.taxRefund' | translate}}:
+                    </label>
+                </div>
+                <div class="span8 row-fluid form-group">
+                    <div class="span7">
+                        <div data-ng-controller="SelectFromArrayCtrl" style="width: 100%;"
+                             data-ui-select2="selectFromArray.options"
+                             data-ng-model="searchFilter.params.income.taxRefundCondition.operator"
+                             data-ng-init="initBasicSingleSelectFromArray(APP_CONSTANTS.OPERATOR, true)">
+                        </div>
+                    </div>
+                    <div class="span5">
+                        <input data-ng-model="searchFilter.params.income.taxRefundCondition.argument2"
+                               type="text" class="form-control"
+                               data-ng-pattern="patterns.number"
+                               data-ng-disabled="searchFilter.params.income.taxRefundCondition.operator.unary"/>
+                    </div>
                 </div>
             </div>
         </div>

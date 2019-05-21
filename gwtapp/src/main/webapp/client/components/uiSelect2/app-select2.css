@@ -196,3 +196,7 @@
 .select2-container .select2-choice > .select2-chosen {
     white-space: normal;
 }
+
+.nowrap-select .select2-container .select2-choice > .select2-chosen {
+    white-space: nowrap;
+}

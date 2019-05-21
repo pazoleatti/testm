@@ -11,6 +11,7 @@ import com.aplana.sbrf.taxaccounting.model.URM;
 import com.aplana.sbrf.taxaccounting.model.consolidation.ConsolidationIncome;
 import com.aplana.sbrf.taxaccounting.model.consolidation.ConsolidationSourceDataSearchFilter;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.model.filter.FilterCondition;
 import com.aplana.sbrf.taxaccounting.model.filter.NdflFilter;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction;
@@ -42,6 +43,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import static com.aplana.sbrf.taxaccounting.model.filter.FilterCondition.OperatorEnum.*;
 import static com.google.common.collect.Iterables.concat;
 import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Arrays.asList;
@@ -403,6 +405,72 @@ public class NdflPersonDaoTest {
     }
 
     @Test
+    public void testFindPersonIncomeByParametersTaxRefundFilled() {
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(1);
+        filter.getIncome().setTaxRefundCondition(new FilterCondition(FILLED));
+
+        PagingParams pagingParams = pagingParams(1, 100, "asc", "refound_tax");
+        List<NdflPersonIncomeDTO> result = ndflPersonDao.fetchPersonIncomeByParameters(filter, pagingParams);
+        assertEquals(2, result.size());
+    }
+
+    @Test
+    public void testFindPersonIncomeByParametersTaxRefundBlank() {
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(1);
+        filter.getIncome().setTaxRefundCondition(new FilterCondition(BLANK));
+
+        PagingParams pagingParams = pagingParams(1, 100, "asc", "refound_tax");
+        List<NdflPersonIncomeDTO> result = ndflPersonDao.fetchPersonIncomeByParameters(filter, pagingParams);
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    public void testFindPersonIncomeByParametersTaxRefundHigher() {
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(1);
+        filter.getIncome().setTaxRefundCondition(new FilterCondition(HIGHER, new BigDecimal(30)));
+
+        PagingParams pagingParams = pagingParams(1, 100, "asc", "refound_tax");
+        List<NdflPersonIncomeDTO> result = ndflPersonDao.fetchPersonIncomeByParameters(filter, pagingParams);
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    public void testFindPersonIncomeByParametersTaxRefundLower() {
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(1);
+        filter.getIncome().setTaxRefundCondition(new FilterCondition(LOWER, new BigDecimal(31)));
+
+        PagingParams pagingParams = pagingParams(1, 100, "asc", "refound_tax");
+        List<NdflPersonIncomeDTO> result = ndflPersonDao.fetchPersonIncomeByParameters(filter, pagingParams);
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    public void testFindPersonIncomeByParametersTaxRefundEqual() {
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(1);
+        filter.getIncome().setTaxRefundCondition(new FilterCondition(EQUAL, new BigDecimal(30)));
+
+        PagingParams pagingParams = pagingParams(1, 100, "asc", "refound_tax");
+        List<NdflPersonIncomeDTO> result = ndflPersonDao.fetchPersonIncomeByParameters(filter, pagingParams);
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    public void testFindPersonIncomeByParametersTaxRefundUnequal() {
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(1);
+        filter.getIncome().setTaxRefundCondition(new FilterCondition(UNEQUAL, new BigDecimal(29)));
+
+        PagingParams pagingParams = pagingParams(1, 100, "asc", "refound_tax");
+        List<NdflPersonIncomeDTO> result = ndflPersonDao.fetchPersonIncomeByParameters(filter, pagingParams);
+        assertEquals(2, result.size());
+    }
+
+    @Test
     public void testFindPersonIncomeByParametersSortByAccruedDate() {
         NdflFilter filter = new NdflFilter();
         filter.setDeclarationDataId(1);
@@ -511,7 +579,7 @@ public class NdflPersonDaoTest {
 
         PagingParams pagingParams = pagingParams(1, 100, "desc", "refoundTax");
         List<NdflPersonIncomeDTO> result = ndflPersonDao.fetchPersonIncomeByParameters(filter, pagingParams);
-        assertEquals("2", result.get(0).getOperationId());
+        assertEquals("3", result.get(0).getOperationId());
     }
 
     @Test
