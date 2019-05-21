@@ -40,7 +40,7 @@
                 }
 
                 function isFilterParamsEquals(params1, params2) {
-                    return (!params1.department && !params2.department || params1.department.id === params2.department.id) &&
+                    return (params1.department ? params1.department.id : null) === (params2.department ? params2.department.id : null) &&
                         params1.relevance.id === params2.relevance.id &&
                         params1.relevanceDate === params2.relevanceDate &&
                         (!params1.kpp && !params2.kpp || params1.kpp === params2.kpp) &&
@@ -49,7 +49,7 @@
                 }
 
                 $scope.searchFilter.isClearByFilterParams = function () {
-                    $scope.searchFilter.isClear = $scope.searchFilter.params.department && !isFilterParamsEquals($scope.searchFilter.params, getDefaultFilterParams());
+                    $scope.searchFilter.isClear = !isFilterParamsEquals($scope.searchFilter.params, getDefaultFilterParams());
                 };
 
                 $scope.searchFilter.resetFilterParams = function () {
