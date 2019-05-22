@@ -1,7 +1,7 @@
 <div data-ng-controller="CommonFilterCtrl">
     <div class="grid-filter">
         <div data-aplana-collapse data-is-collapsed="searchFilter.hideExtendedFilter"
-             data-label="(!searchFilter.isClear ? 'filterPanelLabel' : 'filterPanelLabel.set') | translate">
+             data-label="(searchFilter.isEmpty ? 'filterPanelLabel' : 'filterPanelLabel.set') | translate">
             <form class="form-horizontal info-wrapper flex-row" role="form" data-aplana-submit-valid="submitSearch()" novalidate>
                 <div class="flex-fill flex-row" style="margin-right: 60px;">
                     <div style="flex: 5;">
