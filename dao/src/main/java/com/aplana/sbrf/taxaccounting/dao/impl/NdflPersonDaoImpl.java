@@ -176,10 +176,9 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             alias = "npi.";
         }
         String orderBy = String.format("order by %s %s", alias.concat(FormatUtils.convertToUnderlineStyle(pagingParams.getProperty())), pagingParams.getDirection());
-        String rowNumber = isSupportOver() ? ", row_number() over (" + orderBy + ") rn " : "";
 
         StringBuilder queryBuilder = new StringBuilder(
-                "select np.inp, rba.name as asnu_name, " + createColumns(NdflPersonIncome.COLUMNS, "npi") + rowNumber +
+                "select np.inp, rba.name as asnu_name, " + createColumns(NdflPersonIncome.COLUMNS, "npi") +
                         " from NDFL_PERSON np " +
                         " inner join NDFL_PERSON_INCOME npi on npi.ndfl_person_id = np.id " +
                         " left join ref_book_asnu rba on npi.asnu_id = rba.id" +
@@ -212,14 +211,9 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             queryBuilder.append(")");
         }
 
-        String query = queryBuilder.toString().replace(rowNumber, "");
-        if (isSupportOver()) {
-            queryBuilder.insert(0, "select * from (");
-            queryBuilder.append(orderBy).append(") where rn > :startIndex and rn <= :count");
-        } else {
-            queryBuilder.insert(0, "select * from (select a.*, rownum rn from(");
-            queryBuilder.append(orderBy).append(") a) where rn > :startIndex and rownum <= :count");
-        }
+        String query = queryBuilder.toString();
+        queryBuilder.insert(0, "select * from (select a.*, rownum rn from(");
+        queryBuilder.append(orderBy).append(") a) where rn > :startIndex and rownum <= :count");
         params.addValue("startIndex", pagingParams.getStartIndex())
                 .addValue("count", pagingParams.getCount());
 
