@@ -166,6 +166,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
     @Override
     public PagingResult<NdflPersonIncomeDTO> fetchPersonIncomeByParameters(NdflFilter filter, PagingParams pagingParams) {
+        long start = System.currentTimeMillis();
         String alias = "";
         if ("inp".equals(pagingParams.getProperty())) {
             alias = "np.";
@@ -222,6 +223,8 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         params.addValue("startIndex", pagingParams.getStartIndex())
                 .addValue("count", pagingParams.getCount());
 
+        System.out.println("query rows - " + queryBuilder.toString());
+        System.out.println("query params - " + params.getValues());
         List<NdflPersonIncomeDTO> ndflPersonIncomeList = getNamedParameterJdbcTemplate().query(queryBuilder.toString(),
                 params,
                 new RowMapper<NdflPersonIncomeDTO>() {
@@ -267,8 +270,11 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                         return personIncome;
                     }
                 });
+        System.out.println("rows - " + (System.currentTimeMillis() - start));
 
         int totalCount = getNamedParameterJdbcTemplate().queryForObject("select count(*) from (" + query + ")", params, Integer.class);
+        System.out.println("query total - " + ("select count(*) from (" + query + ")"));
+        System.out.println("total - " + (System.currentTimeMillis() - start));
 
         return new PagingResult<>(ndflPersonIncomeList, totalCount);
     }

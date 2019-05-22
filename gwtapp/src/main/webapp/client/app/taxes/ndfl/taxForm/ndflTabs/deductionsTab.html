@@ -1,9 +1,11 @@
 <div id="deductionsGridContainer" data-ng-controller="deductionCtrl" style="height: 100%; padding: 12px;">
-    <div class="full-height-grid" data-aplana-grid style="height: 100%;"
+    <div id="deductionTable"
+         class="flex-grid"
+         data-aplana-grid
+         style="height: 100%;"
          data-grid-fill-space="true"
          data-grid-options="deductionGrid.options"
          data-init-grid="deductionGrid.init(ctrl)"
          data-grid-ctrl="deductionGrid.ctrl"
-         data-ng-model="deductionGrid.value"
-         id="deductionTable"></div>
+         data-ng-model="deductionGrid.value"></div>
 </div>
