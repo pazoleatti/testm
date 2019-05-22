@@ -30,6 +30,7 @@
                     hideExtendedFilter: false
                 };
 
+                // Фильтр по-умолчанию
                 function getDefaultFilterParams() {
                     return {
                         department: defaultDepartment,
@@ -48,14 +49,21 @@
                         (!params1.taxOrganCode && !params2.taxOrganCode || params1.taxOrganCode === params2.taxOrganCode);
                 }
 
+                function isEmpty(params) {
+                    return !params.department && (params.relevance.id == APP_CONSTANTS.DEPARTMENT_CONFIG_RELEVANCE_SELECT.ALL || !params.relevanceDate) &&
+                        !params.kpp && !params.oktmo && !params.taxOrganCode;
+                }
+
+                // Определение доступности кнопки "Сбросить"
                 $scope.searchFilter.isClearByFilterParams = function () {
                     $scope.searchFilter.isClear = !isFilterParamsEquals($scope.searchFilter.params, getDefaultFilterParams());
+                    $scope.searchFilter.isEmpty = isEmpty($scope.searchFilter.params);
                 };
-
+                // Сброс фильтра
                 $scope.searchFilter.resetFilterParams = function () {
                     $scope.searchFilter.params = getDefaultFilterParams();
                 };
-
+                // Определение подразделения по-умолчанию
                 var unwatchDepartment = $scope.$watch("searchFilter.params.department", function (department) {
                     if (department) {
                         defaultDepartment = department;

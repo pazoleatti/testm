@@ -214,7 +214,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         String query = queryBuilder.toString().replace(rowNumber, "");
         if (isSupportOver()) {
             queryBuilder.insert(0, "select * from (");
-            queryBuilder.append(orderBy).append(") where rn > :startIndex and rownum <= :count");
+            queryBuilder.append(orderBy).append(") where rn > :startIndex and rn <= :count");
         } else {
             queryBuilder.insert(0, "select * from (select a.*, rownum rn from(");
             queryBuilder.append(orderBy).append(") a) where rn > :startIndex and rownum <= :count");
