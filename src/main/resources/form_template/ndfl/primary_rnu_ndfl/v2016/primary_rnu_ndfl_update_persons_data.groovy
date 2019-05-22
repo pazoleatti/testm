@@ -296,7 +296,7 @@ class UpdatePersonsData extends AbstractScriptClass {
      * @return  сообщение для {@code com.aplana.sbrf.taxaccounting.model.log.Logger}
      */
     LogEntry createLogMessage(String personInfo, List<String> updateInfo) {
-        return new LogEntry(LogLevel.INFO, String.format("Обновлены данные у ФЛ: %s. Обновлены поля: %s",
+        return new LogEntry(LogLevel.INFO, String.format("Обновлены данные физического лица: %s. Изменены значения параметров: %s",
                 personInfo,
                 updateInfo.join(", ")))
     }
