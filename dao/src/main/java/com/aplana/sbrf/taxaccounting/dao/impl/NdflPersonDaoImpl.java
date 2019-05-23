@@ -166,17 +166,6 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
     @Override
     public PagingResult<NdflPersonIncomeDTO> fetchPersonIncomeByParameters(NdflFilter filter, PagingParams pagingParams) {
-        long start = System.currentTimeMillis();
-        String alias = "";
-        if ("inp".equals(pagingParams.getProperty())) {
-            alias = "np.";
-        } else if ("name".equals(pagingParams.getProperty())) {
-            alias = "rba.";
-        } else {
-            alias = "npi.";
-        }
-        String orderBy = String.format("order by %s %s", alias.concat(FormatUtils.convertToUnderlineStyle(pagingParams.getProperty())), pagingParams.getDirection());
-
         StringBuilder queryBuilder = new StringBuilder(
                 "select np.inp, rba.name as asnu_name, " + createColumns(NdflPersonIncome.COLUMNS, "npi") +
                         " from NDFL_PERSON np " +
@@ -212,13 +201,21 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         }
 
         String query = queryBuilder.toString();
+        String alias = "";
+        if ("inp".equals(pagingParams.getProperty())) {
+            alias = "np.";
+        } else if ("name".equals(pagingParams.getProperty())) {
+            alias = "rba.";
+        } else {
+            alias = "npi.";
+        }
+        String orderBy = String.format("order by %s %s", alias.concat(FormatUtils.convertToUnderlineStyle(pagingParams.getProperty())), pagingParams.getDirection());
+
         queryBuilder.insert(0, "select * from (select a.*, rownum rn from(");
         queryBuilder.append(orderBy).append(") a) where rn > :startIndex and rownum <= :count");
         params.addValue("startIndex", pagingParams.getStartIndex())
                 .addValue("count", pagingParams.getCount());
 
-        System.out.println("query rows - " + queryBuilder.toString());
-        System.out.println("query params - " + params.getValues());
         List<NdflPersonIncomeDTO> ndflPersonIncomeList = getNamedParameterJdbcTemplate().query(queryBuilder.toString(),
                 params,
                 new RowMapper<NdflPersonIncomeDTO>() {
@@ -264,11 +261,8 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                         return personIncome;
                     }
                 });
-        System.out.println("rows - " + (System.currentTimeMillis() - start));
 
         int totalCount = getNamedParameterJdbcTemplate().queryForObject("select count(*) from (" + query + ")", params, Integer.class);
-        System.out.println("query total - " + ("select count(*) from (" + query + ")"));
-        System.out.println("total - " + (System.currentTimeMillis() - start));
 
         return new PagingResult<>(ndflPersonIncomeList, totalCount);
     }
@@ -297,19 +291,8 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
     @Override
     public PagingResult<NdflPersonDeductionDTO> fetchPersonDeductionByParameters(NdflFilter filter, PagingParams pagingParams) {
-        String alias = "";
-        if ("inp".equals(pagingParams.getProperty())) {
-            alias = "np.";
-        } else if ("name".equals(pagingParams.getProperty())) {
-            alias = "rba.";
-        } else {
-            alias = "npd.";
-        }
-        String orderBy = String.format("order by %s %s", alias.concat(FormatUtils.convertToUnderlineStyle(pagingParams.getProperty())), pagingParams.getDirection());
-        String rowNumber = isSupportOver() ? ", row_number() over (" + orderBy + ") rn " : "";
-
         StringBuilder queryBuilder = new StringBuilder(
-                "select np.inp, rba.name as asnu_name, " + createColumns(NdflPersonDeduction.COLUMNS, "npd") + rowNumber +
+                "select np.inp, rba.name as asnu_name, " + createColumns(NdflPersonDeduction.COLUMNS, "npd") +
                         " from ndfl_person np " +
                         " inner join ndfl_person_deduction npd on npd.ndfl_person_id = np.id " +
                         " left join ref_book_asnu rba on npd.asnu_id = rba.id" +
@@ -342,14 +325,19 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             queryBuilder.append(")");
         }
 
-        String query = queryBuilder.toString().replace(rowNumber, "");
-        if (isSupportOver()) {
-            queryBuilder.insert(0, "select * from (");
-            queryBuilder.append(orderBy).append(") where rn > :startIndex and rownum <= :count");
+        String query = queryBuilder.toString();
+        String alias = "";
+        if ("inp".equals(pagingParams.getProperty())) {
+            alias = "np.";
+        } else if ("name".equals(pagingParams.getProperty())) {
+            alias = "rba.";
         } else {
-            queryBuilder.insert(0, "select * from (select a.*, rownum rn from(");
-            queryBuilder.append(orderBy).append(") a) where rn > :startIndex and rownum <= :count");
+            alias = "npd.";
         }
+        String orderBy = String.format("order by %s %s", alias.concat(FormatUtils.convertToUnderlineStyle(pagingParams.getProperty())), pagingParams.getDirection());
+
+        queryBuilder.insert(0, "select * from (select a.*, rownum rn from(");
+        queryBuilder.append(orderBy).append(") a) where rn > :startIndex and rownum <= :count");
         params.addValue("startIndex", pagingParams.getStartIndex())
                 .addValue("count", pagingParams.getCount());
 
@@ -411,19 +399,8 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
     @Override
     public PagingResult<NdflPersonPrepaymentDTO> fetchPersonPrepaymentByParameters(NdflFilter filter, PagingParams pagingParams) {
-        String alias = "";
-        if ("inp".equals(pagingParams.getProperty())) {
-            alias = "np.";
-        } else if ("name".equals(pagingParams.getProperty())) {
-            alias = "rba.";
-        } else {
-            alias = "npp.";
-        }
-        String orderBy = String.format("order by %s %s", alias.concat(FormatUtils.convertToUnderlineStyle(pagingParams.getProperty())), pagingParams.getDirection());
-        String rowNumber = isSupportOver() ? ", row_number() over (" + orderBy + ") rn " : "";
-
         StringBuilder queryBuilder = new StringBuilder(
-                "select np.inp, rba.name as asnu_name, " + createColumns(NdflPersonPrepayment.COLUMNS, "npp") + rowNumber +
+                "select np.inp, rba.name as asnu_name, " + createColumns(NdflPersonPrepayment.COLUMNS, "npp") +
                         " from ndfl_person np" +
                         " inner join ndfl_person_prepayment npp on npp.ndfl_person_id = np.id " +
                         " left join ref_book_asnu rba on npp.asnu_id = rba.id" +
@@ -456,14 +433,19 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             queryBuilder.append(")");
         }
 
-        String query = queryBuilder.toString().replace(rowNumber, "");
-        if (isSupportOver()) {
-            queryBuilder.insert(0, "select * from (");
-            queryBuilder.append(orderBy).append(") where rn > :startIndex and rownum <= :count");
+        String query = queryBuilder.toString();
+        String alias = "";
+        if ("inp".equals(pagingParams.getProperty())) {
+            alias = "np.";
+        } else if ("name".equals(pagingParams.getProperty())) {
+            alias = "rba.";
         } else {
-            queryBuilder.insert(0, "select * from (select a.*, rownum rn from(");
-            queryBuilder.append(orderBy).append(") a) where rn > :startIndex and rownum <= :count");
+            alias = "npp.";
         }
+        String orderBy = String.format("order by %s %s", alias.concat(FormatUtils.convertToUnderlineStyle(pagingParams.getProperty())), pagingParams.getDirection());
+
+        queryBuilder.insert(0, "select * from (select a.*, rownum rn from(");
+        queryBuilder.append(orderBy).append(") a) where rn > :startIndex and rownum <= :count");
         params.addValue("startIndex", pagingParams.getStartIndex())
                 .addValue("count", pagingParams.getCount());
 
