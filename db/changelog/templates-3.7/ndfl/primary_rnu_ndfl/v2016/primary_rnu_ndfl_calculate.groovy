@@ -967,7 +967,6 @@ class Calculate extends AbstractScriptClass {
             updatePrimaryToRefBookPersonReferences(updatePersonReferenceList)
         }
 
-        updatePersonList.sort {RegistryPerson a, RegistryPerson b -> a.id <=> b.id}
         if (!updatePersonList.isEmpty()) {
             personService.updatePersons(new ArrayList<NaturalPerson>(updatePersonList))
         }
