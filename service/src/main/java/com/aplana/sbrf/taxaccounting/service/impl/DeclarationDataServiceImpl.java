@@ -2615,7 +2615,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             NdflPersonIncome income = incomeDTO.toIncome();
 
             NdflPersonIncome incomeBeforeUpdate = ndflPersonDao.fetchOneNdflPersonIncome(income.getId());
-            NdflRowEditChangelogBuilder changelogBuilder = new NdflRowEditChangelogBuilder(declarationDataId, incomeBeforeUpdate, income);
+            NdflRowEditChangelogBuilder changelogBuilder = new NdflRowEditChangelogBuilder(incomeBeforeUpdate, income);
             if (changelogBuilder.hasChanges()) {
                 ndflPersonDao.updateOneNdflIncome(income, userInfo);
                 reportService.deleteDec(singletonList(declarationDataId), asList(DeclarationReportType.SPECIFIC_REPORT_DEC, DeclarationReportType.EXCEL_DEC));
@@ -2623,12 +2623,16 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 sortPersonRows(changedPersonIds);
 
                 NdflPersonIncome incomeAfterUpdate = ndflPersonDao.fetchOneNdflPersonIncome(income.getId());
-                changelogBuilder.setRowNum(incomeAfterUpdate.getRowNum());
-                for (String message : changelogBuilder.build()) {
+                for (String message : changelogBuilder.build(declarationDataId, incomeBeforeUpdate.getRowNum(), incomeAfterUpdate.getRowNum())) {
                     logger.info(message);
                 }
                 logBusinessService.logFormEvent(declarationDataId, FormDataEvent.NDFL_EDIT, logger.getLogId(), null, userInfo);
                 sendNotification(changelogBuilder.resultMessage, logger.getLogId(), userInfo.getUser().getId());
+            } else {
+                String msg = "Не выполнена замена данных в строке № " + incomeBeforeUpdate.getRowNum() +
+                        " Раздела 2 в форме № " + declarationDataId + ", так как в форме редактирования не было внесено изменений.";
+                logger.error(msg);
+                sendNotification(msg, logger.getLogId(), userInfo.getUser().getId());
             }
             return new ActionResult(logEntryService.save(logger));
         } catch (Exception e) {
@@ -2841,7 +2845,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             NdflPersonDeduction deduction = personDeductionDTO.toDeduction();
 
             NdflPersonDeduction deductionBeforeUpdate = ndflPersonDao.fetchOneNdflPersonDeduction(deduction.getId());
-            NdflRowEditChangelogBuilder changelogBuilder = new NdflRowEditChangelogBuilder(declarationDataId, deductionBeforeUpdate, deduction);
+            NdflRowEditChangelogBuilder changelogBuilder = new NdflRowEditChangelogBuilder(deductionBeforeUpdate, deduction);
             if (changelogBuilder.hasChanges()) {
                 ndflPersonDao.updateOneNdflDeduction(deduction, userInfo);
                 reportService.deleteDec(singletonList(declarationDataId), asList(DeclarationReportType.SPECIFIC_REPORT_DEC, DeclarationReportType.EXCEL_DEC));
@@ -2850,11 +2854,15 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 ndflPersonDao.updateDeductions(updateRowNum(ndflPerson.getDeductions()));
 
                 NdflPersonDeduction deductionAfterUpdate = ndflPersonDao.fetchOneNdflPersonDeduction(deduction.getId());
-                changelogBuilder.setRowNum(deductionAfterUpdate.getRowNum());
-                for (String message : changelogBuilder.build()) {
+                for (String message : changelogBuilder.build(declarationDataId, deductionBeforeUpdate.getRowNum(), deductionAfterUpdate.getRowNum())) {
                     logger.info(message);
                 }
                 logBusinessService.logFormEvent(declarationDataId, FormDataEvent.NDFL_EDIT, logger.getLogId(), null, userInfo);
+            } else {
+                String msg = "Не выполнена замена данных в строке № " + deductionBeforeUpdate.getRowNum() +
+                        " Раздела 3 в форме № " + declarationDataId + ", так как в форме редактирования не было внесено изменений.";
+                logger.error(msg);
+                sendNotification(msg, logger.getLogId(), userInfo.getUser().getId());
             }
             return new ActionResult(logEntryService.save(logger));
         } catch (Exception e) {
@@ -2872,7 +2880,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             NdflPersonPrepayment prepayment = personPrepaymentDTO.toPrepayment();
 
             NdflPersonPrepayment prepaymentBeforeUpdate = ndflPersonDao.fetchOneNdflPersonPrepayment(prepayment.getId());
-            NdflRowEditChangelogBuilder changelogBuilder = new NdflRowEditChangelogBuilder(declarationDataId, prepaymentBeforeUpdate, prepayment);
+            NdflRowEditChangelogBuilder changelogBuilder = new NdflRowEditChangelogBuilder(prepaymentBeforeUpdate, prepayment);
             if (changelogBuilder.hasChanges()) {
                 ndflPersonDao.updateOneNdflPrepayment(prepayment, userInfo);
                 reportService.deleteDec(singletonList(declarationDataId), asList(DeclarationReportType.SPECIFIC_REPORT_DEC, DeclarationReportType.EXCEL_DEC));
@@ -2881,11 +2889,15 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 ndflPersonDao.updatePrepayments(updateRowNum(ndflPerson.getPrepayments()));
 
                 NdflPersonPrepayment prepaymentAfterUpdate = ndflPersonDao.fetchOneNdflPersonPrepayment(prepayment.getId());
-                changelogBuilder.setRowNum(prepaymentAfterUpdate.getRowNum());
-                for (String message : changelogBuilder.build()) {
+                for (String message : changelogBuilder.build(declarationDataId, prepaymentBeforeUpdate.getRowNum(), prepaymentAfterUpdate.getRowNum())) {
                     logger.info(message);
                 }
                 logBusinessService.logFormEvent(declarationDataId, FormDataEvent.NDFL_EDIT, logger.getLogId(), null, userInfo);
+            } else {
+                String msg = "Не выполнена замена данных в строке № " + prepaymentBeforeUpdate.getRowNum() +
+                        " Раздела 4 в форме № " + declarationDataId + ", так как в форме редактирования не было внесено изменений.";
+                logger.error(msg);
+                sendNotification(msg, logger.getLogId(), userInfo.getUser().getId());
             }
             return new ActionResult(logEntryService.save(logger));
         } catch (Exception e) {

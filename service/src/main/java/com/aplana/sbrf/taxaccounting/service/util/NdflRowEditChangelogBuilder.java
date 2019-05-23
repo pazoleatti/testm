@@ -17,36 +17,28 @@ import java.util.Objects;
  * Формирует сообшения с изменениями полей при редактировании строк формы РНУ
  */
 public class NdflRowEditChangelogBuilder {
-    private long declarationDataId;
     private int section;
-    private BigDecimal rowNum;
     private Map<String, String> valuesByFieldBefore;
     private Map<String, String> valuesByFieldAfter;
     public String resultMessage;
     private List<String> changedFields = new ArrayList<>();
 
-    public NdflRowEditChangelogBuilder(long declarationDataId, int section, BigDecimal rowNum) {
-        this.declarationDataId = declarationDataId;
-        this.section = section;
-        this.rowNum = rowNum;
-    }
-
-    public NdflRowEditChangelogBuilder(long declarationDataId, NdflPersonIncome incomeBefore, NdflPersonIncome incomeAfter) {
-        this(declarationDataId, 2, incomeAfter.getRowNum());
+    public NdflRowEditChangelogBuilder(NdflPersonIncome incomeBefore, NdflPersonIncome incomeAfter) {
+        this.section = 2;
         this.valuesByFieldBefore = toMap(incomeBefore);
         this.valuesByFieldAfter = toMap(incomeAfter);
         findChanges();
     }
 
-    public NdflRowEditChangelogBuilder(long declarationDataId, NdflPersonDeduction deductionBefore, NdflPersonDeduction deductionAfter) {
-        this(declarationDataId, 3, deductionAfter.getRowNum());
+    public NdflRowEditChangelogBuilder(NdflPersonDeduction deductionBefore, NdflPersonDeduction deductionAfter) {
+        this.section = 3;
         this.valuesByFieldBefore = toMap(deductionBefore);
         this.valuesByFieldAfter = toMap(deductionAfter);
         findChanges();
     }
 
-    public NdflRowEditChangelogBuilder(long declarationDataId, NdflPersonPrepayment prepaymentBefore, NdflPersonPrepayment prepaymentAfter) {
-        this(declarationDataId, 4, prepaymentAfter.getRowNum());
+    public NdflRowEditChangelogBuilder(NdflPersonPrepayment prepaymentBefore, NdflPersonPrepayment prepaymentAfter) {
+        this.section = 4;
         this.valuesByFieldBefore = toMap(prepaymentBefore);
         this.valuesByFieldAfter = toMap(prepaymentAfter);
         findChanges();
@@ -66,21 +58,22 @@ public class NdflRowEditChangelogBuilder {
         return !changedFields.isEmpty();
     }
 
-    public void setRowNum(BigDecimal rowNum) {
-        this.rowNum = rowNum;
-    }
-
-    public List<String> build() {
+    public List<String> build(long declarationDataId, BigDecimal rowNumBefore, BigDecimal rowNumAfter) {
         List<String> changelog = new ArrayList<>();
         if (!changedFields.isEmpty()) {
-            resultMessage = "Для формы № " + declarationDataId + " внесены изменения в Разделе " + section +
-                    " в строке № " + rowNum + ", измененные значения: " + joinFields(changedFields);
+            if (!Objects.equals(rowNumBefore, rowNumAfter)) {
+                resultMessage = "Для формы № " + declarationDataId + " внесены изменения в Разделе " + section + " в строке № " + rowNumBefore + "." +
+                        " В ходе выполнения сортировки строк, изменен номер отредактированной строки: \"" + rowNumBefore + "\"->\"" + rowNumAfter + "\"." +
+                        " Измененные значения: " + joinFields(changedFields);
+            } else {
+                resultMessage = "Для формы № " + declarationDataId + " внесены изменения в Разделе " + section + " в строке № " + rowNumBefore + "," +
+                        " измененные значения: " + joinFields(changedFields);
+            }
             changelog.add(resultMessage);
             for (String fieldName : changedFields) {
                 String valueBefore = valuesByFieldBefore.get(fieldName);
                 String valueAfter = valuesByFieldAfter.get(fieldName);
-                changelog.add("Внесены изменения в Разделе " + section + " в строке № " + rowNum +
-                        ", изменено значение \"" + fieldName + "\": \"" + valueBefore + "\"->\"" + valueAfter + "\".");
+                changelog.add("В строке изменено значение \"" + fieldName + "\": \"" + valueBefore + "\"->\"" + valueAfter + "\".");
             }
         }
         return changelog;
