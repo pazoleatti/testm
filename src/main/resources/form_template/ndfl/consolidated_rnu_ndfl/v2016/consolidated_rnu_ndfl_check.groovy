@@ -720,7 +720,7 @@ class Check extends AbstractScriptClass {
                     logger.warnExp("%s. %s.", "\"ИНН\" не указан", fioAndInp, pathError,
                             "Значение гр. \"ИНН в РФ\" не указано.")
                 } else {
-                    String checkInn = ScriptUtils.checkInn(ndflPerson.innNp)
+                    String checkInn = ScriptUtils.checkNdflPersonInn(ndflPerson)
                     if (checkInn != null) {
                         String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                         logger.warnExp("%s. %s.", "\"ИНН\" не соответствует формату", fioAndInp, pathError,
