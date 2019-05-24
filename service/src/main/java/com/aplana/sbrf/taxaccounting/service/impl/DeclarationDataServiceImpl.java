@@ -2362,7 +2362,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     "com.aplana.sbrf.taxaccounting.permissions.logging.TargetIdAndLogger", DeclarationDataPermission.UPDATE_DOC_STATE)) {
                 declarationLocker.establishLock(declarationId, OperationType.SEND_EDO, userInfo, logger);
             }
-            messageSender.sendMessage("pinzetsend");
+            messageSender.sendMessage("test message body " + new Date());
             logger.info("test: sendEdo ОНФ № " + declarationId);
             /*File tmpXmlFile = null;
             try {

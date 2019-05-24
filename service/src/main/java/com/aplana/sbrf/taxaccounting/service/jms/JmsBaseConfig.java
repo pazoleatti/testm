@@ -58,7 +58,7 @@ public class JmsBaseConfig {
                 DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
                 factory.setConnectionFactory(connectionFactory);
                 factory.setDestinationResolver(destinationResolver);
-                factory.setSessionTransacted(true);
+                factory.setSessionTransacted(false);
                 factory.setMaxMessagesPerTask(1);
                 factory.setMessageConverter(messageConverter);
                 return factory;
