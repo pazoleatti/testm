@@ -599,7 +599,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             if (State.CREATED.equals(dd.getState())) {
                 declarationDataDao.setStatus(id, State.PREPARED);
             }
-            logBusinessService.logFormEvent(id, FormDataEvent.MOVE_CREATED_TO_PREPARED, logger.getLogId(), "Проверка пройдена, Состояние=\"Подготовлена\"", userInfo);
+            logBusinessService.logFormEvent(id, FormDataEvent.MOVE_CREATED_TO_PREPARED, logger.getLogId(), "Проверка пройдена", userInfo);
             logger.info("Проверка завершена, ошибок не обнаружено");
         } else {
             if (State.PREPARED.equals(dd.getState())) {
@@ -2958,6 +2958,22 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 reportPeriod.getReportPeriod().getName(),
                 getCorrectionDateString(reportPeriod),
                 department.getName());
+    }
+
+    @Override
+    public String getFullDeclarationDescription(Long declarationDataId) {
+        DeclarationData declaration = declarationDataDao.get(declarationDataId);
+        Department department = departmentService.getDepartment(declaration.getDepartmentId());
+        DepartmentReportPeriod reportPeriod = departmentReportPeriodService.fetchOne(declaration.getDepartmentReportPeriodId());
+        DeclarationTemplate declarationTemplate = declarationTemplateService.get(declaration.getDeclarationTemplateId());
+
+        return String.format("№: %d, Период: \"%s, %s%s\", Подразделение: \"%s\", Вид: \"%s\"",
+                declaration.getId(),
+                reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
+                reportPeriod.getReportPeriod().getName(),
+                getCorrectionDateString(reportPeriod),
+                department.getName(),
+                declarationTemplate.getType().getName());
     }
 
     @Override

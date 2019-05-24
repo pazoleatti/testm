@@ -23,6 +23,7 @@ import java.util.Map;
 public class CheckDeclarationAsyncTask extends AbstractDeclarationAsyncTask {
 
     private static final String SUCCESS = "Выполнена проверка налоговой формы: %s";
+    private static final String FAIL = "Не выполнена \"%s\". Форма: %s.";
 
     @Autowired
     private TAUserService userService;
@@ -41,7 +42,7 @@ public class CheckDeclarationAsyncTask extends AbstractDeclarationAsyncTask {
     @Override
     protected BusinessLogicResult executeBusinessLogic(final AsyncTaskData taskData, Logger logger) {
         long declarationDataId = (Long) taskData.getParams().get("declarationDataId");
-        taskData.getParams().put("standardDeclarationDescription", declarationDataService.getStandardDeclarationDescription(declarationDataId));
+        taskData.getParams().put("standardDeclarationDescription", declarationDataService.getFullDeclarationDescription(declarationDataId));
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(taskData.getUserId()));
 
@@ -85,7 +86,7 @@ public class CheckDeclarationAsyncTask extends AbstractDeclarationAsyncTask {
         if (isSuccess) {
             return String.format(SUCCESS, standardDeclarationDescription);
         } else {
-            return String.format(FAIL, "Проверка", standardDeclarationDescription);
+            return String.format(FAIL, "Проверка формы", standardDeclarationDescription) + String.format(CAUSE, "присутствуют фатальные ошибки");
         }
     }
 

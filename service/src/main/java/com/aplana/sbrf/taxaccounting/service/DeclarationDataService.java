@@ -736,6 +736,14 @@ public interface DeclarationDataService {
     String getStandardDeclarationDescription(Long declarationDataId);
 
     /**
+     * Полное Описание налоговой формы
+     *
+     * @param declarationDataId идентификатор налоговой формы
+     * @return строка с описанием
+     */
+    String getFullDeclarationDescription(Long declarationDataId);
+
+    /**
      * Создает задачу для генерации pdf отчета
      *
      * @param userInfo          информация о пользователе

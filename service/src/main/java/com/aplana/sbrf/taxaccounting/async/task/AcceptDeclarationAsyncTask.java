@@ -42,7 +42,7 @@ public class AcceptDeclarationAsyncTask extends AbstractDeclarationAsyncTask {
     @Override
     protected BusinessLogicResult executeBusinessLogic(final AsyncTaskData taskData, Logger logger) {
         long declarationDataId = (Long) taskData.getParams().get("declarationDataId");
-        taskData.getParams().put("standardDeclarationDescription", declarationDataService.getStandardDeclarationDescription(declarationDataId));
+        taskData.getParams().put("standardDeclarationDescription", declarationDataService.getFullDeclarationDescription(declarationDataId));
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(taskData.getUserId()));
 
@@ -86,7 +86,7 @@ public class AcceptDeclarationAsyncTask extends AbstractDeclarationAsyncTask {
         if (isSuccess) {
             return String.format(SUCCESS, standardDeclarationDescription);
         } else {
-            return String.format(FAIL, "Принятие", standardDeclarationDescription);
+            return String.format(FAIL, "Принятие формы", standardDeclarationDescription) + String.format(CAUSE, "присутствуют фатальные ошибки");
         }
     }
 }
