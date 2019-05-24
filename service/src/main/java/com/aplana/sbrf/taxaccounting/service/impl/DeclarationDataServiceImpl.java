@@ -212,8 +212,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     private DeclarationTypeDao declarationTypeDao;
     @Autowired
     private DeclarationLocker declarationLocker;
-    @Autowired
-    MessageSender messageSender;
+    @Autowired (required = false)
+    private MessageSender messageSender;
 
     private class SAXHandler extends DefaultHandler {
         private Map<String, String> values;
