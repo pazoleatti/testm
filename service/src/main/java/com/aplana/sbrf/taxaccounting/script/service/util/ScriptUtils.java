@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.FormStyle;
 import com.aplana.sbrf.taxaccounting.model.consolidation.ConsolidationIncome;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.TAInterruptedException;
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
@@ -787,8 +788,6 @@ public final class ScriptUtils {
     /**
      * Проверка ИНН физического лица
      *
-     * @param innValue
-     * @return
      * @see <a href="https://conf.aplana.com/pages/viewpage.action?pageId=27182953>Проверка ИНН физического лица</a>
      */
     public static String checkInn(String innValue) {
@@ -807,6 +806,33 @@ public final class ScriptUtils {
             }
             if (!RefBookUtils.checkControlSumInn(innValue)) {
                 return "Некорректное контрольное число в значении гр. \"ИНН в РФ\" (\"" + innValue + "\")";
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Проверка значения ИНН в РФ у данных о физлице из раздела 1 налоговой формы.
+     */
+    public static String checkNdflPersonInn(NdflPerson person) {
+        String inn = person.getInnNp();
+        String forPerson = String.format("Строка: %s, для ФЛ: %s, ИНП: %s ", person.getRowNum(), person.getFullName(), person.getInp());
+
+        if (inn != null) {
+            if (inn.length() != 12) {
+                return forPerson + "значение параметра \"ИНН в РФ\" (\"" + inn + "\") должно содержать 12 символов";
+            }
+            if (!checkFormat(inn, "[0-9]{12}")) {
+                return forPerson + "значение параметра \"ИНН в РФ\" (\"" + inn + "\") должно содержать только цифры";
+            }
+            if (checkFormat(inn, "0+")) {
+                return forPerson + "значение параметра \"ИНН в РФ\" (\"" + inn + "\") не должно содержать нули во всех разрядах";
+            }
+            if (Arrays.asList("00", "90", "93", "94", "95", "96", "98").contains(inn.substring(0, 2))) {
+                return forPerson + "значение параметра \"ИНН в РФ\" (\"" + inn + "\") некорректно. Первые два разряда ИНН не могут быть равны одному из значений: \"00\",\"90\",\"93\",\"94\",\"95\",\"96\",\"98\"";
+            }
+            if (!RefBookUtils.checkControlSumInn(inn)) {
+                return forPerson + "указано некорректное контрольное число в значении \"ИНН в РФ\" (\"" + inn + "\")";
             }
         }
         return null;

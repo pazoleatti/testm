@@ -2221,6 +2221,16 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
                 valid = false
             }
         }
+        // Проверка поля "ИНН"
+        if (isEmpty(person.innNp)) {
+            logger.warnExp(emptyParamErrorMsg, '', msgObject, '"ИНН ФЛ"')
+            valid = false
+        } else {
+            if (person.innNp.length() != 12) {
+                logger.warnExp("Строка: ${personLineInFile}. ФЛ: $person.fullName, ИНП: $person.inp. Фактическая длина параметра \"ИНН в РФ\" не совпадает с заданной длиной (12 знаков).", '', msgObject)
+                valid = false
+            }
+        }
 
         return valid
     }
