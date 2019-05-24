@@ -7,7 +7,7 @@ import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
-@Profile("jms")
+@Profile({"jms", "development"})
 public class BaseMessageSenderImpl implements MessageSender {
 
     @Autowired
@@ -16,6 +16,6 @@ public class BaseMessageSenderImpl implements MessageSender {
     @Override
     public void sendMessage(String fileName) {
         System.out.println(fileName);
-        jmsTemplate.convertAndSend(fileName);
+        jmsTemplate.convertAndSend("fundFromNdflSubsystemQueue", fileName);
     }
 }

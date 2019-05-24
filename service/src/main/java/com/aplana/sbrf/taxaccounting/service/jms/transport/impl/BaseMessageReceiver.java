@@ -6,17 +6,19 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.jms.config.JmsListenerEndpointRegistry;
 import org.springframework.messaging.Message;
+import org.springframework.stereotype.Component;
 
 /**
  * Получатель сообщений.
  */
-@Profile("jms")
+@Profile({"jms", "development"})
+@Component
 public class BaseMessageReceiver {
 
     @Autowired
     private JmsListenerEndpointRegistry jmsListenerEndpointRegistry;
 
-    @JmsListener(destination = JmsBaseConfig.TO_NDFL_QUEUE, id="messageReceiver", containerFactory = "edoJmsListenerContainerFactory")
+    @JmsListener(destination = JmsBaseConfig.TO_NDFL_QUEUE, id="messageReceiver", containerFactory = "jmsListenerContainerFactory")
     public void handleMessage(Message<String> message) {
         System.out.println("Raw message: " + message.getPayload());
         System.out.println("Headers: " + message.getHeaders());

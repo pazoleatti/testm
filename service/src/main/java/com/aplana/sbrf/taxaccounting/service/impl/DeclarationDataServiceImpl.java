@@ -44,6 +44,7 @@ import com.aplana.sbrf.taxaccounting.service.component.lock.locker.DeclarationLo
 import com.aplana.sbrf.taxaccounting.service.impl.declaration.edit.incomedate.DateEditor;
 import com.aplana.sbrf.taxaccounting.service.impl.declaration.edit.incomedate.DateEditorFactory;
 import com.aplana.sbrf.taxaccounting.service.impl.declaration.edit.incomedate.EditableDateField;
+import com.aplana.sbrf.taxaccounting.service.jms.transport.MessageSender;
 import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import com.aplana.sbrf.taxaccounting.service.refbook.RefBookAsnuService;
 import com.aplana.sbrf.taxaccounting.service.util.NdflRowEditChangelogBuilder;
@@ -211,6 +212,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     private DeclarationTypeDao declarationTypeDao;
     @Autowired
     private DeclarationLocker declarationLocker;
+    @Autowired
+    MessageSender messageSender;
 
     private class SAXHandler extends DefaultHandler {
         private Map<String, String> values;
@@ -2359,7 +2362,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     "com.aplana.sbrf.taxaccounting.permissions.logging.TargetIdAndLogger", DeclarationDataPermission.UPDATE_DOC_STATE)) {
                 declarationLocker.establishLock(declarationId, OperationType.SEND_EDO, userInfo, logger);
             }
-
+            messageSender.sendMessage("pinzetsend");
             logger.info("test: sendEdo ОНФ № " + declarationId);
             /*File tmpXmlFile = null;
             try {

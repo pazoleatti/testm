@@ -45,6 +45,33 @@
 		</Arg>
 	</New>
 
+	<New id="fundConnectionFactory" class="org.mortbay.jetty.plus.naming.Resource">
+		<Arg>java:comp/env/jms/FundConnectionFactory</Arg>
+		<Arg>
+			<New class="org.apache.activemq.ActiveMQConnectionFactory">
+				<Arg>tcp://localhost:61616</Arg>
+			</New>
+		</Arg>
+	</New>
+
+	<New id="fundFromNdflSubsystemQueue" class="org.mortbay.jetty.plus.naming.Resource">
+		<Arg>java:comp/env/jms/FundFromNdflSubsystemQueue</Arg>
+		<Arg>
+			<New class="org.apache.activemq.command.ActiveMQQueue">
+				<Arg>FROM.NDFL</Arg>
+			</New>
+		</Arg>
+	</New>
+
+	<New id="fundToNdflSubsystemQueue" class="org.mortbay.jetty.plus.naming.Resource">
+		<Arg>java:comp/env/jms/FundToNdflSubsystemQueue</Arg>
+		<Arg>
+			<New class="org.apache.activemq.command.ActiveMQQueue">
+				<Arg>TO.NDFL</Arg>
+			</New>
+		</Arg>
+	</New>
+
 	<Call name="getConfiguration" class="bitronix.tm.TransactionManagerServices">
 		<Set name="journal">null</Set>
 		<Set name="defaultTransactionTimeout">3600</Set>

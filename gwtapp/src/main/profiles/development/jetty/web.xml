@@ -127,6 +127,28 @@
 		<res-auth>Container</res-auth>
 	</resource-ref>
 
+	<resource-ref>
+		<description>Fund JMS Connection</description>
+		<res-ref-name>java:comp/env/jms/FundConnectionFactory</res-ref-name>
+		<res-type>javax.jms.ConnectionFactory</res-type>
+		<res-auth>Container</res-auth>
+		<res-sharing-scope>Shareable</res-sharing-scope>
+	</resource-ref>
+
+	<message-destination-ref>
+		<message-destination-ref-name>java:comp/env/jms/FundFromNdflSubsystemQueue</message-destination-ref-name>
+		<message-destination-type>javax.jms.Queue</message-destination-type>
+		<message-destination-usage>Produces</message-destination-usage>
+		<message-destination-link>java:comp/env/jms/FundFromNdflSubsystemQueue</message-destination-link>
+	</message-destination-ref>
+
+	<message-destination-ref>
+		<message-destination-ref-name>java:comp/env/jms/FundToNdflSubsystemQueue</message-destination-ref-name>
+		<message-destination-type>javax.jms.Queue</message-destination-type>
+		<message-destination-usage>Consumes</message-destination-usage>
+		<message-destination-link>java:comp/env/jms/FundToNdflSubsystemQueue</message-destination-link>
+	</message-destination-ref>
+
 	<security-role>
 		<description>Все аутентифицированные пользователи</description>	
 		<role-name>taxaccountingUsers</role-name>

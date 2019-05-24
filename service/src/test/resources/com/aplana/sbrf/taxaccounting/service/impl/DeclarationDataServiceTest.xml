@@ -6,6 +6,10 @@
     <import resource="classpath:testServiceContext.xml"/>
 
     <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="org.springframework.jms.core.JmsTemplate"/>
+    </bean>
+
+    <bean class="org.mockito.Mockito" factory-method="mock">
         <constructor-arg value="com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService"/>
     </bean>
     <bean class="org.mockito.Mockito" factory-method="mock">
@@ -98,4 +102,11 @@
     <bean id="declarationDataService" class="com.aplana.sbrf.taxaccounting.service.impl.DeclarationDataServiceImpl"/>
     <bean id="departmentReportPeriodFormatter"
           class="com.aplana.sbrf.taxaccounting.utils.DepartmentReportPeriodFormatter"/>
+    <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.service.jms.transport.impl.BaseMessageSenderImpl" />
+    </bean>
+    <!--<bean id="messageSender" class="com.aplana.sbrf.taxaccounting.service.jms.transport.impl.BaseMessageSenderImpl">
+        
+    </bean>-->
+
 </beans>
