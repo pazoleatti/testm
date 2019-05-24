@@ -11,6 +11,7 @@ import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.jms.support.converter.SimpleMessageConverter;
 import org.springframework.jms.support.destination.BeanFactoryDestinationResolver;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
@@ -53,12 +54,14 @@ public class JmsBaseConfig {
         @Bean
         public JmsListenerContainerFactory<?> jmsListenerContainerFactory(ConnectionFactory connectionFactory,
                                                                           MessageConverter messageConverter,
-                                                                          BeanFactoryDestinationResolver destinationResolver) {
+                                                                          BeanFactoryDestinationResolver destinationResolver,
+                                                                          PlatformTransactionManager transactionManager) {
 
                 DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
                 factory.setConnectionFactory(connectionFactory);
                 factory.setDestinationResolver(destinationResolver);
-                factory.setSessionTransacted(false);
+                factory.setTransactionManager(transactionManager);
+                factory.setSessionTransacted(true);
                 factory.setMaxMessagesPerTask(1);
                 factory.setMessageConverter(messageConverter);
                 return factory;
