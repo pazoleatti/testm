@@ -31,10 +31,14 @@ public class LogDaoImpl extends AbstractDao implements LogDao {
     @Override
     public int clean() {
         try {
-            return getJdbcTemplate().update("delete from LOG where id not in " +
-                    "(select LOG_ID from NOTIFICATION union " +
-                    "select LOG_ID from log_business) " +
-                    "and (systimestamp - LOG.creation_date) > numtodsinterval(24, 'hour')");
+            return getJdbcTemplate().update("" +
+                    "delete from log where id in (\n" +
+                    "  select log.id from LOG\n" +
+                    "  left join NOTIFICATION on NOTIFICATION.LOG_ID = LOG.ID\n" +
+                    "  left join LOG_BUSINESS on LOG_BUSINESS.LOG_ID = LOG.ID\n" +
+                    "  where LOG_BUSINESS.ID is null and NOTIFICATION.ID is null and\n" +
+                    "    (systimestamp - LOG.creation_date) > numtodsinterval(24, 'hour')" +
+                    ")");
         } catch (DataAccessException e) {
             throw new DaoException(String.format("Ошибка при удалении устаревших записей таблицы LOG. %s.", e.getMessage()));
         }
