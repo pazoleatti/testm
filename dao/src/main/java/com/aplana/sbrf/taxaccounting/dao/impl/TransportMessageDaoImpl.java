@@ -2,8 +2,18 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.TransportMessageDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
-import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.messaging.*;
+import com.aplana.sbrf.taxaccounting.model.BlobData;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.Subsystem;
+import com.aplana.sbrf.taxaccounting.model.TARole;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.messaging.DeclarationShortInfo;
+import com.aplana.sbrf.taxaccounting.model.messaging.TransportMessage;
+import com.aplana.sbrf.taxaccounting.model.messaging.TransportMessageContentType;
+import com.aplana.sbrf.taxaccounting.model.messaging.TransportMessageFilter;
+import com.aplana.sbrf.taxaccounting.model.messaging.TransportMessageState;
+import com.aplana.sbrf.taxaccounting.model.messaging.TransportMessageType;
 import com.google.common.base.Joiner;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -12,6 +22,8 @@ import org.joda.time.LocalDateTime;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
@@ -147,6 +159,33 @@ public class TransportMessageDaoImpl extends AbstractDao implements TransportMes
         int totalCount = getNamedParameterJdbcTemplate().queryForObject(countSql, params, Integer.class);
 
         return new PagingResult<>(messages, totalCount);
+    }
+
+    @Override
+    public void create(TransportMessage transportMessage) {
+        final KeyHolder keyHolder = new GeneratedKeyHolder();
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("message_uuid", transportMessage.getMessageUuid());
+        params.addValue("datetime", transportMessage.getDateTime().toDate());
+        params.addValue("type", transportMessage.getType().getIntValue());
+        params.addValue("sender_subsystem_id", transportMessage.getSenderSubsystem() != null ? transportMessage.getSenderSubsystem().getId() : null);
+        params.addValue("receiver_subsystem_id", transportMessage.getReceiverSubsystem().getId());
+        params.addValue("content_type", transportMessage.getContentType().getIntValue());
+        params.addValue("state", transportMessage.getState().getIntValue());
+        params.addValue("body", transportMessage.getBody());
+        params.addValue("blob_id", transportMessage.getBlob() != null ? transportMessage.getBlob().getUuid() : null);
+        params.addValue("source_file_name", transportMessage.getSourceFileName());
+        params.addValue("initiator_user_id", transportMessage.getInitiatorUser().getId());
+        params.addValue("explanation", transportMessage.getExplanation());
+        params.addValue("declaration_id", transportMessage.getDeclaration() != null ? transportMessage.getDeclaration().getId() : null);
+
+        getNamedParameterJdbcTemplate().update(
+                "insert into transport_message (id, message_uuid, datetime, type, sender_subsystem_id, receiver_subsystem_id, " +
+                        "content_type, state, body, blob_id, source_file_name, initiator_user_id, explanation, declaration_id)" +
+                        " values (seq_transport_message.nextval, :message_uuid, :datetime, :type, :sender_subsystem_id, :receiver_subsystem_id, " +
+                        ":content_type, :state, :body, :blob_id, :source_file_name, :initiator_user_id, :explanation, :declaration_id)",
+                params, keyHolder, new String[]{"ID"});
+        transportMessage.setId(keyHolder.getKey().longValue());
     }
 
 

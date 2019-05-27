@@ -121,7 +121,7 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
      */
     public static final Permission<DeclarationData> UPDATE_DOC_STATE = new UpdateDocStatePermission(1 << 14);
 
-    public static final Permission<DeclarationData> SEND_EDO = new SendEdoPermission(1 << 15);
+    public static final SendEdoPermission SEND_EDO = new SendEdoPermission(1 << 15);
 
     private static final String DATE_FORMAT = "dd.MM.yyyy";
 
@@ -425,12 +425,10 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
                             } else {
                                 logError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, ROLE_ERROR, logger);
                             }
-                        }
-                        else {
+                        } else {
                             logError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, String.format(STATE_ERROR, OPERATION_NAME, targetDomainObject.getState().getTitle()), logger);
                         }
-                    }
-                    else {
+                    } else {
                         RefBookDocState docState = null;
                         if (targetDomainObject.getDocStateId() != null) {
                             docState = commonRefBookService.fetchRecord(RefBook.Id.DOC_STATE.getId(), targetDomainObject.getDocStateId());
@@ -739,16 +737,43 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
 
         @Override
         protected boolean isGrantedInternal(User user, DeclarationData targetDomainObject, Logger logger) {
-           if (VIEW.isGranted(user, targetDomainObject, logger)) {
-               DeclarationTemplate declarationTemplate = declarationTemplateDao.get(targetDomainObject.getDeclarationTemplateId());
-               RefBookFormType refBookFormType = declarationTemplate.getFormType();
-               List<Long> suitableFormTypes = Arrays.asList(RefBookFormType.NDFL_2_1.getId(), RefBookFormType.NDFL_2_2.getId(), RefBookFormType.NDFL_6.getId());
-               if (suitableFormTypes.contains(refBookFormType.getId())) {
-                   List<Long> suitableDocStates = Arrays.asList(RefBookDocState.NOT_SENT.getId(), RefBookDocState.ERROR.getId(), RefBookDocState.SENT.getId());
-                   return suitableDocStates.contains(targetDomainObject.getDocStateId());
-               }
-           }
-           return false;
+            return isGranted(user, targetDomainObject, logger, null);
+        }
+
+        public boolean isGranted(User user, DeclarationData declarationData, Logger logger, String fileName) {
+            List<String> errMsgs = new ArrayList<>();
+            if (VIEW.isGranted(user, declarationData, logger)) {
+                DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declarationData.getDeclarationTemplateId());
+                RefBookFormType refBookFormType = declarationTemplate.getFormType();
+                List<Long> suitableFormTypes = Arrays.asList(RefBookFormType.NDFL_2_1.getId(), RefBookFormType.NDFL_2_2.getId(), RefBookFormType.NDFL_6.getId());
+                if (suitableFormTypes.contains(refBookFormType.getId())) {
+                    List<Long> suitableDocStates = Arrays.asList(RefBookDocState.NOT_SENT.getId(), RefBookDocState.ERROR.getId(), RefBookDocState.SENT.getId());
+                    if (suitableDocStates.contains(declarationData.getDocStateId())) {
+                        return true;
+                    } else {
+                        RefBookDocState docState = commonRefBookService.fetchRecord(RefBook.Id.DOC_STATE.getId(), declarationData.getDocStateId());
+                        errMsgs.add("Операция \"Отправка в ЭДО\" не допустима для форм в состоянии \"" + docState + "\"");
+                    }
+                }
+            }
+            DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.fetchOne(declarationData.getDepartmentReportPeriodId());
+            Department department = departmentService.getDepartment(declarationData.getDepartmentId());
+            DeclarationTemplate template = declarationTemplateDao.get(declarationData.getDeclarationTemplateId());
+            if (logger != null) {
+                if (errMsgs.isEmpty()) {
+                    errMsgs.add("Недостаточно прав (обратитесь к администратору)");
+                }
+                logger.error("Ошибка отправки в ЭДО файла \"%s\" по отчетной форме №: %s, Период: %s %s%s, Подразделение: %s, Вид: %s. Причина: %s",
+                        fileName,
+                        declarationData.getId(),
+                        departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(),
+                        departmentReportPeriod.getReportPeriod().getName(),
+                        departmentReportPeriod.getCorrectionDate() != null ? " (корр. " + new SimpleDateFormat("dd.MM.yyyy").format(departmentReportPeriod.getCorrectionDate()) + ")" : "",
+                        department.getName(),
+                        template.getName(),
+                        StringUtils.join(errMsgs, ", "));
+            }
+            return false;
         }
     }
 }

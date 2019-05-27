@@ -29,4 +29,9 @@ public class TransportMessageServiceImpl implements TransportMessageService {
     public PagingResult<TransportMessage> findByFilter(TransportMessageFilter filter, PagingParams pagingParams) {
         return transportMessageDao.findByFilter(filter, pagingParams);
     }
+
+    @Override
+    public void create(TransportMessage transportMessage) {
+        transportMessageDao.create(transportMessage);
+    }
 }

@@ -2,9 +2,12 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.TransportMessageDao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.model.Subsystem;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.messaging.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.joda.time.LocalDateTime;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +17,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -159,5 +163,25 @@ public class TransportMessageDaoTest {
                 .extracting("blob")
                 .extracting("uuid")
                 .containsExactly("uuid_1");
+    }
+
+    @Test
+    @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
+    public void test_create() {
+        transportMessageDao.create(TransportMessage.builder()
+                .dateTime(LocalDateTime.now())
+                .messageUuid(UUID.randomUUID().toString().toLowerCase())
+                .type(TransportMessageType.OUTGOING)
+                .receiverSubsystem(Subsystem.builder().id(11).build())
+                .contentType(TransportMessageContentType.ERROR_MESSAGE)
+                .state(TransportMessageState.CONFIRMED)
+                .initiatorUser(createUser())
+                .build());
+    }
+
+    private TAUser createUser() {
+        TAUser user = new TAUser();
+        user.setId(1);
+        return user;
     }
 }

@@ -5,8 +5,6 @@ import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.messaging.TransportMessage;
 import com.aplana.sbrf.taxaccounting.model.messaging.TransportMessageFilter;
 
-import java.util.List;
-
 /**
  * Сервис для работы с Транспортными сообщениями, предназначенными для обмена между подсистемами АС Учет Налогов.
  */
@@ -36,4 +34,11 @@ public interface TransportMessageService {
      * @return список Транспортных сообщений, подходящих под параметры фильтрации с постраничным разбиением.
      */
     PagingResult<TransportMessage> findByFilter(TransportMessageFilter filter, PagingParams pagingParams);
+
+    /**
+     * Создает Транспортное сообщение
+     *
+     * @param transportMessage Транспортное сообщение
+     */
+    void create(TransportMessage transportMessage);
 }

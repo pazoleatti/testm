@@ -17,9 +17,15 @@ import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.filter.NdflFilter;
+import com.aplana.sbrf.taxaccounting.model.jms.TaxMessageDocument;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.messaging.DeclarationShortInfo;
+import com.aplana.sbrf.taxaccounting.model.messaging.TransportMessage;
+import com.aplana.sbrf.taxaccounting.model.messaging.TransportMessageContentType;
+import com.aplana.sbrf.taxaccounting.model.messaging.TransportMessageState;
+import com.aplana.sbrf.taxaccounting.model.messaging.TransportMessageType;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome;
@@ -31,6 +37,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDocState;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookKnfType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.result.*;
+import com.aplana.sbrf.taxaccounting.model.util.AppFileUtils;
 import com.aplana.sbrf.taxaccounting.model.util.DateUtils;
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 import com.aplana.sbrf.taxaccounting.permissions.BasePermissionEvaluator;
@@ -49,6 +56,8 @@ import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import com.aplana.sbrf.taxaccounting.service.refbook.RefBookAsnuService;
 import com.aplana.sbrf.taxaccounting.service.util.NdflRowEditChangelogBuilder;
 import com.aplana.sbrf.taxaccounting.utils.DepartmentReportPeriodFormatter;
+import com.aplana.sbrf.taxaccounting.utils.FileWrapper;
+import com.aplana.sbrf.taxaccounting.utils.ResourceUtils;
 import com.aplana.sbrf.taxaccounting.utils.ZipUtils;
 import com.google.common.collect.Lists;
 import net.sf.jasperreports.engine.JRException;
@@ -72,16 +81,22 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.joda.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
+import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.xml.sax.Attributes;
 import org.xml.sax.helpers.DefaultHandler;
 
+import javax.xml.bind.Marshaller;
+import javax.xml.transform.Result;
+import javax.xml.transform.stream.StreamResult;
 import java.io.*;
 import java.math.BigDecimal;
 import java.sql.Connection;
@@ -212,8 +227,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     private DeclarationTypeDao declarationTypeDao;
     @Autowired
     private DeclarationLocker declarationLocker;
-    @Autowired (required = false)
+    @Autowired(required = false)
     private MessageSender messageSender;
+    @Autowired
+    private TransportMessageService transportMessageService;
 
     private class SAXHandler extends DefaultHandler {
         private Map<String, String> values;
@@ -2355,49 +2372,149 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     public void sendEdo(List<Long> declarationDataIds, TAUserInfo userInfo, Logger logger) {
-        // TODO https://jira.aplana.com/browse/SBRFNDFL-7164
         for (long declarationId : declarationDataIds) {
-            if (permissionEvaluator.hasPermission(SecurityContextHolder.getContext().getAuthentication(),
-                    new TargetIdAndLogger(declarationId, logger),
-                    "com.aplana.sbrf.taxaccounting.permissions.logging.TargetIdAndLogger", DeclarationDataPermission.UPDATE_DOC_STATE)) {
-                declarationLocker.establishLock(declarationId, OperationType.SEND_EDO, userInfo, logger);
-            }
-            messageSender.sendMessage("test message body " + new Date());
-            logger.info("test: sendEdo ОНФ № " + declarationId);
-            /*File tmpXmlFile = null;
+            new SendEdoContext().sendEdo(declarationId, userInfo, logger);
+        }
+    }
+
+    private class SendEdoContext {
+        DeclarationData declarationData;
+        DeclarationTemplate declarationTemplate;
+        TAUserInfo userInfo;
+        Logger logger;
+        DeclarationDataFile outgoingXmlFile = null;
+
+        private void sendEdo(long declarationId, TAUserInfo userInfo, Logger logger) {
+            this.userInfo = userInfo;
+            this.logger = logger;
+            declarationData = get(declarationId);
+            declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
+            File tmpXmlFile = null;
             try {
-                DeclarationData declarationData = get(declarationId);
-                List<DeclarationDataFile> outgoingToFnsDeclarationDataFiles = declarationDataFileDao.findAllByDeclarationIdAndType(declarationId, AttachFileType.OUTGOING_TO_FNS);
-                if (outgoingToFnsDeclarationDataFiles.size() > 1) {
-                    logger.error("В форме № " + declarationId + " найдено более 1 файла с типом \"" + AttachFileType.OUTGOING_TO_FNS.getTitle() + "\"");
-                } else if (outgoingToFnsDeclarationDataFiles.size() < 1) {
-                    logger.error("В форме № " + declarationId + " не найден файл с типом \"" + AttachFileType.OUTGOING_TO_FNS.getTitle() + "\"");
-                } else {
-                    DeclarationDataFile xmlDeclarationDataFile = outgoingToFnsDeclarationDataFiles.get(0);
-                    BlobData xmlBlobData = blobDataService.get(xmlDeclarationDataFile.getUuid());
-                    tmpXmlFile = File.createTempFile("", ".xml");
-                    try (OutputStream outputStream = new FileOutputStream(tmpXmlFile)) {
-                        IOUtils.copy(xmlBlobData.getInputStream(), outputStream);
+                outgoingXmlFile = findOneDeclarationFile(declarationData, AttachFileType.OUTGOING_TO_FNS);
+                if (DeclarationDataPermission.SEND_EDO.isGranted(getAuthUser(), declarationData, logger, outgoingXmlFile.getFileName())) {
+                    //LockData lockData = declarationLocker.establishLock(declarationId, OperationType.SEND_EDO, userInfo, logger);
+                    //if (lockData != null) {
+                    tmpXmlFile = createTempFile(outgoingXmlFile);
+                    if (validateXMLService.validate(declarationData, logger, tmpXmlFile, outgoingXmlFile.getFileName(), null)) {
+                        copyToDocumentExchangeDirectory(tmpXmlFile, outgoingXmlFile.getFileName());
+                        TaxMessageDocument message = buildEdoMessage(outgoingXmlFile.getFileName(), userInfo);
+                        sendToEdo(message);
                     }
-                    if (validateXMLService.validate(declarationData, logger, tmpXmlFile, xmlBlobData.getName(), null)) {
-                        Configuration configuration = configurationService.fetchByEnum(ConfigurationParam.DOCUMENT_EXCHANGE_DIRECTORY);
-                        FileWrapper directory = ResourceUtils.getSharedResource(configuration.getValue());
-                        if (!directory.exists()) {
-                            logger.warn("Не удалось поместить файл ОНФ в папку обмена \"" + configuration.getValue() + "\"");
-                        } else {
-                            FileWrapper file = ResourceUtils.getSharedResource(configuration.getValue() + "/" + xmlBlobData.getName());
-                            try (InputStream inputStream = new FileInputStream(tmpXmlFile);
-                                 OutputStream outputStream = new FileOutputStream(file.getFile())) {
-                                IOUtils.copy(inputStream, outputStream);
-                            }
-                        }
-                    }
+                    //}
                 }
             } catch (Exception e) {
-                logger.error("Ошибка отправки в ЭДО файла \"\" по отчетной форме <ОписаниеФормы>. Причина: " + e.getMessage());
+                String fileNameString = outgoingXmlFile != null ? " \"" + outgoingXmlFile.getFileName() + "\"" : "";
+                logger.error("Ошибка отправки в ЭДО файла%s по отчетной форме %s. Причина: %s",
+                        fileNameString, getFullDeclarationDescription(declarationData.getId()), e.getMessage());
             } finally {
                 AppFileUtils.deleteTmp(tmpXmlFile);
-            }*/
+            }
+        }
+
+        private void sendToEdo(TaxMessageDocument message) {
+            Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
+            marshaller.setClassesToBeBound(TaxMessageDocument.class);
+            Map<String, Object> props = new HashMap<>();
+            props.put(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+            marshaller.setMarshallerProperties(props);
+            Writer writer = new StringWriter();
+            Result result = new StreamResult(writer);
+            marshaller.marshal(message, result);
+            try {
+                messageSender.sendMessage(writer.toString());
+            } catch (Exception e) {
+                // TODO
+            }
+            createTransportMessage(message, writer.toString());
+        }
+
+        private void createTransportMessage(TaxMessageDocument message, String messageXml) {
+            TransportMessage transportMessage = new TransportMessage();
+            transportMessage.setDateTime(LocalDateTime.fromDateFields(message.getDateTime()));
+            transportMessage.setMessageUuid(message.getUuid());
+            transportMessage.setSenderSubsystem(new Subsystem(getConfigIntValue(ConfigurationParam.NDFL_SUBSYSTEM_ID)));
+            transportMessage.setReceiverSubsystem(new Subsystem(getConfigIntValue(ConfigurationParam.TARGET_SUBSYSTEM_ID)));
+            transportMessage.setInitiatorUser(userInfo.getUser());
+            transportMessage.setBody(messageXml);
+            transportMessage.setBlob(blobDataService.get(outgoingXmlFile.getUuid()));
+            transportMessage.setState(TransportMessageState.SENT);
+            transportMessage.setContentType(TransportMessageContentType.fromDeclarationType(declarationTemplate.getType()));
+            transportMessage.setType(TransportMessageType.OUTGOING);
+            transportMessage.setSourceFileName(outgoingXmlFile.getFileName());
+            transportMessage.setDeclaration(DeclarationShortInfo.builder().id(declarationData.getId()).build());
+            transportMessageService.create(transportMessage);
+        }
+
+        private DeclarationDataFile findOneDeclarationFile(DeclarationData declarationData, AttachFileType type) {
+            List<DeclarationDataFile> declarationDataFiles = declarationDataFileDao.findAllByDeclarationIdAndType(declarationData.getId(), type);
+            if (declarationDataFiles.size() < 1) {
+                throw new ServiceException("для ОНФ не найден файл для отправки");
+            } else if (declarationDataFiles.size() > 1) {
+                throw new ServiceException("для ОНФ не найден файл для отправки");
+            } else {
+                return declarationDataFiles.get(0);
+            }
+        }
+
+        private File createTempFile(DeclarationDataFile declarationDataFile) throws IOException {
+            BlobData xmlBlobData = blobDataService.get(declarationDataFile.getUuid());
+            File tmpXmlFile = File.createTempFile(declarationDataFile.getFileName(), ".xml");
+            try (OutputStream outputStream = new FileOutputStream(tmpXmlFile)) {
+                IOUtils.copy(xmlBlobData.getInputStream(), outputStream);
+            }
+            return tmpXmlFile;
+        }
+
+        private void copyToDocumentExchangeDirectory(File file, String fileName) {
+            Configuration dirExchangeConfig = configurationService.fetchByEnum(ConfigurationParam.DOCUMENT_EXCHANGE_DIRECTORY);
+            if (dirExchangeConfig != null) {
+                FileWrapper directory = ResourceUtils.getSharedResource(dirExchangeConfig.getValue());
+                if (directory.exists()) {
+                    try {
+                        FileWrapper xmlFileWrapper = ResourceUtils.getSharedResource(dirExchangeConfig.getValue() + "/" + fileName, false);
+                        try (InputStream inputStream = new FileInputStream(file);
+                             OutputStream outputStream = new FileOutputStream(xmlFileWrapper.getFile())) {
+                            IOUtils.copy(inputStream, outputStream);
+                        }
+                    } catch (Exception e) {
+                        LOG.error(e);
+                        throw new ServiceException("файл не удалось выложить в папку обмена \"" + dirExchangeConfig.getValue() + "\"");
+                    }
+                } else {
+                    throw new ServiceException("файл не удалось выложить в папку обмена \"" + dirExchangeConfig.getValue() + "\"");
+                }
+            } else {
+                throw new ServiceException("не задан конфигурационный параметр: \"" + ConfigurationParam.DOCUMENT_EXCHANGE_DIRECTORY.getCaption() + "\"");
+            }
+        }
+
+        private TaxMessageDocument buildEdoMessage(String fileName, TAUserInfo userInfo) {
+            TaxMessageDocument taxMessageDocument = new TaxMessageDocument();
+            taxMessageDocument.setFormatVersion("2.0");
+            taxMessageDocument.setUuid(UUID.randomUUID().toString().toLowerCase());
+            taxMessageDocument.setSource(getConfigIntValue(ConfigurationParam.NDFL_SUBSYSTEM_ID));
+            taxMessageDocument.setDestination(getConfigIntValue(ConfigurationParam.TARGET_SUBSYSTEM_ID));
+            taxMessageDocument.setLogin(userInfo.getUser().getLogin());
+            taxMessageDocument.setFilename(fileName);
+            return taxMessageDocument;
+        }
+
+        private int getConfigIntValue(ConfigurationParam param) {
+            Configuration configuration = configurationService.fetchByEnum(param);
+            if (configuration != null) {
+                try {
+                    return Integer.valueOf(configuration.getValue());
+                } catch (NumberFormatException e) {
+                    throw new ServiceException("не задан конфигурационный параметр: \"" + param.getCaption() + "\"");
+                }
+            } else {
+                throw new ServiceException("не задан конфигурационный параметр: \"" + param.getCaption() + "\"");
+            }
+        }
+
+        private User getAuthUser() {
+            return (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         }
     }
 

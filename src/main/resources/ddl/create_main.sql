@@ -1753,4 +1753,4 @@ comment on column transport_message.initiator_user_id is 'Инициатор с�
 comment on column transport_message.explanation is 'Текст дополнительного пояснения';
 comment on column transport_message.declaration_id is 'Ссылка на форму, с которой связано сообщение';
 
-create sequence seq_transport_message start with 1 increment by 1;
+create sequence seq_transport_message start with 1000 increment by 1;

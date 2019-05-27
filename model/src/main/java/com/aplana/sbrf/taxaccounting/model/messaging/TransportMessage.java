@@ -1,17 +1,25 @@
 package com.aplana.sbrf.taxaccounting.model.messaging;
 
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.BlobData;
+import com.aplana.sbrf.taxaccounting.model.Subsystem;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.joda.time.LocalDateTime;
 
 /**
  * Транспортное сообщение, участвующее в обмене между подсистемами.
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class TransportMessage {
 
     /**
@@ -67,6 +75,10 @@ public class TransportMessage {
      * Краткая информация о форме, к которой привязано сообщение.
      */
     private DeclarationShortInfo declaration;
+    /**
+     * Тело сообщения
+     */
+    private String body;
     /**
      * Имеется ли поле "body" в базе.
      */

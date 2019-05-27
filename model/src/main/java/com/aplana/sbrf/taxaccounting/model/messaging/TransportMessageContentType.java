@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.model.messaging;
 
+import com.aplana.sbrf.taxaccounting.model.DeclarationType;
 import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.AllArgsConstructor;
 
@@ -66,6 +67,18 @@ public enum TransportMessageContentType {
             }
         }
         throw new IllegalArgumentException(String.valueOf(intValue));
+    }
+
+    public static TransportMessageContentType fromDeclarationType(DeclarationType declarationType) {
+        if (DeclarationType.NDFL_6 == declarationType.getId()) {
+            return NDFL6;
+        } else if (DeclarationType.NDFL_2_1 == declarationType.getId()) {
+            return NDFL2_1;
+        } else if (DeclarationType.NDFL_2_2 == declarationType.getId()) {
+            return NDFL2_2;
+        } else {
+            throw new IllegalArgumentException();
+        }
     }
 
     @JsonValue

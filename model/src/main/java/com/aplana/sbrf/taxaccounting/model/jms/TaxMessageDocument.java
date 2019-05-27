@@ -22,7 +22,7 @@ public class TaxMessageDocument extends BaseMessage {
     private String uuid;
 
     @XmlElement(name = "datetime")
-    private Date dateTime;
+    private Date dateTime = new Date();
 
     @XmlElement(name = "source")
     private Integer source;

@@ -34,4 +34,11 @@ public interface TransportMessageDao {
      * @return список Транспортных сообщений, подходящих под параметры фильтрации с постраничным разбиением.
      */
     PagingResult<TransportMessage> findByFilter(TransportMessageFilter filter, PagingParams pagingParams);
+
+    /**
+     * Создает Транспортное сообщение
+     *
+     * @param transportMessage Транспортное сообщение
+     */
+    void create(TransportMessage transportMessage);
 }
