@@ -1372,6 +1372,8 @@
                             scope.gridParams.fullScreen = gridConfig.fullScreen;
                             scope.grid.jqGrid("setGridParam", {"fullScreen": scope.gridParams.fullScreen});
 
+                            stopOuterScroll(scope.gridParams.bdiv);
+
                             scope.grid.setGridParam({
                                 gridComplete: function (data) {
                                     if (scope.gridCtrl.gridComplete) {
