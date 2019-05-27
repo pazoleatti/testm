@@ -158,6 +158,8 @@ class Check extends AbstractScriptClass {
     //Кэш Асну
     Map<Long, RefBookAsnu> asnuCache = [:]
 
+    Integer calculatedTaxDifference
+
     boolean section_2_15_fatal
     boolean citizenship_fatal
     boolean valueCondition_fatal
@@ -217,6 +219,9 @@ class Check extends AbstractScriptClass {
         switch (formDataEvent) {
             case FormDataEvent.CHECK:
                 ScriptUtils.checkInterrupted()
+
+                ConfigurationParamModel configurationParamModel = declarationService.getAllConfig(userInfo)
+                calculatedTaxDifference = Integer.valueOf(configurationParamModel?.get(ConfigurationParam.CALCULATED_TAX_DIFF)?.get(0)?.get(0))
 
                 long time = System.currentTimeMillis()
                 readChecksFatals()
@@ -720,7 +725,7 @@ class Check extends AbstractScriptClass {
                     logger.warnExp("%s. %s.", "\"ИНН\" не указан", fioAndInp, pathError,
                             "Значение гр. \"ИНН в РФ\" не указано.")
                 } else {
-                    String checkInn = ScriptUtils.checkInn(ndflPerson.innNp)
+                    String checkInn = ScriptUtils.checkNdflPersonInn(ndflPerson)
                     if (checkInn != null) {
                         String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                         logger.warnExp("%s. %s.", "\"ИНН\" не соответствует формату", fioAndInp, pathError,
@@ -1623,7 +1628,7 @@ class Check extends AbstractScriptClass {
                                     BigDecimal ВычисленноеЗначениеНалога = var1 - s2 - s3
 
                                     // Для КНФ: | Р.2.Гр.16 – ВычисленноеЗначениеНалога | < 1
-                                    if (!((ndflPersonIncome.calculatedTax - ВычисленноеЗначениеНалога).abs() < 1)) {
+                                    if (!((ndflPersonIncome.calculatedTax - ВычисленноеЗначениеНалога).abs() < calculatedTaxDifference)) {
                                         String errMsg = String.format("Значение налога исчисленного в гр. 16 (%s р) не совпадает с расчетным (%s р)",
                                                 ndflPersonIncome.calculatedTax, ВычисленноеЗначениеНалога)
                                         String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")

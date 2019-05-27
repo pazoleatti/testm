@@ -406,4 +406,13 @@
 		</update>
 	</changeSet>
 
+	<!--https://jira.aplana.com/browse/SBRFNDFL-7689 Реализовать настройку для проверки корректности исчисленного налога в скрипте КНФ -->
+	<changeSet id="3.7-ytrofimov-9" author="ytrofimov">
+		<insert tableName="configuration">
+			<column name="code" value="CALCULATED_TAX_DIFF"/>
+			<column name="department_id" value="0"/>
+			<column name="value" value="1"/>
+		</insert>
+	</changeSet>
+
 </databaseChangeLog>

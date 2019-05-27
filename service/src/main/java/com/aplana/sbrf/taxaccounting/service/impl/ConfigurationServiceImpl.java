@@ -104,6 +104,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         defaultCommonConfig.add(new Configuration(ConfigurationParam.REPORT_PERIOD_YEAR_MAX.getCaption(), COMMON_PARAM_DEPARTMENT_ID, REPORT_PERIOD_YEAR_MAX));
         defaultCommonConfig.add(new Configuration(ConfigurationParam.DECLARATION_ROWS_BULK_EDIT_MAX_COUNT.getCaption(), COMMON_PARAM_DEPARTMENT_ID, DECLARATION_ROWS_BULK_EDIT_MAX_COUNT_DEFAULT));
         defaultCommonConfig.add(new Configuration(ConfigurationParam.ASYNC_SERIAL_MODE.getCaption(), COMMON_PARAM_DEPARTMENT_ID, ASYNC_MODE_DEFAULT));
+        defaultCommonConfig.add(new Configuration(ConfigurationParam.CALCULATED_TAX_DIFF.getCaption(), COMMON_PARAM_DEPARTMENT_ID, "1"));
         // Веса идентификации
         defaultCommonConfig.add(new Configuration(ConfigurationParam.WEIGHT_LAST_NAME.getCaption(), COMMON_PARAM_DEPARTMENT_ID, "5"));
         defaultCommonConfig.add(new Configuration(ConfigurationParam.WEIGHT_FIRST_NAME.getCaption(), COMMON_PARAM_DEPARTMENT_ID, "10"));
@@ -408,6 +409,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
             checkPositiveIntParam(config, logger);
         } else if (config.getCode().equals(ConfigurationParam.ASYNC_SERIAL_MODE.name())) {
             checkDiscreteValue(config.getValue(), logger);
+        } else if (config.getCode().equals(ConfigurationParam.CALCULATED_TAX_DIFF.name())) {
+            checkCalcTaxDiffInput(config, logger);
         }
     }
 
@@ -457,6 +460,13 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         boolean valid = isPositiveInt(value);
         if (!valid) {
             logger.error(NOT_POSITIVE_INTEGER_ERROR, configuration.getDescription());
+        }
+    }
+
+    private void checkCalcTaxDiffInput(Configuration configuration, Logger logger) {
+        String value = configuration.getValue();
+        if (!isPositiveInt(value)) {
+            logger.error("Для параметра \"%s\" должно быть указано целое число > 0", configuration.getDescription());
         }
     }
 
