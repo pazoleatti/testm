@@ -184,7 +184,7 @@
                         <input data-ng-model="searchFilter.params.income.taxRefundCondition.argument2"
                                type="text" class="form-control"
                                data-ng-pattern="patterns.number"
-                               data-ng-disabled="searchFilter.params.income.taxRefundCondition.operator.unary"/>
+                               data-ng-disabled="!searchFilter.params.income.taxRefundCondition.operator || searchFilter.params.income.taxRefundCondition.operator.unary"/>
                     </div>
                 </div>
             </div>
