@@ -5,6 +5,8 @@ var stopOuterScroll = function (element) {
     element[0].addEventListener('wheel', wheelHandler);
 
     function wheelHandler(event) {
+        var scrollHeight = this.scrollHeight;
+        var height = this.clientHeight;
         var delta = event.deltaY;
 
         var prevent = function () {
@@ -13,9 +15,10 @@ var stopOuterScroll = function (element) {
             event.cancelBubble = true;  // IE events
             event.returnValue = false;  // IE events
         };
-
-        event.currentTarget.scrollTop += sign(delta) * event.currentTarget.offsetHeight * 0.15;
-        return prevent();
+        if (scrollHeight > height) {
+            event.currentTarget.scrollTop += sign(delta) * event.currentTarget.offsetHeight * 0.15;
+            return prevent();
+        }
     }
     function sign(x) {
         return ((x > 0) - (x < 0)) || +x;
