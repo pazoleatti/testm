@@ -64,10 +64,10 @@ public class NdflRowEditChangelogBuilder {
             if (!Objects.equals(rowNumBefore, rowNumAfter)) {
                 resultMessage = "Для формы № " + declarationDataId + " внесены изменения в Разделе " + section + " в строке № " + rowNumBefore + "." +
                         " В ходе выполнения сортировки строк, изменен номер отредактированной строки: \"" + rowNumBefore + "\"->\"" + rowNumAfter + "\"." +
-                        " Измененные значения: " + joinFields(changedFields);
+                        " Измененные значения: " + joinFields(changedFields) + ".";
             } else {
                 resultMessage = "Для формы № " + declarationDataId + " внесены изменения в Разделе " + section + " в строке № " + rowNumBefore + "," +
-                        " измененные значения: " + joinFields(changedFields);
+                        " измененные значения: " + joinFields(changedFields) + ".";
             }
             changelog.add(resultMessage);
             for (String fieldName : changedFields) {
