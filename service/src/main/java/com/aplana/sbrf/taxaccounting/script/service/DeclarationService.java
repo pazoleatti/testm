@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.script.service;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDocState;
 import com.aplana.sbrf.taxaccounting.service.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.service.ScriptExposed;
 import groovy.lang.Closure;
@@ -66,6 +67,13 @@ public interface DeclarationService {
     List<DeclarationData> findAllByTypeIdAndReportPeriodIdAndKppAndOktmo(int declarationTypeId, int reportPeriodId, String kpp, String oktmo);
 
     /**
+     * Возвращяет предыдущую форму того же типа и КПП/ОКТМО в состоянии ЭД из заданного множества
+     *
+     * @return форма
+     */
+    DeclarationData findPrev(DeclarationData declarationData, RefBookDocState... docStates);
+
+    /**
      * Найти все декларации созданные в отчетном периоде
      */
     List<DeclarationData> findAllDeclarationData(int declarationTypeId, int departmentId, int reportPeriodId);
@@ -117,7 +125,8 @@ public interface DeclarationService {
 
     /**
      * Создание декларации в заданном отчетном периоде подразделения
-     *  @param newDeclaration данные формы
+     *
+     * @param newDeclaration данные формы
      * @param logger         объект журнала
      * @param userInfo       информация о пользователе, выполняющего действие
      * @param writeAudit

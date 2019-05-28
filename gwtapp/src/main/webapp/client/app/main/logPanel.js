@@ -93,7 +93,7 @@
                                     {
                                         name: 'ord',
                                         index: 'ord',
-                                        width: 50,
+                                        width: 60,
                                         key: true,
                                         sortable: false,
                                         formatter: $filter('incrementFormatter')
@@ -108,7 +108,7 @@
                                     {
                                         name: 'icon',
                                         index: 'icon',
-                                        width: 110,
+                                        width: 120,
                                         sortable: false,
                                         formatter: $filter('iconFormatter'),
                                         classes: 'image-column'

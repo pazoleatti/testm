@@ -98,11 +98,11 @@ public class DeclarationData extends IdentityObject<Long> implements SecuredEnti
      */
     private Integer correctionNum;
     /**
-     * Нераспределенный отрицательный Доход
+     * Нераспределенный отрицательный Доход (положительное число)
      */
     private BigDecimal negativeIncome;
     /**
-     * Нераспределенный отрицательный Налог
+     * Нераспределенный отрицательный Налог (положительное число)
      */
     private BigDecimal negativeTax;
     /**

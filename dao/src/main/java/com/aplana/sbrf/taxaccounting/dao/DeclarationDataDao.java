@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.DeclarationDataSearchOrdering;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.State;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDocState;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookKnfType;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 
@@ -158,6 +159,13 @@ public interface DeclarationDataDao extends PermissionDao {
      * @return список форм
      */
     List<DeclarationData> findAllByTypeIdAndReportPeriodIdAndKppAndOktmo(int declarationTypeId, int reportPeriodId, String kpp, String oktmo);
+
+    /**
+     * Возвращяет предыдущую форму того же типа и КПП/ОКТМО в состоянии ЭД из заданного множества
+     *
+     * @return форма
+     */
+    DeclarationData findPrev(DeclarationData declarationData, RefBookDocState... docStates);
 
     /**
      * Возвращяет список форм по типу и отчетному периоду подразделения и списку пар кпп/октмо

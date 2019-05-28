@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDocState;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookKnfType;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import org.apache.commons.lang3.StringUtils;
@@ -37,6 +38,8 @@ import java.util.Map;
 import java.util.Set;
 
 import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.transformToSqlInStatement;
+import static com.aplana.sbrf.taxaccounting.model.util.IdentityObjectUtils.getIds;
+import static java.util.Arrays.asList;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
 /**
@@ -201,6 +204,43 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                         "where dt.declaration_type_id = :declarationTypeId and drp.report_period_id = :reportPeriodId and dd.kpp = :kpp and dd.oktmo = :oktmo\n" +
                         "order by correction_num desc, id desc",
                 params, new DeclarationDataRowMapper());
+    }
+
+    @Override
+    public DeclarationData findPrev(DeclarationData declarationData, RefBookDocState... docStates) {
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("declarationTemplateId", declarationData.getDeclarationTemplateId());
+        params.addValue("departmentReportPeriodId", declarationData.getDepartmentReportPeriodId());
+        params.addValue("kpp", declarationData.getKpp());
+        params.addValue("oktmo", declarationData.getOktmo());
+        params.addValue("docStates", getIds(asList(docStates)));
+        try {
+            return getNamedParameterJdbcTemplate().queryForObject("select * from (\n" +
+                            "select " + DeclarationDataRowMapper.FIELDS +
+                            "from declaration_data dd\n" +
+                            "left join ref_book_knf_type knf_type on knf_type.id = dd.knf_type_id\n" +
+                            "join department_report_period drp on dd.department_report_period_id = drp.id\n" +
+                            "join report_period rp on rp.id = drp.report_period_id\n" +
+                            "join tax_period tp on tp.id = rp.tax_period_id\n" +
+                            "join report_period_type rpt on rpt.id = rp.dict_tax_period_id\n" +
+                            "join declaration_template dt on dt.id = dd.declaration_template_id\n" +
+                            "join (" +
+                            "  select dt.declaration_type_id, :kpp kpp, :oktmo oktmo, tp.year, rpt.code rpt_code\n" +
+                            "  from department_report_period drp\n" +
+                            "  join report_period rp on rp.id = drp.report_period_id\n" +
+                            "  join tax_period tp on tp.id = rp.tax_period_id\n" +
+                            "  join report_period_type rpt on rpt.id = rp.dict_tax_period_id\n" +
+                            "  join declaration_template dt on dt.id = :declarationTemplateId\n" +
+                            "  where drp.id = :departmentReportPeriodId\n" +
+                            ") curr_dd " +
+                            "on dt.declaration_type_id = curr_dd.declaration_type_id and (tp.year < curr_dd.year or tp.year = curr_dd.year and rpt.code <= curr_dd.rpt_code) " +
+                            "and dd.kpp = curr_dd.kpp and dd.oktmo = curr_dd.oktmo and dd.doc_state_id in (:docStates)\n" +
+                            "order by tp.year desc, rpt.code desc, drp.correction_date desc, dd.correction_num desc, dd.id desc\n" +
+                            ") where rownum = 1",
+                    params, new DeclarationDataRowMapper());
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
     }
 
     @Override

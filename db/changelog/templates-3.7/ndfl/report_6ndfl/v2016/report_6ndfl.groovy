@@ -44,6 +44,7 @@ class Report6Ndfl extends AbstractScriptClass {
 
     ReportFormsCreationParams reportFormsCreationParams
     DeclarationData declarationData
+    DeclarationData prevDeclarationData
     DeclarationTemplate declarationTemplate
     DepartmentReportPeriod departmentReportPeriod
     ReportPeriod reportPeriod
@@ -232,9 +233,10 @@ class Report6Ndfl extends AbstractScriptClass {
                     }
                     if (declarationData.isAdjustNegativeValues()) {
                         section2Block.adjustNegativeValues()
-                        declarationData.negativeIncome = section2Block.negativeIncome.abs()
-                        declarationData.negativeTax = section2Block.negativeWithholding.abs()
                     }
+                    declarationData.negativeIncome = section2Block.negativeIncome.abs()
+                    declarationData.negativeTax = section2Block.negativeWithholding.abs()
+
                     def generalBlock = new GeneralBlock(incomeList, section2Block)
                     def ОбобщПоказAttrs = [КолФЛДоход  : generalBlock.personCount,
                                            УдержНалИт  : generalBlock.incomeWithholdingTotal,
@@ -402,6 +404,7 @@ class Report6Ndfl extends AbstractScriptClass {
             declarationData.departmentId = departmentReportPeriod.departmentId
             declarationData.state = State.CREATED
 
+            prevDeclarationData = declarationService.findPrev(declarationData, RefBookDocState.ACCEPTED, RefBookDocState.WORKED_OUT)
             File zipFile = null
             Xml xml = null
             try {
@@ -431,10 +434,19 @@ class Report6Ndfl extends AbstractScriptClass {
                         // Добавление информации о источнике созданной отчетной формы.
                         sourceService.addDeclarationConsolidationInfo(declarationData.id, singletonList(sourceKnf.id))
 
-                        logger.info("Успешно выполнено создание отчетной формы \"$declarationTemplate.name\": " +
-                                "Период: \"${formatPeriod(departmentReportPeriod)}\", Подразделение: \"$department.name\", " +
-                                "Вид: \"$declarationTemplate.name\", № $declarationData.id, Налоговый орган: \"$departmentConfig.taxOrganCode\", " +
-                                "КПП: \"$departmentConfig.kpp\", ОКТМО: \"$departmentConfig.oktmo.code\".")
+                        if (!prevDeclarationData || prevDeclarationData.adjustNegativeValues == declarationData.adjustNegativeValues) {
+                            logger.info("Успешно выполнено создание отчетной формы \"$declarationTemplate.name\": " +
+                                    "Период: \"${formatPeriod(departmentReportPeriod)}\", Подразделение: \"$department.name\", " +
+                                    "Вид: \"$declarationTemplate.name\", № $declarationData.id, Налоговый орган: \"$departmentConfig.taxOrganCode\", " +
+                                    "КПП: \"$departmentConfig.kpp\", ОКТМО: \"$departmentConfig.oktmo.code\".")
+                        } else {
+                            logger.info("Выполнено создание отчетной формы \"$declarationTemplate.name\": " +
+                                    "Период: \"${formatPeriod(departmentReportPeriod)}\", Подразделение: \"$department.name\", " +
+                                    "Вид: \"$declarationTemplate.name\", № $declarationData.id, Налоговый орган: \"$departmentConfig.taxOrganCode\", " +
+                                    "КПП: \"$departmentConfig.kpp\", ОКТМО: \"$departmentConfig.oktmo.code\". " +
+                                    "Внимание !!! Значение параметра \"Корректировать отрицательные значения\" отличается от значения в форме за предыдущий период. " +
+                                    "Сформированная форма может быть некорректна!!!")
+                        }
                     }
                 }
             } finally {
@@ -879,6 +891,10 @@ class Report6Ndfl extends AbstractScriptClass {
          * Корректировка отрицательных значений
          */
         void adjustNegativeValues() {
+            if (prevDeclarationData) {
+                negativeIncome = -prevDeclarationData.negativeIncome
+                negativeWithholding = -prevDeclarationData.negativeTax
+            }
             def rows = rows.sort(false) { Section2Row a, Section2Row b ->
                 a.taxDate <=> b.taxDate ?: (sign(a.incomeSum) != sign(b.incomeSum) ? a.incomeSum <=> b.incomeSum : b.incomeSum <=> a.incomeSum) ?:
                         a.key.taxTransferDate <=> b.key.taxTransferDate ?: a.key.incomeDate <=> b.key.incomeDate

@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDocState;
 import com.aplana.sbrf.taxaccounting.script.service.DeclarationService;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.component.lock.locker.DeclarationLocker;
@@ -100,6 +101,11 @@ public class DeclarationServiceImpl implements DeclarationService {
     @Override
     public List<DeclarationData> findAllByTypeIdAndReportPeriodIdAndKppAndOktmo(int declarationTypeId, int reportPeriodId, String kpp, String oktmo) {
         return declarationDataDao.findAllByTypeIdAndReportPeriodIdAndKppAndOktmo(declarationTypeId, reportPeriodId, kpp, oktmo);
+    }
+
+    @Override
+    public DeclarationData findPrev(DeclarationData declarationData, RefBookDocState... docStates) {
+        return declarationDataDao.findPrev(declarationData, docStates);
     }
 
     @Override
