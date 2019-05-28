@@ -13,7 +13,7 @@
     </div>
     <div id="ndflReportJournal" class="container-grid box-shadow-block flex-fill flex-column" style="overflow-y: auto">
         <!-- Фильтр -->
-        <div id="ndflReportJournalTop">
+        <div id="ndflReportJournalTop" style="flex-shrink: 0;">
             <span data-ng-include="'client/app/taxes/ndfl/reportForm/ndflReportJournalFilter.html'"></span>
 
             <!--Панель кнопок -->
@@ -112,7 +112,7 @@
                 </div>
             </div>
         </div>
-        <div class="flex-grid flex-fill" style="min-height: calc(100% - 50px);"
+        <div class="flex-grid flex-fill" style="min-height: calc(100% - 100px);"
              data-aplana-grid
              data-grid-fill-space="true"
              data-grid-store-page-settings="true"
