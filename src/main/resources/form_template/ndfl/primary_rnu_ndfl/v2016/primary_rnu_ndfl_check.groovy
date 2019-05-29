@@ -978,7 +978,7 @@ class Check extends AbstractScriptClass {
                             "которая была бы актуальная на настоящий момент, либо актуальна в периоде \"$reportPeriod.taxPeriod.year, $reportPeriod.name\". " +
                             "По этому сочетанию КПП-ОКТМО не будут сформированы отчетные формы для отправки в ФНС"
                     String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
-                    logger.warnExp("%s. %s.", "\"КПП\" и \"ОКТМО\" отсутствует в настройках подразделений", fioAndInpAndOperId, pathError,
+                    logger.warnExp("%s. %s.", "Отсутствие настройки подразделения для \"КПП\" и \"ОКТМО\"", fioAndInpAndOperId, pathError,
                             errMsg)
                 }
                 departmentConfigTime += (System.currentTimeMillis() - departmentConfigTimePart)
