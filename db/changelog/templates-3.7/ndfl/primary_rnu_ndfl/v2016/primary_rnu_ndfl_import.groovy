@@ -12,6 +12,7 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
 import com.aplana.sbrf.taxaccounting.script.SharedConstants
 import com.aplana.sbrf.taxaccounting.script.service.*
+import com.aplana.sbrf.taxaccounting.service.util.ExcelImportUtils
 import groovy.transform.TypeChecked
 import groovy.transform.TypeCheckingMode
 import org.apache.commons.lang3.StringUtils
@@ -19,7 +20,6 @@ import org.apache.commons.lang3.StringUtils
 import java.text.SimpleDateFormat
 
 import static com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils.checkInterrupted
-import static com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils.readSheetsRange
 
 new Import(this).run()
 
@@ -233,7 +233,7 @@ class Import extends AbstractScriptClass {
         List<List<String>> headerValues = []
         Map<String, Object> paramsMap = ['rowOffset': 0, 'colOffset': 0] as Map<String, Object>  // отступы сверху и слева для таблицы
 
-        readSheetsRange(file, allValues, headerValues, HEADER_START_VALUE, 2, paramsMap, 1, null)
+        ExcelImportUtils.readSheetsRange(file, allValues, headerValues, HEADER_START_VALUE, 2, paramsMap, 1, null)
         checkHeaders(headerValues)
         if (logger.containsLevel(LogLevel.ERROR)) {
             logger.error("Загрузка файла \"$fileName\" не может быть выполнена")
@@ -251,7 +251,7 @@ class Import extends AbstractScriptClass {
         for (def iterator = allValues.iterator(); iterator.hasNext(); rowIndex++) {
             checkInterrupted()
 
-            def row = new Row(rowIndex, iterator.next())
+            def row = new Row(rowIndex, iterator.next() as List<String>)
             iterator.remove()
             if (row.isEmpty()) {// все строки пустые - выход
                 if (rowIndex == TABLE_DATA_START_INDEX) {
@@ -1305,7 +1305,7 @@ class Import extends AbstractScriptClass {
             if (!requisitesEquals(ndflPersonGroup)) {
                 NdflPerson filePerson = ndflPersonGroup.get(0)
                 NdflPerson persistedPerson = persistedPersonsById.get(filePerson.importId)
-                logRequisitesComparisionError(persistedPerson ?: filePerson, ndflPersonGroup*.rowIndex, filePerson.importId)
+                logRequisitesComparisionError(persistedPerson ?: filePerson, ndflPersonGroup*.rowIndex as List<Integer>, filePerson.importId)
             }
         }
     }

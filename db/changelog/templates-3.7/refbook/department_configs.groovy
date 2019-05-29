@@ -12,13 +12,12 @@ import com.aplana.sbrf.taxaccounting.service.TransactionLogic
 import com.aplana.sbrf.taxaccounting.service.refbook.DepartmentConfigService
 import com.aplana.sbrf.taxaccounting.service.refbook.RefBookDepartmentService
 import com.aplana.sbrf.taxaccounting.service.refbook.RefBookOktmoService
+import com.aplana.sbrf.taxaccounting.service.util.ExcelImportUtils
 import groovy.transform.TypeChecked
 import org.apache.commons.lang3.time.FastDateFormat
-import org.codehaus.groovy.ast.stmt.ReturnStatement
 import org.joda.time.LocalDate
 import org.joda.time.format.DateTimeFormat
 
-import static com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils.checkAndReadFile
 import static com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils.checkInterrupted
 
 /**
@@ -74,7 +73,7 @@ class DepartmentConfigScript extends AbstractScriptClass {
 
         List<List<String>> header = []
         List<List<String>> values = []
-        checkAndReadFile(inputStream, fileName, values, header, this.header.first(), this.header.last(), 1, null)
+        ExcelImportUtils.checkAndReadFile(inputStream, fileName, values, header, this.header.first(), this.header.last(), 1, null)
         checkHeader(header)
         if (logger.containsLevel(LogLevel.ERROR)) {
             logger.error("Загрузка файла \"$fileName\" не может быть выполнена")

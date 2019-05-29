@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.script.util;
 
 import com.aplana.sbrf.taxaccounting.model.consolidation.ConsolidationIncome;
 import com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils;
+import com.aplana.sbrf.taxaccounting.service.util.ExcelImportUtils;
 import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
 import org.junit.Assert;
 import org.junit.Test;
@@ -11,7 +12,11 @@ import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.ParseException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -51,7 +56,7 @@ public class ScriptUtilsTest {
         paramsMap.put("rowOffset", 0);
         paramsMap.put("colOffset", 0);
 
-        ScriptUtils.readSheetsRange(file, allValues, headerValues, "Start read from", 1, paramsMap, 1, null);
+        ExcelImportUtils.readSheetsRange(file, allValues, headerValues, "Start read from", 1, paramsMap, 1, null);
 
         Assert.assertEquals(8, allValues.size());
         Assert.assertEquals("initial data1", allValues.get(0).get(0));
