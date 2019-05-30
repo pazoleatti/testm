@@ -151,10 +151,9 @@ class Report6Ndfl extends AbstractScriptClass {
         def incomeList = new IncomeList(incomes)
 
         ConfigurationParamModel configurationParamModel = declarationService.getAllConfig(userInfo)
-        // Получим ИНН из справочника "Общие параметры"
         def sberbankInnParam = configurationParamModel?.get(ConfigurationParam.SBERBANK_INN)?.get(0)?.get(0)
-        // Получим код НО пром из справочника "Общие параметры"
         def kodNoProm = configurationParamModel?.get(ConfigurationParam.NO_CODE)?.get(0)?.get(0)
+        boolean replaceTaxDate = 1 == Integer.valueOf(configurationParamModel?.get(ConfigurationParam.NDFL6_TAX_DATE_REPLACEMENT)?.get(0)?.get(0))
 
         // Код периода
         def periodCode = getRefBookValue(RefBook.Id.PERIOD_CODE.id, reportPeriod?.dictTaxPeriodId)?.CODE?.stringValue
@@ -269,13 +268,13 @@ class Report6Ndfl extends AbstractScriptClass {
                     if (!section2Block.isEmpty()) {
                         ДохНал() {
                             for (def row : section2Block) {
-                                if (isZeroDate(row.taxTransferDate)) {
+                                if (replaceTaxDate && isZeroDate(row.taxTransferDate)) {
                                     logger.warn("В блоке Раздела 2 с параметрами: \"ДатаУдержанияНалога\": ${formatDate(row.taxDate)}; \"СрокПеречисленияНалога: 00.00.0000; " +
                                             "\"ДатаДохода\": ${formatDate(row.incomeDate)}; исходное значение \"ДатаУдержанияНалога\": ${formatDate(row.taxDate)} заменено на \"00.00.0000\".")
                                 }
                                 СумДата(
                                         ДатаФактДох: formatDate(row.incomeDate),
-                                        ДатаУдержНал: isZeroDate(row.taxTransferDate) ? DATE_ZERO_AS_STRING : formatDate(row.taxDate),
+                                        ДатаУдержНал: replaceTaxDate && isZeroDate(row.taxTransferDate) ? DATE_ZERO_AS_STRING : formatDate(row.taxDate),
                                         СрокПрчслНал: isZeroDate(row.taxTransferDate) ? DATE_ZERO_AS_STRING : formatDate(row.taxTransferDate),
                                         ФактДоход: row.incomeSum,
                                         УдержНал: row.withholdingTaxSum

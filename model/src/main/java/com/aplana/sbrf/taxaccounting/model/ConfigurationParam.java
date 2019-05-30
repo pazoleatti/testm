@@ -70,7 +70,8 @@ public enum ConfigurationParam {
     WEIGHT_ADDRESS_INO("Вес для идентификации поля Адрес в стране регистрации", ConfigurationParamGroup.COMMON_PARAM, true, null, 0),
     DECLARATION_ROWS_BULK_EDIT_MAX_COUNT("Максимальное количество строк РНУ для массового изменения", ConfigurationParamGroup.COMMON_PARAM, true, null, 0),
     ASYNC_SERIAL_MODE("Включить возможность последовательного выполнения асинхронных задач", ConfigurationParamGroup.COMMON_PARAM, true, null, 0),
-    CALCULATED_TAX_DIFF("Разница между исчисленным налогом в КНФ и вычисленным значением исчисленного налога, руб.", ConfigurationParamGroup.COMMON_PARAM, true, null, 0);
+    CALCULATED_TAX_DIFF("Разница между исчисленным налогом в КНФ и вычисленным значением исчисленного налога, руб.", ConfigurationParamGroup.COMMON_PARAM, true, null, 0),
+    NDFL6_TAX_DATE_REPLACEMENT("Замена Даты удержания налога в 6-НДФЛ", ConfigurationParamGroup.COMMON_PARAM, true, null, 0);
 
     /**
      * Имя параметра

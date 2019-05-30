@@ -105,6 +105,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         defaultCommonConfig.add(new Configuration(ConfigurationParam.DECLARATION_ROWS_BULK_EDIT_MAX_COUNT.getCaption(), COMMON_PARAM_DEPARTMENT_ID, DECLARATION_ROWS_BULK_EDIT_MAX_COUNT_DEFAULT));
         defaultCommonConfig.add(new Configuration(ConfigurationParam.ASYNC_SERIAL_MODE.getCaption(), COMMON_PARAM_DEPARTMENT_ID, ASYNC_MODE_DEFAULT));
         defaultCommonConfig.add(new Configuration(ConfigurationParam.CALCULATED_TAX_DIFF.getCaption(), COMMON_PARAM_DEPARTMENT_ID, "1"));
+        defaultCommonConfig.add(new Configuration(ConfigurationParam.NDFL6_TAX_DATE_REPLACEMENT.getCaption(), COMMON_PARAM_DEPARTMENT_ID, "1"));
         // Веса идентификации
         defaultCommonConfig.add(new Configuration(ConfigurationParam.WEIGHT_LAST_NAME.getCaption(), COMMON_PARAM_DEPARTMENT_ID, "5"));
         defaultCommonConfig.add(new Configuration(ConfigurationParam.WEIGHT_FIRST_NAME.getCaption(), COMMON_PARAM_DEPARTMENT_ID, "10"));
@@ -396,7 +397,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         } else if (config.getCode().equals(ConfigurationParam.LIMIT_IDENT.name())) {
             checkLimitIdent(config.getValue(), logger);
         } else if (config.getCode().equals(ConfigurationParam.SHOW_TIMING.name()) ||
-                config.getCode().equals(ConfigurationParam.ENABLE_IMPORT_PERSON.name())) {
+                config.getCode().equals(ConfigurationParam.ENABLE_IMPORT_PERSON.name()) ||
+                config.getCode().equals(ConfigurationParam.NDFL6_TAX_DATE_REPLACEMENT.name())) {
             checkDiscreteValue(config.getValue(), logger);
         } else if (config.getCode().equals(ConfigurationParam.CONSOLIDATION_DATA_SELECTION_DEPTH.name())) {
             checkConsolidationDataSelectionDepth(config.getValue(), logger);

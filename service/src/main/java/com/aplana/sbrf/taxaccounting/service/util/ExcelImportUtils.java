@@ -294,10 +294,10 @@ public class ExcelImportUtils {
             if (name.equals("v") || inlineString && name.equals("t")) { // конец значения
                 // добавить отступ: если первое значение таблицы нашлось не в первом столбце, то делается отступ - пропуск лишних столбцов слева
                 int columnIndex = getColumnIndex(position);
-                if (columnIndex < colOffset) {
+                /*if (columnIndex < colOffset) {
                     endRead = (tableEndValue != null && tableEndValue.equals(getValue()));
                     return;
-                }
+                }*/
                 // добавить отсутствующие/пропущенные ячейки
                 if (rowValues.size() < columnIndex - colOffset) {
                     int n = (columnIndex - rowValues.size() - colOffset);
@@ -309,11 +309,11 @@ public class ExcelImportUtils {
                 rowValues.add(getValue());
             } else if (name.equals("row")) { // конец строки
                 if (isData) {
-                    endRead = (rowValues != null && rowValues.contains(tableEndValue));
+                    /*endRead = (rowValues != null && rowValues.contains(tableEndValue));
                     if (!endRead) {
                         // еще не конец таблицы - дополнить список значений недостоющеми значениями и добавить ко всем строкам
                         performRowData();
-                    }
+                    }*/
                 } else {
                     if (headerValues.isEmpty() && rowValues != null && (tableStartValue == null || rowValues.contains(tableStartValue))) {
                         // найдено начало таблицы

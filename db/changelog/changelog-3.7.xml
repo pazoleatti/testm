@@ -415,4 +415,13 @@
 		</insert>
 	</changeSet>
 
+	<!--https://jira.aplana.com/browse/SBRFNDFL-6697 Добавление нового параметра в общих параметрах  "Замена Даты удержания налога в 6-НДФЛ"-->
+	<changeSet id="3.7-dnovikov-24" author="dnovikov">
+		<insert tableName="configuration">
+			<column name="code" value="NDFL6_TAX_DATE_REPLACEMENT"/>
+			<column name="department_id" value="0"/>
+			<column name="value" value="1"/>
+		</insert>
+	</changeSet>
+
 </databaseChangeLog>
