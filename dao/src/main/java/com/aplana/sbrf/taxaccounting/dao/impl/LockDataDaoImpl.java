@@ -244,6 +244,14 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
     }
 
     @Override
+    public List<LockData> fetchAllByKeyPrefixSet(Collection<String> keysBlocker) {
+        return getJdbcTemplate().query(
+                "select id, key, user_id, task_id, date_lock, description from lock_data " +
+                        " where " + SqlUtils.transformToStringPrefixDisjunctionStatement("key", keysBlocker),
+                new LockDataMapper());
+    }
+
+    @Override
     public void lockKeysBatch(Map<String, String> lockKeysWithDescription, int userId) {
         List<Long> ids = dbUtils.getNextIds("seq_lock_data", lockKeysWithDescription.size());
         Date dateLock = new Date();

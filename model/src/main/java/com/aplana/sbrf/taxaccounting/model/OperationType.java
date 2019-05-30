@@ -42,7 +42,8 @@ public enum OperationType {
     CREATE_NOTIFICATIONS_LOGS(AsyncTaskType.CREATE_NOTIFICATIONS_LOGS, "Выгрузка протоколов по оповещениям"),
     RETURN_DECLARATION(null, "Возврат формы из подготовлена/принята в создана"),
     EDIT(null, "Редактирование строки налоговой формы"),
-    EDIT_FILE(null, "Добавление/удаление файлов/комментариев");
+    EDIT_FILE(null, "Добавление/удаление файлов/комментариев"),
+    TRANSFER(null, "Консолидация данных из формы");
 
     /**
      * Идентификатор типа асинхронной задачи

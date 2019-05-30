@@ -1,14 +1,19 @@
 package com.aplana.sbrf.taxaccounting.service.impl.component.lock;
 
 import com.aplana.sbrf.taxaccounting.model.OperationType;
-import com.aplana.sbrf.taxaccounting.service.component.lock.DeclarationDataLockKeyGenerator;
+import com.aplana.sbrf.taxaccounting.service.component.lock.LockKeyGenerator;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-@Component
-public class DeclarationLockKeyGeneratorImpl implements DeclarationDataLockKeyGenerator {
+import java.util.Map;
+
+@Component("mainLockKeyGeneratorImpl")
+public class MainLockKeyGeneratorImpl implements LockKeyGenerator {
 
     @Override
-    public String generateLockKey(Long declarationDataId, OperationType operationType) throws IllegalArgumentException {
+    public String generateLockKey(Map<String, Long> idTokens, OperationType operationType) throws IllegalArgumentException {
+        Long declarationDataId = idTokens.get("declarationDataId");
+        Long sourceDeclarationId = idTokens.get("sourceDeclarationId");
         if (operationType.equals(OperationType.LOAD_TRANSPORT_FILE))
             return String.format("DECLARATION_DATA_%s_IMPORT_TF_DECLARATION", declarationDataId);
         else if (operationType.equals(OperationType.IMPORT_DECLARATION_EXCEL))
@@ -69,7 +74,9 @@ public class DeclarationLockKeyGeneratorImpl implements DeclarationDataLockKeyGe
             return String.format("DECLARATION_DATA_%s_CHANGE_STATUS", declarationDataId);
         else if (operationType.equals(OperationType.SEND_EDO))
             return String.format("DECLARATION_DATA_%s_SEND_EDO", declarationDataId);
-        else
+        else if (operationType.equals(OperationType.TRANSFER)) {
+            return String.format("DECLARATION_DATA_%s_TRANSFER_%s", declarationDataId, sourceDeclarationId);
+        }
             throw new IllegalArgumentException("Unknown operationType type!");
     }
 }

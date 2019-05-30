@@ -8,9 +8,10 @@ import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import com.aplana.sbrf.taxaccounting.service.TransactionHelper;
-import com.aplana.sbrf.taxaccounting.service.component.lock.DeclarationDataLockKeyGenerator;
+import com.aplana.sbrf.taxaccounting.service.component.lock.LockKeyGenerator;
 import com.aplana.sbrf.taxaccounting.service.component.lock.descriptor.DeclarationDataKeyLockDescriptor;
-import com.aplana.sbrf.taxaccounting.service.impl.component.lock.DeclarationLockKeyGeneratorImpl;
+import com.aplana.sbrf.taxaccounting.service.impl.component.lock.CheckupLockKeyGeneratorImpl;
+import com.aplana.sbrf.taxaccounting.service.impl.component.lock.MainLockKeyGeneratorImpl;
 import com.aplana.sbrf.taxaccounting.service.impl.component.lock.locker.DeclarationLockerImpl;
 import org.junit.Before;
 import org.junit.Test;
@@ -69,11 +70,12 @@ public class CrossBlockingTest {
                 .thenReturn(createTestTemplate());
         TransactionHelper tx = new TransactionHelperStub();
         // Генератор ключей берём реальный, заодно проверяем и его.
-        DeclarationDataLockKeyGenerator lockKeyGenerator = new DeclarationLockKeyGeneratorImpl();
-
+        LockKeyGenerator mainLockKeyGenerator = new MainLockKeyGeneratorImpl();
+        LockKeyGenerator checkupLockKeyGenerator = new CheckupLockKeyGeneratorImpl(mainLockKeyGenerator);
         // Создаем тестовый объект с зависимостями.
         declarationLocker = new DeclarationLockerImpl(
-                lockKeyGenerator,
+                mainLockKeyGenerator,
+                checkupLockKeyGenerator,
                 lockDescriptionGenerator,
                 lockDataDao,
                 declarationDataService,
@@ -120,6 +122,15 @@ public class CrossBlockingTest {
         // Аргументом передается коллекция ключей, которые нужно вытащить,
         // если среди них есть наша lockWasInDB, возвращаем LockData с ней.
         // Второй запрос будет только в случае успешной блокировки, там возвращаем новую блокировку
+        when(lockDataDao.fetchAllByKeyPrefixSet((Collection<String>) argThat(hasItem(lockWasInDB))))
+                .thenReturn(Collections.singletonList(new LockData(lockWasInDB, USER_ID)))
+                .thenReturn(Collections.singletonList(new LockData(lockToSet, USER_ID)));
+
+        // Если нашей блокировки среди запрашиваемых нет, возвращаем пустой лист
+        when(lockDataDao.fetchAllByKeyPrefixSet((Collection<String>) argThat(not(hasItem(lockWasInDB)))))
+                .thenReturn(Collections.<LockData>emptyList())
+                .thenReturn(Collections.singletonList(new LockData(lockToSet, USER_ID)));
+
         when(lockDataDao.fetchAllByKeySet((Collection<String>) argThat(hasItem(lockWasInDB))))
                 .thenReturn(Collections.singletonList(new LockData(lockWasInDB, USER_ID)))
                 .thenReturn(Collections.singletonList(new LockData(lockToSet, USER_ID)));

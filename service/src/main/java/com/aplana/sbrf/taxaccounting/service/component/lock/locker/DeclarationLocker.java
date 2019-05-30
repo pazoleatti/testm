@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.ScriptExposed;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Интерфейс отвечающий за проверку и установку блокировки
@@ -37,21 +38,35 @@ public interface DeclarationLocker {
     List<LockData> establishLock(List<Long> declarationDataIdList, OperationType operationType, TAUserInfo userInfo, Logger logger);
 
     /**
+     * Устанавливает блокировки на формы, предварительно проверив существование блокировок, которые мешают постановке в очередь текущей задачи
+     *
+     * @param declarationDataIdList идентификатор налоговой формы
+     * @param operationType         операция
+     * @param additionalParams      дополнительные парметры для генерации ключа блокировок
+     * @param userInfo              информация о пользователе
+     * @param logger                логгер
+     * @return список объектов блокировок в случае успешной установки блокировки иначе null
+     */
+    List<LockData> establishLockWithAdditionalParams(List<Long> declarationDataIdList, OperationType operationType, Map<String, Long> additionalParams, TAUserInfo userInfo, Logger logger);
+
+    /**
      * Снимает блокировку выбранного типа с формы.
      *
      * @param declarationDataId идентификатор налоговой формы
      * @param operationType     тип блокировки
+     * @param additionalParams  дополнительные парметры для генерации ключа блокировок
      * @param logger            логгер
      */
-    void unlock(Long declarationDataId, OperationType operationType, Logger logger);
+    void unlock(Long declarationDataId, OperationType operationType, Map<String,Long> additionalParams, Logger logger);
 
     /**
      * Проверка наличия блокировки на форме.
      *
      * @param declarationDataId идентификатор налоговой формы
      * @param operationType     тип блокировки
+     * @param additionalParams  дополнительные парметры для генерации ключа блокировок
      * @param userInfo          пользователь
      * @return true, если блокировка выбранного типа имеется и установлена данным пользователем
      */
-    boolean lockExists(Long declarationDataId, OperationType operationType, TAUserInfo userInfo);
+    boolean lockExists(Long declarationDataId, OperationType operationType, Map<String, Long> additionalParams, TAUserInfo userInfo);
 }

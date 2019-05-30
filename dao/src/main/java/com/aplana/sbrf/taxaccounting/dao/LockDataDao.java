@@ -119,6 +119,14 @@ public interface LockDataDao extends PermissionDao {
     List<LockData> fetchAllByKeySet(Collection<String> keysBlocker);
 
     /**
+     * Получает список всех блокировок по части ключа
+     *
+     * @param keysBlocker множество ключей
+     * @return список существующих блокировок
+     */
+    List<LockData> fetchAllByKeyPrefixSet(Collection<String> keysBlocker);
+
+    /**
      * Создает несколько блокировок
      *
      * @param lockKeysWithDescription мапа блокировок, где ключом выступает ключ блокировки, а значением -- описание бокировки

@@ -95,6 +95,37 @@ public final class SqlUtils extends AbstractDao {
     }
 
     /**
+     * Метод возвращает строку вида field like '...%' or like '...%' разбивая для каждого элемента коллекции
+     * @param field         поле по которому ведется поиск
+     * @param collection    значения параметара
+     * @return строка подзапроса
+     */
+    public static String transformToStringPrefixDisjunctionStatement(String field, Collection<String> collection) {
+        Set<String> set = new LinkedHashSet<>(collection);
+        checkListSize(set);
+
+        List<String> strings = new ArrayList<String>();
+
+        for (String s : set) {
+            StringBuffer buffer = new StringBuffer();
+            buffer
+                    .append(field)
+                    .append(" LIKE '")
+                    .append(s)
+                    .append("%'");
+
+            strings.add(buffer.toString());
+        }
+
+        StringBuffer buffer = new StringBuffer();
+        buffer
+                .append("(")
+                .append(StringUtils.join(strings.toArray(), " OR ", ""))
+                .append(")");
+
+        return buffer.toString();
+    }
+    /**
      * <p>
      * Метод возвращает строку вида prefix in (...) or prefix in (...) разбивая параметры в условии in по IN_CAUSE_LIMIT штук.
      * </p>

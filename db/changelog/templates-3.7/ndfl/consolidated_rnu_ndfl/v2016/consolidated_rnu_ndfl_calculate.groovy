@@ -42,6 +42,8 @@ class Calculate extends AbstractScriptClass {
     // Даты создания налоговой формы
     Map<Long, Date> creationDateCache = [:]
 
+    List<LockData> locks
+
     @TypeChecked(TypeCheckingMode.SKIP)
     Calculate(scriptClass) {
         //noinspection GroovyAssignabilityCheck
@@ -96,6 +98,8 @@ class Calculate extends AbstractScriptClass {
         } catch (Throwable e) {
             logger.error(e.toString())
             e.printStackTrace()
+        } finally {
+            lockDataService.unlockMultipleTasks(locks?.key)
         }
     }
 
@@ -144,6 +148,19 @@ class Calculate extends AbstractScriptClass {
         ScriptUtils.checkInterrupted()
 
         time = System.currentTimeMillis()
+
+        Set<Long> allSources = operationsForConsolidationList.declarationDataId.toSet()
+        Map<String, Long> additionalParams = [:]
+        additionalParams["sourceDeclarationId"] = declarationData.id
+        locks = declarationLocker.establishLockWithAdditionalParams(new ArrayList<Long>(allSources), OperationType.TRANSFER, additionalParams, userInfo, logger)
+        if (logger.containsLevel(LogLevel.ERROR)) {
+            return
+        }
+        logForDebug("Установка блокировок на источники, (" + ScriptUtils.calcTimeMillis(time))
+
+        time = System.currentTimeMillis()
+
+        ScriptUtils.checkInterrupted()
 
         Map<Pair<String, Long>, List<ConsolidationIncome>> incomesGroupedByOperationIdAndAsnu = [:]
         List<String> kppList = null

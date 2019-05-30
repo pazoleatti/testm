@@ -80,4 +80,14 @@ public class SqlUtilsTest {
 		Assert.assertEquals("?", SqlUtils.preparePlaceHolders(-47));
 	}
 
+	@Test
+	public void test_transformToStringPrefixDisjunctionStatement() {
+    	List<String> tokens = new ArrayList<>();
+		tokens.add("token1");
+		tokens.add("token2");
+		tokens.add("token3");
+    	String result = SqlUtils.transformToStringPrefixDisjunctionStatement("field", tokens);
+    	Assert.assertEquals("(field LIKE 'token1%' OR field LIKE 'token2%' OR field LIKE 'token3%')", result);
+	}
+
 }

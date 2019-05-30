@@ -798,7 +798,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         }
 
         Logger logger = new Logger();
-        if (declarationLocker.lockExists(declarationDataId, OperationType.EDIT_FILE, userInfo)) {
+        if (declarationLocker.lockExists(declarationDataId, OperationType.EDIT_FILE, null, userInfo)) {
             declarationDataDao.updateNote(declarationDataId, dataFileComment.getComment());
             declarationDataFileDao.createOrUpdateList(declarationDataId, dataFileComment.getDeclarationDataFiles());
             logger.info("Данные успешно сохранены.");
@@ -1770,7 +1770,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     public ActionResult unlock(long declarationDataId, OperationType operationType) {
         Logger logger = new Logger();
-        declarationLocker.unlock(declarationDataId, operationType, logger);
+        declarationLocker.unlock(declarationDataId, operationType, null, logger);
 
         ActionResult result = new ActionResult();
         result.setSuccess(!logger.containsLevel(LogLevel.ERROR));
