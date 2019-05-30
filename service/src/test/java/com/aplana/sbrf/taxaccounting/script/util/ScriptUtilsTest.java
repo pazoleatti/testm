@@ -28,7 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class ScriptUtilsTest {
 
-    /*@Test
+    @Test
     public void roundTest1() {
         Assert.assertEquals(3.123, ScriptUtils.round(3.12345, 3), Constants.EPS);
     }
@@ -388,5 +388,5 @@ public class ScriptUtilsTest {
         Assert.assertEquals(uuid11, uuid12);
         Assert.assertEquals(uuid21, uuid22);
         Assert.assertNotEquals(uuid11, uuid21);
-    }*/
+    }
 }
