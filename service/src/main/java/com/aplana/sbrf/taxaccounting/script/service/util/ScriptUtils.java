@@ -5,39 +5,15 @@ import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.FormStyle;
 import com.aplana.sbrf.taxaccounting.model.consolidation.ConsolidationIncome;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.TAInterruptedException;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
-import org.apache.poi.openxml4j.opc.OPCPackage;
-import org.apache.poi.openxml4j.opc.PackageAccess;
-import org.apache.poi.ss.usermodel.BuiltinFormats;
 import org.apache.poi.ss.usermodel.DataFormat;
-import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.ss.util.DateFormatConverter;
-import org.apache.poi.ss.util.NumberToTextConverter;
-import org.apache.poi.xssf.eventusermodel.XSSFReader;
-import org.apache.poi.xssf.model.SharedStringsTable;
-import org.apache.poi.xssf.model.StylesTable;
-import org.apache.poi.xssf.usermodel.XSSFCellStyle;
-import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 import org.joda.time.LocalDateTime;
-import org.xml.sax.Attributes;
-import org.xml.sax.ContentHandler;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import org.xml.sax.XMLReader;
-import org.xml.sax.helpers.DefaultHandler;
-import org.xml.sax.helpers.XMLReaderFactory;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
 import java.text.DateFormat;
@@ -46,16 +22,11 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import static com.aplana.sbrf.taxaccounting.model.util.StringUtils.cleanString;
 
 /**
  * Библиотека скриптовых функций

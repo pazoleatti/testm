@@ -231,7 +231,8 @@ class Import extends AbstractScriptClass {
 
         LinkedList<List<String>> allValues = [] as LinkedList
         List<List<String>> headerValues = []
-        Map<String, Object> paramsMap = ['rowOffset': 0, 'colOffset': 0] as Map<String, Object>  // отступы сверху и слева для таблицы
+        // отступы сверху и слева для таблицы
+        Map<String, Object> paramsMap = ['rowOffset': 0, 'colOffset': 0] as Map<String, Object>
 
         ExcelImportUtils.readSheetsRange(file, allValues, headerValues, HEADER_START_VALUE, 2, paramsMap, 1, null)
         checkHeaders(headerValues)
@@ -240,7 +241,8 @@ class Import extends AbstractScriptClass {
             return
         }
         if (allValues.size() == 0) {
-            logger.error("Ошибка при загрузке файла \"$fileName\". Отсутствуют данные для загрузки.")
+            logger.error("Ошибка при загрузке файла \"$fileName\". Отсутствуют данные для загрузки " +
+                    "или файл не соответствует требуемой структуре (не заполнена строка, следующая непосредственно после шапки таблицы).")
             return
         }
 
@@ -255,7 +257,8 @@ class Import extends AbstractScriptClass {
             iterator.remove()
             if (row.isEmpty()) {// все строки пустые - выход
                 if (rowIndex == TABLE_DATA_START_INDEX) {
-                    logger.error("Ошибка при загрузке файла \"$fileName\". Отсутствуют данные для загрузки.")
+                    logger.error("Ошибка при загрузке файла \"$fileName\". Отсутствуют данные для загрузки " +
+                            "или файл не соответствует требуемой структуре (не заполнена строка, следующая непосредственно после шапки таблицы).")
                     return
                 }
                 break
@@ -896,7 +899,7 @@ class Import extends AbstractScriptClass {
 
         if (!row.isEmpty(46..59)) {
             ndflPerson.deductions.add(createDeduction(row, deductionImportId))
-        } else if (deductionImportId){
+        } else if (deductionImportId) {
             if (emptyDeductionsIds.containsKey(ndflPerson.importId)) {
                 emptyDeductionsIds.get(ndflPerson.importId) << deductionImportId
             } else {
@@ -906,7 +909,7 @@ class Import extends AbstractScriptClass {
 
         if (!row.isEmpty(60..64)) {
             ndflPerson.prepayments.add(createPrepayment(row, prepaymentImportId))
-        } else if (prepaymentImportId){
+        } else if (prepaymentImportId) {
             if (emptyPrepaymentsIds.containsKey(ndflPerson.importId)) {
                 emptyPrepaymentsIds.get(ndflPerson.importId) << prepaymentImportId
             } else {
