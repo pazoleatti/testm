@@ -318,6 +318,22 @@
                     <div class="row-fluid form-group">
                         <div class="span4">
                             <label class="control-label">
+                                {{::'departmentConfig.modal.field.reorganization.label' | translate}}:</label>
+                        </div>
+                        <div data-ng-if="mode === 'VIEW'" class="span8 info-text">
+                            {{record.reorganization | codeNameFormatter}}
+                        </div>
+                        <div data-ng-if="mode !== 'VIEW'" class="span8" data-ng-controller="SelectRefBookCtrl">
+                            <div data-aplana-field>
+                                <div data-ui-select2="select.options"
+                                     data-ng-init="initSelect(APP_CONSTANTS.REFBOOK.REORGANIZATION)"
+                                     data-ng-model="record.reorganization"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row-fluid form-group">
+                        <div class="span4">
+                            <label class="control-label">
                                 {{::'departmentConfig.modal.field.reorgKpp.label' | translate}}:</label>
                         </div>
                         <div data-ng-if="mode === 'VIEW'" class="span8 info-text">
@@ -331,8 +347,8 @@
                                        data-ng-pattern="patterns.number"
                                        data-ui-validate="{kppValidator : 'isKppValid($value)', length: '!$value || $value.length === 9'}"
                                        placeholder="{{'filter.placeholder.search' | translate}}"/>
-                                <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.number' |
-                                    translate}}
+                                <div data-aplana-validator data-key="pattern">
+                                    {{::'common.validation.pattern.number' | translate}}
                                 </div>
                                 <div data-aplana-validator data-key="kppValidator">
                                     {{::'departmentConfig.modal.field.kpp.validation.digits' | translate}}
@@ -373,16 +389,45 @@
                     <div class="row-fluid form-group">
                         <div class="span4">
                             <label class="control-label">
-                                {{::'departmentConfig.modal.field.reorganization.label' | translate}}:</label>
+                                {{::'departmentConfig.modal.field.reorgSuccessorKpp.label' | translate}}:</label>
                         </div>
                         <div data-ng-if="mode === 'VIEW'" class="span8 info-text">
-                            {{record.reorganization | codeNameFormatter}}
+                            {{record.reorgKpp}}
                         </div>
-                        <div data-ng-if="mode !== 'VIEW'" class="span8" data-ng-controller="SelectRefBookCtrl">
+                        <div data-ng-if="mode !== 'VIEW'" class="span8">
                             <div data-aplana-field>
-                                <div data-ui-select2="select.options"
-                                     data-ng-init="initSelect(APP_CONSTANTS.REFBOOK.REORGANIZATION)"
-                                     data-ng-model="record.reorganization"></div>
+                                <input class="form-control" type="text"
+                                       data-ng-model="record.reorgSuccessorKpp"
+                                       maxlength="9"
+                                       data-ng-pattern="patterns.number"
+                                       data-ui-validate="{kppValidator : 'isKppValid($value)', length: '!$value || $value.length === 9'}"
+                                       placeholder="{{'filter.placeholder.search' | translate}}"/>
+                                <div data-aplana-validator data-key="pattern">
+                                    {{::'common.validation.pattern.number' | translate}}
+                                </div>
+                                <div data-aplana-validator data-key="kppValidator">
+                                    {{::'departmentConfig.modal.field.kpp.validation.digits' | translate}}
+                                </div>
+                                <div data-aplana-validator data-key="length">
+                                    {{::'common.validation.length' | translate:'{length: 9}'}}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row-fluid form-group">
+                        <div class="span4">
+                            <label class="control-label">
+                                {{::'departmentConfig.modal.field.reorgSuccessorName.label' | translate}}:</label>
+                        </div>
+                        <div data-ng-if="mode === 'VIEW'" class="span8 info-text">
+                            {{record.name}}
+                        </div>
+                        <div data-ng-if="mode !== 'VIEW'" class="span8">
+                            <div data-aplana-field>
+                                <input class="form-control" type="text"
+                                       data-ng-model="record.reorgSuccessorName"
+                                       maxlength="1000"
+                                       placeholder="{{'filter.placeholder.search' | translate}}"/>
                             </div>
                         </div>
                     </div>

@@ -5,19 +5,17 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
+import org.apache.commons.lang3.time.FastDateFormat;
 
 import java.io.IOException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
  * Парсер даты из текстового формата ISO в объекты типа Date
- *
- * @author dloshkarev
  */
 public class ISODateDeserializer extends JsonDeserializer<Date> {
-    private final SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+    private final FastDateFormat format = FastDateFormat.getInstance("yyyy-MM-dd");
 
     @Override
     public Date deserialize(JsonParser jp, DeserializationContext ctxt)

@@ -38,7 +38,7 @@ public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentCon
             " dc.id, dc.kpp, oktmo.id oktmo_id, oktmo.code oktmo_code, oktmo.name oktmo_name, dc.start_date, dc.end_date," +
             " dc.department_id, dep.name department_name, dc.tax_organ_code, pp.id present_place_id, pp.code present_place_code, pp.name present_place_name, dc.name, dc.phone," +
             " reorg.id reorg_id, reorg.code reorg_code, reorg.name reorg_name, dc.reorg_inn, reorg_kpp, sign.id signatory_id, sign.code signatory_code, sign.name signatory_name, " +
-            " dc.signatory_surname, dc.signatory_firstname, dc.signatory_lastname, dc.approve_doc_name, dc.approve_org_name ";
+            " dc.signatory_surname, dc.signatory_firstname, dc.signatory_lastname, dc.approve_doc_name, dc.approve_org_name, dc.reorg_successor_kpp, dc.reorg_successor_name ";
     private final static String ALL_FIELDS_JOINS = "" +
             "join department dep on dep.id = dc.department_id \n" +
             "join ref_book_oktmo oktmo on oktmo.id = dc.oktmo_id \n" +
@@ -399,11 +399,15 @@ public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentCon
         params.addValue("signatory_lastname", departmentConfig.getSignatoryLastName());
         params.addValue("approve_doc_name", departmentConfig.getApproveDocName());
         params.addValue("approve_org_name", departmentConfig.getApproveOrgName());
+        params.addValue("reorg_successor_kpp", departmentConfig.getReorgSuccessorKpp());
+        params.addValue("reorg_successor_name", departmentConfig.getReorgSuccessorName());
         getNamedParameterJdbcTemplate().update("" +
                         "insert into department_config(id, kpp, oktmo_id, start_date, end_date, department_id, tax_organ_code, present_place_id, name,\n" +
-                        "   phone, reorganization_id, reorg_inn, reorg_kpp, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name)" +
+                        "   phone, reorganization_id, reorg_inn, reorg_kpp, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name,\n" +
+                        "   approve_org_name, reorg_successor_kpp, reorg_successor_name)" +
                         "values (seq_department_config.nextval, :kpp, :oktmo_id, :start_date, :end_date, :department_id, :tax_organ_code, :present_place_id, :name,\n" +
-                        "   :phone, :reorganization_id, :reorg_inn, :reorg_kpp, :signatory_id, :signatory_surname, :signatory_firstname, :signatory_lastname, :approve_doc_name, :approve_org_name)",
+                        "   :phone, :reorganization_id, :reorg_inn, :reorg_kpp, :signatory_id, :signatory_surname, :signatory_firstname, :signatory_lastname, :approve_doc_name,\n" +
+                        "   :approve_org_name, :reorg_successor_kpp, :reorg_successor_name)",
                 params, keyHolder, new String[]{"ID"});
         departmentConfig.setId(keyHolder.getKey().longValue());
     }
@@ -431,12 +435,14 @@ public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentCon
         params.addValue("signatory_lastname", departmentConfig.getSignatoryLastName());
         params.addValue("approve_doc_name", departmentConfig.getApproveDocName());
         params.addValue("approve_org_name", departmentConfig.getApproveOrgName());
+        params.addValue("reorg_successor_kpp", departmentConfig.getReorgSuccessorKpp());
+        params.addValue("reorg_successor_name", departmentConfig.getReorgSuccessorName());
         getNamedParameterJdbcTemplate().update("" +
                         "update department_config\n" +
                         "set kpp = :kpp, oktmo_id = :oktmo_id, start_date = :start_date, end_date = :end_date, department_id = :department_id, tax_organ_code = :tax_organ_code, " +
                         "present_place_id = :present_place_id, name = :name, phone = :phone, reorganization_id = :reorganization_id, reorg_inn = :reorg_inn, reorg_kpp = :reorg_kpp, " +
                         "signatory_id = :signatory_id, signatory_surname = :signatory_surname, signatory_firstname = :signatory_firstname, signatory_lastname = :signatory_lastname, " +
-                        "approve_doc_name = :approve_doc_name, approve_org_name = :approve_org_name\n" +
+                        "approve_doc_name = :approve_doc_name, approve_org_name = :approve_org_name, reorg_successor_kpp = :reorg_successor_kpp, reorg_successor_name = :reorg_successor_name\n" +
                         "where id = :id",
                 params);
     }

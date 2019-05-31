@@ -179,50 +179,38 @@ class Report6Ndfl extends AbstractScriptClass {
         def builder = new MarkupBuilder(new PlatformLineWriter(writer))
         builder.setDoubleQuotes(true)
         builder.setOmitNullAttributes(true)
-        builder.Файл(
-                ИдФайл: xml.fileName,
+        builder.Файл(ИдФайл: xml.fileName,
                 ВерсПрог: applicationVersion,
-                ВерсФорм: "5.02"
-        ) {
-            Документ(
-                    КНД: "1151099",
+                ВерсФорм: "5.02") {
+            Документ(КНД: "1151099",
                     ДатаДок: xml.date.format(SharedConstants.DATE_FORMAT),
                     Период: getPeriod(departmentConfig, periodCode),
                     ОтчетГод: reportPeriod.taxPeriod.year,
                     КодНО: departmentConfig.taxOrganCode,
                     НомКорр: sprintf('%02d', declarationData.correctionNum),
-                    ПоМесту: departmentConfig.presentPlace.code
-            ) {
-                def svNP = ["ОКТМО": declarationData.oktmo]
-                // Атрибут Тлф необязателен
-                if (departmentConfig.phone) {
-                    svNP.put("Тлф", departmentConfig.phone)
-                }
-                СвНП(svNP) {
-                    НПЮЛ(
-                            НаимОрг: departmentConfig.name,
+                    ПоМесту: departmentConfig.presentPlace.code) {
+                СвНП(ОКТМО: declarationData.oktmo,
+                        Тлф: departmentConfig.phone) {
+                    НПЮЛ(НаимОрг: !departmentConfig.reorganization ? departmentConfig.name : departmentConfig.reorgSuccessorName,
                             ИННЮЛ: sberbankInnParam,
-                            КПП: declarationData.kpp
-                    )
-                }
-                Подписант(
-                        ПрПодп: signatoryId
-                ) {
-                    // Узел ФИО необязателен
-                    if (departmentConfig.signatorySurName) {
-                        def fio = ["Фамилия": departmentConfig.signatorySurName, "Имя": departmentConfig.signatoryFirstName]
-                        // Атрибут Отчество необязателен
-                        if (departmentConfig.signatoryLastName) {
-                            fio.put("Отчество", departmentConfig.signatoryLastName)
+                            КПП: !departmentConfig.reorganization ? declarationData.kpp : departmentConfig.reorgSuccessorKpp) {
+                        if (departmentConfig.reorganization) {
+                            СвРеоргЮЛ(ФормРеорг: departmentConfig.reorganization.code,
+                                    КПП: departmentConfig.reorgKpp,
+                                    ИННЮЛ: sberbankInnParam
+                            )
                         }
-                        ФИО(fio) {}
+                    }
+                }
+                Подписант(ПрПодп: signatoryId) {
+                    if (departmentConfig.signatorySurName) {
+                        ФИО(Фамилия: departmentConfig.signatorySurName,
+                                Имя: departmentConfig.signatoryFirstName,
+                                Отчество: departmentConfig.signatoryLastName) {}
                     }
                     if (signatoryId == 2) {
-                        def svPred = ["НаимДок": departmentConfig.approveDocName]
-                        if (departmentConfig.approveOrgName) {
-                            svPred.put("НаимОрг", departmentConfig.approveOrgName)
-                        }
-                        СвПред(svPred) {}
+                        СвПред(НаимДок: departmentConfig.approveDocName,
+                                НаимОрг: departmentConfig.approveOrgName) {}
                     }
                 }
                 НДФЛ6() {
@@ -253,14 +241,13 @@ class Report6Ndfl extends AbstractScriptClass {
                     ОбобщПоказ(ОбобщПоказAttrs) {
                         generalBlock.rows.eachWithIndex { row, index ->
                             ScriptUtils.checkInterrupted()
-                            def СумСтавкаAttrs = [Ставка      : row.rate,
-                                                  НачислДох   : ScriptUtils.round(row.accruedSum, 2),
-                                                  НачислДохДив: ScriptUtils.round(row.accruedSumForDividend, 2),
-                                                  ВычетНал    : ScriptUtils.round(row.deductionsSum, 2),
-                                                  ИсчислНал   : row.calculatedTaxSum,
-                                                  ИсчислНалДив: row.calculatedTaxSumForDividend,
-                                                  АвансПлат   : row.prepaymentsSum] as Map<String, Object>
-                            СумСтавка(СумСтавкаAttrs) {}
+                            СумСтавка(Ставка: row.rate,
+                                    НачислДох: ScriptUtils.round(row.accruedSum, 2),
+                                    НачислДохДив: ScriptUtils.round(row.accruedSumForDividend, 2),
+                                    ВычетНал: ScriptUtils.round(row.deductionsSum, 2),
+                                    ИсчислНал: row.calculatedTaxSum,
+                                    ИсчислНалДив: row.calculatedTaxSumForDividend,
+                                    АвансПлат: row.prepaymentsSum) {}
                         }
                     }
                     section2Block = section2Block.findAll { it.incomeSum || it.withholdingTaxSum }
@@ -272,13 +259,11 @@ class Report6Ndfl extends AbstractScriptClass {
                                     logger.warn("В блоке Раздела 2 с параметрами: \"ДатаУдержанияНалога\": ${formatDate(row.taxDate)}; \"СрокПеречисленияНалога: 00.00.0000; " +
                                             "\"ДатаДохода\": ${formatDate(row.incomeDate)}; исходное значение \"ДатаУдержанияНалога\": ${formatDate(row.taxDate)} заменено на \"00.00.0000\".")
                                 }
-                                СумДата(
-                                        ДатаФактДох: formatDate(row.incomeDate),
+                                СумДата(ДатаФактДох: formatDate(row.incomeDate),
                                         ДатаУдержНал: replaceTaxDate && isZeroDate(row.taxTransferDate) ? DATE_ZERO_AS_STRING : formatDate(row.taxDate),
                                         СрокПрчслНал: isZeroDate(row.taxTransferDate) ? DATE_ZERO_AS_STRING : formatDate(row.taxTransferDate),
                                         ФактДоход: row.incomeSum,
-                                        УдержНал: row.withholdingTaxSum
-                                ) {}
+                                        УдержНал: row.withholdingTaxSum) {}
                             }
                         }
                     }

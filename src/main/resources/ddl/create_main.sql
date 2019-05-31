@@ -1659,26 +1659,28 @@ comment on column ref_book_person_tb.import_date is 'Дата, показыва�
 
 -----------------------------------------------------
 CREATE TABLE department_config (
-  ID                  NUMBER(18) NOT NULL,
-  KPP                 VARCHAR2(9 CHAR) NOT NULL,
-  OKTMO_ID            NUMBER(18,0) NOT NULL,
-  start_date          DATE NOT NULL,
-  end_date            DATE,
-  DEPARTMENT_ID       NUMBER(18) NOT NULL,
-  TAX_ORGAN_CODE      VARCHAR2(4 CHAR) NOT NULL,
-  TAX_ORGAN_CODE_MID  VARCHAR2(4 CHAR),
-  present_place_id    NUMBER(18,0) NOT NULL,
-  NAME                VARCHAR2(1000 CHAR),
-  PHONE               VARCHAR2(20 CHAR),
-  reorganization_id   NUMBER(18,0),
-  REORG_INN           VARCHAR2(12 CHAR),
-  REORG_KPP           VARCHAR2(9 CHAR),
-  SIGNATORY_ID        NUMBER(18,0) NOT NULL,
-  SIGNATORY_SURNAME   VARCHAR2(60 CHAR),
-  SIGNATORY_FIRSTNAME VARCHAR2(60 CHAR),
-  SIGNATORY_LASTNAME  VARCHAR2(60 CHAR),
-  APPROVE_DOC_NAME    VARCHAR2(120 CHAR),
-  APPROVE_ORG_NAME    VARCHAR2(1000 CHAR)
+  ID                    NUMBER(18) NOT NULL,
+  KPP                   VARCHAR2(9 CHAR) NOT NULL,
+  OKTMO_ID              NUMBER(18,0) NOT NULL,
+  start_date            DATE NOT NULL,
+  end_date              DATE,
+  DEPARTMENT_ID         NUMBER(18) NOT NULL,
+  TAX_ORGAN_CODE        VARCHAR2(4 CHAR) NOT NULL,
+  TAX_ORGAN_CODE_MID    VARCHAR2(4 CHAR),
+  present_place_id      NUMBER(18,0) NOT NULL,
+  NAME                  VARCHAR2(1000 CHAR),
+  PHONE                 VARCHAR2(20 CHAR),
+  reorganization_id     NUMBER(18,0),
+  REORG_INN             VARCHAR2(12 CHAR),
+  REORG_KPP             VARCHAR2(9 CHAR),
+  SIGNATORY_ID          NUMBER(18,0) NOT NULL,
+  SIGNATORY_SURNAME     VARCHAR2(60 CHAR),
+  SIGNATORY_FIRSTNAME   VARCHAR2(60 CHAR),
+  SIGNATORY_LASTNAME    VARCHAR2(60 CHAR),
+  APPROVE_DOC_NAME      VARCHAR2(120 CHAR),
+  APPROVE_ORG_NAME      VARCHAR2(1000 CHAR),
+  reorg_successor_kpp   VARCHAR2(9 CHAR),
+  reorg_successor_name  VARCHAR2(1000 CHAR)
 );
 COMMENT ON TABLE department_config IS 'Настройки подразделений';
 COMMENT ON COLUMN department_config.ID IS 'Уникальный идентификатор';
@@ -1701,6 +1703,8 @@ COMMENT ON COLUMN department_config.SIGNATORY_FIRSTNAME IS 'Имя подпис�
 COMMENT ON COLUMN department_config.SIGNATORY_LASTNAME IS 'Отчество подписанта';
 COMMENT ON COLUMN department_config.APPROVE_DOC_NAME IS 'Наименование документа, подтверждающего полномочия';
 COMMENT ON COLUMN department_config.APPROVE_ORG_NAME IS 'Наименование организации-представителя налогоплательщика';
+COMMENT ON COLUMN department_config.reorg_successor_kpp is 'Код причины постановки организации по месту нахождения организации правопреемника';
+COMMENT ON COLUMN department_config.reorg_successor_name is 'Наименование подразделения для титульного листа отчетных форм по реорганизованному подразделению';
 
 create sequence seq_department_config start with 10000;
 

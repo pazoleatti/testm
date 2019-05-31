@@ -613,6 +613,8 @@
         "departmentConfig.header.reorganizationCode": "Код формы реорганизации",
         "departmentConfig.header.reorgKpp": "КПП реорганизованной организации",
         "departmentConfig.header.reorgInn": "ИНН реорганизованной организации",
+        "departmentConfig.header.reorgSuccessorKpp": "КПП подразделения-правопреемника",
+        "departmentConfig.header.reorgSuccessorName": "Наименование подразделения правопреемника",
         "departmentConfig.modal.edit.title": "Редактирование настройки подразделения",
         "departmentConfig.modal.open.title": "Просмотр настройки подразделения",
         "departmentConfig.modal.create.title": "Создание настройки подразделения",
@@ -634,6 +636,8 @@
         "departmentConfig.modal.field.reorganization.label": "Код формы реорганизации",
         "departmentConfig.modal.field.reorgKpp.label": "КПП реорганизованной организации",
         "departmentConfig.modal.field.reorgInn.label": "ИНН реорганизованной организации",
+        "departmentConfig.modal.field.reorgSuccessorKpp.label": "КПП подразделения-правопреемника",
+        "departmentConfig.modal.field.reorgSuccessorName.label": "Наименование подразделения правопреемника",
         "departmentConfig.dialog.delete.confirmMessage": "Вы подтверждаете удаление настройки подразделения?",
 
         "departmentConfig.modal.field.kpp.validation.digits": "5-6 разряды КПП должны принимать одно из следующих значений: \"01\", \"02\", \"03\", \"31\", \"32\", \"43\", \"45\"",

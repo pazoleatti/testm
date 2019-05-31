@@ -28,6 +28,8 @@ public class DepartmentConfigRowMapper implements RowMapper<DepartmentConfig> {
         departmentConfig.setReorganization(mapReorganization(rs));
         departmentConfig.setReorgInn(rs.getString("reorg_inn"));
         departmentConfig.setReorgKpp(rs.getString("reorg_kpp"));
+        departmentConfig.setReorgSuccessorName(rs.getString("reorg_successor_name"));
+        departmentConfig.setReorgSuccessorKpp(rs.getString("reorg_successor_kpp"));
         departmentConfig.setSignatoryMark(mapSignatoryMark(rs));
         departmentConfig.setSignatorySurName(rs.getString("signatory_surname"));
         departmentConfig.setSignatoryFirstName(rs.getString("signatory_firstname"));

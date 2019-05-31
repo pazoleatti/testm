@@ -424,4 +424,14 @@
 		</insert>
 	</changeSet>
 
+	<!--https://jira.aplana.com/browse/SBRFNDFL-7709 Реализовать формирование xml файла  6-НДФЛ по закрывающимся КПП/ОКТМО-->
+	<changeSet id="3.7-dnovikov-25" author="dnovikov">
+		<sql>
+			alter table department_config add reorg_successor_kpp varchar2(9 char);
+			alter table department_config add reorg_successor_name varchar2(1000 char);
+			comment on column department_config.reorg_successor_kpp is 'Код причины постановки организации по месту нахождения организации правопреемника';
+			comment on column department_config.reorg_successor_name is 'Наименование подразделения для титульного листа отчетных форм по реорганизованному подразделению';
+		</sql>
+	</changeSet>
+
 </databaseChangeLog>
