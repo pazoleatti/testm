@@ -94,7 +94,7 @@
                     if (($scope.mode === 'CREATE' || $scope.mode === 'EDIT') && $scope.departmentConfigForm.$dirty) {
                         $dialogs.confirmDialog({
                             title: $filter('translate')('title.confirm'),
-                            content: $filter('translate')('refBook.confirm.cancelEdit'),
+                            content: $filter('translate')('departmentConfig.confirm.cancelEdit'),
                             okBtnCaption: $filter('translate')('common.button.yes'),
                             cancelBtnCaption: $filter('translate')('common.button.no'),
                             okBtnClick: function () {

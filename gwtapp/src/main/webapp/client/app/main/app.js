@@ -1134,6 +1134,7 @@
         "refBook.confirm.versions.delete": "Вы подтверждаете удаление версии записи справочника?",
 
         "refBook.confirm.cancelEdit": "Вы уверены, что хотите отменить редактирование записи?",
+        "departmentConfig.confirm.cancelEdit": "В форме есть несохранённые данные. Вы действительно хотите выйти из редактирования без сохранения?",
         "refBrefBooks.refBooksList.columnHeader.refBookName": "Наименование справочника",
         "refBrefBooks.refBooksList.columnHeader.refBookType": "Тип справочника",
 
