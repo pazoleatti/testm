@@ -74,10 +74,8 @@
 
                 $scope.$watch("searchFilter.params.relevance", function () {
                     if ($scope.searchFilter.params.relevance && $scope.searchFilter.params.relevance.id === APP_CONSTANTS.DEPARTMENT_CONFIG_RELEVANCE_SELECT.ALL.id) {
-                        $scope.relevanceDateDisabled = true;
                         $scope.searchFilter.params.relevanceDate = null;
                     } else {
-                        $scope.relevanceDateDisabled = false;
                         $scope.searchFilter.params.relevanceDate = new Date().format("yyyy-mm-dd");
                     }
                 });

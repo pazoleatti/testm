@@ -2,7 +2,8 @@
     <div class="grid-filter">
         <div data-aplana-collapse data-is-collapsed="searchFilter.hideExtendedFilter"
              data-label="(searchFilter.isEmpty ? 'filterPanelLabel' : 'filterPanelLabel.set') | translate">
-            <form class="form-horizontal info-wrapper flex-row" role="form" data-aplana-submit-valid="submitSearch()" novalidate>
+            <form class="form-horizontal info-wrapper flex-row" role="form" data-aplana-submit-valid="submitSearch()"
+                  novalidate>
                 <div class="flex-fill flex-row" style="margin-right: 60px;">
                     <div style="flex: 5;">
                         <div class="form-group">
@@ -29,8 +30,8 @@
                                  data-ng-init="initBasicSingleSelectFromArray([APP_CONSTANTS.DEPARTMENT_CONFIG_RELEVANCE_SELECT.DATE, APP_CONSTANTS.DEPARTMENT_CONFIG_RELEVANCE_SELECT.ALL])">
                             </div>
                             <div style="flex: 0 130px; margin-left: 10px;">
-                                <div data-aplana-datepicker
-                                     data-ng-disabled="relevanceDateDisabled"
+                                <div ng-hide="searchFilter.params.relevance.id === APP_CONSTANTS.DEPARTMENT_CONFIG_RELEVANCE_SELECT.ALL.id"
+                                     data-aplana-datepicker
                                      data-ng-model="searchFilter.params.relevanceDate"></div>
                             </div>
                         </div>
@@ -48,7 +49,9 @@
                                            maxlength="9"
                                            data-ng-pattern="/^\d*$/"
                                            placeholder="{{'filter.placeholder.search' | translate}}"/>
-                                    <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.number' | translate}}</div>
+                                    <div data-aplana-validator data-key="pattern">
+                                        {{::'common.validation.pattern.number' | translate}}
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -66,7 +69,9 @@
                                            maxlength="11"
                                            data-ng-pattern="/^\d*$/"
                                            placeholder="{{'filter.placeholder.search' | translate}}"/>
-                                    <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.number' | translate}}</div>
+                                    <div data-aplana-validator data-key="pattern">
+                                        {{::'common.validation.pattern.number' | translate}}
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -84,7 +89,9 @@
                                            data-ng-pattern="/^\d*$/"
                                            data-ng-model="searchFilter.params.taxOrganCode" type="text"
                                            placeholder="{{'filter.placeholder.search' | translate}}"/>
-                                    <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.number' | translate}}</div>
+                                    <div data-aplana-validator data-key="pattern">
+                                        {{::'common.validation.pattern.number' | translate}}
+                                    </div>
                                 </div>
                             </div>
                         </div>
