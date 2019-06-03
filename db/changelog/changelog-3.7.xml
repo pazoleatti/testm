@@ -433,5 +433,15 @@
 			comment on column department_config.reorg_successor_name is 'Наименование подразделения для титульного листа отчетных форм по реорганизованному подразделению';
 		</sql>
 	</changeSet>
+	
+    	<!--https://jira.aplana.com/browse/SBRFNDFL-6786 - Перенести резервирование асинхронной задачи в БД-->
+	<changeSet id="3.7-skononova-1" author="skononova">
+        	<sqlFile dbms="oracle"
+        	         encoding="utf8"
+        	         endDelimiter=""
+        	         path="/scripts/reserve_task.sql"
+        	         relativeToChangelogFile="true"
+        	         splitStatements="false"/>
+    	</changeSet>
 
 </databaseChangeLog>
