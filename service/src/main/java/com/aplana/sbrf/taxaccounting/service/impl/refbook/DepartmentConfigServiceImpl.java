@@ -111,7 +111,7 @@ public class DepartmentConfigServiceImpl implements DepartmentConfigService {
         try {
             create(departmentConfig, logger);
         } catch (ServiceException e) {
-            throw e;
+            throw new ServiceException("Невозможно создать настройку подразделения. " + e.getMessage());
         } catch (Exception e) {
             throw new ServiceException(String.format("Ошибка при создании настройки подразделения для \"%s\" с параметрами: КПП: \"%s\", ОКТМО: \"%s\", дата начала действия настройки: " +
                             "\"%s\". Обратитесь к Администратору Системы или повторите операцию позднее.",
@@ -148,7 +148,7 @@ public class DepartmentConfigServiceImpl implements DepartmentConfigService {
         try {
             update(departmentConfig, logger);
         } catch (ServiceException e) {
-            throw e;
+            throw new ServiceException("Невозможно сохранить настройку подразделения. " + e.getMessage());
         } catch (Exception e) {
             throw new ServiceException(String.format("Ошибка при сохранении настройки подразделения для \"%s\" с параметрами: КПП: \"%s\", ОКТМО: \"%s\", дата начала действия настройки: " +
                             "\"%s\". Обратитесь к Администратору Системы или повторите операцию позднее.",
