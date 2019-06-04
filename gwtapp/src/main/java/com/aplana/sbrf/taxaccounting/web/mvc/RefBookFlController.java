@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
 import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookPersonFilter;
+import com.aplana.sbrf.taxaccounting.model.refbook.IdDoc;
 import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPersonDTO;
 import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 import com.aplana.sbrf.taxaccounting.model.result.CheckDulResult;
@@ -25,7 +26,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -133,5 +136,15 @@ public class RefBookFlController {
     @PostMapping(value = "/actions/checkDul")
     public CheckDulResult checkDul(@RequestParam String docCode, @RequestParam String docNumber) {
         return personService.checkDul(docCode, docNumber);
+    }
+
+    /**
+     * ДУЛ включаемый в отчетность.
+     * @param person физическое лицо
+     * @return  ДУЛ включаемый в отчетность
+     */
+    @PostMapping(value = "/actions/selectIncludeReportDocument")
+    public IdDoc selectIncludeReportDocument(@RequestBody RegistryPersonDTO person) {
+        return personService.selectIncludeReportDocument(person);
     }
 }

@@ -85,6 +85,8 @@ public class PersonServiceImplTest {
 
     private static Method forbidVipsDataByUserPermissions;
 
+    private static Method convertDTOToPerson;
+
     @BeforeClass
     public static void initClass() throws NoSuchMethodException {
         Class<? extends PersonServiceImpl> clazz = PersonServiceImpl.class;
@@ -94,6 +96,8 @@ public class PersonServiceImplTest {
         convertPersonToDTO.setAccessible(true);
         forbidVipsDataByUserPermissions = clazz.getDeclaredMethod("forbidVipsDataByUserPermissions", List.class);
         forbidVipsDataByUserPermissions.setAccessible(true);
+        convertDTOToPerson = clazz.getDeclaredMethod("convertDTOToPerson", RegistryPersonDTO.class);
+        convertDTOToPerson.setAccessible(true);
     }
 
     @Before
@@ -334,6 +338,123 @@ public class PersonServiceImplTest {
         assertThat(result.get(0).getTaxPayerState().value().getName()).isEqualTo("Название кода статуса");
         assertThat(result.get(0).getTaxPayerState().value().getCode()).isEqualTo("Код статуса");
         assertThat(result.get(0).isVip()).isFalse();
+    }
+
+    @Test
+    public void test_convertDTOToPerson() throws InvocationTargetException, IllegalAccessException {
+        RegistryPersonDTO dto = mock(RegistryPersonDTO.class);
+        when(dto.getRecordId()).thenReturn(1L);
+        when(dto.getId()).thenReturn(2L);
+
+        Calendar startDate = new GregorianCalendar();
+        startDate.set(2018, Calendar.JANUARY, 1);
+        when(dto.getStartDate()).thenReturn(startDate.getTime());
+
+        when(dto.getLastName()).thenReturn("Фамилия");
+        when(dto.getFirstName()).thenReturn("Имя");
+        when(dto.getMiddleName()).thenReturn("Отчество");
+        when(dto.getInn()).thenReturn(Permissive.of("1234567890"));
+        when(dto.getInnForeign()).thenReturn(Permissive.of("2345678901"));
+        when(dto.getSnils()).thenReturn(Permissive.of("3456789012"));
+
+        RefBookTaxpayerState taxPayerState = mock(RefBookTaxpayerState.class);
+        when(taxPayerState.getName()).thenReturn("Название кода статуса");
+        when(taxPayerState.getCode()).thenReturn("Код статуса");
+        when(dto.getTaxPayerState()).thenReturn(Permissive.of(taxPayerState));
+
+        RefBookCountry citizenship = mock(RefBookCountry.class);
+        when(citizenship.getName()).thenReturn("Название страны гражданства");
+        when(citizenship.getCode()).thenReturn("Код страны гражданства");
+        when(dto.getCitizenship()).thenReturn(Permissive.of(citizenship));
+
+        Calendar birthDate = new GregorianCalendar();
+        birthDate.set(1990, Calendar.JULY, 1);
+        when(dto.getBirthDate()).thenReturn(birthDate.getTime());
+
+        when(dto.getBirthPlace()).thenReturn("Место рождения");
+
+        PersonIdentifier personIdentifier = mock(PersonIdentifier.class);
+        RefBookAsnu asnu = mock(RefBookAsnu.class);
+        when(asnu.getCode()).thenReturn("Код АСНУ");
+        when(asnu.getName()).thenReturn("Название АСНУ");
+        when(asnu.getPriority()).thenReturn(10);
+        when(asnu.getType()).thenReturn("Тип АСНУ");
+        when(personIdentifier.getInp()).thenReturn("4567890123");
+        when(personIdentifier.getAsnu()).thenReturn(asnu);
+        when(dto.getPersonIdentityList()).thenReturn(Collections.singletonList(personIdentifier));
+
+        IdDoc idDoc = mock(IdDoc.class);
+        RefBookDocType refBookDocType = mock(RefBookDocType.class);
+        when(refBookDocType.getName()).thenReturn("Название вида ДУЛ");
+        when(refBookDocType.getCode()).thenReturn("Код вида ДУЛ");
+        when(refBookDocType.getPriority()).thenReturn(1);
+        when(idDoc.getDocType()).thenReturn(refBookDocType);
+        when(idDoc.getDocumentNumber()).thenReturn("123456");
+        when(dto.getReportDoc()).thenReturn(Permissive.of(idDoc));
+        when(dto.getDocuments()).thenReturn(Permissive.of(Collections.singletonList(idDoc)));
+
+        Address address = mock(Address.class);
+        when(address.getAddressIno()).thenReturn("Иностранный адрес");
+        when(address.getAppartment()).thenReturn("3");
+        when(address.getBuild()).thenReturn("А");
+        when(address.getCity()).thenReturn("Энск");
+
+        RefBookCountry addressCountry = mock(RefBookCountry.class);
+        when(addressCountry.getName()).thenReturn("Название страны адреса");
+        when(addressCountry.getCode()).thenReturn("Код страны адреса");
+        when(address.getCountry()).thenReturn(addressCountry);
+
+        when(address.getDistrict()).thenReturn("Название района");
+        when(address.getHouse()).thenReturn("4");
+        when(address.getLocality()).thenReturn("Название населенного пункта");
+        when(address.getPostalCode()).thenReturn("012345");
+        when(address.getRegionCode()).thenReturn("00");
+        when(address.getStreet()).thenReturn("Название улицы");
+        when(dto.getAddress()).thenReturn(Permissive.of(address));
+
+        when(dto.getOldId()).thenReturn(1L);
+        when(dto.getSource()).thenReturn(asnu);
+        when(dto.isVip()).thenReturn(false);
+
+        RegistryPerson result = (RegistryPerson) convertDTOToPerson.invoke(personService, dto);
+        assertThat(result.getAddress().getAddressIno()).isEqualTo("Иностранный адрес");
+        assertThat(result.getAddress().getAppartment()).isEqualTo("3");
+        assertThat(result.getAddress().getBuild()).isEqualTo("А");
+        assertThat(result.getAddress().getCity()).isEqualTo("Энск");
+        assertThat(result.getAddress().getCountry().getCode()).isEqualTo("Код страны адреса");
+        assertThat(result.getAddress().getCountry().getName()).isEqualTo("Название страны адреса");
+        assertThat(result.getAddress().getDistrict()).isEqualTo("Название района");
+        assertThat(result.getAddress().getHouse()).isEqualTo("4");
+        assertThat(result.getAddress().getLocality()).isEqualTo("Название населенного пункта");
+        assertThat(result.getAddress().getPostalCode()).isEqualTo("012345");
+        assertThat(result.getAddress().getRegionCode()).isEqualTo("00");
+        assertThat(result.getAddress().getStreet()).isEqualTo("Название улицы");
+        assertThat(result.getBirthDate()).isEqualTo(birthDate.getTime());
+        assertThat(result.getBirthPlace()).isEqualTo("Место рождения");
+        assertThat(result.getCitizenship().getName()).isEqualTo("Название страны гражданства");
+        assertThat(result.getCitizenship().getCode()).isEqualTo("Код страны гражданства");
+        assertThat(result.getDocuments().get(0).getDocType().getName()).isEqualTo("Название вида ДУЛ");
+        assertThat(result.getDocuments().get(0).getDocType().getCode()).isEqualTo("Код вида ДУЛ");
+        assertThat(result.getDocuments().get(0).getDocType().getPriority()).isEqualTo(1);
+        assertThat(result.getDocuments().get(0).getDocumentNumber()).isEqualTo("123456");
+        assertThat(result.getFirstName()).isEqualTo("Имя");
+        assertThat(result.getLastName()).isEqualTo("Фамилия");
+        assertThat(result.getMiddleName()).isEqualTo("Отчество");
+        assertThat(result.getOldId()).isEqualTo(1L);
+        assertThat(result.getPersonIdentityList().get(0).getAsnu()).isEqualTo(asnu);
+        assertThat(result.getPersonIdentityList().get(0).getInp()).isEqualTo("4567890123");
+        assertThat(result.getReportDoc().getDocType()).isEqualTo(refBookDocType);
+        assertThat(result.getReportDoc().getDocumentNumber()).isEqualTo("123456");
+        assertThat(result.getDocuments().get(0).getDocumentNumber()).isEqualTo("123456");
+        assertThat(result.getDocuments().get(0).getDocType()).isEqualTo(refBookDocType);
+        assertThat(result.getSnils()).isEqualTo("3456789012");
+        assertThat(result.getInn()).isEqualTo("1234567890");
+        assertThat(result.getInnForeign()).isEqualTo("2345678901");
+        assertThat(result.getSource()).isEqualTo(asnu);
+        assertThat(result.getStartDate()).isEqualTo(startDate.getTime());
+        assertThat(result.getTaxPayerState().getName()).isEqualTo("Название кода статуса");
+        assertThat(result.getTaxPayerState().getCode()).isEqualTo("Код статуса");
+        assertThat(result.isVip()).isFalse();
     }
 
     @Test

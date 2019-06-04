@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
 import com.aplana.sbrf.taxaccounting.model.refbook.IdDoc;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookCountry;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDocType;
+import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPerson;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -60,7 +61,7 @@ public class SelectPersonDocumentCalc {
      * @param personDocumentList список документов ФЛ
      * @return индекс главного документа в списке
      */
-    public static IdDoc selectIncludeReportDocument(NaturalPerson naturalPerson, List<IdDoc> personDocumentList) {
+    public static IdDoc selectIncludeReportDocument(RegistryPerson naturalPerson, List<IdDoc> personDocumentList) {
 
         if (personDocumentList == null || personDocumentList.isEmpty()) {
             return null;

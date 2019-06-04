@@ -67,7 +67,8 @@
                         colNames: [
                             '',
                             $filter('translate')('refBook.fl.card.tabs.idDoc.tabColumnHeader.idDocCode'),
-                            $filter('translate')('refBook.fl.card.tabs.idDoc.tabColumnHeader.idDocNumber')
+                            $filter('translate')('refBook.fl.card.tabs.idDoc.tabColumnHeader.idDocNumber'),
+                            $filter('translate')('refBook.fl.card.tabs.idDoc.tabColumnHeader.includeReport')
                         ],
                         colModel: [
                             {name: 'id', width: 100, key: true, hidden: true},
@@ -77,7 +78,13 @@
                                 width: 380,
                                 formatter: $filter('codeNameFormatter')
                             },
-                            {name: 'documentNumber', width: 240}
+                            {name: 'documentNumber', width: 240},
+                            {
+                                name: 'includeReport',
+                                width: 180,
+                                formatter: $filter('reportDocFormatter'),
+                                align: 'center'
+                            }
                         ],
                         rowNum: APP_CONSTANTS.COMMON.PAGINATION[0],
                         rowList: APP_CONSTANTS.COMMON.PAGINATION,
@@ -335,11 +342,19 @@
                  * @description Получение списка ДУЛ для ФЛ
                  */
                 $scope.fetchIdDocs = function (ctrl) {
+                    var idDocs;
+                    var person;
                     if ($scope.mode === APP_CONSTANTS.MODE.VIEW) {
-                        ctrl.refreshGridData($scope.person.documents.value);
+                        idDocs = $scope.person.documents.value;
+                        person = $scope.person
                     } else {
-                        ctrl.refreshGridData($scope.personParam.documents.value);
+                        idDocs = $scope.personParam.documents.value;
+                        person = $scope.personParam
                     }
+                    angular.forEach(idDocs, function (idDoc) {
+                        idDoc.includeReport = person.reportDoc.value.id === idDoc.id;
+                    });
+                    ctrl.refreshGridData(idDocs);
                 };
 
                 /**
@@ -475,9 +490,15 @@
                  * @description Удалить ДУЛ
                  */
                 $scope.deleteIdDoc = function () {
+                    if ($scope.personParam.documents.value.length == 1) {
+                        $dialogs.errorDialog({
+                            content: $filter('translate')('refBook.fl.card.tabs.idDoc.deleteError.cause.single')
+                        });
+                        return
+                    }
                     $dialogs.confirmDialog({
                         title: $filter('translate')('refBook.fl.card.tabs.idDoc.deleteDialog.title'),
-                        content: $filter('translate')('refBook.fl.card.tabs.idDoc.deleteDialog.content'),
+                        content: $scope.idDocsGrid.value[0].includeReport ? $filter('translate')('refBook.fl.card.tabs.idDoc.deleteDialog.reportDoc.content', {versionId: $scope.personParam.id}): $filter('translate')('refBook.fl.card.tabs.idDoc.deleteDialog.content'),
                         okBtnCaption: $filter('translate')('common.button.yes'),
                         cancelBtnCaption: $filter('translate')('common.button.no'),
                         okBtnClick: function () {
@@ -497,8 +518,23 @@
                                     $scope.personParam.reportDoc.value = null;
                                 }
                             }
-                            $rootScope.$broadcast("addIdDoc", $scope.personParam);
-                            $scope.idDocsGrid.ctrl.refreshGridData($scope.personParam.documents.value);
+                            if ($scope.idDocsGrid.value[0].includeReport) {
+                                $http({
+                                    method: "POST",
+                                    url: "controller/actions/selectIncludeReportDocument",
+                                    data: $scope.personParam
+                                }).success(function (response) {
+                                    $scope.personParam.reportDoc.value = response
+                                    angular.forEach($scope.personParam.documents.value, function (idDoc) {
+                                        idDoc.includeReport = $scope.personParam.reportDoc.value.id === idDoc.id;
+                                    });
+                                    $rootScope.$broadcast("addIdDoc", $scope.personParam);
+                                    $scope.idDocsGrid.ctrl.refreshGridData($scope.personParam.documents.value);
+                                });
+                            } else {
+                                $rootScope.$broadcast("addIdDoc", $scope.personParam);
+                                $scope.idDocsGrid.ctrl.refreshGridData($scope.personParam.documents.value);
+                            }
                         }
                     });
                 };

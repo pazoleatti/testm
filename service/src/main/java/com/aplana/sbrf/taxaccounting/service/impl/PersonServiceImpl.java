@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.async.AbstractStartupAsyncTaskHandler;
 import com.aplana.sbrf.taxaccounting.async.AsyncManager;
+import com.aplana.sbrf.taxaccounting.dao.identification.SelectPersonDocumentCalc;
 import com.aplana.sbrf.taxaccounting.dao.impl.IdDocDaoImpl;
 import com.aplana.sbrf.taxaccounting.dao.impl.IdTaxPayerDaoImpl;
 import com.aplana.sbrf.taxaccounting.dao.impl.PersonTbDaoImpl;
@@ -598,6 +599,34 @@ public class PersonServiceImpl implements PersonService {
         for (RegistryPerson person : result) {
             person.getPersonIdentityList().addAll(idTaxPayerDaoImpl.getByPerson(person));
             person.getDocuments().addAll(idDocDaoImpl.getByPerson(person));
+        }
+        return result;
+    }
+
+    @Override
+    public IdDoc selectIncludeReportDocument(RegistryPersonDTO person) {
+        RegistryPerson modelPerson = convertDTOToPerson(person);
+        return SelectPersonDocumentCalc.selectIncludeReportDocument(modelPerson, modelPerson.getDocuments());
+    }
+
+    private RegistryPerson convertDTOToPerson(RegistryPersonDTO dto) {
+        RegistryPerson result = new RegistryPerson();
+        BeanUtils.copyProperties(dto, result, "reportDoc", "citizenship", "inn", "innForeign", "snils", "taxPayerState", "address", "documents");
+        result.setReportDoc(dto.getReportDoc().value());
+        result.setCitizenship(dto.getCitizenship().value());
+        result.setInn(dto.getInn().value());
+        result.setInnForeign(dto.getInnForeign().value());
+        result.setSnils(dto.getSnils().value());
+        result.setAddress(dto.getAddress().value());
+        result.setTaxPayerState(dto.getTaxPayerState().value());
+        result.setDocuments(dto.getDocuments().value());
+        RegistryPerson stub = new RegistryPerson();
+        stub.setId(dto.getId());
+        for (PersonIdentifier personIdentifier : dto.getPersonIdentityList()) {
+            personIdentifier.setPerson(stub);
+        }
+        for (PersonTb personTb : dto.getPersonTbList()) {
+            personTb.setPerson(stub);
         }
         return result;
     }

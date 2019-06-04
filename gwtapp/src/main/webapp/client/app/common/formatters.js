@@ -709,5 +709,18 @@
                 return user.name + ' (' + user.login + ')';
             };
         })
+
+        /**
+         * @description Формат для обозначения ДУЛ включаемого в отчетность
+         */
+        .filter('reportDocFormatter', ['$filter', function($filter) {
+            return function (includeReport) {
+                if(includeReport) {
+                    return $filter('translate')('refBook.fl.card.tabs.lable.idDoc.includeReport');
+                } else {
+                    return '';
+                }
+            };
+        }])
     ;
 }());

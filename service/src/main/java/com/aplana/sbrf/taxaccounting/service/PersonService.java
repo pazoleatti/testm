@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
+import com.aplana.sbrf.taxaccounting.model.refbook.IdDoc;
 import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPerson;
 import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPersonDTO;
 import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
@@ -96,4 +97,11 @@ public interface PersonService {
      * @return список найденных записей реестра ФЛ
      */
     List<RegistryPerson> findActualRefPersonsByDeclarationDataId(Long declarationDataId);
+
+    /**
+     * Определить ДУЛ включаемый в отчетность.
+     * @param person    физическое лицо
+     * @return ДУЛ включаемый в отчетность
+     */
+    IdDoc selectIncludeReportDocument(RegistryPersonDTO person);
 }
