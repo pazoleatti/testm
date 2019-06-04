@@ -135,6 +135,8 @@ class Import extends AbstractScriptClass {
     Map<String, List<Long>> incomeTypeMap
     // Коды справочника "Коды видов вычетов"
     List<String> deductionCodes
+    // ФЛ формы из БД
+    Map<Long, NdflPerson> persistedPersonsById
     // Кэш загруженных ФЛ
     Map<Integer, List<NdflPersonExt>> ndflPersonCache = [:]
     // Операции(доходы, вычеты, авансы) сгруппированные по operationId
@@ -266,9 +268,13 @@ class Import extends AbstractScriptClass {
             def ndflPerson = createNdflPerson(row)
             ndflPersonRows << ndflPerson
         }
-        Map<Long, NdflPerson> persistedPersonsById = ndflPersonService.findNdflPersonWithOperations(declarationData.id)
+        if (logger.containsLevel(LogLevel.ERROR)) {
+            logger.error("Загрузка файла \"$fileName\" не может быть выполнена")
+            return
+        }
+        persistedPersonsById = ndflPersonService.findNdflPersonWithOperations(declarationData.id)
                 .collectEntries { [it.id, it] }
-        checkRequisitesEquality(ndflPersonRows, persistedPersonsById)
+        checkRows(ndflPersonRows)
         for (NdflPersonExt mergingPerson : ndflPersonRows) {
             merge(ndflPersons, mergingPerson)
         }
@@ -853,8 +859,16 @@ class Import extends AbstractScriptClass {
         Long deductionImportId = null
         Long prepaymentImportId = null
         NdflPersonExt ndflPerson = new NdflPersonExt(row.index)
-        if (importIds != null) {
-            ndflPerson.importId = Long.valueOf(importIds[0])
+        if (importIds) {
+            if (importIds[0]) {
+                if (importIds[0].isNumber()) {
+                    ndflPerson.importId = Long.valueOf(importIds[0])
+                } else {
+                    logger.error("Ошибка при загрузке файла \"$fileName\". В строке № \"$row.index\" указан несуществующий идентификатор строки Раздела 1.")
+                }
+            } else {
+                logger.error("Ошибка при загрузке файла \"$fileName\". В строке № \"$row.index\" пустой идентификатор строки Раздела 1.")
+            }
             if (importIds.length > 1 && !importIds[1].isEmpty()) {
                 incomeImportId = Long.valueOf(importIds[1])
                 incomeImportIdList << incomeImportId
@@ -1097,6 +1111,7 @@ class Import extends AbstractScriptClass {
             if (logger.containsLevel(LogLevel.ERROR)) {
                 return
             }
+            checkPersonId(persons)
             checkOperationId(persons)
             checkReferences(persons)
         }
@@ -1287,12 +1302,16 @@ class Import extends AbstractScriptClass {
         }
     }
 
+    void checkRows(List<NdflPersonExt> persons) {
+        checkRequisitesEquality(persons)
+    }
+
     /**
      * Отвечает за проверки, что реквизиты были изменены для всех строк ТФ (Excel),
      * связанных с одной строкой Раздела 1, ранее загруженной в ПНФ
      * @param ndflPersonList список всех объектов раздела 1
      */
-    void checkRequisitesEquality(List<NdflPersonExt> ndflPersonList, Map<Long, NdflPerson> persistedPersonsById) {
+    void checkRequisitesEquality(List<NdflPersonExt> ndflPersonList) {
         Map<Long, List<NdflPersonExt>> ndflPersonsGroupedByImportid = [:]
         for (NdflPersonExt ndflPerson : ndflPersonList) {
             if (ndflPerson.importId != null) {
@@ -1339,6 +1358,14 @@ class Import extends AbstractScriptClass {
         logger.errorExp("Лист \"РНУ НДФЛ\". Строки: \"${fileRowNums.join(", ")}\". Значения реквизитов ФЛ (столбцы 2 - 23) отличаются между собой, " +
                 "хотя должны полностью совпадать. ФЛ: ${person.fullName}, ИНП: ${person.inp}, идентификатор строки Раздела 1: \"${id}\".",
                 "Не совпадают реквизиты одного ФЛ, указанные в разных строках", "${person.fullName}, ИНП: ${person.inp}")
+    }
+
+    void checkPersonId(List<NdflPersonExt> persons) {
+        for (def person : persons) {
+            if (person.importId && !persistedPersonsById.containsKey(person.importId)) {
+                logger.error("Ошибка при загрузке файла \"$fileName\". В строке № \"$person.rowIndex\" указан несуществующий идентификатор строки Раздела 1.")
+            }
+        }
     }
 
     /**
