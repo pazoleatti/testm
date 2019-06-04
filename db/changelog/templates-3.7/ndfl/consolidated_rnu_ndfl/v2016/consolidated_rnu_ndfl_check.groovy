@@ -723,9 +723,9 @@ class Check extends AbstractScriptClass {
                 if (ndflPerson.innNp == null) {
                     String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                     logger.warnExp("%s. %s.", "\"ИНН\" не указан", fioAndInp, pathError,
-                            "Значение гр. \"ИНН в РФ\" не указано.")
+                            "Значение гр. \"ИНН в РФ\" не указано")
                 } else {
-                    String checkInn = ScriptUtils.checkNdflPersonInn(ndflPerson)
+                    String checkInn = ScriptUtils.checkInn(ndflPerson.innNp)
                     if (checkInn != null) {
                         String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                         logger.warnExp("%s. %s.", "\"ИНН\" не соответствует формату", fioAndInp, pathError,

@@ -741,6 +741,9 @@ public class DeclarationDataController {
      */
     @PostMapping(value = "/actions/declarationData/uploadFile", produces = MediaType.TEXT_HTML_VALUE + "; charset=UTF-8")
     public String uploadFile(@RequestParam("uploader") MultipartFile file, @RequestParam Long declarationDataId) throws IOException, JSONException {
+        if (file.isEmpty()) {
+            throw new ServiceException("Файл пустой.");
+        }
         JSONObject jsonObject = new JSONObject();
         jsonObject.put(UuidEnum.UUID.toString(), declarationService.uploadFile(file.getInputStream(), file.getOriginalFilename(), declarationDataId));
         return jsonObject.toString();
