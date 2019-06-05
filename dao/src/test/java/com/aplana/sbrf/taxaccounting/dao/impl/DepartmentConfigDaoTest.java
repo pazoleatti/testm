@@ -157,13 +157,23 @@ public class DepartmentConfigDaoTest {
     }
 
     @Test
-    public void findAllKppOKtmoPairs1() {
-        assertThat(departmentConfigDao.findAllKppOKtmoPairs(1, 2, 2, newDate(1, 1, 2018)), hasSize(3));
+    public void findAllKppOKtmoPairsByDeclaration1() {
+        assertThat(departmentConfigDao.findAllKppOKtmoPairsByDeclaration(1, 2, 2, newDate(1, 1, 2018)), hasSize(3));
     }
 
     @Test
-    public void findAllKppOKtmoPairs2() {
-        assertThat(departmentConfigDao.findAllKppOKtmoPairs(1, null, 2, newDate(1, 1, 2018)), hasSize(4));
+    public void findAllKppOKtmoPairsByDeclaration2() {
+        assertThat(departmentConfigDao.findAllKppOKtmoPairsByDeclaration(1, null, 2, newDate(1, 1, 2018)), hasSize(4));
+    }
+
+    @Test
+    public void test_indAllKppOktmoPairs1() {
+        assertThat(departmentConfigDao.findAllKppOKtmoPairsByDeclaration(1, null, 2, newDate(1, 1, 2018)), hasSize(4));
+    }
+
+    @Test
+    public void test_indAllKppOktmoPairs2() {
+        assertThat(departmentConfigDao.findAllKppOKtmoPairsByDeclaration(1, 2, 2, newDate(1, 1, 2018)), hasSize(3));
     }
 
     @Test

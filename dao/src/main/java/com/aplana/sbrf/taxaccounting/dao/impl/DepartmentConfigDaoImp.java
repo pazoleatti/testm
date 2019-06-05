@@ -86,7 +86,7 @@ public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentCon
     }
 
     @Override
-    public List<KppOktmoPair> findAllKppOKtmoPairs(long declarationId, Integer departmentId, int reportPeriodId, Date relevanceDate) {
+    public List<KppOktmoPair> findAllKppOKtmoPairsByDeclaration(long declarationId, Integer departmentId, int reportPeriodId, Date relevanceDate) {
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("declarationId", declarationId);
         params.addValue("departmentId", departmentId);
@@ -115,6 +115,28 @@ public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentCon
                 return new KppOktmoPair(rs.getString("kpp"), rs.getString("oktmo"));
             }
         });
+    }
+
+    @Override
+    public List<KppOktmoPair> findAllKppOKtmoPairs(Integer departmentId, int reportPeriodId, Date relevanceDate) {
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("departmentId", departmentId);
+        params.addValue("reportPeriodId", reportPeriodId);
+        params.addValue("relevanceDate", FastDateFormat.getInstance("dd.MM.yyyy").format(relevanceDate));
+        String sql = "select dc.kpp kpp, oktmo.code oktmo from department_config dc\n" +
+                "join report_period rp on rp.id = :reportPeriodId\n" +
+                "join ref_book_oktmo oktmo on oktmo.id = dc.oktmo_id\n" +
+                "where oktmo.id = dc.oktmo_id and (\n" +
+                "dc.start_date <= to_date(:relevanceDate, 'DD.MM.YYYY') and (dc.end_date is null or to_date(:relevanceDate, 'DD.MM.YYYY') <= dc.end_date)\n" +
+                "or (dc.start_date <= rp.end_date and (dc.end_date is null or rp.start_date <= dc.end_date)))";
+        return getNamedParameterJdbcTemplate().query(sql,
+                params,
+                new RowMapper<KppOktmoPair>() {
+                    @Override
+                    public KppOktmoPair mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        return new KppOktmoPair(rs.getString("kpp"), rs.getString("oktmo"));
+                    }
+                });
     }
 
     @Override

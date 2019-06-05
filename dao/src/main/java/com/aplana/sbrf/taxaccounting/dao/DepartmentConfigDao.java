@@ -45,7 +45,17 @@ public interface DepartmentConfigDao extends PermissionDao {
      * @param reportPeriodId ид периода формы
      * @return пары КПП/ОКТМО
      */
-    List<KppOktmoPair> findAllKppOKtmoPairs(long declarationId, Integer departmentId, int reportPeriodId, Date relevanceDate);
+    List<KppOktmoPair> findAllKppOKtmoPairsByDeclaration(long declarationId, Integer departmentId, int reportPeriodId, Date relevanceDate);
+
+    /**
+     * Возвращяет пары КПП/ОКТМО формы, для которых существуют настройки подразделений по ТБ.
+     * Настройки берутся только актуальные на текущую дату или которые пересекаются с периодом формы, но не переходят в другой ТБ в старших версиях
+     * @param departmentId      ид подразделений
+     * @param reportPeriodId    ид периода формы
+     * @param relevanceDate     дата актуальности
+     * @return пары КПП/ОКТМО
+     */
+    List<KppOktmoPair> findAllKppOKtmoPairs(Integer departmentId, int reportPeriodId, Date relevanceDate);
 
     /**
      * Возвращяет страницу настроек подразделений для отображения в GUI

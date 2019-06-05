@@ -790,8 +790,8 @@ class Check extends AbstractScriptClass {
         logForDebug("Общие проверки / '${T_PERSON_NAME}' (" + (System.currentTimeMillis() - time) + " мс)")
 
         time = System.currentTimeMillis()
-        def actualKppOktmoPairsByDepartmentId = departmentConfigService.findAllKppOktmoPairs(declarationData.id, declarationData.departmentId, declarationData.reportPeriodId).toSet()
-        def actualKppOktmoPairs = departmentConfigService.findAllKppOktmoPairs(declarationData.id, null, declarationData.reportPeriodId).toSet()
+        def actualKppOktmoPairsByDepartmentId = departmentConfigService.findAllKppOktmoPairs(declarationData.departmentId, declarationData.reportPeriodId).toSet()
+        def actualKppOktmoPairs = departmentConfigService.findAllKppOktmoPairs(null, declarationData.reportPeriodId).toSet()
         long departmentConfigTime = System.currentTimeMillis() - time
         time = System.currentTimeMillis()
         Department department = departmentService.get(declarationData.departmentId)

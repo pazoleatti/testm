@@ -769,7 +769,7 @@ class Check extends AbstractScriptClass {
         logForDebug("Общие проверки / '${T_PERSON_NAME}' (" + (System.currentTimeMillis() - time) + " мс)")
 
         time = System.currentTimeMillis()
-        def actualKppOktmoPairs = departmentConfigService.findAllKppOktmoPairs(declarationData.id, null, declarationData.reportPeriodId).toSet()
+        def actualKppOktmoPairs = departmentConfigService.findAllKppOktmoPairs(null, declarationData.reportPeriodId).toSet()
         long departmentConfigTime = System.currentTimeMillis() - time
         time = System.currentTimeMillis()
         // Общ7 Наличие или отсутствие значения в графе в зависимости от условий

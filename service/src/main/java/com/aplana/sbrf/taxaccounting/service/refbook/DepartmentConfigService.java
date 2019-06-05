@@ -19,6 +19,7 @@ import com.aplana.sbrf.taxaccounting.model.result.ImportDepartmentConfigsResult;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.ScriptExposed;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -53,6 +54,8 @@ public interface DepartmentConfigService {
      * @return пары КПП/ОКТМО
      */
     List<KppOktmoPair> findAllKppOktmoPairs(long declarationId, Integer departmentId, int reportPeriodId);
+
+    List<KppOktmoPair> findAllKppOktmoPairs(Integer departmentId, int reportPeriodId);
 
     /**
      * Возвращяет страницу настроек подразделений для отображения в GUI

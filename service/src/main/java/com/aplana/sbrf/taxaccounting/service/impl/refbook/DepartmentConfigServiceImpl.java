@@ -70,7 +70,12 @@ public class DepartmentConfigServiceImpl implements DepartmentConfigService {
 
     @Override
     public List<KppOktmoPair> findAllKppOktmoPairs(long declarationId, Integer departmentId, int reportPeriodId) {
-        return departmentConfigDao.findAllKppOKtmoPairs(declarationId, departmentId, reportPeriodId, new Date());
+        return departmentConfigDao.findAllKppOKtmoPairsByDeclaration(declarationId, departmentId, reportPeriodId, new Date());
+    }
+
+    @Override
+    public List<KppOktmoPair> findAllKppOktmoPairs(Integer departmentId, int reportPeriodId) {
+        return departmentConfigDao.findAllKppOKtmoPairs(departmentId, reportPeriodId, new Date());
     }
 
     @Override
