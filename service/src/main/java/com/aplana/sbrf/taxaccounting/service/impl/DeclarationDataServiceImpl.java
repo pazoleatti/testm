@@ -2747,7 +2747,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     logger.info(message);
                 }
                 logBusinessService.logFormEvent(declarationDataId, FormDataEvent.NDFL_EDIT, logger.getLogId(), null, userInfo);
-                sendNotification(changelogBuilder.resultMessage, logger.getLogId(), userInfo.getUser().getId());
+                sendNotification(changelogBuilder.notificationMessage, logger.getLogId(), userInfo.getUser().getId());
             } else {
                 String msg = "Не выполнена замена данных в строке № " + incomeBeforeUpdate.getRowNum() +
                         " Раздела 2 в форме № " + declarationDataId + ", так как в форме редактирования не было внесено изменений.";

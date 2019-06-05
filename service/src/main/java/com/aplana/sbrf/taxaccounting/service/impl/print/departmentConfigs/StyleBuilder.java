@@ -60,6 +60,8 @@ public class StyleBuilder {
         Font font = workBook.createFont();
         font.setBoldweight(Font.BOLDWEIGHT_BOLD);
         XSSFCellStyle tableHeaderCellStyle = (XSSFCellStyle) workBook.createCellStyle();
+        DataFormat dataFormat = workBook.createDataFormat();
+        tableHeaderCellStyle.setDataFormat(dataFormat.getFormat("@"));
         tableHeaderCellStyle.setFont(font);
         tableHeaderCellStyle.setBorderRight(CellStyle.BORDER_THIN);
         tableHeaderCellStyle.setBorderLeft(CellStyle.BORDER_THIN);

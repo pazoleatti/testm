@@ -748,8 +748,7 @@ class Check extends AbstractScriptClass {
                     String errorType
                     if (errorMsg.contains("СССР")) {
                         errorType = "В \"ДУЛ\" присутствуют реквизиты паспорта СССР"
-                    }
-                    else {
+                    } else {
                         errorType = "\"ДУЛ\" не соответствует формату"
                     }
                     logger.warnExp("%s. %s.", errorType, fioAndInp, pathError, errorMsg)
@@ -1028,7 +1027,8 @@ class Check extends AbstractScriptClass {
 
         // 1. "Графа 6" = "Графе 7"
         dateConditionDataList << new DateConditionData(["1010", "1011", "1110", "1400", "1552", "2001", "2010", "2012", "2300", "2301",
-                                                        "2640", "2641", "2710", "2760", "2762", "2770", "2800", "2900", "3020", "3023", "4800"],
+                                                        "2520", "2720", "2740", "2750", "2790", "2640", "2641", "2710", "2760", "2762",
+                                                        "2770", "2800", "2900", "3020", "3023", "4800"],
                 ["00"], new Column6EqualsColumn7(),
                 "Значение гр. \"%s\" (\"%s\") должно быть равно значению гр. \"%s\" (\"%s\") для кода дохода и признака дохода, " +
                         "указанных в гр. \"%s\" (\"%s\") и гр. \"%s\" (\"%s\")")
@@ -1051,7 +1051,7 @@ class Check extends AbstractScriptClass {
                         "указанных в гр. \"%s\" (\"%s\") и гр. \"%s\" (\"%s\")")
 
         // 5. "Графа 6" = "Графе 7"
-        dateConditionDataList << new DateConditionData(["2520", "2720", "2740", "2750", "2790", "4800"], ["14"], new Column6EqualsColumn7(),
+        dateConditionDataList << new DateConditionData(["2520", "2720", "2740", "2750", "2790", "4800"], ["13", "14"], new Column6EqualsColumn7(),
                 "Значение гр. \"%s\" (\"%s\") должно быть равно значению гр. \"%s\" (\"%s\") для кода дохода и признака дохода, " +
                         "указанных в гр. \"%s\" (\"%s\") и гр. \"%s\" (\"%s\")")
 
@@ -2560,10 +2560,14 @@ class Check extends AbstractScriptClass {
         String check(NdflPersonIncome checkedIncome) {
             List<NdflPersonIncome> matchedIncomes = []
             NdflPersonFL checkedIncomeFl = ndflPersonFLMap.get(checkedIncome.ndflPersonId)
+            Date workDayAfterLastDayOfYear = dateConditionWorkDay.getWorkDay(getLastDayOfYear(checkedIncome.incomePayoutDate), 1)
             for (NdflPersonIncome income : ndflPersonIncomeList) {
                 if (income.getId() != checkedIncome.getId()) {
                     NdflPersonFL ndflPersonFl = ndflPersonFLMap.get(income.ndflPersonId)
-                    if (checkedIncomeFl?.inp == ndflPersonFl.inp && !["02", "14"].contains(income.incomeType) && income.incomePayoutDate >= checkedIncome.incomePayoutDate && income.asnuId == checkedIncome.asnuId) {
+                    if (checkedIncomeFl?.inp == ndflPersonFl.inp && !["02", "14"].contains(income.incomeType) &&
+                            income.incomePayoutDate >= checkedIncome.incomePayoutDate &&
+                            income.incomePayoutDate <= workDayAfterLastDayOfYear &&
+                            income.asnuId == checkedIncome.asnuId) {
                         matchedIncomes << income
                     }
                 }
@@ -2593,6 +2597,14 @@ class Check extends AbstractScriptClass {
                 }
             }
 
+        }
+
+        private Date getLastDayOfYear(Date date) {
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(date)
+            calendar[Calendar.MONTH] = Calendar.DECEMBER
+            calendar[Calendar.DAY_OF_MONTH] = 31
+            return calendar.time
         }
     }
 
