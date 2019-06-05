@@ -256,9 +256,9 @@ class Report6Ndfl extends AbstractScriptClass {
                         ДохНал() {
                             for (def row : section2Block) {
                                 if (replaceTaxDate && isZeroDate(row.taxTransferDate)) {
-                                    logger.warnExp("В блоке Раздела 2 с параметрами: \"ДатаУдержанияНалога\": ${formatDate(row.taxDate)}; \"СрокПеречисленияНалога: 00.00.0000; " +
-                                            "\"ДатаДохода\": ${formatDate(row.incomeDate)}; исходное значение \"ДатаУдержанияНалога\": ${formatDate(row.taxDate)} заменено на \"00.00.0000\".",
-                                            "Замена значений ДатаУдержанияНалога на 00.00.0000", "")
+                                    logger.warnExp("В блоке Раздела 2 с параметрами: \"Дата удержания налога\": ${formatDate(row.taxDate)}; \"Срок перечисления налога: 00.00.0000; " +
+                                            "\"Дата дохода\": ${formatDate(row.incomeDate)}; исходное значение \"Дата удержания налога\": ${formatDate(row.taxDate)} заменено на \"00.00.0000\".",
+                                            "Замена значений \"Дата удержания налога\" на 00.00.0000", "")
                                 }
                                 СумДата(ДатаФактДох: formatDate(row.incomeDate),
                                         ДатаУдержНал: replaceTaxDate && isZeroDate(row.taxTransferDate) ? DATE_ZERO_AS_STRING : formatDate(row.taxDate),
