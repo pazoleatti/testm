@@ -47,11 +47,11 @@ public class CalendarDaoImpl extends AbstractDao implements CalendarDao {
         params.addValue("offset", Math.abs(offset) + 1);
         try {
             if (offset >= 1) {
-                return getNamedParameterJdbcTemplate().queryForObject(GET_NEXT_WORK_DAY_SQL, params, Date.class);
+                return new LocalDate(getNamedParameterJdbcTemplate().queryForObject(GET_NEXT_WORK_DAY_SQL, params, Date.class)).toDate();
             } else if (offset == 0) {
-                return getNamedParameterJdbcTemplate().queryForObject(GET_NEXT_WORK_DAY_ZERO_OFFSET_SQL, params, Date.class);
+                return new LocalDate(getNamedParameterJdbcTemplate().queryForObject(GET_NEXT_WORK_DAY_ZERO_OFFSET_SQL, params, Date.class)).toDate();
             } else {
-                return getNamedParameterJdbcTemplate().queryForObject(GET_PREV_WORK_DAY_SQL, params, Date.class);
+                return new LocalDate(getNamedParameterJdbcTemplate().queryForObject(GET_PREV_WORK_DAY_SQL, params, Date.class)).toDate();
             }
         } catch (EmptyResultDataAccessException e) {
             //Календарь не заполнен в нужном диапазоне - сдвигаем без учета производственного календаря
