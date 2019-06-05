@@ -93,20 +93,23 @@ public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentCon
         params.addValue("reportPeriodId", reportPeriodId);
         params.addValue("relevanceDate", FastDateFormat.getInstance("dd.MM.yyyy").format(relevanceDate));
         return getNamedParameterJdbcTemplate().query("" +
-                "select distinct npi.kpp, npi.oktmo\n" +
+                "with dep_cfg as \n" +
+                "( select dc.kpp kpp, oktmo.code oktmo from department_config dc\n" +
+                "join report_period rp on rp.id = :reportPeriodId\n" +
+                "join ref_book_oktmo oktmo on oktmo.id = dc.oktmo_id\n" +
+                "where oktmo.id = dc.oktmo_id and (:departmentId is null or dc.department_id = :departmentId) and (\n" +
+                "dc.start_date <= to_date(:relevanceDate, 'DD.MM.YYYY') and (dc.end_date is null or to_date(:relevanceDate, 'DD.MM.YYYY') <= dc.end_date)\n" +
+                "or (dc.start_date <= rp.end_date and (dc.end_date is null or rp.start_date <= dc.end_date)\n" +
+                "and (:departmentId is null or not exists (select * from department_config where kpp = dc.kpp and oktmo_id = dc.oktmo_id and start_date > dc.start_date and department_id != :departmentId))\n" +
+                ")\n" +
+                ")\n" +
+                ")\n" +
+                "select npi.kpp, npi.oktmo\n" +
                 "from ndfl_person np\n" +
                 "join ndfl_person_income npi on npi.ndfl_person_id = np.id\n" +
-                "where np.declaration_data_id = :declarationId and (npi.kpp, npi.oktmo) in (\n" +
-                "  select dc.kpp, oktmo.code from department_config dc\n" +
-                "  join report_period rp on rp.id = :reportPeriodId\n" +
-                "  join ref_book_oktmo oktmo on oktmo.id = dc.oktmo_id\n" +
-                "  where oktmo.id = dc.oktmo_id and (:departmentId is null or dc.department_id = :departmentId) and (\n" +
-                "    dc.start_date <= to_date(:relevanceDate, 'DD.MM.YYYY') and (dc.end_date is null or to_date(:relevanceDate, 'DD.MM.YYYY') <= dc.end_date)\n" +
-                "    or (dc.start_date <= rp.end_date and (dc.end_date is null or rp.start_date <= dc.end_date)\n" +
-                "      and (:departmentId is null or not exists (select * from department_config where kpp = dc.kpp and oktmo_id = dc.oktmo_id and start_date > dc.start_date and department_id != :departmentId))\n" +
-                "    )\n" +
-                "  )\n" +
-                ")", params, new RowMapper<KppOktmoPair>() {
+                "join dep_cfg on dep_cfg.kpp=npi.kpp and dep_cfg.oktmo=npi.oktmo\n" +
+                "where np.declaration_data_id = :declarationId \n" +
+                "group by npi.kpp, npi.oktmo", params, new RowMapper<KppOktmoPair>() {
             @Override
             public KppOktmoPair mapRow(ResultSet rs, int rowNum) throws SQLException {
                 return new KppOktmoPair(rs.getString("kpp"), rs.getString("oktmo"));
