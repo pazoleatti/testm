@@ -1,0 +1,30 @@
+create or replace package body ndfl_tools as 
+
+PROCEDURE SHRINK_SIMPLE_TABLE
+(
+    TABLE_NM in VARCHAR2
+) is
+cn number;
+BEGIN
+    SELECT count(*) INTO cn from USER_TABLES WHERE TABLE_NAME = upper(TABLE_NM);
+    IF (cn<>0) then
+        EXECUTE IMMEDIATE 'ALTER TABLE '||TABLE_NM ||' ENABLE ROW MOVEMENT';
+        EXECUTE IMMEDIATE 'ALTER TABLE '||TABLE_NM ||' SHRINK SPACE CASCADE';
+        EXECUTE IMMEDIATE 'ALTER TABLE '||TABLE_NM ||' DISABLE ROW MOVEMENT';
+    else
+        raise_application_error (-20001, 'Table '||TABLE_NM || ' not exists');
+    end if;
+END;
+
+PROCEDURE SHRINK_TABLES is
+begin
+    SHRINK_SIMPLE_TABLE ('NDFL_PERSON');
+    SHRINK_SIMPLE_TABLE ('NDFL_PERSON_INCOME');    
+    SHRINK_SIMPLE_TABLE ('NDFL_PERSON_DEDUCTION');        
+    SHRINK_SIMPLE_TABLE ('NDFL_PERSON_PREPAYMENT');
+    SHRINK_SIMPLE_TABLE ('NDFL_REFERENCES');    
+end;
+
+end;
+/
+

@@ -444,4 +444,24 @@
         	         splitStatements="false"/>
     	</changeSet>
 
+    	<!--https://jira.aplana.com/browse/SBRFNDFL-7736 - Периодическое сжатие таблиц. Изменения по БД. - Заголовок пакета-->
+	<changeSet id="3.7-skononova-2" author="skononova">
+        	<sqlFile dbms="oracle"
+        	         encoding="utf8"
+        	         endDelimiter=""
+        	         path="/scripts/ndfl_tools_pkg.sql"
+        	         relativeToChangelogFile="true"
+        	         splitStatements="false"/>
+    	</changeSet>
+
+    	<!--https://jira.aplana.com/browse/SBRFNDFL-7736 - Периодическое сжатие таблиц. Изменения по БД. - Тело пакета-->
+	<changeSet id="3.7-skononova-3" author="skononova">
+        	<sqlFile dbms="oracle"
+        	         encoding="utf8"
+        	         endDelimiter=""
+        	         path="/scripts/ndfl_tools_body.sql"
+        	         relativeToChangelogFile="true"
+        	         splitStatements="false"/>
+    	</changeSet>
+
 </databaseChangeLog>
