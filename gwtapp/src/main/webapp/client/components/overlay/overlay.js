@@ -114,7 +114,7 @@
                                 }
                             }
 
-                            if (typeof addMessage === "string") {
+                            if (addMessage && typeof addMessage === "string") {
                                 errorDialog(addMessage);
                             } else if (status === '500' || status === '403') {
                                 messageType = addMessage.messageType;
@@ -133,7 +133,7 @@
                                         $logPanel.open('log-panel-container', addMessage.additionInfo.uuid);
                                     }]);
                                     errorDialog(message);
-                                } else if (messageType === "BUSINESS_ERROR") {
+                                } else if (status === '403' || messageType === "BUSINESS_ERROR") {
                                     // Бизнес-ошибка, стектрейс не нужен
                                     errorDialog(message);
                                 } else {

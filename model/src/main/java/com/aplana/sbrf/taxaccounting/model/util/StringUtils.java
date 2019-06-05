@@ -3,6 +3,8 @@ package com.aplana.sbrf.taxaccounting.model.util;
 
 import com.google.common.base.Joiner;
 
+import java.util.List;
+
 public final class StringUtils {
 
     private StringUtils() {
@@ -33,6 +35,10 @@ public final class StringUtils {
 
     public static String join(Object[] array, char separator) {
         return join(array, String.valueOf(separator), null);
+    }
+
+    public static String join(List<?> list, String separator, String decorator) {
+        return join(list.toArray(), separator, decorator);
     }
 
     public static String join(Object[] array, String separator, String decorator) {

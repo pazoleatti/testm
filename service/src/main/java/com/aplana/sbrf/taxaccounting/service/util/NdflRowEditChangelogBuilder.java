@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment;
 import com.aplana.sbrf.taxaccounting.model.util.DateUtils;
+import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -20,7 +21,7 @@ public class NdflRowEditChangelogBuilder {
     private int section;
     private Map<String, String> valuesByFieldBefore;
     private Map<String, String> valuesByFieldAfter;
-    public String resultMessage;
+    public String notificationMessage;
     private List<String> changedFields = new ArrayList<>();
 
     public NdflRowEditChangelogBuilder(NdflPersonIncome incomeBefore, NdflPersonIncome incomeAfter) {
@@ -61,33 +62,20 @@ public class NdflRowEditChangelogBuilder {
     public List<String> build(long declarationDataId, BigDecimal rowNumBefore, BigDecimal rowNumAfter) {
         List<String> changelog = new ArrayList<>();
         if (!changedFields.isEmpty()) {
+            notificationMessage = "Для формы " + declarationDataId + " выполнена замена значений в разделе " + section;
             if (!Objects.equals(rowNumBefore, rowNumAfter)) {
-                resultMessage = "Для формы № " + declarationDataId + " внесены изменения в Разделе " + section + " в строке № " + rowNumBefore + "." +
-                        " В ходе выполнения сортировки строк, изменен номер отредактированной строки: \"" + rowNumBefore + "\"->\"" + rowNumAfter + "\"." +
-                        " Измененные значения: " + joinFields(changedFields) + ".";
+                changelog.add("Выполнено изменение параметров, указанных пользователем: " + StringUtils.join(changedFields, ", ", "\"") + "." +
+                        " В ходе выполнения сортировки строк, изменен номер отредактированной строки: \"" + rowNumBefore + "\"->\"" + rowNumAfter + "\".");
             } else {
-                resultMessage = "Для формы № " + declarationDataId + " внесены изменения в Разделе " + section + " в строке № " + rowNumBefore + "," +
-                        " измененные значения: " + joinFields(changedFields) + ".";
+                changelog.add("Выполнено изменение параметров, указанных пользователем: " + StringUtils.join(changedFields, ", ", "\"") + ".");
             }
-            changelog.add(resultMessage);
             for (String fieldName : changedFields) {
                 String valueBefore = valuesByFieldBefore.get(fieldName);
                 String valueAfter = valuesByFieldAfter.get(fieldName);
-                changelog.add("В строке изменено значение \"" + fieldName + "\": \"" + valueBefore + "\"->\"" + valueAfter + "\".");
+                changelog.add("Раздел " + section + ". Строка " + rowNumBefore + ". Выполнена замена значения \"" + fieldName + "\": \"" + valueBefore + "\"→\"" + valueAfter + "\".");
             }
         }
         return changelog;
-    }
-
-    private String joinFields(List<String> fields) {
-        StringBuilder stringBuilder = new StringBuilder();
-        for (int i = 0; i < fields.size(); i++) {
-            if (i != 0) {
-                stringBuilder.append(", ");
-            }
-            stringBuilder.append("\"").append(fields.get(i)).append("\"");
-        }
-        return stringBuilder.toString();
     }
 
     private Map<String, String> toMap(NdflPersonIncome income) {
