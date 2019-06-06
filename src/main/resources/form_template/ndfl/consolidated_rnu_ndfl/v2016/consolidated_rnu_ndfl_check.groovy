@@ -1576,7 +1576,7 @@ class Check extends AbstractScriptClass {
                                     }
                                 }
                                 def groupIncomes = incomesByPersonIdForCol16Sec2Check.get(groupKey(ndflPersonIncome))
-                                def groupPrepayments = ndflPersonPrepaymentList.findAll {
+                                def groupPrepayments = ndflPersonPrepaymentCache.get(ndflPersonId).findAll {
                                     it.operationId in groupIncomes.operationId
                                 }
                                 BigDecimal АвансовыеПлатежиПоГруппе = (BigDecimal) groupPrepayments.sum { NdflPersonPrepayment prepayment -> prepayment.summ ?: 0 } ?: 0
