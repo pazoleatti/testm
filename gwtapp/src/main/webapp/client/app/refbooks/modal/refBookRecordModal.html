@@ -76,10 +76,10 @@
                         <div data-ng-switch-when="DATE" data-model-id="{{attribute.alias}}">
                             <div data-aplana-field>
                                 <!-- Особенность для справочника "Коды, определяющие налоговый (отчётный) период" - год отображать не надо -->
-                                <div data-aplana-datepicker
+                                <div name="{{attribute.alias}}" data-aplana-datepicker
                                      aplana-picker-outer-width="150px"
                                      data-ng-model="record[attribute.alias].value"
-                                     data-date-format="{{refBook.id === APP_CONSTANTS.REFBOOK.PERIOD_CODE ? 'dd.MM' : 'dd.MM.yyyy'}}"
+                                     data-date-format="{{refBook.id === APP_CONSTANTS.REFBOOK.PERIOD_CODE || refBook.id === APP_CONSTANTS.REFBOOK.REPORT_PERIOD_IMPORT ? 'dd.MM' : 'dd.MM.yyyy'}}"
                                      title="{{attribute.name}}"
                                      data-ng-disabled="attribute.readOnly"
                                      data-ng-required="{{attribute.required}}"></div>
@@ -91,7 +91,7 @@
                             <div data-aplana-field data-model-id="{{attribute.alias}}">
                                 <div data-ui-select2="select.options"
                                      aplana-input-outer-width="400"
-                                     data-ng-init="initSelect(attribute.refBookId, attribute.alias)"
+                                     data-ng-init="initSelect(attribute.refBookId, attribute.alias, null, false)"
                                      data-ng-model="record[attribute.alias].value"
                                      data-ng-disabled="attribute.readOnly"
                                      data-ng-required="{{attribute.required}}"></div>

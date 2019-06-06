@@ -464,4 +464,57 @@
         	         splitStatements="false"/>
     	</changeSet>
 
+	<!-- Изменение xsd-схемы в рамках работы над запросом https://jira.aplana.com/browse/SBRFNDFL-7122 -->
+	<changeSet id="3.7-snazin-4" author="snazin">
+		<update tableName="BLOB_DATA">
+			<column name="data" valueBlobFile="templates-3.7/ndfl/primary_rnu_ndfl/v2016/rnu_ndfl.xsd"/>
+			<column name="name" value="РНУ_НДФЛ_new6.6.xsd"/>
+			<where>id in (select dt.xsd from declaration_template dt where dt.id = 100)</where>
+		</update>
+	</changeSet>
+	<!--https://jira.aplana.com/browse/SBRFNDFL-7756 Добавить в систему "Справочник Расширяющие интервалы для загрузки данных"-->
+	<changeSet id="3.7-dnovikov-26" author="dnovikov">
+		<sql>
+			create table report_period_import (
+				id number(18) not null,
+				record_id number(18) not null,
+				report_period_type_id number(18) not null,
+				period_start_date date not null,
+				period_end_date date not null,
+				asnu_id number(18) not null,
+				version date not null,
+				status number(1) default 0 not null
+			);
+			alter table report_period_import add constraint report_period_import_pk primary key (id);
+			alter table report_period_import add constraint rep_per_ext_fk_rep_per_type foreign key (report_period_type_id) references report_period_type (id) on delete cascade;
+			alter table report_period_import add constraint rep_per_ext_fk_asnu foreign key (asnu_id) references ref_book_asnu (id) on delete cascade;
+			comment on table report_period_import is 'Справочник Дополнительные интервалы для загрузки данных';
+			comment on column report_period_import.id is 'Идентификатор версии записи';
+			comment on column report_period_import.record_id is 'Идентификатор записи';
+			comment on column report_period_import.report_period_type_id is 'Код периода';
+			comment on column report_period_import.period_start_date is 'Дата начала интервала';
+			comment on column report_period_import.period_end_date is 'Дата окончания интервала';
+			comment on column report_period_import.asnu_id is 'АСНУ';
+			comment on column report_period_import.version is 'Дата актуальности версии';
+			comment on column report_period_import.status is 'Статус записи (0 - обычная запись, -1 - удаленная, 2 - фиктивная)';
+		</sql>
+	</changeSet>
+
+	<!--https://jira.aplana.com/browse/SBRFNDFL-7756 Добавить в систему "Справочник Расширяющие интервалы для загрузки данных"-->
+	<changeSet id="3.7-dnovikov-27" author="dnovikov">
+		<sql>
+			insert into ref_book(id, name, table_name) values(1040, 'Дополнительные интервалы для загрузки данных', 'REPORT_PERIOD_IMPORT');
+			insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, precision, width, required, max_length)
+			values(10401, 1040, 'Код периода', 'REPORT_PERIOD_TYPE_ID', 4, 1, 8, 26, null, 15, 1, null);
+			insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, precision, width, required, max_length, format)
+			values(10402, 1040, 'Дата начала интервала', 'PERIOD_START_DATE', 3, 2, null, null, null, 15, 1, null, 5);
+			insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, precision, width, required, max_length, format)
+			values(10403, 1040, 'Дата окончания интервала', 'PERIOD_END_DATE', 3, 3, null, null, null, 15, 1, null, 5);
+			insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, precision, width, required, max_length)
+			values(10404, 1040, 'АСНУ', 'ASNU_ID', 4, 4, 900, 9003, null, 15, 1, null);
+
+			insert into report_period_type(id, record_id, code, name, status) values(-1, -1, ' ', ' ', 2);
+		</sql>
+	</changeSet>
+
 </databaseChangeLog>

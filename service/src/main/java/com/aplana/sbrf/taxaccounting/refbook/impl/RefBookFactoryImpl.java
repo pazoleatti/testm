@@ -53,6 +53,7 @@ public class RefBookFactoryImpl implements RefBookFactory {
             NDFL_DETAIL.getId(),
             NDFL_REFERENCES.getId(),
             INCOME_KIND.getId(),
+            REPORT_PERIOD_IMPORT.getId(),
 
             // справочник ОКТМО отдельным списком идет, так как является версионируемым, но только для чтения
             // аналогично Справочник: "Признак кода вычета", реализован как нередактируемый

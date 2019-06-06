@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl.refbook;
 
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDepartmentDao;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriodType;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.RowMapper;
@@ -44,6 +45,8 @@ public class RefBookMapperFactory {
             return new KnfTypeMapper();
         } else if (RefBook.Id.DOC_STATE.getId() == refBookId) {
             return new DocStateMapper();
+        } else if (RefBook.Id.PERIOD_CODE.getId() == refBookId) {
+            return new ReportPeriodTypeMapper();
         }
         throw new IllegalArgumentException("Unknown mapper for refBook = " + refBookId);
     }
@@ -210,6 +213,17 @@ public class RefBookMapperFactory {
             result.setId(resultSet.getLong("id"));
             result.setName(resultSet.getString("name"));
             return result;
+        }
+    }
+
+    public class ReportPeriodTypeMapper<T> implements RowMapper<ReportPeriodType> {
+        @Override
+        public ReportPeriodType mapRow(ResultSet rs, int i) throws SQLException {
+            ReportPeriodType reportPeriodType = new ReportPeriodType();
+            reportPeriodType.setId(rs.getLong("id"));
+            reportPeriodType.setName(rs.getString("name"));
+            reportPeriodType.setCode(rs.getString("code"));
+            return reportPeriodType;
         }
     }
 }
