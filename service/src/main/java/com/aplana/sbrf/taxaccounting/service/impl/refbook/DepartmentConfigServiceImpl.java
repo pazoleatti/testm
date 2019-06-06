@@ -283,39 +283,47 @@ public class DepartmentConfigServiceImpl implements DepartmentConfigService {
         AsyncTaskType taskType = AsyncTaskType.IMPORT_DEPARTMENT_CONFIGS;
         TAUser user = userInfo.getUser();
 
-        // Извлечение id подразделения из названия файла и валидация названия файла
-        int fileNameDepartmentId = parseDepartmentIdFromFileName(action.getFileName());
-        // Валидация id подразделения
-        Department fileNameDepartment;
-        if (!departmentService.existDepartment(fileNameDepartmentId) ||
-                (fileNameDepartment = departmentService.getDepartment(fileNameDepartmentId)).getType() != DepartmentType.TERR_BANK) {
-            throw new ServiceException("Не найден территориальный банк с идентификатором (" + fileNameDepartmentId + "), указанным в имени файла \"" + action.getFileName() + "\"");
-        }
-        int userTbId = departmentService.getParentTBId(user.getDepartmentId());
-        if (!(user.hasRole(TARole.N_ROLE_CONTROL_UNP) ||
-                user.hasRole(TARole.N_ROLE_CONTROL_NS) && userTbId == fileNameDepartmentId)) {
-            throw new ServiceException("У вас отсутствуют права загрузки настроек подразделения " + departmentService.getDepartment(fileNameDepartmentId).getShortName() + ".");
-        }
-        if (action.getDepartmentId() != null && !action.isSkipDepartmentCheck() && fileNameDepartmentId != action.getDepartmentId()) {
-            Department selectedDepartment = departmentService.getDepartment(action.getDepartmentId());
-            result.setConfirmDepartmentCheck("Загружаемый файл содержит настройки подразделения \"" + fileNameDepartment.getShortName() + "\", " +
-                    "хотя отображаются данные подразделения \"" + selectedDepartment.getShortName() + "\". " +
-                    "Вы действительно хотите загрузить файл?");
+        if (action.getFileSize() == 0) {
+            logger.error("Загружаемый файл пуст. Загружать в Систему пустые файлы настроек подразделений запрещено.");
         } else {
-            String uuid = blobDataService.create(action.getInputStream(), action.getFileName());
-            Map<String, Object> params = new HashMap<>();
-            params.put("departmentId", fileNameDepartmentId);
-            params.put("blobDataId", uuid);
-            params.put("fileName", action.getFileName());
-            params.put("fileSize", action.getFileSize());
+            // Извлечение id подразделения из названия файла и валидация названия файла
+            Integer fileNameDepartmentId = parseDepartmentIdFromFileName(action.getFileName(), logger);
+            if (fileNameDepartmentId != null) {
+                // Валидация id подразделения
+                Department fileNameDepartment;
+                if (!departmentService.existDepartment(fileNameDepartmentId) ||
+                        (fileNameDepartment = departmentService.getDepartment(fileNameDepartmentId)).getType() != DepartmentType.TERR_BANK) {
+                    logger.error("Не найден территориальный банк с идентификатором (" + fileNameDepartmentId + "), указанным в имени файла \"" + action.getFileName() + "\"");
+                } else {
+                    int userTbId = departmentService.getParentTBId(user.getDepartmentId());
+                    if (!(user.hasRole(TARole.N_ROLE_CONTROL_UNP) ||
+                            user.hasRole(TARole.N_ROLE_CONTROL_NS) && userTbId == fileNameDepartmentId)) {
+                        logger.error("У вас отсутствуют права загрузки настроек подразделения " + departmentService.getDepartment(fileNameDepartmentId).getShortName() + ".");
+                    } else {
+                        if (action.getDepartmentId() != null && !action.isSkipDepartmentCheck() && fileNameDepartmentId != action.getDepartmentId()) {
+                            Department selectedDepartment = departmentService.getDepartment(action.getDepartmentId());
+                            result.setConfirmDepartmentCheck("Загружаемый файл содержит настройки подразделения \"" + fileNameDepartment.getShortName() + "\", " +
+                                    "хотя отображаются данные подразделения \"" + selectedDepartment.getShortName() + "\". " +
+                                    "Вы действительно хотите загрузить файл?");
+                        } else {
+                            String uuid = blobDataService.create(action.getInputStream(), action.getFileName());
+                            Map<String, Object> params = new HashMap<>();
+                            params.put("departmentId", fileNameDepartmentId);
+                            params.put("blobDataId", uuid);
+                            params.put("fileName", action.getFileName());
+                            params.put("fileSize", action.getFileSize());
 
-            String keyTask = "IMPORT_DEPARTMENT_CONFIGS_" + fileNameDepartmentId;
-            asyncManager.executeTask(keyTask, taskType, userInfo, params, logger, false, new AbstractStartupAsyncTaskHandler() {
-                @Override
-                public LockData lockObject(String keyTask, AsyncTaskType reportType, TAUserInfo userInfo) {
-                    return lockDataService.lockAsync(keyTask, userInfo.getUser().getId());
+                            String keyTask = "IMPORT_DEPARTMENT_CONFIGS_" + fileNameDepartmentId;
+                            asyncManager.executeTask(keyTask, taskType, userInfo, params, logger, false, new AbstractStartupAsyncTaskHandler() {
+                                @Override
+                                public LockData lockObject(String keyTask, AsyncTaskType reportType, TAUserInfo userInfo) {
+                                    return lockDataService.lockAsync(keyTask, userInfo.getUser().getId());
+                                }
+                            });
+                        }
+                    }
                 }
-            });
+            }
         }
         result.setUuid(logEntryService.save(logger.getEntries()));
         return result;
@@ -332,13 +340,13 @@ public class DepartmentConfigServiceImpl implements DepartmentConfigService {
         }
     }
 
-    private int parseDepartmentIdFromFileName(String fileName) {
-        int departmentId;
+    private Integer parseDepartmentIdFromFileName(String fileName, Logger logger) {
+        Integer departmentId = null;
         Matcher matcher = Pattern.compile("(\\d*)_.*_\\d{12}\\.xlsx").matcher(fileName);
         if (matcher.matches()) {
             departmentId = Integer.valueOf(matcher.group(1));
         } else {
-            throw new ServiceException("Неверное имя файла \"" + fileName + "\".");
+            logger.error("Неверное имя файла \"" + fileName + "\".");
         }
         return departmentId;
     }

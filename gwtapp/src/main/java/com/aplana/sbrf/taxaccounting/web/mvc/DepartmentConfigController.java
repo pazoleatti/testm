@@ -166,10 +166,6 @@ public class DepartmentConfigController {
     public ImportDepartmentConfigsResult importExcel(@RequestParam(value = "uploader") MultipartFile file,
                                                      @RequestParam ImportDepartmentConfigsAction action)
             throws IOException {
-        if (file.isEmpty()) {
-            throw new ServiceException("Загружаемый файл пуст. Загружать в Систему пустые файлы настроек подразделений запрещено.");
-        }
-
         TAUserInfo userInfo = securityService.currentUserInfo();
         try (InputStream inputStream = file.getInputStream()) {
             action.setInputStream(inputStream);
