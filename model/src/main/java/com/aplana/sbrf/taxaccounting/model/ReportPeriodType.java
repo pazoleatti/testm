@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model;
 
 
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookSimple;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,10 +13,7 @@ import java.util.Date;
  */
 @Getter
 @Setter
-public class ReportPeriodType implements Serializable{
-
-    /** Уникальный идентификатор отчетного периода */
-    private Long id;
+public class ReportPeriodType extends RefBookSimple<Long> implements Serializable{
 
     /** Текстовое обозначение отчетного периода */
     private String name;

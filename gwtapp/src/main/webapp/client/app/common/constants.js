@@ -79,7 +79,8 @@
                 ID_DOC: 902,
                 KNF_TYPE: 909,
                 DEDUCTION_MARK: 927,
-                DOC_STATE: 929
+                DOC_STATE: 929,
+                REPORT_PERIOD_IMPORT: 1040
             },
             DECLARATION_PERMISSION: {
                 CREATE: 1 << 0,

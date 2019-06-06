@@ -40,7 +40,7 @@
                     // Определяем атрибут для сортировки по умолчанию в справочнике
                     if ($scope.refBook.sortAttribute) {
                         // Если в настройках справочника указан атрибут для сортировки - берем его
-                        $scope.sortAttribute =  $scope.refBook.sortAttribute.alias;
+                        $scope.sortAttribute = $scope.refBook.sortAttribute.alias;
                     }
 
                     if ($scope.refBook.versioned) {
@@ -119,7 +119,13 @@
                             break;
                         case 'DATE':
                             // Особенность для справочника "Коды, определяющие налоговый (отчётный) период" - год отображать не надо
-                            var formatter = $scope.refBook.id === APP_CONSTANTS.REFBOOK.PERIOD_CODE ? $filter('dateWithoutYearFormatter') : $filter('dateFormatter');
+                            var formatter;
+                            if ($scope.refBook.id === APP_CONSTANTS.REFBOOK.PERIOD_CODE ||
+                                $scope.refBook.id === APP_CONSTANTS.REFBOOK.REPORT_PERIOD_IMPORT && (colModel.index === 'PERIOD_START_DATE' || colModel.index === 'PERIOD_END_DATE')) {
+                                formatter = $filter('dateWithoutYearFormatter');
+                            } else {
+                                formatter = $filter('dateFormatter');
+                            }
                             value = refBookValue && typeof refBookValue.value !== 'undefined' ? formatter(refBookValue.value) : "";
                             break;
                         case 'REFERENCE':
@@ -130,7 +136,9 @@
                 }
 
                 function refCellFormatter(colModel, refBookValue) {
-                    if (colModel.attribute.refBookId === APP_CONSTANTS.REFBOOK.DEDUCTION_MARK) {
+                    if (colModel.attribute.refBookId === APP_CONSTANTS.REFBOOK.DEDUCTION_MARK ||
+                        colModel.attribute.refBookId === APP_CONSTANTS.REFBOOK.ASNU ||
+                        colModel.attribute.refBookId === APP_CONSTANTS.REFBOOK.PERIOD_CODE) {
                         return $filter("codeNameFormatter")({
                             'code': refBookValue.referenceObject["CODE"].value,
                             'name': refBookValue.referenceObject["NAME"].value

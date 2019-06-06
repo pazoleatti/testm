@@ -78,7 +78,8 @@ public class RefBook implements Serializable {
         KBK(940),                                   // Классификатор доходов бюджетов Российской Федерации
         PERSON_CATEGORY(941),                        // Категорий застрахованных лиц
         NDFL_DETAIL(951),                            // Настройки подразделений по НДФЛ (таблица)
-        NDFL_REFERENCES(964);                            // Ограничение доступа по АСНУ
+        NDFL_REFERENCES(964),                            // Ограничение доступа по АСНУ
+        REPORT_PERIOD_IMPORT(1040);
 
         private final long id;
 

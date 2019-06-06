@@ -810,6 +810,8 @@
                 $scope.refBookConfig[APP_CONSTANTS.REFBOOK.ASNU] = codeNameConfig;
                 // Признак кода вычета
                 $scope.refBookConfig[APP_CONSTANTS.REFBOOK.DEDUCTION_MARK] = codeNameConfig;
+                // Коды, определяющие налоговый (отчётный) период
+                $scope.refBookConfig[APP_CONSTANTS.REFBOOK.PERIOD_CODE] = codeNameConfig;
                 // Коды видов доходов
                 $scope.refBookConfig[APP_CONSTANTS.REFBOOK.INCOME_CODE] = {
                     filter: {
@@ -880,7 +882,7 @@
                  * @param refBookId идентификатор справочника, записи которого будут получены
                  * @param attributeAlias алиас атрибута записи справочника, сама которая является ссылочным значением. Используется для подгрузки полного значения в поле объекта
                  */
-                $scope.initSelect = function (refBookId, attributeAlias, filter) {
+                $scope.initSelect = function (refBookId, attributeAlias, filter, isMultiple) {
                     if (attributeAlias) {
                         /**
                          * Событие первичного проставления значения в выпадашке. Используется для подгрузки "полного" значения записи справочника по ее идентификатору
@@ -911,7 +913,7 @@
                         $scope.select = GetSelectOption.getAjaxSelectOptions(false, true, "controller/rest/refBookValues/30?projection=allDepartments",
                             {}, $scope.config.sort, $scope.config.formatter);
                     } else {
-                        var isMultiple = (
+                        isMultiple = angular.isDefined(isMultiple) ? isMultiple : (
                             refBookId === APP_CONSTANTS.REFBOOK.DOC_TYPE
                             || refBookId === APP_CONSTANTS.REFBOOK.COUNTRY
                             || refBookId === APP_CONSTANTS.REFBOOK.TAXPAYER_STATUS
