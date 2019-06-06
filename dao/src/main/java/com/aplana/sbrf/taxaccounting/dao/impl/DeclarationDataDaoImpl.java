@@ -235,7 +235,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                             ") curr_dd " +
                             "on dt.declaration_type_id = curr_dd.declaration_type_id and (tp.year < curr_dd.year or tp.year = curr_dd.year and rpt.code < curr_dd.rpt_code) " +
                             "and dd.kpp = curr_dd.kpp and dd.oktmo = curr_dd.oktmo and dd.doc_state_id in (:docStates)\n" +
-                            "order by tp.year desc, rpt.code desc, drp.correction_date desc, dd.correction_num desc, dd.id desc\n" +
+                            "order by tp.year desc, rpt.code desc, drp.correction_date desc nulls last, dd.correction_num desc, dd.id desc\n" +
                             ") where rownum = 1",
                     params, new DeclarationDataRowMapper());
         } catch (EmptyResultDataAccessException e) {
