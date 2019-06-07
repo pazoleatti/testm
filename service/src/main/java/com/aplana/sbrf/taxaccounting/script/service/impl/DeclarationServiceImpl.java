@@ -340,4 +340,9 @@ public class DeclarationServiceImpl implements DeclarationService {
     public String getXmlDataFileName(long declarationDataId, TAUserInfo userInfo) {
         return declarationDataService.getXmlDataFileName(declarationDataId, userInfo);
     }
+
+    @Override
+    public String getFullDeclarationDescription(Long declarationDataId) {
+        return declarationDataService.getFullDeclarationDescription(declarationDataId);
+    }
 }

@@ -22,13 +22,11 @@ import com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils
 import com.aplana.sbrf.taxaccounting.service.LogBusinessService
 import com.aplana.sbrf.taxaccounting.service.TAUserService
 import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService
-import com.google.common.base.Strings
 import groovy.transform.TypeChecked
 import groovy.transform.TypeCheckingMode
 import org.apache.commons.collections4.CollectionUtils
 import org.apache.commons.lang3.exception.ExceptionUtils
-
-import java.sql.SQLSyntaxErrorException
+import org.springframework.dao.DeadlockLoserDataAccessException
 
 new Calculate(this).run()
 
@@ -209,85 +207,83 @@ class Calculate extends AbstractScriptClass {
     @Override
     public void run() {
         initConfiguration()
-        updateAndCheckException({
-            switch (formDataEvent) {
-                case FormDataEvent.CALCULATE:
-                    long timeFull = System.currentTimeMillis()
-                    long time = System.currentTimeMillis()
+        switch (formDataEvent) {
+            case FormDataEvent.CALCULATE:
+                long timeFull = System.currentTimeMillis()
+                long time = System.currentTimeMillis()
 
-                    logForDebug("Начало расчета ПНФ")
+                logForDebug("Начало расчета ПНФ")
 
-                    ConfigurationParamModel configurationParamModel = declarationService.getAllConfig(userInfo)
-                    runParallel = configurationParamModel?.get(ConfigurationParam.ASYNC_SERIAL_MODE)?.get(0)?.get(0) == "0"
+                ConfigurationParamModel configurationParamModel = declarationService.getAllConfig(userInfo)
+                runParallel = configurationParamModel?.get(ConfigurationParam.ASYNC_SERIAL_MODE)?.get(0)?.get(0) == "0"
 
-                    maxRegistryPersonId = refBookPersonService.findMaxRegistryPersonId(new Date())
+                maxRegistryPersonId = refBookPersonService.findMaxRegistryPersonId(new Date())
 
-                    if (declarationData.asnuId == null) {
-                        //noinspection GroovyAssignabilityCheck
-                        throw new ServiceException("Для " + declarationData.id + ", " + declarationData.fileName + " не указан код АСНУ загрузившей данные!")
-                    }
-
-                    refBookPersonService.clearRnuNdflPerson(declarationData.id)
-
-                    //Получаем список всех ФЛ в первичной НФ
-                    primaryPersonDataList = refBookPersonService.findNaturalPersonPrimaryDataFromNdfl(declarationData.id, createPrimaryRowMapper())
-                    if (logger.containsLevel(LogLevel.ERROR)) {
-                        return
-                    }
-
-                    insertPersonList.addAll(primaryPersonDataList)
-
+                if (declarationData.asnuId == null) {
                     //noinspection GroovyAssignabilityCheck
-                    logForDebug("В ПНФ номер " + declarationData.id + " получены записи о физ. лицах (" + primaryPersonDataList.size() + " записей, " + ScriptUtils.calcTimeMillis(time))
+                    throw new ServiceException("Для " + declarationData.id + ", " + declarationData.fileName + " не указан код АСНУ загрузившей данные!")
+                }
 
-                    Map<Long, NaturalPerson> primaryPersonMap = primaryPersonDataList.collectEntries { NaturalPerson naturalPerson ->
-                        [naturalPerson.getPrimaryPersonId(), naturalPerson]
-                    }
+                refBookPersonService.clearRnuNdflPerson(declarationData.id)
 
-                    if (!getPrimaryPersonDataList().isEmpty()) {
-                        //Заполнени временной таблицы версий
+                //Получаем список всех ФЛ в первичной НФ
+                primaryPersonDataList = refBookPersonService.findNaturalPersonPrimaryDataFromNdfl(declarationData.id, createPrimaryRowMapper())
+                if (logger.containsLevel(LogLevel.ERROR)) {
+                    return
+                }
+
+                insertPersonList.addAll(primaryPersonDataList)
+
+                //noinspection GroovyAssignabilityCheck
+                logForDebug("В ПНФ номер " + declarationData.id + " получены записи о физ. лицах (" + primaryPersonDataList.size() + " записей, " + ScriptUtils.calcTimeMillis(time))
+
+                Map<Long, NaturalPerson> primaryPersonMap = primaryPersonDataList.collectEntries { NaturalPerson naturalPerson ->
+                    [naturalPerson.getPrimaryPersonId(), naturalPerson]
+                }
+
+                if (!getPrimaryPersonDataList().isEmpty()) {
+                    //Заполнени временной таблицы версий
+                    time = System.currentTimeMillis()
+                    refBookPersonService.fillRecordVersions()
+                    //noinspection GroovyAssignabilityCheck
+                    logForDebug("Заполнение таблицы версий (" + ScriptUtils.calcTimeMillis(time))
+
+                    // Идентификатор записи в первичной форме - список подходящих записей для идентификации по весам и обновления справочников
+                    time = System.currentTimeMillis()
+                    Map<Long, Map<Long, NaturalPerson>> similarityPersonMap = refBookPersonService.findPersonForUpdateFromPrimaryRnuNdfl(declarationData.id, createRefbookHandler())
+                    //noinspection GroovyAssignabilityCheck
+                    logForDebug("Предварительная выборка по значимым параметрам (" + similarityPersonMap.size() + " записей, " + ScriptUtils.calcTimeMillis(time))
+
+                    time = System.currentTimeMillis()
+                    updateNaturalPersonRefBookRecords(primaryPersonMap, similarityPersonMap)
+                    //noinspection GroovyAssignabilityCheck
+                    logForDebug("Обновление записей (" + ScriptUtils.calcTimeMillis(time))
+
+                    if (!insertPersonList.isEmpty()) {
                         time = System.currentTimeMillis()
-                        refBookPersonService.fillRecordVersions()
+                        Map<Long, Map<Long, NaturalPerson>> checkSimilarityPersonMap = refBookPersonService.findPersonForCheckFromPrimaryRnuNdfl(declarationData.id, createRefbookHandler())
                         //noinspection GroovyAssignabilityCheck
-                        logForDebug("Заполнение таблицы версий (" + ScriptUtils.calcTimeMillis(time))
-
-                        // Идентификатор записи в первичной форме - список подходящих записей для идентификации по весам и обновления справочников
-                        time = System.currentTimeMillis()
-                        Map<Long, Map<Long, NaturalPerson>> similarityPersonMap = refBookPersonService.findPersonForUpdateFromPrimaryRnuNdfl(declarationData.id, createRefbookHandler())
-                        //noinspection GroovyAssignabilityCheck
-                        logForDebug("Предварительная выборка по значимым параметрам (" + similarityPersonMap.size() + " записей, " + ScriptUtils.calcTimeMillis(time))
+                        logForDebug("Основная выборка по всем параметрам (" + checkSimilarityPersonMap.size() + " записей, " + ScriptUtils.calcTimeMillis(time))
 
                         time = System.currentTimeMillis()
-                        updateNaturalPersonRefBookRecords(primaryPersonMap, similarityPersonMap)
+                        updateNaturalPersonRefBookRecords(primaryPersonMap, checkSimilarityPersonMap)
                         //noinspection GroovyAssignabilityCheck
                         logForDebug("Обновление записей (" + ScriptUtils.calcTimeMillis(time))
-
-                        if (!insertPersonList.isEmpty()) {
-                            time = System.currentTimeMillis()
-                            Map<Long, Map<Long, NaturalPerson>> checkSimilarityPersonMap = refBookPersonService.findPersonForCheckFromPrimaryRnuNdfl(declarationData.id, createRefbookHandler())
-                            //noinspection GroovyAssignabilityCheck
-                            logForDebug("Основная выборка по всем параметрам (" + checkSimilarityPersonMap.size() + " записей, " + ScriptUtils.calcTimeMillis(time))
-
-                            time = System.currentTimeMillis()
-                            updateNaturalPersonRefBookRecords(primaryPersonMap, checkSimilarityPersonMap)
-                            //noinspection GroovyAssignabilityCheck
-                            logForDebug("Обновление записей (" + ScriptUtils.calcTimeMillis(time))
-                        }
-
-                        if (!insertPersonList.isEmpty()) {
-                            time = System.currentTimeMillis()
-                            preCreateNaturalPersonRefBookRecords()
-                            //noinspection GroovyAssignabilityCheck
-                            logForDebug("Создание (" + insertPersonList.size() + " записей, " + ScriptUtils.calcTimeMillis(time))
-                        }
-
                     }
 
-                    countTotalAndUniquePerson()
-                    //noinspection GroovyAssignabilityCheck
-                    logForDebug("Завершение расчета ПНФ (" + ScriptUtils.calcTimeMillis(timeFull))
-            }
-        })
+                    if (!insertPersonList.isEmpty()) {
+                        time = System.currentTimeMillis()
+                        preCreateNaturalPersonRefBookRecords()
+                        //noinspection GroovyAssignabilityCheck
+                        logForDebug("Создание (" + insertPersonList.size() + " записей, " + ScriptUtils.calcTimeMillis(time))
+                    }
+
+                }
+
+                countTotalAndUniquePerson()
+                //noinspection GroovyAssignabilityCheck
+                logForDebug("Завершение расчета ПНФ (" + ScriptUtils.calcTimeMillis(timeFull))
+        }
     }
 
     // Вывод информации о количестве обработанных физлиц всего и уникальных
@@ -968,7 +964,20 @@ class Calculate extends AbstractScriptClass {
         }
 
         if (!updatePersonList.isEmpty()) {
-            personService.updatePersons(new ArrayList<NaturalPerson>(updatePersonList))
+            try {
+                personService.updatePersons(new ArrayList<NaturalPerson>(updatePersonList))
+            } catch (Exception e) {
+                e.printStackTrace()
+                if (ExceptionUtils.indexOfThrowable(e, DeadlockLoserDataAccessException.class) != -1) {
+                    e.printStackTrace()
+                    logger.error("Не выполнена операция \"Идентификация\" для налоговой формы: " +
+                            "${declarationService.getFullDeclarationDescription(declarationData.id)}. Причина: " +
+                            "Параллельно запущены операции идентификации ФЛ, в ходе которых произошла попытка обновить " +
+                            "данные одного и того же ФЛ. Необходимо запустить идентификацию повторно.")
+                }
+                throw e
+            }
+
         }
         logForDebug("Идентификация и обновление (" + ScriptUtils.calcTimeMillis(time))
 
@@ -1301,26 +1310,6 @@ class Calculate extends AbstractScriptClass {
             throw new Exception("Ошибка при получении записей справочника " + refBookId)
         }
         return refBookList
-    }
-
-    void updateAndCheckException(Closure<Void> update) {
-        try {
-            update()
-        } catch (Exception e) {
-            e.printStackTrace()
-            int i = ExceptionUtils.indexOfThrowable(e, SQLSyntaxErrorException.class)
-            if (i != -1) {
-                SQLSyntaxErrorException sqlSyntaxErrorException = (SQLSyntaxErrorException) ExceptionUtils.getThrowableList(e).get(i)
-                if (sqlSyntaxErrorException.getLocalizedMessage().contains("ORA-02049") || sqlSyntaxErrorException.getLocalizedMessage().contains("ORA-00060")) {
-                    e.printStackTrace()
-                    logger.error("Невозможно выполнить обновление записей Реестра физических лиц при выполнении операции \"Идентификация ФЛ\" " +
-                            "для налоговой формы №: ${declarationData.id}. Записи Реестра физических лиц используются при выполнении операции \"Идентификация ФЛ\" " +
-                            "для другой налоговой формы. Выполните операцию позднее.")
-                    return
-                }
-            }
-            throw e
-        }
     }
 
     /**

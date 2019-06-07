@@ -317,4 +317,12 @@ public interface DeclarationService {
      * @return имя файла взятого из xml данных
      */
     String getXmlDataFileName(long declarationDataId, TAUserInfo userInfo);
+
+    /**
+     * Полное Описание налоговой формы
+     *
+     * @param declarationDataId идентификатор налоговой формы
+     * @return строка с описанием
+     */
+    String getFullDeclarationDescription(Long declarationDataId);
 }
