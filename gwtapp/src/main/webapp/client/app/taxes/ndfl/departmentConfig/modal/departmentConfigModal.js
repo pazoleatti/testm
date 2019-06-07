@@ -7,7 +7,12 @@
         .controller('departmentConfigModalCtrl', ['$scope', '$filter', 'APP_CONSTANTS', '$modalInstance', '$shareData', '$dialogs', 'DepartmentConfigResource', '$http', '$logPanel',
             function ($scope, $filter, APP_CONSTANTS, $modalInstance, $shareData, $dialogs, DepartmentConfigResource, $http, $logPanel) {
                 $scope.mode = $shareData.mode;
-                $scope.record = ($shareData.mode === 'CREATE') ? {} : $.extend(true, {}, $shareData.record);
+
+                function initRecord() {
+                    $scope.record = $shareData.mode === 'CREATE' ? {} : $.extend(true, {}, $shareData.record);
+                }
+
+                initRecord();
 
                 $scope.save = function () {
                     if ($scope.mode === 'CREATE') {
@@ -96,6 +101,8 @@
                 $scope.returnToView = function () {
                     $scope.mode = 'VIEW';
                     $modalInstance.updateTitle($filter('translate')('departmentConfig.modal.open.title'));
+                    $scope.departmentConfigForm.$setPristine();
+                    initRecord();
                 };
 
                 $scope.cancel = function (close) {
