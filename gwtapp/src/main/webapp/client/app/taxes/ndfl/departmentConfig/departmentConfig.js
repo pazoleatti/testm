@@ -206,13 +206,10 @@
                         resolve: {
                             $shareData: function () {
                                 return {
-                                    mode: "CREATE"
+                                    mode: "CREATE",
+                                    refreshGrid: $scope.refreshGrid
                                 };
                             }
-                        }
-                    }).result.then(function (needToRefresh) {
-                        if (needToRefresh) {
-                            $scope.refreshGrid();
                         }
                     });
                 };
@@ -228,13 +225,10 @@
                                 $shareData: function () {
                                     return {
                                         mode: "VIEW",
-                                        record: $scope.departmentConfigGrid.value[0]
+                                        record: $scope.departmentConfigGrid.value[0],
+                                        refreshGrid: $scope.refreshGrid
                                     };
                                 }
-                            }
-                        }).result.then(function (needToRefresh) {
-                            if (needToRefresh) {
-                                $scope.refreshGrid();
                             }
                         });
                     }

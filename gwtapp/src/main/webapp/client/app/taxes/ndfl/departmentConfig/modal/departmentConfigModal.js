@@ -54,7 +54,8 @@
                         if (response.data.error) {
                             $dialogs.errorDialog({content: response.data.error});
                         } else {
-                            $modalInstance.close(true);
+                            $shareData.refreshGrid();
+                            $modalInstance.close();
                         }
                     });
                 }
@@ -79,7 +80,8 @@
                         if (response.data.error) {
                             $dialogs.errorDialog({content: response.data.error});
                         } else {
-                            $modalInstance.close(true);
+                            $shareData.refreshGrid();
+                            $scope.returnToView();
                         }
                     });
                 }
@@ -90,7 +92,13 @@
                     $modalInstance.updateTitle($filter('translate')('departmentConfig.modal.edit.title'));
                 };
 
-                $scope.close = function () {
+                // Выход из режима редактирования
+                $scope.returnToView = function () {
+                    $scope.mode = 'VIEW';
+                    $modalInstance.updateTitle($filter('translate')('departmentConfig.modal.open.title'));
+                };
+
+                $scope.cancel = function (close) {
                     if (($scope.mode === 'CREATE' || $scope.mode === 'EDIT') && $scope.departmentConfigForm.$dirty) {
                         $dialogs.confirmDialog({
                             title: $filter('translate')('title.confirm'),
@@ -98,17 +106,25 @@
                             okBtnCaption: $filter('translate')('common.button.yes'),
                             cancelBtnCaption: $filter('translate')('common.button.no'),
                             okBtnClick: function () {
-                                $modalInstance.close(false);
+                                if (close || $scope.mode !== 'EDIT') {
+                                    $modalInstance.close();
+                                } else {
+                                    $scope.returnToView();
+                                }
                             }
                         });
                     } else {
-                        $modalInstance.close(false);
+                        if (close || $scope.mode !== 'EDIT') {
+                            $modalInstance.close();
+                        } else {
+                            $scope.returnToView();
+                        }
                     }
                 };
 
                 // срабатывает при нажатии на крестик в модальном окне
                 $scope.modalCloseCallback = function () {
-                    $scope.close();
+                    $scope.cancel();
                 };
             }]);
 }());
