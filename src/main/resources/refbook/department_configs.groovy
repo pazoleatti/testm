@@ -66,7 +66,8 @@ class DepartmentConfigScript extends AbstractScriptClass {
 
     List<String> header = ["Дата начала действия настройки", "Дата окончания действия настройки", "КПП", "ОКТМО", "Код НО (конечного)", "Код по месту представления",
                            "Наименование для титульного листа", "Контактный телефон", "Признак подписанта", "Фамилия подписанта", "Имя подписанта", "Отчество подписанта",
-                           "Документ полномочий подписанта", "Код формы реорганизации", "КПП реорганизованной организации", "ИНН реорганизованной организации"]
+                           "Документ полномочий подписанта", "Код формы реорганизации", "КПП реорганизованной организации", "ИНН реорганизованной организации",
+                           "КПП подразделения правопреемника", "Наименование подразделения правопреемника"]
 
     void importData() {
         this.department = refBookDepartmentService.fetch(departmentId)
@@ -164,6 +165,8 @@ class DepartmentConfigScript extends AbstractScriptClass {
         departmentConfig.setReorganization(row.cell(++colNum).getReorganization())
         departmentConfig.setReorgKpp(row.cell(++colNum).getReorgKpp())
         departmentConfig.setReorgInn(row.cell(++colNum).getReorgInn())
+        departmentConfig.setReorgSuccessorKpp(row.cell(++colNum).getReorgSuccessorKpp())
+        departmentConfig.setReorgSuccessorName(row.cell(++colNum).getReorgSuccessorName())
         return departmentConfig
     }
 
@@ -328,7 +331,9 @@ class DepartmentConfigScript extends AbstractScriptClass {
                     Objects.equals(approveDocName, that.approveDocName) &&
                     Objects.equals(reorganization?.id, that.reorganization?.id) &&
                     Objects.equals(reorgKpp, that.reorgKpp) &&
-                    Objects.equals(reorgInn, that.reorgInn)
+                    Objects.equals(reorgInn, that.reorgInn) &&
+                    Objects.equals(reorgSuccessorKpp, that.reorgSuccessorKpp) &&
+                    Objects.equals(reorgSuccessorName, that.reorgSuccessorName)
         }
     }
 
@@ -533,6 +538,22 @@ class DepartmentConfigScript extends AbstractScriptClass {
                 return null
             }
             return value ?: null
+        }
+
+        String getReorgSuccessorKpp() {
+            if (value && (value.length() != 9 || !(value[4..5] in ["01", "02", "03", "05", "31", "32", "43", "45"]))) {
+                logError("\"КПП подразделения правопреемника\" должен содержать 9 цифр, из которых 5 и 6 цифры должны содержать одно из значений: \"01\", \"02\", \"03\", \"05\", \"31\", \"32\", \"43\", \"45\"")
+                return null
+            }
+            return value ?: null
+        }
+
+        String getReorgSuccessorName() {
+            if (value && value.length() > 1000) {
+                logError("\"Наименование подразделения правопреемника\" должно содержать строку длиной не более 1000 символов")
+                return null
+            }
+            return value
         }
 
         void logIncorrectTypeError(def type) {
