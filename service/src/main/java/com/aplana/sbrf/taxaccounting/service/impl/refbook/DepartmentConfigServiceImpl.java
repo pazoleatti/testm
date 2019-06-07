@@ -37,6 +37,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.google.common.base.Objects.firstNonNull;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.time.DateUtils.addDays;
 
 @Service("departmentConfigService")
@@ -261,16 +262,22 @@ public class DepartmentConfigServiceImpl implements DepartmentConfigService {
         ActionResult result = new ActionResult();
         AsyncTaskType taskType = AsyncTaskType.EXCEL_DEPARTMENT_CONFIGS;
 
-        Map<String, Object> params = new HashMap<>();
-        params.put("departmentId", filter.getDepartmentId());
+        Department department = departmentService.getDepartment(filter.getDepartmentId());
+        if (isEmpty(department.getShortName())) {
+            logger.error("При формировании файла выгрузки настроек подразделения произошла ошибка. " +
+                    "Обратитесь к Администратору Системы или повторите операцию позднее. Описание ошибки: Сокращенное наименование не может быть пустым");
+        } else {
+            Map<String, Object> params = new HashMap<>();
+            params.put("departmentId", filter.getDepartmentId());
 
-        String keyTask = "EXCEL_DEPARTMENT_CONFIGS_" + System.currentTimeMillis();
-        asyncManager.executeTask(keyTask, taskType, userInfo, params, logger, false, new AbstractStartupAsyncTaskHandler() {
-            @Override
-            public LockData lockObject(String keyTask, AsyncTaskType reportType, TAUserInfo userInfo) {
-                return lockDataService.lockAsync(keyTask, userInfo.getUser().getId());
-            }
-        });
+            String keyTask = "EXCEL_DEPARTMENT_CONFIGS_" + System.currentTimeMillis();
+            asyncManager.executeTask(keyTask, taskType, userInfo, params, logger, false, new AbstractStartupAsyncTaskHandler() {
+                @Override
+                public LockData lockObject(String keyTask, AsyncTaskType reportType, TAUserInfo userInfo) {
+                    return lockDataService.lockAsync(keyTask, userInfo.getUser().getId());
+                }
+            });
+        }
         result.setUuid(logEntryService.save(logger.getEntries()));
         return result;
     }
