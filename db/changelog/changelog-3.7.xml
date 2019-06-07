@@ -531,4 +531,16 @@
 		</update>
 	</changeSet>
 
+
+	<changeSet id="3.7-ytrofimov-10" author="ytrofimov">
+		<insert tableName="CONFIGURATION_SCHEDULER">
+			<column name="id" value="6"/>
+			<column name="task_name" value="Очистка файлового хранилища"/>
+			<column name="schedule" value="0 0 22 ? * SAT"/>
+			<column name="active" value="1"/>
+			<column name="modification_date" valueDate="sysdate"/>
+			<column name="last_fire_date" valueDate="sysdate"/>
+		</insert>
+	</changeSet>
+
 </databaseChangeLog>

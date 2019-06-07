@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.async.AsyncTaskThreadContainer;
 import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTask;
 import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTaskData;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
+import com.aplana.sbrf.taxaccounting.service.DBToolService;
 import com.aplana.sbrf.taxaccounting.service.LockDataService;
 import com.aplana.sbrf.taxaccounting.service.SchedulerTaskService;
 import com.aplana.sbrf.taxaccounting.service.scheduler.SchedulerService;
@@ -91,6 +92,12 @@ public class SchedulerServiceImpl implements SchedulingConfigurer, SchedulerServ
                     asyncTasksMonitoring();
                 }
             })
+            .put("SHRINK_TABLES", new SchedulerTaskExecutor() {
+                @Override
+                public void execute() {
+                    shrinkTables();
+                }
+            })
             .build();
 
     //Реестр запланированных задач в Spring
@@ -110,6 +117,8 @@ public class SchedulerServiceImpl implements SchedulingConfigurer, SchedulerServ
     private TaxEventProcessor taxEventProcessor;
     @Autowired
     private ApplicationInfo applicationInfo;
+    @Autowired
+    private DBToolService dbToolService;
 
     /**
      * Инициализация планировщика
@@ -322,6 +331,16 @@ public class SchedulerServiceImpl implements SchedulingConfigurer, SchedulerServ
      */
     private void asyncTasksMonitoring() {
         asyncTaskThreadContainer.processQueues();
+    }
+
+    private void shrinkTables() {
+        SchedulerTaskData schedulerTask = schedulerTaskService.fetchOne(SchedulerTask.SHRINK_TABLES);
+        if (schedulerTask.isActive()) {
+            LOG.info("shrinking tables started by scheduler");
+            schedulerTaskService.updateStartDate(SchedulerTask.SHRINK_TABLES);
+            dbToolService.shrinkTables();
+            LOG.info("shrinking tables finished");
+        }
     }
 
     /**
