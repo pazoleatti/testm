@@ -2072,7 +2072,6 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
     }
 
 
-
     /**
      * Фабрика для получения экземплярая SheetFiller по индексу листа
      */
@@ -2579,48 +2578,18 @@ class ReportXlsxSheetFiller implements SheetFiller {
         this.departmentService = departmentService
     }
 
+    @EqualsAndHashCode
     class XlsxReportRowKey {
         String kpp
         String oktmo
-        Department primaryTB
+        String primaryTB
+        String period
 
-        XlsxReportRowKey(String kpp, String oktmo, Department primaryTB) {
+        XlsxReportRowKey(String kpp, String oktmo, String primaryTB, String period) {
             this.kpp = kpp
             this.oktmo = oktmo
             this.primaryTB = primaryTB
-        }
-
-        boolean equals(o) {
-            if (this.is(o)) return true
-            if (getClass() != o.class) return false
-
-            XlsxReportRowKey that = (XlsxReportRowKey) o
-
-            if (kpp != that.kpp) return false
-            if (oktmo != that.oktmo) return false
-            if (primaryTB?.id != that.primaryTB?.id) return false
-
-            return true
-        }
-
-        int hashCode() {
-            int result
-            result = (kpp != null ? kpp.hashCode() : 0)
-            result = 31 * result + (oktmo != null ? oktmo.hashCode() : 0)
-            result = 31 * result + (primaryTB != null ? primaryTB.id.hashCode() : 0)
-            return result
-        }
-    }
-
-    class IncomeList extends ArrayList<NdflPersonIncome> {
-        Map<String, List<NdflPersonIncome>> incomesByOperationId
-        Map<Integer, List<NdflPersonIncome>> incomesByRate
-
-        Map<Integer, List<NdflPersonIncome>> groupByTaxRate() {
-            if (!incomesByRate) {
-                incomesByRate = this.groupBy { it.taxRate }
-            }
-            return incomesByRate
+            this.period = period
         }
     }
 
@@ -2633,27 +2602,6 @@ class ReportXlsxSheetFiller implements SheetFiller {
             this.personIdSet = personIdSet
             this.incomeAccruedSumm = incomeAccruedSumm
             this.calculatedTax = calculatedTax
-        }
-
-        boolean equals(o) {
-            if (this.is(o)) return true
-            if (getClass() != o.class) return false
-
-            FlIncomeData that = (FlIncomeData) o
-
-            if (incomeAccruedSumm != that.incomeAccruedSumm) return false
-            if (calculatedTax != that.calculatedTax) return false
-            if (personIdSet != that.personIdSet) return false
-
-            return true
-        }
-
-        int hashCode() {
-            int result
-            result = (personIdSet != null ? personIdSet.hashCode() : 0)
-            result = 31 * result + (incomeAccruedSumm != null ? incomeAccruedSumm.hashCode() : 0)
-            result = 31 * result + (calculatedTax != null ? calculatedTax.hashCode() : 0)
-            return result
         }
     }
 
@@ -2670,20 +2618,23 @@ class ReportXlsxSheetFiller implements SheetFiller {
         CellStyle textLeftStyle = styler.createBorderStyleLeftAlignedTypeText()
         FlIncomeData summaryFlIncomeData = new FlIncomeData(new HashSet<Long>(), new BigDecimal(0).setScale(2), new BigDecimal(0).setScale(2))
         for (NdflPersonIncome npi in ndflPersonIncomeList) {
-            Department primaryTB = getPrimaryTB(npi)
-            XlsxReportRowKey rowKey = new XlsxReportRowKey(npi.kpp, npi.oktmo, primaryTB)
-            if (flIncomeDataMap.get(rowKey) == null) {
-                flIncomeDataMap.put(rowKey, new FlIncomeData(new HashSet<Long>(), new BigDecimal(0).setScale(2), new BigDecimal(0).setScale(2)))
-            }
-            FlIncomeData flIncomeData = flIncomeDataMap.get(rowKey)
-            flIncomeData.personIdSet.add(npi.ndflPersonId)
-            flIncomeData.incomeAccruedSumm = npi.incomeAccruedSumm ? flIncomeData.incomeAccruedSumm.add(npi.incomeAccruedSumm) : flIncomeData.incomeAccruedSumm
-            flIncomeData.calculatedTax = npi.calculatedTax ? flIncomeData.calculatedTax.add(npi.calculatedTax) : flIncomeData.calculatedTax
-            flIncomeDataMap.put(rowKey, flIncomeData)
+            if (npi.incomeAccruedDate) {
+                Department primaryTB = getPrimaryTB(npi)
+                String period = getPeriod(npi.incomeAccruedDate)
+                XlsxReportRowKey rowKey = new XlsxReportRowKey(npi.kpp, npi.oktmo, primaryTB?.name, period)
+                if (flIncomeDataMap.get(rowKey) == null) {
+                    flIncomeDataMap.put(rowKey, new FlIncomeData(new HashSet<Long>(), new BigDecimal(0).setScale(2), new BigDecimal(0).setScale(2)))
+                }
+                FlIncomeData flIncomeData = flIncomeDataMap.get(rowKey)
+                flIncomeData.personIdSet.add(npi.ndflPersonId)
+                flIncomeData.incomeAccruedSumm = npi.incomeAccruedSumm ? flIncomeData.incomeAccruedSumm.add(npi.incomeAccruedSumm) : flIncomeData.incomeAccruedSumm
+                flIncomeData.calculatedTax = npi.calculatedTax ? flIncomeData.calculatedTax.add(npi.calculatedTax) : flIncomeData.calculatedTax
+                flIncomeDataMap.put(rowKey, flIncomeData)
 
-            summaryFlIncomeData.personIdSet.add(npi.ndflPersonId)
-            summaryFlIncomeData.incomeAccruedSumm = npi.incomeAccruedSumm ? summaryFlIncomeData.incomeAccruedSumm.add(npi.incomeAccruedSumm) : summaryFlIncomeData.incomeAccruedSumm
-            summaryFlIncomeData.calculatedTax = npi.calculatedTax ? summaryFlIncomeData.calculatedTax.add(npi.calculatedTax) : summaryFlIncomeData.calculatedTax
+                summaryFlIncomeData.personIdSet.add(npi.ndflPersonId)
+                summaryFlIncomeData.incomeAccruedSumm = npi.incomeAccruedSumm ? summaryFlIncomeData.incomeAccruedSumm.add(npi.incomeAccruedSumm) : summaryFlIncomeData.incomeAccruedSumm
+                summaryFlIncomeData.calculatedTax = npi.calculatedTax ? summaryFlIncomeData.calculatedTax.add(npi.calculatedTax) : summaryFlIncomeData.calculatedTax
+            }
         }
 
         for (XlsxReportRowKey reportRowKey : flIncomeDataMap.keySet()) {
@@ -2710,7 +2661,10 @@ class ReportXlsxSheetFiller implements SheetFiller {
             cell6.setCellValue(flIncomeData.calculatedTax?.toString());
             Cell cell7 = row.createCell(7);
             cell7.setCellStyle(textCenteredStyle)
-            cell7.setCellValue(reportRowKey.primaryTB?.name ?: "");
+            cell7.setCellValue(reportRowKey.primaryTB ?: "");
+            Cell cell8 = row.createCell(8);
+            cell8.setCellStyle(textLeftStyle)
+            cell8.setCellValue(reportRowKey.period ?: "");
             rowNumber++
             ppNumber++
         }
@@ -2738,6 +2692,9 @@ class ReportXlsxSheetFiller implements SheetFiller {
         Cell cell7 = row.createCell(7)
         cell7.setCellStyle(textRightStyle)
         cell7.setCellValue("")
+        Cell cell8 = row.createCell(8)
+        cell8.setCellStyle(textLeftStyle)
+        cell8.setCellValue("")
 
     }
 
@@ -2749,6 +2706,23 @@ class ReportXlsxSheetFiller implements SheetFiller {
             return departmentService.getParentTB(primaryDeclaration.departmentId)
         }
         return null
+    }
+
+    String getPeriod(Date date) {
+        return date[Calendar.YEAR] + ", " + getQuarter(date)
+    }
+
+    String getQuarter(Date date) {
+        int month = date[Calendar.MONTH]
+        if (Calendar.JANUARY <= month && month <= Calendar.MARCH) {
+            return "первый квартал"
+        } else if (Calendar.APRIL <= month && month <= Calendar.JUNE) {
+            return "полугодие "
+        } else if (Calendar.JULY <= month && month <= Calendar.SEPTEMBER) {
+            return "девять месяцев"
+        } else {
+            return "год"
+        }
     }
 }
 

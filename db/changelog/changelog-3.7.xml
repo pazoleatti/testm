@@ -517,4 +517,18 @@
 		</sql>
 	</changeSet>
 
+	<!--https://jira.aplana.com/browse/SBRFNDFL-7744 Обновление шаблона для отчета-->
+	<changeSet id="3.7-dnovikov-29" author="dnovikov">
+		<update tableName="blob_data">
+			<column name="data" valueBlobFile="templates-3.7/ndfl/consolidated_rnu_ndfl/v2016/report.xlsx"/>
+			<where>
+				id = (
+					select bd.id from declaration_template_file dtf
+					join blob_data bd on bd.id = dtf.blob_data_id
+					where declaration_template_id = 101 and bd.name = 'report.xlsx'
+				)
+			</where>
+		</update>
+	</changeSet>
+
 </databaseChangeLog>
