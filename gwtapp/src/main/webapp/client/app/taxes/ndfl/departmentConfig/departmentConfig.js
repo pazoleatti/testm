@@ -169,8 +169,7 @@
                             {
                                 name: 'approveDocName',
                                 index: 'approve_doc_name',
-                                width: 165,
-                                classes: 'grid-cell-white-space'
+                                width: 165
                             },
                             {
                                 name: 'reorganization',
