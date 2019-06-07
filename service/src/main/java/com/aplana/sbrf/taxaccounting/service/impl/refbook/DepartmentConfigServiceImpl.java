@@ -230,8 +230,8 @@ public class DepartmentConfigServiceImpl implements DepartmentConfigService {
         DepartmentConfig next = prev != null ? departmentConfigDao.findNextById(departmentConfig.getId()) : null;
         departmentConfigDao.deleteById(departmentConfig.getId());
 
-        if (prev != null && next != null) {
-            prev.setEndDate(addDays(next.getStartDate(), -1));
+        if (prev != null) {
+            prev.setEndDate(next != null ? addDays(next.getStartDate(), -1) : null);
             departmentConfigDao.updateEndDate(prev.getId(), prev.getEndDate());
             logger.info("При удалении настройки подразделения \"" + departmentConfig.getDepartment().getName() + "\", " +
                     "КПП: " + departmentConfig.getKpp() + ", ОКТМО: " + departmentConfig.getOktmo().getCode() + ", период актуальности " +
