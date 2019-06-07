@@ -43,16 +43,17 @@
             <div class="block-title">{{::'departmentConfig.modal.block1.title' | translate}}</div>
             <div class="row-fluid" style="padding-right: 20px;">
                 <div class="span6">
+                    <!--Территориальный банк-->
                     <div class="row-fluid form-group">
                         <div class="span4">
                             <label class="control-label">
                                 {{::'departmentConfig.modal.field.department.label' | translate}}:</label>
                         </div>
-                        <div data-ng-if="mode === 'VIEW'" class="span8 info-text">
+                        <div data-ng-if="mode === 'VIEW'" class="span8 info-text" title="{{record.department.name}}">
                             {{record.department.name}}
                         </div>
                         <div data-ng-if="mode !== 'VIEW'" class="span8" data-ng-controller="SelectDepartmentCtrl">
-                            <div data-aplana-field>
+                            <div data-aplana-field title="{{record.department.name}}">
                                 <div data-ui-select2="departmentsSelect.options"
                                      data-ng-init="initAvailableTBSelect()"
                                      data-ng-model="record.department"
@@ -64,16 +65,17 @@
                             </div>
                         </div>
                     </div>
+                    <!--Наименование для титульного листа-->
                     <div class="row-fluid form-group">
                         <div class="span4">
                             <label class="control-label">
                                 {{::'departmentConfig.modal.field.name.label' | translate}}:</label>
                         </div>
-                        <div data-ng-if="mode === 'VIEW'" class="span8 info-text">
+                        <div data-ng-if="mode === 'VIEW'" class="span8 info-text" title="{{record.name}}">
                             {{record.name}}
                         </div>
                         <div data-ng-if="mode !== 'VIEW'" class="span8">
-                            <div data-aplana-field>
+                            <div data-aplana-field title="{{record.name}}">
                                 <input class="form-control" type="text"
                                        data-ng-model="record.name"
                                        maxlength="1000"
@@ -81,6 +83,7 @@
                             </div>
                         </div>
                     </div>
+                    <!--Контактный телефон-->
                     <div class="row-fluid form-group">
                         <div class="span4">
                             <label class="control-label">
@@ -98,16 +101,17 @@
                             </div>
                         </div>
                     </div>
+                    <!--Код места представления-->
                     <div class="row-fluid form-group">
                         <div class="span4">
                             <label class="control-label">
                                 {{::'departmentConfig.modal.field.presentPlace.label' | translate}}:</label>
                         </div>
-                        <div data-ng-if="mode === 'VIEW'" class="span8 info-text">
+                        <div data-ng-if="mode === 'VIEW'" class="span8 info-text" title="{{record.presentPlace | codeNameFormatter}}">
                             {{record.presentPlace | codeNameFormatter}}
                         </div>
                         <div data-ng-if="mode !== 'VIEW'" class="span8" data-ng-controller="SelectRefBookCtrl">
-                            <div data-aplana-field>
+                            <div data-aplana-field title="{{record.presentPlace | codeNameFormatter}}">
                                 <div data-ui-select2="select.options"
                                      data-ng-init="initSelect(APP_CONSTANTS.REFBOOK.PRESENT_PLACE)"
                                      data-ng-model="record.presentPlace"
@@ -120,6 +124,7 @@
                     </div>
                 </div>
                 <div class="span6">
+                    <!--КПП-->
                     <div class="row-fluid form-group">
                         <div class="span4">
                             <label class="control-label">
@@ -152,16 +157,17 @@
                             </div>
                         </div>
                     </div>
+                    <!--ОКТМО-->
                     <div class="row-fluid form-group">
                         <div class="span4">
                             <label class="control-label">
                                 {{::'departmentConfig.modal.field.oktmo.label' | translate}}:</label>
                         </div>
-                        <div data-ng-if="mode === 'VIEW'" class="span8 info-text">
+                        <div data-ng-if="mode === 'VIEW'" class="span8 info-text" title="{{record.oktmo | codeNameFormatter}}">
                             {{record.oktmo | codeNameFormatter}}
                         </div>
                         <div data-ng-if="mode !== 'VIEW'" class="span8" data-ng-controller="SelectRefBookCtrl">
-                            <div data-aplana-field>
+                            <div data-aplana-field title="{{record.oktmo | codeNameFormatter}}">
                                 <div data-ui-select2="select.options"
                                      data-ng-init="initSelect(APP_CONSTANTS.REFBOOK.OKTMO)"
                                      data-ng-model="record.oktmo"
@@ -172,6 +178,7 @@
                             </div>
                         </div>
                     </div>
+                    <!--Код НО (конечного):-->
                     <div class="row-fluid form-group">
                         <div class="span4">
                             <label class="control-label">
@@ -209,12 +216,13 @@
             <div class="block-title">{{::'departmentConfig.modal.block2.title' | translate}}</div>
             <div class="row-fluid" style="padding-right: 20px;">
                 <div class="span6">
+                    <!--Фамилия подписанта-->
                     <div class="row-fluid form-group">
                         <div class="span4">
                             <label class="control-label">
                                 {{::'departmentConfig.modal.field.signatorySurName.label' | translate}}:</label>
                         </div>
-                        <div data-ng-if="mode === 'VIEW'" class="span8 info-text">
+                        <div data-ng-if="mode === 'VIEW'" class="span8 info-text" title="{{record.signatorySurName}}">
                             {{record.signatorySurName}}
                         </div>
                         <div data-ng-if="mode !== 'VIEW'" class="span8">
@@ -230,12 +238,13 @@
                             </div>
                         </div>
                     </div>
+                    <!--Имя подписанта-->
                     <div class="row-fluid form-group">
                         <div class="span4">
                             <label class="control-label">
                                 {{::'departmentConfig.modal.field.signatoryFirstName.label' | translate}}:</label>
                         </div>
-                        <div data-ng-if="mode === 'VIEW'" class="span8 info-text">
+                        <div data-ng-if="mode === 'VIEW'" class="span8 info-text" title="{{record.signatoryFirstName}}">
                             {{record.signatoryFirstName}}
                         </div>
                         <div data-ng-if="mode !== 'VIEW'" class="span8">
@@ -251,12 +260,13 @@
                             </div>
                         </div>
                     </div>
+                    <!--Отчество подписанта-->
                     <div class="row-fluid form-group">
                         <div class="span4">
                             <label class="control-label">
                                 {{::'departmentConfig.modal.field.signatoryLastName.label' | translate}}:</label>
                         </div>
-                        <div data-ng-if="mode === 'VIEW'" class="span8 info-text">
+                        <div data-ng-if="mode === 'VIEW'" class="span8 info-text" title="{{record.signatoryLastName}}">
                             {{record.signatoryLastName}}
                         </div>
                         <div data-ng-if="mode !== 'VIEW'" class="span8">
@@ -270,16 +280,17 @@
                     </div>
                 </div>
                 <div class="span6">
+                    <!--Признак подписанта-->
                     <div class="row-fluid form-group">
                         <div class="span4">
                             <label class="control-label">
                                 {{::'departmentConfig.modal.field.signatoryMark.label' | translate}}:</label>
                         </div>
-                        <div data-ng-if="mode === 'VIEW'" class="span8 info-text">
+                        <div data-ng-if="mode === 'VIEW'" class="span8 info-text" title="{{record.signatoryMark | codeNameFormatter}}">
                             {{record.signatoryMark | codeNameFormatter}}
                         </div>
                         <div data-ng-if="mode !== 'VIEW'" class="span8" data-ng-controller="SelectRefBookCtrl">
-                            <div data-aplana-field>
+                            <div data-aplana-field title="{{record.signatoryMark | codeNameFormatter}}">
                                 <div data-ui-select2="select.options"
                                      data-ng-init="initSelect(APP_CONSTANTS.REFBOOK.SIGNATORY_MARK)"
                                      data-ng-model="record.signatoryMark"
@@ -290,12 +301,13 @@
                             </div>
                         </div>
                     </div>
+                    <!--Документ полномочий подписанта-->
                     <div class="row-fluid form-group">
                         <div class="span4">
                             <label class="control-label">
                                 {{::'departmentConfig.modal.field.approveDocName.label' | translate}}:</label>
                         </div>
-                        <div data-ng-if="mode === 'VIEW'" class="span8 info-text">
+                        <div data-ng-if="mode === 'VIEW'" class="span8 info-text" title="{{record.approveDocName}}">
                             {{record.approveDocName}}
                         </div>
                         <div data-ng-if="mode !== 'VIEW'" class="span8">
@@ -315,22 +327,24 @@
             <div class="block-title">{{::'departmentConfig.modal.block3.title' | translate}}</div>
             <div class="row-fluid" style="padding-right: 20px;">
                 <div class="span6">
+                    <!--Код формы реорганизации-->
                     <div class="row-fluid form-group">
                         <div class="span4">
                             <label class="control-label">
                                 {{::'departmentConfig.modal.field.reorganization.label' | translate}}:</label>
                         </div>
-                        <div data-ng-if="mode === 'VIEW'" class="span8 info-text">
+                        <div data-ng-if="mode === 'VIEW'" class="span8 info-text" title="{{record.reorganization | codeNameFormatter}}">
                             {{record.reorganization | codeNameFormatter}}
                         </div>
                         <div data-ng-if="mode !== 'VIEW'" class="span8" data-ng-controller="SelectRefBookCtrl">
-                            <div data-aplana-field>
+                            <div data-aplana-field title="{{record.reorganization | codeNameFormatter}}">
                                 <div data-ui-select2="select.options"
                                      data-ng-init="initSelect(APP_CONSTANTS.REFBOOK.REORGANIZATION)"
                                      data-ng-model="record.reorganization"></div>
                             </div>
                         </div>
                     </div>
+                    <!--КПП реорганизованной организации-->
                     <div class="row-fluid form-group">
                         <div class="span4">
                             <label class="control-label">
@@ -359,6 +373,7 @@
                             </div>
                         </div>
                     </div>
+                    <!--ИНН реорганизованной организации-->
                     <div class="row-fluid form-group">
                         <div class="span4">
                             <label class="control-label">
@@ -386,6 +401,7 @@
                     </div>
                 </div>
                 <div class="span6">
+                    <!--КПП подразделения-правопреемника-->
                     <div class="row-fluid form-group">
                         <div class="span4">
                             <label class="control-label">
@@ -414,12 +430,13 @@
                             </div>
                         </div>
                     </div>
+                    <!--Наименование подразделения правопреемника-->
                     <div class="row-fluid form-group">
                         <div class="span4">
                             <label class="control-label">
                                 {{::'departmentConfig.modal.field.reorgSuccessorName.label' | translate}}:</label>
                         </div>
-                        <div data-ng-if="mode === 'VIEW'" class="span8 info-text">
+                        <div data-ng-if="mode === 'VIEW'" class="span8 info-text" title="{{record.reorgSuccessorName}}">
                             {{record.reorgSuccessorName}}
                         </div>
                         <div data-ng-if="mode !== 'VIEW'" class="span8">
