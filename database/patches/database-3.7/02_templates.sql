@@ -1,4 +1,20 @@
+--бпелеммн рнкэйн Б 3.7
+--хяопюбкемхе ньханй б дюммшу
+--оняке 3.7 сапюрэ!
 
+merge into blob_data dst using
+(
+	select '7833e689-c60b-4a1b-98be-b181079d0c29' as id, 'report.xlsx' as name,
+		  to_date ('19.04.2019','dd.mm.yyyy') as creation_date from dual) src
+on (src.id=dst.id)
+when not matched then
+insert (id, name, creation_date, data) values (src.id, src.name, src.creation_date, 
+	(select data from blob_data where id='4b85f92c-7fd0-4d67-834d-e61g34684336'));
+
+update declaration_template_file set blob_data_id='7833e689-c60b-4a1b-98be-b181079d0c29'
+	where declaration_template_id=101 and blob_data_id='4b85f92c-7fd0-4d67-834d-e61g34684336';
+commit;
+                                        
 PROMPT Create service tables...
 
 declare 
@@ -224,6 +240,7 @@ exception when others then
    dbms_output.put_line(sqlerrm);
    raise_application_error(-20999,'Error drop service tables');   
 end;
+
 /
 
 

@@ -48,7 +48,7 @@ PROMPT ## 01_ddl_tables_views_synonyms
 @database-3.7/01_ddl_tables_views_synonyms.sql %NSI_USER% 
 
 PROMPT ## 02_templates
-@database-3.7/02_templates.sql "_log/3.7_02_templates.txt" "&4" "&5" "_log" "_bad"
+@database-3.7/02_templates.sql "_log/3.7_02_templates.txt" "&4" "&5" "../_log" "../_bad"
 
 
 PROMPT ## 03_update_dml.sql

@@ -16,7 +16,11 @@ SET nls_lang=AMERICAN_AMERICA.AL32UTF8
 
 "%ORA_BIN%\sqlplus" %DBA_AUTH% @"tech/create_version_history.sql" %NDFL_USR% _log/create_version_history.log
 
-"%ORA_BIN%\sqlplus" %DBA_AUTH% @"database-3.7/patch_03_007_00.sql" %NDFL_USR% _log/patch_03_007_00.log %NSI_USR% %ORA_BIN% %DBA_AUTH% 
+cd PATCHES
+
+"%ORA_BIN%\sqlplus" %DBA_AUTH% @"database-3.7/patch_03_007_00.sql" %NDFL_USR% ../_log/patch_03_007_00.log %NSI_USR% %ORA_BIN% %DBA_AUTH% 
+
+cd ..
 
 "%ORA_BIN%\sqlplus" %DBA_AUTH% @"tech/result_log.sql" %NDFL_USR% _log/result_log.log
 pause
