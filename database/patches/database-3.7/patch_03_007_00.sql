@@ -36,7 +36,7 @@ begin
   	select count(1) into :v_cnt from version_history where status='OK' and version='03.007.00';
 	if :v_cnt > 0 then
 		dbms_output.put_line('Version 03.007.00 already installed.');
---		raise_application_error(-20999,'Version 01.006.01 already installed.');
+--		raise_application_error(-20999,'Version 03.007.00 already installed.');
 	end if; 
 end;
 /  
