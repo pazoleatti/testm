@@ -16,7 +16,6 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Repository;
 
-import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 
@@ -64,6 +63,18 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
         List<LogBusinessDTO> logs = getNamedParameterJdbcTemplate().query(query, params, logBusinessDTORowMapper);
         int total = getNamedParameterJdbcTemplate().queryForObject("select count(*) from(" + query + ")", params, Integer.class);
         return new PagingResult<>(logs, total);
+    }
+
+    @Override
+    public Date getMaxLogDateByDeclarationIdAndEvent(Long declarationId, FormDataEvent event) {
+        try {
+            return new Date(getJdbcTemplate().queryForObject("" +
+                    "select max(log_date) from log_business \n" +
+                    "where declaration_data_id = ? \n" +
+                    "and event_id = ?", Date.class, declarationId, event.getCode()).getTime());
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
     }
 
     @Override

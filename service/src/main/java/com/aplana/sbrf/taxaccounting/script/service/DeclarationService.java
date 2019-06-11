@@ -325,4 +325,13 @@ public interface DeclarationService {
      * @return строка с описанием
      */
     String getFullDeclarationDescription(Long declarationDataId);
+
+    /**
+     * Возвращяет дату последней записи в историю формы о событию
+     *
+     * @param declarationId идентификатор формы
+     * @param event         искомое событие
+     * @return записи выбранного типа события
+     */
+    Date getMaxLogDateByDeclarationIdAndEvent(Long declarationId, FormDataEvent event);
 }

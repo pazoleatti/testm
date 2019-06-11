@@ -29,8 +29,16 @@ public interface SourceService {
     /**
      * Возвращает список нф-приемников для указанной декларации (включая несозданные)
      *
-     * @param declarationData декларация-источник
+     * @param sourceDeclaration декларация-источник
      * @return список нф-источников
      */
-    List<Relation> getDestinationsInfo(DeclarationData declarationData);
+    List<Relation> getDestinationsInfo(DeclarationData sourceDeclaration);
+
+    /**
+     * Возвращает список НФ-источников для указанной НФ.
+     *
+     * @param destinationDeclaration НФ-приёмник
+     * @return список объектов связей "источник-приёмник", где переданная НФ является приёмником.
+     */
+    List<Relation> getSourcesInfo(DeclarationData destinationDeclaration);
 }

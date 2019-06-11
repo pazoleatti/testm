@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao;
 
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.LogBusiness;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
@@ -12,6 +13,15 @@ import java.util.List;
  * DAO-Интерфейс для работы с историей событий деклараций
  */
 public interface LogBusinessDao {
+
+    /**
+     * Возвращяет дату последней записи в историю формы о событию
+     *
+     * @param declarationId идентификатор формы
+     * @param event         требуемое событие
+     * @return список событий
+     */
+    Date getMaxLogDateByDeclarationIdAndEvent(Long declarationId, FormDataEvent event);
 
     /**
      * Возвращяет список записей историй событий для ФЛ

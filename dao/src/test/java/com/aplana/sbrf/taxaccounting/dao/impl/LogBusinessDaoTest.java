@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.TARole;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.dto.LogBusinessDTO;
+import org.joda.time.LocalDate;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -59,7 +60,7 @@ public class LogBusinessDaoTest {
     @Test
     public void testFindAllByPersonId() {
         LogBusinessDTO logBusiness = logBusinessDao.findAllByPersonId(1, new PagingParams("log_date", "desc")).get(0);
-        assertEquals(Long.valueOf(4), logBusiness.getId());
+        assertEquals(Long.valueOf(5), logBusiness.getId());
         assertEquals("Удалить", logBusiness.getEventName());
         assertEquals("Контролёр Банка (controlBank)", logBusiness.getUserName());
         assertEquals("operator", logBusiness.getRoles());
@@ -71,7 +72,7 @@ public class LogBusinessDaoTest {
     @Test
     public void testCreate() {
         LogBusiness logBusiness = new LogBusiness();
-        logBusiness.setId(5L);
+        logBusiness.setId(1000L);
         logBusiness.setLogDate(new Date());
         logBusiness.setDeclarationDataId(1L);
         logBusiness.setEvent(FormDataEvent.CALCULATE);
@@ -93,5 +94,10 @@ public class LogBusinessDaoTest {
         assertEquals(Long.valueOf(1), logBusinessDTO.getDeclarationDataId());
         assertEquals("Б - департамент", logBusinessDTO.getUserDepartmentName());
         assertEquals("the best note", logBusinessDTO.getNote());
+    }
+
+    @Test
+    public void testGetMaxLogDateByDeclarationIdAndEvent() {
+        assertEquals(new LocalDate(2013, 3, 1).toDate(), logBusinessDao.getMaxLogDateByDeclarationIdAndEvent(1L, FormDataEvent.CALCULATE));
     }
 }

@@ -39,6 +39,8 @@ class Check extends AbstractScriptClass {
     PersonService personService
     DepartmentConfigService departmentConfigService
     RefBookService refBookService
+    SourceService sourceService
+    OperationType operationType
 
     // Сервис для получения рабочих дней
     DateConditionWorkDay dateConditionWorkDay
@@ -205,6 +207,12 @@ class Check extends AbstractScriptClass {
         }
         if (scriptClass.getBinding().hasVariable("refBookService")) {
             this.refBookService = (RefBookService) scriptClass.getProperty("refBookService")
+        }
+        if (scriptClass.getBinding().hasVariable("sourceService")) {
+            this.sourceService = (SourceService) scriptClass.getProperty("sourceService")
+        }
+        if (scriptClass.getBinding().hasVariable("operationType")) {
+            this.operationType = (OperationType) scriptClass.getProperty("operationType")
         }
     }
 
@@ -993,7 +1001,27 @@ class Check extends AbstractScriptClass {
         checkDummyIncomes(ndflPersonIncomeList)
         logForDebug("Общие проверки / Фиктивные записи (" + (System.currentTimeMillis() - time) + " мс)")
 
+        time = System.currentTimeMillis()
+        checkDestinations()
+        logForDebug("Общие проверки / Состояние источников и приемников (" + (System.currentTimeMillis() - time) + " мс)")
+
         logForDebug("Общие проверки всего (" + (System.currentTimeMillis() - timeTotal) + " мс)")
+    }
+
+    // Проверяет что все формы-приёмники в текущем тербанке находятся в состоянии "Создана"
+    void checkDestinations() {
+        if (!(operationType == OperationType.CHECK_DEC && declarationData.state == State.ACCEPTED)) {
+            Integer declarationTerbankId = departmentService.getParentTBId(declarationData.departmentId)
+            List<Relation> destinations = sourceService.getDestinationsInfo(declarationData)
+            List<Relation> conflictingDestinations = destinations.findAll { it.declarationState != State.CREATED }
+            Set<Integer> conflictingDestinationsTerbankIds = conflictingDestinations.collect {
+                departmentService.getParentTBId(it.departmentId)
+            }.toSet()
+            if (conflictingDestinationsTerbankIds.contains(declarationTerbankId)) {
+                logger.errorExp("В списке \"Источники-приемники\" есть формы-приемники в состоянии, отличном от \"Создана\"",
+                        "Состояние форм-приемников отличается от \"Создана\"", "")
+            }
+        }
     }
 
     /**

@@ -345,4 +345,9 @@ public class DeclarationServiceImpl implements DeclarationService {
     public String getFullDeclarationDescription(Long declarationDataId) {
         return declarationDataService.getFullDeclarationDescription(declarationDataId);
     }
+
+    @Override
+    public Date getMaxLogDateByDeclarationIdAndEvent(Long declarationId, FormDataEvent event) {
+        return logBusinessService.getMaxLogDateByDeclarationIdAndEvent(declarationId, event);
+    }
 }

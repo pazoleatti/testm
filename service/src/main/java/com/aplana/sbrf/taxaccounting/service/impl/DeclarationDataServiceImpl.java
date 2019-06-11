@@ -611,7 +611,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             if (lockStateLogger != null) {
                 lockStateLogger.updateState(AsyncTaskState.FORM_CHECK);
             }
-            declarationDataScriptingService.executeScript(userInfo, dd, FormDataEvent.CHECK, scriptLogger, null);
+            Map<String, Object> exchangeParams = new HashMap<>();
+            exchangeParams.put("operationType", OperationType.CHECK_DEC);
+            declarationDataScriptingService.executeScript(userInfo, dd, FormDataEvent.CHECK, scriptLogger, exchangeParams);
         } finally {
             logger.getEntries().addAll(scriptLogger.getEntries());
         }
@@ -1050,7 +1052,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         Logger scriptLogger = new Logger();
         try {
             lockStateLogger.updateState(AsyncTaskState.FORM_CHECK);
-            declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.CHECK, scriptLogger, null);
+            Map<String, Object> exchangeParams = new HashMap<>();
+            exchangeParams.put("operationType", OperationType.ACCEPT_DEC);
+            declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.CHECK, scriptLogger, exchangeParams);
         } finally {
             logger.getEntries().addAll(scriptLogger.getEntries());
         }

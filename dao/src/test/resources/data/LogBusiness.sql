@@ -26,8 +26,10 @@ values (1, 1, 'Иванов', 'Борис', 'Петрович', date '1975-04-15
 insert into log_business (id, log_date, event_id, user_login, roles, declaration_data_id, person_id, user_department_name, note)
 values (1, date '2013-01-01', 1, 'controlBank', 'operator', 1, null, 'А - департамент', 'the best note');
 insert into log_business (id, log_date, event_id, user_login, roles, declaration_data_id, person_id, user_department_name, note)
-values (2, date '2013-02-01', 2, 'controlBank', 'operator', 1, null, 'B - департамент', 'the best note');
+values (2, date '2013-02-01', 3, 'controlBank', 'operator', 1, null, 'B - департамент', 'the best note');
 insert into log_business (id, log_date, event_id, user_login, roles, declaration_data_id, person_id, user_department_name, note)
-values (3, date '2013-01-01', 1, 'controlBank', 'operator', null, 1, 'A - департамент', 'the best note');
+values (3, date '2013-03-01', 3, 'controlBank', 'operator', 1, null, 'B - департамент', 'the best note');
 insert into log_business (id, log_date, event_id, user_login, roles, declaration_data_id, person_id, user_department_name, note)
-values (4, date '2013-02-01', 2, 'controlBank', 'operator', null, 1, 'B - департамент', 'the best note');
+values (4, date '2013-01-01', 1, 'controlBank', 'operator', null, 1, 'A - департамент', 'the best note');
+insert into log_business (id, log_date, event_id, user_login, roles, declaration_data_id, person_id, user_department_name, note)
+values (5, date '2013-02-01', 2, 'controlBank', 'operator', null, 1, 'B - департамент', 'the best note');
