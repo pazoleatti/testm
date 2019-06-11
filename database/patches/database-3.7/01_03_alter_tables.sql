@@ -60,6 +60,28 @@ EXCEPTION
 END;
 /
 
+--3.7-skononova-4 https://jira.aplana.com/browse/SBRFNDFL-7713 Оптимизация отбора источников при консолидации
+DECLARE
+	v_run_condition number(1);
+	v_task_name varchar2(128):='alter_tables block #3 - indexes';  
+BEGIN
+	select decode(count(*),0,1,0) into v_run_condition from user_indexes where index_NAME= 'IDX_NPI_OPER_ID_DATES';
+	IF v_run_condition=1 THEN
+		EXECUTE IMMEDIATE 'create index idx_npi_oper_id_dates on ndfl_person_income (income_payout_date asc, 
+				    tax_transfer_date asc, tax_date asc, income_accrued_date asc, operation_id asc )
+				    compute statistics';
+		dbms_output.put_line(v_task_name||'[INFO]:'||' Success');
+	ELSE
+		dbms_output.put_line(v_task_name||'[WARNING]:'||' changes had already been implemented');
+	END IF;
+
+EXCEPTION
+	when OTHERS then
+		dbms_output.put_line(v_task_name||'[FATAL]:'||sqlerrm);	
+END;
+/
+
+
 COMMIT;
 
 

@@ -543,4 +543,14 @@
 		</insert>
 	</changeSet>
 
+	<!--https://jira.aplana.com/browse/SBRFNDFL-7713 Оптимизация отбора источников при консолидации"-->
+	<changeSet id="3.7-skononova-4" author="skononova">
+		<sql>
+		    create index idx_npi_oper_id_dates on ndfl_person_income (income_payout_date asc, 
+				tax_transfer_date asc, tax_date asc, income_accrued_date asc, operation_id asc )
+				compute statistics;
+		</sql>
+	</changeSet>
+
+
 </databaseChangeLog>
