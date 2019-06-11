@@ -1002,7 +1002,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
     @Override
     public Date getCreatedDateById(long declarationId) {
         return new Date(
-                getJdbcTemplate().queryForObject("select created_date from declaration_data where declaration_data_id = ?", Timestamp.class, declarationId).getTime()
+                getJdbcTemplate().queryForObject("select created_date from declaration_data where id = ?", Timestamp.class, declarationId).getTime()
         );
     }
 }
