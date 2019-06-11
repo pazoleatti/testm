@@ -261,7 +261,7 @@ begin
 	insert  (id, task_name,schedule, active,modification_date, last_fire_date) values 
 	(src.id, src.task_name, src.schedule, src.active, sysdate, sysdate)
 	when matched then
-	update set dst.name=src.name, dst.schedule = src.schedule, dst.active = src.active,
+	update set dst.task_name=src.task_name, dst.schedule = src.schedule, dst.active = src.active,
 		dst.modification_date=sysdate;	
 
 	CASE SQL%ROWCOUNT 
