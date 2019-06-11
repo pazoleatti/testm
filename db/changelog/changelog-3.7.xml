@@ -552,5 +552,13 @@
 		</sql>
 	</changeSet>
 
+	<!--https://jira.aplana.com/browse/SBRFNDFL-7806 Неверное название задачи на сжатие таблиц в планировщике"-->
+	<changeSet id="3.7-skononova-5" author="skononova">
+		<sql>
+		    update CONFIGURATION_SCHEDULER set 
+			task_name='Периодическое сжатие таблиц', modification_date=sysdate where id=6;
+		</sql>
+	</changeSet>
+
 
 </databaseChangeLog>

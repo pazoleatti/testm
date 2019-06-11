@@ -254,12 +254,15 @@ declare
   v_task_name varchar2(128):='insert_update_delete block #7 - add task';  
 begin
         merge into CONFIGURATION_SCHEDULER dst using
-	( select 6 as id, 'Очистка файлового хранилища' as task_name, '0 0 22 ? * SAT' as schedule, 1 as active  from dual
+	( select 6 as id, 'Периодическое сжатие таблиц' as task_name, '0 0 22 ? * SAT' as schedule, 1 as active  from dual
 	) src
 	on (src.id=dst.id)
 	when not matched then
 	insert  (id, task_name,schedule, active,modification_date, last_fire_date) values 
-	(src.id, src.task_name, src.schedule, src.active, sysdate, sysdate);	
+	(src.id, src.task_name, src.schedule, src.active, sysdate, sysdate)
+	when matched then
+	update set dst.name=src.name, dst.schedule = src.schedule, dst.active = src.active,
+		dst.modification_date=sysdate;	
 
 	CASE SQL%ROWCOUNT 
 	WHEN 0 THEN dbms_output.put_line(v_task_name||'[WARNING]:'||' No changes was done');
