@@ -2002,7 +2002,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                 "with kpp_oktmo as (\n" +
                 departmentConfigsKppOktmoSelect +
                 ")\n" +
-                "select npi.operation_id, dd.asnu_id\n" +
+                "select /*+ INDEX(npi idx_npi_oper_id_dates) NO_INDEX(npi IDX_NPI_KPP_OKTMO) */ npi.operation_id, dd.asnu_id\n" +
                 "from ndfl_person_income npi \n" +
                 "join kpp_oktmo on kpp_oktmo.kpp = npi.kpp and kpp_oktmo.oktmo = npi.oktmo\n" +
                 "join ndfl_person np on npi.ndfl_person_id = np.id \n" +
