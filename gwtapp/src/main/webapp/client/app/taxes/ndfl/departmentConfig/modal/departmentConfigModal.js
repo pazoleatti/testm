@@ -102,7 +102,6 @@
                     $scope.mode = 'VIEW';
                     $modalInstance.updateTitle($filter('translate')('departmentConfig.modal.open.title'));
                     $scope.departmentConfigForm.$setPristine();
-                    initRecord();
                 };
 
                 $scope.cancel = function (close) {
@@ -117,6 +116,7 @@
                                     $modalInstance.close();
                                 } else {
                                     $scope.returnToView();
+                                    initRecord();
                                 }
                             }
                         });
@@ -125,6 +125,7 @@
                             $modalInstance.close();
                         } else {
                             $scope.returnToView();
+                            initRecord();
                         }
                     }
                 };
