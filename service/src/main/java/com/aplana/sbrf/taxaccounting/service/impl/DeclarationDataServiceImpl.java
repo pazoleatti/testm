@@ -2112,7 +2112,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         Logger logger = new Logger();
         ActionResult taskResult = new ActionResult();
 
-        DeclarationData knf = findConsolidatedDeclarationForReport(action, logger);
+        DeclarationData knf = findKnfForReport(action, logger);
         if (!logger.containsLevel(LogLevel.ERROR)) {
             ReportFormsCreationParams params = new ReportFormsCreationParams(action);
             params.setSourceKnfId(knf.getId());
@@ -2129,52 +2129,88 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         return taskResult;
     }
 
-    private DeclarationData findConsolidatedDeclarationForReport(CreateReportFormsAction action, Logger logger) {
-        DeclarationData consolidatedDeclaration;
+    /**
+     * Получение КНФ для формирования ОНФ.
+     */
+    private DeclarationData findKnfForReport(CreateReportFormsAction action, Logger logger) {
+
+        // Определяем КНФ, Подразделение и Отчетный период.
+        DeclarationData knf;
+        DepartmentReportPeriod departmentReportPeriod;
         if (action.getKnfId() != null) {
-            consolidatedDeclaration = declarationDataDao.get(action.getKnfId());
-            if (consolidatedDeclaration.getState() != State.ACCEPTED) {
-                DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.fetchOne(consolidatedDeclaration.getDepartmentReportPeriodId());
-                DeclarationType declarationType = declarationTypeDao.get(action.getDeclarationTypeId());
-                Department department = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
-                logger.error("Отчетность %s для %s за период %s, %s%s" +
-                                " не сформирована. Для указанного подразделения и периода форма РНУ НДФЛ (консолидированная) № %s должна быть в состоянии \"Принята\". Примите форму и повторите операцию",
-                        declarationType.getName(),
-                        department.getName(),
-                        departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(),
-                        departmentReportPeriod.getReportPeriod().getName(),
-                        formatCorrectionDate(departmentReportPeriod.getCorrectionDate()),
-                        consolidatedDeclaration.getId());
-            }
+            knf = declarationDataDao.get(action.getKnfId());
+            departmentReportPeriod = departmentReportPeriodService.fetchOne(knf.getDepartmentReportPeriodId());
         } else {
+            departmentReportPeriod = departmentReportPeriodService.fetchLast(action.getDepartmentId(), action.getPeriodId());
             RefBookKnfType knfType = action.getDeclarationTypeId() == DeclarationType.NDFL_2_2 ? RefBookKnfType.BY_NONHOLDING_TAX : RefBookKnfType.ALL;
-            DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.fetchLast(action.getDepartmentId(), action.getPeriodId());
-            consolidatedDeclaration = declarationDataDao.findKnfByKnfTypeAndPeriodId(knfType, departmentReportPeriod.getId());
-            if (consolidatedDeclaration == null || consolidatedDeclaration.getState() != State.ACCEPTED) {
-                DeclarationType declarationType = declarationTypeDao.get(action.getDeclarationTypeId());
-                Department department = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
-                if (consolidatedDeclaration == null) {
-                    logger.error("Отчетность %s для %s за период %s, %s%s" +
-                                    " не сформирована. Для указанного подразделения и периода не найдена форма РНУ НДФЛ (консолидированная).",
-                            declarationType.getName(),
-                            department.getName(),
-                            departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(),
-                            departmentReportPeriod.getReportPeriod().getName(),
-                            formatCorrectionDate(departmentReportPeriod.getCorrectionDate()));
-                } else if (consolidatedDeclaration.getState() != State.ACCEPTED) {
-                    logger.error("Отчетность %s для %s за период %s, %s%s" +
-                                    " не сформирована. Для указанного подразделения и периода форма РНУ НДФЛ (консолидированная) № %s должна быть в состоянии \"Принята\". Примите форму и повторите операцию",
-                            declarationType.getName(),
-                            department.getName(),
-                            departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(),
-                            departmentReportPeriod.getReportPeriod().getName(),
-                            formatCorrectionDate(departmentReportPeriod.getCorrectionDate()),
-                            consolidatedDeclaration.getId());
-                }
-                return null;
-            }
+            knf = declarationDataDao.findKnfByKnfTypeAndPeriodId(knfType, departmentReportPeriod.getId());
         }
-        return consolidatedDeclaration;
+
+        // Период должен быть открыт.
+        if (!departmentReportPeriod.isActive()) {
+            logger.error(generatePeriodIsClosedErrorText(action.getDeclarationTypeId(), departmentReportPeriod));
+            return null;
+        }
+        // КНФ должна существовать :)
+        if (knf == null) {
+            logger.error(generateKnfIsNotFoundErrorText(action.getDeclarationTypeId(), departmentReportPeriod));
+            return null;
+        }
+        // КНФ должна быть Принята
+        if (knf.getState() != State.ACCEPTED) {
+            logger.error(generateKnfIsNotAcceptedErrorText(action.getDeclarationTypeId(), knf, departmentReportPeriod));
+            return null;
+        }
+        return knf;
+    }
+
+    /**
+     * Генерация текста ошибки при формировании ОНФ по закрытому периоду.
+     */
+    private String generatePeriodIsClosedErrorText(Integer reportDeclarationTypeId, DepartmentReportPeriod departmentReportPeriod) {
+        DeclarationType declarationType = declarationTypeDao.get(reportDeclarationTypeId);
+        Department department = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
+        return String.format("Не выполнена операция \"Создание отчетных форм: \"%s\", Период: \"%s, %s%s\", Подразделение: \"%s\". " +
+                        "Причина: Выбранный период закрыт.",
+                declarationType.getName(),
+                departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(),
+                departmentReportPeriod.getReportPeriod().getName(),
+                formatCorrectionDate(departmentReportPeriod.getCorrectionDate()),
+                department.getName()
+        );
+    }
+
+    /**
+     * Генерация текста ошибки при формировании ОНФ по отсутствующей КНФ.
+     */
+    private String generateKnfIsNotFoundErrorText(Integer reportDeclarationTypeId, DepartmentReportPeriod departmentReportPeriod) {
+        DeclarationType declarationType = declarationTypeDao.get(reportDeclarationTypeId);
+        Department department = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
+        return String.format("Отчетность %s для %s за период %s, %s%s не сформирована. " +
+                        "Для указанного подразделения и периода не найдена форма РНУ НДФЛ (консолидированная).",
+                declarationType.getName(),
+                department.getName(),
+                departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(),
+                departmentReportPeriod.getReportPeriod().getName(),
+                formatCorrectionDate(departmentReportPeriod.getCorrectionDate())
+        );
+    }
+
+    /**
+     * Генерация текста ошибки при формировании ОНФ по непринятой КНФ.
+     */
+    private String generateKnfIsNotAcceptedErrorText(Integer reportDeclarationTypeId, DeclarationData knf, DepartmentReportPeriod departmentReportPeriod) {
+        DeclarationType declarationType = declarationTypeDao.get(reportDeclarationTypeId);
+        Department department = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
+        return String.format("Отчетность %s для %s за период %s, %s%s не сформирована. " +
+                        "Для указанного подразделения и периода форма РНУ НДФЛ (консолидированная) № %s должна быть в состоянии \"Принята\". Примите форму и повторите операцию",
+                declarationType.getName(),
+                department.getName(),
+                departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(),
+                departmentReportPeriod.getReportPeriod().getName(),
+                formatCorrectionDate(departmentReportPeriod.getCorrectionDate()),
+                knf.getId()
+        );
     }
 
     @Override
