@@ -1011,17 +1011,21 @@ class Check extends AbstractScriptClass {
     // Проверяет что все формы-приёмники в текущем тербанке находятся в состоянии "Создана"
     void checkDestinations() {
         if (!(operationType == OperationType.CHECK_DEC && declarationData.state == State.ACCEPTED)) {
-            Integer declarationTerbankId = departmentService.getParentTBId(declarationData.departmentId)
+            Department declarationTerbank = departmentService.getParentTB(declarationData.departmentId)
             List<Relation> destinations = sourceService.getDestinationsInfo(declarationData)
             List<Relation> conflictingDestinations = destinations.findAll { it.declarationState != State.CREATED }
             Set<Integer> conflictingDestinationsTerbankIds = conflictingDestinations.collect {
                 departmentService.getParentTBId(it.departmentId)
             }.toSet()
-            if (conflictingDestinationsTerbankIds.contains(declarationTerbankId)) {
-                logger.errorExp("В списке \"Источники-приемники\" есть формы-приемники в том же Тербанке и в состоянии, отличном от \"Создана\"",
+            if (conflictingDestinationsTerbankIds.contains(declarationTerbank.id)) {
+                logger.errorExp("В списке \"Источники-приемники\" есть формы-приемники в состоянии, отличном от \"Создана\" в Тербанке ${declarationTerbank.name}",
                         "Состояние форм-приемников отличается от \"Создана\"", "")
             } else if (conflictingDestinationsTerbankIds) {
-                logger.warnExp("В списке \"Источники-приемники\" есть формы-приемники в других Тербанках и в состоянии, отличном от \"Создана\"",
+                List<Department> departments = conflictingDestinationsTerbankIds.collect {
+                    departmentService.get(it)
+                }
+                String tbNames = departments.collect { it.name }.join(", ")
+                logger.warnExp("В списке \"Источники-приемники\" есть формы-приемники в других Тербанках и в состоянии, отличном от \"Создана\" в других Тербанках $tbNames",
                         "Состояние форм-приемников отличается от \"Создана\"", "")
             }
         }
