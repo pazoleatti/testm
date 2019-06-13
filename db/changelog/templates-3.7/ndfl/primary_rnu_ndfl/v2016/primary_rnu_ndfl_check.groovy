@@ -1018,7 +1018,10 @@ class Check extends AbstractScriptClass {
                 departmentService.getParentTBId(it.departmentId)
             }.toSet()
             if (conflictingDestinationsTerbankIds.contains(declarationTerbankId)) {
-                logger.errorExp("В списке \"Источники-приемники\" есть формы-приемники в состоянии, отличном от \"Создана\"",
+                logger.errorExp("В списке \"Источники-приемники\" есть формы-приемники в том же Тербанке и в состоянии, отличном от \"Создана\"",
+                        "Состояние форм-приемников отличается от \"Создана\"", "")
+            } else if (conflictingDestinationsTerbankIds) {
+                logger.warnExp("В списке \"Источники-приемники\" есть формы-приемники в других Тербанках и в состоянии, отличном от \"Создана\"",
                         "Состояние форм-приемников отличается от \"Создана\"", "")
             }
         }
