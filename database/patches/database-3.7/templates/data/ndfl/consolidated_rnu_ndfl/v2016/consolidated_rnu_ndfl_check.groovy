@@ -31,6 +31,7 @@ class Check extends AbstractScriptClass {
     DepartmentReportPeriod departmentReportPeriod
     Department department
     ReportPeriod reportPeriod
+    DeclarationService declarationService
     DepartmentService departmentService
     CalendarService calendarService
     FiasRefBookService fiasRefBookService
@@ -40,6 +41,8 @@ class Check extends AbstractScriptClass {
     PersonService personService
     DepartmentConfigService departmentConfigService
     RefBookService refBookService
+    SourceService sourceService
+    OperationType operationType
 
     // Сервис для получения рабочих дней
     DateConditionWorkDay dateConditionWorkDay
@@ -172,6 +175,9 @@ class Check extends AbstractScriptClass {
     Check(scriptClass) {
         //noinspection GroovyAssignabilityCheck
         super(scriptClass)
+        if (scriptClass.getBinding().hasVariable("declarationService")) {
+            this.declarationService = (DeclarationService) scriptClass.getProperty("declarationService")
+        }
         if (scriptClass.getBinding().hasVariable("departmentService")) {
             this.departmentService = (DepartmentService) scriptClass.getProperty("departmentService")
         }
@@ -210,6 +216,12 @@ class Check extends AbstractScriptClass {
         }
         if (scriptClass.getBinding().hasVariable("refBookService")) {
             this.refBookService = (RefBookService) scriptClass.getProperty("refBookService")
+        }
+        if (scriptClass.getBinding().hasVariable("sourceService")) {
+            this.sourceService = (SourceService) scriptClass.getProperty("sourceService")
+        }
+        if (scriptClass.getBinding().hasVariable("operationType")) {
+            this.operationType = (OperationType) scriptClass.getProperty("operationType")
         }
     }
 
@@ -1030,7 +1042,60 @@ class Check extends AbstractScriptClass {
         checkDummyIncomes(ndflPersonIncomeList)
         logForDebug("Общие проверки / Фиктивные записи (" + (System.currentTimeMillis() - time) + " мс)")
 
+        time = System.currentTimeMillis()
+        checkDestinations()
+        checkSources()
+        logForDebug("Общие проверки / Состояние источников и приемников (" + (System.currentTimeMillis() - time) + " мс)")
+
         logForDebug("Общие проверки всего (" + (System.currentTimeMillis() - timeTotal) + " мс)")
+    }
+
+    // Проверяет что все формы-приёмники в текущем тербанке находятся в состоянии "Создана"
+    void checkDestinations() {
+        if (!(operationType == OperationType.CHECK_DEC && declarationData.state == State.ACCEPTED)) {
+            Integer declarationTerbankId = departmentService.getParentTBId(declarationData.departmentId)
+            List<Relation> destinations = sourceService.getDestinationsInfo(declarationData)
+            List<Relation> conflictingDestinations = destinations.findAll { it.declarationState != State.CREATED }
+            Set<Integer> conflictingDestinationsTerbankIds = conflictingDestinations.collect {
+                departmentService.getParentTBId(it.departmentId)
+            }.toSet()
+            if (conflictingDestinationsTerbankIds.contains(declarationTerbankId)) {
+                logger.errorExp("В списке \"Источники-приемники\" есть формы-приемники в том же Тербанке и в состоянии, отличном от \"Создана\"",
+                        "Состояние форм-приемников отличается от \"Создана\"", "")
+            } else if (conflictingDestinationsTerbankIds) {
+                logger.warnExp("В списке \"Источники-приемники\" есть формы-приемники в других Тербанках и в состоянии, отличном от \"Создана\"",
+                        "Состояние форм-приемников отличается от \"Создана\"", "")
+            }
+        }
+    }
+
+    // Проверяет что все формы-источники в текущем тербанке находятся в состоянии "Принята" и были принятыы после консолидации текущей формы
+    void checkSources() {
+        Integer declarationTerbankId = departmentService.getParentTBId(declarationData.departmentId)
+        List<Relation> sources = sourceService.getSourcesInfo(declarationData)
+        List<Relation> sourcesInTheSameTerbank = sources.findAll {
+            Integer sourceTerbankId = departmentService.getParentTBId(it.departmentId)
+            return declarationTerbankId == sourceTerbankId
+        }
+        boolean isAnySourceNotAccepted = sourcesInTheSameTerbank.any { it.declarationState != State.ACCEPTED }
+
+        Date lastConsolidationDate = declarationService.getMaxLogDateByDeclarationIdAndEvent(declarationData.id, FormDataEvent.CONSOLIDATE)
+        boolean isAnySourceAcceptedAfterTheLastConsolidation = sourcesInTheSameTerbank.any {
+            Date lastSourceAcceptanceDate = declarationService.getMaxLogDateByDeclarationIdAndEvent(it.declarationDataId, FormDataEvent.ACCEPT)
+            return lastSourceAcceptanceDate > lastConsolidationDate
+        }
+
+        if (isAnySourceNotAccepted && isAnySourceAcceptedAfterTheLastConsolidation) {
+            logger.logCheck("В списке \"Источники-приемники\" есть формы-источники, принятые позже последней операции консолидации для налоговой формы, " +
+                    "а так же формы-источники в состоянии, отличном от \"Принята\"",
+                    operationType == OperationType.ACCEPT_DEC, "Состояние форм-источников отличается от \"Принята\"", "")
+        } else if (isAnySourceNotAccepted) {
+            logger.logCheck("В списке \"Источники-приемники\" есть формы-источники в состоянии, отличном от \"Принята\"",
+                    operationType == OperationType.ACCEPT_DEC, "Состояние форм-источников отличается от \"Принята\"", "")
+        } else if (isAnySourceAcceptedAfterTheLastConsolidation) {
+            logger.logCheck("В списке \"Источники-приемники\" есть формы источники, принятые позже последней операции консолидации для налоговой формы",
+                    operationType == OperationType.ACCEPT_DEC, "Состояние форм-источников отличается от \"Принята\"", "")
+        }
     }
 
     /**

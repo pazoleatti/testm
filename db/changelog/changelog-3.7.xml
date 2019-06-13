@@ -576,4 +576,29 @@
 		</update>
 	</changeSet>
 
+	<!--https://jira.aplana.com/browse/SBRFNDFL-7804 Добавить в справочник "Виды дохода" новые записи-->
+	<changeSet id="3.7-skononova-6" author="skononova">
+		<sql splitStatements="false">
+			begin
+			insert into REF_BOOK_INCOME_KIND(id,record_id,income_type_id,mark,name,version)
+			values(seq_ref_book_record.nextval,seq_ref_book_record_row_id.nextval,(select id from (select id,version from ref_book_income_type where code='2520' and status=0 order by version desc) where rownum=1),'00','',to_date('01.01.2016','DD.MM.YYYY'));
+
+			insert into REF_BOOK_INCOME_KIND(id,record_id,income_type_id,mark,name,version)
+			values(seq_ref_book_record.nextval,seq_ref_book_record_row_id.nextval,(select id from (select id,version from ref_book_income_type where code='2720' and status=0 order by version desc) where rownum=1),'00','',to_date('01.01.2016','DD.MM.YYYY'));
+
+			insert into REF_BOOK_INCOME_KIND(id,record_id,income_type_id,mark,name,version)
+			values(seq_ref_book_record.nextval,seq_ref_book_record_row_id.nextval,(select id from (select id,version from ref_book_income_type where code='2720' and status=0 order by version desc) where rownum=1),'13','Выплата дохода в денежной форме',to_date('01.01.2016','DD.MM.YYYY'));
+
+			insert into REF_BOOK_INCOME_KIND(id,record_id,income_type_id,mark,name,version)
+			values(seq_ref_book_record.nextval,seq_ref_book_record_row_id.nextval,(select id from (select id,version from ref_book_income_type where code='2740' and status=0 order by version desc) where rownum=1),'00','',to_date('01.01.2016','DD.MM.YYYY'));
+
+			insert into REF_BOOK_INCOME_KIND(id,record_id,income_type_id,mark,name,version)
+			values(seq_ref_book_record.nextval,seq_ref_book_record_row_id.nextval,(select id from (select id,version from ref_book_income_type where code='2750' and status=0 order by version desc) where rownum=1),'00','',to_date('01.01.2016','DD.MM.YYYY'));
+
+			insert into REF_BOOK_INCOME_KIND(id,record_id,income_type_id,mark,name,version)
+			values(seq_ref_book_record.nextval,seq_ref_book_record_row_id.nextval,(select id from (select id,version from ref_book_income_type where code='2790' and status=0 order by version desc) where rownum=1),'00','',to_date('01.01.2016','DD.MM.YYYY'));
+
+		</sql>
+	</changeSet>
+
 </databaseChangeLog>
