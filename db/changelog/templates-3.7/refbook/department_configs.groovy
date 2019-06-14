@@ -141,32 +141,34 @@ class DepartmentConfigScript extends AbstractScriptClass {
         }
     }
 
+    final int reorganizationColIndex = 13
+
     /**
      * Создает {@link DepartmentConfig} по строке excel файла и выполняет проверки
      * ошибки пишет в логгер отдельной строки
      */
     DepartmentConfigExt checkAndMakeDepartmentConfig(Row row) {
-        int colNum = 0
+        int colIndex = 0
         DepartmentConfigExt departmentConfig = new DepartmentConfigExt(row)
         departmentConfig.setDepartment(department)
-        departmentConfig.setStartDate(row.cell(colNum).nonEmpty().toDate())
-        departmentConfig.setEndDate(row.cell(++colNum).toDate())
-        departmentConfig.setKpp(row.cell(++colNum).getKpp())
-        departmentConfig.setOktmo(row.cell(++colNum).getOktmo())
-        departmentConfig.setTaxOrganCode(row.cell(++colNum).getTaxOrganCode())
-        departmentConfig.setPresentPlace(row.cell(++colNum).getPresentPlace())
-        departmentConfig.setName(row.cell(++colNum).getName())
-        departmentConfig.setPhone(row.cell(++colNum).getPhone())
-        departmentConfig.setSignatoryMark(row.cell(++colNum).getSignatoryMark())
-        departmentConfig.setSignatorySurName(row.cell(++colNum).getSignatorySurName())
-        departmentConfig.setSignatoryFirstName(row.cell(++colNum).getSignatoryFirstName())
-        departmentConfig.setSignatoryLastName(row.cell(++colNum).getSignatoryLastName())
-        departmentConfig.setApproveDocName(row.cell(++colNum).getApproveDocName())
-        departmentConfig.setReorganization(row.cell(++colNum).getReorganization())
-        departmentConfig.setReorgKpp(row.cell(++colNum).getReorgKpp())
-        departmentConfig.setReorgInn(row.cell(++colNum).getReorgInn())
-        departmentConfig.setReorgSuccessorKpp(row.cell(++colNum).getReorgSuccessorKpp())
-        departmentConfig.setReorgSuccessorName(row.cell(++colNum).getReorgSuccessorName())
+        departmentConfig.setStartDate(row.cell(colIndex).nonEmpty().toDate())
+        departmentConfig.setEndDate(row.cell(++colIndex).toDate())
+        departmentConfig.setKpp(row.cell(++colIndex).getKpp())
+        departmentConfig.setOktmo(row.cell(++colIndex).getOktmo())
+        departmentConfig.setTaxOrganCode(row.cell(++colIndex).getTaxOrganCode())
+        departmentConfig.setPresentPlace(row.cell(++colIndex).getPresentPlace())
+        departmentConfig.setName(row.cell(++colIndex).getName())
+        departmentConfig.setPhone(row.cell(++colIndex).getPhone())
+        departmentConfig.setSignatoryMark(row.cell(++colIndex).getSignatoryMark())
+        departmentConfig.setSignatorySurName(row.cell(++colIndex).getSignatorySurName())
+        departmentConfig.setSignatoryFirstName(row.cell(++colIndex).getSignatoryFirstName())
+        departmentConfig.setSignatoryLastName(row.cell(++colIndex).getSignatoryLastName())
+        departmentConfig.setApproveDocName(row.cell(++colIndex).getApproveDocName())
+        departmentConfig.setReorganization(row.cell(colIndex = reorganizationColIndex).getReorganization())
+        departmentConfig.setReorgKpp(row.cell(++colIndex).getReorgKpp())
+        departmentConfig.setReorgInn(row.cell(++colIndex).getReorgInn())
+        departmentConfig.setReorgSuccessorKpp(row.cell(++colIndex).getReorgSuccessorKpp())
+        departmentConfig.setReorgSuccessorName(row.cell(++colIndex).getReorgSuccessorName())
         return departmentConfig
     }
 
@@ -388,9 +390,13 @@ class DepartmentConfigScript extends AbstractScriptClass {
 
         Cell nonEmpty() {
             if (!value) {
-                logError("Отсутствует значение для ячейки столбца \"${header[index]}\"")
+                logNotEmptyError()
             }
             return this
+        }
+
+        void logNotEmptyError() {
+            logError("Отсутствует значение для ячейки столбца \"${header[index]}\"")
         }
 
         Date toDate() {
@@ -448,11 +454,16 @@ class DepartmentConfigScript extends AbstractScriptClass {
         }
 
         String getName() {
-            if (value && value.length() > 1000) {
-                logError("\"Наименование для титульного листа\" должно содержать строку длиной не более 1000 символов")
+            if (!row.cell(reorganizationColIndex).value && !value) {
+                logNotEmptyError()
                 return null
+            } else {
+                if (value && value.length() > 1000) {
+                    logError("\"Наименование для титульного листа\" должно содержать строку длиной не более 1000 символов")
+                    return null
+                }
+                return value
             }
-            return value
         }
 
         String getPhone() {
@@ -541,19 +552,29 @@ class DepartmentConfigScript extends AbstractScriptClass {
         }
 
         String getReorgSuccessorKpp() {
-            if (value && (value.length() != 9 || !(value[4..5] in ["01", "02", "03", "05", "31", "32", "43", "45"]))) {
-                logError("\"КПП подразделения правопреемника\" должен содержать 9 цифр, из которых 5 и 6 цифры должны содержать одно из значений: \"01\", \"02\", \"03\", \"05\", \"31\", \"32\", \"43\", \"45\"")
+            if (row.cell(reorganizationColIndex).value && !value) {
+                logNotEmptyError()
                 return null
+            } else {
+                if (value && (value.length() != 9 || !(value[4..5] in ["01", "02", "03", "05", "31", "32", "43", "45"]))) {
+                    logError("\"КПП подразделения правопреемника\" должен содержать 9 цифр, из которых 5 и 6 цифры должны содержать одно из значений: \"01\", \"02\", \"03\", \"05\", \"31\", \"32\", \"43\", \"45\"")
+                    return null
+                }
+                return value ?: null
             }
-            return value ?: null
         }
 
         String getReorgSuccessorName() {
-            if (value && value.length() > 1000) {
-                logError("\"Наименование подразделения правопреемника\" должно содержать строку длиной не более 1000 символов")
+            if (row.cell(reorganizationColIndex).value && !value) {
+                logNotEmptyError()
                 return null
+            } else {
+                if (value && value.length() > 1000) {
+                    logError("\"Наименование подразделения правопреемника\" должно содержать строку длиной не более 1000 символов")
+                    return null
+                }
+                return value
             }
-            return value
         }
 
         void logIncorrectTypeError(def type) {

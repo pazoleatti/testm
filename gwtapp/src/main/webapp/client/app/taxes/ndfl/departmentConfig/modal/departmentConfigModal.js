@@ -22,7 +22,7 @@
                     }
                 };
                 // Необходимость заполнения фамилии и имени в зависимости от значения поля "признак подписанта"
-                $scope.isNameRequiredBySignatoryMark = function ($value) {
+                $scope.isSignatoryNameRequired = function ($value) {
                     return !(!$scope.record.signatoryMark || $scope.record.signatoryMark.code !== 2 || !!$value);
                 };
                 // Валидация КПП полей
