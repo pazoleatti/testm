@@ -1087,7 +1087,7 @@
         "refBook.fl.card.tabs.idDoc.modal.title.create": "Создание нового ДУЛ",
         "refBook.fl.card.tabs.idDoc.modal.title.edit": "Редактирование ДУЛ",
         "refBook.fl.card.tabs.idDoc.deleteDialog.title": "Удаление ДУЛ",
-        "refBook.fl.card.tabs.idDoc.deleteDialog.content": "Вы действительно хотите удалить выбранный ДУЛ?",
+        "refBook.fl.card.tabs.idDoc.deleteDialog.content": "Вы уверены, что хотите удалить ДУЛ?",
         "refBook.fl.card.tabs.idDoc.deleteDialog.reportDoc.content": "Документ назначен для отчетности, для ФЛ: {{descripion}}. В случае удаления, ДУЛ для отчетности будет переназначен автоматически. Вы уверены, что хотите удалить ДУЛ?",
         "refBook.fl.card.tabs.idDoc.deleteError.cause.single": "Нельзя удалить единственный ДУЛ, т.к. у ФЛ всегда должен быть хотя бы один документ, для назначения для отчетности",
         "refBook.fl.card.tabs.original.modal.title": "Выбор физического лица для назначения оригинала",
