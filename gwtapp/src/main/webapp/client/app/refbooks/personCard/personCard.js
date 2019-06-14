@@ -495,7 +495,8 @@
                     }
                     $dialogs.confirmDialog({
                         title: $filter('translate')('refBook.fl.card.tabs.idDoc.deleteDialog.title'),
-                        content: $scope.idDocsGrid.value[0].includeReport ? $filter('translate')('refBook.fl.card.tabs.idDoc.deleteDialog.reportDoc.content', {versionId: $scope.personParam.id}): $filter('translate')('refBook.fl.card.tabs.idDoc.deleteDialog.content'),
+                        content: $scope.idDocsGrid.value[0].includeReport ? $filter('translate')('refBook.fl.card.tabs.idDoc.deleteDialog.reportDoc.content', {descripion: $scope.personParam.recordId + ', ' + ($scope.personParam.lastName ? ' ' + $scope.personParam.lastName:"") +
+                            ($scope.personParam.firstName ? ' ' + $scope.personParam.firstName : "") + ($scope.personParam.middleName ? ' ' + $scope.personParam.middleName : "")}): $filter('translate')('refBook.fl.card.tabs.idDoc.deleteDialog.content'),
                         okBtnCaption: $filter('translate')('common.button.yes'),
                         cancelBtnCaption: $filter('translate')('common.button.no'),
                         okBtnClick: function () {
