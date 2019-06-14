@@ -2172,7 +2172,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
     boolean checkNdflPerson(NdflPerson person, String personLineInFile) {
         String personInfo = "$person.fullName, ИНП: $person.inp"
         String rowInfoPrefix = "Строка: $personLineInFile. Для ФЛ: $personInfo"
-        String emptyParamErrorMsg = "$rowInfoPrefix не заполнен параметр %s."
+        String emptyParamErrorMsg = "$rowInfoPrefix значение параметра %s не указано."
         String valueNotFound = "$rowInfoPrefix Параметр \"%s\" (%s) содержит значение (%s), которое не найдено в справочнике %s."
         // Проверка поля "Гражданство"
         boolean valid = true
