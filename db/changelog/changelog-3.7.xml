@@ -601,4 +601,12 @@
 		</sql>
 	</changeSet>
 
+	<!-- Удаление ненужного индекса (откат оптимизации) -->
+	<changeSet id="3.7-skononova-7" author="skononova">
+		<sql>
+		    drop  index idx_npi_oper_id_dates ;
+		</sql>
+	</changeSet>
+
+
 </databaseChangeLog>
