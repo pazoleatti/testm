@@ -1,13 +1,12 @@
---количество записей с учетом версий
 begin 
-	dbms_output. put_line ('Query #1: Ref book person');
+	dbms_output. put_line ('Query #1: Ref book person (count without versions)');
 end;
 /
 select count(*) as count_person from ref_book_person;
 
 --количество записей с учетом версий
 begin 
-	dbms_output. put_line ('Query #2: Ref book person (using record_id)');
+	dbms_output. put_line ('Query #2: Ref book person (count with versions)');
 end;
 /
 
@@ -15,7 +14,7 @@ select count(*) as count_person from (select record_id from ref_book_person grou
 
 --количество дубликатов без учета версий
 begin 
-	dbms_output. put_line ('Query #3: Ref book person');
+	dbms_output. put_line ('Query #3: Ref book person (doubles without versions)');
 end;
 /
 
@@ -23,7 +22,7 @@ select count(*) as count_of_doubles from ref_book_person where old_id <> record_
 
 --количество дубликатов с учетом версий
 begin 
-	dbms_output. put_line ('Query #4: Ref book person');
+	dbms_output. put_line ('Query #4: Ref book person (doubles with versions)');
 end;
 /
 
@@ -32,7 +31,7 @@ select count(*) as count_of_doubles from (select old_id from ref_book_person whe
 --Количество ФЛ в разрезе количества ДУЛ-ов (REF_BOOK_ID_DOC - с одним ДУЛ, с двумя ДУЛ и т. д.)
 
 begin 
-	dbms_output. put_line ('Query #5: Ref book person');
+	dbms_output. put_line ('Query #5: Ref book person (count of documents and count of persons)');
 end;
 /
 
@@ -43,7 +42,7 @@ group by record_id)
 group by cnt_all;
 
 begin 
-	dbms_output. put_line ('Query #6: Notification');
+	dbms_output. put_line ('Query #6: Notification (count)');
 end;
 /
 
@@ -51,7 +50,7 @@ end;
 select count(*) as count_of_notifications from notification;
 
 begin 
-	dbms_output. put_line ('Query #7: Logs');
+	dbms_output. put_line ('Query #7: Log (count)');
 end;
 /
 
@@ -59,14 +58,14 @@ end;
 select count(*) as count_of_logs from log;
 
 begin 
-	dbms_output. put_line ('Query #8: Logs');
+	dbms_output. put_line ('Query #8: Log_entry (count)');
 end;
 /
 
 select count(*) as count_of_log_entries from log_entry;
 
 begin 
-	dbms_output. put_line ('Query #9: Logs');
+	dbms_output. put_line ('Query #9: Log_business (count)');
 end;
 /
 
@@ -76,7 +75,7 @@ select count(*) as count_of_log_business from log_business;
 
 --1. Количество записей в блобах.
 begin 
-	dbms_output. put_line ('Query #10: BLOBs');
+	dbms_output. put_line ('Query #10: BLOBs (count)');
 end;
 /
 
@@ -84,14 +83,14 @@ select count(*) from blob_data;
 
 --2. Общий размер всех блобов.
 begin 
-	dbms_output. put_line ('Query #11: BLOBs');
+	dbms_output. put_line ('Query #11: BLOBs (size)');
 end;
 /
 
 select round(sum(dbms_lob.getlength(data)/1024/1024),2) as size_MB from blob_data;
 
 begin 
-	dbms_output. put_line ('Query #12: BLOBs');
+	dbms_output. put_line ('Query #12: BLOBs (real size)');
 end;
 /
 
@@ -107,7 +106,7 @@ and   user_lobs.column_name = 'DATA';
 
 -- Количество форм в разрезе по макету (DECLARATION_TEMPLATE).--
 begin 
-	dbms_output. put_line ('Query #12: Forms');
+	dbms_output. put_line ('Query #12: Forms (count)');
 end;
 /
 
@@ -120,7 +119,7 @@ group by declaration_template_id;
 -- Количество записей в реквизитах, доходах, вычетах и авансах всех ПНФ и КНФ.
 
 begin 
-	dbms_output. put_line ('Query #13: Forms');
+	dbms_output. put_line ('Query #13: Forms (count of ndfl_persons)');
 end;
 /
 
@@ -128,7 +127,7 @@ select dd.declaration_template_id, count(*) as count_of_persons from declaration
 where declaration_template_id in (100,101) group by declaration_template_id;
 
 begin 
-	dbms_output. put_line ('Query #14: Forms');
+	dbms_output. put_line ('Query #14: Forms (count of ndfl_person_incomes)');
 end;
 /
 
@@ -137,7 +136,7 @@ join ndfl_person_income npi on npi.ndfl_person_id = np.id
 where declaration_template_id in (100,101) group by declaration_template_id;
 
 begin 
-	dbms_output. put_line ('Query #15: Forms');
+	dbms_output. put_line ('Query #15: Forms (count of ndfl_person_deductions)');
 end;
 /
 
@@ -146,7 +145,7 @@ join ndfl_person_deduction npd on npd.ndfl_person_id = np.id
 where declaration_template_id in (100,101) group by declaration_template_id;
 
 begin 
-	dbms_output. put_line ('Query #16: Forms');
+	dbms_output. put_line ('Query #16: Forms (count of ndfl_person_prepayments');
 end;
 /
 
@@ -157,7 +156,7 @@ where declaration_template_id in (100,101) group by declaration_template_id;
 --Количество ПНФ по диапазонам количества реквизитов в ПНФ. 
 
 begin 
-	dbms_output. put_line ('Query #17: Forms');
+	dbms_output. put_line ('Query #17: Forms (range of quantities (primary forms))');
 end;
 /
 
@@ -180,7 +179,7 @@ order by grps;
 
 -- Количество КНФ по диапазонам количества реквизитов в КНФ. 
 begin 
-	dbms_output. put_line ('Query #18: Forms');
+	dbms_output. put_line ('Query #18: Forms (range of quantities (consolidated forms))');
 end;
 /
 
@@ -207,7 +206,7 @@ order by grps;
 
 -- Количество реквизитов, доходов, вычетов, авансов в КНФ с максимальным числом реквизитов.
 begin 
-	dbms_output. put_line ('Query #19: Forms');
+	dbms_output. put_line ('Query #19: Forms (count of persons, incomes, deductions, prepayments in biggest consolidated forms)');
 end;
 /
 
