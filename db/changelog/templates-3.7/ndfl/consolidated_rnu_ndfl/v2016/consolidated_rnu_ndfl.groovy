@@ -2636,6 +2636,7 @@ class ReportXlsxSheetFiller implements SheetFiller {
                 summaryFlIncomeData.calculatedTax = npi.calculatedTax ? summaryFlIncomeData.calculatedTax.add(npi.calculatedTax) : summaryFlIncomeData.calculatedTax
             }
         }
+        flIncomeDataMap = flIncomeDataMap.sort { e1, e2 -> e1.key.kpp <=> e2.key.kpp ?: e1.key.oktmo <=> e2.key.oktmo }
 
         for (XlsxReportRowKey reportRowKey : flIncomeDataMap.keySet()) {
             FlIncomeData flIncomeData = flIncomeDataMap.get(reportRowKey)
