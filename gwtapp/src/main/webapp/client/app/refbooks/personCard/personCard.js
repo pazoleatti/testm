@@ -46,6 +46,11 @@
                                 $scope.personRegTabs.push($scope.changelogTab);
                             }
                         }
+                        angular.forEach(value.documents.value, function (idDoc) {
+                            if (value.reportDoc && value.reportDoc.value) {
+                                idDoc.includeReport = value.reportDoc.value.id === idDoc.id;
+                            }
+                        });
                         return value;
                     });
                     return data;
@@ -342,19 +347,11 @@
                  * @description Получение списка ДУЛ для ФЛ
                  */
                 $scope.fetchIdDocs = function (ctrl) {
-                    var idDocs;
-                    var person;
                     if ($scope.mode === APP_CONSTANTS.MODE.VIEW) {
-                        idDocs = $scope.person.documents.value;
-                        person = $scope.person
+                        ctrl.refreshGridData($scope.person.documents.value);
                     } else {
-                        idDocs = $scope.personParam.documents.value;
-                        person = $scope.personParam
+                        ctrl.refreshGridData($scope.personParam.documents.value);
                     }
-                    angular.forEach(idDocs, function (idDoc) {
-                        idDoc.includeReport = person.reportDoc.value.id === idDoc.id;
-                    });
-                    ctrl.refreshGridData(idDocs);
                 };
 
                 /**
