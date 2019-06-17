@@ -117,7 +117,7 @@
                                     $modalInstance.close();
                                 } else {
                                     $scope.returnToView();
-                                    resetRecord();
+                                    initRecord();
                                 }
                             }
                         });
@@ -126,7 +126,7 @@
                             $modalInstance.close();
                         } else {
                             $scope.returnToView();
-                            resetRecord();
+                            initRecord();
                         }
                     }
                 };
