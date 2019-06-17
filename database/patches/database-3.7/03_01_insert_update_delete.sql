@@ -303,9 +303,7 @@ begin
 	on (a.income_type_id=b.income_type_id and a.mark=b.mark and a.version=b.version)
 	when not matched then
 		insert (id,record_id,income_type_id,mark,name,version)
-		values (seq_ref_book_record.nextval,seq_ref_book_record_row_id.nextval,b.income_type_id,b.mark,b.name,b.version)
-	when matched then
-		update set a.name = b.name;
+		values (seq_ref_book_record.nextval,seq_ref_book_record_row_id.nextval,b.income_type_id,b.mark,b.name,b.version);
 		
 	CASE SQL%ROWCOUNT 
 	WHEN 0 THEN dbms_output.put_line(v_task_name||'[WARNING]:'||' No changes was done');
