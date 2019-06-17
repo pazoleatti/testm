@@ -299,9 +299,6 @@ begin
 	 union
 	 select (select id from (select id,version from ref_book_income_type where code='2790' and status=0 order by version desc) where rownum=1) as income_type_id, 
 	        '00' as mark, '' as name, to_date('01.01.2016','DD.MM.YYYY') as version from dual
-	 union
-	 select (select id from (select id,version from ref_book_income_type where code='2510' and status=0 order by version desc) where rownum=1) as income_type_id, 
-	        '13' as mark, 'Выплата дохода в денежной форме' as name, to_date('01.01.2016','DD.MM.YYYY') as version from dual
 	) b
 	on (a.income_type_id=b.income_type_id and a.mark=b.mark and a.version=b.version)
 	when not matched then
