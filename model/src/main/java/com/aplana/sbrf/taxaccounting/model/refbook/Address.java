@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.model.refbook;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -12,6 +13,7 @@ import lombok.ToString;
 @Setter
 @NoArgsConstructor
 @ToString
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Address {
     /**
      * Код региона
