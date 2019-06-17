@@ -219,4 +219,3 @@ from
 where cnt_rank <=3
 order by cnt_rank;
 /
-

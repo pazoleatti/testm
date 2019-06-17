@@ -608,5 +608,15 @@
 		</sql>
 	</changeSet>
 
+	<!--https://jira.aplana.com/browse/SBRFNDFL-7842 Значение в столбце "Наименование" для "2510 - 13" справочника "Виды дохода" отличается от постановки -->
+	<changeSet id="3.7-skononova-8" author="skononova">
+		<sql >
+		    update REF_BOOK_INCOME_KIND set name = 'Выплата дохода в денежной форме' where
+			mark='13' and income_type_id = 
+			    (select id from (select id,version from ref_book_income_type where code='2510' 
+						and status=0 and version=to_date('01.01.2016','dd.mm.yyyy') order by version desc) where rownum=1);
+		</sql>
+	</changeSet>
+
 
 </databaseChangeLog>
