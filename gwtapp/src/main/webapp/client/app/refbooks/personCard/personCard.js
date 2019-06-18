@@ -46,6 +46,11 @@
                                 $scope.personRegTabs.push($scope.changelogTab);
                             }
                         }
+                        angular.forEach(value.documents.value, function (idDoc) {
+                            if (value.reportDoc && value.reportDoc.value) {
+                                idDoc.includeReport = value.reportDoc.value.id === idDoc.id;
+                            }
+                        });
                         return value;
                     });
                     return data;
@@ -342,19 +347,11 @@
                  * @description Получение списка ДУЛ для ФЛ
                  */
                 $scope.fetchIdDocs = function (ctrl) {
-                    var idDocs;
-                    var person;
                     if ($scope.mode === APP_CONSTANTS.MODE.VIEW) {
-                        idDocs = $scope.person.documents.value;
-                        person = $scope.person
+                        ctrl.refreshGridData($scope.person.documents.value);
                     } else {
-                        idDocs = $scope.personParam.documents.value;
-                        person = $scope.personParam
+                        ctrl.refreshGridData($scope.personParam.documents.value);
                     }
-                    angular.forEach(idDocs, function (idDoc) {
-                        idDoc.includeReport = person.reportDoc.value.id === idDoc.id;
-                    });
-                    ctrl.refreshGridData(idDocs);
                 };
 
                 /**
@@ -498,7 +495,8 @@
                     }
                     $dialogs.confirmDialog({
                         title: $filter('translate')('refBook.fl.card.tabs.idDoc.deleteDialog.title'),
-                        content: $scope.idDocsGrid.value[0].includeReport ? $filter('translate')('refBook.fl.card.tabs.idDoc.deleteDialog.reportDoc.content', {versionId: $scope.personParam.id}): $filter('translate')('refBook.fl.card.tabs.idDoc.deleteDialog.content'),
+                        content: $scope.idDocsGrid.value[0].includeReport ? $filter('translate')('refBook.fl.card.tabs.idDoc.deleteDialog.reportDoc.content', {descripion: $scope.personParam.recordId + ', ' + ($scope.personParam.lastName ? ' ' + $scope.personParam.lastName:"") +
+                            ($scope.personParam.firstName ? ' ' + $scope.personParam.firstName : "") + ($scope.personParam.middleName ? ' ' + $scope.personParam.middleName : "")}): $filter('translate')('refBook.fl.card.tabs.idDoc.deleteDialog.content'),
                         okBtnCaption: $filter('translate')('common.button.yes'),
                         cancelBtnCaption: $filter('translate')('common.button.no'),
                         okBtnClick: function () {

@@ -39,6 +39,8 @@ class Check extends AbstractScriptClass {
     PersonService personService
     DepartmentConfigService departmentConfigService
     RefBookService refBookService
+    SourceService sourceService
+    OperationType operationType
 
     // Сервис для получения рабочих дней
     DateConditionWorkDay dateConditionWorkDay
@@ -205,6 +207,12 @@ class Check extends AbstractScriptClass {
         }
         if (scriptClass.getBinding().hasVariable("refBookService")) {
             this.refBookService = (RefBookService) scriptClass.getProperty("refBookService")
+        }
+        if (scriptClass.getBinding().hasVariable("sourceService")) {
+            this.sourceService = (SourceService) scriptClass.getProperty("sourceService")
+        }
+        if (scriptClass.getBinding().hasVariable("operationType")) {
+            this.operationType = (OperationType) scriptClass.getProperty("operationType")
         }
     }
 
@@ -993,7 +1001,34 @@ class Check extends AbstractScriptClass {
         checkDummyIncomes(ndflPersonIncomeList)
         logForDebug("Общие проверки / Фиктивные записи (" + (System.currentTimeMillis() - time) + " мс)")
 
+        time = System.currentTimeMillis()
+        checkDestinations()
+        logForDebug("Общие проверки / Состояние источников и приемников (" + (System.currentTimeMillis() - time) + " мс)")
+
         logForDebug("Общие проверки всего (" + (System.currentTimeMillis() - timeTotal) + " мс)")
+    }
+
+    // Проверяет что все формы-приёмники в текущем тербанке находятся в состоянии "Создана"
+    void checkDestinations() {
+        if (!(operationType == OperationType.CHECK_DEC && declarationData.state == State.ACCEPTED)) {
+            Department declarationTerbank = departmentService.getParentTB(declarationData.departmentId)
+            List<Relation> destinations = sourceService.getDestinationsInfo(declarationData)
+            List<Relation> conflictingDestinations = destinations.findAll { it.declarationState != State.CREATED }
+            Set<Integer> conflictingDestinationsTerbankIds = conflictingDestinations.collect {
+                departmentService.getParentTBId(it.departmentId)
+            }.toSet()
+            if (conflictingDestinationsTerbankIds.contains(declarationTerbank.id)) {
+                logger.errorExp("В списке \"Источники-приемники\" есть формы-приемники в состоянии, отличном от \"Создана\" в Тербанке ${declarationTerbank.name}",
+                        "Состояние форм-приемников отличается от \"Создана\"", "")
+            } else if (conflictingDestinationsTerbankIds) {
+                List<Department> departments = conflictingDestinationsTerbankIds.collect {
+                    departmentService.get(it)
+                }
+                String tbNames = departments.collect { it.name }.join(", ")
+                logger.warnExp("В списке \"Источники-приемники\" есть формы-приемники в других Тербанках и в состоянии, отличном от \"Создана\" в других Тербанках $tbNames",
+                        "Состояние форм-приемников отличается от \"Создана\"", "")
+            }
+        }
     }
 
     /**
@@ -1046,12 +1081,13 @@ class Check extends AbstractScriptClass {
                         "указанных в гр. \"%s\" (\"%s\") и гр. \"%s\" (\"%s\")")
 
         // 4. "Графа 6" = "Графе 7"
-        dateConditionDataList << new DateConditionData(["2013", "2014", "4800", "2510", "2202", "2740", "2750", "2790", "2520"], ["13"], new Column6EqualsColumn7(),
+        dateConditionDataList << new DateConditionData(["2013", "2014", "4800", "2510", "2202", "2720", "2740", "2750", "2790",
+                                                        "2520"], ["13"], new Column6EqualsColumn7(),
                 "Значение гр. \"%s\" (\"%s\") должно быть равно значению гр. \"%s\" (\"%s\") для кода дохода и признака дохода, " +
                         "указанных в гр. \"%s\" (\"%s\") и гр. \"%s\" (\"%s\")")
 
         // 5. "Графа 6" = "Графе 7"
-        dateConditionDataList << new DateConditionData(["2520", "2720", "2740", "2750", "2790", "4800"], ["13", "14"], new Column6EqualsColumn7(),
+        dateConditionDataList << new DateConditionData(["2520", "2720", "2740", "2750", "2790", "4800"], ["14"], new Column6EqualsColumn7(),
                 "Значение гр. \"%s\" (\"%s\") должно быть равно значению гр. \"%s\" (\"%s\") для кода дохода и признака дохода, " +
                         "указанных в гр. \"%s\" (\"%s\") и гр. \"%s\" (\"%s\")")
 

@@ -254,12 +254,15 @@ declare
   v_task_name varchar2(128):='insert_update_delete block #7 - add task';  
 begin
         merge into CONFIGURATION_SCHEDULER dst using
-	( select 6 as id, 'Очистка файлового хранилища' as task_name, '0 0 22 ? * SAT' as schedule, 1 as active  from dual
+	( select 6 as id, 'Периодическое сжатие таблиц' as task_name, '0 0 22 ? * SAT' as schedule, 1 as active  from dual
 	) src
 	on (src.id=dst.id)
 	when not matched then
 	insert  (id, task_name,schedule, active,modification_date, last_fire_date) values 
-	(src.id, src.task_name, src.schedule, src.active, sysdate, sysdate);	
+	(src.id, src.task_name, src.schedule, src.active, sysdate, sysdate)
+	when matched then
+	update set dst.task_name=src.task_name, dst.schedule = src.schedule, dst.active = src.active,
+		dst.modification_date=sysdate;	
 
 	CASE SQL%ROWCOUNT 
 	WHEN 0 THEN dbms_output.put_line(v_task_name||'[WARNING]:'||' No changes was done');
@@ -272,3 +275,45 @@ EXCEPTION
 end;
 /
 COMMIT;
+
+-- 3.7-skononova-6 https://jira.aplana.com/browse/SBRFNDFL-7804 Добавить в справочник "Виды дохода" новые записи
+-- 3.7-skononova-8 https://jira.aplana.com/browse/SBRFNDFL-7842 Значение в столбце "Наименование" для "2510 - 13" справочника "Виды дохода" отличается от постановки
+declare 
+  v_task_name varchar2(128):='insert_update_delete block #8 - merge into ref_book_income_kind';  
+begin
+	merge into ref_book_income_kind a using
+	 (select (select id from (select id,version from ref_book_income_type where code='2520' and status=0 order by version desc) where rownum=1) as income_type_id, 
+	        '00' as mark, '' as name, to_date('01.01.2016','DD.MM.YYYY') as version from dual
+	 union
+	 select (select id from (select id,version from ref_book_income_type where code='2720' and status=0 order by version desc) where rownum=1) as income_type_id, 
+	        '00' as mark, '' as name, to_date('01.01.2016','DD.MM.YYYY') as version from dual
+	 union
+	 select (select id from (select id,version from ref_book_income_type where code='2720' and status=0 order by version desc) where rownum=1) as income_type_id, 
+	        '13' as mark, 'Выплата дохода в денежной форме' as name, to_date('01.01.2016','DD.MM.YYYY') as version from dual
+	 union
+	 select (select id from (select id,version from ref_book_income_type where code='2740' and status=0 order by version desc) where rownum=1) as income_type_id, 
+	        '00' as mark, '' as name, to_date('01.01.2016','DD.MM.YYYY') as version from dual
+	 union
+	 select (select id from (select id,version from ref_book_income_type where code='2750' and status=0 order by version desc) where rownum=1) as income_type_id, 
+	        '00' as mark, '' as name, to_date('01.01.2016','DD.MM.YYYY') as version from dual
+	 union
+	 select (select id from (select id,version from ref_book_income_type where code='2790' and status=0 order by version desc) where rownum=1) as income_type_id, 
+	        '00' as mark, '' as name, to_date('01.01.2016','DD.MM.YYYY') as version from dual
+	) b
+	on (a.income_type_id=b.income_type_id and a.mark=b.mark and a.version=b.version)
+	when not matched then
+		insert (id,record_id,income_type_id,mark,name,version)
+		values (seq_ref_book_record.nextval,seq_ref_book_record_row_id.nextval,b.income_type_id,b.mark,b.name,b.version);
+		
+	CASE SQL%ROWCOUNT 
+	WHEN 0 THEN dbms_output.put_line(v_task_name||'[WARNING]:'||' No changes was done');
+	ELSE dbms_output.put_line(v_task_name||'[INFO]:'||' Success');
+	END CASE; 
+EXCEPTION
+  when OTHERS then
+    dbms_output.put_line(v_task_name||'[FATAL]:'||sqlerrm);		
+end;
+/
+COMMIT;
+
+

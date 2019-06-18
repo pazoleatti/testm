@@ -26,7 +26,7 @@
                     }
                 };
                 // Необходимость заполнения фамилии и имени в зависимости от значения поля "признак подписанта"
-                $scope.isNameRequiredBySignatoryMark = function ($value) {
+                $scope.isSignatoryNameRequired = function ($value) {
                     return !(!$scope.record.signatoryMark || $scope.record.signatoryMark.code !== 2 || !!$value);
                 };
                 // Валидация КПП полей
@@ -90,7 +90,7 @@
                             $dialogs.errorDialog({content: response.data.error});
                         } else {
                             $shareData.refreshGrid();
-                            flushRecord();
+                            $shareData.record = $scope.record;
                             $scope.returnToView();
                         }
                     });
@@ -107,7 +107,6 @@
                     $scope.mode = 'VIEW';
                     $modalInstance.updateTitle($filter('translate')('departmentConfig.modal.open.title'));
                     $scope.departmentConfigForm.$setPristine();
-                    initRecord();
                 };
 
                 $scope.cancel = function (close) {
@@ -122,7 +121,7 @@
                                     $modalInstance.close();
                                 } else {
                                     $scope.returnToView();
-                                    resetRecord();
+                                    initRecord();
                                 }
                             }
                         });
@@ -131,7 +130,7 @@
                             $modalInstance.close();
                         } else {
                             $scope.returnToView();
-                            resetRecord();
+                            initRecord();
                         }
                     }
                 };

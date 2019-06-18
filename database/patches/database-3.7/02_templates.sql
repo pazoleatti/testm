@@ -169,7 +169,7 @@ HOST "&2\sqlldr" &3 control=database-3.7/templates/ldr/ndfl/blob_data.ldr log=&4
 HOST "&2\sqlldr" &3 control=database-3.7/templates/ldr/ndfl/template.ldr log=&4/02_03_ndfl_template.txt bad=&5/02_03_ndfl_template.bad
 
 --3.6-ytrofimov-1, 3.7-ytrofimov-1, 3.6-ytrofimov-2, 3.7-ytrofimov-2, 3.6-ytrofimov-5, 3.7-dnovikov-6, 3.6-ytrofimov-5, 3.7-dnovikov-2,
---3.6-ytrofimov-5, 3.7-dnovikov-3, 3.6-ytrofimov-5, 3.7-dnovikov-4, 3.7-dnovikov-23
+--3.6-ytrofimov-5, 3.7-dnovikov-3, 3.6-ytrofimov-5, 3.7-dnovikov-4, 3.7-dnovikov-23, 3/7-dnovikov30
 HOST "&2\sqlldr" &3 control=database-3.7/templates/ldr/ndfl/template_script.ldr log=&4/02_04_ndfl_template_script.txt bad=&5/02_04_ndfl_template_script.bad
 
 BEGIN

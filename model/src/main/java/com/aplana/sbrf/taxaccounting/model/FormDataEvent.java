@@ -94,7 +94,7 @@ public enum FormDataEvent implements Serializable {
 	private String title;
 	private int code;
 
-	private FormDataEvent(int code, String title) {
+	FormDataEvent(int code, String title) {
 		this.code = code;
 		this.title = title;
 	}

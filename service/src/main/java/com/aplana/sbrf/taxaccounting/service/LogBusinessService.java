@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.dto.LogBusinessDTO;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -42,6 +43,15 @@ public interface LogBusinessService {
      * @param logBusiness данные записи
      */
     void create(LogBusiness logBusiness);
+
+    /**
+     * Возвращяет дату последней записи в историю формы о событию
+     *
+     * @param declarationId идентификатор формы
+     * @param event         требуемое событие
+     * @return список событий
+     */
+    Date getMaxLogDateByDeclarationIdAndEvent(long declarationId, FormDataEvent event);
 
     /**
      * Получить информацию об истории событий налоговой формы
