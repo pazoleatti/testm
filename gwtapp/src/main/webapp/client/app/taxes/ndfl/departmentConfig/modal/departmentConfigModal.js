@@ -8,11 +8,15 @@
             function ($scope, $filter, APP_CONSTANTS, $modalInstance, $shareData, $dialogs, DepartmentConfigResource, $http, $logPanel) {
                 $scope.mode = $shareData.mode;
 
-                function initRecord() {
-                    $scope.record = $shareData.mode === 'CREATE' ? {} : $.extend(true, {}, $shareData.record);
+                $scope.record = $shareData.mode === 'CREATE' ? {} : $.extend(true, {}, $shareData.record);
+
+                function resetRecord() {
+                    $scope.record = $.extend(true, {}, $shareData.record);
                 }
 
-                initRecord();
+                function flushRecord() {
+                    $shareData.record = $.extend(true, {}, $scope.record);
+                }
 
                 $scope.save = function () {
                     if ($scope.mode === 'CREATE') {
@@ -86,6 +90,7 @@
                             $dialogs.errorDialog({content: response.data.error});
                         } else {
                             $shareData.refreshGrid();
+                            flushRecord();
                             $scope.returnToView();
                         }
                     });
@@ -117,6 +122,7 @@
                                     $modalInstance.close();
                                 } else {
                                     $scope.returnToView();
+                                    resetRecord();
                                 }
                             }
                         });
@@ -125,6 +131,7 @@
                             $modalInstance.close();
                         } else {
                             $scope.returnToView();
+                            resetRecord();
                         }
                     }
                 };
