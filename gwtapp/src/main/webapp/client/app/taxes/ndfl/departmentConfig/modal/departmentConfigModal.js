@@ -90,7 +90,7 @@
                             $dialogs.errorDialog({content: response.data.error});
                         } else {
                             $shareData.refreshGrid();
-                            $shareData.record = $scope.record;
+                            flushRecord();
                             $scope.returnToView();
                         }
                     });
@@ -121,7 +121,7 @@
                                     $modalInstance.close();
                                 } else {
                                     $scope.returnToView();
-                                    initRecord();
+                                    resetRecord();
                                 }
                             }
                         });
@@ -130,7 +130,7 @@
                             $modalInstance.close();
                         } else {
                             $scope.returnToView();
-                            initRecord();
+                            resetRecord()
                         }
                     }
                 };
