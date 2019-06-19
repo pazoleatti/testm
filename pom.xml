@@ -7,7 +7,7 @@
     <artifactId>ndfl</artifactId>
 
     <description>АС "Учёт налогов"</description>
-    <version>3.7</version>
+    <version>3.8</version>
     <packaging>pom</packaging>
 
     <modules>
