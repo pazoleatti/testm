@@ -4,6 +4,10 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
 
-
+    <changeSet id="3.8-dnovikov-1" author="dnovikov">
+        <sql>
+            insert into ref_book_doc_state(id, name) values(8, 'Отправка в ЭДО');
+        </sql>
+    </changeSet>
 
 </databaseChangeLog>

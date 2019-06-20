@@ -11,6 +11,7 @@ import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.result.*;
 import com.aplana.sbrf.taxaccounting.permissions.logging.TargetIdAndLogger;
+import com.aplana.sbrf.taxaccounting.service.impl.transport.edo.SendToEdoResult;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.util.JRSwapFile;
 
@@ -458,6 +459,11 @@ public interface DeclarationDataService {
     List<DeclarationDataFile> getFiles(long declarationDataId);
 
     /**
+     * Найти данные по файлам НФ имеющие указаныый тип
+     */
+    List<DeclarationDataFile> findAllFilesByDeclarationIdAndType(Long declarationDataId, AttachFileType fileType);
+
+    /**
      * Получения комментария для формы "Файлы и комментарии"
      */
     String getNote(long declarationDataId);
@@ -561,6 +567,14 @@ public interface DeclarationDataService {
     void updateDocState(List<Long> declarationDataIds, long docStateId, TAUserInfo userInfo, Logger logger);
 
     /**
+     * Изменяет состояние ЭД форм
+     *
+     * @param declarationId ид формы
+     * @param docStateId    ид состояния ЭД
+     */
+    void updateDocState(long declarationId, long docStateId);
+
+    /**
      * Запускает ассинхронную задачу на отправку в ЭДО форм по фильтру
      *
      * @param filter   фильтр, по которому выбираются формы
@@ -580,12 +594,11 @@ public interface DeclarationDataService {
 
     /**
      * Отправляет данные ОНФ в ЭДО
-     *
-     * @param declarationDataIds список ид форм
+     *  @param declarationDataIds список ид форм
      * @param userInfo           пользователь запустивший операцию
      * @param logger             логгер
      */
-    void sendEdo(List<Long> declarationDataIds, TAUserInfo userInfo, Logger logger);
+    SendToEdoResult sendToEdo(List<Long> declarationDataIds, TAUserInfo userInfo, Logger logger);
 
     /**
      * Создание отчета для отчетной НФ

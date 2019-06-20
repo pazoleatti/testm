@@ -5,11 +5,10 @@ import com.aplana.sbrf.taxaccounting.model.AsyncQueue;
 import com.aplana.sbrf.taxaccounting.model.AsyncTaskData;
 import com.aplana.sbrf.taxaccounting.model.AsyncTaskType;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDocState;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
-import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
+import com.aplana.sbrf.taxaccounting.service.impl.transport.edo.SendToEdoResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -17,6 +16,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
+
+import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 
 /**
  * Отправка ЭД в ЭДО
@@ -48,14 +49,50 @@ public class SendEdoAsyncTask extends AbstractAsyncTask {
         Map<String, Object> params = taskData.getParams();
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(taskData.getUserId()));
-        List<Long> declarationDataIds = (List<Long>) params.get("declarationDataIds");
-        declarationDataService.sendEdo(declarationDataIds, userInfo, logger);
-        return new BusinessLogicResult(true, null);
+        List<Long> declarationDataIds = (List<Long>) params.get("noLockDeclarationDataIds");
+        SendToEdoResult result = declarationDataService.sendToEdo(declarationDataIds, userInfo, logger);
+        params.put("result", result);
+        return new BusinessLogicResult(defineLogLevelByResult(result), true);
     }
 
     @Override
     protected String getNotificationMsg(AsyncTaskData taskData) {
-        return "Выполнение операции \"" + getAsyncTaskType().getDescription() + "\" завершено.";
+        SendToEdoResult result = (SendToEdoResult) taskData.getParams().get("result");
+        if (result != null) {
+            List succeedDeclarations = result.getDeclarationsByLogLevel(LogLevel.INFO);
+            List warnDeclarations = result.getDeclarationsByLogLevel(LogLevel.WARNING);
+            List errorDeclarations = result.getDeclarationsByLogLevel(LogLevel.ERROR);
+            if (isEmpty(errorDeclarations)) {
+                if (isEmpty(warnDeclarations)) {
+                    return "Выполнена отправка в ЭДО.";
+                } else {
+                    return "Выполнена отправка в ЭДО (присутствуют нефатальные ошибки).";
+                }
+            } else {
+                if (!isEmpty(succeedDeclarations) || !isEmpty(warnDeclarations)) {
+                    return "Частично выполнена отправка в ЭДО (для некоторых форм имеются фатальные ошибки).";
+                } else {
+                    return "Не выполнена отправка в ЭДО (для всех форм имеются фатальные ошибки).";
+                }
+            }
+        } else {
+            return "Выполнение операции \"" + getAsyncTaskType().getDescription() + "\" завершено.";
+        }
+    }
+
+    private LogLevel defineLogLevelByResult(SendToEdoResult result) {
+        List succeedDeclarations = result.getDeclarationsByLogLevel(LogLevel.INFO);
+        List warnDeclarations = result.getDeclarationsByLogLevel(LogLevel.WARNING);
+        List errorDeclarations = result.getDeclarationsByLogLevel(LogLevel.ERROR);
+        if (isEmpty(errorDeclarations)) {
+            return LogLevel.INFO;
+        } else {
+            if (!isEmpty(succeedDeclarations) || !isEmpty(warnDeclarations)) {
+                return LogLevel.WARNING;
+            } else {
+                return LogLevel.ERROR;
+            }
+        }
     }
 
     @Override

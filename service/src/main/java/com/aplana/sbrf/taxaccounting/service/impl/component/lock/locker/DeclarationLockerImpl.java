@@ -261,6 +261,9 @@ public class DeclarationLockerImpl implements DeclarationLocker {
     }
 
     private List<LockData> doCheckAndLock(final List<Long> declarationDataIdList, final OperationType currentTask, final Set<OperationType> lockingTasks, Map<String, Long> additionalParams, final TAUserInfo userinfo, final Logger logger) {
+        if (declarationDataIdList == null) {
+            return new ArrayList<>();
+        }
         final Map<String, Long> declarationDataByLockKeys = new HashMap<>();
         final Map<String, Long> declarationDataByCurrentLockKeys = new HashMap<>();
         final Map<String, String> currentLockKeysWithDescription = new HashMap<>();

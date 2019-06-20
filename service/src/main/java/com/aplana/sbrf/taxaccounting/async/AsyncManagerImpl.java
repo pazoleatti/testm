@@ -62,6 +62,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils.isEmpty;
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
 /**
  * Реализация менеджера асинхронных задач на Spring
@@ -269,10 +270,7 @@ public class AsyncManagerImpl implements AsyncManager {
                         checkParams(params);
                     }
                     lockDataList = checkAndCreateLocks(operationType, params, logger, user);
-                    if (CollectionUtils.isNotEmpty(lockDataList)) {
-                        for (LockData lockData : lockDataList) {
-                            keys.add(lockData.getKey());
-                        }
+                    if (lockDataList != null) {
                         //Постановка новой задачи в очередь
                         AsyncQueue queue = task.defineTaskLimit(description, user, params);
 
@@ -281,7 +279,12 @@ public class AsyncManagerImpl implements AsyncManager {
                         AsyncTaskType asyncTaskType = AsyncTaskType.getByAsyncTaskTypeId(operationType.getAsyncTaskType().getId());
                         taskData = asyncTaskDao.create(operationType.getAsyncTaskType().getId(), user.getUser().getId(), description, queue, priorityNode, AsyncTaskGroupFactory.getTaskGroup(asyncTaskType), params);
 
-                        lockDataService.bindTaskToMultiKeys(keys, taskData.getId());
+                        if (isNotEmpty(lockDataList)) {
+                            for (LockData lockData : lockDataList) {
+                                keys.add(lockData.getKey());
+                            }
+                            lockDataService.bindTaskToMultiKeys(keys, taskData.getId());
+                        }
                         logger.info("Задача %s поставлена в очередь на исполнение", description);
                         LOG.info(String.format("Task with id %s was put in queue %s. Task type: %s, priority node: %s",
                                 taskData.getId(), queue.name(), asyncTaskType.getId(), priorityNode));

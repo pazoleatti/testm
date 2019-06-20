@@ -199,6 +199,10 @@ public class Logger implements Serializable {
         entries.add(topPosition, entry);
     }
 
+    public void log(LogLevel level, String message) {
+        log(level, message, null, null, false);
+    }
+
     private void log(LogLevel level, String message, String type, String object, boolean excludeIfNotExist, Object... args) {
         String extMessage = message;
         if (args != null && args.length > 0) {

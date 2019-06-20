@@ -102,6 +102,9 @@
     <bean class="org.mockito.Mockito" factory-method="mock">
         <constructor-arg value="com.aplana.sbrf.taxaccounting.service.component.lock.locker.DeclarationLocker"/>
     </bean>
+    <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.service.EdoMessageService"/>
+    </bean>
     <bean id="declarationDataService" class="com.aplana.sbrf.taxaccounting.service.impl.DeclarationDataServiceImpl"/>
     <bean id="departmentReportPeriodFormatter"
           class="com.aplana.sbrf.taxaccounting.utils.DepartmentReportPeriodFormatter"/>

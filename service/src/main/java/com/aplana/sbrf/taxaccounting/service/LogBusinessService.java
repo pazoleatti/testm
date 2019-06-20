@@ -21,7 +21,7 @@ public interface LogBusinessService {
      *
      * @param declarationId идентификатор формы
      * @param event         событие
-     * @param logId
+     * @param logId         ссылка на уведомления
      * @param note          текст
      * @param userInfo      информация о пользователе, инициирующего событие
      */

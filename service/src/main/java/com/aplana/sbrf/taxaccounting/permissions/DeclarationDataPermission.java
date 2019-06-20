@@ -747,12 +747,12 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
                 RefBookFormType refBookFormType = declarationTemplate.getFormType();
                 List<Long> suitableFormTypes = Arrays.asList(RefBookFormType.NDFL_2_1.getId(), RefBookFormType.NDFL_2_2.getId(), RefBookFormType.NDFL_6.getId());
                 if (suitableFormTypes.contains(refBookFormType.getId())) {
-                    List<Long> suitableDocStates = Arrays.asList(RefBookDocState.NOT_SENT.getId(), RefBookDocState.ERROR.getId(), RefBookDocState.SENT.getId());
+                    List<Long> suitableDocStates = Arrays.asList(RefBookDocState.NOT_SENT.getId(), RefBookDocState.ERROR.getId(), RefBookDocState.EXPORTED.getId());
                     if (suitableDocStates.contains(declarationData.getDocStateId())) {
                         return true;
                     } else {
                         RefBookDocState docState = commonRefBookService.fetchRecord(RefBook.Id.DOC_STATE.getId(), declarationData.getDocStateId());
-                        errMsgs.add("Операция \"Отправка в ЭДО\" не допустима для форм в состоянии \"" + docState + "\"");
+                        errMsgs.add("Операция \"Отправка в ЭДО\" не допустима для форм в состоянии \"" + docState.getName() + "\"");
                     }
                 }
             }

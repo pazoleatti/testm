@@ -197,7 +197,7 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                     LOG.info(String.format("Storing notifications for task with id %s", taskData.getId()));
                     asyncManager.updateState(taskData.getId(), AsyncTaskState.SAVING_MSGS);
                     String msg = taskStatus.isSuccess() ? getNotificationMsg(taskData) : getErrorMsg(taskData, taskStatus.isUnexpected());
-                    logger.getEntries().add(0, new LogEntry(taskStatus.isSuccess() ? LogLevel.INFO : LogLevel.ERROR, msg));
+                    logger.getEntries().add(0, new LogEntry(taskStatus.getLogLevel(), msg));
                     logEntryService.save(logger);
                     String uuid = logger.getLogId();
                     asyncManager.updateState(taskData.getId(), AsyncTaskState.SENDING_MSGS);
@@ -267,24 +267,34 @@ public abstract class AbstractAsyncTask implements AsyncTask {
      * Класс с результатом выполнения бизнес-логики
      */
     protected class BusinessLogicResult {
-        private final String reportId;
         private final boolean success;
+        private final LogLevel logLevel;
         private final boolean unexpected;
         private final NotificationType notificationType;
+        private final String reportId;
+
+        public BusinessLogicResult(boolean success, LogLevel logLevel, boolean unexpected, NotificationType notificationType, String reportId) {
+            this.success = success;
+            this.logLevel = logLevel;
+            this.unexpected = unexpected;
+            this.notificationType = notificationType;
+            this.reportId = reportId;
+        }
 
         public BusinessLogicResult(boolean success, boolean unexpected, NotificationType notificationType, String reportId) {
-            this.reportId = reportId;
-            this.notificationType = notificationType;
-            this.success = success;
-            this.unexpected = unexpected;
+            this(success, success ? LogLevel.INFO : LogLevel.ERROR, unexpected, notificationType, reportId);
         }
 
         public BusinessLogicResult(boolean success, NotificationType notificationType, String reportId) {
-            this(success, false, notificationType, reportId);
+            this(success, success ? LogLevel.INFO : LogLevel.ERROR, false, notificationType, reportId);
         }
 
         public BusinessLogicResult(boolean success, String reportId) {
-            this(success, false, NotificationType.DEFAULT, reportId);
+            this(success, success ? LogLevel.INFO : LogLevel.ERROR, false, NotificationType.DEFAULT, reportId);
+        }
+
+        public BusinessLogicResult(LogLevel logLevel, boolean success) {
+            this(success, logLevel, false, NotificationType.DEFAULT, null);
         }
 
         public NotificationType getNotificationType() {
@@ -297,6 +307,10 @@ public abstract class AbstractAsyncTask implements AsyncTask {
 
         public boolean isSuccess() {
             return success;
+        }
+
+        public LogLevel getLogLevel() {
+            return logLevel;
         }
 
         public boolean isUnexpected() {
