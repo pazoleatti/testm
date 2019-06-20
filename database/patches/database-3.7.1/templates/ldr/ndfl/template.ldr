@@ -19,8 +19,4 @@ CREATE_SCRIPT LOBFILE( L_0) TERMINATED BY EOF NULLIF L_0 = 'null',
 NAME
 )
 begindata
- 100|100|01.01.2006|0|3|2||92d063a7-6505-46ff-88dc-10947791e36c|database-3.7/templates/data/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl.groovy|РНУ_НДФЛ (первичная)|
- 101|101|01.01.2016|0|2|2|||database-3.7/templates/data/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl.groovy|РНУ_НДФЛ (консолидированная)|
- 102|102|01.01.2016|0|7|3|f6b8a069-97d5-4c3f-80fc-1fbb2e44fd71|790782e0-2282-41f4-8735-7b50904703ac|database-3.7/templates/data/ndfl/report_2ndfl_1/v2016/report_2ndfl.groovy|2-НДФЛ (1)|
- 104|104|01.01.2016|0|7|4|f076d3e3-9374-4184-b376-5b13c04b01bb|7b2630a5-b0de-433a-9370-133427917d18|database-3.7/templates/data/ndfl/report_2ndfl_1/v2016/report_2ndfl.groovy|2-НДФЛ (2)|
- 103|103|01.01.2016|0|7|5|850ff4b7-7367-4d13-97ba-6432b7999a27|13765b29-f1b7-4ec0-a8a9-88196a6e45a1|database-3.7/templates/data/ndfl/report_6ndfl/v2016/report_6ndfl.groovy|6-НДФЛ|
+ 100|100|01.01.2006|0|3|2||92d063a7-6505-46ff-88dc-10947791e36c|database-3.7/templates/data/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl.groovy|РНУ_НДФЛ (первичная)|              

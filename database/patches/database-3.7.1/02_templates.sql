@@ -1,19 +1,3 @@
---¬–≈Ã≈ÕÕŒ “ŒÀ‹ Œ ‚ 3.7
---»—œ–¿¬À≈Õ»≈ Œÿ»¡Œ  ¬ ƒ¿ÕÕ€’
---œŒ—À≈ 3.7 ”¡–¿“‹!
-
-merge into blob_data dst using
-(
-	select '7833e689-c60b-4a1b-98be-b181079d0c29' as id, 'report.xlsx' as name,
-		  to_date ('19.04.2019','dd.mm.yyyy') as creation_date from dual) src
-on (src.id=dst.id)
-when not matched then
-insert (id, name, creation_date, data) values (src.id, src.name, src.creation_date, 
-	(select data from blob_data where id='4b85f92c-7fd0-4d67-834d-e61g34684336'));
-
-update declaration_template_file set blob_data_id='7833e689-c60b-4a1b-98be-b181079d0c29'
-	where declaration_template_id=101 and blob_data_id='4b85f92c-7fd0-4d67-834d-e61g34684336';
-commit;
                                         
 PROMPT Create service tables...
 
@@ -158,19 +142,10 @@ PROMPT Fill tables
 PROMPT ======================
 
 PROMPT Fill service tables...
---3.6-ytrofimov-4, 3.7-ytrofimov-6, 3.7-ytrofimov-8, 3.7-dnovikov-1
-HOST "&2\sqlldr" &3 control=database-3.7/templates/ldr/refbook/blob_data.ldr log=&4/02_01_refbook_blob_data.txt bad=&5/02_01_refbook_blob_data.bad
 
---3.6-ytrofimov-6, 3.6-ytrofimov-7, 3.6-ytrofimov-8, 3.6-ytrofimov-9, 3.7-ishevchuk-2, 3.7-ishevchuk-1, 3.7-snazin-4, 
---3.7-dnovikov-29
-HOST "&2\sqlldr" &3 control=database-3.7/templates/ldr/ndfl/blob_data.ldr log=&4/02_02_ndfl_blob_data.txt bad=&5/02_02_ndfl_blob_data.bad
+HOST "&2\sqlldr" &3 control=database-3.7.1/templates/ldr/ndfl/template.ldr log=&4/02_03_ndfl_template.txt bad=&5/02_03_ndfl_template.bad
 
---3.6-ytrofimov-5, 3.7-ytrofimov-5, 3.7-ytrofimov-7, 3.7-dnovikov-5
-HOST "&2\sqlldr" &3 control=database-3.7/templates/ldr/ndfl/template.ldr log=&4/02_03_ndfl_template.txt bad=&5/02_03_ndfl_template.bad
-
---3.6-ytrofimov-1, 3.7-ytrofimov-1, 3.6-ytrofimov-2, 3.7-ytrofimov-2, 3.6-ytrofimov-5, 3.7-dnovikov-6, 3.6-ytrofimov-5, 3.7-dnovikov-2,
---3.6-ytrofimov-5, 3.7-dnovikov-3, 3.6-ytrofimov-5, 3.7-dnovikov-4, 3.7-dnovikov-23, 3/7-dnovikov30
-HOST "&2\sqlldr" &3 control=database-3.7/templates/ldr/ndfl/template_script.ldr log=&4/02_04_ndfl_template_script.txt bad=&5/02_04_ndfl_template_script.bad
+HOST "&2\sqlldr" &3 control=database-3.7.1/templates/ldr/ndfl/template_script.ldr log=&4/02_04_ndfl_template_script.txt bad=&5/02_04_ndfl_template_script.bad
 
 BEGIN
 	insert into blob_names_tmp(id, blob_data_id, name)

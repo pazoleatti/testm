@@ -26,7 +26,6 @@ end;
 /
  
 begin 
---заглушка на будущее
 	select count(1) into :v_cnt from version_history where status='OK' and version='03.007.00';
 	if :v_cnt = 0 then
 		dbms_output.put_line('Error: 03.007.00 not installed. Check log-files.');
@@ -44,8 +43,8 @@ end;
 
 PROMPT ## Beginning Installing Patch
 
---PROMPT ## 02_templates
---@database-3.7.1/02_templates.sql "_log/3.7_02_templates.txt" "&4" "&5" "../_log" "../_bad"
+PROMPT ## 02_templates
+@database-3.7.1/02_templates.sql "_log/3.7.1_02_templates.txt" "&4" "&5" "../_log" "../_bad"
 
 
 PROMPT ## 03_update_dml.sql
