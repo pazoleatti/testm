@@ -20,6 +20,9 @@ cd PATCHES
 
 "%ORA_BIN%\sqlplus" %DBA_AUTH% @"database-3.7/patch_03_007_00.sql" %NDFL_USR% ../_log/patch_03_007_00.log %NSI_USR% %ORA_BIN% %DBA_AUTH% 
 
+"%ORA_BIN%\sqlplus" %DBA_AUTH% @"database-3.7.1/patch_03_007_01.sql" %NDFL_USR% ../_log/patch_03_007_01.log %NSI_USR% %ORA_BIN% %DBA_AUTH% 
+
+
 cd ..
 
 "%ORA_BIN%\sqlplus" %DBA_AUTH% @"tech/result_log.sql" %NDFL_USR% _log/result_log.log

@@ -1,0 +1,23 @@
+LOAD DATA
+INFILE *
+APPEND
+CONTINUEIF NEXT(1:1) = '#'
+INTO TABLE "BLOB_DATA_TMP"
+FIELDS TERMINATED BY'|'
+OPTIONALLY ENCLOSED BY '[' AND ']'
+TRAILING NULLCOLS ( 
+ID char(36),
+NAME char(530),
+L_0 FILLER char,
+DATA LOBFILE( L_0) TERMINATED BY EOF NULLIF L_0 = 'null',
+CREATION_DATE DATE "DD.MM.RR",
+DECLARATION_TEMPLATE_ID)
+begindata
+ b92395ea-62b1-4ce1-b06e-c9ee0270fb93|UO_OTCH_1_097_00_05_05_01.xsd|database-3.7/templates/data/ndfl/report_6ndfl/v2016/UO_OTCH_1_097_00_05_05_01.xsd|01.01.2016|103|
+ b92395ea-62b1-4ce1-b06e-c9ee0270fb94|KV_OTCH_1_095_00_05_04_01.xsd|database-3.7/templates/data/ndfl/report_6ndfl/v2016/KV_OTCH_1_095_00_05_04_01.xsd|01.01.2016|103|
+ b92395ea-62b1-4ce1-b06e-c9ee0270fb92|IV_OTCH_1_098_00_05_04_01.xsd|database-3.7/templates/data/ndfl/report_6ndfl/v2016/IV_OTCH_1_098_00_05_04_01.xsd|01.01.2016|103|
+ b92395ea-62b1-4ce1-b06e-c9ee0270fb91|UU_OTCH_1_087_00_05_07_01.xsd|database-3.7/templates/data/ndfl/report_6ndfl/v2016/UU_OTCH_1_087_00_05_07_01.xsd|01.01.2016|103|
+ 3b4eb6e0-3ce3-48ba-b8e5-0b9c9174b5fe|excel_template_dec.xlsx|database-3.7/templates/data/ndfl/primary_rnu_ndfl/v2016/excel_template_dec.xlsx|18.04.2020||
+ 550f4ffa-2281-4adb-a701-8d375b5261f9|РНУ_НДФЛ_new6.6.xsd|database-3.7/templates/data/ndfl/primary_rnu_ndfl/v2016/rnu_ndfl.xsd|04.06.2019|100|
+ 4b85f92c-7fd0-4d67-834d-e61g34684336|report.xlsx|database-3.7/templates/data/ndfl/primary_rnu_ndfl/v2016/report.xlsx|10.07.2018|100|
+ 7833e689-c60b-4a1b-98be-b181079d0c29|report.xlsx|database-3.7/templates/data/ndfl/consolidated_rnu_ndfl/v2016/report.xlsx|19.04.2019|101|

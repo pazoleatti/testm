@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+
+	<!--https://jira.aplana.com/browse/SBRFNDFL-7852 Добавить прочерк в поле Наименование для вновь добавленных статей дохода-->
+	<changeSet id="3.7.1-skononova-1" author="skononova">
+		<sql splitStatements="false">
+			begin
+			update REF_BOOK_INCOME_KIND set name='-' where income_type_id in 
+				(select id from (select id,version from ref_book_income_type where code='2520' and status=0 order by version desc) where rownum=1)
+			and mark='00' and version=to_date('01.01.2016','DD.MM.YYYY') and status=0 and name is null;
+
+			update REF_BOOK_INCOME_KIND set name='-' where income_type_id=
+				(select id from (select id,version from ref_book_income_type where code='2720' and status=0 order by version desc) where rownum=1)
+			and mark='00' and version=to_date('01.01.2016','DD.MM.YYYY') and status=0 and name is null;
+
+			update REF_BOOK_INCOME_KIND set name='-' where income_type_id=
+				(select id from (select id,version from ref_book_income_type where code='2740' and status=0 order by version desc) where rownum=1)
+			and mark='00' and version=to_date('01.01.2016','DD.MM.YYYY') and status=0 and name is null;
+
+			update REF_BOOK_INCOME_KIND set name='-' where income_type_id=
+				(select id from (select id,version from ref_book_income_type where code='2750' and status=0 order by version desc) where rownum=1)
+			and mark='00' and version=to_date('01.01.2016','DD.MM.YYYY') and status=0 and name is null;
+
+			update REF_BOOK_INCOME_KIND set name='-' where income_type_id=
+				(select id from (select id,version from ref_book_income_type where code='2790' and status=0 order by version desc) where rownum=1)
+			and mark='00' and version=to_date('01.01.2016','DD.MM.YYYY') and status=0 and name is null;
+			end;	
+		</sql>
+	</changeSet>
+
+</databaseChangeLog>
