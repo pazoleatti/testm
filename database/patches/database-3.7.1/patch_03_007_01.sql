@@ -56,10 +56,6 @@ PROMPT ## 06_check_index_constraints
 PROMPT ## gather statistics
 @database-3.7.1/07_gather_statistics.sql
 
-
-PROMPT ## get statistics
-@database-3.7.1/08_get_statistics.sql
-
 insert into version_history (version, scrname, status, start_time, end_time) values (:version, 'patch_03_007_01.sql', :status, to_timestamp(:start_time,'yyyy.mm.dd hh24:mi:ss:FF3'), systimestamp);
 commit;
 
