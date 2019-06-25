@@ -85,7 +85,6 @@ public class RefBookSimpleQueryBuilderComponentTest {
     }
 
     @Test
-    @Ignore
     public void test_AllRecordsByVersion_withEmptyFilter() {
         String filter = "";
         String direction = "asc";
@@ -95,7 +94,7 @@ public class RefBookSimpleQueryBuilderComponentTest {
                 "SELECT p.*, p.version as record_version_from, (SELECT min(version) - interval '1' day FROM null WHERE status in (0,2) and record_id = p.record_id and version > p.version) as record_version_to \n" +
                 "FROM ( \n" +
                 " SELECT frb.* FROM null frb\n" +
-                " WHERE frb.status = 0 and (:version is null or frb.version = (select max(version) from null where version <= :version and record_id = frb.record_id))\n" +
+                " WHERE frb.status = 0 and (:version is null or frb.version = (select max(version) from null where status in (0,2) and version <= :version and record_id = frb.record_id))\n" +
                 " ) p\n" +
                 ") r\n" +
                 ") where rn between :paging_start and :paging_end").toLowerCase();
@@ -104,7 +103,6 @@ public class RefBookSimpleQueryBuilderComponentTest {
     }
 
     @Test
-    @Ignore
     public void test_AllRecordsByVersion_withFilledFilter() {
         String filter = "test filter";
         String direction = "asc";
@@ -114,7 +112,7 @@ public class RefBookSimpleQueryBuilderComponentTest {
                 "SELECT p.*, p.version as record_version_from, (SELECT min(version) - interval '1' day FROM null WHERE status in (0,2) and record_id = p.record_id and version > p.version) as record_version_to \n" +
                 "FROM ( \n" +
                 " SELECT frb.* FROM null frb\n" +
-                " WHERE frb.status = 0 and (:version is null or frb.version = (select max(version) from null where version <= :version and record_id = frb.record_id))\n" +
+                " WHERE frb.status = 0 and (:version is null or frb.version = (select max(version) from null where status in (0,2) and version <= :version and record_id = frb.record_id))\n" +
                 " and (test filter)\n" +
                 " ) p\n" +
                 ") r\n" +
