@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+
+	<!--https://jira.aplana.com/browse/SBRFNDFL-7852 Добавить прочерк в поле Наименование для вновь добавленных статей дохода-->
+	<changeSet id="3.7.1-skononova-1" author="skononova">
+		<sql splitStatements="false">
+			begin
+			update REF_BOOK_INCOME_KIND set name='-' where income_type_id in 
+				(select id from (select id,version from ref_book_income_type where code='2520' and status=0 order by version desc) where rownum=1)
+			and mark='00' and version=to_date('01.01.2016','DD.MM.YYYY') and status=0 and name is null;
+
+			update REF_BOOK_INCOME_KIND set name='-' where income_type_id=
+				(select id from (select id,version from ref_book_income_type where code='2720' and status=0 order by version desc) where rownum=1)
+			and mark='00' and version=to_date('01.01.2016','DD.MM.YYYY') and status=0 and name is null;
+
+			update REF_BOOK_INCOME_KIND set name='-' where income_type_id=
+				(select id from (select id,version from ref_book_income_type where code='2740' and status=0 order by version desc) where rownum=1)
+			and mark='00' and version=to_date('01.01.2016','DD.MM.YYYY') and status=0 and name is null;
+
+			update REF_BOOK_INCOME_KIND set name='-' where income_type_id=
+				(select id from (select id,version from ref_book_income_type where code='2750' and status=0 order by version desc) where rownum=1)
+			and mark='00' and version=to_date('01.01.2016','DD.MM.YYYY') and status=0 and name is null;
+
+			update REF_BOOK_INCOME_KIND set name='-' where income_type_id=
+				(select id from (select id,version from ref_book_income_type where code='2790' and status=0 order by version desc) where rownum=1)
+			and mark='00' and version=to_date('01.01.2016','DD.MM.YYYY') and status=0 and name is null;
+			end;	
+		</sql>
+	</changeSet>
+
+	<!--https://jira.aplana.com/browse/SBRFNDFL-7912 Добавить новые ОКТМО в справочник ОКТМО-->
+	<changeSet id="3.7.1-skononova-2" author="skononova">
+		<sql splitStatements="false">
+			begin
+				merge into ref_book_oktmo dst using 
+				    (select '96612101' as code, 'Курчалойское' as name, '1' as razd from dual union
+				     select '96612101001','г Курчалой','2' from dual union
+				     select '76636402','Балягинское','1' from dual union
+				     select '76636402101','с Баляга','2' from dual union
+				     select '76636402106','с Кули','2' from dual union
+				     select '76636452','Тарбагатайское','1' from dual union
+				     select '76636452101','c Тарбагатай','2' from dual union
+				     select '76636452106','c Нижний Тарбагатай','2' from dual
+				    )  src
+				    on (dst.code=src.code)
+				    when not matched then insert (id, code, name, version, status, record_id, razd)
+				    values (seq_ref_book_record.nextval, src.code, src.name, to_date ('01.05.2019','dd.mm.yyyy'), 0, seq_ref_book_record_row_id.nextval, src.razd);
+			end;	
+		</sql>
+	</changeSet>
+
+	<changeSet id="3.7.1-skononova-3" author="skononova">
+		<sql splitStatements="false">
+			declare 
+			  v_task_name varchar2(128):='insert_update_delete block #3 - change department_config';  
+			  cnt_u number := 0;
+			  cnt_i number := 0; 
+			    procedure convert_department_config (old_oktmo_code in varchar, new_oktmo_code in varchar, cnt_upd in out number, cnt_ins in out number) is
+			        cnt_r number;
+			    begin
+			        update department_config set end_date=to_date ('30.04.2019','dd.mm.yyyy') where end_date is null 
+			          and oktmo_id in (select id from ref_book_oktmo where code=old_oktmo_code);
+			        cnt_r := sql%rowcount;
+			        cnt_upd := cnt_upd + cnt_r;
+			        if  cnt_r>0 then
+			            insert into department_config (ID,KPP,OKTMO_ID,START_DATE,END_DATE,DEPARTMENT_ID,TAX_ORGAN_CODE,TAX_ORGAN_CODE_MID,PRESENT_PLACE_ID,NAME,
+			                                   PHONE,REORGANIZATION_ID,REORG_INN,REORG_KPP,SIGNATORY_ID,SIGNATORY_SURNAME,SIGNATORY_FIRSTNAME,SIGNATORY_LASTNAME,
+			                                   APPROVE_DOC_NAME,APPROVE_ORG_NAME,REORG_SUCCESSOR_KPP)
+			            select seq_department_config.nextval,KPP,(select id from ref_book_oktmo where code=new_oktmo_code),to_date('01.05.2019','dd.mm.yyyy'),null,DEPARTMENT_ID,TAX_ORGAN_CODE,
+			                   TAX_ORGAN_CODE_MID,PRESENT_PLACE_ID,NAME,PHONE,REORGANIZATION_ID,REORG_INN,REORG_KPP,SIGNATORY_ID,SIGNATORY_SURNAME,SIGNATORY_FIRSTNAME,
+			                   SIGNATORY_LASTNAME,APPROVE_DOC_NAME,APPROVE_ORG_NAME,REORG_SUCCESSOR_KPP from department_config 
+			            where end_date=to_date ('30.04.2019','dd.mm.yyyy') 
+			            and oktmo_id in (select id from ref_book_oktmo where code=old_oktmo_code);
+	    
+				    cnt_ins := cnt_ins + sql%rowcount;	
+			        end if;  
+			    end;
+			
+			begin
+			    convert_department_config(96612419,96612101,cnt_u, cnt_i);
+			    convert_department_config(96612419101,96612101001,cnt_u, cnt_i);
+			    convert_department_config(76636152,76636402,cnt_u, cnt_i);
+			    convert_department_config(76636152051,76636402101,cnt_u, cnt_i);
+			    convert_department_config(76636152106,76636402106,cnt_u, cnt_i);
+			    convert_department_config(76636158,76636452,cnt_u, cnt_i);
+			    convert_department_config(76636158051,76636452101,cnt_u, cnt_i);
+			    dbms_output.put_line(v_task_name ||': updated '||to_char (cnt_u) || ' records, inserted ' || to_char (cnt_i) || ' records');	
+			end;
+		</sql>
+	</changeSet>
+
+	<changeSet id="3.7.1-dnovikov-1" author="dnovikov" runAlways="true">
+		<update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+			<column name="script" valueClobFile="templates-3.7.1/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_import.groovy"/>
+			<where>DECLARATION_TEMPLATE_ID = 100 and EVENT_ID = 7</where>
+		</update>
+		<update tableName="DECLARATION_TEMPLATE">
+			<column name="CREATE_SCRIPT" valueClobFile="templates-3.7.1/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl.groovy"/>
+			<where>declaration_type_id = 100</where>
+		</update>
+	</changeSet>
+
+
+</databaseChangeLog>
