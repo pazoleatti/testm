@@ -19,4 +19,4 @@ CREATE_SCRIPT LOBFILE( L_0) TERMINATED BY EOF NULLIF L_0 = 'null',
 NAME
 )
 begindata
- 100|100|01.01.2006|0|3|2||92d063a7-6505-46ff-88dc-10947791e36c|database-3.7/templates/data/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl.groovy|РНУ_НДФЛ (первичная)|              
+ 100|100|01.01.2006|0|3|2||92d063a7-6505-46ff-88dc-10947791e36c|database-3.7.1/templates/data/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl.groovy|РНУ_НДФЛ (первичная)|              

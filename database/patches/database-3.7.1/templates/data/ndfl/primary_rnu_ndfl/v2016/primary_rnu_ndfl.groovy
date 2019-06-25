@@ -27,30 +27,24 @@ import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAsnu
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
+import com.aplana.sbrf.taxaccounting.model.refbook.ReportPeriodImport
 import com.aplana.sbrf.taxaccounting.model.util.Pair
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
 import com.aplana.sbrf.taxaccounting.script.SharedConstants
 import com.aplana.sbrf.taxaccounting.script.dao.BlobDataService
-import com.aplana.sbrf.taxaccounting.script.service.DepartmentReportPeriodService
-import com.aplana.sbrf.taxaccounting.script.service.DepartmentService
-import com.aplana.sbrf.taxaccounting.script.service.NdflPersonService
-import com.aplana.sbrf.taxaccounting.script.service.RefBookService
-import com.aplana.sbrf.taxaccounting.script.service.ReportPeriodService
+import com.aplana.sbrf.taxaccounting.script.service.*
 import com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils
-import groovy.transform.AutoClone
-import groovy.transform.EqualsAndHashCode
-import groovy.transform.ToString
-import groovy.transform.TypeChecked
-import groovy.transform.TypeCheckingMode
+import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService
+import groovy.transform.*
 import groovy.transform.builder.Builder
 import groovy.transform.builder.SimpleStrategy
 import groovy.util.slurpersupport.GPathResult
 import groovy.util.slurpersupport.NodeChild
 import org.apache.commons.io.IOUtils
-import org.apache.commons.lang3.time.DateUtils
 import org.apache.poi.ss.usermodel.*
 import org.apache.poi.ss.util.CellRangeAddress
 import org.apache.poi.xssf.streaming.SXSSFWorkbook
@@ -67,7 +61,6 @@ import java.text.DecimalFormatSymbols
 import java.text.SimpleDateFormat
 
 import static com.aplana.sbrf.taxaccounting.script.SharedConstants.DATE_ZERO_AS_STRING
-import static org.apache.commons.lang3.StringUtils.isEmpty
 import static form_template.ndfl.primary_rnu_ndfl.v2016.PrimaryRnuNdfl.DataFormatEnum.*
 import static org.apache.commons.lang3.StringUtils.isEmpty
 
@@ -86,6 +79,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
     RefBookFactory refBookFactory
     ReportPeriodService reportPeriodService
     DepartmentService departmentService
+    CommonRefBookService commonRefBookService
     Boolean needSources
     Boolean light
     FormSources sources
@@ -151,6 +145,9 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         }
         if (scriptClass.getBinding().hasVariable("blobDataServiceDaoImpl")) {
             this.blobDataService = (BlobDataService) scriptClass.getProperty("blobDataServiceDaoImpl")
+        }
+        if (scriptClass.getBinding().hasVariable("commonRefBookService")) {
+            this.commonRefBookService = (CommonRefBookService) scriptClass.getProperty("commonRefBookService")
         }
     }
 
@@ -2246,76 +2243,64 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         List<NdflPersonIncome> result = []
 
         Map<String, List<NdflPersonIncomeExt>> incomesGroupedByOperationId = incomes.groupBy { it.operationId }
-        for (List<NdflPersonIncomeExt> incomeGroup : incomesGroupedByOperationId.values()) {
-            if (isIncomeGroupInPeriod(incomeGroup, person)) {
-                result.addAll(incomeGroup)
+        for (List<NdflPersonIncomeExt> operationIncomes : incomesGroupedByOperationId.values()) {
+            if (!isOperationBelongToPeriod(operationIncomes, getImportPeriod())) {
+                for (def income : operationIncomes) {
+                    logDateNotBelongToImportPeriod(income, income.incomeAccruedDate, person, "ДатаДохНач", "Дата начисления дохода")
+                    logDateNotBelongToImportPeriod(income, income.incomePayoutDate, person, "ДатаДохВыпл", "Дата выплаты дохода")
+                    logDateNotBelongToImportPeriod(income, income.taxDate, person, "ДатаНалог", "Дата НДФЛ")
+                    logDateNotBelongToImportPeriod(income, income.paymentDate, person, "ПлПоручДат", "Дата платёжного поручения")
+                }
+            } else {
+                result.addAll(operationIncomes)
+                if (!isOperationBelongToPeriod(operationIncomes, getCalendarPeriod())) {
+                    for (def income : operationIncomes) {
+                        logDateNotBelongToReportPeriod(income, income.incomeAccruedDate, person, "ДатаДохНач", "Дата начисления дохода")
+                        logDateNotBelongToReportPeriod(income, income.incomePayoutDate, person, "ДатаДохВыпл", "Дата выплаты дохода")
+                        logDateNotBelongToReportPeriod(income, income.taxDate, person, "ДатаНалог", "Дата НДФЛ")
+                        logDateNotBelongToReportPeriod(income, income.paymentDate, person, "ПлПоручДат", "Дата платёжного поручения")
+                    }
+                }
             }
         }
         return result
     }
 
-    /**
-     * Проверка вхождения записей о доходах ФЛ в отчетный период.
-     */
-    boolean isIncomeGroupInPeriod(List<NdflPersonIncomeExt> incomeGroup, NdflPerson person) {
-
-        List<NdflPersonIncomeExt> incomesWithAccruedDate = incomeGroup.findAll { it.incomeAccruedDate }
-        boolean isAnyAccruedDateInPeriod = incomesWithAccruedDate.any { isDateInReportPeriod(it.incomeAccruedDate) }
-        if (isAnyAccruedDateInPeriod) return true
-
-        List<NdflPersonIncomeExt> incomesWithPayoutDate = incomeGroup.findAll { it.incomePayoutDate }
-        boolean isAnyPayoutDateInPeriod = incomesWithPayoutDate.any { isDateInReportPeriod(it.incomePayoutDate) }
-        if (isAnyPayoutDateInPeriod) return true
-
-        List<NdflPersonIncomeExt> incomesWithTaxDate = incomeGroup.findAll { it.taxDate }
-        boolean isAnyTaxDateInPeriod = incomesWithTaxDate.any { isDateInReportPeriod(it.taxDate) }
-        if (isAnyTaxDateInPeriod) return true
-
-        // Если не удалось найти ни одной даты в периоде, печатаем информацию обо всех проверенных.
-        incomesWithAccruedDate.each { income ->
-            logIncomeDatesWarning(income, income.incomeAccruedDate, person, "ДатаДохНач", "Дата начисления дохода")
+    boolean isOperationBelongToPeriod(List<NdflPersonIncomeExt> operationIncomes, Period period) {
+        if (operationIncomes.any {
+            isDateBelongToPeriod(it.incomeAccruedDate, period) || isDateBelongToPeriod(it.incomePayoutDate, period) || isDateBelongToPeriod(it.taxDate, period)
+        }) {
+            return true
         }
-        incomesWithPayoutDate.each { income ->
-            logIncomeDatesWarning(income, income.incomePayoutDate, person, "ДатаДохВыпл", "Дата выплаты дохода")
+        if (operationIncomes.every { !it.incomeAccruedDate && !it.incomePayoutDate && !it.taxDate } &&
+                operationIncomes.any { isDateBelongToPeriod(it.paymentDate, period) }) {
+            return true
         }
-        incomesWithTaxDate.each { income ->
-            logIncomeDatesWarning(income, income.taxDate, person, "ДатаНалог", "Дата НДФЛ")
-        }
-
-        // Если хотя бы одна дата была, валидация не пройдена
-        if (incomesWithAccruedDate || incomesWithPayoutDate || incomesWithTaxDate) {
-            return false
-        }
-
-        // Если все даты выше пустые, но есть хотя бы одна дата платежного поручения, тоже берём строки
-        List<NdflPersonIncomeExt> incomesWithPaymentDate = incomeGroup.findAll { it.paymentDate }
-        boolean isAnyPaymentDateInPeriod = incomesWithPaymentDate.any { isDateInReportPeriod(it.paymentDate) }
-        if (isAnyPaymentDateInPeriod) return true
-
-        incomesWithPaymentDate.each { income ->
-            logIncomeDatesWarning(income, income.paymentDate, person, "ПлПоручДат", "Дата платёжного поручения")
-        }
-
         return false
     }
 
-    // Проверка принадлежности даты к периоду формы
-    boolean isDateInReportPeriod(Date date) {
-        return (date >= getReportPeriodCalendarStartDate() && date <= getReportPeriodEndDate())
+    boolean isDateBelongToPeriod(Date date, Period period) {
+        return period.startDate <= date && date <= period.endDate
     }
 
-    void logIncomeDatesWarning(NdflPersonIncomeExt income, Date date, NdflPerson person, String xmlParam, String explicitParamName) {
-        String warningMessage = "Строка: ${income.fileLine}. " +
-                "Значение параметра \"${xmlParam}\" (${explicitParamName}) : ${ScriptUtils.formatDate(date)} не входит в ${reportPeriodFullName}. " +
-                "Операция (\"${income.operationId}\") не загружена в налоговую форму. ФЛ: $person.fullName, ИНП: $person.inp."
-        logger.warnExp(warningMessage, "Даты операций не входят в период", "")
+    void logDateNotBelongToImportPeriod(NdflPersonIncomeExt income, Date date, NdflPerson person, String xmlParam, String explicitParamName) {
+        if (date) {
+            String warningMessage = "Строка: ${income.fileLine}. " +
+                    "Значение параметра \"${xmlParam}\" (${explicitParamName}) : ${ScriptUtils.formatDate(date)} " +
+                    "не входит в период загрузки данных для отчетного периода: ${reportPeriod.taxPeriod.year}, ${reportPeriod.name}. " +
+                    "Операция (\"${income.operationId}\") не загружена в налоговую форму. ФЛ: $person.fullName, ИНП: $person.inp."
+            logger.warnExp(warningMessage, "Даты операций не входят в период загрузки данных", "")
+        }
     }
 
-    String getReportPeriodFullName() {
-        ReportPeriodType periodType = reportPeriodService.getReportPeriodTypeById(reportPeriod.dictTaxPeriodId)
-        String code = periodType.code
-        String title = (code == "21" || code == "51") ? "отчетный период" : "последний квартал отчетного периода"
-        return "${title}: $reportPeriod.taxPeriod.year, $reportPeriod.name"
+    void logDateNotBelongToReportPeriod(NdflPersonIncomeExt income, Date date, NdflPerson person, String xmlParam, String explicitParamName) {
+        if (date) {
+            String warningMessage = "Строка: ${income.fileLine}. " +
+                    "Значение параметра \"${xmlParam}\" (${explicitParamName}) : ${ScriptUtils.formatDate(date)} " +
+                    "не входит в последние три месяца отчетного периода. " +
+                    "Операция (\"${income.operationId}\") по ФЛ: $person.fullName, ИНП: $person.inp загружена в налоговую форму."
+            logger.warnExp(warningMessage, "Даты операций не входят в период", "")
+        }
     }
 
     class NdflPersonIncomeExt extends NdflPersonIncome {
@@ -2599,7 +2584,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
     Date getReportPeriodStartDate() {
         def periodInfo = getReportPeriodFromRefBook()
         if (periodInfo) {
-            return toReportPeriodDate(periodInfo.START_DATE.dateValue)
+            return toDate(reportPeriod.taxPeriod.year, periodInfo.START_DATE.dateValue)
         } else if (!periodStartDate) {
             periodStartDate = reportPeriodService.getStartDate(declarationData.reportPeriodId)?.time
         }
@@ -2613,7 +2598,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
     Date getReportPeriodCalendarStartDate() {
         def periodInfo = getReportPeriodFromRefBook()
         if (periodInfo) {
-            return toReportPeriodDate(periodInfo.CALENDAR_START_DATE.dateValue)
+            return toDate(reportPeriod.taxPeriod.year, periodInfo.CALENDAR_START_DATE.dateValue)
         } else if (periodCalendarStartDate == null) {
             periodCalendarStartDate = reportPeriodService.getCalendarStartDate(declarationData.reportPeriodId)?.time
         }
@@ -2627,18 +2612,95 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
     Date getReportPeriodEndDate() {
         def periodInfo = getReportPeriodFromRefBook()
         if (periodInfo) {
-            return toReportPeriodDate(periodInfo.END_DATE.dateValue)
+            return toDate(reportPeriod.taxPeriod.year, periodInfo.END_DATE.dateValue)
         } else if (periodEndDate == null) {
             periodEndDate = reportPeriodService.getEndDate(declarationData.reportPeriodId)?.time
         }
         return periodEndDate
     }
 
-    Date toReportPeriodDate(Date refDate) {
-        Calendar date = Calendar.getInstance();
-        date.setTime(refDate)
-        date[Calendar.YEAR] = reportPeriod.taxPeriod.year
-        return date.getTime()
+    Period importPeriodCache = null
+
+    /**
+     * Возвращяет период загрузки данных
+     */
+    Period getImportPeriod() {
+        if (importPeriodCache == null) {
+            def recordsById = refBookFactory.getDataProvider(RefBook.Id.REPORT_PERIOD_IMPORT.getId())
+                    .getRecordDataVersionWhere(" where asnu_id = ${declarationData.asnuId} and report_period_type_id = ${reportPeriod.dictTaxPeriodId} ", new Date())
+            if (recordsById.size() > 1) {
+                def asnu = getAsnuById(declarationData.asnuId)
+                def periodType = getReportPeriodTypeById(reportPeriod.dictTaxPeriodId)
+                logger.warn("В справочнике \"Дополнительные интервалы для загрузки данных\" найдено более одной записи" +
+                        " для АСНУ: \"$asnu.name\", кода периода: $periodType.code и актуальной на текущую дату.")
+                importPeriodCache = new Period(reportPeriod.startDate, reportPeriod.endDate)
+            } else if (recordsById.isEmpty()) {
+                importPeriodCache = new Period(reportPeriod.startDate, reportPeriod.endDate)
+            } else {
+                Map<String, RefBookValue> record = recordsById.values()[0]
+                importPeriodCache = getImportPeriod(record)
+            }
+        }
+        return importPeriodCache
+    }
+
+    Period getImportPeriod(Map<String, RefBookValue> record) {
+        ReportPeriodImport reportPeriodImport = new ReportPeriodImport()
+        reportPeriodImport.startDate = record."PERIOD_START_DATE".dateValue
+        reportPeriodImport.endDate = record."PERIOD_END_DATE".dateValue
+        reportPeriodImport.reportPeriodType = getReportPeriodTypeById(record."REPORT_PERIOD_TYPE_ID".referenceValue.longValue())
+        reportPeriodImport.asnu = getAsnuById(record."ASNU_ID".referenceValue.longValue())
+        return getImportPeriod(reportPeriodImport)
+    }
+
+    Period getImportPeriod(ReportPeriodImport reportPeriodImport) {
+        Date startDate = reportPeriodImport.startDate
+        Date endDate = reportPeriodImport.endDate
+        int periodYear = reportPeriod.taxPeriod.year
+        Date importStartDate = toDate(periodYear, reportPeriodImport.startDate)
+        Date importEndDate = toDate(periodYear, reportPeriodImport.endDate)
+        if (reportPeriodImport.reportPeriodType.code == "21" &&
+                toDate(startDate, 11, 30) <= startDate && startDate <= toDate(startDate, 12, 31)) {
+            importStartDate = toDate(periodYear - 1, reportPeriodImport.startDate)
+        } else if (reportPeriodImport.reportPeriodType.code == "34" &&
+                toDate(endDate, 1, 1) <= endDate && endDate <= toDate(endDate, 2, 5)) {
+            importEndDate = toDate(periodYear + 1, reportPeriodImport.endDate)
+        }
+        return new Period(importStartDate, importEndDate)
+    }
+
+    Period calendarPeriodCache = null
+    /**
+     * Возвращяет период 3х последних месяцев отчетного периода
+     */
+    Period getCalendarPeriod() {
+        if (calendarPeriodCache == null) {
+            calendarPeriodCache = new Period(reportPeriod.calendarStartDate, reportPeriod.endDate)
+        }
+        return calendarPeriodCache
+    }
+
+    Date toDate(Date date, int month, int dayOfMonth) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date)
+        calendar[Calendar.MONTH] = month - 1
+        calendar[Calendar.DAY_OF_MONTH] = dayOfMonth
+        return calendar.getTime()
+    }
+
+    Date toDate(int year, Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date)
+        calendar[Calendar.YEAR] = year
+        return calendar.getTime()
+    }
+
+    RefBookAsnu getAsnuById(long id) {
+        return (RefBookAsnu) commonRefBookService.fetchRecord(RefBook.Id.ASNU.getId(), id)
+    }
+
+    ReportPeriodType getReportPeriodTypeById(long id) {
+        return (ReportPeriodType) commonRefBookService.fetchRecord(RefBook.Id.PERIOD_CODE.getId(), id)
     }
 
     /**
@@ -3980,4 +4042,14 @@ class ExcelTemplateRow {
     NdflPersonIncome ndflPersonIncome
     NdflPersonDeduction ndflPersonDeduction
     NdflPersonPrepayment ndflPersonPrepayment
+}
+
+class Period {
+    private Date startDate;
+    private Date endDate;
+
+    Period(Date startDate, Date endDate) {
+        this.startDate = startDate
+        this.endDate = endDate
+    }
 }
