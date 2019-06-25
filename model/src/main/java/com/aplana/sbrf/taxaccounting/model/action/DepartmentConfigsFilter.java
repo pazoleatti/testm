@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model.action;
 
+import com.aplana.sbrf.taxaccounting.model.json.ISODateDeserializer;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -19,6 +21,7 @@ import java.util.Date;
 @Builder
 public class DepartmentConfigsFilter implements Serializable {
     private Integer departmentId;
+    @JsonDeserialize(using = ISODateDeserializer.class)
     private Date relevanceDate;
     private String kpp;
     private String oktmo;
