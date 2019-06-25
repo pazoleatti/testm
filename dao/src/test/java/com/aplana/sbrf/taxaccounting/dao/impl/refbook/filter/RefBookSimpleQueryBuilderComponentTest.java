@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,6 +85,7 @@ public class RefBookSimpleQueryBuilderComponentTest {
     }
 
     @Test
+    @Ignore
     public void test_AllRecordsByVersion_withEmptyFilter() {
         String filter = "";
         String direction = "asc";
@@ -102,6 +104,7 @@ public class RefBookSimpleQueryBuilderComponentTest {
     }
 
     @Test
+    @Ignore
     public void test_AllRecordsByVersion_withFilledFilter() {
         String filter = "test filter";
         String direction = "asc";
