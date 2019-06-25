@@ -66,16 +66,17 @@ public class EdoMessageServiceImpl implements EdoMessageService {
     private final BlobDataService blobDataService;
     private final ConfigurationService configurationService;
     private final ValidateXMLService validateXMLService;
-    private final MessageSender messageSender;
     private final TransportMessageService transportMessageService;
     private final CommonRefBookService commonRefBookService;
     private final LogBusinessService logBusinessService;
     private final LockDataService lockDataService;
+    @Autowired(required = false)
+    private MessageSender messageSender;
 
     @Autowired
     public EdoMessageServiceImpl(DeclarationDataService declarationDataService, DeclarationTemplateService declarationTemplateService, DeclarationLocker declarationLocker,
                                  BlobDataService blobDataService, ConfigurationService configurationService, ValidateXMLService validateXMLService,
-                                 @Autowired(required = false) MessageSender messageSender, TransportMessageService transportMessageService, CommonRefBookService commonRefBookService,
+                                 TransportMessageService transportMessageService, CommonRefBookService commonRefBookService,
                                  LogBusinessService logBusinessService, LockDataService lockDataService) {
         this.declarationDataService = declarationDataService;
         this.declarationTemplateService = declarationTemplateService;
@@ -83,7 +84,6 @@ public class EdoMessageServiceImpl implements EdoMessageService {
         this.blobDataService = blobDataService;
         this.configurationService = configurationService;
         this.validateXMLService = validateXMLService;
-        this.messageSender = messageSender;
         this.transportMessageService = transportMessageService;
         this.commonRefBookService = commonRefBookService;
         this.logBusinessService = logBusinessService;
