@@ -153,7 +153,7 @@ public class RefBookSimpleQueryBuilderComponent {
                 .append(getJoinPart(refBook, filter, sortAttribute))
                 .append(" WHERE frb.status = 0 and (:version is null or frb.version = (select max(version) FROM ")
                 .append(refBook.getTableName())
-                .append(" WHERE version <= :version and record_id = frb.record_id))\n")
+                .append(" WHERE status in (0,2) and version <= :version and record_id = frb.record_id))\n")
                 .append(StringUtils.isNotEmpty(filter) ? " AND (" + filter + ")\n" : "")
                 .append(" ) p\n");
         q.addNamedParam("version", version);
