@@ -2246,19 +2246,27 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         for (List<NdflPersonIncomeExt> operationIncomes : incomesGroupedByOperationId.values()) {
             if (!isOperationBelongToPeriod(operationIncomes, getImportPeriod())) {
                 for (def income : operationIncomes) {
-                    logDateNotBelongToImportPeriod(income, income.incomeAccruedDate, person, "ДатаДохНач", "Дата начисления дохода")
-                    logDateNotBelongToImportPeriod(income, income.incomePayoutDate, person, "ДатаДохВыпл", "Дата выплаты дохода")
-                    logDateNotBelongToImportPeriod(income, income.taxDate, person, "ДатаНалог", "Дата НДФЛ")
-                    logDateNotBelongToImportPeriod(income, income.paymentDate, person, "ПлПоручДат", "Дата платёжного поручения")
+                    boolean onlyPaymentDateDefined = operationIncomes.every { !it.incomeAccruedDate && !it.incomePayoutDate && !it.taxDate }
+                    if (!onlyPaymentDateDefined) {
+                        logDateNotBelongToImportPeriod(income, income.incomeAccruedDate, person, "ДатаДохНач", "Дата начисления дохода")
+                        logDateNotBelongToImportPeriod(income, income.incomePayoutDate, person, "ДатаДохВыпл", "Дата выплаты дохода")
+                        logDateNotBelongToImportPeriod(income, income.taxDate, person, "ДатаНалог", "Дата НДФЛ")
+                    } else {
+                        logDateNotBelongToImportPeriod(income, income.paymentDate, person, "ПлПоручДат", "Дата платёжного поручения")
+                    }
                 }
             } else {
                 result.addAll(operationIncomes)
                 if (!isOperationBelongToPeriod(operationIncomes, getCalendarPeriod())) {
                     for (def income : operationIncomes) {
-                        logDateNotBelongToReportPeriod(income, income.incomeAccruedDate, person, "ДатаДохНач", "Дата начисления дохода")
-                        logDateNotBelongToReportPeriod(income, income.incomePayoutDate, person, "ДатаДохВыпл", "Дата выплаты дохода")
-                        logDateNotBelongToReportPeriod(income, income.taxDate, person, "ДатаНалог", "Дата НДФЛ")
-                        logDateNotBelongToReportPeriod(income, income.paymentDate, person, "ПлПоручДат", "Дата платёжного поручения")
+                        boolean onlyPaymentDateDefined = operationIncomes.every { !it.incomeAccruedDate && !it.incomePayoutDate && !it.taxDate }
+                        if (!onlyPaymentDateDefined) {
+                            logDateNotBelongToReportPeriod(income, income.incomeAccruedDate, person, "ДатаДохНач", "Дата начисления дохода")
+                            logDateNotBelongToReportPeriod(income, income.incomePayoutDate, person, "ДатаДохВыпл", "Дата выплаты дохода")
+                            logDateNotBelongToReportPeriod(income, income.taxDate, person, "ДатаНалог", "Дата НДФЛ")
+                        } else {
+                            logDateNotBelongToReportPeriod(income, income.paymentDate, person, "ПлПоручДат", "Дата платёжного поручения")
+                        }
                     }
                 }
             }
