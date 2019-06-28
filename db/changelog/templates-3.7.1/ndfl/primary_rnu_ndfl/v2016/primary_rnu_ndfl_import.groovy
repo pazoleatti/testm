@@ -1210,7 +1210,7 @@ class Import extends AbstractScriptClass {
 
         for (List<NdflPersonIncomeExt> operationIncomes : incomesGroupedByOperationId.values()) {
             if (!isOperationBelongToPeriod(operationIncomes, getImportPeriod())) {
-                logger.error("Для ФЛ: \"${person.fullName}\", ИНП: \"${person.inp ?: "_"}\" операция \"${operationIncomes[0].operationId}\" " +
+                logger.error("Для ФЛ: \"${person.fullName}\", ИНП: \"${person.inp ?: "_"}\" операция: \"${operationIncomes[0].operationId}\" " +
                         "не загружена в Налоговую форму №: \"${declarationData.id}\", Период: " +
                         "\"${reportPeriod.taxPeriod.year}, ${reportPeriod.name}\", Подразделение: \"${department.name}\", Вид: \"${declarationTemplate.name}\"" +
                         "${asnuName ? ", АСНУ: \"${asnuName}\"" : ""}. Ни одна из дат операции: \"Дата начисления дохода\", " +
@@ -1218,7 +1218,7 @@ class Import extends AbstractScriptClass {
             } else {
                 allRecordsFailed = false
                 if (!isOperationBelongToPeriod(operationIncomes, getCalendarPeriod())) {
-                    logger.warn("Для ФЛ: \"${person.fullName}\", ИНП: \"${person.inp ?: "_"}\" операция \"${operationIncomes[0].operationId}\" " +
+                    logger.warn("Для ФЛ: \"${person.fullName}\", ИНП: \"${person.inp ?: "_"}\" операция: \"${operationIncomes[0].operationId}\" " +
                             "загруженная в Налоговую форму №: \"${declarationData.id}\", Период: " +
                             "\"${reportPeriod.taxPeriod.year}, ${reportPeriod.name}\", Подразделение: \"${department.name}\", Вид: \"${declarationTemplate.name}\"" +
                             "${asnuName ? ", АСНУ: \"${asnuName}\"" : ""}. Ни одна из дат операции: \"Дата начисления дохода\", " +
