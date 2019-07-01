@@ -43,6 +43,10 @@ end;
 
 PROMPT ## Beginning Installing Patch
 
+PROMPT ## 02_templates
+@database-3.8/02_templates.sql "_log/3.8_02_templates.txt" "&4" "&5" "../_log" "../_bad"
+
+
 PROMPT ## 03_update_dml.sql
 @database-3.8/03_update_dml.sql
 
