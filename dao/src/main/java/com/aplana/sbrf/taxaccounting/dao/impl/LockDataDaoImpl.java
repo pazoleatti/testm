@@ -245,6 +245,9 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
 
     @Override
     public List<LockData> fetchAllByKeyPrefixSet(Collection<String> keysBlocker) {
+        if (keysBlocker == null || keysBlocker.isEmpty()) {
+            return new ArrayList<>();
+        }
         return getJdbcTemplate().query(
                 "select id, key, user_id, task_id, date_lock, description from lock_data " +
                         " where " + SqlUtils.transformToStringPrefixDisjunctionStatement("key", keysBlocker),
