@@ -11,7 +11,6 @@ import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import net.sf.jasperreports.web.actions.ActionException;
 
 import java.util.List;
-import java.util.Set;
 
 /**
  * Сервис для работы с отчетными периодами
@@ -80,7 +79,7 @@ public interface PeriodService {
     /**
      * Получение списка всех отчётных периодов.
      */
-    List<ReportPeriod> fetchAll();
+    List<ReportPeriod> findAll();
 
     /**
      * Получение записи справочника "Коды, определяющие налоговый (отчётный) период" по идентификатору
@@ -124,16 +123,7 @@ public interface PeriodService {
      * @param user пользователь
      * @return множество {@link ReportPeriod} или пустое множество
      */
-    Set<ReportPeriod> getOpenReportPeriodForUser(TAUser user);
-
-    /**
-     * Список открытых периодов
-     *
-     * @param departmentList подразделения
-     * @param withoutCorrect true - без корректирующих периодов false - с корректирующими периодами
-     * @return список {@link ReportPeriod} или пустой список
-     */
-    List<ReportPeriod> getOpenPeriodsByDepartments(List<Integer> departmentList, boolean withoutCorrect);
+    List<ReportPeriod> findAllActive(TAUser user);
 
     /**
      * Получить корректирующие периоды

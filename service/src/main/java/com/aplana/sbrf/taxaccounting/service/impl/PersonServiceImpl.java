@@ -125,6 +125,20 @@ public class PersonServiceImpl implements PersonService {
 
     @Override
     @Transactional(readOnly = true)
+    public PagingResult<PersonFor2NdflFL> findAllFor2NdflFL(PagingParams pagingParams, RefBookPersonFilter filter) {
+        PagingResult<RegistryPerson> persons = refBookPersonDao.getPersons(pagingParams, filter);
+        PagingResult<PersonFor2NdflFL> personsFor2NdflFL = new PagingResult<>(new ArrayList<PersonFor2NdflFL>(), persons.getTotalCount());
+        for (RegistryPerson person : persons) {
+            PersonFor2NdflFL dto = new PersonFor2NdflFL();
+            dto.setId(person.getId());
+            BeanUtils.copyProperties(person, dto);
+            personsFor2NdflFL.add(dto);
+        }
+        return personsFor2NdflFL;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public int getPersonsCount(RefBookPersonFilter filter) {
         return refBookPersonDao.getPersonsCount(filter);
     }
@@ -568,7 +582,7 @@ public class PersonServiceImpl implements PersonService {
             person.setRecordId(recordId);
             person.setOldId(recordId);
             Iterator<IdDoc> idDocIterator = person.getDocuments().iterator();
-            while(idDocIterator.hasNext()) {
+            while (idDocIterator.hasNext()) {
                 IdDoc idDoc = idDocIterator.next();
                 if (idDoc.getDocType() == null || idDoc.getDocType().getId() == null) {
                     idDocIterator.remove();

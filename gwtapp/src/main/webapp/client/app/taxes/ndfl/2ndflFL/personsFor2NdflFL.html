@@ -1,0 +1,36 @@
+<div class="flex-column">
+    <div class="content-header">
+        <h1>{{::'ndfl.personsFor2NdflFL.title' | translate}}</h1>
+    </div>
+    <div class="container-grid box-shadow-block flex-fill flex-column" style="overflow-y: auto;">
+        <div style="flex-shrink: 0;">
+            <!-- Панель фильтра -->
+            <div>
+                <span data-ng-include="'client/app/taxes/ndfl/2ndflFL/personsFor2NdflFLFilter.html'"></span>
+            </div>
+            <!--Панель кнопок -->
+            <div class="button_panel">
+                <div class="btn-toolbar" role="toolbar">
+                    <!--Создать 2-НДФЛ-->
+                    <span>
+                        <button type="button" class="btn btn-default" data-ng-click="create2NdflFL()"
+                                data-ng-disabled="!(personsGrid.value.length === 1 && permissionChecker.check(user, APP_CONSTANTS.USER_PERMISSION._2NDFL_FL))">
+                            <span data-translate-once="ndfl.personsFor2NdflFL.button.create2Ndfl"></span>
+                        </button>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Таблица -->
+        <div class="flex-grid flex-fill" style="min-height: calc(100% - 50px);"
+             data-aplana-grid
+             data-grid-fill-space="true"
+             data-grid-store-page-settings="true"
+             data-grid-options="personsGrid.options"
+             data-grid-ctrl="personsGrid.ctrl"
+             data-ng-model="personsGrid.value"
+             id="personsFor2NdflFLTable">
+        </div>
+    </div>
+</div>

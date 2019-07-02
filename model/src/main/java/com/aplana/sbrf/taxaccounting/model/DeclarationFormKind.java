@@ -39,7 +39,11 @@ public enum DeclarationFormKind {
     /**
      * Отчетная НФ(declaration)
      */
-    REPORTS(7, "Отчетная");
+    REPORTS(7, "Отчетная"),
+    /**
+     * Отчетная ФЛ
+     */
+    REPORTS_FL(8, "Отчетная ФЛ");
 
     private final long id;
     private final String name;

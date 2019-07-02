@@ -1,0 +1,175 @@
+<div data-ng-controller="CommonFilterCtrl">
+    <div class="grid-filter">
+        <div data-aplana-collapse
+             data-is-collapsed="searchFilter.hideExtendedFilter"
+             data-label="(!searchFilter.isClear ? 'filterPanelLabel' : 'filterPanelLabel.set') | translate">
+            <form id="ndfl_group_filter"
+                  class="form-horizontal info-wrapper"
+                  role="form"
+                  style="display: flex; padding-top: 0;"
+                  novalidate>
+                <div class="row-fluid">
+                    <div class="span11 child-margin0" style="padding-top: 10px;">
+                        <div class="span4">
+                            <!--Фамилия-->
+                            <div class="row-fluid form-group">
+                                <div class="span4">
+                                    <label class="control-label">{{::'title.lastName' | translate}}:</label>
+                                </div>
+                                <div class="span8">
+                                    <input data-ng-model="searchFilter.params.lastName"
+                                           type="text"
+                                           placeholder="{{'filter.placeholder.search' | translate}}"
+                                           class="form-control"/>
+                                </div>
+                            </div>
+                            <!--Имя-->
+                            <div class="row-fluid form-group">
+                                <div class="span4">
+                                    <label class="control-label">{{::'title.firstName' | translate}}:</label>
+                                </div>
+                                <div class="span8">
+                                    <input data-ng-model="searchFilter.params.firstName"
+                                           type="text"
+                                           placeholder="{{'filter.placeholder.search' | translate}}"
+                                           class="form-control"/>
+                                </div>
+                            </div>
+                            <!--Отчество-->
+                            <div class="row-fluid form-group">
+                                <div class="span4">
+                                    <label class="control-label">{{::'title.middleName' | translate}}:</label>
+                                </div>
+                                <div class="span8">
+                                    <input data-ng-model="searchFilter.params.middleName"
+                                           type="text"
+                                           placeholder="{{'filter.placeholder.search' | translate}}"
+                                           class="form-control"/>
+                                </div>
+                            </div>
+                            <!--Дата рождения-->
+                            <div class="row-fluid form-group">
+                                <date-from-to-filter
+                                        data-label-width="4"
+                                        ng-period-model="searchFilter.params"
+                                        ng-from-param="birthDateFrom"
+                                        ng-to-param="birthDateTo"
+                                        ng-label="title.dateOfBirthFrom">
+                                </date-from-to-filter>
+                            </div>
+                        </div>
+                        <div class="span4">
+                            <!--Тип ДУЛ-->
+                            <div class="row-fluid form-group">
+                                <div class="span4">
+                                    <label class="control-label">{{::'refBook.fl.filter.label.documentType' |
+                                        translate}}:</label>
+                                </div>
+                                <div class="span8"
+                                     data-ng-controller="SelectRefBookCtrl"
+                                     data-ui-select2="select.options"
+                                     data-ng-init="initSelect(APP_CONSTANTS.REFBOOK.DOC_TYPE)"
+                                     data-ng-model="searchFilter.params.documentTypes">
+                                </div>
+                            </div>
+                            <!--Серия и № ДУЛ-->
+                            <div class="row-fluid form-group">
+                                <div class="span4">
+                                    <label class="control-label">
+                                        {{::'refBook.fl.filter.label.documentNumber' | translate}}:</label>
+                                </div>
+                                <div class="span8">
+                                    <input data-ng-model="searchFilter.params.documentNumber"
+                                           type="text"
+                                           placeholder="{{'filter.placeholder.search' | translate}}"
+                                           class="form-control"/>
+                                </div>
+                            </div>
+                            <!--Гражданство-->
+                            <div class="row-fluid form-group">
+                                <div class="span4">
+                                    <label class="control-label">{{::'refBook.fl.filter.label.citizenship' |
+                                        translate}}:</label>
+                                </div>
+                                <div class="span8"
+                                     data-ng-controller="SelectRefBookCtrl"
+                                     data-ui-select2="select.options"
+                                     data-ng-init="initSelect(APP_CONSTANTS.REFBOOK.COUNTRY)"
+                                     data-ng-model="searchFilter.params.citizenshipCountries">
+                                </div>
+                            </div>
+                            <!--Статус НП-->
+                            <div class="row-fluid form-group">
+                                <div class="span4">
+                                    <label class="control-label">{{::'refBook.fl.filter.label.status' |
+                                        translate}}:</label>
+                                </div>
+                                <div class="span8"
+                                     data-ng-controller="SelectRefBookCtrl"
+                                     data-ui-select2="select.options"
+                                     data-ng-init="initSelect(APP_CONSTANTS.REFBOOK.TAXPAYER_STATUS)"
+                                     data-ng-model="searchFilter.params.taxpayerStates">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="span4">
+                            <!--ИНН РФ-->
+                            <div class="row-fluid form-group">
+                                <div class="span4">
+                                    <label class="control-label">{{::'title.innNp' | translate}}:</label>
+                                </div>
+                                <div class="span8">
+                                    <input data-ng-model="searchFilter.params.inn"
+                                           type="text"
+                                           placeholder="{{'filter.placeholder.search' | translate}}"
+                                           class="form-control"/>
+                                </div>
+                            </div>
+                            <!--ИНН Ино-->
+                            <div class="row-fluid form-group">
+                                <div class="span4">
+                                    <label class="control-label">{{::'title.innForeign' | translate}}:</label>
+                                </div>
+                                <div class="span8">
+                                    <input data-ng-model="searchFilter.params.innForeign"
+                                           type="text"
+                                           placeholder="{{'filter.placeholder.search' | translate}}"
+                                           class="form-control"/>
+                                </div>
+                            </div>
+                            <!--СНИЛС-->
+                            <div class="row-fluid form-group">
+                                <div class="span4">
+                                    <label class="control-label">{{::'title.snils' | translate}}:</label>
+                                </div>
+                                <div class="span8">
+                                    <input data-ng-model="searchFilter.params.snils"
+                                           type="text"
+                                           placeholder="{{'filter.placeholder.search' | translate}}"
+                                           class="form-control"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="span1 vertical-btn-group" style="padding-top: 20px">
+                        <!--Кнопка Найти-->
+                        <button type="button"
+                                class="btn btn-default"
+                                id="searchButton"
+                                data-ng-click="submitSearch()">
+                            <span data-translate-once="common.button.search"></span>
+                        </button>
+                        <!--Кнопка Сбросить-->
+                        <button type="button"
+                                class="btn btn-default"
+                                id="clearButton"
+                                data-ng-click="resetFilter()"
+                                data-ng-disabled="!searchFilter.isClear">
+                            <span data-translate-once="common.button.clear"></span>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

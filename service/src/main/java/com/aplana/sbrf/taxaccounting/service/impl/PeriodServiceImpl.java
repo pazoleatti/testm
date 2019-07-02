@@ -414,8 +414,8 @@ public class PeriodServiceImpl implements PeriodService {
     }
 
     @Override
-    public List<ReportPeriod> fetchAll() {
-        return reportPeriodDao.fetchAll();
+    public List<ReportPeriod> findAll() {
+        return reportPeriodDao.findAll();
     }
 
     @Override
@@ -424,13 +424,9 @@ public class PeriodServiceImpl implements PeriodService {
     }
 
     @Override
-    public Set<ReportPeriod> getOpenReportPeriodForUser(TAUser user) {
-        List<Integer> departments = departmentService.findAllAvailableIds(user);
-        if (user.hasRoles(TaxType.NDFL, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER)) {
-            return new LinkedHashSet<>(getOpenPeriodsByDepartments(departments, false));
-        } else {
-            return Collections.EMPTY_SET;
-        }
+    public List<ReportPeriod> findAllActive(TAUser user) {
+        List<Integer> departmentIds = departmentService.findAllAvailableIds(user);
+        return reportPeriodDao.findAllActive(departmentIds);
     }
 
     @Override
@@ -473,11 +469,6 @@ public class PeriodServiceImpl implements PeriodService {
     @Override
     public List<ReportPeriod> getPeriodsByDepartments(List<Integer> departmentList) {
         return reportPeriodDao.fetchAllByDepartments(departmentList);
-    }
-
-    @Override
-    public List<ReportPeriod> getOpenPeriodsByDepartments(List<Integer> departmentList, boolean withoutCorrect) {
-        return reportPeriodDao.getOpenPeriodsAndDepartments(departmentList, withoutCorrect);
     }
 
     @Override

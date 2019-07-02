@@ -67,6 +67,13 @@
                         });
                     }
 
+                    if ($scope.permissionChecker.check($scope.security.user, $scope.APP_CONSTANTS.USER_PERMISSION._2NDFL_FL)) {
+                        subtree.push({
+                            name: $filter('translate')('menu.taxes.ndfl.personsFor2NdflFL'),
+                            href: $state.href('personsFor2NdflFL')
+                        });
+                    }
+
                     //Задаем ссылки для главного меню
                     $scope.treeTaxes = [];
                     if ($scope.permissionChecker.check($scope.security.user, $scope.APP_CONSTANTS.USER_PERMISSION.VIEW_TAXES_NDFL)) {

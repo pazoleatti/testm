@@ -475,16 +475,18 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         params.addValue("negative_income", declarationData.getNegativeIncome());
         params.addValue("negative_tax", declarationData.getNegativeTax());
         params.addValue("negative_sums_sign", declarationData.getNegativeSumsSign() != null ? declarationData.getNegativeSumsSign().ordinal() : null);
+        params.addValue("person_id", declarationData.getPersonId());
+        params.addValue("signatory", declarationData.getSignatory());
         params.addValue("created_date", declarationData.getCreatedDate());
         params.addValue("created_by", declarationData.getCreatedBy().getId());
 
         getNamedParameterJdbcTemplate().update("" +
                         "insert into declaration_data (id, declaration_template_id, department_report_period_id, state, tax_organ_code, kpp, " +
                         "   oktmo, asnu_id, knf_type_id, note, file_name, doc_state_id, manually_created, last_data_modified, adjust_negative_values, " +
-                        "   correction_num, tax_refund_reflection_mode, negative_income, negative_tax, negative_sums_sign, created_date, created_by) " +
+                        "   correction_num, tax_refund_reflection_mode, negative_income, negative_tax, negative_sums_sign, person_id, signatory, created_date, created_by) " +
                         "values (:id, :declaration_template_id, :department_report_period_id, :state, :tax_organ_code, :kpp, " +
                         "   :oktmo, :asnu_id, :knf_type_id, :note, :file_name, :doc_state_id, :manually_created, :last_data_modified, :adjust_negative_values, " +
-                        "   :correction_num, :tax_refund_reflection_mode, :negative_income, :negative_tax, :negative_sums_sign, :created_date, :created_by)",
+                        "   :correction_num, :tax_refund_reflection_mode, :negative_income, :negative_tax, :negative_sums_sign, :person_id, :signatory, :created_date, :created_by)",
                 params);
 
         if (declarationData.getKnfType() != null && declarationData.getKnfType().equals(RefBookKnfType.BY_KPP)) {
@@ -932,7 +934,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 "dd.department_report_period_id, dd.asnu_id, dd.file_name, dd.doc_state_id, dd.manually_created, " +
                 "dd.adjust_negative_values, drp.report_period_id, drp.department_id, dd.note, knf_type.id as knf_type_id, " +
                 "knf_type.name as knf_type_name, dd.last_data_modified, dd.correction_num, dd.tax_refund_reflection_mode, " +
-                "dd.negative_income, dd.negative_tax, dd.negative_sums_sign, dd.created_date, dd.created_by ";
+                "dd.negative_income, dd.negative_tax, dd.negative_sums_sign, dd.person_id, dd.signatory, dd.created_date, dd.created_by ";
 
         @Override
         public DeclarationData mapRow(ResultSet rs, int index) throws SQLException {
@@ -968,6 +970,8 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             d.setNegativeIncome(rs.getBigDecimal("negative_income"));
             d.setNegativeTax(rs.getBigDecimal("negative_tax"));
             d.setNegativeSumsSign(NegativeSumsSign.valueOf(SqlUtils.getInteger(rs, "negative_sums_sign")));
+            d.setPersonId(rs.getLong("person_id"));
+            d.setSignatory(rs.getString("signatory"));
             d.setCreatedDate(new Date(rs.getTimestamp("created_date").getTime()));
             d.setCreatedBy(userDao.getUser(rs.getInt("created_by")));
             return d;

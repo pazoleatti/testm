@@ -45,7 +45,7 @@ public interface ReportPeriodDao extends PermissionDao {
     /**
      * Получение списка всех отчётных периодов.
      */
-    List<ReportPeriod> fetchAll();
+    List<ReportPeriod> findAll();
 
     /**
      * Получение списка отчётных периодов, входящий в данный налоговый период.
@@ -101,10 +101,9 @@ public interface ReportPeriodDao extends PermissionDao {
      * Получение списка открытых периодов по списку подразделений и признаку корректировки
      *
      * @param departmentList список подразделений
-     * @param withoutCorrect признак отсутствия корректировки(true - без корректировки/false - все периоды)
      * @return список {@link ReportPeriod} или пустой список
      */
-    List<ReportPeriod> getOpenPeriodsAndDepartments(List<Integer> departmentList, boolean withoutCorrect);
+    List<ReportPeriod> findAllActive(List<Integer> departmentList);
 
     /**
      * Получить корректирующие периоды

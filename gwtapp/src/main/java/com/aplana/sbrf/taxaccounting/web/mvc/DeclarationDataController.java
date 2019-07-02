@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.action.Create2NdflFLAction;
 import com.aplana.sbrf.taxaccounting.model.action.CreateDeclarationDataAction;
 import com.aplana.sbrf.taxaccounting.model.action.CreateReportAction;
 import com.aplana.sbrf.taxaccounting.model.action.CreateReportFormsAction;
@@ -319,6 +320,18 @@ public class DeclarationDataController {
     }
 
     /**
+     * Создание налоговой формы
+     *
+     * @param action параметры создания формы
+     * @return Результат создания
+     */
+    @PostMapping(value = "/actions/declarationData/create")
+    public CreateResult<Long> createDeclaration(CreateDeclarationDataAction action) {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        return declarationService.create(userInfo, action);
+    }
+
+    /**
      * Создание отчетной формы
      *
      * @param action параметры создания отчетности
@@ -335,10 +348,10 @@ public class DeclarationDataController {
      * @param action параметры создания формы
      * @return Результат создания
      */
-    @PostMapping(value = "/actions/declarationData/create")
-    public CreateResult<Long> createDeclaration(CreateDeclarationDataAction action) {
+    @PostMapping(value = "/actions/declarationData/create2NdflFL")
+    public ActionResult create2NdflFL(@RequestBody Create2NdflFLAction action) {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        return declarationService.create(userInfo, action);
+        return declarationService.create2NdflFL(userInfo, action);
     }
 
     /**

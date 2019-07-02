@@ -80,22 +80,25 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
 								 Map<String, Object> exchangeParams) {
         LOG.debug("Starting processing request to run create script");
         String script = declarationTemplateDao.getDeclarationTemplateScript(declarationData.getDeclarationTemplateId());
-		String scriptFilePath = null;
-		if (!applicationInfo.isProductionMode()) {
-			scriptFilePath = getScriptFilePath(getPackageName(script), SCRIPT_PATH_PREFIX, logger, event);
-			if (scriptFilePath != null) {
-				script = getScript(scriptFilePath);
+        if (script != null) {
+			String scriptFilePath = null;
+			if (!applicationInfo.isProductionMode()) {
+				scriptFilePath = getScriptFilePath(getPackageName(script), SCRIPT_PATH_PREFIX, logger, event);
+				if (scriptFilePath != null) {
+					script = getScript(scriptFilePath);
+				}
+			} else {
+				String eventScript = declarationTemplateEventScriptDao.findScript(declarationData.getDeclarationTemplateId(), event.getCode());
+				if (eventScript != null) {
+					script = eventScript;
+				}
 			}
-		} else {
-			String eventScript = declarationTemplateEventScriptDao.findScript(declarationData.getDeclarationTemplateId(), event.getCode());
-			if (eventScript != null) {
-				script = eventScript;
+			if (!canExecuteScript(script, event)) {
+				return false;
 			}
+			return executeScript(userInfo, script, declarationData, scriptFilePath, event, logger, exchangeParams);
 		}
-		if (!canExecuteScript(script, event)) {
-            return false;
-        }
-        return executeScript(userInfo, script, declarationData, scriptFilePath, event, logger, exchangeParams);
+        return false;
     }
 
     @Override
