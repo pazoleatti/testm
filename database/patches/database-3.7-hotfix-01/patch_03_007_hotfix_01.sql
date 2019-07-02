@@ -9,8 +9,7 @@ var start_time varchar2(30);
 var version varchar2(10);
 var STATUS VARCHAR2(3000);
 var USER_NDFL VARCHAR2(50);
-var NSI_USER VARCHAR2(50);
-
+.
 PROMPT Install patch DB
 PROMPT ======================
 
@@ -18,7 +17,6 @@ WHENEVER SQLERROR EXIT SQL.SQLCODE
 
 begin  
    :USER_NDFL := upper('&1');
-   :NSI_USER := upper('&3');
    select to_char(systimestamp,'yyyy.mm.dd hh24:mi:ss:FF3') into :start_time from dual;	
    :version := '03.007.fx1';
    :STATUS := 'OK';   
