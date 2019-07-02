@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.action.Create2NdflFLAction;
 import com.aplana.sbrf.taxaccounting.model.action.CreateDeclarationDataAction;
 import com.aplana.sbrf.taxaccounting.model.action.CreateReportAction;
 import com.aplana.sbrf.taxaccounting.model.action.CreateReportFormsAction;
@@ -37,6 +38,22 @@ public interface DeclarationDataService {
      * @return Модель {@link CreateResult}, в которой содержатся данные о результате операции
      */
     CreateResult<Long> create(TAUserInfo userInfo, CreateDeclarationDataAction action);
+
+    /**
+     * Создание отчётности
+     *
+     * @param action   параметры создания отчетности
+     * @param userInfo информация о пользователе
+     */
+    ActionResult createReportsCreateTask(CreateReportFormsAction action, TAUserInfo userInfo);
+
+    /**
+     * Создает форму 2-НДФЛ (ФЛ)
+     *
+     * @param userInfo пользователь
+     * @param action   параметры создания
+     */
+    ActionResult create2NdflFL(TAUserInfo userInfo, Create2NdflFLAction action);
 
     /**
      * Создание декларации в заданном отчетном периоде подразделения
@@ -500,15 +517,6 @@ public interface DeclarationDataService {
     DeclarationDataExistenceAndKindResult fetchDeclarationDataExistenceAndKind(TAUserInfo userInfo, long declarationDataId);
 
     /**
-     * Создание отчётности
-     *
-     * @param action   параметры создания отчетности
-     * @param userInfo информация о пользователе
-     * @return результат создания отчетности
-     */
-    ActionResult createReportsCreateTask(CreateReportFormsAction action, TAUserInfo userInfo);
-
-    /**
      * Запускает ассинхронную задачу на выгрузку отчетности для форм
      *
      * @param filter   фильтр, по которому выбираются формы
@@ -594,7 +602,8 @@ public interface DeclarationDataService {
 
     /**
      * Отправляет данные ОНФ в ЭДО
-     *  @param declarationDataIds список ид форм
+     *
+     * @param declarationDataIds список ид форм
      * @param userInfo           пользователь запустивший операцию
      * @param logger             логгер
      */

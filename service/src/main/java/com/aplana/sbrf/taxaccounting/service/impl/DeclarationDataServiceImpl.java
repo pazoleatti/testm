@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.ndfl.NdflPersonDao;
 import com.aplana.sbrf.taxaccounting.dao.util.DBUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.action.Create2NdflFLAction;
 import com.aplana.sbrf.taxaccounting.model.action.CreateDeclarationDataAction;
 import com.aplana.sbrf.taxaccounting.model.action.CreateReportAction;
 import com.aplana.sbrf.taxaccounting.model.action.CreateReportFormsAction;
@@ -243,6 +244,50 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         }
     }
 
+    @Override
+    public ActionResult createReportsCreateTask(CreateReportFormsAction action, TAUserInfo userInfo) {
+        LOG.info(String.format("DeclarationDataServiceImpl.createReportsCreateTask by %s. action: %s", userInfo, action));
+        Logger logger = new Logger();
+        ActionResult taskResult = new ActionResult();
+
+        DeclarationData knf = findKnfForReport(action, logger);
+        if (!logger.containsLevel(LogLevel.ERROR)) {
+            ReportFormsCreationParams params = new ReportFormsCreationParams(action);
+            params.setSourceKnfId(knf.getId());
+            final Map<String, Object> taskParams = new HashMap<>();
+            taskParams.put("declarationDataId", knf.getId());
+            taskParams.put("declarationTypeId", action.getDeclarationTypeId());
+            taskParams.put("departmentReportPeriodId", knf.getDepartmentReportPeriodId());
+            taskParams.put("params", params);
+            asyncManager.createTask(OperationType.getOperationByDeclarationTypeId(action.getDeclarationTypeId()),
+                    userInfo, taskParams, logger);
+
+        }
+        taskResult.setUuid(logEntryService.save(logger.getEntries()));
+        return taskResult;
+    }
+
+    @Override
+    public ActionResult create2NdflFL(TAUserInfo userInfo, Create2NdflFLAction action) {
+        ActionResult taskResult = new ActionResult();
+        Logger logger = new Logger();
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.fetchLast(action.getDepartmentId(), action.getReportPeriodId());
+        if (departmentReportPeriod != null) {
+            int activeTemplateId = declarationTemplateService.getActiveDeclarationTemplateId(action.getDeclarationTypeId(), action.getReportPeriodId());
+            DeclarationData declarationData = new DeclarationData();
+            declarationData.setDeclarationTemplateId(activeTemplateId);
+            declarationData.setDepartmentReportPeriodId(departmentReportPeriod.getId());
+            declarationData.setDepartmentId(action.getDepartmentId());
+            declarationData.setReportPeriodId(action.getReportPeriodId());
+            declarationData.setPersonId(action.getPersonId());
+            declarationData.setSignatory(action.getSignatory());
+            declarationData.setState(State.ISSUED);
+            createWithotChecks(declarationData, logger, userInfo, true);
+        }
+        taskResult.setUuid(logEntryService.save(logger.getEntries()));
+        return taskResult;
+    }
+
     /**
      * Логика создания вынесена в отдельный метод, для решения проблем с транзакциями при вызове из других транзакционных методов
      */
@@ -390,15 +435,17 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         ReportPeriod reportPeriod = departmentReportPeriod.getReportPeriod();
         List<DepartmentDeclarationType> ddts = sourceService.getDDTByDepartment(departmentReportPeriod.getDepartmentId(),
                 TaxType.NDFL, reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
-        boolean found = false;
-        for (DepartmentDeclarationType ddt : ddts) {
-            if (ddt.getDeclarationTypeId() == declarationTypeId) {
-                found = true;
-                break;
+        if (declarationTypeId != DeclarationType.NDFL_2_FL) {
+            boolean found = false;
+            for (DepartmentDeclarationType ddt : ddts) {
+                if (ddt.getDeclarationTypeId() == declarationTypeId) {
+                    found = true;
+                    break;
+                }
             }
-        }
-        if (!found) {
-            error("Выбранный вид налоговой формы не назначен подразделению", logger);
+            if (!found) {
+                error("Выбранный вид налоговой формы не назначен подразделению", logger);
+            }
         }
         // Создавать декларацию могут только контролёры УНП и контролёры
         // текущего уровня обособленного подразделения
@@ -2064,29 +2111,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         declarationDataScriptingService.executeScript(userInfo,
                 declarationData, FormDataEvent.PRE_CREATE_REPORTS, logger, exchangeParams);
         return (Boolean) paramMap.get("successfullPreCreate");
-    }
-
-    @Override
-    public ActionResult createReportsCreateTask(CreateReportFormsAction action, TAUserInfo userInfo) {
-        LOG.info(String.format("DeclarationDataServiceImpl.createReportsCreateTask by %s. action: %s", userInfo, action));
-        Logger logger = new Logger();
-        ActionResult taskResult = new ActionResult();
-
-        DeclarationData knf = findKnfForReport(action, logger);
-        if (!logger.containsLevel(LogLevel.ERROR)) {
-            ReportFormsCreationParams params = new ReportFormsCreationParams(action);
-            params.setSourceKnfId(knf.getId());
-            final Map<String, Object> taskParams = new HashMap<>();
-            taskParams.put("declarationDataId", knf.getId());
-            taskParams.put("declarationTypeId", action.getDeclarationTypeId());
-            taskParams.put("departmentReportPeriodId", knf.getDepartmentReportPeriodId());
-            taskParams.put("params", params);
-            asyncManager.createTask(OperationType.getOperationByDeclarationTypeId(action.getDeclarationTypeId()),
-                    userInfo, taskParams, logger);
-
-        }
-        taskResult.setUuid(logEntryService.save(logger.getEntries()));
-        return taskResult;
     }
 
     /**

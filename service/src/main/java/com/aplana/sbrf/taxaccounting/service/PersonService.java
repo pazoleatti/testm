@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
 import com.aplana.sbrf.taxaccounting.model.refbook.IdDoc;
+import com.aplana.sbrf.taxaccounting.model.refbook.PersonFor2NdflFL;
 import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPerson;
 import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPersonDTO;
 import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
@@ -26,6 +27,15 @@ public interface PersonService {
      * @return список ФЛ
      */
     PagingResult<RegistryPersonDTO> getPersonsData(PagingParams pagingParams, RefBookPersonFilter filter);
+
+    /**
+     * Возвращяет списк ФЛ для формирования 2-НДФЛ (ФЛ)
+     *
+     * @param pagingParams параметры постраничной выдачи и сортировки
+     * @param filter       фильтр
+     * @return список ФЛ
+     */
+    PagingResult<PersonFor2NdflFL> findAllFor2NdflFL(PagingParams pagingParams, RefBookPersonFilter filter);
 
     /**
      * Возвращяет кол-во ФЛ по фильтру
@@ -100,7 +110,8 @@ public interface PersonService {
 
     /**
      * Определить ДУЛ включаемый в отчетность.
-     * @param person    физическое лицо
+     *
+     * @param person физическое лицо
      * @return ДУЛ включаемый в отчетность
      */
     IdDoc selectIncludeReportDocument(RegistryPersonDTO person);

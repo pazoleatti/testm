@@ -70,6 +70,14 @@ public class DeclarationData extends IdentityObject<Long> implements SecuredEnti
      */
     private Long docStateId;
     /**
+     * Идентификатор ФЛ
+     */
+    private Long personId;
+    /**
+     * Подписант
+     */
+    private String signatory;
+    /**
      * Права
      */
     private long permissions;
@@ -117,6 +125,7 @@ public class DeclarationData extends IdentityObject<Long> implements SecuredEnti
      * Пользователь, создавший форму
      */
     private TAUser createdBy;
+
     /**
      * Проверка статуса формы.
      */

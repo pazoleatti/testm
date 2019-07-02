@@ -288,7 +288,6 @@
             function ($scope, $rootScope, APP_CONSTANTS, GetSelectOption, RefBookValuesResource, DeclarationTypeForCreateResource, PermissionChecker) {
                 $scope.declarationTypeSelect = {};
 
-                //TODO: https://jira.aplana.com/browse/SBRFNDFL-2358 Сделать селекты, общие для отчетных и налоговых форм, убрать лишние функции
                 var isTaxForm = function (declarationType) {
                     return declarationType.id === APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_PRIMARY.id || declarationType.id === APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_CONSOLIDATED.id;
                 };
@@ -300,31 +299,27 @@
                 };
 
                 /**
-                 * Инициализировать список со всеми видами форм
+                 * Инициализировать список со всеми видами налоговых форм
                  */
-                //Убрать фильтрацию data в рамках TODO: https://jira.aplana.com/browse/SBRFNDFL-2358
                 $scope.initSelectWithAllDeclarationTypes = function () {
                     $scope.declarationTypeSelect = GetSelectOption.getBasicMultipleSelectOptions(true);
-                    RefBookValuesResource.query({refBookId: APP_CONSTANTS.REFBOOK.DECLARATION_TYPE}, function (data) {
-                        data = data.filter(function (declarationType) {
-                            return isTaxForm(declarationType);
-                        });
-                        $scope.declarationTypeSelect.options.data.results = data;
-                    });
+                    $scope.declarationTypeSelect.options.data.results = [
+                        APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_PRIMARY, APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_CONSOLIDATED
+                    ];
                 };
 
                 /**
                  * Инициализировать список со всеми видами форм
                  */
-                //Убрать фильтрацию data в рамках TODO: https://jira.aplana.com/browse/SBRFNDFL-2358
                 $scope.initSelectWithTaxAndReportDeclarationTypes = function () {
                     $scope.declarationTypeSelect = GetSelectOption.getBasicMultipleSelectOptions(true);
-                    RefBookValuesResource.query({refBookId: APP_CONSTANTS.REFBOOK.DECLARATION_TYPE}, function (data) {
-                        data = data.filter(function (declarationType) {
-                            return isTaxForm(declarationType) || isReportForm(declarationType);
-                        });
-                        $scope.declarationTypeSelect.options.data.results = data;
-                    });
+                    $scope.declarationTypeSelect.options.data.results = [
+                        APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_PRIMARY,
+                        APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_CONSOLIDATED,
+                        APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_1,
+                        APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_2,
+                        APP_CONSTANTS.DECLARATION_TYPE.REPORT_6_NDFL
+                    ];
                 };
 
                 /**
@@ -344,15 +339,13 @@
                 /**
                  * Инициализировать список со всеми видами отчетных форм
                  */
-                //Убрать фильтрацию data в рамках TODO: https://jira.aplana.com/browse/SBRFNDFL-2358
                 $scope.initSelectWithAllReportDeclarationTypes = function () {
                     $scope.declarationTypeSelect = GetSelectOption.getBasicMultipleSelectOptions(true);
-                    RefBookValuesResource.query({refBookId: APP_CONSTANTS.REFBOOK.DECLARATION_TYPE}, function (data) {
-                        data = data.filter(function (declarationType) {
-                            return isReportForm(declarationType);
-                        });
-                        $scope.declarationTypeSelect.options.data.results = data;
-                    });
+                    $scope.declarationTypeSelect.options.data.results = [
+                        APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_1,
+                        APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_2,
+                        APP_CONSTANTS.DECLARATION_TYPE.REPORT_6_NDFL
+                    ];
                 };
 
                 /**
@@ -379,7 +372,9 @@
                     });
                 };
 
-                //Убрать фильтрацию data в рамках TODO: https://jira.aplana.com/browse/SBRFNDFL-2358
+                /**
+                 * Загружает актуальные в указанном периоде типы отчетных форм, на которые есть назначения подразделения
+                 */
                 function loadReportFormTypes(knf, department, period) {
                     if (department && period) {
                         DeclarationTypeForCreateResource.query({
@@ -396,7 +391,7 @@
                 }
 
                 /**
-                 * Определение доступности вида отчетности по типу КНФ
+                 * Определение доступности создания отчетной формы указанного типа по типу КНФ
                  */
                 function isReportTypeAvailableByKnfType(declarationType, knfType) {
                     return knfType.id !== APP_CONSTANTS.KNF_TYPE.BY_NONHOLDING_TAX.id || declarationType.id === APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_2.id;
@@ -1190,14 +1185,14 @@
                  * @param periodModelPath путь в scope до модели периода
                  */
                 $scope.initSelectKppOktmoPairsByParams = function (modelPath, knf, departmentModelPath, periodModelPath) {
-                    if (!knf) {
+                    if (!knf && departmentModelPath && periodModelPath) {
                         $scope.$watchCollection("[" + departmentModelPath + ", " + periodModelPath + "]", function (newValues, oldValues) {
+                            // при изменении зависимых параметров сбрасываем значение
                             var department = newValues && newValues[0], oldDepartment = oldValues && oldValues[0];
                             var period = newValues && newValues[1], oldPeriod = oldValues && oldValues[1];
                             if (department && (!oldDepartment || department.id !== oldDepartment.id) ||
                                 period && (!oldPeriod || period.id !== oldPeriod.id)
                             ) {
-                                // при изменении зависимых параметров сбрасываем значение
                                 _.deep($scope, modelPath, []);
                             }
                         });

@@ -171,6 +171,10 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
      * Право доступа к формированию Уведомления о неудержанном налоге
      */
     public static final Permission<TAUser> TAX_NOTIFICATION = new TaxNotificationPermission(1L << 32);
+    /**
+     * Право на создание первичной формы вручную (журнал = налоговые формы)
+     */
+    public static final Permission<TAUser> _2NDFL_FL = new _2NdflFlPermission(1L << 33);
 
     public UserPermission(long mask) {
         super(mask);
@@ -656,6 +660,18 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
         @Override
         protected boolean isGrantedInternal(User user, TAUser targetDomainObject, Logger logger) {
             return PermissionUtils.hasRole(user, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_OPER_NOTICE);
+        }
+    }
+
+    public static final class _2NdflFlPermission extends UserPermission {
+
+        public _2NdflFlPermission(long mask) {
+            super(mask);
+        }
+
+        @Override
+        protected boolean isGrantedInternal(User user, TAUser targetDomainObject, Logger logger) {
+            return PermissionUtils.hasRole(user, TARole.N_ROLE_CONTROL_UNP);
         }
     }
 }

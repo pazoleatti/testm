@@ -164,7 +164,7 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
     }
 
     @Override
-    public List<ReportPeriod> fetchAll() {
+    public List<ReportPeriod> findAll() {
         return getJdbcTemplate().query(
                 "select rp.id, rp.name, rp.tax_period_id, tp.tax_type, tp.year, rp.start_date, rp.end_date, rp.dict_tax_period_id, rp.calendar_start_date \n" +
                         "from report_period rp, tax_period tp \n" +
@@ -243,14 +243,16 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
     }
 
     @Override
-    public List<ReportPeriod> getOpenPeriodsAndDepartments(List<Integer> departmentList, boolean withoutCorrect) {
-        return getJdbcTemplate().query(
-                "select rp.id, rp.name, rp.tax_period_id, tp.tax_type, tp.year, rp.start_date, rp.end_date, rp.dict_tax_period_id, " +
-                        "rp.calendar_start_date from report_period rp, tax_period tp where rp.id in " +
-                        "(select distinct report_period_id from department_report_period " +
-                        "where " + SqlUtils.transformToSqlInStatement("department_id", departmentList) + " and is_active=1 " +
-                        (withoutCorrect ? "and correction_date is null" : "") + " ) " +
-                        "and rp.tax_period_id = tp.id " +
+    public List<ReportPeriod> findAllActive(List<Integer> departmentIds) {
+        return getJdbcTemplate().query("" +
+                        "select rp.id, rp.name, rp.tax_period_id, tp.tax_type, tp.year, rp.start_date, rp.end_date, rp.dict_tax_period_id, " +
+                        "  rp.calendar_start_date\n" +
+                        "from report_period rp\n" +
+                        "join tax_period tp on tp.id = rp.tax_period_id\n" +
+                        "where rp.id in (\n" +
+                        "  select drp.report_period_id from department_report_period drp\n" +
+                        "  where drp.is_active = 1 and " + SqlUtils.transformToSqlInStatement("drp.department_id", departmentIds) + "\n" +
+                        ")" +
                         "order by tp.year desc, rp.calendar_start_date",
                 new ReportPeriodMapper());
     }

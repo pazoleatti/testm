@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
 import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.refbook.IdDoc;
+import com.aplana.sbrf.taxaccounting.model.refbook.PersonFor2NdflFL;
 import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPersonDTO;
 import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 import com.aplana.sbrf.taxaccounting.model.result.CheckDulResult;
@@ -26,9 +27,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -91,6 +90,20 @@ public class RefBookFlController {
     }
 
     /**
+     * Возвращяет списк ФЛ для формирования 2-НДФЛ (ФЛ)
+     *
+     * @param filter       фильтр выборки
+     * @param pagingParams параметры постраничной выдачи
+     * @return Страница списка значений справочника
+     */
+    @GetMapping(value = "/rest/refBookFL", params = "projection=for2NdflFL")
+    public JqgridPagedList<PersonFor2NdflFL> findAllPersonsFor2NdflFL(@RequestParam(required = false) RefBookPersonFilter filter,
+                                                                      @RequestParam(required = false) PagingParams pagingParams) {
+        PagingResult<PersonFor2NdflFL> records = personService.findAllFor2NdflFL(pagingParams, filter);
+        return JqgridPagedResourceAssembler.buildPagedList(records, records.getTotalCount(), pagingParams);
+    }
+
+    /**
      * Получение оригинала ФЛ
      *
      * @param id идентификатор версии
@@ -140,8 +153,9 @@ public class RefBookFlController {
 
     /**
      * ДУЛ включаемый в отчетность.
+     *
      * @param person физическое лицо
-     * @return  ДУЛ включаемый в отчетность
+     * @return ДУЛ включаемый в отчетность
      */
     @PostMapping(value = "/actions/selectIncludeReportDocument")
     public IdDoc selectIncludeReportDocument(@RequestBody RegistryPersonDTO person) {

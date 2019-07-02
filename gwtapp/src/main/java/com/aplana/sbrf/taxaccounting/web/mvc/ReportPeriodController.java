@@ -13,8 +13,6 @@ import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -42,7 +40,7 @@ public class ReportPeriodController {
     @GetMapping(value = "/rest/reportPeriod", params = "projection=opened")
     public List<ReportPeriod> fetchOpened() {
         TAUser user = securityService.currentUserInfo().getUser();
-        return new ArrayList<>(periodService.getOpenReportPeriodForUser(user));
+        return periodService.findAllActive(user);
     }
 
     /**
@@ -52,7 +50,7 @@ public class ReportPeriodController {
      */
     @GetMapping(value = "/rest/reportPeriod", params = "projection=all")
     public List<ReportPeriod> fetchAllReportPeriods() {
-        return periodService.fetchAll();
+        return periodService.findAll();
     }
 
     /**

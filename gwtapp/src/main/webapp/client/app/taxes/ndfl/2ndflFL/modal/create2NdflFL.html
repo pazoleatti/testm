@@ -1,0 +1,97 @@
+<form class="form-horizontal" name="create2NdflFL" data-aplana-submit-valid="create()">
+    <div class="modal-body">
+        <table class="horizontal-input-table gray-label-table auto-width-uneditable-input-table nowrap-label-table" style="width: 100%; padding-right: 20px;">
+            <colgroup>
+                <col style="width:35%">
+                <col style="width:65%">
+            </colgroup>
+            <tbody>
+            <!--Вид отчетности-->
+            <tr>
+                <td>
+                    <label class="control-label">
+                        {{::'createReport.reportType' | translate}}:
+                    </label>
+                </td>
+                <td>
+                    <div>
+                        <div data-aplana-field>
+                            <div data-ng-controller="SelectFromArrayCtrl"
+                                 data-ui-select2="selectFromArray.options"
+                                 data-ng-init="initBasicSingleSelectFromArray([APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_FL])"
+                                 data-ng-model="create2NdflFLForm.declarationType"
+                                 data-required>
+                            </div>
+                            <div data-aplana-validator data-key='required'>
+                                {{::'common.validation.required' | translate}}
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            <!--Период-->
+            <tr>
+                <td>
+                    <label class="control-label">{{::'createReport.period' | translate}}:</label>
+                </td>
+                <td>
+                    <div>
+                        <div data-aplana-field>
+                            <div data-ng-controller="SelectPeriodCtrl"
+                                 data-ui-select2="periodSelect.options"
+                                 data-ng-init="initSelectWithOpenPeriods()"
+                                 data-ng-model="create2NdflFLForm.reportPeriod"
+                                 data-required>
+                            </div>
+                            <div data-aplana-validator data-key='required'>
+                                {{::'common.validation.required' | translate}}
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            <!--КПП/ОКТМО-->
+            <tr data-ng-if="create2NdflFLForm.reportPeriod">
+                <td>
+                    <label class="control-label">
+                        {{::'createReport.kppOktmo' | translate}}:
+                    </label>
+                </td>
+                <td>
+                    <div data-aplana-field>
+                        <div data-ng-controller="SelectKppOktmoPairsCtrl"
+                             data-ui-select2="kppOkmtoPairsSelect.options"
+                             data-ng-model="create2NdflFLForm.kppOktmoPairs"
+                             data-ng-init="initSelectKppOktmoPairsByParams('create2NdflFLForm.kppOktmoPairs', null, 'user.terBank', 'create2NdflFLForm.reportPeriod')">
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            <!--Подписант-->
+            <tr>
+                <td>
+                    <label class="control-label" for="create2NdflFLForm_signatory">
+                        {{::'createReport.signatory' | translate}}:
+                    </label>
+                </td>
+                <td>
+                    <div data-aplana-field>
+                        <input id="create2NdflFLForm_signatory" type="text"
+                               data-ng-model="create2NdflFLForm.signatory"/>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="modal-footer">
+        <button type="submit" class="btn btn-default iconed-btn" id="saveButton">
+            <span data-translate-once="button.create"></span>
+            <span class="btn-icon-ok"></span>
+        </button>
+        <button type="button" class="btn btn-default-nonBg iconed-btn" id="closeButton" data-ng-click="close()">
+            <span data-translate-once="button.cancel"></span>
+            <span class="btn-icon-noneBg-close"></span>
+        </button>
+    </div>
+</form>

@@ -382,6 +382,8 @@ create table declaration_data (
   negative_income             number(20,2),
   negative_tax                number(20,2),
   negative_sums_sign          number(1),
+  person_id                   number(18),
+  signatory                   varchar2(60 char),
   created_date                date default sysdate not null,
   created_by                  number(18) not null
 );
@@ -404,6 +406,8 @@ comment on column declaration_data.tax_refund_reflection_mode is 'Показыв
 comment on column declaration_data.negative_income is 'Нераспределенный отрицательный Доход';
 comment on column declaration_data.negative_tax is 'Нераспределенный отрицательный Налог';
 comment on column declaration_data.negative_sums_sign is 'Признак нераспределенных сумм (0 - из текущей формы, 1 - из предыдущей формы)';
+comment on column declaration_data.person_id is 'Ид ФЛ из реестра ФЛ';
+comment on column declaration_data.signatory is 'ФИО подписанта';
 comment on column declaration_data.created_date is 'Дата создания формы';
 comment on column declaration_data.created_by is 'Ид пользователя, создавшего форму';
 

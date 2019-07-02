@@ -147,6 +147,7 @@
         "menu.taxes.ndfl.settingsUnits": "Настройки подразделений",
         "menu.taxes.ndfl.declarationTypeAssignment": "Назначение форм",
         "menu.taxes.ndfl.accountability": "Отчетность",
+        "menu.taxes.ndfl.personsFor2NdflFL": "Сформировать 2-НДФЛ для выдачи сотруднику ",
         "menu.taxes.service": "Сервис",
         "menu.taxes.service.loadFiles": "Загрузить файлы",
         "menu.taxes.commonParameters": "Общие параметры",
@@ -355,6 +356,7 @@
         "title.reasonForReturn": "Причина возврата:",
         "title.indicateReasonForReturn": "Укажите причину возврата",
         "title.creatingReport": "Создание отчетности по НДФЛ",
+        "title.create2NdflFL": "Создание отчетности по НДФЛ",
         "title.updateDocState": "Установить Состояние ЭД",
         "title.terBank": "Тербанк",
         "title.importance": "Важность",
@@ -794,6 +796,7 @@
         "createReport.reportFormCreateType": "Формировать отчетность",
         "createReport.kppOktmo": "КПП/ОКТМО",
         "createReport.correctionMessage": "Отчетности будут созданы в корректирующем периоде, дата сдачи корректировки: ",
+        "createReport.signatory": "Подписант (ФИО)",
 
         "createDeclaration.title": "Создание налоговой формы",
         "createDeclaration.period": "Период",
@@ -807,6 +810,9 @@
         "createDeclaration.cancel.text": "Отменить создание?",
 
         "returnToCreated.error.noReasonMessage": "Необходимо указать причину возврата",
+
+        "ndfl.personsFor2NdflFL.title": "НДФЛ - Форма выбора ФЛ для выдачи  2-НДФЛ",
+        "ndfl.personsFor2NdflFL.button.create2Ndfl": "Создать 2-НДФЛ",
 
         "taskList.title.taskManager": "Планировщик задач",
         "taskList.title.taskChange": "Изменить задачу",
@@ -1210,6 +1216,7 @@
         'app.ndflJournal',
         'app.ndflReport',
         'app.ndflReportJournal',
+        'app.personsFor2NdflFL',
         'app.schedulerTaskList',
         'app.lockDataList',
         'app.asyncTaskList',
