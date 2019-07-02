@@ -83,12 +83,14 @@ begin
 	     select '76636152051','пгт Баляга','2', to_date ('01.05.2019','dd.mm.yyyy'), 2 from dual union
 	     select '76636152106','с Кули','2', to_date ('01.05.2019','dd.mm.yyyy'), 2 from dual union
 	     select '76636158','Тарбагатайское','1', to_date ('01.05.2019','dd.mm.yyyy'), 2 from dual union
-	     select '76636158051','пгт Тарбагатай','2', to_date ('01.05.2019','dd.mm.yyyy'), 2 from dual 
+	     select '76636158051','пгт Тарбагатай','2', to_date ('01.05.2019','dd.mm.yyyy'), 2 from dual union
+	     select '76636158106','с Нижний Тарбагатай','2', to_date ('01.05.2019','dd.mm.yyyy'), 2 from dual
 	    )  src
 	    on (dst.code=src.code and dst.version=src.version)
 	    when not matched then insert (id, code, name, version, status, record_id, razd)
 	    values (seq_ref_book_record.nextval, src.code, src.name, src.version, src.status, 
-	   (select max(record_id) from ref_book_oktmo c where c.code=src.code and c.status=0),  src.razd);
+	   (select max(record_id) from ref_book_oktmo c where c.code=src.code and c.status=0),  src.razd)
+	   where (select max(record_id) from ref_book_oktmo c where c.code=src.code and c.status=0) is not null;
 
 	CASE SQL%ROWCOUNT 
 	WHEN 0 THEN dbms_output.put_line(v_task_name||'[WARNING]:'||' No changes was done');
