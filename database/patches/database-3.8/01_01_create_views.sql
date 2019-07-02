@@ -1,3 +1,5 @@
+--3.8-skononova-1
+
 create or replace view vw_department_config (id, department_id, kpp, oktmo, tax_organ_code, reorg_successor_kpp, start_date, end_date) as
 select id,  department_id, kpp, (select code from ref_book_oktmo rk where rk.id=oktmo_id) as oktmo, tax_organ_code, 
 REORG_SUCCESSOR_KPP,start_date, end_date from department_config;

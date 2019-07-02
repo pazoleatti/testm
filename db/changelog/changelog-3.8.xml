@@ -30,7 +30,7 @@
         </update>
     </changeSet>
 
-
+    <!--https://jira.aplana.com/browse/SBRFNDFL-7961 Реализовать представление справочника "Настройки подразделений" для общего справочного пространства-->
     <changeSet id="3.8-skononova-1" author="skononova">
         <sql>
 		create or replace view vw_department_config (id, department_id, kpp, oktmo, tax_organ_code, reorg_successor_kpp, start_date, end_date) as
