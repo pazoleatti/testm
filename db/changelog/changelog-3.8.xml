@@ -59,4 +59,12 @@
         </sql>
     </changeSet>
 
+    <changeSet id="3.8-skononova-2" author="skononova">
+        <sql>
+		comment on column declaration_data.person_id is 'Физ. лицо';
+		comment on column declaration_data.signatory is 'Подписант';
+        </sql>
+    </changeSet>
+
+
 </databaseChangeLog>
