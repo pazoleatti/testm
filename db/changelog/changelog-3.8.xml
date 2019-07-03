@@ -50,5 +50,13 @@
         </sql>
     </changeSet>
 
+    <!--https://jira.aplana.com/browse/SBRFNDFL-7974 Ошибка при открытии списка НФ-->
+    <changeSet id="3.8-ytrofimov-3" author="ytrofimov">
+        <sql>
+            alter table declaration_data add person_id number(18);
+            alter table declaration_data add constraint fk_declaration_data_person foreign key (person_id) references ref_book_person (id);
+            alter table declaration_data add signatory varchar2(60 char);
+        </sql>
+    </changeSet>
 
 </databaseChangeLog>
