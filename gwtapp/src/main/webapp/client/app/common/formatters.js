@@ -67,7 +67,7 @@
          */
         .filter('dateTimeSerializer', ['$filter', function ($filter) {
             return function (date) {
-                return date ? new Date(date).format("dd.mm.yyyy'T'HH:MM") : null;
+                return date ? new Date(date).format("dd.mm.yyyy'T'HH:MM") : undefined;
             };
         }])
 
@@ -80,6 +80,9 @@
          */
         .filter('idExtractor', function () {
             return function (items, property) {
+                if (!items || items.length === 0) {
+                    return undefined;
+                }
                 if (!property) {
                     property = 'id';
                 }

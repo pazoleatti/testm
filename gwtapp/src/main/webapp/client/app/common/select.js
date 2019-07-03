@@ -198,14 +198,19 @@
          */
         .controller('SelectDeclarationStateCtrl', ['$scope', 'APP_CONSTANTS', 'GetSelectOption',
             function ($scope, APP_CONSTANTS, GetSelectOption) {
-                var declarationStates = [APP_CONSTANTS.STATE.CREATED, APP_CONSTANTS.STATE.PREPARED, APP_CONSTANTS.STATE.ACCEPTED];
-
                 $scope.initSingleSelectDeclarationState = function () {
-                    $scope.stateSelect = GetSelectOption.getBasicSingleSelectOptionsWithResults(true, declarationStates);
+                    $scope.stateSelect = GetSelectOption.getBasicSingleSelectOptionsWithResults(true,
+                        [APP_CONSTANTS.STATE.CREATED, APP_CONSTANTS.STATE.PREPARED, APP_CONSTANTS.STATE.ACCEPTED]);
+                };
+
+                $scope.initSingleSelect2NdflFLState = function () {
+                    $scope.stateSelect = GetSelectOption.getBasicSingleSelectOptionsWithResults(true,
+                        [APP_CONSTANTS.STATE.CREATED, APP_CONSTANTS.STATE.ISSUED]);
                 };
 
                 $scope.initMultiSelectDeclarationState = function () {
-                    $scope.stateSelect = GetSelectOption.getBasicMultiSelectOptionsWithResults(true, declarationStates);
+                    $scope.stateSelect = GetSelectOption.getBasicMultiSelectOptionsWithResults(true,
+                        [APP_CONSTANTS.STATE.CREATED, APP_CONSTANTS.STATE.PREPARED, APP_CONSTANTS.STATE.ACCEPTED]);
                 };
             }]
         )

@@ -2,7 +2,7 @@
     'use strict';
 
     /**
-     * @description Модуль для работы со формами ндфл
+     * @description Список ФЛ для создания 2-НДФЛ
      */
     angular.module('app.personsFor2NdflFL', ['app.constants', 'app.create2NdflFL', 'app.logPanel'])
         .config(['$stateProvider', function ($stateProvider) {
@@ -19,9 +19,6 @@
             });
         }])
 
-        /**
-         * @description Контроллер страницы "Реестр Физических лиц"
-         */
         .controller('personsFor2NdflFLCtrl', ['$scope', '$filter', 'RefBookFLResource', 'APP_CONSTANTS', '$logPanel', '$aplanaModal',
             function ($scope, $filter, RefBookFLResource, APP_CONSTANTS, $logPanel, $aplanaModal) {
 

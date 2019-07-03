@@ -72,6 +72,10 @@
                             name: $filter('translate')('menu.taxes.ndfl.personsFor2NdflFL'),
                             href: $state.href('personsFor2NdflFL')
                         });
+                        subtree.push({
+                            name: $filter('translate')('menu.taxes.ndfl.2ndflFLJournal'),
+                            href: $state.href('2ndflFLJournal')
+                        });
                     }
 
                     //Задаем ссылки для главного меню

@@ -6,7 +6,9 @@ import com.aplana.sbrf.taxaccounting.model.action.CreateDeclarationDataAction;
 import com.aplana.sbrf.taxaccounting.model.action.CreateReportAction;
 import com.aplana.sbrf.taxaccounting.model.action.CreateReportFormsAction;
 import com.aplana.sbrf.taxaccounting.model.action.PrepareSubreportAction;
+import com.aplana.sbrf.taxaccounting.model.dto.Declaration2NdflFLDTO;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.filter.Declaration2NdflFLFilter;
 import com.aplana.sbrf.taxaccounting.model.filter.NdflFilter;
 import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
@@ -103,6 +105,7 @@ public class DeclarationDataController {
         binder.registerCustomEditor(RefBookKnfType.class, new RequestParamEditor(RefBookKnfType.class));
         binder.registerCustomEditor(Ndfl2_6DataReportParams.class, new RequestParamEditor(Ndfl2_6DataReportParams.class));
         binder.registerCustomEditor(NdflFilter.class, new RequestParamEditor(NdflFilter.class));
+        binder.registerCustomEditor(Declaration2NdflFLFilter.class, new RequestParamEditor(Declaration2NdflFLFilter.class));
     }
 
     /**
@@ -488,6 +491,21 @@ public class DeclarationDataController {
         PagingResult<DeclarationDataJournalItem> pagingResult = declarationService.fetchDeclarations(userInfo, filter, pagingParams);
 
         setDeclarationDataJournalItemsPermissions(pagingResult);
+
+        return JqgridPagedResourceAssembler.buildPagedList(
+                pagingResult,
+                pagingResult.getTotalCount(),
+                pagingParams
+        );
+    }
+
+    /**
+     * Возвращяет список форм 2-НДФЛ (ФЛ) по фильтру и пагинации
+     */
+    @GetMapping(value = "/rest/declarationData", params = "projection=2ndflFLDeclarations")
+    public JqgridPagedList<Declaration2NdflFLDTO> findAll2NdflFL(@RequestParam Declaration2NdflFLFilter filter, @RequestParam PagingParams pagingParams) {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        PagingResult<Declaration2NdflFLDTO> pagingResult = declarationService.findAll2NdflFL(filter, pagingParams);
 
         return JqgridPagedResourceAssembler.buildPagedList(
                 pagingResult,

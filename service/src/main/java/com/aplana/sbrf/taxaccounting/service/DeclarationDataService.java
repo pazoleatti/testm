@@ -6,7 +6,9 @@ import com.aplana.sbrf.taxaccounting.model.action.CreateDeclarationDataAction;
 import com.aplana.sbrf.taxaccounting.model.action.CreateReportAction;
 import com.aplana.sbrf.taxaccounting.model.action.CreateReportFormsAction;
 import com.aplana.sbrf.taxaccounting.model.action.PrepareSubreportAction;
+import com.aplana.sbrf.taxaccounting.model.dto.Declaration2NdflFLDTO;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
+import com.aplana.sbrf.taxaccounting.model.filter.Declaration2NdflFLFilter;
 import com.aplana.sbrf.taxaccounting.model.filter.NdflFilter;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -236,6 +238,15 @@ public interface DeclarationDataService {
      * @return список налоговых форм {@link DeclarationDataSearchResultItem}
      */
     PagingResult<DeclarationDataJournalItem> fetchDeclarations(TAUserInfo userInfo, DeclarationDataFilter filter, PagingParams pagingParams);
+
+    /**
+     * Возвращяет страницу форм 2-НДФЛ (ФЛ)
+     *
+     * @param filter       фильтр
+     * @param pagingParams параметры пагинации
+     * @return страница форм 2-НДФЛ (ФЛ)
+     */
+    PagingResult<Declaration2NdflFLDTO> findAll2NdflFL(Declaration2NdflFLFilter filter, PagingParams pagingParams);
 
     /**
      * Формирование спецотчета по форме

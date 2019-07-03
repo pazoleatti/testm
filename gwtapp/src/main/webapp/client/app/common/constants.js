@@ -121,7 +121,8 @@
                 CREATED: {id: 1, name: "Создана"},
                 PREPARED: {id: 2, name: "Подготовлена"},
                 ACCEPTED: {id: 3, name: "Принята"},
-                NOT_EXIST: {id: 4, name: "Не создана"}
+                ISSUED: {id: 4, name: "Выдана"},
+                NOT_EXIST: {id: 999, name: "Не создана"}
             },
             DECLARATION_FILE_PERMISSION: {
                 DELETE: 1 << 0

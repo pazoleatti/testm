@@ -13,10 +13,12 @@ import com.aplana.sbrf.taxaccounting.model.action.CreateDeclarationDataAction;
 import com.aplana.sbrf.taxaccounting.model.action.CreateReportAction;
 import com.aplana.sbrf.taxaccounting.model.action.CreateReportFormsAction;
 import com.aplana.sbrf.taxaccounting.model.action.PrepareSubreportAction;
+import com.aplana.sbrf.taxaccounting.model.dto.Declaration2NdflFLDTO;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
+import com.aplana.sbrf.taxaccounting.model.filter.Declaration2NdflFLFilter;
 import com.aplana.sbrf.taxaccounting.model.filter.NdflFilter;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
@@ -900,6 +902,11 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             filter.setUserDepartmentId(currentUser.getDepartmentId());
             filter.setControlNs(false);
         }
+    }
+
+    @Override
+    public PagingResult<Declaration2NdflFLDTO> findAll2NdflFL(Declaration2NdflFLFilter filter, PagingParams pagingParams) {
+        return declarationDataDao.findAll2NdflFL(filter, pagingParams);
     }
 
     @Override

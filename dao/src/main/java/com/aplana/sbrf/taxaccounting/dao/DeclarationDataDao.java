@@ -7,6 +7,8 @@ import com.aplana.sbrf.taxaccounting.model.DeclarationDataSearchOrdering;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.State;
+import com.aplana.sbrf.taxaccounting.model.dto.Declaration2NdflFLDTO;
+import com.aplana.sbrf.taxaccounting.model.filter.Declaration2NdflFLFilter;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDocState;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookKnfType;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
@@ -122,6 +124,15 @@ public interface DeclarationDataDao extends PermissionDao {
      * @return Страница списка идентификаторов данных по декларациям, соответствующие критериям поиска
      */
     PagingResult<DeclarationDataJournalItem> findPage(DeclarationDataFilter declarationDataFilter, PagingParams pagingParams);
+
+    /**
+     * Возвращяет страницу форм 2-НДФЛ (ФЛ)
+     *
+     * @param filter       фильтр
+     * @param pagingParams параметры пагинации
+     * @return страница форм 2-НДФЛ (ФЛ)
+     */
+    PagingResult<Declaration2NdflFLDTO> findAll2NdflFL(Declaration2NdflFLFilter filter, PagingParams pagingParams);
 
     /**
      * Возвращяет список ид форм по фильтру

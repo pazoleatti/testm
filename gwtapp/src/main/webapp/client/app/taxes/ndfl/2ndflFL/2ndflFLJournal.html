@@ -1,0 +1,34 @@
+<div class="flex-column">
+    <div class="content-header">
+        <h1>{{::'ndfl.2ndflFLJournal.title' | translate}}</h1>
+    </div>
+    <div class="container-grid box-shadow-block flex-fill flex-column" style="overflow-y: auto;">
+        <div style="flex-shrink: 0;">
+            <!-- Панель фильтра -->
+            <div>
+                <span data-ng-include="'client/app/taxes/ndfl/2ndflFL/2ndflFLJournalFilter.html'"></span>
+            </div>
+            <!--Панель кнопок -->
+            <div class="button_panel">
+                <div class="btn-toolbar" role="toolbar">
+                    <!--Удалить-->
+                    <span>
+                        <button type="button" class="btn btn-default" data-ng-click="delete()"
+                                data-ng-disabled="!(_2ndflFLGrid.value.length === 1 && permissionChecker.check(user, APP_CONSTANTS.USER_PERMISSION._2NDFL_FL))">
+                            <span data-translate-once="button.delete"></span>
+                        </button>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Таблица -->
+        <div class="flex-grid flex-fill" style="min-height: calc(100% - 50px);"
+             data-aplana-grid
+             data-grid-options="_2ndflFLGrid.options"
+             data-grid-ctrl="_2ndflFLGrid.ctrl"
+             data-ng-model="_2ndflFLGrid.value"
+             id="_2ndflFLTable">
+        </div>
+    </div>
+</div>

@@ -2,9 +2,12 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
+import com.aplana.sbrf.taxaccounting.dao.impl.sqlBuilder.Declaration2NdflFLSqlBuilder;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.dto.Declaration2NdflFLDTO;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.model.filter.Declaration2NdflFLFilter;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDocState;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookKnfType;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
@@ -426,6 +429,19 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         queryData.setQuery(sql.toString());
         queryData.setParameterSource(params);
         return queryData;
+    }
+
+    @Override
+    public PagingResult<Declaration2NdflFLDTO> findAll2NdflFL(Declaration2NdflFLFilter filter, PagingParams pagingParams) {
+        Declaration2NdflFLSqlBuilder sqlBuilder = new Declaration2NdflFLSqlBuilder();
+        sqlBuilder.build(filter, pagingParams);
+
+        List<Declaration2NdflFLDTO> items = getNamedParameterJdbcTemplate().query(
+                sqlBuilder.getQuery(), sqlBuilder.getParams(), sqlBuilder.getRowMapper()
+        );
+        long count = getNamedParameterJdbcTemplate().queryForObject(sqlBuilder.getCountQuery(), sqlBuilder.getParams(), Long.class);
+
+        return new PagingResult<>(items, (int) count);
     }
 
     @Override

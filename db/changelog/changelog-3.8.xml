@@ -67,4 +67,24 @@
     </changeSet>
 
 
+    <changeSet id="3.8-dnovikov-2" author="dnovikov">
+        <sql>
+            alter table declaration_data add person_id number(18);
+            alter table declaration_data add signatory varchar2(60 char);
+            alter table declaration_data add constraint fk_declaration_data_person foreign key (person_id) references ref_book_person (id);
+            comment on column declaration_data.person_id is 'Ид ФЛ из реестра ФЛ';
+            comment on column declaration_data.signatory is 'ФИО подписанта';
+        </sql>
+    </changeSet>
+
+    <changeSet id="3.8-dnovikov-3" author="dnovikov">
+        <sql>
+            insert into ref_book_form_type(id, code, name) values(6, '2 НДФЛ (ФЛ)', '2-НДФЛ для выдачи ФЛ');
+            insert into declaration_kind(id, name) values(8, 'Отчетная ФЛ');
+            insert into declaration_type(id, name) values(105, '2 НДФЛ (ФЛ)');
+            insert into declaration_template(id, version, name, declaration_type_id, form_kind, form_type) values(105, to_date('01.01.2016', 'dd.mm.yyyy'), '2 НДФЛ (ФЛ)', 105, 8, 6);
+            insert into state(id, name) values(4, 'Выдан');
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>
