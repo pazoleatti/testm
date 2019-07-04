@@ -37,6 +37,18 @@ public class DeclarationResult {
      */
     private String department;
     /**
+     * Ид ФЛ
+     */
+    private Long personId;
+    /**
+     * ФИО ФЛ
+     */
+    private String person;
+    /**
+     * Подписант
+     */
+    private String signatory;
+    /**
      * Ид периода
      */
     private int reportPeriodId;

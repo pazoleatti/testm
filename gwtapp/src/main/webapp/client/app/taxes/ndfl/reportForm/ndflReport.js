@@ -35,7 +35,9 @@
                                     projection: "existenceAndKind"
                                 },
                                 function (data) {
-                                    if (data.exists && data.declarationKindId === APP_CONSTANTS.NDFL_DECLARATION_KIND.REPORTS.id) {
+                                    if (data.exists && (data.declarationKindId === APP_CONSTANTS.NDFL_DECLARATION_KIND.REPORTS.id ||
+                                        data.declarationKindId === APP_CONSTANTS.NDFL_DECLARATION_KIND.REPORTS_FL.id)
+                                    ) {
                                         d.resolve();
                                     } else {
                                         d.reject();
@@ -94,17 +96,13 @@
                                 } else {
                                     $scope.declarationData = data;
                                     $scope.declarationDataId = $stateParams.declarationDataId;
-                                    switch (data.declarationType) {
-                                        case APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_1.id:
-                                            $scope.declarationTypeName = APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_1.name;
-                                            break;
-                                        case APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_2.id:
-                                            $scope.declarationTypeName = APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_2.name;
-                                            break;
-                                        case APP_CONSTANTS.DECLARATION_TYPE.REPORT_6_NDFL.id:
-                                            $scope.declarationTypeName = APP_CONSTANTS.DECLARATION_TYPE.REPORT_6_NDFL.name;
-                                            break;
-                                    }
+                                    var declarationTypes = [APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_1, APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_2,
+                                        APP_CONSTANTS.DECLARATION_TYPE.REPORT_6_NDFL, APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_FL];
+                                    declarationTypes.forEach(function (declarationType) {
+                                        if (declarationType.id === data.declarationType) {
+                                            $scope.declarationTypeName = declarationType.name;
+                                        }
+                                    });
                                 }
                             }
                         }
@@ -143,8 +141,8 @@
                                     cancelAllIntervals();
                                     showDeclarationDataNotExistsError();
                                 } else {
+                                    $scope.availableXml = data.downloadXmlAvailable;
                                     $scope.availablePdf = data.availablePdf;
-                                    $scope.availableReports = data.downloadXmlAvailable;
                                     $scope.availableXlsxReport = data.downloadXlsxAvailable;
                                     if (!$scope.pdfLoaded && data.availablePdf) {
                                         $http({

@@ -112,7 +112,7 @@
                         ],
                         colModel: [
                             {name: 'declarationDataId', index: 'declarationDataId', width: 120, key: true},
-                            {name: 'declarationType', index: 'declarationType', width: 170},
+                            {name: 'declarationType', index: 'declarationType', width: 170, formatter: ndfl2FLLink},
                             {name: 'person', index: 'person', width: 200, formatter: personLink},
                             {name: 'department', index: 'department', width: 200},
                             {name: 'reportPeriod', index: 'reportPeriod', width: 175},
@@ -160,6 +160,10 @@
                         });
                     }
                 };
+
+                function ndfl2FLLink(cellValue, options) {
+                    return "<a href='index.html#/taxes/ndfl/ndflReport/" + options.rowId + "'>" + cellValue + "</a>";
+                }
 
                 function personLink(cellValue, options, row) {
                     var value = cellValue;

@@ -364,6 +364,7 @@
         "title.region": "Регион",
         "title.correctionNum": "Номер корректировки",
         "title.person": "Физическое лицо",
+        "title.signatory": "Подписант",
 
         "title.amountCalcIncome": "Начислено",
         "title.amountPaymentIncome": "Выплачено",

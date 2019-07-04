@@ -158,7 +158,8 @@
                 SUMMARY: {id: 4, name: "Сводная"},
                 UNP: {id: 5, name: "Форма УНП"},
                 CALCULATED: {id: 6, name: "Расчетная"},
-                REPORTS: {id: 7, name: "Отчетная"}
+                REPORTS: {id: 7, name: "Отчетная"},
+                REPORTS_FL: {id: 8, name: "Отчетная ФЛ"}
             },
             CORRECTION_TAG: {
                 ALL: {id: 0, name: "Все периоды"},

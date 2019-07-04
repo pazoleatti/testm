@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.dao.DeclarationDataFileDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.ndfl.NdflPersonDao;
+import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookPersonDao;
 import com.aplana.sbrf.taxaccounting.dao.util.DBUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.action.Create2NdflFLAction;
@@ -33,6 +34,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAsnu;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDocState;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookKnfType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPerson;
 import com.aplana.sbrf.taxaccounting.model.result.*;
 import com.aplana.sbrf.taxaccounting.model.util.DateUtils;
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
@@ -53,6 +55,7 @@ import com.aplana.sbrf.taxaccounting.service.refbook.RefBookAsnuService;
 import com.aplana.sbrf.taxaccounting.service.util.NdflRowEditChangelogBuilder;
 import com.aplana.sbrf.taxaccounting.utils.DepartmentReportPeriodFormatter;
 import com.aplana.sbrf.taxaccounting.utils.ZipUtils;
+import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRParameter;
@@ -215,6 +218,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     private DeclarationLocker declarationLocker;
     @Autowired
     private EdoMessageService edoMessageService;
+    @Autowired
+    private RefBookPersonDao refBookPersonDao;
 
     @Override
     public CreateResult<Long> create(TAUserInfo userInfo, CreateDeclarationDataAction action) {
@@ -705,6 +710,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             result.setAdjustNegativeValues(declaration.isAdjustNegativeValues());
             result.setHasNdflPersons(ndflPersonDao.ndflPersonExistsByDeclarationId(declarationDataId));
             result.setCreationUserName(declaration.getCreatedBy().getName());
+            result.setPersonId(declaration.getPersonId());
+            RegistryPerson person = refBookPersonDao.fetchPersonVersion(declaration.getPersonId());
+            result.setPerson(Joiner.on(" ").skipNulls().join(asList(person.getLastName(), person.getFirstName(), person.getMiddleName())));
+            result.setSignatory(declaration.getSignatory());
 
             DeclarationTemplate declarationTemplate = declarationTemplateService.get(declaration.getDeclarationTemplateId());
             result.setDeclarationFormKind(declarationTemplate.getDeclarationFormKind().getTitle());
