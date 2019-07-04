@@ -711,8 +711,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             result.setHasNdflPersons(ndflPersonDao.ndflPersonExistsByDeclarationId(declarationDataId));
             result.setCreationUserName(declaration.getCreatedBy().getName());
             result.setPersonId(declaration.getPersonId());
-            RegistryPerson person = refBookPersonDao.fetchPersonVersion(declaration.getPersonId());
-            result.setPerson(Joiner.on(" ").skipNulls().join(asList(person.getLastName(), person.getFirstName(), person.getMiddleName())));
+           if (declaration.getPersonId() != null) {
+                RegistryPerson person = refBookPersonDao.fetchPersonVersion(declaration.getPersonId());
+                result.setPerson(Joiner.on(" ").skipNulls().join(asList(person.getLastName(), person.getFirstName(), person.getMiddleName())));
+            }
             result.setSignatory(declaration.getSignatory());
 
             DeclarationTemplate declarationTemplate = declarationTemplateService.get(declaration.getDeclarationTemplateId());

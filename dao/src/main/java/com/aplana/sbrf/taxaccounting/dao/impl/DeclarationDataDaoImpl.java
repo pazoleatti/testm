@@ -986,7 +986,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             d.setNegativeIncome(rs.getBigDecimal("negative_income"));
             d.setNegativeTax(rs.getBigDecimal("negative_tax"));
             d.setNegativeSumsSign(NegativeSumsSign.valueOf(SqlUtils.getInteger(rs, "negative_sums_sign")));
-            d.setPersonId(rs.getLong("person_id"));
+            d.setPersonId(SqlUtils.getLong(rs, "person_id"));
             d.setSignatory(rs.getString("signatory"));
             d.setCreatedDate(new Date(rs.getTimestamp("created_date").getTime()));
             d.setCreatedBy(userDao.getUser(rs.getInt("created_by")));
