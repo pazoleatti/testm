@@ -451,7 +451,7 @@
                  */
                 $scope.initSelectWithOpenPeriods = function (latestPeriod) {
                     $scope.periodSelect = GetSelectOption.getBasicSingleSelectOptions(true, true, 'periodFormatter');
-                    fillSelectListAndFindLatestPeriod("opened", latestPeriod);
+                    fillSelectListAndFindLatestPeriod("all", latestPeriod);
                 };
 
                 /**
