@@ -54,14 +54,11 @@ public class JmsBaseConfig {
         @Bean
         public JmsListenerContainerFactory<?> jmsListenerContainerFactory(ConnectionFactory connectionFactory,
                                                                           MessageConverter messageConverter,
-                                                                          BeanFactoryDestinationResolver destinationResolver,
-                                                                          PlatformTransactionManager transactionManager) {
+                                                                          BeanFactoryDestinationResolver destinationResolver) {
 
                 DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
                 factory.setConnectionFactory(connectionFactory);
                 factory.setDestinationResolver(destinationResolver);
-                factory.setTransactionManager(transactionManager);
-                factory.setSessionTransacted(true);
                 factory.setMaxMessagesPerTask(1);
                 factory.setMessageConverter(messageConverter);
                 return factory;
