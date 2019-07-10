@@ -17,7 +17,7 @@ public class Declaration2NdflFLFilter {
     // Реквизиты форм
     private List<Integer> reportPeriodIds;
     private List<Integer> departmentIds;
-    private Long declarationDataId;
+    private String declarationDataId;
     @JsonDeserialize(using = DateTimeDeserializer.class)
     private Date creationDateFrom;
     @JsonDeserialize(using = DateTimeDeserializer.class)
