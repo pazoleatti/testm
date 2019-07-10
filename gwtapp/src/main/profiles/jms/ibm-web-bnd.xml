@@ -7,7 +7,7 @@
 
 	<virtual-host name="default_host" />
 
-    <resource-ref name="jdbc/TaxAccDS" binding-name="jdbc/DataSourceUnstable2"/>
+    <resource-ref name="jdbc/TaxAccDS" binding-name="jdbc/TaxAccDS${releasePostfix}"/>
 
 	<resource-ref name="jms/FundConnectionFactory" binding-name="jms/FundConnectionFactory" />
 	<resource-ref name="jms/FundFromNdflSubsystemQueue" binding-name="jms/FundFromNdflSubsystemQueue" />
