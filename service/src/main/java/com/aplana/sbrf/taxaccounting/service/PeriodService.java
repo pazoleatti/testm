@@ -82,6 +82,11 @@ public interface PeriodService {
     List<ReportPeriod> findAll();
 
     /**
+     * Получение списка всех отчётных периодов для 2-НДФЛ (ФЛ)
+     */
+    List<ReportPeriod> findAllFor2NdflFL();
+
+    /**
      * Получение записи справочника "Коды, определяющие налоговый (отчётный) период" по идентификатору
      *
      * @param id идентификатор

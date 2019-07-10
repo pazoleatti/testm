@@ -54,6 +54,16 @@ public class ReportPeriodController {
     }
 
     /**
+     * Получение всех Отчетных периодов для формы 2-НДФЛ (ФЛ)
+     *
+     * @return Список периодов
+     */
+    @GetMapping(value = "/rest/reportPeriod", params = "projection=for2NdflFL")
+    public List<ReportPeriod> findAllFor2NdflFL() {
+        return periodService.findAllFor2NdflFL();
+    }
+
+    /**
      * Получает периоды назначенные подразделению
      *
      * @param departmentId идентификатор подразделения

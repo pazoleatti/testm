@@ -447,11 +447,19 @@
                 };
 
                 /**
-                 * Добавить в список открытые отчетные периоды и определить последний
+                 * Список периодов для формы 2-НДФЛ (ФЛ)
                  */
-                $scope.initSingleSelectWithAllPeriods = function (latestPeriod) {
+                $scope.initSelectWithAllPeriodsFor2NdflFL = function (latestPeriod) {
+                    $scope.periodSelect = GetSelectOption.getBasicMultipleSelectOptions(true, 'periodFormatter');
+                    fillSelectListAndFindLatestPeriod("for2NdflFL", latestPeriod);
+                };
+
+                /**
+                 * Список периодов для формы 2-НДФЛ (ФЛ)
+                 */
+                $scope.initSingleSelectWithAllPeriodsFor2NdflFL = function (latestPeriod) {
                     $scope.periodSelect = GetSelectOption.getBasicSingleSelectOptions(true, true, 'periodFormatter');
-                    fillSelectListAndFindLatestPeriod("all", latestPeriod);
+                    fillSelectListAndFindLatestPeriod("for2NdflFL", latestPeriod);
                 };
 
                 /**

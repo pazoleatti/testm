@@ -48,6 +48,11 @@ public interface ReportPeriodDao extends PermissionDao {
     List<ReportPeriod> findAll();
 
     /**
+     * Получение списка всех отчётных периодов для 2-НДФЛ (ФЛ)
+     */
+    List<ReportPeriod> findAllFor2NdflFL();
+
+    /**
      * Получение списка отчётных периодов, входящий в данный налоговый период.
      * Список отсортирован по {@link ReportPeriod#getOrder()} порядковым номерам отчётных периодов
      *
