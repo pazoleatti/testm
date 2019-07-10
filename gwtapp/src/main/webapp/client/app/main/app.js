@@ -614,7 +614,7 @@
         "departmentConfig.header.signatoryFirstName": "Имя подписанта",
         "departmentConfig.header.signatoryLastName": "Отчество подписанта",
         "departmentConfig.header.approveDocName": "Документ полномочий подписанта",
-        "departmentConfig.header.approveOrgName": "Наименование организации-представителя налогоплательщика",
+        "departmentConfig.header.approveOrgName": "Организация представителя налогового агента",
         "departmentConfig.header.reorganizationCode": "Код формы реорганизации",
         "departmentConfig.header.reorgKpp": "КПП реорганизованной организации",
         "departmentConfig.header.reorgInn": "ИНН реорганизованной организации",

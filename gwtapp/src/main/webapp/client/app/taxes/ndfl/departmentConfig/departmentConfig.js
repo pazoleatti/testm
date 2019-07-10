@@ -119,6 +119,7 @@
                             $filter('translate')('departmentConfig.header.signatoryFirstName'),
                             $filter('translate')('departmentConfig.header.signatoryLastName'),
                             $filter('translate')('departmentConfig.header.approveDocName'),
+                            $filter('translate')('departmentConfig.header.approveOrgName'),
                             $filter('translate')('departmentConfig.header.reorganizationCode'),
                             $filter('translate')('departmentConfig.header.reorgKpp'),
                             $filter('translate')('departmentConfig.header.reorgInn'),
@@ -166,11 +167,8 @@
                             {name: 'signatorySurName', index: 'signatory_surname', width: 110},
                             {name: 'signatoryFirstName', index: 'signatory_firstname', width: 110},
                             {name: 'signatoryLastName', index: 'signatory_lastname', width: 130},
-                            {
-                                name: 'approveDocName',
-                                index: 'approve_doc_name',
-                                width: 165
-                            },
+                            {name: 'approveDocName', index: 'approve_doc_name', width: 165},
+                            {name: 'approveOrgName', index: 'approve_org_name', width: 165},
                             {
                                 name: 'reorganization',
                                 index: 'reorg_code',
