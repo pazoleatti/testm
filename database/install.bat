@@ -28,6 +28,9 @@ cd PATCHES
 
 
 cd ..
+echo "Gather statistics"
+"%ORA_BIN%\sqlplus" %DBA_AUTH% @"tech/gather_statistics.sql" %NDFL_USR% _log/stats.log
 
 "%ORA_BIN%\sqlplus" %DBA_AUTH% @"tech/result_log.sql" %NDFL_USR% _log/result_log.log
+
 pause

@@ -64,10 +64,6 @@ PROMPT ## 05_procedures_packages
 PROMPT ## 06_check_index_constraints
 @database-3.7/06_check_index_constraints.sql
 
-PROMPT ## gather statistics
-@database-3.7/07_gather_statistics.sql
-
-
 PROMPT ## get statistics
 @database-3.7/08_get_statistics.sql
 

@@ -58,10 +58,6 @@ PROMPT ## 03_update_dml.sql
 PROMPT ## 06_check_index_constraints
 @database-3.8/06_check_index_constraints.sql
 
-PROMPT ## gather statistics
-@database-3.8/07_gather_statistics.sql
-
-
 PROMPT ## get statistics
 @database-3.8/08_get_statistics.sql
 
