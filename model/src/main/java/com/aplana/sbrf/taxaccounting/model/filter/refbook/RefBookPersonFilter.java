@@ -57,4 +57,19 @@ public class RefBookPersonFilter implements Serializable {
     private Date versionDate;
 
     private Boolean duplicates;
+
+    public RefBookPersonFilter allVersions(Boolean allVersions) {
+        this.allVersions = allVersions;
+        return this;
+    }
+
+    public RefBookPersonFilter versionDate(Date versionDate) {
+        this.versionDate = versionDate;
+        return this;
+    }
+
+    public RefBookPersonFilter duplicates(Boolean duplicates) {
+        this.duplicates = duplicates;
+        return this;
+    }
 }

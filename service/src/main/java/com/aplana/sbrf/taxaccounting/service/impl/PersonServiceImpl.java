@@ -126,6 +126,9 @@ public class PersonServiceImpl implements PersonService {
     @Override
     @Transactional(readOnly = true)
     public PagingResult<PersonFor2NdflFL> findAllFor2NdflFL(PagingParams pagingParams, RefBookPersonFilter filter) {
+        filter.allVersions(false)
+                .versionDate(new Date())
+                .duplicates(false);
         PagingResult<RegistryPerson> persons = refBookPersonDao.getPersons(pagingParams, filter);
         PagingResult<PersonFor2NdflFL> personsFor2NdflFL = new PagingResult<>(new ArrayList<PersonFor2NdflFL>(), persons.getTotalCount());
         for (RegistryPerson person : persons) {
