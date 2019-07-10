@@ -14,7 +14,7 @@ MKDIR %LOG_DIR%
 
 DEL /s /q /f %LOG_DIR%\*.log
 
-ECHO ## update-ndfl_person_income
+ECHO ## get plan
 "%ORA_BIN%\sqlplus" %AUTH% @"get_plan.sql" %LOG_DIR%/get_plan.log
 
 PAUSE
