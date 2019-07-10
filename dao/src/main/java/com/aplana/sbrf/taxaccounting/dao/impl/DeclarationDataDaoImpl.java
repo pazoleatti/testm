@@ -1035,7 +1035,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                         "join department_report_period drp on drp.id = dd.department_report_period_id\n" +
                         "join declaration_template dt on dt.id = dd.declaration_template_id\n" +
                         "join (\n" +
-                        "  select distinct drp.report_period_id, dt.declaration_type_id, dd.kpp, dd.oktmo, max(dd.correction_num) correction_num\n" +
+                        "  select distinct drp.report_period_id, dt.declaration_type_id, dd.kpp, dd.oktmo, max(drp.correction_date) correction_date\n" +
                         "  from declaration_data dd\n" +
                         "  join declaration_template dt on dt.id = dd.declaration_template_id\n" +
                         "  join department_report_period drp on drp.id = dd.department_report_period_id\n" +
@@ -1046,7 +1046,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                         (isNotEmpty(kppOktmoPairs) ? SqlUtils.pairInStatement("and (dd.kpp, dd.oktmo)", toPairs(kppOktmoPairs)) : "") +
                         "  group by drp.report_period_id, dt.declaration_type_id, dd.kpp, dd.oktmo\n" +
                         ") t on t.report_period_id = drp.report_period_id and t.declaration_type_id = dt.declaration_type_id " +
-                        " and t.kpp = dd.kpp and t.oktmo = dd.oktmo and t.correction_num = dd.correction_num",
+                        " and t.kpp = dd.kpp and t.oktmo = dd.oktmo and (t.correction_date is null and drp.correction_date is null or t.correction_date = drp.correction_date)",
                 Long.class, reportPeriodId, personId);
     }
 
