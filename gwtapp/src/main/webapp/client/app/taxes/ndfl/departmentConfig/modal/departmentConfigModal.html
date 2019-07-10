@@ -331,6 +331,25 @@
                             </div>
                         </div>
                     </div>
+                    <!--Организация представителя налогового агента-->
+                    <div class="row-fluid form-group">
+                        <div class="span4">
+                            <label class="control-label">
+                                {{::'departmentConfig.modal.field.approveOrgName.label' | translate}}:</label>
+                        </div>
+                        <div data-ng-if="mode === 'VIEW'" class="span8 info-text" style="white-space: nowrap;"
+                             title="{{record.approveOrgName}}">
+                            {{record.approveOrgName}}
+                        </div>
+                        <div data-ng-if="mode !== 'VIEW'" class="span8">
+                            <div data-aplana-field>
+                                <input class="form-control" type="text"
+                                       data-ng-model="record.approveOrgName"
+                                       maxlength="1000"
+                                       placeholder="{{'filter.placeholder.search' | translate}}"/>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

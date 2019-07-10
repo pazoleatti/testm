@@ -638,6 +638,7 @@
         "departmentConfig.modal.field.signatoryLastName.label": "Отчество подписанта",
         "departmentConfig.modal.field.signatoryMark.label": "Признак подписанта",
         "departmentConfig.modal.field.approveDocName.label": "Документ полномочий подписанта",
+        "departmentConfig.modal.field.approveOrgName.label": "Организация представителя налогового агента",
         "departmentConfig.modal.field.reorganization.label": "Код формы реорганизации",
         "departmentConfig.modal.field.reorgKpp.label": "КПП реорганизованной организации",
         "departmentConfig.modal.field.reorgInn.label": "ИНН реорганизованной организации",
