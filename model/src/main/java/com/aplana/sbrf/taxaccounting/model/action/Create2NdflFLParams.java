@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.KppOktmoPair;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -11,11 +12,11 @@ import java.util.List;
  */
 @Getter
 @Setter
-public class Create2NdflFLAction {
+public class Create2NdflFLParams implements Serializable {
     private long personId;
     private int declarationTypeId;
-    private int departmentId;
     private int reportPeriodId;
     private List<KppOktmoPair> kppOktmoPairs;
     private String signatory;
+    private List<Long> declaration2Ndfl1Ids;
 }

@@ -33,6 +33,7 @@ import java.sql.Timestamp;
 import java.sql.Types;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -43,6 +44,7 @@ import java.util.Set;
 import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.transformToSqlInStatement;
 import static com.aplana.sbrf.taxaccounting.model.util.IdentityObjectUtils.getIds;
 import static java.util.Arrays.asList;
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
 /**
@@ -1024,5 +1026,35 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         return new Date(
                 getJdbcTemplate().queryForObject("select created_date from declaration_data where id = ?", Timestamp.class, declarationId).getTime()
         );
+    }
+
+    @Override
+    public List<Long> findAllIdsFor2NdflFL(int reportPeriodId, long personId, List<KppOktmoPair> kppOktmoPairs) {
+        return getJdbcTemplate().queryForList("" +
+                        "select dd.id from declaration_data dd\n" +
+                        "join department_report_period drp on drp.id = dd.department_report_period_id\n" +
+                        "join declaration_template dt on dt.id = dd.declaration_template_id\n" +
+                        "join (\n" +
+                        "  select distinct drp.report_period_id, dt.declaration_type_id, dd.kpp, dd.oktmo, max(dd.correction_num) correction_num\n" +
+                        "  from declaration_data dd\n" +
+                        "  join declaration_template dt on dt.id = dd.declaration_template_id\n" +
+                        "  join department_report_period drp on drp.id = dd.department_report_period_id\n" +
+                        "  join ndfl_references nr on nr.declaration_data_id = dd.id\n" +
+                        "  where dt.declaration_type_id = " + DeclarationType.NDFL_2_1 + " \n" +
+                        "    and drp.report_period_id = ? and nr.person_id = ? \n" +
+                        "    and dd.doc_state_id in (" + RefBookDocState.ACCEPTED.getId() + ", " + RefBookDocState.WORKED_OUT.getId() + ") \n" +
+                        (isNotEmpty(kppOktmoPairs) ? SqlUtils.pairInStatement("and (dd.kpp, dd.oktmo)", toPairs(kppOktmoPairs)) : "") +
+                        "  group by drp.report_period_id, dt.declaration_type_id, dd.kpp, dd.oktmo\n" +
+                        ") t on t.report_period_id = drp.report_period_id and t.declaration_type_id = dt.declaration_type_id " +
+                        " and t.kpp = dd.kpp and t.oktmo = dd.oktmo and t.correction_num = dd.correction_num",
+                Long.class, reportPeriodId, personId);
+    }
+
+    private Collection<Pair<String, String>> toPairs(List<KppOktmoPair> kppOktmoPairs) {
+        List<Pair<String, String>> pairs = new ArrayList<>();
+        for (KppOktmoPair kppOktmoPair : kppOktmoPairs) {
+            pairs.add(new Pair<>(kppOktmoPair.getKpp(), kppOktmoPair.getOktmo()));
+        }
+        return pairs;
     }
 }

@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.DeclarationData;
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataFilter;
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataJournalItem;
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataSearchOrdering;
+import com.aplana.sbrf.taxaccounting.model.KppOktmoPair;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.State;
@@ -285,4 +286,14 @@ public interface DeclarationDataDao extends PermissionDao {
      * @return дата создания формы
      */
     Date getCreatedDateById(long declarationId);
+
+    /**
+     * Возвращяет список ид форм 2-НДФЛ (1) для создания формы 2-НДФЛ (ФЛ)
+     *
+     * @param reportPeriodId ид отчетного периода
+     * @param personId       ид ФЛ
+     * @param kppOktmoPairs  пары КПП/ОКТМО
+     * @return список ид форм
+     */
+    List<Long> findAllIdsFor2NdflFL(int reportPeriodId, long personId, List<KppOktmoPair> kppOktmoPairs);
 }

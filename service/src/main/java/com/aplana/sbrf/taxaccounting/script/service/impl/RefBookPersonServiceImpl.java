@@ -79,8 +79,10 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
     @Autowired
     private TransactionHelper tx;
 
-    // ----------------------------- РНУ-НДФЛ  -----------------------------
-
+    @Override
+    public RegistryPerson findById(long id) {
+        return refBookPersonDao.fetchPersonVersion(id);
+    }
 
     @Override
     public void clearRnuNdflPerson(Long declarationDataId) {

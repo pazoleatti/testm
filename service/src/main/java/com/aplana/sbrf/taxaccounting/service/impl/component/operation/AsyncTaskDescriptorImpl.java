@@ -44,6 +44,7 @@ public class AsyncTaskDescriptorImpl implements AsyncTaskDescriptor {
     @Override
     public String createDescription(Map<String, Object> params, OperationType operationType) {
         Long declarationDataId = null;
+        Integer reportPeriodId = null;
         Integer departmentReportPeriodId = null;
         Integer declarationTypeId = null;
         String fileName = null;
@@ -51,6 +52,9 @@ public class AsyncTaskDescriptorImpl implements AsyncTaskDescriptor {
         String dates = "";
         if (params.containsKey("declarationDataId")) {
             declarationDataId = (Long) params.get("declarationDataId");
+        }
+        if (params.containsKey("reportPeriodId")) {
+            reportPeriodId = (Integer) params.get("reportPeriodId");
         }
         if (params.containsKey("departmentReportPeriodId")) {
             departmentReportPeriodId = (Integer) params.get("departmentReportPeriodId");
@@ -109,6 +113,8 @@ public class AsyncTaskDescriptorImpl implements AsyncTaskDescriptor {
             return declarationDataAsyncTaskDescriptor.createDescription(declarationDataId, "Формирование отчета \"2-НДФЛ (2) по физическому лицу\" ");
         else if (operationType.equals(OperationType.DECLARATION_2NDFL1) || operationType.equals(OperationType.DECLARATION_2NDFL2) || operationType.equals(OperationType.DECLARATION_6NDFL))
             return createReportsAsyncTaskDescriptor.createDescription(departmentReportPeriodId, declarationTypeId);
+        else if (operationType.equals(OperationType.DECLARATION_2NDFL_FL))
+            return createReportsAsyncTaskDescriptor.createShortDescription(reportPeriodId, declarationTypeId);
         else if (operationType.equals(OperationType.EXPORT_REPORTS))
             return declarationDataReportingMultiModeAsyncTaskDescriptor.createDescription(declarationDataIds, "Выгрузка отчетности");
         else if (operationType.equals(OperationType.LOAD_TRANSPORT_FILE))

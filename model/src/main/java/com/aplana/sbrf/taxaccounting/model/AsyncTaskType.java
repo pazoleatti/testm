@@ -36,6 +36,7 @@ public enum AsyncTaskType {
     EXPORT_REPORTS(41L, "EXPORT_REPORTS", "Выгрузка отчетности"),
     UPDATE_DOC_STATE(42L, "UPDATE_DOC_STATE", "Изменение состояния ЭД"),
     CREATE_NOTIFICATIONS_LOGS(43L, "CREATE_NOTIFICATIONS_LOGS", "Выгрузка протоколов по оповещениям за: %s"),
+    CREATE_2NDFL_FL(44L, "CREATE_2NDFL_FL", "Формирование ОНФ 2-НДФЛ(ФЛ)"),
 
     //Псевдозадачи, которые тут чтобы использоваться в общих механизмах
     IMPORT_TF_DEC("IMPORT_TF_DECLARATION", "Импорт ТФ из каталога загрузки"); //формально является задачей, блокирует форму при импорт из каталога загрузки

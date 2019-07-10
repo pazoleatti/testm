@@ -71,7 +71,7 @@ public class DeclarationLockerImpl implements DeclarationLocker {
             OperationType.RNU_NDFL_DETAIL_REPORT, OperationType.RNU_NDFL_PERSON_DB,
             OperationType.RNU_NDFL_PERSON_ALL_DB, OperationType.RNU_PAYMENT_REPORT, OperationType.RNU_RATE_REPORT,
             OperationType.EXCEL_DEC, OperationType.EXCEL_TEMPLATE_DEC, OperationType.DECLARATION_2NDFL1, OperationType.DECLARATION_2NDFL2,
-            OperationType.DECLARATION_6NDFL, OperationType.IMPORT_DECLARATION_EXCEL, OperationType.TRANSFER);
+            OperationType.DECLARATION_6NDFL, OperationType.DECLARATION_2NDFL_FL, OperationType.IMPORT_DECLARATION_EXCEL, OperationType.TRANSFER);
 
     private static final Set<OperationType> SET_CHECK__ACCEPT = ImmutableSet.of(
             OperationType.ACCEPT_DEC, OperationType.CHECK_DEC,
@@ -94,7 +94,7 @@ public class DeclarationLockerImpl implements DeclarationLocker {
             OperationType.RNU_NDFL_PERSON_DB, OperationType.RNU_NDFL_PERSON_ALL_DB,
             OperationType.RNU_PAYMENT_REPORT, OperationType.RNU_RATE_REPORT, OperationType.UPDATE_PERSONS_DATA,
             OperationType.EXCEL_DEC, OperationType.DECLARATION_2NDFL1, OperationType.DECLARATION_2NDFL2,
-            OperationType.DECLARATION_6NDFL, OperationType.EXCEL_TEMPLATE_DEC, OperationType.IDENTIFY_PERSON,
+            OperationType.DECLARATION_6NDFL, OperationType.DECLARATION_2NDFL_FL, OperationType.EXCEL_TEMPLATE_DEC, OperationType.IDENTIFY_PERSON,
             OperationType.IMPORT_DECLARATION_EXCEL, OperationType.TRANSFER);
 
 
@@ -118,7 +118,7 @@ public class DeclarationLockerImpl implements DeclarationLocker {
             OperationType.RNU_NDFL_PERSON_DB, OperationType.RNU_NDFL_PERSON_ALL_DB,
             OperationType.RNU_PAYMENT_REPORT, OperationType.RNU_RATE_REPORT, OperationType.UPDATE_PERSONS_DATA,
             OperationType.EXCEL_DEC, OperationType.DECLARATION_2NDFL1, OperationType.DECLARATION_2NDFL2,
-            OperationType.DECLARATION_6NDFL, OperationType.EXCEL_TEMPLATE_DEC, OperationType.EXPORT_REPORTS,
+            OperationType.DECLARATION_6NDFL, OperationType.DECLARATION_2NDFL_FL, OperationType.EXCEL_TEMPLATE_DEC, OperationType.EXPORT_REPORTS,
             OperationType.IMPORT_DECLARATION_EXCEL, OperationType.UPDATE_DOC_STATE, OperationType.SEND_EDO,
             OperationType.TRANSFER
     );
@@ -246,6 +246,8 @@ public class DeclarationLockerImpl implements DeclarationLocker {
         } else if (operationType.equals(OperationType.DECLARATION_2NDFL2)) {
             return doCheckAndLock(declarationDataIdList, operationType, SET_REPORT_KPP_OKTMO__2NDFL1__2NDFL2__6NDFL, additionalParams, userInfo, logger);
         } else if (operationType.equals(OperationType.DECLARATION_6NDFL)) {
+            return doCheckAndLock(declarationDataIdList, operationType, SET_REPORT_KPP_OKTMO__2NDFL1__2NDFL2__6NDFL, additionalParams, userInfo, logger);
+        } else if (operationType.equals(OperationType.DECLARATION_2NDFL_FL)) {
             return doCheckAndLock(declarationDataIdList, operationType, SET_REPORT_KPP_OKTMO__2NDFL1__2NDFL2__6NDFL, additionalParams, userInfo, logger);
         } else if (operationType.equals(OperationType.EXPORT_REPORTS)) {
             return doCheckAndLock(declarationDataIdList, operationType, SET_EDIT_FILE__PDF__EXPORT_REPORTS__REPORT_2NDFL1__REPORT_2NDFL2, additionalParams, userInfo, logger);

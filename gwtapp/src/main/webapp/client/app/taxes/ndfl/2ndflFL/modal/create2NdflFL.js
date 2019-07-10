@@ -17,7 +17,6 @@
                     var createParams = {
                         personId: $shareData.person.id,
                         declarationTypeId: $scope.create2NdflFLForm.declarationType.id,
-                        departmentId: $scope.user.terBank.id,
                         reportPeriodId: $scope.create2NdflFLForm.reportPeriod.id,
                         kppOktmoPairs: $scope.create2NdflFLForm.kppOktmoPairs,
                         signatory: $scope.create2NdflFLForm.signatory

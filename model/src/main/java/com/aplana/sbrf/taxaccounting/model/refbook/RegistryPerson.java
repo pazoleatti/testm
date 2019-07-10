@@ -2,10 +2,12 @@ package com.aplana.sbrf.taxaccounting.model.refbook;
 
 import com.aplana.sbrf.taxaccounting.model.IdentityObject;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.google.common.base.Joiner;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -147,4 +149,7 @@ public class RegistryPerson extends IdentityObject<Long> implements PermissivePe
         this.personTbList = new ArrayList<>();
     }
 
+    public String getFullName() {
+        return Joiner.on(" ").skipNulls().join(Arrays.asList(lastName, firstName, middleName));
+    }
 }

@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import java.io.File;
 import java.io.InputStream;
 
+@ScriptExposed
 public interface ValidateXMLService {
 
     /**

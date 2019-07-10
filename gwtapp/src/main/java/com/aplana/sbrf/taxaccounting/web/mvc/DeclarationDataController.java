@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.action.Create2NdflFLAction;
+import com.aplana.sbrf.taxaccounting.model.action.Create2NdflFLParams;
 import com.aplana.sbrf.taxaccounting.model.action.CreateDeclarationDataAction;
 import com.aplana.sbrf.taxaccounting.model.action.CreateReportAction;
 import com.aplana.sbrf.taxaccounting.model.action.CreateReportFormsAction;
@@ -342,7 +342,7 @@ public class DeclarationDataController {
      */
     @PostMapping(value = "/actions/declarationData/createReportForm")
     public ActionResult createReportForm(@RequestBody CreateReportFormsAction action) {
-        return declarationService.createReportsCreateTask(action, securityService.currentUserInfo());
+        return declarationService.asyncCreateReportForms(action, securityService.currentUserInfo());
     }
 
     /**
@@ -352,9 +352,9 @@ public class DeclarationDataController {
      * @return Результат создания
      */
     @PostMapping(value = "/actions/declarationData/create2NdflFL")
-    public ActionResult create2NdflFL(@RequestBody Create2NdflFLAction action) {
+    public ActionResult create2NdflFL(@RequestBody Create2NdflFLParams action) {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        return declarationService.create2NdflFL(userInfo, action);
+        return declarationService.asyncCreate2NdflFL(action, userInfo);
     }
 
     /**

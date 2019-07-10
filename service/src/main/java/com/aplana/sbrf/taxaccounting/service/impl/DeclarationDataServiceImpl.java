@@ -9,7 +9,7 @@ import com.aplana.sbrf.taxaccounting.dao.ndfl.NdflPersonDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookPersonDao;
 import com.aplana.sbrf.taxaccounting.dao.util.DBUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.action.Create2NdflFLAction;
+import com.aplana.sbrf.taxaccounting.model.action.Create2NdflFLParams;
 import com.aplana.sbrf.taxaccounting.model.action.CreateDeclarationDataAction;
 import com.aplana.sbrf.taxaccounting.model.action.CreateReportAction;
 import com.aplana.sbrf.taxaccounting.model.action.CreateReportFormsAction;
@@ -252,8 +252,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    public ActionResult createReportsCreateTask(CreateReportFormsAction action, TAUserInfo userInfo) {
-        LOG.info(String.format("DeclarationDataServiceImpl.createReportsCreateTask by %s. action: %s", userInfo, action));
+    public ActionResult asyncCreateReportForms(CreateReportFormsAction action, TAUserInfo userInfo) {
+        LOG.info(String.format("asyncCreateReportForms by %s. action: %s", userInfo, action));
         Logger logger = new Logger();
         ActionResult taskResult = new ActionResult();
 
@@ -275,24 +275,62 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    public ActionResult create2NdflFL(TAUserInfo userInfo, Create2NdflFLAction action) {
-        ActionResult taskResult = new ActionResult();
+    @Transactional
+    public void createReportForms(ReportFormsCreationParams params, LockStateLogger stateLogger, Logger logger, TAUserInfo userInfo) {
+        LOG.info(String.format("createReportForms by %s. params: %s", userInfo, params));
+        DeclarationData sourceKnf = get(params.getSourceKnfId());
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.fetchOne(sourceKnf.getDepartmentReportPeriodId());
+        DeclarationData declarationDataTemp = new DeclarationData();
+        declarationDataTemp.setDeclarationTemplateId(declarationTemplateService.getActiveDeclarationTemplateId(params.getDeclarationTypeId(), departmentReportPeriod.getReportPeriod().getId()));
+        declarationDataTemp.setDepartmentReportPeriodId(departmentReportPeriod.getId());
+
+        Map<String, Object> additionalParameters = new HashMap<>();
+        additionalParameters.put("reportFormsCreationParams", params);
+        declarationDataScriptingService.executeScript(userInfo, declarationDataTemp, FormDataEvent.CREATE_FORMS, logger, additionalParameters);
+    }
+
+    @Override
+    public ActionResult asyncCreate2NdflFL(Create2NdflFLParams params, TAUserInfo userInfo) {
+        LOG.info(String.format("asyncCreate2NdflFL by %s. action: %s", userInfo, params));
         Logger logger = new Logger();
-        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.fetchLast(action.getDepartmentId(), action.getReportPeriodId());
-        if (departmentReportPeriod != null) {
-            int activeTemplateId = declarationTemplateService.getActiveDeclarationTemplateId(action.getDeclarationTypeId(), action.getReportPeriodId());
-            DeclarationData declarationData = new DeclarationData();
-            declarationData.setDeclarationTemplateId(activeTemplateId);
-            declarationData.setDepartmentReportPeriodId(departmentReportPeriod.getId());
-            declarationData.setDepartmentId(action.getDepartmentId());
-            declarationData.setReportPeriodId(action.getReportPeriodId());
-            declarationData.setPersonId(action.getPersonId());
-            declarationData.setSignatory(action.getSignatory());
-            declarationData.setState(State.ISSUED);
-            createWithotChecks(declarationData, logger, userInfo, true);
+        ActionResult taskResult = new ActionResult();
+        Map<String, Object> taskParams = new HashMap<>();
+
+        List<Long> declarationDataIds = declarationDataDao.findAllIdsFor2NdflFL(params.getReportPeriodId(), params.getPersonId(), params.getKppOktmoPairs());
+        if (isNotEmpty(declarationDataIds)) {
+            params.setDeclaration2Ndfl1Ids(declarationDataIds);
+            taskParams.put("declarationDataIds", declarationDataIds);
+            taskParams.put("declarationTypeId", params.getDeclarationTypeId());
+            taskParams.put("reportPeriodId", params.getReportPeriodId());
+            taskParams.put("params", params);
+            asyncManager.createTask(OperationType.getOperationByDeclarationTypeId(params.getDeclarationTypeId()),
+                    userInfo, taskParams, logger);
+            taskResult.setUuid(logEntryService.save(logger.getEntries()));
+        } else {
+            ReportPeriod reportPeriod = reportPeriodService.fetchReportPeriod(params.getReportPeriodId());
+            RegistryPerson person = refBookPersonDao.fetchPersonVersion(params.getPersonId());
+            String message = String.format("Не выполнена операция: \"Создание отчетной формы 2-НДФЛ(ФЛ)\" Сотрудник: " +
+                            "%s, Отчетный период: %s %s. Причина: В системе нет данных для формирования 2-НДФЛ(ФЛ)",
+                    person.getFullName(),
+                    reportPeriod.getTaxPeriod().getYear(),
+                    reportPeriod.getName());
+            logger.error(message);
+            Notification notification = createNotification(message, logger);
+            taskResult.setUuid(notification.getLogId());
         }
-        taskResult.setUuid(logEntryService.save(logger.getEntries()));
         return taskResult;
+    }
+
+    @Override
+    public void create2NdflFL(Create2NdflFLParams params, TAUserInfo userInfo, Logger logger) {
+        LOG.info(String.format("create2NdflFL by %s. params: %s", userInfo, params));
+        DeclarationData declarationDataTemp = new DeclarationData();
+        declarationDataTemp.setDeclarationTemplateId(
+                declarationTemplateService.getActiveDeclarationTemplateId(params.getDeclarationTypeId(), params.getReportPeriodId()));
+
+        Map<String, Object> additionalParameters = new HashMap<>();
+        additionalParameters.put("createParams", params);
+        declarationDataScriptingService.executeScript(userInfo, declarationDataTemp, FormDataEvent.CREATE_FORMS, logger, additionalParameters);
     }
 
     /**
@@ -433,16 +471,15 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     private void canCreate(TAUserInfo userInfo, int declarationTemplateId, DepartmentReportPeriod departmentReportPeriod, Long asnuId, Logger logger) {
         // Для начала проверяем, что в данном подразделении вообще можно
         // работать с декларациями данного вида
-        if (!departmentReportPeriod.isActive()) {
-            error("Выбранный период закрыт", logger);
-        }
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationTemplateId);
         int declarationTypeId = declarationTemplate.getType().getId();
-
-        ReportPeriod reportPeriod = departmentReportPeriod.getReportPeriod();
-        List<DepartmentDeclarationType> ddts = sourceService.getDDTByDepartment(departmentReportPeriod.getDepartmentId(),
-                TaxType.NDFL, reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
         if (declarationTypeId != DeclarationType.NDFL_2_FL) {
+            if (!departmentReportPeriod.isActive()) {
+                error("Выбранный период закрыт", logger);
+            }
+            ReportPeriod reportPeriod = departmentReportPeriod.getReportPeriod();
+            List<DepartmentDeclarationType> ddts = sourceService.getDDTByDepartment(departmentReportPeriod.getDepartmentId(),
+                    TaxType.NDFL, reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
             boolean found = false;
             for (DepartmentDeclarationType ddt : ddts) {
                 if (ddt.getDeclarationTypeId() == declarationTypeId) {
@@ -453,58 +490,58 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             if (!found) {
                 error("Выбранный вид налоговой формы не назначен подразделению", logger);
             }
-        }
-        // Создавать декларацию могут только контролёры УНП и контролёры
-        // текущего уровня обособленного подразделения
+            // Создавать декларацию могут только контролёры УНП и контролёры
+            // текущего уровня обособленного подразделения
 
-        //Подразделение формы
-        Department declDepartment = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
+            //Подразделение формы
+            Department declDepartment = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
 
-        TaxType taxType = TaxType.NDFL;
+            TaxType taxType = TaxType.NDFL;
 
-        // Выборка для доступа к экземплярам деклараций
-        // http://conf.aplana.com/pages/viewpage.action?pageId=11380670
-        // Не используется логика из com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission.VIEW, т.к тут нет экземпляра декларации
+            // Выборка для доступа к экземплярам деклараций
+            // http://conf.aplana.com/pages/viewpage.action?pageId=11380670
+            // Не используется логика из com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission.VIEW, т.к тут нет экземпляра декларации
 
-        // Контролёр УНП может просматривать все декларации
-        if (userInfo.getUser().hasRoles(taxType, TARole.N_ROLE_CONTROL_UNP)) {
-            return;
-        }
-
-        // Контролёр НС
-        if (userInfo.getUser().hasRoles(taxType, TARole.N_ROLE_CONTROL_NS)) {
-            List<Integer> departments = departmentService.findAllAvailableIds(userInfo.getUser());
-            if (departments.contains(declDepartment.getId())) {
+            // Контролёр УНП может просматривать все декларации
+            if (userInfo.getUser().hasRoles(taxType, TARole.N_ROLE_CONTROL_UNP)) {
                 return;
             }
-        }
 
-        // Оператор (НДФЛ или Сборы)
-        if (userInfo.getUser().hasRoles(taxType, TARole.N_ROLE_OPER)) {
-            if (asnuId != null && !checkUserAsnu(userInfo, asnuId)) {
-                throw new AccessDeniedException("Нет прав на доступ к форме");
-            }
-
-            List<Integer> executors = departmentService.findAllAvailableIds(userInfo.getUser());
-            if (executors.contains(declDepartment.getId())) {
-                if (!declarationTemplate.getDeclarationFormKind().equals(DeclarationFormKind.CONSOLIDATED)) {
+            // Контролёр НС
+            if (userInfo.getUser().hasRoles(taxType, TARole.N_ROLE_CONTROL_NS)) {
+                List<Integer> departments = departmentService.findAllAvailableIds(userInfo.getUser());
+                if (departments.contains(declDepartment.getId())) {
                     return;
                 }
             }
-        }
 
-        // Прочие
-        String asnuMsgPart = "";
-        if (asnuId != null) {
-            RefBookDataProvider asnuProvider = refBookFactory.getDataProvider(RefBook.Id.ASNU.getId());
-            String asnuName = asnuProvider.getRecordData(asnuId).get("NAME").getStringValue();
-            asnuMsgPart = String.format(" и наличие доступа к АСНУ «%s»", asnuName);
+            // Оператор (НДФЛ или Сборы)
+            if (userInfo.getUser().hasRoles(taxType, TARole.N_ROLE_OPER)) {
+                if (asnuId != null && !checkUserAsnu(userInfo, asnuId)) {
+                    throw new AccessDeniedException("Нет прав на доступ к форме");
+                }
+
+                List<Integer> executors = departmentService.findAllAvailableIds(userInfo.getUser());
+                if (executors.contains(declDepartment.getId())) {
+                    if (!declarationTemplate.getDeclarationFormKind().equals(DeclarationFormKind.CONSOLIDATED)) {
+                        return;
+                    }
+                }
+            }
+
+            // Прочие
+            String asnuMsgPart = "";
+            if (asnuId != null) {
+                RefBookDataProvider asnuProvider = refBookFactory.getDataProvider(RefBook.Id.ASNU.getId());
+                String asnuName = asnuProvider.getRecordData(asnuId).get("NAME").getStringValue();
+                asnuMsgPart = String.format(" и наличие доступа к АСНУ «%s»", asnuName);
+            }
+            error(String.format(
+                    ACCESS_ERR_MSG_FMT,
+                    declDepartment.getName(),
+                    asnuMsgPart
+            ), logger);
         }
-        error(String.format(
-                ACCESS_ERR_MSG_FMT,
-                declDepartment.getName(),
-                asnuMsgPart
-        ), logger);
     }
 
     /**
@@ -711,7 +748,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             result.setHasNdflPersons(ndflPersonDao.ndflPersonExistsByDeclarationId(declarationDataId));
             result.setCreationUserName(declaration.getCreatedBy().getName());
             result.setPersonId(declaration.getPersonId());
-           if (declaration.getPersonId() != null) {
+            if (declaration.getPersonId() != null) {
                 RegistryPerson person = refBookPersonDao.fetchPersonVersion(declaration.getPersonId());
                 result.setPerson(Joiner.on(" ").skipNulls().join(asList(person.getLastName(), person.getFirstName(), person.getMiddleName())));
             }
@@ -2050,21 +2087,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    @Transactional
-    public void createReportForms(ReportFormsCreationParams params, LockStateLogger stateLogger, Logger logger, TAUserInfo userInfo) {
-        LOG.info(String.format("DeclarationDataServiceImpl.createReportForms by %s. params: %s", userInfo, params));
-        DeclarationData sourceKnf = get(params.getSourceKnfId());
-        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.fetchOne(sourceKnf.getDepartmentReportPeriodId());
-        DeclarationData declarationDataTemp = new DeclarationData();
-        declarationDataTemp.setDeclarationTemplateId(declarationTemplateService.getActiveDeclarationTemplateId(params.getDeclarationTypeId(), departmentReportPeriod.getReportPeriod().getId()));
-        declarationDataTemp.setDepartmentReportPeriodId(departmentReportPeriod.getId());
-
-        Map<String, Object> additionalParameters = new HashMap<>();
-        additionalParameters.put("reportFormsCreationParams", params);
-        declarationDataScriptingService.executeScript(userInfo, declarationDataTemp, FormDataEvent.CREATE_FORMS, logger, additionalParameters);
-    }
-
-    @Override
     public String createReports(Logger logger, TAUserInfo userInfo, DepartmentReportPeriod departmentReportPeriod, int declarationTypeId, LockStateLogger stateLogger) {
         LOG.info(String.format("DeclarationDataServiceImpl.createReports by %s. departmentReportPeriod: %s; declarationTypeId: %s",
                 userInfo, departmentReportPeriod, declarationTypeId));
@@ -3090,6 +3112,18 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         notification.setReportId(null);
         notification.setNotificationType(NotificationType.DEFAULT);
         notificationService.create(Collections.singletonList(notification));
+    }
+
+    private Notification createNotification(String text, Logger logger) {
+        Notification notification = new Notification();
+        notification.setUserId(userService.getCurrentUser().getId());
+        notification.setCreateDate(new Date());
+        notification.setText(text);
+        notification.setLogId(logEntryService.save(logger));
+        notification.setReportId(null);
+        notification.setNotificationType(NotificationType.DEFAULT);
+        notificationService.create(Collections.singletonList(notification));
+        return notification;
     }
 
     private String createExtendDescription(Long declarationDataId) {

@@ -19,8 +19,8 @@
             });
         }])
 
-        .controller('2ndflFLJournalCtrl', ['$scope', '$filter', 'APP_CONSTANTS', '$logPanel', '$aplanaModal', 'DeclarationDataResource',
-            function ($scope, $filter, APP_CONSTANTS, $logPanel, $aplanaModal, DeclarationDataResource) {
+        .controller('2ndflFLJournalCtrl', ['$scope', '$filter', 'APP_CONSTANTS', '$logPanel', '$aplanaModal', 'DeclarationDataResource', '$dialogs', '$http',
+            function ($scope, $filter, APP_CONSTANTS, $logPanel, $aplanaModal, DeclarationDataResource, $dialogs, $http) {
 
                 $scope.refreshGrid = function (page) {
                     $scope._2ndflFLGrid.ctrl.refreshGrid(page);
@@ -141,7 +141,7 @@
 
                 $scope.delete = function () {
                     if ($scope._2ndflFLGrid.value && $scope._2ndflFLGrid.value.length > 0) {
-                        var selectedItems = $scope.ndflReportJournalGrid.value;
+                        var selectedItems = $scope._2ndflFLGrid.value;
                         $dialogs.confirmDialog({
                             content: $filter('translate')('title.deleteDeclarations'),
                             okBtnCaption: $filter('translate')('common.button.yes'),

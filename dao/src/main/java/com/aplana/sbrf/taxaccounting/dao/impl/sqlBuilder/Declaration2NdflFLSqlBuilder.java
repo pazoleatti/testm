@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.sqlBuilder;
 
+import com.aplana.sbrf.taxaccounting.model.DeclarationType;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.dto.Declaration2NdflFLDTO;
 import com.aplana.sbrf.taxaccounting.model.filter.Declaration2NdflFLFilter;
@@ -75,6 +76,7 @@ public class Declaration2NdflFLSqlBuilder {
                 "join DEPARTMENT dep on dep.id = drp.department_id\n" +
                 "join DEPARTMENT_FULLPATH dep_fullpath on dep_fullpath.id = dep.id\n" +
                 whereMultiple(
+                        equals("dtype.id", DeclarationType.NDFL_2_FL),
                         in("rp.id", filter.getReportPeriodIds()),
                         in("dep.id", filter.getDepartmentIds()),
                         like("dd.id", filter.getDeclarationDataId()),
@@ -109,6 +111,15 @@ public class Declaration2NdflFLSqlBuilder {
             return "";
         }
         return "where " + Joiner.on("\n and ").skipNulls().join(conditions);
+    }
+
+    private String equals(String field, Object value) {
+        if (value != null && isNotEmpty(value.toString())) {
+            String paramName = field.replace(".", "_");
+            params.addValue(paramName, value);
+            return field + " = :" + paramName;
+        }
+        return null;
     }
 
     private String dateBetween(String field, Date from, Date to) {

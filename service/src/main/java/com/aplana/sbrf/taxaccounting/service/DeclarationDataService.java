@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.action.Create2NdflFLAction;
+import com.aplana.sbrf.taxaccounting.model.action.Create2NdflFLParams;
 import com.aplana.sbrf.taxaccounting.model.action.CreateDeclarationDataAction;
 import com.aplana.sbrf.taxaccounting.model.action.CreateReportAction;
 import com.aplana.sbrf.taxaccounting.model.action.CreateReportFormsAction;
@@ -47,15 +47,25 @@ public interface DeclarationDataService {
      * @param action   параметры создания отчетности
      * @param userInfo информация о пользователе
      */
-    ActionResult createReportsCreateTask(CreateReportFormsAction action, TAUserInfo userInfo);
+    ActionResult asyncCreateReportForms(CreateReportFormsAction action, TAUserInfo userInfo);
+
+    /**
+     * Запускает ассинхронную задачу на создание формы 2-НДФЛ (ФЛ)
+     *
+     * @param action   параметры создания формы
+     * @param userInfo пользователь
+     * @return результат создания задачи
+     */
+    ActionResult asyncCreate2NdflFL(Create2NdflFLParams action, TAUserInfo userInfo);
 
     /**
      * Создает форму 2-НДФЛ (ФЛ)
      *
-     * @param userInfo пользователь
      * @param action   параметры создания
+     * @param userInfo пользователь
+     * @param logger
      */
-    ActionResult create2NdflFL(TAUserInfo userInfo, Create2NdflFLAction action);
+    void create2NdflFL(Create2NdflFLParams action, TAUserInfo userInfo, Logger logger);
 
     /**
      * Создание декларации в заданном отчетном периоде подразделения

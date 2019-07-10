@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.identification.IdentificationData;
 import com.aplana.sbrf.taxaccounting.model.identification.IdentityPerson;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPerson;
 import com.aplana.sbrf.taxaccounting.model.util.BaseWeightCalculator;
 import com.aplana.sbrf.taxaccounting.model.util.WeightCalculator;
 import com.aplana.sbrf.taxaccounting.service.ScriptExposed;
@@ -25,7 +26,13 @@ import java.util.Map;
 public interface RefBookPersonService {
 
     /**
+     * Возвращяет версию ФЛ по ид
+     */
+    RegistryPerson findById(long id);
+
+    /**
      * Очищает данные по ФЛ
+     *
      * @param declarationDataId
      */
     void clearRnuNdflPerson(Long declarationDataId);
@@ -67,33 +74,37 @@ public interface RefBookPersonService {
     /**
      * Рассчитывает вес, который показывает насколько похоже сравниваемое физлицо с физлицом из списка. Метод ничего не
      * возвращает поскольку вес записывается в поле weight объекта NaturalPerson.
-     * @param searchPersonData  физлицо для которого определяется схожесть по весам.
-     * @param personDataList    физлица которые были отобраны для сравнения по весам с основным физлицом
-     * @param weightCalculator  объект содержащий логику сравнения по весам
+     *
+     * @param searchPersonData физлицо для которого определяется схожесть по весам.
+     * @param personDataList   физлица которые были отобраны для сравнения по весам с основным физлицом
+     * @param weightCalculator объект содержащий логику сравнения по весам
      */
     void calculateWeight(NaturalPerson searchPersonData, List<NaturalPerson> personDataList, WeightCalculator<IdentityPerson> weightCalculator);
 
     /**
      * Найти идентификатор версии ФЛ в реестре ФЛ с максимальным идентификатором для даты актуальности. Дубликаты также исключаются из результата.
-     * @param currentDate   дата актуальности для определения версии ФЛ
+     *
+     * @param currentDate дата актуальности для определения версии ФЛ
      * @return идентификатор записи в Реестре ФЛ
      */
     Long findMaxRegistryPersonId(Date currentDate);
 
     /**
      * Установить блокировку на Реестр ФЛ
-     * @param userInfo      информация о пользователе
-     * @param taskDataId    идентификатор асинхронной задачи
-     * @return              {@code true} в случае если блокировка установлена
+     *
+     * @param userInfo   информация о пользователе
+     * @param taskDataId идентификатор асинхронной задачи
+     * @return {@code true} в случае если блокировка установлена
      */
     boolean lockPersonsRegistry(TAUserInfo userInfo, Long taskDataId);
 
     /**
      * Найти список физлиц в реестре ФЛ для даты актуальности, идентификатор которых больше указанного в параметре. Дубликаты также исключаются из результата.
-     * @param oldMaxId              предыдущий идентификатор версии ФЛ
-     * @param currentDate           дата актуальности для определения версии ФЛ
-     * @param naturalPersonMapper   проинициализированный справониками маппер
-     * @return                      список найденных ФЛ
+     *
+     * @param oldMaxId            предыдущий идентификатор версии ФЛ
+     * @param currentDate         дата актуальности для определения версии ФЛ
+     * @param naturalPersonMapper проинициализированный справониками маппер
+     * @return список найденных ФЛ
      */
     List<NaturalPerson> findNewRegistryPersons(Long oldMaxId, Date currentDate, NaturalPersonMapper naturalPersonMapper);
 }

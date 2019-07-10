@@ -39,7 +39,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.zip.ZipInputStream;
 
-@Service
+@Service("validateXMLService")
 public class ValidateXMLServiceImpl implements ValidateXMLService {
 
     private static final Log LOG = LogFactory.getLog(ValidateXMLServiceImpl.class);
