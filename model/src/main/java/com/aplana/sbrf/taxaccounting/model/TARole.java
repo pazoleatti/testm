@@ -52,6 +52,10 @@ public class TARole implements Serializable {
 	 * Алиас роли "Читатель VIP-данных (НДФЛ)"
 	 */
 	public static final String N_ROLE_VIP_READER = "N_ROLE_VIP_READER";
+	/**
+	 * Алиас роли "Оператор выдачи 2-НДФЛ клиенту по запросу (НДФЛ)"
+	 */
+	public static final String N_ROLE_OPER_2NDFL_FL = "N_ROLE_OPER_2NDFL_FL";
 
 	private static final long serialVersionUID = 1L;
 	
