@@ -9,7 +9,7 @@ var start_time varchar2(30);
 var version varchar2(10);
 var STATUS VARCHAR2(3000);
 var USER_NDFL VARCHAR2(50);
-.
+
 PROMPT Install patch DB
 PROMPT ======================
 
@@ -40,6 +40,8 @@ end;
 
 PROMPT ## Beginning Installing Hotfix
 
+PROMPT ## 02_templates
+@02_templates.sql "_log/3.7_hotfix_02_templates.txt" "&3" "&4" "_log" "_bad"
 
 PROMPT ## 03_create_table_ddl.sql
 @01_create_table_ddl.sql
