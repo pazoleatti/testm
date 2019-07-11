@@ -188,7 +188,7 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
         bindings.put("commonRefBookService", commonRefBookService);
         bindings.put("namedParameterJdbcTemplate", namedParameterJdbcTemplate);
 
-        String applicationVersion = "ФП «НДФЛ»";
+        String applicationVersion = "АС УН, ФП \"НДФЛ\"";
         applicationVersion += " " + applicationInfo.getVersion();
         bindings.put("applicationVersion", applicationVersion);
 

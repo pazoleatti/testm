@@ -136,7 +136,7 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
 			b.put("declarationData", declarationData);
 		}
 
-		String applicationVersion = "ФП «НДФЛ»";
+		String applicationVersion = "АС УН, ФП \"НДФЛ\"";
 		applicationVersion += " " + applicationInfo.getVersion();
         b.put("applicationVersion", applicationVersion);
 
