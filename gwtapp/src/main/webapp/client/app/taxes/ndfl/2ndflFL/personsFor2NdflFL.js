@@ -34,9 +34,6 @@
                     params: getDefaultFilterParams(),
                     ajaxFilter: [],
                     filterName: 'personsFor2NdflFLFilter',
-                    onCreateComplete: function () {
-                        $scope.refreshGrid();
-                    },
                     resetFilterParams: function () {
                         $scope.searchFilter.params = getDefaultFilterParams();
                     },
