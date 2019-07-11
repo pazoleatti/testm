@@ -16,10 +16,15 @@ import com.aplana.sbrf.taxaccounting.script.SharedConstants
 import com.aplana.sbrf.taxaccounting.script.service.*
 import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService
 import com.aplana.sbrf.taxaccounting.service.util.ExcelImportUtils
+import form_template.ndfl.primary_rnu_ndfl.v2016.Import.Cell
 import groovy.transform.TypeChecked
 import groovy.transform.TypeCheckingMode
 import org.apache.commons.lang3.StringUtils
+import org.springframework.jdbc.core.RowMapper
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 
+import java.sql.ResultSet
+import java.sql.SQLException
 import java.text.SimpleDateFormat
 
 import static com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils.checkInterrupted
@@ -120,6 +125,7 @@ class Import extends AbstractScriptClass {
     DepartmentReportPeriodService departmentReportPeriodService
     RefBookFactory refBookFactory
     CommonRefBookService commonRefBookService
+    NamedParameterJdbcTemplate namedParameterJdbcTemplate
 
     String fileName // имя загружаемого файла
     File file // временный файл с данными
@@ -186,6 +192,7 @@ class Import extends AbstractScriptClass {
         this.declarationService = (DeclarationService) scriptClass.getProperty("declarationService")
         this.refBookPersonService = (RefBookPersonService) scriptClass.getProperty("refBookPersonService")
         this.commonRefBookService = (CommonRefBookService) scriptClass.getProperty("commonRefBookService")
+        this.namedParameterJdbcTemplate = (NamedParameterJdbcTemplate) scriptClass.getProperty("namedParameterJdbcTemplate")
 
         reportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId).reportPeriod
         correctReportPeriod()
@@ -325,6 +332,8 @@ class Import extends AbstractScriptClass {
             List<NdflPersonIncome> incomesForUpdate = []
             List<NdflPersonDeduction> deductionsForUpdate = []
             List<NdflPersonPrepayment> prepaymentsForUpdate = []
+
+            boolean operationsTransformed = false
 
             for (NdflPersonExt ndflPerson : ndflPersons) {
                 ndflPerson.rowNum = ++personRowNum
@@ -765,7 +774,10 @@ class Import extends AbstractScriptClass {
                         messages << createNewOperationMessage(ndflPerson, "Сведения о доходах в виде авансовых платежей", prepaymentsCreateCount)
                     }
                 } else {
-                    transformOperationId()
+                    if (!operationsTransformed) {
+                        transformOperationId()
+                    }
+                    operationsTransformed = true
                     for (def income : ndflPerson.incomes) {
                         income.rowNum = new BigDecimal(++incomeRowNum)
                     }
@@ -1078,15 +1090,37 @@ class Import extends AbstractScriptClass {
     /**
      * Ищет идентификаторы операций которые отсутствуют в налоговой форме и изменяет их
      */
+
     void transformOperationId() {
-        if (!operationsGrouped.keySet().isEmpty()) {
-            List<List<String>> operationsForSeek = operationsGrouped.keySet().collate(1000)
-            List<String> persistedOperationIdList = []
-            for (List<String> operationsPart : operationsForSeek) {
-                persistedOperationIdList.addAll(ndflPersonService.findIncomeOperationId(operationsPart))
+        Set<String> operationsSet = operationsGrouped.keySet()
+        if (!operationsSet.isEmpty()) {
+
+            Map<String, Object>[] parameters = new Map[operationsSet.size()]
+
+            operationsSet.eachWithIndex { String operation, int index ->
+                Map<String, String> entity = new HashMap<>()
+                entity.put("operation", operation)
+                parameters[index] = entity
             }
+
+            String insertSql = "insert into tmp_operation_id operation_id values (:operation)"
+
+            namedParameterJdbcTemplate.batchUpdate(insertSql, parameters)
+
+            String selectSql = "select npi.operation_id from ndfl_person_income npi " +
+                    "join tmp_operation_id tmp on npi.operation_id = tmp.operation_id " +
+                    "where exists (select operation_id from ndfl_person_income where npi.operation_id = tmp.operation_id)"
+
+            List<String> findedOperations = namedParameterJdbcTemplate.query(selectSql, new RowMapper<String>() {
+                @Override
+                String mapRow(ResultSet rs, int rowNum) throws SQLException {
+                    return rs.getString("operation_id")
+                }
+            })
+
             Set<String> operationsForTransform = operationsGrouped.keySet()
-            operationsForTransform.removeAll(persistedOperationIdList)
+            operationsForTransform.removeAll(findedOperations)
+
             for (String operationId : operationsForTransform) {
                 List<NdflPersonOperation> operations = operationsGrouped.get(operationId)
                 String uuid = UUID.randomUUID().toString()
