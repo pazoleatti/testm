@@ -20,8 +20,5 @@ SET nls_lang=AMERICAN_AMERICA.AL32UTF8
 
 "%ORA_BIN%\sqlplus" %DBA_AUTH% @"patch_03_007_hotfix_02.sql" %NDFL_USR% _log/patch_03_007_hotfix_02.log %ORA_BIN% %DBA_AUTH% 
 
-ECHO ## gather statistics
-"%ORA_BIN%\sqlplus" %DBA_AUTH% @"tech/gather_statistics.sql" > _log/gather_statistics.txt"
-
 "%ORA_BIN%\sqlplus" %DBA_AUTH% @"tech/result_log.sql" %NDFL_USR% _log/result_log.log
 pause
