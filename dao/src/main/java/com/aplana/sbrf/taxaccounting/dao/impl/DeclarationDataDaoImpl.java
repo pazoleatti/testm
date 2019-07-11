@@ -1030,7 +1030,10 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 
     @Override
     public List<Long> findAllIdsFor2NdflFL(int reportPeriodId, long personId, List<KppOktmoPair> kppOktmoPairs) {
-        return getJdbcTemplate().queryForList("" +
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("reportPeriodId", reportPeriodId);
+        params.addValue("personId", personId);
+        return getNamedParameterJdbcTemplate().queryForList("" +
                         "select dd.id from declaration_data dd\n" +
                         "join department_report_period drp on drp.id = dd.department_report_period_id\n" +
                         "join declaration_template dt on dt.id = dd.declaration_template_id\n" +
@@ -1041,13 +1044,13 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                         "  join department_report_period drp on drp.id = dd.department_report_period_id\n" +
                         "  join ndfl_references nr on nr.declaration_data_id = dd.id\n" +
                         "  where dt.declaration_type_id = " + DeclarationType.NDFL_2_1 + " \n" +
-                        "    and drp.report_period_id = ? and nr.person_id = ? \n" +
+                        "    and drp.report_period_id = :reportPeriodId and nr.person_id = :personId \n" +
                         "    and dd.doc_state_id in (" + RefBookDocState.ACCEPTED.getId() + ", " + RefBookDocState.WORKED_OUT.getId() + ") \n" +
                         (isNotEmpty(kppOktmoPairs) ? SqlUtils.pairInStatement("and (dd.kpp, dd.oktmo)", toPairs(kppOktmoPairs)) : "") +
                         "  group by drp.report_period_id, dt.declaration_type_id, dd.kpp, dd.oktmo\n" +
                         ") t on t.report_period_id = drp.report_period_id and t.declaration_type_id = dt.declaration_type_id " +
                         " and t.kpp = dd.kpp and t.oktmo = dd.oktmo and (t.correction_date is null and drp.correction_date is null or t.correction_date = drp.correction_date)",
-                Long.class, reportPeriodId, personId);
+                params, Long.class);
     }
 
     private Collection<Pair<String, String>> toPairs(List<KppOktmoPair> kppOktmoPairs) {

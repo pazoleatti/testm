@@ -76,6 +76,7 @@ class Report2NdflFL extends AbstractScriptClass {
     }
 
     void createForms() {
+        List<DeclarationDataFile> declarationDataFiles = []
         for (long declaration2Ndfl1Id : createParams.declaration2Ndfl1Ids) {
             File tmpXmlFile = null
             try {
@@ -83,6 +84,7 @@ class Report2NdflFL extends AbstractScriptClass {
                 def declarationDataFile = findDeclarationXmlFile(declaration2Ndfl1)
                 tmpXmlFile = createTempFile(declarationDataFile)
                 validateXml(declaration2Ndfl1, tmpXmlFile, declarationDataFile.fileName)
+                declarationDataFiles.add(declarationDataFile)
                 def referenceNums = findReferenceNums(declaration2Ndfl1, tmpXmlFile)
                 for (int referenceNum : referenceNums) {
                     declarationData = create2NdflFL(declaration2Ndfl1)
@@ -105,21 +107,26 @@ class Report2NdflFL extends AbstractScriptClass {
                 AppFileUtils.deleteTmp(tmpXmlFile);
             }
         }
+        if (createParams.declaration2Ndfl1Ids && !declarationDataFiles) {
+            logger.error("Не выполнена операция: \"Создание отчетной формы 2-НДФЛ(ФЛ) Сотрудник: $person.fullName, " +
+                    "Отчетный период: $reportPeriod.taxPeriod.year $reportPeriod.name. Причина: " +
+                    "Ни один xml файл из файлов привязанных к налоговым формам не соответствует требованиям.");
+        }
     }
 
-    DeclarationDataFile findDeclarationXmlFile(DeclarationData declarationData) {
-        List<DeclarationDataFile> declarationDataFiles = declarationService.findAllFilesByDeclarationIdAndType(declarationData.getId(), AttachFileType.OUTGOING_TO_FNS);
+    DeclarationDataFile findDeclarationXmlFile(DeclarationData declaration2Ndfl1) {
+        List<DeclarationDataFile> declarationDataFiles = declarationService.findAllFilesByDeclarationIdAndType(declaration2Ndfl1.getId(), AttachFileType.OUTGOING_TO_FNS);
         if (declarationDataFiles.size() == 1) {
             return declarationDataFiles.get(0);
         } else {
-            throw new ServiceException("Ни один xml файл из файлов привязанных к налоговым формам не соответствует требованиям.")
+            throw new ServiceException("XML файл, привязанный к налоговой форме ${declarationDescription(declaration2Ndfl1)} не соответствует требованиям.")
         }
     }
 
     void validateXml(DeclarationData declaration2Ndfl1, File xmlFile, String fileName) {
         def logger = new Logger()
         if (!validateXMLService.validate(declaration2Ndfl1, logger, xmlFile, fileName, null)) {
-            throw new ServiceException("XML файл, привязанный к налоговой форме ${declarationDescription(declaration2Ndfl1)} не соответствует требованиям.");
+            throw new ServiceException("XML файл, привязанный к налоговой форме ${declarationDescription(declaration2Ndfl1)} не соответствует требованиям.")
         }
     }
 
