@@ -311,7 +311,7 @@ class Report2Ndfl extends AbstractScriptClass {
                                         УведВыч(КодВидУвед: row.notifType,
                                                 НомерУвед: row.notifNum,
                                                 ДатаУвед: formatDate(row.notifDate),
-                                                ИФНСУвед: row.notifSource)
+                                                НОУвед: row.notifSource)
                                     }
                                 }
                                 ДохВыч() {
