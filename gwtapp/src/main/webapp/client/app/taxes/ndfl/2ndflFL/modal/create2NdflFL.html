@@ -14,19 +14,7 @@
                     </label>
                 </td>
                 <td>
-                    <div>
-                        <div data-aplana-field>
-                            <div data-ng-controller="SelectFromArrayCtrl"
-                                 data-ui-select2="selectFromArray.options"
-                                 data-ng-init="initBasicSingleSelectFromArray([APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_FL])"
-                                 data-ng-model="create2NdflFLForm.declarationType"
-                                 data-required>
-                            </div>
-                            <div data-aplana-validator data-key='required'>
-                                {{::'common.validation.required' | translate}}
-                            </div>
-                        </div>
-                    </div>
+                    <label class="bold-text">{{create2NdflFLForm.declarationType.name}}</label>
                 </td>
             </tr>
             <!--Период-->
@@ -39,7 +27,7 @@
                         <div data-aplana-field>
                             <div data-ng-controller="SelectPeriodCtrl"
                                  data-ui-select2="periodSelect.options"
-                                 data-ng-init="initSingleSelectWithAllPeriodsFor2NdflFL()"
+                                 data-ng-init="initSingleSelectWithAllPeriodsFor2NdflFL('create2NdflFLForm.reportPeriod')"
                                  data-ng-model="create2NdflFLForm.reportPeriod"
                                  data-required>
                             </div>

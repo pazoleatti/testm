@@ -420,20 +420,21 @@
                 /**
                  * Заполнить список, загрузив данные из указанной проекции, и определить последний период
                  * @param projection Проекция
-                 * @param latestPeriod Последний период
+                 * @param reportPeriodModelPath путь к модели в scope
                  */
-                var fillSelectListAndFindLatestPeriod = function (projection, latestPeriod) {
+                var fillSelectListAndFindLatestPeriod = function (projection, reportPeriodModelPath) {
                     ReportPeriodResource.query({
                         projection: projection
                     }, function (data) {
                         $scope.periodSelect.options.data.results = data;
-                        if (latestPeriod && data && data.length > 0) {
-                            latestPeriod.period = data[0];
+                        if (reportPeriodModelPath && data && data.length > 0) {
+                            var defaultPeriod = data[0];
                             angular.forEach(data, function (period) {
-                                if (Date.parse(latestPeriod.period.endDate) < Date.parse(period.endDate)) {
-                                    latestPeriod.period = period;
+                                if (Date.parse(defaultPeriod.endDate) < Date.parse(period.endDate)) {
+                                    defaultPeriod = period;
                                 }
                             });
+                            _.deep($scope, reportPeriodModelPath, defaultPeriod);
                         }
                     });
                 };
@@ -441,25 +442,25 @@
                 /**
                  * Добавить в список все отчетные периоды и определить последний
                  */
-                $scope.initSelectWithAllPeriods = function (latestPeriod) {
+                $scope.initSelectWithAllPeriods = function (reportPeriodModelPath) {
                     $scope.periodSelect = GetSelectOption.getBasicMultipleSelectOptions(true, 'periodFormatter');
-                    fillSelectListAndFindLatestPeriod("all", latestPeriod);
+                    fillSelectListAndFindLatestPeriod("all", reportPeriodModelPath);
                 };
 
                 /**
                  * Список периодов для формы 2-НДФЛ (ФЛ)
                  */
-                $scope.initSelectWithAllPeriodsFor2NdflFL = function (latestPeriod) {
+                $scope.initSelectWithAllPeriodsFor2NdflFL = function (reportPeriodModelPath) {
                     $scope.periodSelect = GetSelectOption.getBasicMultipleSelectOptions(true, 'periodFormatter');
-                    fillSelectListAndFindLatestPeriod("for2NdflFL", latestPeriod);
+                    fillSelectListAndFindLatestPeriod("for2NdflFL", reportPeriodModelPath);
                 };
 
                 /**
                  * Список периодов для формы 2-НДФЛ (ФЛ)
                  */
-                $scope.initSingleSelectWithAllPeriodsFor2NdflFL = function (latestPeriod) {
+                $scope.initSingleSelectWithAllPeriodsFor2NdflFL = function (reportPeriodModelPath) {
                     $scope.periodSelect = GetSelectOption.getBasicSingleSelectOptions(true, true, 'periodFormatter');
-                    fillSelectListAndFindLatestPeriod("for2NdflFL", latestPeriod);
+                    fillSelectListAndFindLatestPeriod("for2NdflFL", reportPeriodModelPath);
                 };
 
                 /**
