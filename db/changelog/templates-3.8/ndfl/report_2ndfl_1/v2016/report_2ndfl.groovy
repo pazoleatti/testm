@@ -289,29 +289,31 @@ class Report2Ndfl extends AbstractScriptClass {
                                         НалПеречисл: is2Ndfl1() ? НалПеречисл(person.incomes) : 0,// тут берутся строки перечисления, у которых rate=null
                                         НалУдержЛиш: is2Ndfl1() ? НалУдержЛиш(rateIncomes) : 0,
                                         НалНеУдерж: is2Ndfl1() ? НалНеУдерж(rateIncomes) : СуммаНИ(rateIncomes))
-                                НалВычССИ() {
-                                    def deductions = rateDeductions.findAll {
-                                        it.typeCode && !(deductionTypesByCode[it.typeCode]?.mark?.code in [INVESTMENT_CODE, OTHERS_CODE])
-                                    }.sort { a, b ->
-                                        a.typeCode <=> b.typeCode ?: a.notifDate <=> b.notifDate ?: a.notifType <=> b.notifType ?:
-                                                a.notifNum <=> b.notifNum ?: a.notifSource <=> b.notifSource
-                                    }
-                                    def deductionsByCode = deductions.groupBy { it.typeCode }
-                                    deductionsByCode.each { deductionCode, deductionsOfCode ->
-                                        ПредВычССИ(КодВычет: deductionCode,
-                                                СумВычет: ScriptUtils.round(СумВыч(deductionsOfCode), 2))
-                                    }
-                                    def СписокУведомленийОВычетах = deductions.collect([] as Set) {
-                                        new УведВычKey(it.notifDate, it.notifType, it.notifNum, it.notifSource)
-                                    }.sort { a, b ->
-                                        a.notifDate <=> b.notifDate ?: a.notifType <=> b.notifType ?:
-                                                a.notifNum <=> b.notifNum ?: a.notifSource <=> b.notifSource
-                                    }
-                                    for (def row : СписокУведомленийОВычетах) {
-                                        УведВыч(КодВидУвед: row.notifType,
-                                                НомерУвед: row.notifNum,
-                                                ДатаУвед: formatDate(row.notifDate),
-                                                НОУвед: row.notifSource)
+                                def deductions = rateDeductions.findAll {
+                                    it.typeCode && !(deductionTypesByCode[it.typeCode]?.mark?.code in [INVESTMENT_CODE, OTHERS_CODE])
+                                }.sort { a, b ->
+                                    a.typeCode <=> b.typeCode ?: a.notifDate <=> b.notifDate ?: a.notifType <=> b.notifType ?:
+                                            a.notifNum <=> b.notifNum ?: a.notifSource <=> b.notifSource
+                                }
+                                def deductionsByCode = deductions.groupBy { it.typeCode }
+                                def СписокУведомленийОВычетах = deductions.collect([] as Set) {
+                                    new УведВычKey(it.notifDate, it.notifType, it.notifNum, it.notifSource)
+                                }.sort { a, b ->
+                                    a.notifDate <=> b.notifDate ?: a.notifType <=> b.notifType ?:
+                                            a.notifNum <=> b.notifNum ?: a.notifSource <=> b.notifSource
+                                }
+                                if (deductionsByCode || СписокУведомленийОВычетах) {
+                                    НалВычССИ() {
+                                        deductionsByCode.each { deductionCode, deductionsOfCode ->
+                                            ПредВычССИ(КодВычет: deductionCode,
+                                                    СумВычет: ScriptUtils.round(СумВыч(deductionsOfCode), 2))
+                                        }
+                                        for (def row : СписокУведомленийОВычетах) {
+                                            УведВыч(КодВидУвед: row.notifType,
+                                                    НомерУвед: row.notifNum,
+                                                    ДатаУвед: formatDate(row.notifDate),
+                                                    НОУвед: row.notifSource)
+                                        }
                                     }
                                 }
                                 ДохВыч() {
@@ -332,10 +334,10 @@ class Report2Ndfl extends AbstractScriptClass {
                                         СвСумДох(Месяц: sprintf('%02d', monthAndIncomeCodeKey.month + 1),
                                                 КодДоход: monthAndIncomeCodeKey.incomeCode,
                                                 СумДоход: ScriptUtils.round(СумДох(monthAndIncomeCodeIncomes, monthAndIncomeCodeDeductions), 2)) {
-                                            def deductionsByCode = monthAndIncomeCodeDeductions.groupBy {
+                                            def monthAndIncomeCodeDeductionsByCode = monthAndIncomeCodeDeductions.groupBy {
                                                 it.typeCode
                                             }
-                                            deductionsByCode.each { deductionCode, deductionsOfCode ->
+                                            monthAndIncomeCodeDeductionsByCode.each { deductionCode, deductionsOfCode ->
                                                 СвСумВыч(КодВычет: deductionCode,
                                                         СумВычет: ScriptUtils.round(СумВыч(deductionsOfCode), 2))
                                             }
