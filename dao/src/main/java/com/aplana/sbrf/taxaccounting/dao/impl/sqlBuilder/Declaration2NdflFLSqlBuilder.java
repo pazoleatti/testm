@@ -95,7 +95,8 @@ public class Declaration2NdflFLSqlBuilder {
                         in("person.taxpayer_state", filter.getTaxpayerStateIds()),
                         likeIgnoreCase("person.inn", filter.getInn()),
                         likeIgnoreCase("person.inn_foreign", filter.getInnForeign()),
-                        likeIgnoreCaseAndDelimiters("person.snils", filter.getSnils())
+                        likeIgnoreCaseAndDelimiters("person.snils", filter.getSnils()),
+                        equals("person.vip", filter.getVipInt())
                 );
 
         String orderedSql = baseQuery + " order by " + pagingParams.getProperty() + " " + pagingParams.getDirection();

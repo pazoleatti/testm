@@ -953,7 +953,11 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    public PagingResult<Declaration2NdflFLDTO> findAll2NdflFL(Declaration2NdflFLFilter filter, PagingParams pagingParams) {
+    @PreAuthorize("hasPermission(#user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission)._2NDFL_FL)")
+    public PagingResult<Declaration2NdflFLDTO> findAll2NdflFL(Declaration2NdflFLFilter filter, PagingParams pagingParams, TAUser user) {
+        if (!user.hasRoles(TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_VIP_READER)) {
+            filter.setVip(false);
+        }
         return declarationDataDao.findAll2NdflFL(filter, pagingParams);
     }
 

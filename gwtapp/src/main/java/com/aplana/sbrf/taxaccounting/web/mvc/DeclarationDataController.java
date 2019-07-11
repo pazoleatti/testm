@@ -504,8 +504,8 @@ public class DeclarationDataController {
      */
     @GetMapping(value = "/rest/declarationData", params = "projection=2ndflFLDeclarations")
     public JqgridPagedList<Declaration2NdflFLDTO> findAll2NdflFL(@RequestParam Declaration2NdflFLFilter filter, @RequestParam PagingParams pagingParams) {
-        TAUserInfo userInfo = securityService.currentUserInfo();
-        PagingResult<Declaration2NdflFLDTO> pagingResult = declarationService.findAll2NdflFL(filter, pagingParams);
+        TAUser user = securityService.currentUserInfo().getUser();
+        PagingResult<Declaration2NdflFLDTO> pagingResult = declarationService.findAll2NdflFL(filter, pagingParams, user);
 
         return JqgridPagedResourceAssembler.buildPagedList(
                 pagingResult,

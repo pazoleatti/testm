@@ -99,7 +99,8 @@ public class RefBookFlController {
     @GetMapping(value = "/rest/refBookFL", params = "projection=for2NdflFL")
     public JqgridPagedList<PersonFor2NdflFL> findAllPersonsFor2NdflFL(@RequestParam(required = false) RefBookPersonFilter filter,
                                                                       @RequestParam(required = false) PagingParams pagingParams) {
-        PagingResult<PersonFor2NdflFL> records = personService.findAllFor2NdflFL(pagingParams, filter);
+        TAUser currentUser = securityService.currentUserInfo().getUser();
+        PagingResult<PersonFor2NdflFL> records = personService.findAllFor2NdflFL(pagingParams, filter, currentUser);
         return JqgridPagedResourceAssembler.buildPagedList(records, records.getTotalCount(), pagingParams);
     }
 

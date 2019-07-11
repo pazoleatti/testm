@@ -125,10 +125,12 @@ public class PersonServiceImpl implements PersonService {
 
     @Override
     @Transactional(readOnly = true)
-    public PagingResult<PersonFor2NdflFL> findAllFor2NdflFL(PagingParams pagingParams, RefBookPersonFilter filter) {
-        filter.allVersions(false)
-                .versionDate(new Date())
-                .duplicates(false);
+    @PreAuthorize("hasPermission(#user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission)._2NDFL_FL)")
+    public PagingResult<PersonFor2NdflFL> findAllFor2NdflFL(PagingParams pagingParams, RefBookPersonFilter filter, TAUser user) {
+        filter.allVersions(false).versionDate(new Date()).duplicates(false);
+        if (!user.hasRoles(TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_VIP_READER)) {
+            filter.setVip(false);
+        }
         PagingResult<RegistryPerson> persons = refBookPersonDao.getPersons(pagingParams, filter);
         PagingResult<PersonFor2NdflFL> personsFor2NdflFL = new PagingResult<>(new ArrayList<PersonFor2NdflFL>(), persons.getTotalCount());
         for (RegistryPerson person : persons) {

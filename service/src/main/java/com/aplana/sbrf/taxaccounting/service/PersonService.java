@@ -33,9 +33,10 @@ public interface PersonService {
      *
      * @param pagingParams параметры постраничной выдачи и сортировки
      * @param filter       фильтр
+     * @param user         пользователь запустивший операцию
      * @return список ФЛ
      */
-    PagingResult<PersonFor2NdflFL> findAllFor2NdflFL(PagingParams pagingParams, RefBookPersonFilter filter);
+    PagingResult<PersonFor2NdflFL> findAllFor2NdflFL(PagingParams pagingParams, RefBookPersonFilter filter, TAUser user);
 
     /**
      * Возвращяет кол-во ФЛ по фильтру

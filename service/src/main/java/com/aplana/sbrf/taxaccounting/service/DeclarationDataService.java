@@ -254,9 +254,10 @@ public interface DeclarationDataService {
      *
      * @param filter       фильтр
      * @param pagingParams параметры пагинации
+     * @param user         пользователь, выполняющий действие
      * @return страница форм 2-НДФЛ (ФЛ)
      */
-    PagingResult<Declaration2NdflFLDTO> findAll2NdflFL(Declaration2NdflFLFilter filter, PagingParams pagingParams);
+    PagingResult<Declaration2NdflFLDTO> findAll2NdflFL(Declaration2NdflFLFilter filter, PagingParams pagingParams, TAUser user);
 
     /**
      * Формирование спецотчета по форме

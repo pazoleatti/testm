@@ -42,4 +42,12 @@ public class Declaration2NdflFLFilter {
     private String inn;
     private String innForeign;
     private String snils;
+    private Boolean vip;
+
+    public Integer getVipInt() {
+        if (vip == null) {
+            return null;
+        }
+        return vip ? 1 : 0;
+    }
 }
