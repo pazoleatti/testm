@@ -357,7 +357,7 @@
         "title.reasonForReturn": "Причина возврата:",
         "title.indicateReasonForReturn": "Укажите причину возврата",
         "title.creatingReport": "Создание отчетности по НДФЛ",
-        "title.create2NdflFL": "Создание отчетности по НДФЛ",
+        "title.create2NdflFL": "Создание 2-НДФЛ (ФЛ)",
         "title.updateDocState": "Установить Состояние ЭД",
         "title.terBank": "Тербанк",
         "title.importance": "Важность",
