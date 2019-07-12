@@ -1043,8 +1043,9 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                         "  join declaration_template dt on dt.id = dd.declaration_template_id\n" +
                         "  join department_report_period drp on drp.id = dd.department_report_period_id\n" +
                         "  join ndfl_references nr on nr.declaration_data_id = dd.id\n" +
+                        "  join ref_book_person person on person.id = nr.person_id\n" +
                         "  where dt.declaration_type_id = " + DeclarationType.NDFL_2_1 + " \n" +
-                        "    and drp.report_period_id = :reportPeriodId and nr.person_id = :personId \n" +
+                        "    and drp.report_period_id = :reportPeriodId and person.record_id in (select record_id from ref_book_person where id = :personId) \n" +
                         "    and dd.doc_state_id in (" + RefBookDocState.ACCEPTED.getId() + ", " + RefBookDocState.WORKED_OUT.getId() + ") \n" +
                         (isNotEmpty(kppOktmoPairs) ? SqlUtils.pairInStatement("and (dd.kpp, dd.oktmo)", toPairs(kppOktmoPairs)) : "") +
                         "  group by drp.report_period_id, dt.declaration_type_id, dd.kpp, dd.oktmo\n" +
