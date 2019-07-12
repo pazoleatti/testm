@@ -75,6 +75,38 @@
             insert into state(id, name) values(4, 'Выдан');
         </sql>
     </changeSet>
+    <!--https://jira.aplana.com/browse/SBRFNDFL-7951 Реализовать заполнение печатной формы 2-НДФЛ (ФЛ) для выдачи сотруднику-->
+    <changeSet id="3.8-ytrofimov-4" author="ytrofimov">
+        <insert tableName="BLOB_DATA">
+            <column name="id" value="6466aad0-90c5-4101-8002-fb97b0e32d16"/>
+            <column name="name" value="2ndfl_by_person_additional_page.pdf"/>
+            <column name="data" valueBlobFile="templates-3.8/ndfl/report_2ndfl_fl/v2016/2ndfl_by_person_additional_page.pdf"/>
+            <column name="CREATION_DATE" valueDate="2019-07-03"/>
+        </insert>
+        <insert tableName="BLOB_DATA">
+            <column name="id" value="5f3eb319-56cb-4dd8-b06e-b97ea3df0cf1"/>
+            <column name="name" value="2ndfl_by_person_base_page.pdf"/>
+            <column name="data" valueBlobFile="templates-3.8/ndfl/report_2ndfl_fl/v2016/2ndfl_by_person_base_page.pdf"/>
+            <column name="CREATION_DATE" valueDate="2019-07-03"/>
+        </insert>
+        <sql splitStatements="false">
+            begin
+            insert into declaration_template_file(declaration_template_id, blob_data_id) values (105, '6466aad0-90c5-4101-8002-fb97b0e32d16');
+            insert into declaration_template_file(declaration_template_id, blob_data_id) values (105, '5f3eb319-56cb-4dd8-b06e-b97ea3df0cf1');
+            end;
+        </sql>
+    </changeSet>
+    <!--https://jira.aplana.com/browse/SBRFNDFL-7951 Реализовать заполнение печатной формы 2-НДФЛ (ФЛ) для выдачи сотруднику-->
+    <changeSet id="3.8-ytrofimov-5" author="ytrofimov" runAlways="true">
+        <update tableName="BLOB_DATA">
+            <column name="data" valueBlobFile="templates-3.8/ndfl/report_2ndfl_fl/v2016/2ndfl_by_person_additional_page.pdf"/>
+            <where>id='6466aad0-90c5-4101-8002-fb97b0e32d16'</where>
+        </update>
+        <update tableName="BLOB_DATA">
+            <column name="data" valueBlobFile="templates-3.8/ndfl/report_2ndfl_fl/v2016/2ndfl_by_person_base_page.pdf"/>
+            <where>id='5f3eb319-56cb-4dd8-b06e-b97ea3df0cf1'</where>
+        </update>
+    </changeSet>
 
     <changeSet id="3.8-dnovikov-4" author="dnovikov" runAlways="true">
         <update tableName="DECLARATION_TEMPLATE">

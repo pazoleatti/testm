@@ -45,6 +45,15 @@ public class DeclarationTemplateFile implements Serializable {
      */
     public static final String NDFL_2_REPORT_BY_PERSON_PAGE_APPLICATION = "ndfl_2_report_by_person_page_application.pdf";
 
+    /**
+     * 2НДФЛ для выдачи сотруднику - основная страница
+     */
+    public static final String NDFL_2_REFERENCE_FOR_PERSON_BASE_PAGE = "2ndfl_by_person_base_page.pdf";
+    /**
+     * 2НДФЛ для выдачи сотруднику - дополнительная страница
+     */
+    public static final String NDFL_2_REFERENCE_FOR_PERSON_ADDITIONAL_PAGE = "2ndfl_by_person_additional_page.pdf";
+
     private String fileName;
     private String blobDataId;
 

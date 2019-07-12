@@ -730,10 +730,11 @@ public interface DeclarationDataService {
      * Создать имя Pdf отчета
      *
      * @param declarationDataId идентификатор налоговой формы
+     * @param blobDataFileName  имя файла указанное в blobобъекте файла
      * @param userInfo          информация о пользователе
      * @return имя Pdf отчета
      */
-    String createPdfFileName(Long declarationDataId, TAUserInfo userInfo);
+    String createPdfFileName(Long declarationDataId, String blobDataFileName, TAUserInfo userInfo);
 
     /**
      * Создает задачу на обновление данных ФЛ в КНФ
