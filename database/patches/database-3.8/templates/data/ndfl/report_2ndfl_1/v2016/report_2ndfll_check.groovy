@@ -79,7 +79,7 @@ class Check extends AbstractScriptClass {
     final String TAX_ORGAN_CODE = "КодНО"
     final String UVED_SOTS_VICH = "УведСоцВыч"
     final String UVED_IMUSCH_VICH = "УведИмущВыч"
-    final String IFNS_UVED = "ИФНСУвед"
+    final String IFNS_UVED = "НОУвед"
 
 // Узлы 6 НДФЛ
     final NODE_NAME_SUM_STAVKA6 = "СумСтавка"
@@ -216,7 +216,7 @@ class Check extends AbstractScriptClass {
                 Ndfl2Leaf<BigDecimal> incomeSumCommonLeaf = new Ndfl2Leaf<>(INCOME_SUM_COMMON, svedDohNodeItem.СумИтНалПер.@СумДохОбщ.text(), BigDecimal.class)
                 Ndfl2Leaf<BigDecimal> taxBaseLeaf = new Ndfl2Leaf<>(TAX_BASE, svedDohNodeItem.СумИтНалПер.@НалБаза.text(), BigDecimal.class)
                 Ndfl2Leaf<BigDecimal> notHoldingTaxLeaf = new Ndfl2Leaf<>(NOT_HOLDING_TAX, svedDohNodeItem.СумИтНалПер.@НалНеУдерж.text(), BigDecimal.class)
-                Ndfl2Leaf<String> uvedFixPlatTaxOrganCode = new Ndfl2Leaf<>(IFNS_UVED, svedDohNodeItem.СумИтНалПер.УведФиксПлат.@ИФНСУвед.text(), String.class)
+                Ndfl2Leaf<String> uvedFixPlatTaxOrganCode = new Ndfl2Leaf<>(IFNS_UVED, svedDohNodeItem.СумИтНалПер.УведФиксПлат.@НОУвед.text(), String.class)
                 svedDohNdfl2Node.addLeaf(taxRateLeaf)
                 svedDohNdfl2Node.addLeaf(calculatedTaxLeaf)
                 svedDohNdfl2Node.addLeaf(taxSummLeaf)
@@ -266,13 +266,13 @@ class Check extends AbstractScriptClass {
                 }
                 uvedSotsVich.each { uvedSotsVichItem ->
                     Ndfl2Node uvedSotsVichNdfl2Node = new Ndfl2Node(UVED_SOTS_VICH)
-                    Ndfl2Leaf<String> taxOrganCode = new Ndfl2Leaf<>(IFNS_UVED, uvedSotsVichItem.@ИФНСУвед.text(), String.class)
+                    Ndfl2Leaf<String> taxOrganCode = new Ndfl2Leaf<>(IFNS_UVED, uvedSotsVichItem.@НОУвед.text(), String.class)
                     uvedSotsVichNdfl2Node.addLeaf(taxOrganCode)
                     svedDohNdfl2Node.addChild(uvedSotsVichNdfl2Node)
                 }
                 uvedImuschVich.each { uvedImuschVichItem ->
                     Ndfl2Node uvedImuschVichNdfl2Node = new Ndfl2Node(UVED_IMUSCH_VICH)
-                    Ndfl2Leaf<String> taxOrganCode = new Ndfl2Leaf<>(IFNS_UVED, uvedImuschVichItem.@ИФНСУвед.text(), String.class)
+                    Ndfl2Leaf<String> taxOrganCode = new Ndfl2Leaf<>(IFNS_UVED, uvedImuschVichItem.@НОУвед.text(), String.class)
                     uvedImuschVichNdfl2Node.addLeaf(taxOrganCode)
                     svedDohNdfl2Node.addChild(uvedImuschVichNdfl2Node)
                 }
@@ -592,7 +592,7 @@ class Check extends AbstractScriptClass {
         final String UVED_FIX_PLAT = "УведФиксПлат"
         final String UVED_SOTS_VICH = "УведСоцВыч"
         final String UVED_IMUSCH_VICH = "УведИмущВыч"
-        final String IFNS_UVED = "ИФНСУвед"
+        final String IFNS_UVED = "НОУвед"
 
         Ndfl2Node headNode;
 
@@ -686,19 +686,19 @@ class Check extends AbstractScriptClass {
                     for (Ndfl2Node uvedFixPlatNode : uvedFixPlatNodeList) {
                         String uvedFixPlatIfns = extractAttribute(IFNS_UVED, uvedFixPlatNode)?.getValue()
                         if (uvedFixPlatIfns != null && uvedFixPlatIfns != "" && !taxInspectionList.contains(uvedFixPlatIfns)) {
-                            createErrorMessage(logger, documentNode, "Значение не соответствует справочнику \"Налоговые инспекции\"", "Значение параметра \"Файл.Документ.НДФЛ-2.СведДох.СумИтНалПер.УведФиксПлат.ИФНСУвед\" (\"$uvedFixPlatIfns\") отсутствует в справочнике \"Налоговые инспекции\".")
+                            createErrorMessage(logger, documentNode, "Значение не соответствует справочнику \"Налоговые инспекции\"", "Значение параметра \"Файл.Документ.НДФЛ-2.СведДох.СумИтНалПер.УведФиксПлат.НОУвед\" (\"$uvedFixPlatIfns\") отсутствует в справочнике \"Налоговые инспекции\".")
                         }
                     }
                     for (Ndfl2Node uvedSotsVichNode : uvedSotsVichNodeList) {
                         String uvedSotsVichIfns = extractAttribute(IFNS_UVED, uvedSotsVichNode)?.getValue()
                         if (uvedSotsVichIfns != null && uvedSotsVichIfns != "" && !taxInspectionList.contains(uvedSotsVichIfns)) {
-                            createErrorMessage(logger, documentNode, "Значение не соответствует справочнику \"Налоговые инспекции\"", "Значение параметра \"Файл.Документ.НДФЛ-2.СведДох.НалВычССИ.УведСоцВыч.ИФНСУвед\" (\"$uvedSotsVichIfns\") отсутствует в справочнике \"Налоговые инспекции\".")
+                            createErrorMessage(logger, documentNode, "Значение не соответствует справочнику \"Налоговые инспекции\"", "Значение параметра \"Файл.Документ.НДФЛ-2.СведДох.НалВычССИ.УведСоцВыч.НОУвед\" (\"$uvedSotsVichIfns\") отсутствует в справочнике \"Налоговые инспекции\".")
                         }
                     }
                     for (Ndfl2Node uvedImuschVichNode : uvedImuschVichNodeList) {
                         String uvedImuschVichIfns = extractAttribute(IFNS_UVED, uvedImuschVichNode)?.getValue()
                         if (uvedImuschVichIfns != null && uvedImuschVichIfns != "" && !taxInspectionList.contains(uvedImuschVichIfns)) {
-                            createErrorMessage(logger, documentNode, "Значение не соответствует справочнику \"Налоговые инспекции\"", "Значение параметра \"Файл.Документ.НДФЛ-2.СведДох.НалВычССИ.УведИмущВыч.ИФНСУвед\" (\"$uvedImuschVichIfns\") отсутствует в справочнике \"Налоговые инспекции\".")
+                            createErrorMessage(logger, documentNode, "Значение не соответствует справочнику \"Налоговые инспекции\"", "Значение параметра \"Файл.Документ.НДФЛ-2.СведДох.НалВычССИ.УведИмущВыч.НОУвед\" (\"$uvedImuschVichIfns\") отсутствует в справочнике \"Налоговые инспекции\".")
                         }
                     }
                 }
