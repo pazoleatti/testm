@@ -5,4 +5,8 @@ prompt create_views
 prompt alter_tables
 @@01_02_alter_tables.sql
 
+prompt create_tables
+@@01_03_create_tables.sql
+
+
 /
