@@ -23,7 +23,11 @@
             function ($scope, $filter, RefBookFLResource, APP_CONSTANTS, $logPanel, $aplanaModal) {
 
                 $scope.refreshGrid = function (page) {
-                    $scope.personsGrid.ctrl.refreshGrid(page);
+                    if ($scope.searchFilter.isClear) {
+                        $scope.personsGrid.ctrl.refreshGrid(page);
+                    } else {
+                        $scope.personsGrid.ctrl.getGrid().jqGrid('clearGridData');
+                    }
                 };
 
                 function getDefaultFilterParams() {
