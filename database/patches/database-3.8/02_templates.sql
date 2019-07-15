@@ -143,7 +143,7 @@ PROMPT ======================
 PROMPT Fill service tables...
 --HOST "&2\sqlldr" &3 control=database-3.8/templates/ldr/refbook/blob_data.ldr log=&4/02_01_refbook_blob_data.txt bad=&5/02_01_refbook_blob_data.bad
 
---3.8-ytrofimov-2
+--3.8-ytrofimov-2, 3.8-ytrofimov-4, 3.8-ytrofimov-5
 HOST "&2\sqlldr" &3 control=database-3.8/templates/ldr/ndfl/blob_data.ldr log=&4/02_02_ndfl_blob_data.txt bad=&5/02_02_ndfl_blob_data.bad
 
 --3.8-dnovikov-4, 3.8-dnovikov-6

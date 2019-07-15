@@ -14,3 +14,5 @@ CREATION_DATE DATE "DD.MM.RR",
 DECLARATION_TEMPLATE_ID)
 begindata
  3a8afe75-a882-4ecb-9bd2-46920d12803d|ndfl_2_report_by_person_page_application.pdf|database-3.8/templates/data/ndfl/report_2ndfl_1/v2016/ndfl_2_report_by_person_page_application.pdf|13.02.2019||
+ 6466aad0-90c5-4101-8002-fb97b0e32d16|2ndfl_by_person_additional_page.pdf|database-3.8/templates/data/ndfl/report_2ndfl_fl/v2016/2ndfl_by_person_additional_page.pdf|03.07.2019||
+ 5f3eb319-56cb-4dd8-b06e-b97ea3df0cf1|2ndfl_by_person_base_page.pdf|database-3.8/templates/data/ndfl/report_2ndfl_fl/v2016/2ndfl_by_person_base_page.pdf|03.07.2019||

@@ -20,7 +20,7 @@ begin
    :USER_NDFL := upper('&1');
    :NSI_USER := upper('&3');
    select to_char(systimestamp,'yyyy.mm.dd hh24:mi:ss:FF3') into :start_time from dual;	
-   :version := '03.007.00';
+   :version := '03.008.00';
    :STATUS := 'OK';   
 end;
 /
