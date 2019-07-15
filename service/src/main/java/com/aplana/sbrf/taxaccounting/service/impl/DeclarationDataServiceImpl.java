@@ -3189,6 +3189,14 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         return result;
     }
 
+    @Override
+    public void changeStateToIssued(Long declarationDataId) {
+        DeclarationData declarationData = declarationDataDao.get(declarationDataId);
+        DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
+        if (declarationTemplate.getType().getId() == DeclarationType.NDFL_2_FL) {
+            declarationDataDao.setStatus(declarationDataId, State.ISSUED);
+        }
+    }
 
     /**
      * Обновление номеров строк операций. Начало нумерации

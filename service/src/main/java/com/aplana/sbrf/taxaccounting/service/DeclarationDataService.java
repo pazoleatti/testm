@@ -804,4 +804,11 @@ public interface DeclarationDataService {
      * @return ActionResult со статусом и логами проверки
      */
     ActionResult checkRowsEditCountParam(int count);
+
+    /**
+     * Изменить статус на Выдана.
+     *
+     * @param declarationDataId идентификатор НФ у которой нужно сменить статус на Выдана
+     */
+    void changeStateToIssued(Long declarationDataId);
 }

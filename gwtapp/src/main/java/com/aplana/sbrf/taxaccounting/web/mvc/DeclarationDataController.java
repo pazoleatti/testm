@@ -140,6 +140,7 @@ public class DeclarationDataController {
         if (blobData != null) {
             TAUserInfo userInfo = securityService.currentUserInfo();
             blobData.setName(declarationService.createPdfFileName(declarationDataId, blobData.getName(), userInfo));
+            declarationService.changeStateToIssued(declarationDataId);
         }
         createBlobResponse(blobData, req, response);
     }
