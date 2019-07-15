@@ -132,14 +132,14 @@ class Report2NdflFL extends AbstractScriptClass {
         if (declarationDataFiles.size() == 1) {
             return declarationDataFiles.get(0);
         } else {
-            //throw new ServiceException("XML файл, привязанный к налоговой форме ${declarationDescription(declaration2Ndfl1)} не соответствует требованиям.")
+            throw new ServiceException("XML файл, привязанный к налоговой форме ${declarationDescription(declaration2Ndfl1)} не соответствует требованиям.")
         }
     }
 
     void validateXml(DeclarationData declaration2Ndfl1, File xmlFile, String fileName) {
         def logger = new Logger()
         if (!validateXMLService.validate(declaration2Ndfl1, logger, xmlFile, fileName, null)) {
-            //throw new ServiceException("XML файл, привязанный к налоговой форме ${declarationDescription(declaration2Ndfl1)} не соответствует требованиям.")
+            throw new ServiceException("XML файл, привязанный к налоговой форме ${declarationDescription(declaration2Ndfl1)} не соответствует требованиям.")
         }
     }
 
