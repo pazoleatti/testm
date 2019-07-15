@@ -4,11 +4,11 @@ declare
 begin
 	merge into ref_book_oktmo dst using 
 	    (
-	     select '04614452' as code, 'сельсовет Памяти 13 Борцов' as name, '1' as razd, to_date ('01.05.2019','dd.mm.yyyy') as version, 0 as status from dual union
-	     select '04614452101','п Памяти 13 Борцов','2', to_date ('01.05.2019','dd.mm.yyyy'), 0 from dual union
-	     select '04614452106','д Малый Кемчуг','2', to_date ('01.05.2019','dd.mm.yyyy'), 0 from dual union
-	     select '04639450','поселок Тинской','1', to_date ('01.05.2019','dd.mm.yyyy'), 0 from dual union
-	     select '04639450101','п Тинской','2', to_date ('01.05.2019','dd.mm.yyyy'), 0 from dual 
+	     select '04614452' as code, 'сельсовет Памяти 13 Борцов' as name, '1' as razd, to_date ('01.06.2019','dd.mm.yyyy') as version, 0 as status from dual union
+	     select '04614452101','п Памяти 13 Борцов','2', to_date ('01.06.2019','dd.mm.yyyy'), 0 from dual union
+	     select '04614452106','д Малый Кемчуг','2', to_date ('01.06.2019','dd.mm.yyyy'), 0 from dual union
+	     select '04639450','поселок Тинской','1', to_date ('01.06.2019','dd.mm.yyyy'), 0 from dual union
+	     select '04639450101','п Тинской','2', to_date ('01.06.2019','dd.mm.yyyy'), 0 from dual 
 	    ) src
 	    on (dst.code=src.code and dst.version=src.version and dst.status=src.status)
 	    when not matched then insert (id, code, name, version, status, record_id, razd)
@@ -35,7 +35,7 @@ declare
     procedure convert_department_config (old_oktmo_code in varchar, new_oktmo_code in varchar, cnt_upd in out number, cnt_ins in out number) is
         cnt_r number;
     begin
-        update department_config set end_date=to_date ('30.04.2019 23:59:59','dd.mm.yyyy hh24:mi:ss') where end_date is null
+        update department_config set end_date=to_date ('31.05.2019 23:59:59','dd.mm.yyyy hh24:mi:ss') where end_date is null
           and oktmo_id in (select id from ref_book_oktmo where code=old_oktmo_code);
         cnt_r := sql%rowcount;
         cnt_upd := cnt_upd + cnt_r;
@@ -43,10 +43,10 @@ declare
             insert into department_config (ID,KPP,OKTMO_ID,START_DATE,END_DATE,DEPARTMENT_ID,TAX_ORGAN_CODE,TAX_ORGAN_CODE_MID,PRESENT_PLACE_ID,NAME,
                                    PHONE,REORGANIZATION_ID,REORG_INN,REORG_KPP,SIGNATORY_ID,SIGNATORY_SURNAME,SIGNATORY_FIRSTNAME,SIGNATORY_LASTNAME,
                                    APPROVE_DOC_NAME,APPROVE_ORG_NAME,REORG_SUCCESSOR_KPP)
-            select seq_department_config.nextval,KPP,(select id from ref_book_oktmo where code=new_oktmo_code),to_date('01.05.2019','dd.mm.yyyy'),null,DEPARTMENT_ID,TAX_ORGAN_CODE,
+            select seq_department_config.nextval,KPP,(select id from ref_book_oktmo where code=new_oktmo_code),to_date('01.06.2019','dd.mm.yyyy'),null,DEPARTMENT_ID,TAX_ORGAN_CODE,
                    TAX_ORGAN_CODE_MID,PRESENT_PLACE_ID,NAME,PHONE,REORGANIZATION_ID,REORG_INN,REORG_KPP,SIGNATORY_ID,SIGNATORY_SURNAME,SIGNATORY_FIRSTNAME,
                    SIGNATORY_LASTNAME,APPROVE_DOC_NAME,APPROVE_ORG_NAME,REORG_SUCCESSOR_KPP from department_config 
-            where trunc(end_date)=to_date ('30.04.2019','dd.mm.yyyy') 
+            where trunc(end_date)=to_date ('31.05.2019','dd.mm.yyyy') 
             and oktmo_id in (select id from ref_book_oktmo where code=old_oktmo_code);
 	    
 	    cnt_ins := cnt_ins + sql%rowcount;	
@@ -73,11 +73,11 @@ declare
   v_task_name varchar2(128):='insert_update_delete block #3 - merge into ref_book_oktmo';  
 begin
 	merge into ref_book_oktmo dst using 
-	    (select  '04614156' as code, 'поселок Памяти 13 Борцов' as name, '1' as razd, to_date ('01.05.2019','dd.mm.yyyy') as version, 2 as status from dual union
-	     select '04614156051','рп Памяти 13 Борцов','2', to_date ('01.05.2019','dd.mm.yyyy'), 2 from dual union
-	     select '04614156106','д Малый Кемчуг','2', to_date ('01.05.2019','dd.mm.yyyy'), 2 from dual union
-	     select '04639160','поселок Тинской','1', to_date ('01.05.2019','dd.mm.yyyy'), 2 from dual union
-	     select '04639160051','рп Тинской','2', to_date ('01.05.2019','dd.mm.yyyy'), 2 from dual 
+	    (select  '04614156' as code, 'поселок Памяти 13 Борцов' as name, '1' as razd, to_date ('01.06.2019','dd.mm.yyyy') as version, 2 as status from dual union
+	     select '04614156051','рп Памяти 13 Борцов','2', to_date ('01.06.2019','dd.mm.yyyy'), 2 from dual union
+	     select '04614156106','д Малый Кемчуг','2', to_date ('01.06.2019','dd.mm.yyyy'), 2 from dual union
+	     select '04639160','поселок Тинской','1', to_date ('01.06.2019','dd.mm.yyyy'), 2 from dual union
+	     select '04639160051','рп Тинской','2', to_date ('01.06.2019','dd.mm.yyyy'), 2 from dual 
 	    )  src
 	    on (dst.code=src.code and dst.version=src.version)
 	    when not matched then insert (id, code, name, version, status, record_id, razd)
