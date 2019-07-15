@@ -324,6 +324,10 @@ class Report2NdflFL extends AbstractScriptClass {
                 }
             }
 
+            СведСумДохDataList?.sort { o1, o2 ->
+                o1?.month <=> o2?.month ?: o1?.incomeCode <=> o2?.incomeCode ?: o1?.deductionCode <=> o2?.deductionCode
+            }
+
             List<List<СведСумДохData>> СведСумДохDataByPages = СведСумДохDataList.collate(30)
 
             List<Node> ПредВычССИList = СведДох.НалВычССИ[0]?.ПредВычССИ
@@ -333,6 +337,10 @@ class Report2NdflFL extends AbstractScriptClass {
                 data.code = ПредВычССИ.@КодВычет
                 data.sum = ПредВычССИ.@СумВычет
                 ПредВычССИDataList << data
+            }
+
+            ПредВычССИDataList?.sort { o1, o2 ->
+                o1?.code <=> o2?.code
             }
 
             List<List<ПредВычССИData>> ПредВычССИDataByPages = ПредВычССИDataList.collate(4)
