@@ -150,4 +150,10 @@
         </update>
     </changeSet>
 
+    <changeSet id="3.8-dnovikov-8" author="dnovikov">
+        <sql>
+            update state set name = 'Выдана' where id = 4;
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>
