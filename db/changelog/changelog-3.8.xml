@@ -150,4 +150,38 @@
         </update>
     </changeSet>
 
+    <changeSet id="3.8-skononova-3" author="skononova">
+		<sql splitStatements="false">
+			create table KNO_TEMP (code varchar2 (4 char), name varchar2(250 char))
+		</sql>
+    </changeSet>
+    <changeSet id="3.8-skononova-4" author="skononova">
+		<loadData encoding="UTF-8" file="csv/kno.csv" tableName="KNO_TEMP" separator=";">
+		            <column name="CODE" type="string"/>
+		            <column name="NAME" type="string"/>
+	        </loadData>
+
+    </changeSet>
+    <changeSet id="3.8-skononova-5" author="skononova">
+		<sql splitStatements="false">
+		   begin
+			update ref_book set visible=1 where upper(table_name)='REF_BOOK_TAX_INSPECTION';
+			merge into ref_book_tax_inspection dst using 
+			    ( select code, name from kno_temp
+			    )  src
+			    on (dst.code=src.code )
+			    when not matched then insert (id, code, name)
+			    values (seq_ref_book_record.nextval, src.code, src.name)
+			    when matched then update set dst.name=src.name where dst.name!=src.name;
+		   end;
+		</sql>
+    </changeSet>
+
+    <changeSet id="3.8-skononova-6" author="skononova">
+		<sql>
+			drop table KNO_TEMP
+		</sql>
+    </changeSet>
+
+
 </databaseChangeLog>
