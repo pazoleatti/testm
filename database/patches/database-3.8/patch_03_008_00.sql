@@ -10,6 +10,7 @@ var version varchar2(10);
 var STATUS VARCHAR2(3000);
 var USER_NDFL VARCHAR2(50);
 var NSI_USER VARCHAR2(50);
+var TAXREC_USER VARCHAR2(50);
 
 PROMPT Install patch DB
 PROMPT ======================
@@ -19,6 +20,7 @@ WHENEVER SQLERROR EXIT SQL.SQLCODE
 begin  
    :USER_NDFL := upper('&1');
    :NSI_USER := upper('&3');
+   :TAXREC_USER := upper('&6');	
    select to_char(systimestamp,'yyyy.mm.dd hh24:mi:ss:FF3') into :start_time from dual;	
    :version := '03.008.00';
    :STATUS := 'OK';   
@@ -44,7 +46,7 @@ end;
 PROMPT ## Beginning Installing Patch
 
 PROMPT ## 01_ddl_tables_views_synonyms
-@database-3.8/01_ddl_tables_views_synonyms.sql &3
+@database-3.8/01_ddl_tables_views_synonyms.sql &3 &6
 
 
 PROMPT ## 02_templates
