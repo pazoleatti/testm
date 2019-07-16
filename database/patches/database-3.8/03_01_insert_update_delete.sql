@@ -95,16 +95,18 @@ end;
 /
 COMMIT;
 
+--3.8-dnovikov-8
 declare 
   v_task_name varchar2(128):='insert_update_delete block #5 - merge into state';  
 begin
 	merge into state dst using
-	(select 4 as id, 'Выдан' as name from dual 
+	(select 4 as id, 'Выдана' as name from dual 
 	) src
 	on (src.id=dst.id)
 	when not matched then
 		insert (id, name)
-		values (src.id, src.name);
+		values (src.id, src.name)
+	when matched then update set dst.name=src.name where dst.name<>src.name;
 	
 	CASE SQL%ROWCOUNT 
 	WHEN 0 THEN dbms_output.put_line(v_task_name||'[WARNING]:'||' No changes was done');
@@ -256,6 +258,44 @@ begin
 	    values (seq_ref_book_record.nextval, src.code, src.name, src.version, src.status, 
 	   (select max(record_id) from ref_book_oktmo c where c.code=src.code and c.status=0),  src.razd)
 	   where (select max(record_id) from ref_book_oktmo c where c.code=src.code and c.status=0) is not null;
+
+	CASE SQL%ROWCOUNT 
+	WHEN 0 THEN dbms_output.put_line(v_task_name||'[WARNING]:'||' No changes was done');
+	ELSE dbms_output.put_line(v_task_name||'[INFO]:'||' Success');
+	END CASE; 
+	
+
+EXCEPTION
+  when OTHERS then
+    dbms_output.put_line(v_task_name||'[FATAL]:'||sqlerrm);		
+end;
+/
+COMMIT;
+
+declare 
+  v_task_name varchar2(128):='insert_update_delete block #11 - update ref_book';  
+begin
+
+	update ref_book set visible=1 where upper(table_name)='REF_BOOK_TAX_INSPECTION';
+
+	CASE SQL%ROWCOUNT 
+	WHEN 0 THEN dbms_output.put_line(v_task_name||'[WARNING]:'||' No changes was done');
+	ELSE dbms_output.put_line(v_task_name||'[INFO]:'||' Success');
+	END CASE; 
+	
+
+EXCEPTION
+  when OTHERS then
+    dbms_output.put_line(v_task_name||'[FATAL]:'||sqlerrm);		
+end;
+/
+COMMIT;
+/
+declare 
+  v_task_name varchar2(128):='insert_update_delete block #12 - update ref_book_tax_inspection';  
+begin
+
+	delete from ref_book_tax_inspection where id=-1;
 
 	CASE SQL%ROWCOUNT 
 	WHEN 0 THEN dbms_output.put_line(v_task_name||'[WARNING]:'||' No changes was done');

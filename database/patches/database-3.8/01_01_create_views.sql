@@ -153,8 +153,24 @@ comment on column vw_department_report_period.is_active is 'Признак ак�
 comment on column vw_department_report_period.correction_date is 'Период сдачи корректировки';
 comment on table vw_department_report_period is 'Привязка отчетных периодов к подразделениям';
 
---
+-- налоговые формы 
 begin
 	dbms_output.put_line ('Create vw_declaration_data');                                                                         
 end;
+/
+create or replace view vw_declaration_data as
+select id, declaration_template_id, tax_organ_code, kpp, oktmo,department_report_period_id, state, last_data_modified, created_date  from declaration_data;
+grant select on vw_declaration_data to &2;
+grant references on declaration_data to &2;
+
+comment on column vw_declaration_data.id is 'Идентификатор';
+comment on column vw_declaration_data.declaration_template_id is 'Ссылка на шаблон налоговой формы';
+comment on column vw_declaration_data.tax_organ_code is 'Налоговый орган';
+comment on column vw_declaration_data.kpp is 'КПП';
+comment on column vw_declaration_data.oktmo is 'ОКТМО';
+comment on column vw_declaration_data.department_report_period_id is 'Идентификатор отчетного периода подразделения';
+comment on column vw_declaration_data.state is 'Статус (состояние формы)';
+comment on column vw_declaration_data.last_data_modified is 'Дата последних изменений данных формы';
+comment on column vw_declaration_data.created_date is 'Дата создания формы';
+comment on table vw_declaration_data is 'Налоговые формы';
 /
