@@ -103,18 +103,33 @@
                         ],
                         colModel: [
                             {name: 'id', index: 'id', key: true, hidden: true},
-                            {name: 'lastName'},
-                            {name: 'firstName'},
-                            {name: 'middleName'},
-                            {name: 'birthDate', formatter: $filter('dateFormatter'), width: 80},
-                            {name: 'reportDoc.docType', formatter: $filter('codeNameFormatter'), width: 250},
-                            {name: 'reportDoc.documentNumber'},
-                            {name: 'citizenship', formatter: $filter('codeNameFormatter')},
-                            {name: 'taxPayerState', formatter: $filter('codeNameFormatter'), width: 200},
-                            {name: 'inn', width: 110},
-                            {name: 'innForeign'},
-                            {name: 'snils', width: 110},
-                            {name: 'address', formatter: $filter('personAddressFormatter'), width: 400}
+                            {name: 'lastName', index: 'lastName'},
+                            {name: 'firstName', index: 'firstName'},
+                            {name: 'middleName', index: 'middleName'},
+                            {name: 'birthDate', index: 'birthDate', formatter: $filter('dateFormatter'), width: 80},
+                            {
+                                name: 'reportDoc.docType',
+                                index: 'docType',
+                                formatter: $filter('codeNameFormatter'),
+                                width: 250
+                            },
+                            {name: 'reportDoc.documentNumber', index: 'docNumber'},
+                            {name: 'citizenship', index: 'citizenship', formatter: $filter('codeNameFormatter')},
+                            {
+                                name: 'taxPayerState',
+                                index: 'taxPayerState',
+                                formatter: $filter('codeNameFormatter'),
+                                width: 200
+                            },
+                            {name: 'inn', index: 'inn', width: 110},
+                            {name: 'innForeign', index: 'innForeign'},
+                            {name: 'snils', index: 'snils', width: 110},
+                            {
+                                name: 'address',
+                                index: 'address',
+                                formatter: $filter('personAddressFormatter'),
+                                width: 400
+                            }
                         ],
                         rowNum: 100,
                         rowList: [5, 10, 50, 100, 200, 300],
