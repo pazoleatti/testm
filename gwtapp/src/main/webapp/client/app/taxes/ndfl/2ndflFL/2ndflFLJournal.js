@@ -19,8 +19,8 @@
             });
         }])
 
-        .controller('2ndflFLJournalCtrl', ['$scope', '$filter', 'APP_CONSTANTS', '$logPanel', '$aplanaModal', 'DeclarationDataResource', '$dialogs', '$http',
-            function ($scope, $filter, APP_CONSTANTS, $logPanel, $aplanaModal, DeclarationDataResource, $dialogs, $http) {
+        .controller('2ndflFLJournalCtrl', ['$scope', '$filter', 'APP_CONSTANTS', '$logPanel', '$aplanaModal', 'DeclarationDataResource', '$dialogs', '$http', 'PermissionChecker',
+            function ($scope, $filter, APP_CONSTANTS, $logPanel, $aplanaModal, DeclarationDataResource, $dialogs, $http, PermissionChecker) {
 
                 $scope.refreshGrid = function (page) {
                     $scope._2ndflFLGrid.ctrl.refreshGrid(page);
@@ -172,6 +172,20 @@
                     }
                     return "<a href='index.html#/personRegistry/personCard/" + row.personId + "'>" + value + "</a>";
                 }
+
+                /**
+                 * Проверка, может ли текущий пользоватеть выполнить операцию над выделенными налоговыми формами
+                 */
+                $scope.checkPermissionForSelectedItems = function (permission) {
+                    var selectedItems = $scope._2ndflFLGrid.value;
+                    if (selectedItems && selectedItems.length > 0) {
+                        return selectedItems.every(function (item) {
+                            return PermissionChecker.check(item, permission);
+                        });
+                    } else {
+                        return false;
+                    }
+                };
             }]
         );
 }());

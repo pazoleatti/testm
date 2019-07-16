@@ -14,7 +14,7 @@
                     <!--Удалить-->
                     <span>
                         <button type="button" class="btn btn-default" data-ng-click="delete()"
-                                data-ng-disabled="!(_2ndflFLGrid.value.length > 0 && permissionChecker.check(user, APP_CONSTANTS.USER_PERMISSION._2NDFL_FL))">
+                                data-ng-disabled="!checkPermissionForSelectedItems(APP_CONSTANTS.DECLARATION_PERMISSION.DELETE)">
                             <span data-translate-once="button.delete"></span>
                         </button>
                     </span>
