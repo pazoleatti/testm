@@ -70,7 +70,7 @@ class SelectPersonQueryGenerator {
         SORT_FIELDS_BY_PROPERTY.put("snils", Arrays.asList("snils", "id"));
         SORT_FIELDS_BY_PROPERTY.put("address", Arrays.asList("postal_code", "region_code", "district", "city", "locality", "street",
                 "house", "building", "apartment", "id"));
-        SORT_FIELDS_BY_PROPERTY.put("foreignAddress", Arrays.asList("address_country_code", "address", "address_id", "id"));
+        SORT_FIELDS_BY_PROPERTY.put("foreignAddress", Arrays.asList("address_country_code", "address_foreign", "id"));
         SORT_FIELDS_BY_PROPERTY.put("source", Arrays.asList("asnu_code", "id"));
         SORT_FIELDS_BY_PROPERTY.put("startDate", Arrays.asList("version", "id"));
         SORT_FIELDS_BY_PROPERTY.put("endDate", Arrays.asList("version_to", "id"));
@@ -325,7 +325,7 @@ class SelectPersonQueryGenerator {
             String sortProperty = getSortProperty(pagingParams);
             SortDirection sortDirection = SortDirection.of(pagingParams.getDirection());
 
-            if (isPropertyPermissive(sortProperty)) {
+            if (filter.isVipOrder() && isPropertyPermissive(sortProperty)) {
                 query = query + "vip " + sortDirection.opposite() + ", ";
             }
 

@@ -69,7 +69,8 @@
                         taxpayerStateIds: $filter('idExtractor')($scope.searchFilter.params.taxpayerStates),
                         inn: $scope.searchFilter.params.inn,
                         innForeign: $scope.searchFilter.params.innForeign,
-                        snils: $scope.searchFilter.params.snils
+                        snils: $scope.searchFilter.params.snils,
+                        vipOrder: false
                     });
                 };
 

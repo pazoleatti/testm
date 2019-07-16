@@ -142,7 +142,6 @@
         </update>
     </changeSet>
 
-
     <changeSet id="3.8-dnovikov-7" author="dnovikov" runAlways="true">
         <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
             <column name="script" valueClobFile="templates-3.8/ndfl/report_6ndfl/v2016/report_6ndfl_check.groovy"/>
@@ -150,6 +149,15 @@
         </update>
     </changeSet>
 
+<<<<<<< HEAD
+=======
+    <changeSet id="3.8-dnovikov-8" author="dnovikov">
+        <sql>
+            update state set name = 'Выдана' where id = 4;
+        </sql>
+    </changeSet>
+    <!--https://jira.aplana.com/browse/SBRFNDFL-8089 Добавить изменения по SBRFNDFL-8081 в ликвибейс-->
+>>>>>>> 73b3b3316eb3b44e7693cea8f8c9b77df0b7045a
     <changeSet id="3.8-skononova-3" author="skononova">
 		<sql splitStatements="false">
 			create table KNO_TEMP (code varchar2 (4 char), name varchar2(250 char))
@@ -183,5 +191,8 @@
 		</sql>
     </changeSet>
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 73b3b3316eb3b44e7693cea8f8c9b77df0b7045a
 </databaseChangeLog>

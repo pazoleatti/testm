@@ -501,21 +501,6 @@ public class DeclarationDataController {
     }
 
     /**
-     * Возвращяет список форм 2-НДФЛ (ФЛ) по фильтру и пагинации
-     */
-    @GetMapping(value = "/rest/declarationData", params = "projection=2ndflFLDeclarations")
-    public JqgridPagedList<Declaration2NdflFLDTO> findAll2NdflFL(@RequestParam Declaration2NdflFLFilter filter, @RequestParam PagingParams pagingParams) {
-        TAUser user = securityService.currentUserInfo().getUser();
-        PagingResult<Declaration2NdflFLDTO> pagingResult = declarationService.findAll2NdflFL(filter, pagingParams, user);
-
-        return JqgridPagedResourceAssembler.buildPagedList(
-                pagingResult,
-                pagingResult.getTotalCount(),
-                pagingParams
-        );
-    }
-
-    /**
      * Установка прав доступа для всех налоговых форм страницы
      *
      * @param page Страница списка налоговых форм
@@ -543,6 +528,51 @@ public class DeclarationDataController {
                             DeclarationDataPermission.ACCEPTED, DeclarationDataPermission.CHECK,
                             DeclarationDataPermission.CREATE, DeclarationDataPermission.EDIT_ASSIGNMENT, DeclarationDataPermission.DOWNLOAD_REPORTS,
                             DeclarationDataPermission.IDENTIFY, DeclarationDataPermission.CONSOLIDATE);
+                    item.setPermissions(declaration.getPermissions());
+                }
+            }
+        }
+    }
+
+    /**
+     * Возвращяет список форм 2-НДФЛ (ФЛ) по фильтру и пагинации
+     */
+    @GetMapping(value = "/rest/declarationData", params = "projection=2ndflFLDeclarations")
+    public JqgridPagedList<Declaration2NdflFLDTO> findAll2NdflFL(@RequestParam Declaration2NdflFLFilter filter, @RequestParam PagingParams pagingParams) {
+        TAUser user = securityService.currentUserInfo().getUser();
+        PagingResult<Declaration2NdflFLDTO> pagingResult = declarationService.findAll2NdflFL(filter, pagingParams, user);
+
+        set2NdflFLPermissions(pagingResult);
+
+        return JqgridPagedResourceAssembler.buildPagedList(
+                pagingResult,
+                pagingResult.getTotalCount(),
+                pagingParams
+        );
+    }
+
+    /**
+     * Установка прав доступа для форм 2-НДФЛ ФЛ
+     */
+    private void set2NdflFLPermissions(PagingResult<Declaration2NdflFLDTO> page) {
+        if (!page.isEmpty()) {
+            //Получение id всех форм
+            List<Long> declarationIds = new ArrayList<>();
+            for (Declaration2NdflFLDTO item : page) {
+                declarationIds.add(item.getDeclarationDataId());
+            }
+
+            //Сохранение в мапе для получения формы по id
+            Map<Long, DeclarationData> declarationDataMap = new HashMap<>();
+            for (DeclarationData declarationData : declarationService.get(declarationIds)) {
+                declarationDataMap.put(declarationData.getId(), declarationData);
+            }
+
+            //Для каждого элемента страницы взять форму, определить права доступа на нее и установить их элементу страницы
+            for (Declaration2NdflFLDTO item : page) {
+                DeclarationData declaration = declarationDataMap.get(item.getDeclarationDataId());
+                if (declaration != null) {//noinspection unchecked
+                    declarationDataPermissionSetter.setPermissions(declaration, DeclarationDataPermission.DELETE);
                     item.setPermissions(declaration.getPermissions());
                 }
             }
