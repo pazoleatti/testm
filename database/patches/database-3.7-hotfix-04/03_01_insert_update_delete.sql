@@ -41,3 +41,21 @@ end;
 /
 COMMIT;
 
+declare 
+  v_task_name varchar2(128):='insert_update_delete block #3 - update ref_book_tax_inspection';  
+begin
+
+	delete from ref_book_tax_inspection where id=-1;
+
+	CASE SQL%ROWCOUNT 
+	WHEN 0 THEN dbms_output.put_line(v_task_name||'[WARNING]:'||' No changes was done');
+	ELSE dbms_output.put_line(v_task_name||'[INFO]:'||' Success');
+	END CASE; 
+	
+
+EXCEPTION
+  when OTHERS then
+    dbms_output.put_line(v_task_name||'[FATAL]:'||sqlerrm);		
+end;
+/
+COMMIT;
