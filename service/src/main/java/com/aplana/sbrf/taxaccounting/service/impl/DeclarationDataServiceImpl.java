@@ -780,8 +780,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         if (!logger.containsLevel(LogLevel.ERROR)) {
             if (State.CREATED.equals(dd.getState())) {
                 declarationDataDao.setStatus(id, State.PREPARED);
+                logBusinessService.logFormEvent(id, FormDataEvent.MOVE_CREATED_TO_PREPARED, logger.getLogId(), "Проверка пройдена, состояние изменено на \"Подготовлена\"", userInfo);
+            } else {
+                logBusinessService.logFormEvent(id, FormDataEvent.MOVE_CREATED_TO_PREPARED, logger.getLogId(), "Проверка пройдена", userInfo);
             }
-            logBusinessService.logFormEvent(id, FormDataEvent.MOVE_CREATED_TO_PREPARED, logger.getLogId(), "Проверка пройдена", userInfo);
             logger.info("Проверка завершена, ошибок не обнаружено");
         } else {
             if (State.PREPARED.equals(dd.getState())) {
