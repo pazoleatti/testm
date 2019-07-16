@@ -25,9 +25,9 @@ public enum State {
      */
     ACCEPTED(3, "Принята"),
     /**
-     * Статус "Выдан"
+     * Статус "Выдана"
      */
-    ISSUED(4, "Выдан");
+    ISSUED(4, "Выдана");
 
     private final Integer id;
     private final String title;

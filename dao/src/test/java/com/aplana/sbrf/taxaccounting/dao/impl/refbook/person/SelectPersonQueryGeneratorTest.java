@@ -266,7 +266,7 @@ public class SelectPersonQueryGeneratorTest {
 
         String query = generator.generatePagedAndFilteredQuery();
         assertThat(query).endsWith("order by vip asc, postal_code desc, region_code desc, district desc, city desc, " +
-                "locality desc, street desc, house desc, building desc, apartment desc, address_id desc, id desc");
+                "locality desc, street desc, house desc, building desc, apartment desc, id desc");
     }
 
     @Test

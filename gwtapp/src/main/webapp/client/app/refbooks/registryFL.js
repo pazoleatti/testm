@@ -140,87 +140,106 @@
                         colModel: [
                             {
                                 name: 'oldId',
+                                index: 'oldId',
                                 formatter: $filter('personIdFormatter'),
                                 width: 120
                             },
                             {
                                 name: 'vip',
+                                index: 'vip',
                                 formatter: $filter('vipTextFormatter'),
                                 width: 80
                             },
                             {
                                 name: 'lastName',
+                                index: 'lastName',
                                 formatter: $filter('personLinkFormatter')
                             },
                             {
-                                name: 'firstName'
+                                name: 'firstName',
+                                index: 'firstName'
                             },
                             {
-                                name: 'middleName'
+                                name: 'middleName',
+                                index: 'middleName'
                             },
                             {
                                 name: 'birthDate',
+                                index: 'birthDate',
                                 formatter: $filter('dateFormatter'),
                                 width: 80
                             },
                             {
                                 name: 'reportDoc',
+                                index: 'docType',
                                 formatter: $filter('docTypeFormatter'),
                                 width: 250
                             },
                             {
                                 name: 'reportDoc',
+                                index: 'docNumber',
                                 formatter: $filter('docNumberFormatter')
                             },
                             {
                                 name: 'citizenship',
+                                index: 'citizenship',
                                 formatter: $filter('permissiveCodeFormatter')
                             },
                             {
                                 name: 'taxPayerState',
+                                index: 'taxPayerState',
                                 formatter: $filter('permissiveCodeFormatter'),
                                 width: 50
                             },
                             {
                                 name: 'inn',
+                                index: 'inn',
                                 formatter: $filter('permissiveFormatter'),
                                 width: 110
                             },
                             {
                                 name: 'innForeign',
+                                index: 'innForeign',
                                 formatter: $filter('permissiveFormatter')
                             },
                             {
                                 name: 'snils',
+                                index: 'snils',
                                 formatter: $filter('permissiveFormatter'),
                                 width: 110
                             },
                             {
                                 name: 'address',
+                                index: 'address',
                                 formatter: $filter('russianAddressFormatter'),
                                 width: 400
                             },
                             {
                                 name: 'address',
+                                index: 'foreignAddress',
                                 formatter: $filter('foreignAddressFormatter'),
                                 width: 300
                             },
                             {
                                 name: 'source',
+                                index: 'source',
                                 formatter: $filter('codeNameFormatter')
                             },
                             {
                                 name: 'startDate',
+                                index: 'startDate',
                                 formatter: $filter('dateFormatter'),
                                 width: 80
                             },
                             {
                                 name: 'endDate',
+                                index: 'endDate',
                                 formatter: $filter('dateFormatter'),
                                 width: 80
                             },
                             {
-                                name: 'id'
+                                name: 'id',
+                                index: 'id'
                             }
                         ],
                         rowNum: 100,

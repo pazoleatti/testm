@@ -58,6 +58,8 @@ public class RefBookPersonFilter implements Serializable {
 
     private Boolean duplicates;
 
+    private boolean vipOrder = true;
+
     public RefBookPersonFilter allVersions(Boolean allVersions) {
         this.allVersions = allVersions;
         return this;

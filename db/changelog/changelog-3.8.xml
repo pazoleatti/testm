@@ -142,4 +142,18 @@
         </update>
     </changeSet>
 
+
+    <changeSet id="3.8-dnovikov-7" author="dnovikov" runAlways="true">
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script" valueClobFile="templates-3.8/ndfl/report_6ndfl/v2016/report_6ndfl_check.groovy"/>
+            <where>DECLARATION_TEMPLATE_ID = 103 and EVENT_ID = 5</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="3.8-dnovikov-8" author="dnovikov">
+        <sql>
+            update state set name = 'Выдана' where id = 4;
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>

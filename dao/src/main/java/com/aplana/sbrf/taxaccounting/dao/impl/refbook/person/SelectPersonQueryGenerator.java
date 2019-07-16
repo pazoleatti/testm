@@ -64,16 +64,16 @@ class SelectPersonQueryGenerator {
         SORT_FIELDS_BY_PROPERTY.put("docType", Arrays.asList("doc_code", "doc_name", "id"));
         SORT_FIELDS_BY_PROPERTY.put("docNumber", Arrays.asList("doc_number", "id"));
         SORT_FIELDS_BY_PROPERTY.put("citizenship", Arrays.asList("citizenship_country_code", "id"));
-        SORT_FIELDS_BY_PROPERTY.put("taxpayerState", Arrays.asList("state_code", "id"));
+        SORT_FIELDS_BY_PROPERTY.put("taxPayerState", Arrays.asList("state_code", "id"));
         SORT_FIELDS_BY_PROPERTY.put("inn", Arrays.asList("inn", "id"));
         SORT_FIELDS_BY_PROPERTY.put("innForeign", Arrays.asList("inn_foreign", "id"));
         SORT_FIELDS_BY_PROPERTY.put("snils", Arrays.asList("snils", "id"));
         SORT_FIELDS_BY_PROPERTY.put("address", Arrays.asList("postal_code", "region_code", "district", "city", "locality", "street",
-                "house", "building", "apartment", "address_id", "id"));
-        SORT_FIELDS_BY_PROPERTY.put("foreignAddress", Arrays.asList("address_country_code", "address", "address_id", "id"));
+                "house", "building", "apartment", "id"));
+        SORT_FIELDS_BY_PROPERTY.put("foreignAddress", Arrays.asList("address_country_code", "address_foreign", "id"));
         SORT_FIELDS_BY_PROPERTY.put("source", Arrays.asList("asnu_code", "id"));
-        SORT_FIELDS_BY_PROPERTY.put("version", Arrays.asList("version", "id"));
-        SORT_FIELDS_BY_PROPERTY.put("versionEnd", Arrays.asList("version_to", "id"));
+        SORT_FIELDS_BY_PROPERTY.put("startDate", Arrays.asList("version", "id"));
+        SORT_FIELDS_BY_PROPERTY.put("endDate", Arrays.asList("version_to", "id"));
         SORT_FIELDS_BY_PROPERTY.put("id", Collections.singletonList("id"));
     }
 
@@ -325,7 +325,7 @@ class SelectPersonQueryGenerator {
             String sortProperty = getSortProperty(pagingParams);
             SortDirection sortDirection = SortDirection.of(pagingParams.getDirection());
 
-            if (isPropertyPermissive(sortProperty)) {
+            if (filter.isVipOrder() && isPropertyPermissive(sortProperty)) {
                 query = query + "vip " + sortDirection.opposite() + ", ";
             }
 

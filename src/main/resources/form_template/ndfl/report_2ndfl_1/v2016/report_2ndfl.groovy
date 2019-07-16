@@ -286,7 +286,7 @@ class Report2Ndfl extends AbstractScriptClass {
                                         НалИсчисл: НалИсчисл(rateIncomes, ratePrepayments),
                                         АвансПлатФикс: АвансПлатФикс(ratePrepayments),
                                         НалУдерж: is2Ndfl1() ? НалУдерж(rateIncomes) : 0,
-                                        НалПеречисл: is2Ndfl1() ? НалПеречисл(person.incomes) : 0,// тут берутся строки перечисления, у которых rate=null
+                                        НалПеречисл: is2Ndfl1() ? НалПеречисл(person.incomes, rate) : 0,// тут берутся строки перечисления, у которых rate=null
                                         НалУдержЛиш: is2Ndfl1() ? НалУдержЛиш(rateIncomes) : 0,
                                         НалНеУдерж: is2Ndfl1() ? НалНеУдерж(rateIncomes) : СуммаНИ(rateIncomes))
                                 def deductions = rateDeductions.findAll {
@@ -601,10 +601,16 @@ class Report2Ndfl extends AbstractScriptClass {
         return sum
     }
 
-    Long НалПеречисл(List<NdflPersonIncome> incomes) {
+    Long НалПеречисл(List<NdflPersonIncome> incomes, int rate) {
         Long sum = 0
-        for (def income : incomes) {
-            sum += income.taxSumm ?: 0
+        def incomesByOperationId = incomes.groupBy { it.operationId }
+        for (def operationId : incomesByOperationId.keySet()) {
+            def operationIdIncomes = incomesByOperationId.get(operationId)
+            if (operationIdIncomes.find { it.taxRate == rate }) {
+                for (def income : operationIdIncomes) {
+                    sum += income.taxSumm ?: 0
+                }
+            }
         }
         return sum
     }
