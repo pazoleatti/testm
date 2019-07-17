@@ -91,3 +91,25 @@ end;
 /
 
 PROMPT OK.
+
+PROMPT Fill REF_BOOK_TAX_INSPECTION... 
+begin
+	merge into ref_book_tax_inspection dst using 
+	    ( select code, name from kno_temp
+	    )  src
+	    on (dst.code=src.code )
+	    when not matched then insert (id, code, name)
+	    values (seq_ref_book_record.nextval, src.code, src.name)
+	    when matched then update set dst.name=src.name where dst.name<>src.name;
+	commit;	
+EXCEPTION
+	when others then
+
+	   rollback;
+	   dbms_output.put_line(sqlerrm);
+	   commit;
+	   raise_application_error(-20999,'Error fill table REF_BOOK_TAX_INSPECTION.');
+end;
+/
+PROMPT OK.
+/
