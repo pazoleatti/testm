@@ -224,4 +224,18 @@
 		</sql>
 	</changeSet>
 
+	<changeSet id="3.7.1-ytrofimov-1" author="ytrofimov">
+		<update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+			<column name="script" valueClobFile="templates-3.7.1/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl_update_persons_data.groovy"/>
+			<where>DECLARATION_TEMPLATE_ID = 101 and EVENT_ID = 11</where>
+		</update>
+	</changeSet>
+
+	<changeSet id="3.7.1-ytrofimov-2" author="ytrofimov">
+		<update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+			<column name="script" valueClobFile="templates-3.7.1/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_update_persons_data.groovy"/>
+			<where>DECLARATION_TEMPLATE_ID = 100 and EVENT_ID = 11</where>
+		</update>
+	</changeSet>
+
 </databaseChangeLog>
