@@ -1351,7 +1351,7 @@ class Report2Ndfl extends AbstractScriptClass {
 
             StringBuilder printingValue = new StringBuilder(value)
             for (int i = 0; i < maxLength - value.length(); i++) {
-                printingValue.append("-")
+                printingValue.insert(0, "-")
             }
             field.setValue(printingValue.toString())
         }
@@ -1366,22 +1366,22 @@ class Report2Ndfl extends AbstractScriptClass {
     class HeaderFiller extends FDFiller {
         @Override
         void accept(PageVisitor pageVisitor) {
-            processField(pageVisitor.acroForm.getField("inn"), pageVisitor.xmlRoot.Документ[0].СвНА[0].СвНАЮЛ[0].@ИННЮЛ)
-            processField(pageVisitor.acroForm.getField("kpp"), pageVisitor.xmlRoot.Документ[0].СвНА[0].СвНАЮЛ[0].@КПП)
-            processPageNumField(pageVisitor.acroForm.getField("pageNum"), String.valueOf(pageVisitor.pageNum))
-            processField(pageVisitor.acroForm.getField("refNum"), pageVisitor.reference.@НомСпр)
-            processField(pageVisitor.acroForm.getField("reportYear"), pageVisitor.xmlRoot.Документ[0].@ОтчетГод)
-            processField(pageVisitor.acroForm.getField("mark"), pageVisitor.xmlRoot.Документ[0].@Признак)
-            processField(pageVisitor.acroForm.getField("corrNum"), pageVisitor.reference.@НомКорр)
-            processField(pageVisitor.acroForm.getField("taxAuthority"), pageVisitor.xmlRoot.Документ[0].@КодНО)
-            processField(pageVisitor.acroForm.getField("signer"), pageVisitor.xmlRoot.Документ[0].Подписант[0].@ПрПодп)
-            processField(pageVisitor.acroForm.getField("signerLastName"), pageVisitor.xmlRoot.Документ[0].Подписант[0].ФИО[0]?.@Фамилия)
-            processField(pageVisitor.acroForm.getField("signerFirstName"), pageVisitor.xmlRoot.Документ[0].Подписант[0].ФИО[0]?.@Имя)
-            processField(pageVisitor.acroForm.getField("signerMiddleName"), pageVisitor.xmlRoot.Документ[0].Подписант[0].ФИО[0]?.@Отчество)
-            processField(pageVisitor.acroForm.getField("approveDoc"), pageVisitor.xmlRoot.Документ[0].Подписант[0].СвПред[0]?.@НаимДок)
-            processField(pageVisitor.acroForm.getField("signDay"), pageVisitor.xmlRoot.Документ[0].@ДатаДок.substring(0, 2))
-            processField(pageVisitor.acroForm.getField("signMonth"), pageVisitor.xmlRoot.Документ[0].@ДатаДок.substring(3, 5))
-            processField(pageVisitor.acroForm.getField("signYear"), pageVisitor.xmlRoot.Документ[0].@ДатаДок.substring(6))
+            processField(pageVisitor.acroForm.getField("inn"), pageVisitor.xmlRoot.Документ[0].СвНА[0].СвНАЮЛ[0].@ИННЮЛ?.toUpperCase())
+            processField(pageVisitor.acroForm.getField("kpp"), pageVisitor.xmlRoot.Документ[0].СвНА[0].СвНАЮЛ[0].@КПП?.toUpperCase())
+            processPageNumField(pageVisitor.acroForm.getField("pageNum"), String.valueOf(pageVisitor.pageNum)?.toUpperCase())
+            processField(pageVisitor.acroForm.getField("refNum"), pageVisitor.reference.@НомСпр?.toUpperCase())
+            processField(pageVisitor.acroForm.getField("reportYear"), pageVisitor.xmlRoot.Документ[0].@ОтчетГод?.toUpperCase())
+            processField(pageVisitor.acroForm.getField("mark"), pageVisitor.xmlRoot.Документ[0].@Признак?.toUpperCase())
+            processField(pageVisitor.acroForm.getField("corrNum"), pageVisitor.reference.@НомКорр?.toUpperCase())
+            processField(pageVisitor.acroForm.getField("taxAuthority"), pageVisitor.xmlRoot.Документ[0].@КодНО?.toUpperCase())
+            processField(pageVisitor.acroForm.getField("signer"), pageVisitor.xmlRoot.Документ[0].Подписант[0].@ПрПодп?.toUpperCase())
+            processField(pageVisitor.acroForm.getField("signerLastName"), pageVisitor.xmlRoot.Документ[0].Подписант[0].ФИО[0]?.@Фамилия?.toUpperCase())
+            processField(pageVisitor.acroForm.getField("signerFirstName"), pageVisitor.xmlRoot.Документ[0].Подписант[0].ФИО[0]?.@Имя?.toUpperCase())
+            processField(pageVisitor.acroForm.getField("signerMiddleName"), pageVisitor.xmlRoot.Документ[0].Подписант[0].ФИО[0]?.@Отчество?.toUpperCase())
+            processField(pageVisitor.acroForm.getField("approveDoc"), pageVisitor.xmlRoot.Документ[0].Подписант[0].СвПред[0]?.@НаимДок?.toUpperCase())
+            processField(pageVisitor.acroForm.getField("signDay"), pageVisitor.xmlRoot.Документ[0].@ДатаДок.substring(0, 2)?.toUpperCase())
+            processField(pageVisitor.acroForm.getField("signMonth"), pageVisitor.xmlRoot.Документ[0].@ДатаДок.substring(3, 5)?.toUpperCase())
+            processField(pageVisitor.acroForm.getField("signYear"), pageVisitor.xmlRoot.Документ[0].@ДатаДок.substring(6)?.toUpperCase())
         }
     }
 
@@ -1389,13 +1389,13 @@ class Report2Ndfl extends AbstractScriptClass {
     class ApplicationHeaderFiller extends FDFiller {
         @Override
         void accept(PageVisitor pageVisitor) {
-            processField(pageVisitor.acroForm.getField("inn"), pageVisitor.xmlRoot.Документ[0].СвНА[0].СвНАЮЛ[0].@ИННЮЛ)
-            processField(pageVisitor.acroForm.getField("kpp"), pageVisitor.xmlRoot.Документ[0].СвНА[0].СвНАЮЛ[0].@КПП)
+            processField(pageVisitor.acroForm.getField("inn"), pageVisitor.xmlRoot.Документ[0].СвНА[0].СвНАЮЛ[0].@ИННЮЛ?.toUpperCase())
+            processField(pageVisitor.acroForm.getField("kpp"), pageVisitor.xmlRoot.Документ[0].СвНА[0].СвНАЮЛ[0].@КПП?.toUpperCase())
             processPageNumField(pageVisitor.acroForm.getField("pageNum"), String.valueOf(pageVisitor.pageNum))
-            processField(pageVisitor.acroForm.getField("refNum"), pageVisitor.reference.@НомСпр)
-            processField(pageVisitor.acroForm.getField("reportYear"), pageVisitor.xmlRoot.Документ[0].@ОтчетГод)
+            processField(pageVisitor.acroForm.getField("refNum"), pageVisitor.reference.@НомСпр?.toUpperCase())
+            processField(pageVisitor.acroForm.getField("reportYear"), pageVisitor.xmlRoot.Документ[0].@ОтчетГод?.toUpperCase())
             processField(pageVisitor.acroForm.getField("taxRate"), pageVisitor.СведСумДохDataList[0].taxRate)
-            processField(pageVisitor.acroForm.getField("signDate"), pageVisitor.xmlRoot.Документ[0].@ДатаДок)
+            processField(pageVisitor.acroForm.getField("signDate"), pageVisitor.xmlRoot.Документ[0].@ДатаДок?.toUpperCase())
         }
     }
 
@@ -1404,27 +1404,27 @@ class Report2Ndfl extends AbstractScriptClass {
         @Override
         void accept(PageVisitor pageVisitor) {
             String orgName = getOrgName(pageVisitor.xmlRoot)
-            processField(pageVisitor.acroForm.getField("taxAgent1"), pageVisitor.pageNum == 1 ? orgName.substring(0, 40) : null)
-            processField(pageVisitor.acroForm.getField("taxAgent2"), pageVisitor.pageNum == 1 ? orgName.substring(40, 80) : null)
-            processField(pageVisitor.acroForm.getField("taxAgent3"), pageVisitor.pageNum == 1 ? orgName.substring(80, 120) : null)
-            processField(pageVisitor.acroForm.getField("liquidation"), pageVisitor.pageNum == 1 ? pageVisitor.xmlRoot.Документ[0].СвНА[0].СвНАЮЛ[0].СвРеоргЮЛ[0]?.@ФормРеорг : null)
-            processField(pageVisitor.acroForm.getField("liquidationInn"), pageVisitor.pageNum == 1 ? pageVisitor.xmlRoot.Документ[0].СвНА[0].СвНАЮЛ[0].СвРеоргЮЛ[0]?.@ИННЮЛ : null)
-            processField(pageVisitor.acroForm.getField("liquidationKpp"), pageVisitor.pageNum == 1 ? pageVisitor.xmlRoot.Документ[0].СвНА[0].СвНАЮЛ[0].СвРеоргЮЛ[0]?.@КПП : null)
-            processField(pageVisitor.acroForm.getField("oktmo"), pageVisitor.pageNum == 1 ? pageVisitor.xmlRoot.Документ[0].СвНА[0].@ОКТМО : null)
-            processField(pageVisitor.acroForm.getField("phone"), pageVisitor.pageNum == 1 ? pageVisitor.xmlRoot.Документ[0].СвНА[0].@Тлф : null)
+            processField(pageVisitor.acroForm.getField("taxAgent1"), pageVisitor.pageNum == 1 ? orgName.substring(0, 40)?.toUpperCase() : null)
+            processField(pageVisitor.acroForm.getField("taxAgent2"), pageVisitor.pageNum == 1 ? orgName.substring(40, 80)?.toUpperCase() : null)
+            processField(pageVisitor.acroForm.getField("taxAgent3"), pageVisitor.pageNum == 1 ? orgName.substring(80, 120)?.toUpperCase() : null)
+            processField(pageVisitor.acroForm.getField("liquidation"), pageVisitor.pageNum == 1 ? pageVisitor.xmlRoot.Документ[0].СвНА[0].СвНАЮЛ[0].СвРеоргЮЛ[0]?.@ФормРеорг?.toUpperCase() : null)
+            processField(pageVisitor.acroForm.getField("liquidationInn"), pageVisitor.pageNum == 1 ? pageVisitor.xmlRoot.Документ[0].СвНА[0].СвНАЮЛ[0].СвРеоргЮЛ[0]?.@ИННЮЛ?.toUpperCase() : null)
+            processField(pageVisitor.acroForm.getField("liquidationKpp"), pageVisitor.pageNum == 1 ? pageVisitor.xmlRoot.Документ[0].СвНА[0].СвНАЮЛ[0].СвРеоргЮЛ[0]?.@КПП?.toUpperCase() : null)
+            processField(pageVisitor.acroForm.getField("oktmo"), pageVisitor.pageNum == 1 ? pageVisitor.xmlRoot.Документ[0].СвНА[0].@ОКТМО?.toUpperCase() : null)
+            processField(pageVisitor.acroForm.getField("phone"), pageVisitor.pageNum == 1 ? pageVisitor.xmlRoot.Документ[0].СвНА[0].@Тлф?.toUpperCase() : null)
 
-            processField(pageVisitor.acroForm.getField("innPerson"), pageVisitor.reference.ПолучДох[0].@ИННФЛ)
-            processField(pageVisitor.acroForm.getField("lastName"), pageVisitor.reference.ПолучДох[0].ФИО[0].@Фамилия)
-            processField(pageVisitor.acroForm.getField("firstName"), pageVisitor.reference.ПолучДох[0].ФИО[0].@Имя)
-            processField(pageVisitor.acroForm.getField("middleName"), pageVisitor.reference.ПолучДох[0].ФИО[0].@Отчество)
-            processField(pageVisitor.acroForm.getField("taxPayerState"), pageVisitor.reference.ПолучДох[0].@Статус)
+            processField(pageVisitor.acroForm.getField("innPerson"), pageVisitor.reference.ПолучДох[0].@ИННФЛ?.toUpperCase())
+            processField(pageVisitor.acroForm.getField("lastName"), pageVisitor.reference.ПолучДох[0].ФИО[0].@Фамилия?.toUpperCase())
+            processField(pageVisitor.acroForm.getField("firstName"), pageVisitor.reference.ПолучДох[0].ФИО[0].@Имя?.toUpperCase())
+            processField(pageVisitor.acroForm.getField("middleName"), pageVisitor.reference.ПолучДох[0].ФИО[0].@Отчество?.toUpperCase())
+            processField(pageVisitor.acroForm.getField("taxPayerState"), pageVisitor.reference.ПолучДох[0].@Статус?.toUpperCase())
 
             processField(pageVisitor.acroForm.getField("birthDay"), pageVisitor.reference.ПолучДох[0].@ДатаРожд.substring(0, 2))
             processField(pageVisitor.acroForm.getField("birthMonth"), pageVisitor.reference.ПолучДох[0].@ДатаРожд.substring(3, 5))
             processField(pageVisitor.acroForm.getField("birthYear"), pageVisitor.reference.ПолучДох[0].@ДатаРожд.substring(6))
             processField(pageVisitor.acroForm.getField("citizenship"), pageVisitor.reference.ПолучДох[0].@Гражд)
-            processField(pageVisitor.acroForm.getField("docCode"), pageVisitor.reference.ПолучДох[0].УдЛичнФЛ[0].@КодУдЛичн)
-            processField(pageVisitor.acroForm.getField("docNumber"), pageVisitor.reference.ПолучДох[0].УдЛичнФЛ[0].@СерНомДок)
+            processField(pageVisitor.acroForm.getField("docCode"), pageVisitor.reference.ПолучДох[0].УдЛичнФЛ[0].@КодУдЛичн?.toUpperCase())
+            processField(pageVisitor.acroForm.getField("docNumber"), pageVisitor.reference.ПолучДох[0].УдЛичнФЛ[0].@СерНомДок?.toUpperCase())
         }
     }
 
