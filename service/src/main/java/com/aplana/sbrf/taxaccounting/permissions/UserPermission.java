@@ -191,7 +191,7 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
 
         @Override
         protected boolean isGrantedInternal(User currentUser, TAUser entity, Logger logger) {
-            return PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER);
+            return PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER, TARole.N_ROLE_OPER_2NDFL_FL);
         }
     }
 
@@ -529,7 +529,8 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
 
         @Override
         protected boolean isGrantedInternal(User currentUser, TAUser entity, Logger logger) {
-            return PermissionUtils.hasRole(currentUser, TARole.N_ROLE_OPER, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP, TARole.ROLE_ADMIN, TARole.N_ROLE_OPER_NOTICE);
+            return PermissionUtils.hasRole(currentUser, TARole.N_ROLE_OPER, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP,
+                    TARole.ROLE_ADMIN, TARole.N_ROLE_OPER_NOTICE, TARole.N_ROLE_OPER_2NDFL_FL);
         }
     }
 
