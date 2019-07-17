@@ -44,7 +44,8 @@
                 IMPORT_DEPARTMENT_CONFIG: 1 << 30,
                 VIEW_ADMINISTRATION: Math.pow(2, 31),
                 TAX_NOTIFICATION: Math.pow(2, 32),
-                _2NDFL_FL: Math.pow(2, 33)
+                _2NDFL_FL: Math.pow(2, 33),
+                VIEW_TAXES_NDFL_FORMS: Math.pow(2, 34)
             },
             PERSON_PERMISSION: {
                 VIEW: 1 << 0,
