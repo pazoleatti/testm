@@ -5,6 +5,8 @@ REM схема пользователя
 SET NDFL_PASS=NDFL
 REM имя схемы данных нормативно-справочной информации (НСИ)
 SET NSI_USR=TAXNSI
+REM имя схемы данных подсистемы Налоговая Выверка (TAXREC)
+SET TAXREC_USR=TAXREC
 REM база данных
 SET DBNAME=taxdb
 REM строка соединения с базой данных

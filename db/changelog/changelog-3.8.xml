@@ -142,7 +142,6 @@
         </update>
     </changeSet>
 
-
     <changeSet id="3.8-dnovikov-7" author="dnovikov" runAlways="true">
         <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
             <column name="script" valueClobFile="templates-3.8/ndfl/report_6ndfl/v2016/report_6ndfl_check.groovy"/>
@@ -154,6 +153,145 @@
         <sql>
             update state set name = 'Выдана' where id = 4;
         </sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-8089 Добавить изменения по SBRFNDFL-8081 в ликвибейс-->
+    <changeSet id="3.8-skononova-3" author="skononova">
+		<sql splitStatements="false">
+			create table KNO_TEMP (code varchar2 (4 char), name varchar2(250 char))
+		</sql>
+    </changeSet>
+    <changeSet id="3.8-skononova-4" author="skononova">
+		<loadData encoding="UTF-8" file="csv/kno.csv" tableName="KNO_TEMP" separator=";">
+		            <column name="CODE" type="string"/>
+		            <column name="NAME" type="string"/>
+	        </loadData>
+
+    </changeSet>
+    <changeSet id="3.8-skononova-5" author="skononova">
+		<sql splitStatements="false">
+		   begin
+			update ref_book set visible=1 where upper(table_name)='REF_BOOK_TAX_INSPECTION';
+			merge into ref_book_tax_inspection dst using 
+			    ( select code, name from kno_temp
+			    )  src
+			    on (dst.code=src.code )
+			    when not matched then insert (id, code, name)
+			    values (seq_ref_book_record.nextval, src.code, src.name)
+			    when matched then update set dst.name=src.name where dst.name!=src.name;
+		   end;
+		</sql>
+    </changeSet>
+
+    <changeSet id="3.8-skononova-6" author="skononova">
+		<sql>
+			drop table KNO_TEMP
+		</sql>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-8053 Предоставить права пользователю НВ для доступа к декларациям 6-НДФЛ-->
+
+    <changeSet id="3.8-skononova-7" author="skononova">
+		<sql>
+			create or replace view vw_state as select id, name from state;
+			grant select on vw_state to TAXREC_UNSTABLE;
+			grant references on state to TAXREC_UNSTABLE;
+			comment on column vw_state.id is 'Идентификатор';
+			comment on column vw_state.name is 'Наименование';
+			comment on table vw_state is 'Статус формы';  
+			create or replace view vw_declaration_type as select id, name, status from declaration_type;
+			grant select on vw_declaration_type to TAXREC_UNSTABLE;
+			grant references on declaration_type to TAXREC_UNSTABLE;
+			comment on table vw_declaration_type is 'Виды деклараций';
+			comment on column vw_declaration_type.id is 'Идентификатор';
+			comment on column vw_declaration_type.name is 'Наименование';
+			comment on column vw_declaration_type.status is 'Статус';
+			
+			create or replace view vw_declaration_template as
+			select id, status, version, name, create_script, jrxml, declaration_type_id, xsd,form_kind,form_type  from declaration_template;
+			grant select on vw_declaration_template to TAXREC_UNSTABLE;
+			grant references on declaration_template to TAXREC_UNSTABLE;
+			COMMENT ON COLUMN vw_declaration_template.id IS 'Идентификатор (первичный ключ)';
+			COMMENT ON COLUMN vw_declaration_template.status IS 'Статус версии (значения (-1, 0, 1, 2))';
+			COMMENT ON COLUMN vw_declaration_template.version IS 'Версия';
+			COMMENT ON COLUMN vw_declaration_template.name IS 'Наименование версии макета';
+			COMMENT ON COLUMN vw_declaration_template.create_script IS 'Скрипт формирования налоговой формы';
+			COMMENT ON COLUMN vw_declaration_template.jrxml IS 'Макет JasperReports для формирования печатного представления формы';
+			COMMENT ON COLUMN vw_declaration_template.declaration_type_id IS 'Вид налоговой формы';
+			COMMENT ON COLUMN vw_declaration_template.xsd IS 'XSD-схема';
+			COMMENT ON COLUMN vw_declaration_template.form_kind IS 'Вид налоговой формы';
+			COMMENT ON COLUMN vw_declaration_template.form_type IS 'Тип налоговой формы';
+			COMMENT ON TABLE  vw_declaration_template IS 'Шаблон налоговой формы';
+			
+			create or replace view vw_blob_data as
+			select id, name, data, creation_date from blob_data;
+			grant select on vw_blob_data to TAXREC_UNSTABLE;
+			grant references on blob_data to TAXREC_UNSTABLE;
+			comment on column vw_blob_data.id is 'Идентификатор';
+			comment on column vw_blob_data.name is 'Название файла';
+			comment on column vw_blob_data.data is 'Бинарные данные';
+			comment on column vw_blob_data.creation_date is 'Дата создания';
+			comment on table vw_blob_data is 'Файловое хранилище';
+			
+			create or replace view vw_declaration_report as
+			select declaration_data_id, blob_data_id, type, subreport_id from declaration_report;
+			grant select on vw_declaration_report to TAXREC_UNSTABLE;
+			grant references on declaration_report to TAXREC_UNSTABLE;
+			comment on column vw_declaration_report.declaration_data_id is 'Идентификатор налоговой формы';
+			comment on column vw_declaration_report.blob_data_id is 'Идентификатор отчета';
+			comment on column vw_declaration_report.type is 'Тип отчета (0 - Excel, 1 - XML, 2 - PDF, 3 - Jasper, 4 - Спец.отчет)';
+			comment on column vw_declaration_report.subreport_id is 'Идентификатор спец. отчета';
+			comment on table vw_declaration_report is 'Отчеты по налоговым формам';
+			
+			create or replace view vw_tax_period as
+			select id, tax_type, year from tax_period;
+			grant select on vw_tax_period to TAXREC_UNSTABLE;
+			grant references on tax_period to TAXREC_UNSTABLE;
+			comment on column vw_tax_period.id is 'Идентификатор';
+			comment on column vw_tax_period.tax_type is 'Вид налога';
+			comment on column vw_tax_period.year is 'Год';
+			comment on table vw_tax_period is 'Налоговые периоды';
+			
+			create or replace view vw_report_period as
+			select id, name, tax_period_id, (select code from report_period_type where report_period_type.id=dict_tax_period_id) tax_period_code, start_date, end_date, calendar_start_date from report_period;
+			grant select on vw_report_period to TAXREC_UNSTABLE;
+			grant references on report_period to TAXREC_UNSTABLE;
+			comment on column vw_report_period.id is 'Идентификатор';
+			comment on column vw_report_period.name is 'Наименование';
+			comment on column vw_report_period.tax_period_id is 'Налоговый период';
+			comment on column vw_report_period.tax_period_code is 'Код налогового периода (двухзначный)';
+			comment on column vw_report_period.start_date is 'Дата начала отчетного перида';
+			comment on column vw_report_period.end_date is 'Дата окончания отчетного периода';
+			comment on column vw_report_period.calendar_start_date is 'Календарная дата начала отчетного периода';
+			comment on table vw_report_period is 'Отчетные периоды';
+			
+			create or replace view vw_department_report_period as
+			select id, department_id,  report_period_id ,  is_active, correction_date from department_report_period;
+			grant select on vw_department_report_period to TAXREC_UNSTABLE;
+			grant references on department_report_period to TAXREC_UNSTABLE;
+			comment on column vw_department_report_period.id is 'Идентификатор';
+			comment on column vw_department_report_period.department_id is 'Код подразделения';
+			comment on column vw_department_report_period.report_period_id is 'Код отчетного периода';
+			comment on column vw_department_report_period.is_active is 'Признак активности (0 - период закрыт, 1 - период открыт)';
+			comment on column vw_department_report_period.correction_date is 'Период сдачи корректировки';
+			comment on table vw_department_report_period is 'Привязка отчетных периодов к подразделениям';
+			
+			create or replace view vw_declaration_data as
+			select id, declaration_template_id, tax_organ_code, kpp, oktmo,department_report_period_id, state, last_data_modified, created_date  from declaration_data;
+			grant select on vw_declaration_data to TAXREC_UNSTABLE;
+			grant references on declaration_data to TAXREC_UNSTABLE;
+			comment on column vw_declaration_data.id is 'Идентификатор';
+			comment on column vw_declaration_data.declaration_template_id is 'Ссылка на шаблон налоговой формы';
+			comment on column vw_declaration_data.tax_organ_code is 'Налоговый орган';
+			comment on column vw_declaration_data.kpp is 'КПП';
+			comment on column vw_declaration_data.oktmo is 'ОКТМО';
+			comment on column vw_declaration_data.department_report_period_id is 'Идентификатор отчетного периода подразделения';
+			comment on column vw_declaration_data.state is 'Статус (состояние формы)';
+			comment on column vw_declaration_data.last_data_modified is 'Дата последних изменений данных формы';
+			comment on column vw_declaration_data.created_date is 'Дата создания формы';
+			comment on table vw_declaration_data is 'Налоговые формы';
+		</sql>
+
     </changeSet>
 
 </databaseChangeLog>

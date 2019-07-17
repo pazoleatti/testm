@@ -39,7 +39,7 @@
 
                 function buildHeader() {
                     var subtree = [];
-                    if ($scope.permissionChecker.check($scope.security.user, $scope.APP_CONSTANTS.USER_PERMISSION.VIEW_TAXES_NDFL)) {
+                    if ($scope.permissionChecker.check($scope.security.user, $scope.APP_CONSTANTS.USER_PERMISSION.VIEW_TAXES_NDFL_FORMS)) {
                         subtree.push({
                             name: $filter('translate')('menu.taxes.ndfl.forms'),
                             href: $state.href('ndflJournal')

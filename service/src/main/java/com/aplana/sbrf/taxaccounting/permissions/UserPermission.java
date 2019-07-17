@@ -17,7 +17,7 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
     protected TAUserService taUserService;
 
     /**
-     * Право доступа к пункту меню "Налоги->НДФЛ->Формы"
+     * Право доступа к пункту меню "Налоги->НДФЛ"
      */
     public static final Permission<TAUser> VIEW_TAXES_NDFL = new ViewTaxesNdflPermission(1L << 0);
     /**
@@ -176,16 +176,36 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
      */
     public static final Permission<TAUser> _2NDFL_FL = new _2NdflFlPermission(1L << 33);
 
+    /**
+     * Право доступа к пункту меню "Налоги->НДФЛ->Формы"
+     */
+    public static final Permission<TAUser> VIEW_TAXES_NDFL_FORMS = new ViewTaxesNdflFormsPermission(1L << 34);
+
     public UserPermission(long mask) {
         super(mask);
     }
 
     /**
-     * Право доступа к пункту меню "Налоги->НДФЛ->Формы"
+     * Право доступа к пункту меню "Налоги->НДФЛ"
      */
     public static final class ViewTaxesNdflPermission extends UserPermission {
 
         public ViewTaxesNdflPermission(long mask) {
+            super(mask);
+        }
+
+        @Override
+        protected boolean isGrantedInternal(User currentUser, TAUser entity, Logger logger) {
+            return PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER, TARole.N_ROLE_OPER_2NDFL_FL);
+        }
+    }
+
+    /**
+     * Право доступа к пункту меню "Налоги->НДФЛ->Формы"
+     */
+    public static final class ViewTaxesNdflFormsPermission extends UserPermission {
+
+        public ViewTaxesNdflFormsPermission(long mask) {
             super(mask);
         }
 
@@ -529,7 +549,8 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
 
         @Override
         protected boolean isGrantedInternal(User currentUser, TAUser entity, Logger logger) {
-            return PermissionUtils.hasRole(currentUser, TARole.N_ROLE_OPER, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP, TARole.ROLE_ADMIN, TARole.N_ROLE_OPER_NOTICE);
+            return PermissionUtils.hasRole(currentUser, TARole.N_ROLE_OPER, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP,
+                    TARole.ROLE_ADMIN, TARole.N_ROLE_OPER_NOTICE, TARole.N_ROLE_OPER_2NDFL_FL);
         }
     }
 

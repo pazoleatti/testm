@@ -47,7 +47,7 @@ public class UserDataController {
                 UserPermission.VIEW_REF_BOOK, UserPermission.EDIT_REF_BOOK, UserPermission.VIEW_ADMINISTRATION_USERS, UserPermission.EDIT_DECLARATION_TYPES_ASSIGNMENT,
                 UserPermission.OPEN_DEPARTMENT_REPORT_PERIOD, UserPermission.VIEW_TAXES_SERVICE, UserPermission.VIEW_TAXES_CREATE_APPLICATION_2,
                 UserPermission.CREATE_DEPARTMENT_CONFIG, UserPermission.EXPORT_PERSONS, UserPermission.EXPORT_DEPARTMENT_CONFIG, UserPermission.IMPORT_DEPARTMENT_CONFIG,
-                UserPermission.VIEW_ADMINISTRATION, UserPermission.TAX_NOTIFICATION, UserPermission._2NDFL_FL);
+                UserPermission.VIEW_ADMINISTRATION, UserPermission.TAX_NOTIFICATION, UserPermission._2NDFL_FL, UserPermission.VIEW_TAXES_NDFL_FORMS);
 
         return new UserDataModel(userInfo, userDepartment, userTB);
     }

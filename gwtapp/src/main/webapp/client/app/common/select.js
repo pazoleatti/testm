@@ -1199,8 +1199,12 @@
                  * @param periodModelPath путь в scope до модели периода
                  */
                 $scope.initSelectKppOktmoPairsByParams = function (modelPath, knf, departmentModelPath, periodModelPath) {
-                    if (!knf && departmentModelPath && periodModelPath) {
-                        $scope.$watchCollection("[" + departmentModelPath + ", " + periodModelPath + "]", function (newValues, oldValues) {
+                    if (!knf && (departmentModelPath || periodModelPath)) {
+                        var fields = [periodModelPath];
+                        if (departmentModelPath) {
+                            fields.push(departmentModelPath);
+                        }
+                        $scope.$watchCollection("[" + fields.join(", ") + "]", function (newValues, oldValues) {
                             // при изменении зависимых параметров сбрасываем значение
                             var department = newValues && newValues[0], oldDepartment = oldValues && oldValues[0];
                             var period = newValues && newValues[1], oldPeriod = oldValues && oldValues[1];
@@ -1222,7 +1226,7 @@
                         return {
                             filter: {
                                 declarationId: knf && knf.id,
-                                departmentId: knf ? knf.departmentId : _.deep($scope, departmentModelPath).id,
+                                departmentId: knf ? knf.departmentId : (departmentModelPath ? _.deep($scope, departmentModelPath).id : null),
                                 reportPeriodId: knf ? knf.reportPeriodId : _.deep($scope, periodModelPath).id
                             }
                         };
