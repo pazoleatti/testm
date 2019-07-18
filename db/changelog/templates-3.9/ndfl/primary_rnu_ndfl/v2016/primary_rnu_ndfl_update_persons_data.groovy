@@ -281,7 +281,8 @@ class UpdatePersonsData extends AbstractScriptClass {
 
         Department department = departmentService.get(declarationData.departmentId)
         DepartmentReportPeriod reportPeriod = departmentReportPeriodService.get(declarationData.getDepartmentReportPeriodId())
-        logger.info("Завершено обновление данных ФЛ формы: № %s, Период %s, Подразделение %s, Вид: \"%s\". Обновлено %s записей.",
+        l
+        ogger.info("Завершено обновление данных ФЛ формы: № %s, Период %s, Подразделение %s, Вид: \"%s\". Обновлено %s записей.",
                 declarationData.id,
                 departmentReportPeriodService.formatPeriodName(reportPeriod, SharedConstants.DATE_FORMAT),
                 department.getName(),
