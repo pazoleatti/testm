@@ -1962,25 +1962,20 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
     @Override
     public List<NdflPerson> fetchRefBookPersonsAsNdflPerson(Long declarationDataId, Date actualDate) {
-        String sql = "SELECT rbp.id, rbp.record_id AS inp, rbp.last_name, rbp.first_name, rbp.middle_name, rbp.birth_date, rbc.code AS citizenship, \n" +
-                "rbp.inn, rbp.inn_foreign, rbts.code AS status, rbp.snils, rbdt.code AS id_doc_type, rbid.doc_number, rbp.region_code, \n" +
-                "rbp.postal_code, rbp.district, rbp.city, rbp.locality, rbp.street, rbp.house, rbp.build, \n" +
-                "rbp.appartment, rbp.address_foreign as address, rbc2.code AS country_code \n" +
-                "FROM ref_book_person rbp \n" +
-                "LEFT JOIN ndfl_person np ON rbp.id = np.person_id \n" +
-                "LEFT JOIN declaration_data dd ON np.declaration_data_id = dd.id \n" +
+        String sql = "SELECT rbp.id, rbp.record_id AS inp, rbp.last_name, rbp.first_name, rbp.middle_name, rbp.birth_date, rbc.code AS citizenship, rbp.inn, rbp.inn_foreign, rbts.code AS status, \n" +
+                "rbp.snils, rbdt.code AS id_doc_type, rbid.doc_number, rbp.region_code, rbp.postal_code, rbp.district, rbp.city, rbp.locality, rbp.street, rbp.house, rbp.build, rbp.appartment,\n" +
+                "rbp.address_foreign as address, rbc2.code AS country_code \n" +
+                "FROM ndfl_person np \n" +
+                "join ref_book_person rbp_d ON rbp_d.id = np.person_id \n" +
+                "join ref_book_person rbp on rbp.record_id=rbp_d.record_id and (rbp.start_date <= :date and (rbp.end_date >= :date or rbp.end_date is null)) AND rbp.record_id = rbp.old_id\n" +
                 "LEFT JOIN ref_book_country rbc ON rbp.citizenship = rbc.id AND rbc.status = 0 \n" +
                 "LEFT JOIN ref_book_country rbc2 ON rbp.country_id = rbc2.id AND rbc2.status = 0 \n" +
                 "LEFT JOIN ref_book_taxpayer_state rbts ON rbp.taxpayer_state = rbts.id AND rbts.status = 0 \n" +
                 "LEFT JOIN ref_book_id_tax_payer ritp ON ritp.person_id = rbp.id \n" +
                 "LEFT JOIN ref_book_id_doc rbid ON rbid.id = rbp.report_doc \n" +
                 "LEFT JOIN ref_book_doc_type rbdt ON rbid.doc_id = rbdt.id AND rbdt.status = 0 \n" +
-                "WHERE dd.id = :dd\n" +
-                "and rbp.record_id in (select record_id from ref_book_person where id in (SELECT rbp2.id FROM ref_book_person rbp2 LEFT JOIN ndfl_person np2 ON rbp2.id = np2.person_id \n" +
-                "LEFT JOIN declaration_data dd2 ON np2.declaration_data_id = dd2.id)) \n" +
-                "AND (rbp.start_date <= :currentDate and (rbp.end_date >= :currentDate or rbp.end_date is null))\n" +
-                "AND rbp.record_id = rbp.old_id";
-        MapSqlParameterSource params = new MapSqlParameterSource("currentDate", actualDate);
+                "WHERE np.declaration_data_id = :dd";
+        MapSqlParameterSource params = new MapSqlParameterSource("date", actualDate);
         params.addValue("dd", declarationDataId);
         return getNamedParameterJdbcTemplate().query(sql, params, new NdflPersonRefBookRowMapper());
     }
