@@ -147,7 +147,7 @@
         "menu.taxes.ndfl.settingsUnits": "Настройки подразделений",
         "menu.taxes.ndfl.declarationTypeAssignment": "Назначение форм",
         "menu.taxes.ndfl.accountability": "Отчетность",
-        "menu.taxes.ndfl.personsFor2NdflFL": "Сформировать 2-НДФЛ для выдачи сотруднику",
+        "menu.taxes.ndfl.personsFor2NdflFL": "Сформировать 2-НДФЛ для выдачи ФЛ",
         "menu.taxes.ndfl.2ndflFLJournal": "Журнал 2-НДФЛ по ФЛ",
         "menu.taxes.service": "Сервис",
         "menu.taxes.service.loadFiles": "Загрузить файлы",
