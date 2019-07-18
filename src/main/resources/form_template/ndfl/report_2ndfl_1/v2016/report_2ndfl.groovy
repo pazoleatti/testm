@@ -273,73 +273,79 @@ class Report2Ndfl extends AbstractScriptClass {
                         def incomesByRate = person.incomes.groupBy { it.taxRate }.sort { it.key }
                         incomesByRate.remove(null)
                         for (def rate : incomesByRate.keySet()) {
-                            СведДох(Ставка: rate) {
-                                def rateIncomes = incomesByRate.get(rate)
-                                def operationIds = rateIncomes.operationId.toSet()
-                                def rateDeductions = сторнированиеВычетов(
-                                        person.deductions.findAll { it.operationId in operationIds }
-                                )
-                                def ratePrepayments = person.prepayments.findAll { it.operationId in operationIds }
-                                СумИтНалПер(
-                                        СумДохОбщ: ScriptUtils.round(СумДох(rateIncomes, rateDeductions), 2),
-                                        НалБаза: ScriptUtils.round(НалБаза(rateIncomes, rateDeductions), 2),
-                                        НалИсчисл: НалИсчисл(rateIncomes, ratePrepayments),
-                                        АвансПлатФикс: АвансПлатФикс(ratePrepayments),
-                                        НалУдерж: is2Ndfl1() ? НалУдерж(rateIncomes) : 0,
-                                        НалПеречисл: is2Ndfl1() ? НалПеречисл(person.incomes, rate) : 0,// тут берутся строки перечисления, у которых rate=null
-                                        НалУдержЛиш: is2Ndfl1() ? НалУдержЛиш(rateIncomes) : 0,
-                                        НалНеУдерж: is2Ndfl1() ? НалНеУдерж(rateIncomes) : СуммаНИ(rateIncomes))
-                                def deductions = rateDeductions.findAll {
-                                    it.typeCode && !(deductionTypesByCode[it.typeCode]?.mark?.code in [INVESTMENT_CODE, OTHERS_CODE])
-                                }.sort { a, b ->
-                                    a.typeCode <=> b.typeCode ?: a.notifDate <=> b.notifDate ?: a.notifType <=> b.notifType ?:
-                                            a.notifNum <=> b.notifNum ?: a.notifSource <=> b.notifSource
-                                }
-                                def deductionsByCode = deductions.groupBy { it.typeCode }
-                                def СписокУведомленийОВычетах = deductions.collect([] as Set) {
-                                    new УведВычKey(it.notifDate, it.notifType, it.notifNum, it.notifSource)
-                                }.sort { a, b ->
-                                    a.notifDate <=> b.notifDate ?: a.notifType <=> b.notifType ?:
-                                            a.notifNum <=> b.notifNum ?: a.notifSource <=> b.notifSource
-                                }
-                                if (deductionsByCode || СписокУведомленийОВычетах) {
-                                    НалВычССИ() {
-                                        deductionsByCode.each { deductionCode, deductionsOfCode ->
-                                            ПредВычССИ(КодВычет: deductionCode,
-                                                    СумВычет: ScriptUtils.round(СумВыч(deductionsOfCode), 2))
-                                        }
-                                        for (def row : СписокУведомленийОВычетах) {
-                                            УведВыч(КодВидУвед: row.notifType,
-                                                    НомерУвед: row.notifNum,
-                                                    ДатаУвед: formatDate(row.notifDate),
-                                                    НОУвед: row.notifSource)
-                                        }
-                                    }
-                                }
-                                ДохВыч() {
-                                    def incomesByMonthAndIncomeCode = rateIncomes.findAll {
-                                        isBelongToPeriod(it.incomeAccruedDate) && it.incomeCode
-                                    }.groupBy {
-                                        new MonthAndIncomeCodeKey(it.incomeAccruedDate[Calendar.MONTH], it.incomeCode)
+                            def rateIncomes = incomesByRate.get(rate)
+                            def operationIds = rateIncomes.operationId.toSet()
+                            def rateDeductions = сторнированиеВычетов(
+                                    person.deductions.findAll { it.operationId in operationIds }
+                            )
+                            def ratePrepayments = person.prepayments.findAll { it.operationId in operationIds }
+                            def СумДохОбщ = СумДох(rateIncomes, rateDeductions)
+                            if (СумДохОбщ > 0) {
+                                СведДох(Ставка: rate) {
+                                    СумИтНалПер(
+                                            СумДохОбщ: ScriptUtils.round(СумДохОбщ, 2),
+                                            НалБаза: ScriptUtils.round(НалБаза(rateIncomes, rateDeductions), 2),
+                                            НалИсчисл: НалИсчисл(rateIncomes, ratePrepayments),
+                                            АвансПлатФикс: АвансПлатФикс(ratePrepayments),
+                                            НалУдерж: is2Ndfl1() ? НалУдерж(rateIncomes) : 0,
+                                            НалПеречисл: is2Ndfl1() ? НалПеречисл(person.incomes, rate) : 0,// тут берутся строки перечисления, у которых rate=null
+                                            НалУдержЛиш: is2Ndfl1() ? НалУдержЛиш(rateIncomes) : 0,
+                                            НалНеУдерж: is2Ndfl1() ? НалНеУдерж(rateIncomes) : СуммаНИ(rateIncomes))
+                                    def deductions = rateDeductions.findAll {
+                                        it.typeCode && !(deductionTypesByCode[it.typeCode]?.mark?.code in [INVESTMENT_CODE, OTHERS_CODE])
                                     }.sort { a, b ->
-                                        a.key.month <=> b.key.month ?: a.key.incomeCode <=> b.key.incomeCode
+                                        a.typeCode <=> b.typeCode ?: a.notifDate <=> b.notifDate ?: a.notifType <=> b.notifType ?:
+                                                a.notifNum <=> b.notifNum ?: a.notifSource <=> b.notifSource
                                     }
-                                    for (def monthAndIncomeCodeKey : incomesByMonthAndIncomeCode.keySet()) {
-                                        def monthAndIncomeCodeIncomes = incomesByMonthAndIncomeCode.get(monthAndIncomeCodeKey)
-                                        def monthAndIncomeCodeDeductions = rateDeductions.findAll {
-                                            it.incomeCode == monthAndIncomeCodeKey.incomeCode &&
-                                                    it.periodCurrDate && it.periodCurrDate[Calendar.MONTH] == monthAndIncomeCodeKey.month &&
-                                                    deductionTypesByCode[it.typeCode]?.mark?.code in [INVESTMENT_CODE, OTHERS_CODE]
-                                        }
-                                        СвСумДох(Месяц: sprintf('%02d', monthAndIncomeCodeKey.month + 1),
-                                                КодДоход: monthAndIncomeCodeKey.incomeCode,
-                                                СумДоход: ScriptUtils.round(СумДох(monthAndIncomeCodeIncomes, monthAndIncomeCodeDeductions), 2)) {
-                                            def monthAndIncomeCodeDeductionsByCode = monthAndIncomeCodeDeductions.groupBy {
-                                                it.typeCode
+                                    def deductionsByCode = deductions.groupBy { it.typeCode }
+                                    def СписокУведомленийОВычетах = deductions.collect([] as Set) {
+                                        new УведВычKey(it.notifDate, it.notifType, it.notifNum, it.notifSource)
+                                    }.sort { a, b ->
+                                        a.notifDate <=> b.notifDate ?: a.notifType <=> b.notifType ?:
+                                                a.notifNum <=> b.notifNum ?: a.notifSource <=> b.notifSource
+                                    }
+                                    if (deductionsByCode || СписокУведомленийОВычетах) {
+                                        НалВычССИ() {
+                                            deductionsByCode.each { deductionCode, deductionsOfCode ->
+                                                def СумВыч = СумВыч(deductionsOfCode)
+                                                if (СумВыч != 0) {
+                                                    ПредВычССИ(КодВычет: deductionCode,
+                                                            СумВычет: ScriptUtils.round(СумВыч, 2))
+                                                }
                                             }
-                                            monthAndIncomeCodeDeductionsByCode.each { deductionCode, deductionsOfCode ->
-                                                СвСумВыч(КодВычет: deductionCode,
-                                                        СумВычет: ScriptUtils.round(СумВыч(deductionsOfCode), 2))
+                                            for (def row : СписокУведомленийОВычетах) {
+                                                УведВыч(КодВидУвед: row.notifType,
+                                                        НомерУвед: row.notifNum,
+                                                        ДатаУвед: formatDate(row.notifDate),
+                                                        НОУвед: row.notifSource)
+                                            }
+                                        }
+                                    }
+                                    ДохВыч() {
+                                        def incomesByMonthAndIncomeCode = rateIncomes.findAll {
+                                            isBelongToPeriod(it.incomeAccruedDate) && it.incomeCode
+                                        }.groupBy {
+                                            new MonthAndIncomeCodeKey(it.incomeAccruedDate[Calendar.MONTH], it.incomeCode)
+                                        }.sort { a, b ->
+                                            a.key.month <=> b.key.month ?: a.key.incomeCode <=> b.key.incomeCode
+                                        }
+                                        for (def monthAndIncomeCodeKey : incomesByMonthAndIncomeCode.keySet()) {
+                                            def monthAndIncomeCodeIncomes = incomesByMonthAndIncomeCode.get(monthAndIncomeCodeKey)
+                                            def monthAndIncomeCodeDeductions = rateDeductions.findAll {
+                                                it.incomeCode == monthAndIncomeCodeKey.incomeCode &&
+                                                        it.periodCurrDate && it.periodCurrDate[Calendar.MONTH] == monthAndIncomeCodeKey.month &&
+                                                        deductionTypesByCode[it.typeCode]?.mark?.code in [INVESTMENT_CODE, OTHERS_CODE]
+                                            }
+                                            СвСумДох(Месяц: sprintf('%02d', monthAndIncomeCodeKey.month + 1),
+                                                    КодДоход: monthAndIncomeCodeKey.incomeCode,
+                                                    СумДоход: ScriptUtils.round(СумДох(monthAndIncomeCodeIncomes, monthAndIncomeCodeDeductions), 2)) {
+                                                def monthAndIncomeCodeDeductionsByCode = monthAndIncomeCodeDeductions.groupBy {
+                                                    it.typeCode
+                                                }
+                                                monthAndIncomeCodeDeductionsByCode.each { deductionCode, deductionsOfCode ->
+                                                    СвСумВыч(КодВычет: deductionCode,
+                                                            СумВычет: ScriptUtils.round(СумВыч(deductionsOfCode), 2))
+                                                }
                                             }
                                         }
                                     }
