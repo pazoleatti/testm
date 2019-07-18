@@ -95,9 +95,33 @@ end;
 /
 COMMIT;
 
+declare 
+  v_task_name varchar2(128):='insert_update_delete block #5 - merge into declaration_template';  
+begin
+	merge into declaration_template dst using
+	(select 105 as id, to_date('01.01.2016', 'dd.mm.yyyy') as version, '2 НДФЛ (ФЛ)' as name, 105 as declaration_type_id, 8 as form_kind, 6 as form_type from dual 
+	) src
+	on (src.id=dst.id)
+	when not matched then
+		insert (id, version, name, declaration_type_id, form_kind, form_type)
+		values (src.id, src.version, src.name, src.declaration_type_id, src.form_kind, src.form_type);
+	
+	CASE SQL%ROWCOUNT 
+	WHEN 0 THEN dbms_output.put_line(v_task_name||'[WARNING]:'||' No changes was done');
+	ELSE dbms_output.put_line(v_task_name||'[INFO]:'||' Success');
+	END CASE; 
+
+EXCEPTION
+  when OTHERS then 
+    dbms_output.put_line(v_task_name||'[FATAL]:'||sqlerrm);		
+end;
+/
+COMMIT;
+
+
 --3.8-dnovikov-8
 declare 
-  v_task_name varchar2(128):='insert_update_delete block #5 - merge into state';  
+  v_task_name varchar2(128):='insert_update_delete block #6 - merge into state';  
 begin
 	merge into state dst using
 	(select 4 as id, 'Выдана' as name from dual 
@@ -122,7 +146,7 @@ COMMIT;
 
 --3.8-dnovikov-5
 declare 
-  v_task_name varchar2(128):='insert_update_delete block #6 - merge into async_task_type';  
+  v_task_name varchar2(128):='insert_update_delete block #7 - merge into async_task_type';  
 begin
 	merge into async_task_type dst using
 	(select 44 as id, 'Формирование ОНФ 2-НДФЛ(ФЛ)' as name, 'Create2NdflFLAsyncTask' as handler_bean from dual 
@@ -146,7 +170,7 @@ end;
 COMMIT;
 --3.8-ytrofimov-4
 declare 
-  v_task_name varchar2(128):='insert_update_delete block #7 - merge into declaration_template_file';  
+  v_task_name varchar2(128):='insert_update_delete block #8 - merge into declaration_template_file';  
 begin
 
 	merge into declaration_template_file dst using
@@ -173,7 +197,7 @@ COMMIT;
 
 -- 3.7.1-skononova-7 
 declare 
-  v_task_name varchar2(128):='insert_update_delete block #8 - merge into ref_book_oktmo';  
+  v_task_name varchar2(128):='insert_update_delete block #9 - merge into ref_book_oktmo';  
 begin
 	merge into ref_book_oktmo dst using 
 	    (
@@ -202,7 +226,7 @@ COMMIT;
 
 -- 3.7.1-skononova-8  изменение ссылок на ОКТМО в Параметрах подразделений.
 declare 
-  v_task_name varchar2(128):='insert_update_delete block #9 - change department_config';  
+  v_task_name varchar2(128):='insert_update_delete block #10 - change department_config';  
   cnt_u number := 0;
   cnt_i number := 0; 
     procedure convert_department_config (old_oktmo_code in varchar, new_oktmo_code in varchar, cnt_upd in out number, cnt_ins in out number) is
@@ -243,7 +267,7 @@ COMMIT;
 /
 --3.7.1-skononova-9  плюс архивация ОКТМО 76636158106 из хотфикса 3.7-hotfix-1
 declare 
-  v_task_name varchar2(128):='insert_update_delete block #10 - merge into ref_book_oktmo';  
+  v_task_name varchar2(128):='insert_update_delete block #11 - merge into ref_book_oktmo';  
 begin
 	merge into ref_book_oktmo dst using 
 	    (select  '04614156' as code, 'поселок Памяти 13 Борцов' as name, '1' as razd, to_date ('01.06.2019','dd.mm.yyyy') as version, 2 as status from dual union
@@ -273,7 +297,7 @@ end;
 COMMIT;
 
 declare 
-  v_task_name varchar2(128):='insert_update_delete block #11 - update ref_book';  
+  v_task_name varchar2(128):='insert_update_delete block #12 - update ref_book';  
 begin
 
 	update ref_book set visible=1 where upper(table_name)='REF_BOOK_TAX_INSPECTION';
@@ -292,7 +316,7 @@ end;
 COMMIT;
 /
 declare 
-  v_task_name varchar2(128):='insert_update_delete block #12 - update ref_book_tax_inspection';  
+  v_task_name varchar2(128):='insert_update_delete block #13 - update ref_book_tax_inspection';  
 begin
 
 	delete from ref_book_tax_inspection where id=-1;
