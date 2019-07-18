@@ -1132,6 +1132,10 @@ comment on column ndfl_person_income.tax_summ is 'НДФЛ.Перечислен�
 create sequence seq_ndfl_person_income start with 1000;
 create sequence seq_oper_info start with 1000;
 ------------------------------------------------------------------------------------------------------
+create global temporary table TMP_OPERATION_ID (
+  operation_id varchar2 (100 char)
+) on commit delete rows
+------------------------------------------------------------------------------------------------------
 create table ndfl_person_deduction
 (
   id               number(18)        not null,
