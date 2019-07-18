@@ -48,13 +48,11 @@ PROMPT ## Beginning Installing Patch
 PROMPT ## 01_ddl_tables_views_synonyms
 @database-3.8/01_ddl_tables_views_synonyms.sql &3 &6
 
-
-PROMPT ## 02_templates
-@database-3.8/02_templates.sql "_log/3.8_02_templates.txt" "&4" "&5" "../_log" "../_bad"
-
-
-PROMPT ## 03_update_dml.sql
+PROMPT ## 02_update_dml.sql
 @database-3.8/03_update_dml.sql
+
+PROMPT ## 03_templates
+@database-3.8/02_templates.sql "_log/3.8_02_templates.txt" "&4" "&5" "../_log" "../_bad"
 
  
 PROMPT ## 06_check_index_constraints

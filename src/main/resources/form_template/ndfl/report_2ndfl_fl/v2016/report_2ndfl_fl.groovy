@@ -286,7 +286,7 @@ class Report2NdflFL extends AbstractScriptClass {
         List<Node> СведДохList = reference.СведДох
 
         СведДохList?.sort { o1, o2 ->
-            o1.@Ставка <=> o2.@Ставка
+            o1.@Ставка.toInteger() <=> o2.@Ставка.toInteger()
         }
 
         List<DocumentWrapper> documentList = []

@@ -50,10 +50,11 @@ PROMPT Fill DECLARATION_TEMPLATE...
 
 begin
 	merge into DECLARATION_TEMPLATE a using
-	(select id, create_script from DECLARATION_TEMPLATE_TMP) b
+	(select ID, STATUS,VERSION, NAME,CREATE_SCRIPT, JRXML, DECLARATION_TYPE_ID, XSD, FORM_KIND, FORM_TYPE from DECLARATION_TEMPLATE_TMP) b
 	on (a.id = b.id)
 	when not matched then
-	insert (id, create_script) values(b.id, b.create_script)
+	insert (id, status,version,name,create_script,jrxml, declaration_type_id, xsd,form_kind,form_type) values
+	(b.id,b.status,b.version,b.name, b.create_script,b.jrxml, b.declaration_type_id, b.xsd,b.form_kind,b.form_type)
 	when matched then
 	update set a.create_script=b.create_script; 
 

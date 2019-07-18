@@ -1,11 +1,9 @@
 package form_template.ndfl.primary_rnu_ndfl.v2016
 
 import com.aplana.sbrf.taxaccounting.AbstractScriptClass
-import com.aplana.sbrf.taxaccounting.model.*
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.log.Logger
-import com.aplana.sbrf.taxaccounting.model.ndfl.*
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAsnu
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
@@ -13,19 +11,14 @@ import com.aplana.sbrf.taxaccounting.model.refbook.ReportPeriodImport
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
 import com.aplana.sbrf.taxaccounting.script.SharedConstants
-import com.aplana.sbrf.taxaccounting.script.service.*
 import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService
 import com.aplana.sbrf.taxaccounting.service.util.ExcelImportUtils
-import form_template.ndfl.primary_rnu_ndfl.v2016.Import.Cell
 import groovy.transform.TypeChecked
 import groovy.transform.TypeCheckingMode
 import org.apache.commons.lang3.StringUtils
-import org.springframework.jdbc.core.RowMapper
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 
-import java.sql.ResultSet
-import java.sql.SQLException
 import java.text.SimpleDateFormat
+import java.util.logging.Logger
 
 import static com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils.checkInterrupted
 
@@ -125,7 +118,6 @@ class Import extends AbstractScriptClass {
     DepartmentReportPeriodService departmentReportPeriodService
     RefBookFactory refBookFactory
     CommonRefBookService commonRefBookService
-    NamedParameterJdbcTemplate namedParameterJdbcTemplate
 
     String fileName // имя загружаемого файла
     File file // временный файл с данными
@@ -192,7 +184,6 @@ class Import extends AbstractScriptClass {
         this.declarationService = (DeclarationService) scriptClass.getProperty("declarationService")
         this.refBookPersonService = (RefBookPersonService) scriptClass.getProperty("refBookPersonService")
         this.commonRefBookService = (CommonRefBookService) scriptClass.getProperty("commonRefBookService")
-        this.namedParameterJdbcTemplate = (NamedParameterJdbcTemplate) scriptClass.getProperty("namedParameterJdbcTemplate")
 
         reportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId).reportPeriod
         correctReportPeriod()
@@ -1094,32 +1085,8 @@ class Import extends AbstractScriptClass {
     void transformOperationId() {
         Set<String> operationsSet = operationsGrouped.keySet()
         if (!operationsSet.isEmpty()) {
-
-            Map<String, Object>[] parameters = new Map[operationsSet.size()]
-
-            operationsSet.eachWithIndex { String operation, int index ->
-                Map<String, String> entity = new HashMap<>()
-                entity.put("operation", operation)
-                parameters[index] = entity
-            }
-
-            String insertSql = "insert into tmp_operation_id operation_id values (:operation)"
-
-            namedParameterJdbcTemplate.batchUpdate(insertSql, parameters)
-
-            String selectSql = "select npi.operation_id from ndfl_person_income npi " +
-                    "join tmp_operation_id tmp on npi.operation_id = tmp.operation_id " +
-                    "where exists (select operation_id from ndfl_person_income where npi.operation_id = tmp.operation_id)"
-
-            List<String> findedOperations = namedParameterJdbcTemplate.query(selectSql, new RowMapper<String>() {
-                @Override
-                String mapRow(ResultSet rs, int rowNum) throws SQLException {
-                    return rs.getString("operation_id")
-                }
-            })
-
-            Set<String> operationsForTransform = operationsGrouped.keySet()
-            operationsForTransform.removeAll(findedOperations)
+            List<String> persistedOperationIdList = ndflPersonService.findIncomeOperationId(Collections.list(operationsSet))
+            operationsForTransform.removeAll(persistedOperationIdList)
 
             for (String operationId : operationsForTransform) {
                 List<NdflPersonOperation> operations = operationsGrouped.get(operationId)

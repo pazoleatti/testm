@@ -21,7 +21,6 @@ public class RefBookOktmoServiceImpl implements RefBookOktmoService {
     private RefBookOktmoDao refBookOktmoDao;
 
     @Override
-    @PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS')")
     public PagingResult<RefBookOktmo> fetchAll(String filter, PagingParams pagingParams) {
         return refBookOktmoDao.fetchAll(filter, pagingParams);
     }

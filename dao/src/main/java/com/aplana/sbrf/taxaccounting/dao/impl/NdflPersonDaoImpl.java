@@ -1376,12 +1376,31 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         return getNamedParameterJdbcTemplate().queryForList(query, params, String.class);
     }
 
-    //TODO: если вызвать с аргументом длиной больше 1000, метод отработает неверно
     @Override
-    public List<String> findIncomeOperationId(List<String> operationIdList) {
-        return getNamedParameterJdbcTemplate().queryForList("SELECT DISTINCT operation_id FROM ndfl_person_income WHERE operation_id IN (:operationIdList)",
-                new MapSqlParameterSource("operationIdList", operationIdList),
-                String.class);
+    public List<String> findIncomeOperationId(final List<String> operationIdList) {
+        getJdbcTemplate().batchUpdate("insert into tmp_operation_id operation_id values (:operation)",
+                new BatchPreparedStatementSetter() {
+                    @Override
+                    public void setValues(PreparedStatement preparedStatement, int i) throws SQLException {
+                        preparedStatement.setString(1, operationIdList.get(i));
+                    }
+
+                    @Override
+                    public int getBatchSize() {
+                        return operationIdList.size();
+                    }
+                });
+
+        String selectSql = "select distinct npi.operation_id from ndfl_person_income npi " +
+                "join tmp_operation_id tmp on npi.operation_id = tmp.operation_id " +
+                "where exists (select operation_id from ndfl_person_income where npi.operation_id = tmp.operation_id)";
+
+        return getNamedParameterJdbcTemplate().query(selectSql, new RowMapper<String>() {
+            @Override
+            public String mapRow(ResultSet rs, int rowNum) throws SQLException {
+                return rs.getString("operation_id");
+            }
+        });
     }
 
     @Override
