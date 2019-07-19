@@ -149,10 +149,13 @@ class Calculate extends AbstractScriptClass {
 
         time = System.currentTimeMillis()
 
-        Set<Long> allSources = operationsForConsolidationList.declarationDataId.toSet()
+        Set<Long> allSourcesAccepted = operationsForConsolidationList.findAll {ConsolidationIncome income ->
+            income.accepted
+        }.declarationDataId.toSet()
+
         Map<String, Long> additionalParams = [:]
         additionalParams["sourceDeclarationId"] = declarationData.id
-        locks = declarationLocker.establishLockWithAdditionalParams(new ArrayList<Long>(allSources), OperationType.TRANSFER, additionalParams, userInfo, logger)
+        locks = declarationLocker.establishLockWithAdditionalParams(new ArrayList<Long>(allSourcesAccepted), OperationType.TRANSFER, additionalParams, userInfo, logger)
         if (logger.containsLevel(LogLevel.ERROR)) {
             return
         }
