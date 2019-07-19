@@ -724,20 +724,20 @@ class Check extends AbstractScriptClass {
                     String lastName = extractAttribute(LAST_NAME, documentNode).getValue()
                     String firstName = extractAttribute(FIRST_NAME, documentNode).getValue()
                     if (inn == null || inn.trim() == "") {
-                        createWarnMessage(logger, documentNode, "Проверка заполнения поля ИНН в РФ у гражданина РФ", "Значение гр. \"ИНН в РФ\" не указано.")
+                        createWarnMessage(logger, documentNode, "\"ИНН\" не указан", "Значение гр. \"ИНН в РФ\" не указано.")
                     } else {
                         String checkInn = ScriptUtils.checkInn(inn)
                         if (checkInn != null) {
-                            createWarnMessage(logger, documentNode, "Проверка корректности ИНН ФЛ", checkInn)
+                            createWarnMessage(logger, documentNode, "\"ИНН\" не соответствует формату", checkInn)
                         }
                     }
                     List<String> errorMessages = ScriptUtils.checkLastName(lastName, citizenship)
                     for (String message: errorMessages) {
-                        createErrorMessage(logger, documentNode, "Фамилия, Имя не соответствует формату", message)
+                        createErrorMessage(logger, documentNode, "\"Фамилия\", \"Имя\" не соответствует формату", message)
                     }
                     errorMessages = ScriptUtils.checkFirstName(firstName, citizenship)
                     for (String message: errorMessages) {
-                        createErrorMessage(logger, documentNode, "Фамилия, Имя не соответствует формату", message)
+                        createErrorMessage(logger, documentNode, "\"Фамилия\", \"Имя\" не соответствует формату", message)
                     }
                 }
                 ID_DOC_CHECK:
@@ -746,7 +746,7 @@ class Check extends AbstractScriptClass {
                     String idDocNumber = extractAttribute(ID_DOC_NUMBER, documentNode).getValue()
                     String checkDul = ScriptUtils.checkDul(idDocType, idDocNumber, "Документ удостоверяющий личность.Номер")
                     if (checkDul != null) {
-                        createErrorMessage(logger, documentNode, "Проверка соответствия Серии и Номера ДУЛ формату", checkDul)
+                        createErrorMessage(logger, documentNode, "\"ДУЛ\" не соответствует формату", checkDul)
                     }
                 }
             }
@@ -881,7 +881,7 @@ class Check extends AbstractScriptClass {
                     BigDecimal taxSum = (BigDecimal) taxSumAttribute.getValue()
                     BigDecimal withHoldingTax = (BigDecimal) withHoldingTaxAttribute.getValue()
                     if (taxSum > withHoldingTax) {
-                        createErrorMessage(logger, documentNode, "«Сумма налога перечисленная» рассчитана некорректно", "В \"Разделе 5. \"Общие суммы дохода и налога\" «Сумма налога перечисленная» $taxSum не должна превышать «Сумму налога удержанную» $withHoldingTax.")
+                        createErrorMessage(logger, documentNode, "«Сумма налога перечисленная» рассчитана некорректно", "В \"Разделе 2. \"Общие суммы дохода и налога по итогам налогового периода\" «Сумма налога перечисленная» (\"$taxSum\") не должна превышать «Сумму налога удержанную» (\"$withHoldingTax\").")
                     }
                 }
             }
@@ -906,7 +906,7 @@ class Check extends AbstractScriptClass {
                     BigDecimal prepayment = (BigDecimal) prepaymentAttribute.getValue()
                     BigDecimal calculatedTax = (BigDecimal) calculatedTaxAttribute.getValue()
                     if (prepayment > calculatedTax) {
-                        createErrorMessage(logger, documentNode, "«Сумма фиксированных авансовых платежей» заполнена некорректно", "В \"Разделе 5. \"Общие суммы дохода и налога\" «Сумма фиксированных авансовых платежей» $prepayment не должна превышать «Сумму налога исчисленного» $calculatedTax.")
+                        createErrorMessage(logger, documentNode, "«Сумма фиксированных авансовых платежей» заполнена некорректно", "В \"Разделе 2. \"Общие суммы дохода и налога по итогам налогового периода\" «Сумма фиксированных авансовых платежей» (\"$prepayment\") не должна превышать «Сумму налога исчисленного» (\"$calculatedTax\").")
                     }
                 }
             }
@@ -936,7 +936,7 @@ class Check extends AbstractScriptClass {
                     Ndfl2Leaf<BigDecimal> incomeSumCommonAttribute = (Ndfl2Leaf<BigDecimal>) extractAttribute(INCOME_SUM_COMMON, svedDohNode)
                     BigDecimal incomeSumCommon = (BigDecimal) incomeSumCommonAttribute.getValue()
                     if (incomeSumCommon != sumDohodSum) {
-                        createErrorMessage(logger, documentNode, "«Общая сумма дохода» рассчитана некорректно", "В \"Раздел 5. \"Общие суммы дохода и налога\" «Общая сумма дохода» $incomeSumCommon должна быть равна «Сумме доходов по всем месяцам» $sumDohodSum \"Раздела 3. \"Доходы, облагаемые по ставке ${extractAttribute(TAX_RATE, svedDohNode).getValue()} %%\"")
+                        createErrorMessage(logger, documentNode, "«Общая сумма дохода» рассчитана некорректно", "В \"Разделе 2. \"Общие суммы дохода и налога по итогам налогового периода\" «Общая сумма дохода» (\"$incomeSumCommon\") должна быть равна «Сумме доходов по всем месяцам» (\"$sumDohodSum\") \"Раздела 3. \"Доходы, облагаемые по ставке ${extractAttribute(TAX_RATE, svedDohNode).getValue()} %\"")
                     }
                 }
             }
@@ -969,7 +969,7 @@ class Check extends AbstractScriptClass {
                             }
                             BigDecimal deduction = deductionSumAttribute ? (BigDecimal) deductionSumAttribute.getValue() : new BigDecimal(0)
                             if (income < deduction) {
-                                createErrorMessage(logger, documentNode, "«Сумма вычета» заполнена некорректно", "В \"Разделе 3. \"Доходы, облагаемые по ставке ${extractAttribute(TAX_RATE, svedDohNode).getValue()} %%\" «Сумма вычета» $deduction. по коду ${extractAttribute(DEDUCTION_CODE, svSumVich).value} превышает «Сумму полученного дохода» $income, к которому он применен.")
+                                createErrorMessage(logger, documentNode, "«Сумма вычета» заполнена некорректно", "В \"Приложение.Сведения о доходах и соответствующих вычетах по месяцам налогового периода.\" \"Доходы, облагаемые по ставке ${extractAttribute(TAX_RATE, svedDohNode).getValue()} %\" «Сумма вычета» (\"$deduction\") по коду (\"${extractAttribute(DEDUCTION_CODE, svSumVich).value}\") превышает «Сумму полученного дохода» (\"$income\"), к которому он применен.")
                             }
                         }
                     }
@@ -993,7 +993,7 @@ class Check extends AbstractScriptClass {
                 for (Ndfl2Node svedDohNode : svedDohNodeList) {
                     Ndfl2Leaf<BigDecimal> notHoldingTaxAttribute = (Ndfl2Leaf<BigDecimal>) extractAttribute(NOT_HOLDING_TAX, svedDohNode)
                     if (((BigDecimal) notHoldingTaxAttribute.value) <= new BigDecimal(0)) {
-                        createErrorMessage(logger, documentNode, "«Сумма налога, не удержанная налоговым агентом» заполнена некорректно", "В соответствии с п.5 ст.226 НК РФ должна быть больше «0» «Сумма налога, не удержанная налоговым агентом» в \"Разделе 5. \"Общие суммы дохода и налога\"")
+                        createErrorMessage(logger, documentNode, "«Сумма налога, не удержанная налоговым агентом» заполнена некорректно", "В соответствии с п.5 ст.226 НК РФ «Сумма налога, не удержанная налоговым агентом» в \"Разделе 2. \"Общие суммы дохода и налога по итогам налогового периода\" должна быть больше «0».")
                     }
                 }
             }
@@ -1017,7 +1017,7 @@ class Check extends AbstractScriptClass {
                     Ndfl2Leaf<BigDecimal> withHoldingTaxAttribute = (Ndfl2Leaf<BigDecimal>) extractAttribute(WITHHOLDING_TAX, svedDohNode)
                     BigDecimal withHoldingTax = (BigDecimal) withHoldingTaxAttribute.getValue()
                     if (withHoldingTaxAttribute.getValue() != new BigDecimal(0)) {
-                        createErrorMessage(logger, documentNode, "«Сумма налога удержанная» заполнена некорректно", "Сумма налога удержанная» $withHoldingTax в \"Разделе 5. \"Общие суммы дохода и налога\" должна быть равна \"0\"")
+                        createErrorMessage(logger, documentNode, "«Сумма налога удержанная» заполнена некорректно", "Сумма налога удержанная» (\"$withHoldingTax\") в \"Разделе 2. \"Общие суммы дохода и налога по итогам налогового периода\" должна быть равна \"0\"")
                     }
                 }
             }
