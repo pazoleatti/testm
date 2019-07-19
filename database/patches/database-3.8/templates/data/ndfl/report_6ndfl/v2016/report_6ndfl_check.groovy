@@ -110,10 +110,10 @@ class Check extends AbstractScriptClass {
         }
         boolean isAnySourceNotAccepted = sourcesInTheSameTerbank.any { it.declarationState != State.ACCEPTED }
 
-        Date lastConsolidationDate = declarationService.getMaxLogDateByDeclarationIdAndEvent(declarationData.id, FormDataEvent.CREATE)
-        boolean isAnySourceAcceptedAfterTheLastConsolidation = sourcesInTheSameTerbank.any {
+        Date createDate = declarationService.getMaxLogDateByDeclarationIdAndEvent(declarationData.id, FormDataEvent.CREATE)
+        boolean isAnySourceAcceptedAfterTheLastConsolidation = createDate && sourcesInTheSameTerbank.any {
             Date lastSourceAcceptanceDate = declarationService.getMaxLogDateByDeclarationIdAndEvent(it.declarationDataId, FormDataEvent.ACCEPT)
-            return lastSourceAcceptanceDate > lastConsolidationDate
+            return lastSourceAcceptanceDate && lastSourceAcceptanceDate > createDate
         }
 
         if (isAnySourceNotAccepted && isAnySourceAcceptedAfterTheLastConsolidation) {
