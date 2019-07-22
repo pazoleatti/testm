@@ -167,34 +167,6 @@ EXCEPTION
 end;
 /
 
-COMMIT;
---3.8-ytrofimov-4
-declare 
-  v_task_name varchar2(128):='insert_update_delete block #8 - merge into declaration_template_file';  
-begin
-
-	merge into declaration_template_file dst using
-	(select 105 as declaration_template_id, '6466aad0-90c5-4101-8002-fb97b0e32d16' as blob_data_id from dual  union
-         select 105 as declaration_template_id, '5f3eb319-56cb-4dd8-b06e-b97ea3df0cf1' as blob_data_id from dual  
-	) src
-	on (src.declaration_template_id=dst.declaration_template_id and src.blob_data_id=dst.blob_data_id)
-	when not matched then
-		insert (declaration_template_id, blob_data_id)
-		values (src.declaration_template_id, src.blob_data_id);
-	
-	CASE SQL%ROWCOUNT 
-	WHEN 0 THEN dbms_output.put_line(v_task_name||'[WARNING]:'||' No changes was done');
-	ELSE dbms_output.put_line(v_task_name||'[INFO]:'||' Success');
-	END CASE; 
-
-EXCEPTION
-  when OTHERS then 
-    dbms_output.put_line(v_task_name||'[FATAL]:'||sqlerrm);		
-end;
-/
-COMMIT;
-/
-
 -- 3.7.1-skononova-7 
 declare 
   v_task_name varchar2(128):='insert_update_delete block #9 - merge into ref_book_oktmo';  

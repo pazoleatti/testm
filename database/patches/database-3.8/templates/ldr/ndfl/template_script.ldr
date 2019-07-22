@@ -19,3 +19,5 @@ begindata
  10|103|5|database-3.8/templates/data/ndfl/report_6ndfl/v2016/report_6ndfl_check.groovy|	
  15|101|11|database-3.8/templates/data/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl_update_persons_data.groovy|
  24|100|11|database-3.8/templates/data/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_update_persons_data.groovy|
+ 5|101|3|database-3.8/templates/data/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl_calculate.groovy|
+ 6|101|5|database-3.8/templates/data/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl_check.groovy|

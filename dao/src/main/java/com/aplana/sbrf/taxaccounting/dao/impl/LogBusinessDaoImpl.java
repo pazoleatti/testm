@@ -68,10 +68,15 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
     @Override
     public Date getMaxLogDateByDeclarationIdAndEvent(Long declarationId, FormDataEvent event) {
         try {
-            return new Date(getJdbcTemplate().queryForObject("" +
+            Date timestamp = getJdbcTemplate().queryForObject("" +
                     "select max(log_date) from log_business \n" +
                     "where declaration_data_id = ? \n" +
-                    "and event_id = ?", Date.class, declarationId, event.getCode()).getTime());
+                    "and event_id = ?", Date.class, declarationId, event.getCode());
+            if (timestamp == null) {
+                return null;
+            } else {
+                return new Date(timestamp.getTime());
+            }
         } catch (EmptyResultDataAccessException e) {
             return null;
         }
