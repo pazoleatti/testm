@@ -293,12 +293,10 @@
                         </button>
                     </span>
                     <!-- Отправить в ЭДО -->
-                    <!-- Скрыл для версии 3.8-->
-                    <span>
+                    <!-- Скрыл для версии 3.8-->                    <span>
                         <button type="button" class="btn btn-default"
                                 data-ng-click="sendEdo()"
-                                data-ng-disabled="!permissionChecker.check(declarationData, APP_CONSTANTS.DECLARATION_PERMISSION.UPDATE_DOC_STATE)"
-                                data-ng-show="false">
+                                data-ng-disabled="!permissionChecker.check(declarationData, APP_CONSTANTS.DECLARATION_PERMISSION.UPDATE_DOC_STATE)">
                             <span data-translate-once="ndflReportJournal.button.sendEdo"></span>
                         </button>
                     </span>
