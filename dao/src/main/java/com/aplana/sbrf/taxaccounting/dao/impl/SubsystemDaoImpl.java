@@ -41,7 +41,7 @@ public class SubsystemDaoImpl extends AbstractDao implements SubsystemDao {
         String conditions = " lower(name) like :name";
         SqlParameterSource params = new MapSqlParameterSource().addValue("name", "%" + name.toLowerCase() + "%");
 
-        String selectByName = SELECT_SUBSYSTEM + " where " + conditions;
+        String selectByName = SELECT_SUBSYSTEM + " where " + conditions + " order by name ASC";
         String selectCountByName = "select count(*) from " + SUBSYSTEM_TABLE_NAME + " where " + conditions;
 
         List<Subsystem> result = getNamedParameterJdbcTemplate().query(selectByName, params, new SubsystemRowMapper());
