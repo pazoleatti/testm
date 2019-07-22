@@ -65,7 +65,7 @@ public class DeclarationTypeAssignmentServiceImpl implements DeclarationTypeAssi
     public PagingResult<DeclarationTypeAssignment> fetchDeclarationTypeAssignments(TAUserInfo userInfo, DeclarationTypeAssignmentFilter filter, PagingParams pagingParams) {
         List<Long> departmentIds = new ArrayList<>();
 
-        if (filter.getDepartmentIds().isEmpty()) {
+        if (filter.getDepartmentIds() == null || filter.getDepartmentIds().isEmpty()) {
             for (Integer id : departmentService.getBADepartmentIds(userInfo.getUser())) {
                 departmentIds.add(Long.valueOf(id));
             }
