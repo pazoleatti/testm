@@ -878,7 +878,7 @@
         "transportMessages.title.declarationDepartment": "Подразделение формы",
         "transportMessages.title.declarationPeriod": "Период формы",
         "transportMessages.title.declarationType": "Вид формы",
-        "transportMessages.title.file": "Файл вложения",
+        "transportMessages.title.file": "Файл вложение",
         "transportMessages.title.sourceFileName": "Имя исходного файла",
         "transportMessages.title.datetime": "Дата и время сообщения",
         "transportMessages.title.date": "Дата сообщения",
