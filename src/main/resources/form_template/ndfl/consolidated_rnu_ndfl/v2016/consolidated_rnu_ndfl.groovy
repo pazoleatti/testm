@@ -173,6 +173,10 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
     public final static String RNU_NDFL_PERSON_ALL_DB = "rnu_ndfl_person_all_db.xlsx"
     public final static String REPORT_XLSX = "report.xlsx"
 
+    Map<Long, NdflPerson> ndflPersonCache = [:]
+    Map<Long, DeclarationData> declarationDataCache = [:]
+    Map<Integer, Department> departmentCache = [:]
+
     /**
      * Идентификатор шаблона РНУ-НДФЛ (консолидированная)
      */
@@ -2094,779 +2098,811 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
             }
         }
     }
-}
 
-/**
- * Класс инкапсулирующий данные
- */
-public class SheetFillerContext {
-
-    private String departmentName;
-
-    private String reportDate;
-
-    private String period;
-
-    private String year;
-
-    private List<NdflPerson> ndflPersonList;
-
-    private List<NdflPersonIncome> ndflPersonIncomeList;
-
-    private List<NdflPersonDeduction> ndflPersonDeductionList;
-
-    private List<NdflPersonPrepayment> ndflPersonPrepaymentList;
-
-    private Map<Long, NdflPerson> idNdflPersonMap;
-
-    SheetFillerContext(String departmentName, String reportDate, String period, String year, List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndflPersonIncomeList, List<NdflPersonDeduction> ndflPersonDeductionList, List<NdflPersonPrepayment> ndflPersonPrepaymentList) {
-        this.departmentName = departmentName
-        this.reportDate = reportDate
-        this.period = period
-        this.year = year
-        this.ndflPersonList = ndflPersonList
-        this.ndflPersonIncomeList = ndflPersonIncomeList
-        this.ndflPersonDeductionList = ndflPersonDeductionList
-        this.ndflPersonPrepaymentList = ndflPersonPrepaymentList
-    }
-
-    SheetFillerContext(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndflPersonIncomeList) {
-        this.ndflPersonList = ndflPersonList
-        this.ndflPersonIncomeList = ndflPersonIncomeList
-    }
-
-    String getDepartmentName() {
-        return departmentName
-    }
-
-    String getReportDate() {
-        return reportDate
-    }
-
-    String getPeriod() {
-        return period
-    }
-
-    String getYear() {
-        return year
-    }
-
-    List<NdflPerson> getNdflPersonList() {
-        return ndflPersonList
-    }
-
-    List<NdflPersonIncome> getNdflPersonIncomeList() {
-        return ndflPersonIncomeList
-    }
-
-    List<NdflPersonDeduction> getNdflPersonDeductionList() {
-        return ndflPersonDeductionList
-    }
-
-    List<NdflPersonPrepayment> getNdflPersonPrepaymentList() {
-        return ndflPersonPrepaymentList
-    }
-
-    Map<Long, NdflPerson> getIdNdflPersonMap() {
-        if (idNdflPersonMap == null) {
-            idNdflPersonMap = new HashMap<>();
-            for (NdflPerson ndflPerson : ndflPersonList) {
-                idNdflPersonMap.put(ndflPerson.getId(), ndflPerson);
-            }
-        }
-        return idNdflPersonMap;
-    }
-}
-
-/**
- * Интерфейс определяющий заполнение листа и состояние классов реализующих интерфеййс
- */
-interface SheetFiller {
-    void fillSheet(Workbook wb, SheetFillerContext context);
-}
-
-/**
- * Заполнитель заголовка
- */
-@TypeChecked
-class TitleSheetFiller implements SheetFiller {
-    @Override
-    void fillSheet(Workbook wb, final SheetFillerContext context) {
-        Sheet sheet = wb.getSheetAt(0);
-        Cell cell0 = sheet.getRow(1).createCell(2);
-        cell0.setCellValue(context.getDepartmentName());
-        Cell cell1 = sheet.createRow(2).createCell(1);
-        cell1.setCellValue(context.getReportDate());
-        Cell cell2 = sheet.getRow(4).createCell(2);
-        cell2.setCellValue(context.getPeriod() + " " + context.getYear());
-    }
-}
-
-/**
- * Заполнитель реквизитов
- */
-@TypeChecked
-class RequisitesSheetFiller implements SheetFiller {
-    @Override
-    void fillSheet(Workbook wb, SheetFillerContext context) {
-        Sheet sheet = wb.getSheetAt(1)
-        int index = 3
-        Styler styler = new Styler(wb)
-        CellStyle centeredStyle = styler.createBorderStyleCenterAligned()
-        CellStyle centeredStyleDate = styler.createBorderStyleCenterAlignedDate()
-        for (NdflPerson np : context.getNdflPersonList()) {
-            ScriptUtils.checkInterrupted()
-            Row row = sheet.createRow(index)
-            Cell cell1 = row.createCell(1)
-            cell1.setCellStyle(centeredStyle)
-            cell1.setCellValue(np.getRowNum().intValue());
-            Cell cell2 = row.createCell(2)
-            cell2.setCellStyle(centeredStyle)
-            cell2.setCellValue(np.getInp() != null ? np.getInp() : "")
-            Cell cell3 = row.createCell(3)
-            cell3.setCellStyle(centeredStyle)
-            cell3.setCellValue(np.getLastName() != null ? np.getLastName() : "")
-            Cell cell4 = row.createCell(4)
-            cell4.setCellStyle(centeredStyle)
-            cell4.setCellValue(np.getFirstName() != null ? np.getFirstName() : "")
-            Cell cell5 = row.createCell(5);
-            cell5.setCellStyle(centeredStyle)
-            cell5.setCellValue(np.getMiddleName() != null ? np.getMiddleName() : "")
-            Cell cell6 = row.createCell(6)
-            cell6.setCellStyle(centeredStyleDate)
-            cell6.setCellValue(np.birthDay)
-            Cell cell7 = row.createCell(7)
-            cell7.setCellStyle(centeredStyle)
-            cell7.setCellValue(np.getCitizenship() != null ? np.getCitizenship() : "")
-            Cell cell8 = row.createCell(8)
-            cell8.setCellStyle(centeredStyle)
-            cell8.setCellValue(np.getInnNp() != null ? np.getInnNp() : "")
-            Cell cell9 = row.createCell(9)
-            cell9.setCellStyle(centeredStyle)
-            cell9.setCellValue(np.getInnForeign() != null ? np.getInnForeign() : "")
-            Cell cell10 = row.createCell(10)
-            cell10.setCellStyle(centeredStyle)
-            cell10.setCellValue(np.getIdDocType() != null ? np.getIdDocType() : "")
-            Cell cell11 = row.createCell(11)
-            cell11.setCellStyle(centeredStyle)
-            cell11.setCellValue(np.getIdDocNumber() != null ? np.getIdDocNumber() : "")
-            Cell cell12 = row.createCell(12)
-            cell12.setCellStyle(centeredStyle)
-            cell12.setCellValue(np.getStatus() != null ? np.getStatus() : "")
-            Cell cell13 = row.createCell(13)
-            cell13.setCellStyle(centeredStyle)
-            cell13.setCellValue(np.getRegionCode() != null ? np.getRegionCode() : "")
-            Cell cell14 = row.createCell(14)
-            cell14.setCellStyle(centeredStyle)
-            cell14.setCellValue(np.getPostIndex() != null ? np.getPostIndex() : "");
-            Cell cell15 = row.createCell(15)
-            cell15.setCellStyle(centeredStyle)
-            cell15.setCellValue(np.getArea() != null ? np.getArea() : "");
-            Cell cell16 = row.createCell(16)
-            cell16.setCellStyle(centeredStyle)
-            cell16.setCellValue(np.getCity() != null ? np.getCity() : "");
-            Cell cell17 = row.createCell(17)
-            cell17.setCellStyle(centeredStyle)
-            cell17.setCellValue(np.getLocality() != null ? np.getLocality() : "");
-            Cell cell18 = row.createCell(18)
-            cell18.setCellStyle(centeredStyle)
-            cell18.setCellValue(np.getStreet() != null ? np.getStreet() : "");
-            Cell cell19 = row.createCell(19)
-            cell19.setCellStyle(centeredStyle)
-            cell19.setCellValue(np.getHouse() != null ? np.getHouse() : "");
-            Cell cell20 = row.createCell(20)
-            cell20.setCellStyle(centeredStyle)
-            cell20.setCellValue(np.getBuilding() != null ? np.getBuilding() : "");
-            Cell cell21 = row.createCell(21)
-            cell21.setCellStyle(centeredStyle)
-            cell21.setCellValue(np.getFlat() != null ? np.getFlat() : "");
-            Cell cell22 = row.createCell(22)
-            cell22.setCellStyle(centeredStyle)
-            cell22.setCellValue(np.snils != null ? np.snils : "")
-            index++
-        }
-    }
-}
-
-/**
- * Заполнитель сведений о доходах
- */
-@TypeChecked
-class IncomesSheetFiller implements SheetFiller {
-    @Override
-    void fillSheet(Workbook wb, SheetFillerContext context) {
-        List<NdflPersonIncome> ndflPersonIncomeList = context.getNdflPersonIncomeList();
-        Sheet sheet = wb.getSheetAt(2)
-        int index = 3
-        Styler styler = new Styler(wb)
-        CellStyle borderStyle = styler.createBorderStyle()
-        CellStyle centeredStyle = styler.createBorderStyleCenterAligned()
-        CellStyle centeredStyleDate = styler.createBorderStyleCenterAlignedDate()
-        CellStyle numberCenteredStyle = styler.createBorderStyleCenterAlignedTypeNumber()
-        for (NdflPersonIncome npi : ndflPersonIncomeList) {
-            ScriptUtils.checkInterrupted()
-
-            Row row = sheet.createRow(index)
-            Cell cell1 = row.createCell(1)
-            cell1.setCellStyle(centeredStyle)
-            cell1.setCellValue(npi.getRowNum().intValue());
-            Cell cell2 = row.createCell(2)
-            cell2.setCellStyle(centeredStyle)
-            String inp = context.getIdNdflPersonMap().get(npi.getNdflPersonId()).getInp()
-            cell2.setCellValue(inp != null ? inp : "")
-            Cell cell3 = row.createCell(3)
-            cell3.setCellStyle(centeredStyle)
-            cell3.setCellValue(npi.getOperationId() != null ? npi.getOperationId() : "")
-            Cell cell4 = row.createCell(4)
-            cell4.setCellStyle(centeredStyle)
-            cell4.setCellValue(npi.getIncomeCode() != null ? npi.getIncomeCode() : "")
-            Cell cell5 = row.createCell(5)
-            cell5.setCellStyle(centeredStyle)
-            cell5.setCellValue(npi.getIncomeType() != null ? npi.getIncomeType() : "")
-            Cell cell6 = row.createCell(6)
-            cell6.setCellStyle(centeredStyleDate)
-            if (npi.incomeAccruedDate != null) {
-                cell6.setCellValue(npi.incomeAccruedDate);
-            }
-            Cell cell7 = row.createCell(7)
-            cell7.setCellStyle(centeredStyleDate)
-            if (npi.incomePayoutDate != null) {
-                cell7.setCellValue(npi.incomePayoutDate);
-            }
-            Cell cell8 = row.createCell(8)
-            cell8.setCellStyle(centeredStyle)
-            cell8.setCellValue(npi.getKpp() != null ? npi.getKpp() : "");
-            Cell cell9 = row.createCell(9)
-            cell9.setCellStyle(centeredStyle)
-            cell9.setCellValue(npi.getOktmo() != null ? npi.getOktmo() : "");
-            Cell cell10 = row.createCell(10)
-            cell10.setCellStyle(numberCenteredStyle)
-            if (npi.incomeAccruedSumm != null) {
-                cell10.setCellValue(npi.incomeAccruedSumm.doubleValue());
-            }
-            Cell cell11 = row.createCell(11)
-            cell11.setCellStyle(numberCenteredStyle)
-            if (npi.incomePayoutSumm != null) {
-                cell11.setCellValue(npi.incomePayoutSumm.doubleValue());
-            }
-            Cell cell12 = row.createCell(12)
-            cell12.setCellStyle(numberCenteredStyle)
-            if (npi.totalDeductionsSumm != null) {
-                cell12.setCellValue(npi.totalDeductionsSumm.doubleValue());
-            }
-            Cell cell13 = row.createCell(13)
-            cell13.setCellStyle(numberCenteredStyle)
-            if (npi.taxBase != null) {
-                cell13.setCellValue(npi.taxBase.doubleValue());
-            }
-            Cell cell14 = row.createCell(14)
-            cell14.setCellStyle(borderStyle)
-            if (npi.taxRate != null) {
-                cell14.setCellValue(npi.taxRate);
-            }
-            Cell cell15 = row.createCell(15)
-            cell15.setCellStyle(centeredStyleDate)
-            if (npi.taxDate != null) {
-                cell15.setCellValue(npi.taxDate);
-            }
-
-            Cell cell16 = row.createCell(16)
-            cell16.setCellStyle(numberCenteredStyle)
-            if (npi.calculatedTax != null) {
-                cell16.setCellValue(npi.calculatedTax.doubleValue())
-            }
-            Cell cell17 = row.createCell(17)
-            cell17.setCellStyle(numberCenteredStyle)
-            if (npi.withholdingTax != null) {
-                cell17.setCellValue(npi.withholdingTax.doubleValue());
-            }
-            Cell cell18 = row.createCell(18)
-            cell18.setCellStyle(numberCenteredStyle)
-            if (npi.notHoldingTax != null) {
-                cell18.setCellValue(npi.notHoldingTax.doubleValue());
-            }
-            Cell cell19 = row.createCell(19)
-            cell19.setCellStyle(numberCenteredStyle)
-            if (npi.overholdingTax != null) {
-                cell19.setCellValue(npi.overholdingTax.doubleValue());
-            }
-            Cell cell20 = row.createCell(20)
-            cell20.setCellStyle(numberCenteredStyle)
-            if (npi.refoundTax != null) {
-                cell20.setCellValue(npi.refoundTax.doubleValue());
-            }
-            Cell cell21 = row.createCell(21)
-            if (npi.taxTransferDate != null) {
-                if (npi.taxTransferDate.format(SharedConstants.DATE_FORMAT) == SharedConstants.DATE_ZERO_AS_DATE) {
-                    cell21.setCellStyle(centeredStyle)
-                    cell21.setCellValue(SharedConstants.DATE_ZERO_AS_STRING)
-                } else {
-                    cell21.setCellStyle(centeredStyleDate)
-                    cell21.setCellValue(npi.taxTransferDate)
-                }
-            } else {
-                cell21.setCellStyle(centeredStyle)
-            }
-            Cell cell22 = row.createCell(22)
-            cell22.setCellStyle(centeredStyleDate)
-            if (npi.paymentDate != null) {
-                cell22.setCellValue(npi.paymentDate)
-            }
-            Cell cell23 = row.createCell(23)
-            cell23.setCellStyle(centeredStyle)
-            cell23.setCellValue(npi.getPaymentNumber() != null ? npi.getPaymentNumber() : "")
-            Cell cell24 = row.createCell(24)
-            cell24.setCellStyle(numberCenteredStyle)
-            if (npi.taxSumm != null) {
-                cell24.setCellValue(npi.taxSumm.intValue())
-            }
-            index++
-        }
-    }
-}
-
-/**
- * Заполнитель сведений о вычетах
- */
-@TypeChecked
-class DeductionsSheetFiller implements SheetFiller {
-    @Override
-    void fillSheet(Workbook wb, SheetFillerContext context) {
-        List<NdflPersonDeduction> ndflPersonDeductionList = context.getNdflPersonDeductionList()
-        Sheet sheet = wb.getSheetAt(3)
-        int index = 3
-        Styler styler = new Styler(wb)
-        CellStyle centeredStyle = styler.createBorderStyleCenterAligned()
-        CellStyle centeredStyleDate = styler.createBorderStyleCenterAlignedDate()
-        CellStyle numberCenteredStyle = styler.createBorderStyleCenterAlignedTypeNumber()
-        for (NdflPersonDeduction npd : ndflPersonDeductionList) {
-            ScriptUtils.checkInterrupted()
-
-            Row row = sheet.createRow(index)
-            Cell cell1 = row.createCell(1)
-            cell1.setCellStyle(centeredStyle)
-            cell1.setCellValue(npd.rowNum.intValue())
-            Cell cell2 = row.createCell(2)
-            cell2.setCellStyle(centeredStyle)
-            String inp = context.getIdNdflPersonMap().get(npd.getNdflPersonId()).getInp()
-            cell2.setCellValue(inp != null ? inp : "")
-            Cell cell3 = row.createCell(3)
-            cell3.setCellStyle(centeredStyle)
-            cell3.setCellValue(npd.getTypeCode() != null ? npd.getTypeCode() : "")
-            Cell cell4 = row.createCell(4)
-            cell4.setCellStyle(centeredStyle)
-            cell4.setCellValue(npd.getNotifType() != null ? npd.getNotifType() : "")
-            Cell cell5 = row.createCell(5)
-            cell5.setCellStyle(centeredStyleDate)
-            if (npd.notifDate != null) {
-                cell5.setCellValue(npd.notifDate);
-            }
-            Cell cell6 = row.createCell(6)
-            cell6.setCellStyle(centeredStyle)
-            cell6.setCellValue(npd.getNotifNum() != null ? npd.getNotifNum() : "б/н")
-            Cell cell7 = row.createCell(7)
-            cell7.setCellStyle(centeredStyle)
-            cell7.setCellValue(npd.getNotifSource() != null ? npd.getNotifSource() : "")
-            Cell cell8 = row.createCell(8)
-            cell8.setCellStyle(numberCenteredStyle)
-            if (npd.notifSumm != null) {
-                cell8.setCellValue(npd.notifSumm.doubleValue());
-            }
-            Cell cell9 = row.createCell(9)
-            cell9.setCellStyle(centeredStyle)
-            cell9.setCellValue(npd.getOperationId() != null ? npd.getOperationId() : "")
-            Cell cell10 = row.createCell(10)
-            cell10.setCellStyle(centeredStyleDate)
-            if (npd.incomeAccrued != null) {
-                cell10.setCellValue(npd.incomeAccrued);
-            }
-            Cell cell11 = row.createCell(11)
-            cell11.setCellStyle(centeredStyle)
-            cell11.setCellValue(npd.getIncomeCode() != null ? npd.getIncomeCode() : "")
-            Cell cell12 = row.createCell(12)
-            cell12.setCellStyle(numberCenteredStyle)
-            if (npd.incomeSumm != null) {
-                cell12.setCellValue(npd.incomeSumm.doubleValue())
-            }
-            Cell cell13 = row.createCell(13)
-            cell13.setCellStyle(centeredStyleDate)
-            if (npd.periodPrevDate != null) {
-                cell13.setCellValue(npd.periodPrevDate)
-            }
-            Cell cell14 = row.createCell(14)
-            cell14.setCellStyle(numberCenteredStyle)
-            if (npd.periodPrevSumm != null) {
-                cell14.setCellValue(npd.periodPrevSumm.doubleValue())
-            }
-            Cell cell15 = row.createCell(15)
-            cell15.setCellStyle(centeredStyleDate)
-            if (npd.periodCurrDate != null) {
-                cell15.setCellValue(npd.periodCurrDate);
-            }
-            Cell cell16 = row.createCell(16)
-            cell16.setCellStyle(numberCenteredStyle)
-            if (npd.periodCurrSumm != null) {
-                cell16.setCellValue(npd.periodCurrSumm.doubleValue())
-            }
-            index++
-        }
-    }
-}
-
-/**
- * Заполнитель сведений об авансах
- */
-@TypeChecked
-class PrepaymentSheetFiller implements SheetFiller {
-    @Override
-    void fillSheet(Workbook wb, SheetFillerContext context) {
-        List<NdflPersonPrepayment> ndflPersonPrepaymentList = context.getNdflPersonPrepaymentList()
-        Sheet sheet = wb.getSheetAt(4)
-        int index = 3
-        Styler styler = new Styler(wb)
-        CellStyle centeredStyle = styler.createBorderStyleCenterAligned()
-        CellStyle centeredStyleDate = styler.createBorderStyleCenterAlignedDate()
-        CellStyle numberCenteredStyle = styler.createBorderStyleCenterAlignedTypeNumber()
-        for (NdflPersonPrepayment npp : ndflPersonPrepaymentList) {
-            ScriptUtils.checkInterrupted()
-
-            Row row = sheet.createRow(index)
-            Cell cell1 = row.createCell(1)
-            cell1.setCellStyle(centeredStyle)
-            cell1.setCellValue(npp.rowNum.doubleValue())
-            Cell cell2 = row.createCell(2)
-            cell2.setCellStyle(centeredStyle)
-            String inp = context.getIdNdflPersonMap().get(npp.getNdflPersonId()).getInp()
-            cell2.setCellValue(inp != null ? inp : "")
-            Cell cell3 = row.createCell(3)
-            cell3.setCellStyle(centeredStyle)
-            cell3.setCellValue(npp.getOperationId() != null ? npp.getOperationId() : "")
-            Cell cell4 = row.createCell(4)
-            cell4.setCellStyle(numberCenteredStyle)
-            if (npp.summ != null) {
-                cell4.setCellValue(npp.summ.doubleValue())
-            }
-            Cell cell5 = row.createCell(5)
-            cell5.setCellStyle(centeredStyle)
-            cell5.setCellValue(npp.getNotifNum() != null ? npp.getNotifNum() : "")
-            Cell cell6 = row.createCell(6)
-            cell6.setCellStyle(centeredStyleDate)
-            if (npp.notifDate != null) {
-                cell6.setCellValue(npp.notifDate)
-            }
-            Cell cell7 = row.createCell(7)
-            cell7.setCellStyle(centeredStyle)
-            cell7.setCellValue(npp.getNotifSource() != null ? npp.getNotifSource() : "")
-            index++
-        }
-    }
-}
-
-/**
- * Содержит логику заполнения реестра загруженных данных РНУ НДФЛ
- */
-@TypeChecked
-class ReportXlsxSheetFiller implements SheetFiller {
-
-    NdflPersonService ndflPersonService
-    DeclarationService declarationService
-    DepartmentService departmentService
-
-    ReportXlsxSheetFiller(NdflPersonService ndflPersonService, DeclarationService declarationService, DepartmentService departmentService) {
-        this.ndflPersonService = ndflPersonService
-        this.declarationService = declarationService
-        this.departmentService = departmentService
-    }
-
-    @EqualsAndHashCode
-    class XlsxReportRowKey {
-        String kpp
-        String oktmo
-        String primaryTB
-        String period
-
-        XlsxReportRowKey(String kpp, String oktmo, String primaryTB, String period) {
-            this.kpp = kpp
-            this.oktmo = oktmo
-            this.primaryTB = primaryTB
-            this.period = period
-        }
-    }
-
-    class FlIncomeData {
-        Set<Long> personIdSet
-        BigDecimal incomeAccruedSumm
-        BigDecimal calculatedTax
-
-        FlIncomeData(Set<Long> personIdSet, BigDecimal incomeAccruedSumm, BigDecimal calculatedTax) {
-            this.personIdSet = personIdSet
-            this.incomeAccruedSumm = incomeAccruedSumm
-            this.calculatedTax = calculatedTax
-        }
-    }
-
-    @Override
-    void fillSheet(Workbook wb, SheetFillerContext context) {
-        List<NdflPersonIncome> ndflPersonIncomeList = context.getNdflPersonIncomeList()
-        Map<XlsxReportRowKey, FlIncomeData> flIncomeDataMap = new HashMap<>()
-        Sheet sheet = wb.getSheetAt(0);
-        Integer rowNumber = 3;
-        Integer ppNumber = 1
-        Styler styler = new Styler(wb)
-        CellStyle textCenteredStyle = styler.createBorderStyleCenterAlignedTypeText()
-        CellStyle textRightStyle = styler.createBorderStyleRightAlignedTypeText()
-        CellStyle textLeftStyle = styler.createBorderStyleLeftAlignedTypeText()
-        FlIncomeData summaryFlIncomeData = new FlIncomeData(new HashSet<Long>(), new BigDecimal(0).setScale(2), new BigDecimal(0).setScale(2))
-        for (NdflPersonIncome npi in ndflPersonIncomeList) {
-            if (npi.incomeAccruedDate) {
-                Department primaryTB = getPrimaryTB(npi)
-                String period = getPeriod(npi.incomeAccruedDate)
-                XlsxReportRowKey rowKey = new XlsxReportRowKey(npi.kpp, npi.oktmo, primaryTB?.name, period)
-                if (flIncomeDataMap.get(rowKey) == null) {
-                    flIncomeDataMap.put(rowKey, new FlIncomeData(new HashSet<Long>(), new BigDecimal(0).setScale(2), new BigDecimal(0).setScale(2)))
-                }
-                FlIncomeData flIncomeData = flIncomeDataMap.get(rowKey)
-                flIncomeData.personIdSet.add(npi.ndflPersonId)
-                flIncomeData.incomeAccruedSumm = npi.incomeAccruedSumm ? flIncomeData.incomeAccruedSumm.add(npi.incomeAccruedSumm) : flIncomeData.incomeAccruedSumm
-                flIncomeData.calculatedTax = npi.calculatedTax ? flIncomeData.calculatedTax.add(npi.calculatedTax) : flIncomeData.calculatedTax
-                flIncomeDataMap.put(rowKey, flIncomeData)
-
-                summaryFlIncomeData.personIdSet.add(npi.ndflPersonId)
-                summaryFlIncomeData.incomeAccruedSumm = npi.incomeAccruedSumm ? summaryFlIncomeData.incomeAccruedSumm.add(npi.incomeAccruedSumm) : summaryFlIncomeData.incomeAccruedSumm
-                summaryFlIncomeData.calculatedTax = npi.calculatedTax ? summaryFlIncomeData.calculatedTax.add(npi.calculatedTax) : summaryFlIncomeData.calculatedTax
-            }
-        }
-        flIncomeDataMap = flIncomeDataMap.sort { e1, e2 -> e1.key.kpp <=> e2.key.kpp ?: e1.key.oktmo <=> e2.key.oktmo }
-
-        for (XlsxReportRowKey reportRowKey : flIncomeDataMap.keySet()) {
-            FlIncomeData flIncomeData = flIncomeDataMap.get(reportRowKey)
-            ScriptUtils.checkInterrupted();
-            Row row = sheet.createRow(rowNumber);
-            Cell cell1 = row.createCell(1);
-            cell1.setCellStyle(textRightStyle)
-            cell1.setCellValue(ppNumber);
-            Cell cell2 = row.createCell(2);
-            cell2.setCellStyle(textLeftStyle)
-            cell2.setCellValue(reportRowKey.kpp);
-            Cell cell3 = row.createCell(3);
-            cell3.setCellStyle(textLeftStyle)
-            cell3.setCellValue(reportRowKey.oktmo);
-            Cell cell4 = row.createCell(4);
-            cell4.setCellStyle(textRightStyle)
-            cell4.setCellValue(flIncomeData.personIdSet.size());
-            Cell cell5 = row.createCell(5);
-            cell5.setCellStyle(textRightStyle)
-            cell5.setCellValue(flIncomeData.incomeAccruedSumm?.toString());
-            Cell cell6 = row.createCell(6);
-            cell6.setCellStyle(textRightStyle)
-            cell6.setCellValue(flIncomeData.calculatedTax?.toString());
-            Cell cell7 = row.createCell(7);
-            cell7.setCellStyle(textCenteredStyle)
-            cell7.setCellValue(reportRowKey.primaryTB ?: "");
-            Cell cell8 = row.createCell(8);
-            cell8.setCellStyle(textLeftStyle)
-            cell8.setCellValue(reportRowKey.period ?: "");
-            rowNumber++
-            ppNumber++
-        }
-        textRightStyle.setFont(styler.createBoldFont())
-        sheet.addMergedRegion(new CellRangeAddress(rowNumber, rowNumber, 1, 3))
-        Row row = sheet.createRow(rowNumber)
-        Cell cell1 = row.createCell(1)
-        cell1.setCellStyle(textRightStyle)
-        cell1.setCellValue("Итого")
-        Cell cell2 = row.createCell(2)
-        cell2.setCellStyle(textCenteredStyle)
-        cell2.setCellValue("")
-        Cell cell3 = row.createCell(3)
-        cell3.setCellStyle(textCenteredStyle)
-        cell3.setCellValue("")
-        Cell cell4 = row.createCell(4)
-        cell4.setCellStyle(textRightStyle)
-        cell4.setCellValue(summaryFlIncomeData.personIdSet.size())
-        Cell cell5 = row.createCell(5)
-        cell5.setCellStyle(textRightStyle)
-        cell5.setCellValue(summaryFlIncomeData.incomeAccruedSumm.toString())
-        Cell cell6 = row.createCell(6)
-        cell6.setCellStyle(textRightStyle)
-        cell6.setCellValue(summaryFlIncomeData.calculatedTax.toString())
-        Cell cell7 = row.createCell(7)
-        cell7.setCellStyle(textRightStyle)
-        cell7.setCellValue("")
-        Cell cell8 = row.createCell(8)
-        cell8.setCellStyle(textLeftStyle)
-        cell8.setCellValue("")
-
-    }
 
     Department getPrimaryTB(NdflPersonIncome income) {
         if (income.sourceId) {
             NdflPersonIncome primaryIncome = ndflPersonService.getIncome(income.sourceId)
-            NdflPerson primaryPerson = ndflPersonService.get(primaryIncome.ndflPersonId)
-            DeclarationData primaryDeclaration = declarationService.getDeclarationData(primaryPerson.declarationDataId)
-            return departmentService.getParentTB(primaryDeclaration.departmentId)
+            NdflPerson primaryPerson = getNdflPerson(primaryIncome.ndflPersonId)
+            DeclarationData primaryDeclaration = getDeclarationData(primaryPerson.declarationDataId)
+            Department parentTB = getDepartment(primaryDeclaration.departmentId)
+            return parentTB
         }
         return null
     }
 
-    String getPeriod(Date date) {
-        return date[Calendar.YEAR] + ", " + getQuarter(date)
+    NdflPerson getNdflPerson(Long ndflPersonId) {
+        NdflPerson ndflPerson = ndflPersonCache.get(ndflPersonId)
+        if (!ndflPerson) {
+            ndflPerson = ndflPersonService.get(ndflPersonId)
+            ndflPersonCache.put(ndflPersonId, ndflPerson)
+        }
+        return ndflPerson
     }
 
-    String getQuarter(Date date) {
-        int month = date[Calendar.MONTH]
-        if (Calendar.JANUARY <= month && month <= Calendar.MARCH) {
-            return "первый квартал"
-        } else if (Calendar.APRIL <= month && month <= Calendar.JUNE) {
-            return "полугодие "
-        } else if (Calendar.JULY <= month && month <= Calendar.SEPTEMBER) {
-            return "девять месяцев"
-        } else {
-            return "год"
+    DeclarationData getDeclarationData(Long declarationDataId) {
+        DeclarationData declarationData = declarationDataCache.get(declarationDataId)
+        if (!declarationData) {
+            declarationData = declarationService.getDeclarationData(declarationDataId)
+            declarationDataCache.put(declarationDataId, declarationData)
+        }
+        return declarationData
+    }
+
+    Department getDepartment(Integer departmentId) {
+        Department department = departmentCache.get(departmentId)
+        if (!department) {
+            department = departmentService.getParentTB(departmentId)
+            departmentCache.put(departmentId, department)
+        }
+        return department
+    }
+
+    /**
+     * Класс инкапсулирующий данные
+     */
+    public class SheetFillerContext {
+
+        private String departmentName;
+
+        private String reportDate;
+
+        private String period;
+
+        private String year;
+
+        private List<NdflPerson> ndflPersonList;
+
+        private List<NdflPersonIncome> ndflPersonIncomeList;
+
+        private List<NdflPersonDeduction> ndflPersonDeductionList;
+
+        private List<NdflPersonPrepayment> ndflPersonPrepaymentList;
+
+        private Map<Long, NdflPerson> idNdflPersonMap;
+
+        SheetFillerContext(String departmentName, String reportDate, String period, String year, List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndflPersonIncomeList, List<NdflPersonDeduction> ndflPersonDeductionList, List<NdflPersonPrepayment> ndflPersonPrepaymentList) {
+            this.departmentName = departmentName
+            this.reportDate = reportDate
+            this.period = period
+            this.year = year
+            this.ndflPersonList = ndflPersonList
+            this.ndflPersonIncomeList = ndflPersonIncomeList
+            this.ndflPersonDeductionList = ndflPersonDeductionList
+            this.ndflPersonPrepaymentList = ndflPersonPrepaymentList
+        }
+
+        SheetFillerContext(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndflPersonIncomeList) {
+            this.ndflPersonList = ndflPersonList
+            this.ndflPersonIncomeList = ndflPersonIncomeList
+        }
+
+        String getDepartmentName() {
+            return departmentName
+        }
+
+        String getReportDate() {
+            return reportDate
+        }
+
+        String getPeriod() {
+            return period
+        }
+
+        String getYear() {
+            return year
+        }
+
+        List<NdflPerson> getNdflPersonList() {
+            return ndflPersonList
+        }
+
+        List<NdflPersonIncome> getNdflPersonIncomeList() {
+            return ndflPersonIncomeList
+        }
+
+        List<NdflPersonDeduction> getNdflPersonDeductionList() {
+            return ndflPersonDeductionList
+        }
+
+        List<NdflPersonPrepayment> getNdflPersonPrepaymentList() {
+            return ndflPersonPrepaymentList
+        }
+
+        Map<Long, NdflPerson> getIdNdflPersonMap() {
+            if (idNdflPersonMap == null) {
+                idNdflPersonMap = new HashMap<>();
+                for (NdflPerson ndflPerson : ndflPersonList) {
+                    idNdflPersonMap.put(ndflPerson.getId(), ndflPerson);
+                }
+            }
+            return idNdflPersonMap;
         }
     }
-}
+
+/**
+ * Интерфейс определяющий заполнение листа и состояние классов реализующих интерфеййс
+ */
+    interface SheetFiller {
+        void fillSheet(Workbook wb, SheetFillerContext context);
+    }
+
+/**
+ * Заполнитель заголовка
+ */
+    @TypeChecked
+    class TitleSheetFiller implements SheetFiller {
+        @Override
+        void fillSheet(Workbook wb, final SheetFillerContext context) {
+            Sheet sheet = wb.getSheetAt(0)
+            Cell cell0 = sheet.getRow(1).createCell(2)
+            cell0.setCellValue(context.getDepartmentName())
+            Cell cell1 = sheet.createRow(2).createCell(1)
+            cell1.setCellValue(context.getReportDate())
+            Cell cell2 = sheet.getRow(4).createCell(2)
+            cell2.setCellValue(context.getPeriod() + " " + context.getYear())
+        }
+    }
+
+/**
+ * Заполнитель реквизитов
+ */
+    @TypeChecked
+    class RequisitesSheetFiller implements SheetFiller {
+        @Override
+        void fillSheet(Workbook wb, SheetFillerContext context) {
+            Sheet sheet = wb.getSheetAt(1)
+            int index = 3
+            Styler styler = new Styler(wb)
+            CellStyle centeredStyle = styler.createBorderStyleCenterAligned()
+            CellStyle centeredStyleDate = styler.createBorderStyleCenterAlignedDate()
+            for (NdflPerson np : context.getNdflPersonList()) {
+                ScriptUtils.checkInterrupted()
+                Row row = sheet.createRow(index)
+                Cell cell1 = row.createCell(1)
+                cell1.setCellStyle(centeredStyle)
+                cell1.setCellValue(np.getRowNum().intValue());
+                Cell cell2 = row.createCell(2)
+                cell2.setCellStyle(centeredStyle)
+                cell2.setCellValue(np.getInp() != null ? np.getInp() : "")
+                Cell cell3 = row.createCell(3)
+                cell3.setCellStyle(centeredStyle)
+                cell3.setCellValue(np.getLastName() != null ? np.getLastName() : "")
+                Cell cell4 = row.createCell(4)
+                cell4.setCellStyle(centeredStyle)
+                cell4.setCellValue(np.getFirstName() != null ? np.getFirstName() : "")
+                Cell cell5 = row.createCell(5);
+                cell5.setCellStyle(centeredStyle)
+                cell5.setCellValue(np.getMiddleName() != null ? np.getMiddleName() : "")
+                Cell cell6 = row.createCell(6)
+                cell6.setCellStyle(centeredStyleDate)
+                cell6.setCellValue(np.birthDay)
+                Cell cell7 = row.createCell(7)
+                cell7.setCellStyle(centeredStyle)
+                cell7.setCellValue(np.getCitizenship() != null ? np.getCitizenship() : "")
+                Cell cell8 = row.createCell(8)
+                cell8.setCellStyle(centeredStyle)
+                cell8.setCellValue(np.getInnNp() != null ? np.getInnNp() : "")
+                Cell cell9 = row.createCell(9)
+                cell9.setCellStyle(centeredStyle)
+                cell9.setCellValue(np.getInnForeign() != null ? np.getInnForeign() : "")
+                Cell cell10 = row.createCell(10)
+                cell10.setCellStyle(centeredStyle)
+                cell10.setCellValue(np.getIdDocType() != null ? np.getIdDocType() : "")
+                Cell cell11 = row.createCell(11)
+                cell11.setCellStyle(centeredStyle)
+                cell11.setCellValue(np.getIdDocNumber() != null ? np.getIdDocNumber() : "")
+                Cell cell12 = row.createCell(12)
+                cell12.setCellStyle(centeredStyle)
+                cell12.setCellValue(np.getStatus() != null ? np.getStatus() : "")
+                Cell cell13 = row.createCell(13)
+                cell13.setCellStyle(centeredStyle)
+                cell13.setCellValue(np.getRegionCode() != null ? np.getRegionCode() : "")
+                Cell cell14 = row.createCell(14)
+                cell14.setCellStyle(centeredStyle)
+                cell14.setCellValue(np.getPostIndex() != null ? np.getPostIndex() : "");
+                Cell cell15 = row.createCell(15)
+                cell15.setCellStyle(centeredStyle)
+                cell15.setCellValue(np.getArea() != null ? np.getArea() : "");
+                Cell cell16 = row.createCell(16)
+                cell16.setCellStyle(centeredStyle)
+                cell16.setCellValue(np.getCity() != null ? np.getCity() : "");
+                Cell cell17 = row.createCell(17)
+                cell17.setCellStyle(centeredStyle)
+                cell17.setCellValue(np.getLocality() != null ? np.getLocality() : "");
+                Cell cell18 = row.createCell(18)
+                cell18.setCellStyle(centeredStyle)
+                cell18.setCellValue(np.getStreet() != null ? np.getStreet() : "");
+                Cell cell19 = row.createCell(19)
+                cell19.setCellStyle(centeredStyle)
+                cell19.setCellValue(np.getHouse() != null ? np.getHouse() : "");
+                Cell cell20 = row.createCell(20)
+                cell20.setCellStyle(centeredStyle)
+                cell20.setCellValue(np.getBuilding() != null ? np.getBuilding() : "");
+                Cell cell21 = row.createCell(21)
+                cell21.setCellStyle(centeredStyle)
+                cell21.setCellValue(np.getFlat() != null ? np.getFlat() : "");
+                Cell cell22 = row.createCell(22)
+                cell22.setCellStyle(centeredStyle)
+                cell22.setCellValue(np.snils != null ? np.snils : "")
+                index++
+            }
+        }
+    }
+
+/**
+ * Заполнитель сведений о доходах
+ */
+    @TypeChecked
+    class IncomesSheetFiller implements SheetFiller {
+        @Override
+        void fillSheet(Workbook wb, SheetFillerContext context) {
+            List<NdflPersonIncome> ndflPersonIncomeList = context.getNdflPersonIncomeList();
+            Sheet sheet = wb.getSheetAt(2)
+            int index = 3
+            Styler styler = new Styler(wb)
+            CellStyle borderStyle = styler.createBorderStyle()
+            CellStyle centeredStyle = styler.createBorderStyleCenterAligned()
+            CellStyle centeredStyleDate = styler.createBorderStyleCenterAlignedDate()
+            CellStyle numberCenteredStyle = styler.createBorderStyleCenterAlignedTypeNumber()
+            for (NdflPersonIncome npi : ndflPersonIncomeList) {
+                ScriptUtils.checkInterrupted()
+
+                Row row = sheet.createRow(index)
+                Cell cell1 = row.createCell(1)
+                cell1.setCellStyle(centeredStyle)
+                cell1.setCellValue(npi.getRowNum().intValue());
+                Cell cell2 = row.createCell(2)
+                cell2.setCellStyle(centeredStyle)
+                String inp = context.getIdNdflPersonMap().get(npi.getNdflPersonId()).getInp()
+                cell2.setCellValue(inp != null ? inp : "")
+                Cell cell3 = row.createCell(3)
+                cell3.setCellStyle(centeredStyle)
+                cell3.setCellValue(npi.getOperationId() != null ? npi.getOperationId() : "")
+                Cell cell4 = row.createCell(4)
+                cell4.setCellStyle(centeredStyle)
+                cell4.setCellValue(npi.getIncomeCode() != null ? npi.getIncomeCode() : "")
+                Cell cell5 = row.createCell(5)
+                cell5.setCellStyle(centeredStyle)
+                cell5.setCellValue(npi.getIncomeType() != null ? npi.getIncomeType() : "")
+                Cell cell6 = row.createCell(6)
+                cell6.setCellStyle(centeredStyleDate)
+                if (npi.incomeAccruedDate != null) {
+                    cell6.setCellValue(npi.incomeAccruedDate);
+                }
+                Cell cell7 = row.createCell(7)
+                cell7.setCellStyle(centeredStyleDate)
+                if (npi.incomePayoutDate != null) {
+                    cell7.setCellValue(npi.incomePayoutDate);
+                }
+                Cell cell8 = row.createCell(8)
+                cell8.setCellStyle(centeredStyle)
+                cell8.setCellValue(npi.getKpp() != null ? npi.getKpp() : "");
+                Cell cell9 = row.createCell(9)
+                cell9.setCellStyle(centeredStyle)
+                cell9.setCellValue(npi.getOktmo() != null ? npi.getOktmo() : "");
+                Cell cell10 = row.createCell(10)
+                cell10.setCellStyle(numberCenteredStyle)
+                if (npi.incomeAccruedSumm != null) {
+                    cell10.setCellValue(npi.incomeAccruedSumm.doubleValue());
+                }
+                Cell cell11 = row.createCell(11)
+                cell11.setCellStyle(numberCenteredStyle)
+                if (npi.incomePayoutSumm != null) {
+                    cell11.setCellValue(npi.incomePayoutSumm.doubleValue());
+                }
+                Cell cell12 = row.createCell(12)
+                cell12.setCellStyle(numberCenteredStyle)
+                if (npi.totalDeductionsSumm != null) {
+                    cell12.setCellValue(npi.totalDeductionsSumm.doubleValue());
+                }
+                Cell cell13 = row.createCell(13)
+                cell13.setCellStyle(numberCenteredStyle)
+                if (npi.taxBase != null) {
+                    cell13.setCellValue(npi.taxBase.doubleValue());
+                }
+                Cell cell14 = row.createCell(14)
+                cell14.setCellStyle(borderStyle)
+                if (npi.taxRate != null) {
+                    cell14.setCellValue(npi.taxRate);
+                }
+                Cell cell15 = row.createCell(15)
+                cell15.setCellStyle(centeredStyleDate)
+                if (npi.taxDate != null) {
+                    cell15.setCellValue(npi.taxDate);
+                }
+
+                Cell cell16 = row.createCell(16)
+                cell16.setCellStyle(numberCenteredStyle)
+                if (npi.calculatedTax != null) {
+                    cell16.setCellValue(npi.calculatedTax.doubleValue())
+                }
+                Cell cell17 = row.createCell(17)
+                cell17.setCellStyle(numberCenteredStyle)
+                if (npi.withholdingTax != null) {
+                    cell17.setCellValue(npi.withholdingTax.doubleValue());
+                }
+                Cell cell18 = row.createCell(18)
+                cell18.setCellStyle(numberCenteredStyle)
+                if (npi.notHoldingTax != null) {
+                    cell18.setCellValue(npi.notHoldingTax.doubleValue());
+                }
+                Cell cell19 = row.createCell(19)
+                cell19.setCellStyle(numberCenteredStyle)
+                if (npi.overholdingTax != null) {
+                    cell19.setCellValue(npi.overholdingTax.doubleValue());
+                }
+                Cell cell20 = row.createCell(20)
+                cell20.setCellStyle(numberCenteredStyle)
+                if (npi.refoundTax != null) {
+                    cell20.setCellValue(npi.refoundTax.doubleValue());
+                }
+                Cell cell21 = row.createCell(21)
+                if (npi.taxTransferDate != null) {
+                    if (npi.taxTransferDate.format(SharedConstants.DATE_FORMAT) == SharedConstants.DATE_ZERO_AS_DATE) {
+                        cell21.setCellStyle(centeredStyle)
+                        cell21.setCellValue(SharedConstants.DATE_ZERO_AS_STRING)
+                    } else {
+                        cell21.setCellStyle(centeredStyleDate)
+                        cell21.setCellValue(npi.taxTransferDate)
+                    }
+                } else {
+                    cell21.setCellStyle(centeredStyle)
+                }
+                Cell cell22 = row.createCell(22)
+                cell22.setCellStyle(centeredStyleDate)
+                if (npi.paymentDate != null) {
+                    cell22.setCellValue(npi.paymentDate)
+                }
+                Cell cell23 = row.createCell(23)
+                cell23.setCellStyle(centeredStyle)
+                cell23.setCellValue(npi.getPaymentNumber() != null ? npi.getPaymentNumber() : "")
+                Cell cell24 = row.createCell(24)
+                cell24.setCellStyle(numberCenteredStyle)
+                if (npi.taxSumm != null) {
+                    cell24.setCellValue(npi.taxSumm.intValue())
+                }
+                index++
+            }
+        }
+    }
+
+/**
+ * Заполнитель сведений о вычетах
+ */
+    @TypeChecked
+    class DeductionsSheetFiller implements SheetFiller {
+        @Override
+        void fillSheet(Workbook wb, SheetFillerContext context) {
+            List<NdflPersonDeduction> ndflPersonDeductionList = context.getNdflPersonDeductionList()
+            Sheet sheet = wb.getSheetAt(3)
+            int index = 3
+            Styler styler = new Styler(wb)
+            CellStyle centeredStyle = styler.createBorderStyleCenterAligned()
+            CellStyle centeredStyleDate = styler.createBorderStyleCenterAlignedDate()
+            CellStyle numberCenteredStyle = styler.createBorderStyleCenterAlignedTypeNumber()
+            for (NdflPersonDeduction npd : ndflPersonDeductionList) {
+                ScriptUtils.checkInterrupted()
+
+                Row row = sheet.createRow(index)
+                Cell cell1 = row.createCell(1)
+                cell1.setCellStyle(centeredStyle)
+                cell1.setCellValue(npd.rowNum.intValue())
+                Cell cell2 = row.createCell(2)
+                cell2.setCellStyle(centeredStyle)
+                String inp = context.getIdNdflPersonMap().get(npd.getNdflPersonId()).getInp()
+                cell2.setCellValue(inp != null ? inp : "")
+                Cell cell3 = row.createCell(3)
+                cell3.setCellStyle(centeredStyle)
+                cell3.setCellValue(npd.getTypeCode() != null ? npd.getTypeCode() : "")
+                Cell cell4 = row.createCell(4)
+                cell4.setCellStyle(centeredStyle)
+                cell4.setCellValue(npd.getNotifType() != null ? npd.getNotifType() : "")
+                Cell cell5 = row.createCell(5)
+                cell5.setCellStyle(centeredStyleDate)
+                if (npd.notifDate != null) {
+                    cell5.setCellValue(npd.notifDate);
+                }
+                Cell cell6 = row.createCell(6)
+                cell6.setCellStyle(centeredStyle)
+                cell6.setCellValue(npd.getNotifNum() != null ? npd.getNotifNum() : "б/н")
+                Cell cell7 = row.createCell(7)
+                cell7.setCellStyle(centeredStyle)
+                cell7.setCellValue(npd.getNotifSource() != null ? npd.getNotifSource() : "")
+                Cell cell8 = row.createCell(8)
+                cell8.setCellStyle(numberCenteredStyle)
+                if (npd.notifSumm != null) {
+                    cell8.setCellValue(npd.notifSumm.doubleValue());
+                }
+                Cell cell9 = row.createCell(9)
+                cell9.setCellStyle(centeredStyle)
+                cell9.setCellValue(npd.getOperationId() != null ? npd.getOperationId() : "")
+                Cell cell10 = row.createCell(10)
+                cell10.setCellStyle(centeredStyleDate)
+                if (npd.incomeAccrued != null) {
+                    cell10.setCellValue(npd.incomeAccrued);
+                }
+                Cell cell11 = row.createCell(11)
+                cell11.setCellStyle(centeredStyle)
+                cell11.setCellValue(npd.getIncomeCode() != null ? npd.getIncomeCode() : "")
+                Cell cell12 = row.createCell(12)
+                cell12.setCellStyle(numberCenteredStyle)
+                if (npd.incomeSumm != null) {
+                    cell12.setCellValue(npd.incomeSumm.doubleValue())
+                }
+                Cell cell13 = row.createCell(13)
+                cell13.setCellStyle(centeredStyleDate)
+                if (npd.periodPrevDate != null) {
+                    cell13.setCellValue(npd.periodPrevDate)
+                }
+                Cell cell14 = row.createCell(14)
+                cell14.setCellStyle(numberCenteredStyle)
+                if (npd.periodPrevSumm != null) {
+                    cell14.setCellValue(npd.periodPrevSumm.doubleValue())
+                }
+                Cell cell15 = row.createCell(15)
+                cell15.setCellStyle(centeredStyleDate)
+                if (npd.periodCurrDate != null) {
+                    cell15.setCellValue(npd.periodCurrDate);
+                }
+                Cell cell16 = row.createCell(16)
+                cell16.setCellStyle(numberCenteredStyle)
+                if (npd.periodCurrSumm != null) {
+                    cell16.setCellValue(npd.periodCurrSumm.doubleValue())
+                }
+                index++
+            }
+        }
+    }
+
+/**
+ * Заполнитель сведений об авансах
+ */
+    @TypeChecked
+    class PrepaymentSheetFiller implements SheetFiller {
+        @Override
+        void fillSheet(Workbook wb, SheetFillerContext context) {
+            List<NdflPersonPrepayment> ndflPersonPrepaymentList = context.getNdflPersonPrepaymentList()
+            Sheet sheet = wb.getSheetAt(4)
+            int index = 3
+            Styler styler = new Styler(wb)
+            CellStyle centeredStyle = styler.createBorderStyleCenterAligned()
+            CellStyle centeredStyleDate = styler.createBorderStyleCenterAlignedDate()
+            CellStyle numberCenteredStyle = styler.createBorderStyleCenterAlignedTypeNumber()
+            for (NdflPersonPrepayment npp : ndflPersonPrepaymentList) {
+                ScriptUtils.checkInterrupted()
+
+                Row row = sheet.createRow(index)
+                Cell cell1 = row.createCell(1)
+                cell1.setCellStyle(centeredStyle)
+                cell1.setCellValue(npp.rowNum.doubleValue())
+                Cell cell2 = row.createCell(2)
+                cell2.setCellStyle(centeredStyle)
+                String inp = context.getIdNdflPersonMap().get(npp.getNdflPersonId()).getInp()
+                cell2.setCellValue(inp != null ? inp : "")
+                Cell cell3 = row.createCell(3)
+                cell3.setCellStyle(centeredStyle)
+                cell3.setCellValue(npp.getOperationId() != null ? npp.getOperationId() : "")
+                Cell cell4 = row.createCell(4)
+                cell4.setCellStyle(numberCenteredStyle)
+                if (npp.summ != null) {
+                    cell4.setCellValue(npp.summ.doubleValue())
+                }
+                Cell cell5 = row.createCell(5)
+                cell5.setCellStyle(centeredStyle)
+                cell5.setCellValue(npp.getNotifNum() != null ? npp.getNotifNum() : "")
+                Cell cell6 = row.createCell(6)
+                cell6.setCellStyle(centeredStyleDate)
+                if (npp.notifDate != null) {
+                    cell6.setCellValue(npp.notifDate)
+                }
+                Cell cell7 = row.createCell(7)
+                cell7.setCellStyle(centeredStyle)
+                cell7.setCellValue(npp.getNotifSource() != null ? npp.getNotifSource() : "")
+                index++
+            }
+        }
+    }
+
+/**
+ * Содержит логику заполнения реестра загруженных данных РНУ НДФЛ
+ */
+    @TypeChecked
+    class ReportXlsxSheetFiller implements SheetFiller {
+
+        NdflPersonService ndflPersonService
+        DeclarationService declarationService
+        DepartmentService departmentService
+
+        ReportXlsxSheetFiller(NdflPersonService ndflPersonService, DeclarationService declarationService, DepartmentService departmentService) {
+            this.ndflPersonService = ndflPersonService
+            this.declarationService = declarationService
+            this.departmentService = departmentService
+        }
+
+        @EqualsAndHashCode
+        class XlsxReportRowKey {
+            String kpp
+            String oktmo
+            String primaryTB
+            String period
+
+            XlsxReportRowKey(String kpp, String oktmo, String primaryTB, String period) {
+                this.kpp = kpp
+                this.oktmo = oktmo
+                this.primaryTB = primaryTB
+                this.period = period
+            }
+        }
+
+        class FlIncomeData {
+            Set<Long> personIdSet
+            BigDecimal incomeAccruedSumm
+            BigDecimal calculatedTax
+
+            FlIncomeData(Set<Long> personIdSet, BigDecimal incomeAccruedSumm, BigDecimal calculatedTax) {
+                this.personIdSet = personIdSet
+                this.incomeAccruedSumm = incomeAccruedSumm
+                this.calculatedTax = calculatedTax
+            }
+        }
+
+        @Override
+        void fillSheet(Workbook wb, SheetFillerContext context) {
+            List<NdflPersonIncome> ndflPersonIncomeList = context.getNdflPersonIncomeList()
+            Map<XlsxReportRowKey, FlIncomeData> flIncomeDataMap = new HashMap<>()
+            Sheet sheet = wb.getSheetAt(0);
+            Integer rowNumber = 3;
+            Integer ppNumber = 1
+            Styler styler = new Styler(wb)
+            CellStyle textCenteredStyle = styler.createBorderStyleCenterAlignedTypeText()
+            CellStyle textRightStyle = styler.createBorderStyleRightAlignedTypeText()
+            CellStyle textLeftStyle = styler.createBorderStyleLeftAlignedTypeText()
+            FlIncomeData summaryFlIncomeData = new FlIncomeData(new HashSet<Long>(), new BigDecimal(0).setScale(2), new BigDecimal(0).setScale(2))
+            for (NdflPersonIncome npi in ndflPersonIncomeList) {
+                if (npi.incomeAccruedDate) {
+                    Department primaryTB = getPrimaryTB(npi)
+                    String period = getPeriod(npi.incomeAccruedDate)
+                    XlsxReportRowKey rowKey = new XlsxReportRowKey(npi.kpp, npi.oktmo, primaryTB?.name, period)
+                    if (flIncomeDataMap.get(rowKey) == null) {
+                        flIncomeDataMap.put(rowKey, new FlIncomeData(new HashSet<Long>(), new BigDecimal(0).setScale(2), new BigDecimal(0).setScale(2)))
+                    }
+                    FlIncomeData flIncomeData = flIncomeDataMap.get(rowKey)
+                    flIncomeData.personIdSet.add(npi.ndflPersonId)
+                    flIncomeData.incomeAccruedSumm = npi.incomeAccruedSumm ? flIncomeData.incomeAccruedSumm.add(npi.incomeAccruedSumm) : flIncomeData.incomeAccruedSumm
+                    flIncomeData.calculatedTax = npi.calculatedTax ? flIncomeData.calculatedTax.add(npi.calculatedTax) : flIncomeData.calculatedTax
+                    flIncomeDataMap.put(rowKey, flIncomeData)
+
+                    summaryFlIncomeData.personIdSet.add(npi.ndflPersonId)
+                    summaryFlIncomeData.incomeAccruedSumm = npi.incomeAccruedSumm ? summaryFlIncomeData.incomeAccruedSumm.add(npi.incomeAccruedSumm) : summaryFlIncomeData.incomeAccruedSumm
+                    summaryFlIncomeData.calculatedTax = npi.calculatedTax ? summaryFlIncomeData.calculatedTax.add(npi.calculatedTax) : summaryFlIncomeData.calculatedTax
+                }
+            }
+            flIncomeDataMap = flIncomeDataMap.sort { e1, e2 -> e1.key.kpp <=> e2.key.kpp ?: e1.key.oktmo <=> e2.key.oktmo }
+
+            for (XlsxReportRowKey reportRowKey : flIncomeDataMap.keySet()) {
+                FlIncomeData flIncomeData = flIncomeDataMap.get(reportRowKey)
+                ScriptUtils.checkInterrupted()
+                Row row = sheet.createRow(rowNumber)
+                Cell cell1 = row.createCell(1)
+                cell1.setCellStyle(textRightStyle)
+                cell1.setCellValue(ppNumber)
+                Cell cell2 = row.createCell(2)
+                cell2.setCellStyle(textLeftStyle)
+                cell2.setCellValue(reportRowKey.kpp)
+                Cell cell3 = row.createCell(3)
+                cell3.setCellStyle(textLeftStyle)
+                cell3.setCellValue(reportRowKey.oktmo)
+                Cell cell4 = row.createCell(4)
+                cell4.setCellStyle(textRightStyle)
+                cell4.setCellValue(flIncomeData.personIdSet.size())
+                Cell cell5 = row.createCell(5)
+                cell5.setCellStyle(textRightStyle)
+                cell5.setCellValue(flIncomeData.incomeAccruedSumm?.toString())
+                Cell cell6 = row.createCell(6)
+                cell6.setCellStyle(textRightStyle)
+                cell6.setCellValue(flIncomeData.calculatedTax?.toString())
+                Cell cell7 = row.createCell(7)
+                cell7.setCellStyle(textCenteredStyle)
+                cell7.setCellValue(reportRowKey.primaryTB ?: "")
+                Cell cell8 = row.createCell(8)
+                cell8.setCellStyle(textLeftStyle)
+                cell8.setCellValue(reportRowKey.period ?: "")
+                rowNumber++
+                ppNumber++
+            }
+            textRightStyle.setFont(styler.createBoldFont())
+            sheet.addMergedRegion(new CellRangeAddress(rowNumber, rowNumber, 1, 3))
+            Row row = sheet.createRow(rowNumber)
+            Cell cell1 = row.createCell(1)
+            cell1.setCellStyle(textRightStyle)
+            cell1.setCellValue("Итого")
+            Cell cell2 = row.createCell(2)
+            cell2.setCellStyle(textCenteredStyle)
+            cell2.setCellValue("")
+            Cell cell3 = row.createCell(3)
+            cell3.setCellStyle(textCenteredStyle)
+            cell3.setCellValue("")
+            Cell cell4 = row.createCell(4)
+            cell4.setCellStyle(textRightStyle)
+            cell4.setCellValue(summaryFlIncomeData.personIdSet.size())
+            Cell cell5 = row.createCell(5)
+            cell5.setCellStyle(textRightStyle)
+            cell5.setCellValue(summaryFlIncomeData.incomeAccruedSumm.toString())
+            Cell cell6 = row.createCell(6)
+            cell6.setCellStyle(textRightStyle)
+            cell6.setCellValue(summaryFlIncomeData.calculatedTax.toString())
+            Cell cell7 = row.createCell(7)
+            cell7.setCellStyle(textRightStyle)
+            cell7.setCellValue("")
+            Cell cell8 = row.createCell(8)
+            cell8.setCellStyle(textLeftStyle)
+            cell8.setCellValue("")
+
+        }
+
+        String getPeriod(Date date) {
+            return date[Calendar.YEAR] + ", " + getQuarter(date)
+        }
+
+        String getQuarter(Date date) {
+            int month = date[Calendar.MONTH]
+            if (Calendar.JANUARY <= month && month <= Calendar.MARCH) {
+                return "первый квартал"
+            } else if (Calendar.APRIL <= month && month <= Calendar.JUNE) {
+                return "полугодие "
+            } else if (Calendar.JULY <= month && month <= Calendar.SEPTEMBER) {
+                return "девять месяцев"
+            } else {
+                return "год"
+            }
+        }
+    }
 
 /**
  * Класс содержащий набор методов отвечающих за стилизацию ячеек при формирования файла Excel
  */
-class Styler {
+    class Styler {
 
-    Workbook workbook
+        Workbook workbook
 
-    Styler(Workbook workbook) {
-        this.workbook = workbook
+        Styler(Workbook workbook) {
+            this.workbook = workbook
+        }
+
+        /**
+         * Создать стиль ячейки с нормальным шрифтом с тонкими границами и выравниваем по центру
+         * @return
+         */
+        CellStyle createBorderStyleCenterAligned() {
+            CellStyle style = workbook.createCellStyle()
+            style.setAlignment(CellStyle.ALIGN_CENTER)
+            addThinBorderStyle(style)
+            return style
+        }
+
+        /**
+         * Создать стиль ячейки с нормальным шрифтом с тонкими границами
+         * @return
+         */
+        CellStyle createBorderStyle() {
+            CellStyle style = workbook.createCellStyle()
+            addThinBorderStyle(style)
+            return style
+        }
+
+        /**
+         * Создать стиль ячейки с нормальным шрифтом с тонкими границами и выравниваем по центру для дат
+         * @return
+         */
+        CellStyle createBorderStyleCenterAlignedDate() {
+            CellStyle style = createBorderStyleCenterAligned()
+            return addDateFormat(style)
+        }
+
+        /**
+         * Добавляет к стилю формат даты в ДД.ММ.ГГГГ
+         * @param style
+         * @return
+         */
+        CellStyle addDateFormat(CellStyle style) {
+            style.setDataFormat(ScriptUtils.createXlsDateFormat(workbook))
+            return style
+        }
+
+        /**
+         * Добавляет к стилю ячейки тонкие границы
+         * @param style
+         * @return
+         */
+        CellStyle addThinBorderStyle(CellStyle style) {
+            style.setBorderTop(CellStyle.BORDER_THIN)
+            style.setBorderBottom(CellStyle.BORDER_THIN)
+            style.setBorderLeft(CellStyle.BORDER_THIN)
+            style.setBorderRight(CellStyle.BORDER_THIN)
+            return style
+        }
+
+        /**
+         * Создать стиль ячейки с нормальным шрифтом с тонкими границами и выравниваем по центру по горизонтали о по верху
+         * по вериткали
+         * @return
+         */
+        @TypeChecked(TypeCheckingMode.SKIP)
+        CellStyle createVerticalByTopHorizontalByCenter() {
+            CellStyle style = workbook.createCellStyle()
+            style.setAlignment(HorizontalAlignment.CENTER)
+            style.setVerticalAlignment(VerticalAlignment.TOP)
+            addThinBorderStyle(style)
+            return style
+        }
+
+        /**
+         * Создать стиль ячейки с нормальным шрифтом с тонкими границами и выравниваем по центру по горизонтали о по верху
+         * по вериткали
+         * @return
+         */
+        CellStyle createVerticalByTopHorizontalByCenterDate() {
+            CellStyle style = createVerticalByTopHorizontalByCenter()
+            return addDateFormat(style)
+        }
+
+        CellStyle createBorderStyleTypeText(short cellAlign) {
+            CellStyle style = workbook.createCellStyle()
+            style.setAlignment(cellAlign)
+            addThinBorderStyle(style)
+            DataFormat format = workbook.createDataFormat()
+            style.setDataFormat(format.getFormat("text"))
+            return style
+        }
+
+        /**
+         * Создать стиль ячейки с нормальным шрифтом с тонкими границами и выравниваем по центру
+         * тип поля Текстовый
+         * @return
+         */
+        CellStyle createBorderStyleCenterAlignedTypeText() {
+            return createBorderStyleTypeText(CellStyle.ALIGN_CENTER)
+        }
+
+        /**
+         * Создать стиль ячейки с нормальным шрифтом с тонкими границами и выравниваем по левому краю
+         * тип поля Текстовый
+         * @return
+         */
+        CellStyle createBorderStyleLeftAlignedTypeText() {
+            return createBorderStyleTypeText(CellStyle.ALIGN_LEFT)
+        }
+
+        /**
+         * Создать стиль ячейки с нормальным шрифтом с тонкими границами и выравниваем по правому краю
+         * тип поля Текстовый
+         * @return
+         */
+        CellStyle createBorderStyleRightAlignedTypeText() {
+            return createBorderStyleTypeText(CellStyle.ALIGN_RIGHT)
+        }
+
+        /**
+         * Создать стиль ячейки с нормальным шрифтом с тонкими границами и выравниваем по центру
+         * тип поля Числовой
+         * @return
+         */
+        CellStyle createBorderStyleCenterAlignedTypeNumber() {
+            CellStyle style = workbook.createCellStyle()
+            style.setAlignment(CellStyle.ALIGN_CENTER)
+            addThinBorderStyle(style)
+            DataFormat format = workbook.createDataFormat()
+            style.setDataFormat(format.getFormat("0.00"))
+            return style
+        }
+
+        XSSFFont createBoldFont() {
+            XSSFFont boldFont = (XSSFFont) workbook.createFont()
+            boldFont.setBold(true)
+            return boldFont
+        }
     }
 
-    /**
-     * Создать стиль ячейки с нормальным шрифтом с тонкими границами и выравниваем по центру
-     * @return
-     */
-    CellStyle createBorderStyleCenterAligned() {
-        CellStyle style = workbook.createCellStyle()
-        style.setAlignment(CellStyle.ALIGN_CENTER)
-        addThinBorderStyle(style)
-        return style
-    }
-
-    /**
-     * Создать стиль ячейки с нормальным шрифтом с тонкими границами
-     * @return
-     */
-    CellStyle createBorderStyle() {
-        CellStyle style = workbook.createCellStyle()
-        addThinBorderStyle(style)
-        return style
-    }
-
-    /**
-     * Создать стиль ячейки с нормальным шрифтом с тонкими границами и выравниваем по центру для дат
-     * @return
-     */
-    CellStyle createBorderStyleCenterAlignedDate() {
-        CellStyle style = createBorderStyleCenterAligned()
-        return addDateFormat(style)
-    }
-
-    /**
-     * Добавляет к стилю формат даты в ДД.ММ.ГГГГ
-     * @param style
-     * @return
-     */
-    CellStyle addDateFormat(CellStyle style) {
-        style.setDataFormat(ScriptUtils.createXlsDateFormat(workbook))
-        return style
-    }
-
-    /**
-     * Добавляет к стилю ячейки тонкие границы
-     * @param style
-     * @return
-     */
-    CellStyle addThinBorderStyle(CellStyle style) {
-        style.setBorderTop(CellStyle.BORDER_THIN)
-        style.setBorderBottom(CellStyle.BORDER_THIN)
-        style.setBorderLeft(CellStyle.BORDER_THIN)
-        style.setBorderRight(CellStyle.BORDER_THIN)
-        return style
-    }
-
-    /**
-     * Создать стиль ячейки с нормальным шрифтом с тонкими границами и выравниваем по центру по горизонтали о по верху
-     * по вериткали
-     * @return
-     */
-    CellStyle createVerticalByTopHorizontalByCenter() {
-        CellStyle style = workbook.createCellStyle()
-        style.setAlignment(HorizontalAlignment.CENTER)
-        style.setVerticalAlignment(VerticalAlignment.TOP)
-        addThinBorderStyle(style)
-        return style
-    }
-
-    /**
-     * Создать стиль ячейки с нормальным шрифтом с тонкими границами и выравниваем по центру по горизонтали о по верху
-     * по вериткали
-     * @return
-     */
-    CellStyle createVerticalByTopHorizontalByCenterDate() {
-        CellStyle style = createVerticalByTopHorizontalByCenter()
-        return addDateFormat(style)
-    }
-
-    CellStyle createBorderStyleTypeText(short cellAlign) {
-        CellStyle style = workbook.createCellStyle()
-        style.setAlignment(cellAlign)
-        addThinBorderStyle(style)
-        DataFormat format = workbook.createDataFormat()
-        style.setDataFormat(format.getFormat("text"))
-        return style
-    }
-
-    /**
-     * Создать стиль ячейки с нормальным шрифтом с тонкими границами и выравниваем по центру
-     * тип поля Текстовый
-     * @return
-     */
-    CellStyle createBorderStyleCenterAlignedTypeText() {
-        return createBorderStyleTypeText(CellStyle.ALIGN_CENTER)
-    }
-
-    /**
-     * Создать стиль ячейки с нормальным шрифтом с тонкими границами и выравниваем по левому краю
-     * тип поля Текстовый
-     * @return
-     */
-    CellStyle createBorderStyleLeftAlignedTypeText() {
-        return createBorderStyleTypeText(CellStyle.ALIGN_LEFT)
-    }
-
-    /**
-     * Создать стиль ячейки с нормальным шрифтом с тонкими границами и выравниваем по правому краю
-     * тип поля Текстовый
-     * @return
-     */
-    CellStyle createBorderStyleRightAlignedTypeText() {
-        return createBorderStyleTypeText(CellStyle.ALIGN_RIGHT)
-    }
-
-    /**
-     * Создать стиль ячейки с нормальным шрифтом с тонкими границами и выравниваем по центру
-     * тип поля Числовой
-     * @return
-     */
-    CellStyle createBorderStyleCenterAlignedTypeNumber() {
-        CellStyle style = workbook.createCellStyle()
-        style.setAlignment(CellStyle.ALIGN_CENTER)
-        addThinBorderStyle(style)
-        DataFormat format = workbook.createDataFormat()
-        style.setDataFormat(format.getFormat("0.00"))
-        return style
-    }
-
-    XSSFFont createBoldFont() {
-        XSSFFont boldFont = workbook.createFont()
-        boldFont.setBold(true)
-        return boldFont
-    }
 }
+
