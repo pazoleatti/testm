@@ -143,7 +143,7 @@ PROMPT ======================
 
 PROMPT Fill service tables...
 
-HOST "&2\sqlldr" &3 control=templates/ldr/ndfl/template_script.ldr log=&4/02_04_ndfl_template_script.txt bad=&5/02_04_ndfl_template_script.bad
+HOST "&2\sqlldr" &3 control=templates/ldr/ndfl/template.ldr log=&4/02_04_ndfl_template_script.txt bad=&5/02_04_ndfl_template_script.bad
 
 BEGIN
 	insert into blob_names_tmp(id, blob_data_id, name)
