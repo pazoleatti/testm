@@ -235,7 +235,9 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
                 // Подразделение формы = (ТБ подразделения пользователя + все дочерние + иерархия подразделений от подразделения, для которого являемся исполнителем, вверх до ТБ и всех дочерних вниз)
                 List<Integer> departments = departmentService.findAllAvailableIds(taUser);
                 if (departments.contains(targetDomainObject.getDepartmentId())) {
-                    return true;
+                    if (declarationType.getId() != DeclarationType.NDFL_2_FL) {
+                        return true;
+                    }
                 }
             }
 
@@ -255,6 +257,13 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
                             return true;
                         }
                     }
+                }
+            }
+
+            // Оператор выдачи 2-НДФЛ клиенту по запросу (НДФЛ)
+            if (PermissionUtils.hasRole(currentUser, TARole.N_ROLE_OPER_2NDFL_FL)) {
+                if (declarationType.getId() == DeclarationType.NDFL_2_FL) {
+                    return true;
                 }
             }
 
