@@ -244,4 +244,11 @@
 			<where>DECLARATION_TEMPLATE_ID = 101 and EVENT_ID = 3</where>
 		</update>
 	</changeSet>
+
+	<changeSet id="3.7.1-ytrofimov-4" author="ytrofimov">
+		<update tableName="DECLARATION_TEMPLATE">
+			<column name="CREATE_SCRIPT" valueClobFile="templates-3.7.1/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl.groovy"/>
+			<where>declaration_type_id = 101</where>
+		</update>
+	</changeSet>
 </databaseChangeLog>
