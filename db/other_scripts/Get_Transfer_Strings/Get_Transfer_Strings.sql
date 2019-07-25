@@ -31,7 +31,8 @@ left join ref_book_asnu rba on npi.asnu_id = rba.id
 where np.declaration_data_id = to_number(form_num)  and 
 (npi.tax_transfer_date is not null and  npi.payment_date is not null and  npi.payment_number is not null and  npi.tax_summ is not null)
 and not exists (select * from ndfl_person np1 join ndfl_person_income npi1 on npi1.ndfl_person_id=np1.id where np1.declaration_data_id=to_number(form_num) and 
-npi1.operation_id=npi.operation_id and npi1.asnu_id=npi.asnu_id and npi1.id<>npi.id )
+npi1.operation_id=npi.operation_id and npi1.asnu_id=npi.asnu_id and npi1.id<>npi.id 
+and not (npi1.tax_transfer_date is not null and  npi1.payment_date is not null and  npi1.payment_number is not null and  npi1.tax_summ is not null))
 order by npi.row_num asc)
 loop
 
