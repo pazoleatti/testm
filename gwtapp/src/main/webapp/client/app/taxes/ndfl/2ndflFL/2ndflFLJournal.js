@@ -170,7 +170,7 @@
                     if (!cellValue) {
                         value = $filter('translate')('refBook.fl.table.label.undefined');
                     }
-                    return "<a href='index.html#/personRegistry/personCard/" + row.personId + "'>" + value + "</a>";
+                    return "<a href='index.html#/personRegistry/personCard/" + row.personId + "' target='_blank'>" + value + "</a>";
                 }
 
                 /**
