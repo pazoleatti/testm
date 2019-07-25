@@ -182,7 +182,7 @@ HOST "&2\sqlldr" &3 control=database-3.8/templates/ldr/ndfl/template.ldr log=&4/
 HOST "&2\sqlldr" &3 control=database-3.8/templates/ldr/ndfl/template_script.ldr log=&4/02_04_ndfl_template_script.txt bad=&5/02_04_ndfl_template_script.bad
 
 --kno
-HOST "&2\sqlldr" &3 control=database-3.8/kno/kno.ldr log=&4/02_03_ndfl_template.txt bad=&5/02_03_ndfl_template.bad
+HOST "&2\sqlldr" &3 control=database-3.8/kno/kno.ldr log=&4/02_05_ndfl_kno.txt bad=&5/02_05_ndfl_kno.bad
 
 BEGIN
 	insert into blob_names_tmp(id, blob_data_id, name)
