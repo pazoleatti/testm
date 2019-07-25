@@ -301,7 +301,7 @@
 		</update>
 	</changeSet>
 
-	<changeSet id="3.7-ytrofimov-7" author="ytrofimov">
+	<changeSet id="3.7-ytrofimov-7" author="ytrofimov" runAlways="true">
 		<update tableName="DECLARATION_TEMPLATE">
 			<column name="CREATE_SCRIPT" valueClobFile="templates-3.8/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl.groovy"/>
 			<where>declaration_type_id = 101</where>
