@@ -51,6 +51,7 @@ class Report2NdflFL extends AbstractScriptClass {
     Department department
     Create2NdflFLParams createParams
     Map<Long, File> result = [:]
+    Date currentDate = new Date()
 
     @TypeChecked(TypeCheckingMode.SKIP)
     Report2NdflFL(scriptClass) {
@@ -316,7 +317,6 @@ class Report2NdflFL extends AbstractScriptClass {
                         deductionData.month = СведСумДох.@Месяц
                         deductionData.incomeCode = СведСумДох.@КодДоход
                         deductionData.incomeSum = СведСумДох.@СумДоход
-                        deductionData.taxRate = СведДох.@Ставка
                         deductionData.deductionCode = СвСумВыч.@КодВычет
                         deductionData.deductionSum = СвСумВыч.@СумВычет
                         СведСумДохDataList << deductionData
@@ -464,9 +464,9 @@ class Report2NdflFL extends AbstractScriptClass {
         @Override
         void accept(PageVisitor pageVisitor) {
             processField((PDTextField) pageVisitor.acroForm.getField("year"), pageVisitor.xmlRoot.Документ[0].@ОтчетГод, "", createStyle(9.5f, true))
-            processField((PDTextField) pageVisitor.acroForm.getField("dateDay"), pageVisitor.xmlRoot.Документ[0].@ДатаДок.substring(0, 2), "", createStyle(9.5f, true))
-            processField((PDTextField) pageVisitor.acroForm.getField("dateMonth"), pageVisitor.xmlRoot.Документ[0].@ДатаДок.substring(3, 5), "", createStyle(9.5f, true))
-            processField((PDTextField) pageVisitor.acroForm.getField("dateYear"), pageVisitor.xmlRoot.Документ[0].@ДатаДок.substring(6), "", createStyle(9.5f, true))
+            processField((PDTextField) pageVisitor.acroForm.getField("dateDay"), currentDate.format("dd"), "", createStyle(9.5f, true))
+            processField((PDTextField) pageVisitor.acroForm.getField("dateMonth"), currentDate.format("MM"), "", createStyle(9.5f, true))
+            processField((PDTextField) pageVisitor.acroForm.getField("dateYear"), currentDate.format("yyyy"), "", createStyle(9.5f, true))
             processField((PDTextField) pageVisitor.acroForm.getField("oktmo"), pageVisitor.xmlRoot.Документ[0].СвНА[0].@ОКТМО?.toUpperCase(), "", createStyle(8.5f, false))
             processField((PDTextField) pageVisitor.acroForm.getField("phone"), pageVisitor.xmlRoot.Документ[0].СвНА[0].@Тлф?.toUpperCase(), "", createStyle(8.5f, false))
             processField((PDTextField) pageVisitor.acroForm.getField("inn"), pageVisitor.xmlRoot.Документ[0].СвНА[0].СвНАЮЛ[0].@ИННЮЛ?.toUpperCase(), "", createStyle(8.5f, false))
