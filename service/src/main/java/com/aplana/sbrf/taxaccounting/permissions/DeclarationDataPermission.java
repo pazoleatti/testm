@@ -123,6 +123,11 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
 
     public static final SendEdoPermission SEND_EDO = new SendEdoPermission(1 << 15);
 
+    /**
+     * Право на просмотр карточки ФЛ
+     */
+    public static final PersonViewPermission PERSON_VIEW = new PersonViewPermission(1 << 16);
+
     private static final String DATE_FORMAT = "dd.MM.yyyy";
 
     public DeclarationDataPermission(long mask) {
@@ -783,6 +788,21 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
                         StringUtils.join(errMsgs, ", "));
             }
             return false;
+        }
+    }
+
+    /**
+     * Право на просмотр карточки ФЛ
+     */
+    public static final class PersonViewPermission extends DeclarationDataPermission {
+
+        public PersonViewPermission(long mask) {
+            super(mask);
+        }
+
+        @Override
+        protected boolean isGrantedInternal(User currentUser, DeclarationData targetDomainObject, Logger logger) {
+            return PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER);
         }
     }
 }

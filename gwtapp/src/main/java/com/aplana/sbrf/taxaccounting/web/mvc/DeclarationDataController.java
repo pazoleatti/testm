@@ -14,10 +14,7 @@ import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookKnfType;
 import com.aplana.sbrf.taxaccounting.model.result.*;
-import com.aplana.sbrf.taxaccounting.permissions.DeclarationDataFilePermission;
-import com.aplana.sbrf.taxaccounting.permissions.DeclarationDataFilePermissionSetter;
-import com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission;
-import com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermissionSetter;
+import com.aplana.sbrf.taxaccounting.permissions.*;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
@@ -572,7 +569,8 @@ public class DeclarationDataController {
             for (Declaration2NdflFLDTO item : page) {
                 DeclarationData declaration = declarationDataMap.get(item.getDeclarationDataId());
                 if (declaration != null) {//noinspection unchecked
-                    declarationDataPermissionSetter.setPermissions(declaration, DeclarationDataPermission.DELETE);
+                    declarationDataPermissionSetter.setPermissions(declaration, DeclarationDataPermission.DELETE,
+                            DeclarationDataPermission.PERSON_VIEW);
                     item.setPermissions(declaration.getPermissions());
                 }
             }

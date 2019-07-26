@@ -171,7 +171,7 @@
                         value = $filter('translate')('refBook.fl.table.label.undefined');
                     }
 
-                    if (PermissionChecker.check($scope.$parent.user, APP_CONSTANTS.USER_PERMISSION.VIEW_NSI)) {
+                    if (PermissionChecker.check($scope.$parent.user, APP_CONSTANTS.DECLARATION_PERMISSION.PERSON_VIEW)) {
                         return "<a href='index.html#/personRegistry/personCard/" + row.personId + "' target='_blank'>" + value + "</a>";
                     }
                     return value;
