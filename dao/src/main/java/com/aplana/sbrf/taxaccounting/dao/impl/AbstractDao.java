@@ -39,13 +39,22 @@ public abstract class AbstractDao {
     @Autowired
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
+    @Autowired
+    private NamedParameterJdbcTemplate namedParameterJdbcTemplateSecondary;
+
     protected JdbcTemplate getJdbcTemplate() {
         return (JdbcTemplate) namedParameterJdbcTemplate.getJdbcOperations();
+    }
+
+    protected JdbcTemplate getJdbcTemplateSecondary() {
+        return (JdbcTemplate) namedParameterJdbcTemplateSecondary.getJdbcOperations();
     }
 
     protected NamedParameterJdbcTemplate getNamedParameterJdbcTemplate() {
         return namedParameterJdbcTemplate;
     }
+
+    protected NamedParameterJdbcTemplate getNamedParameterJdbcTemplateSecondary() {return namedParameterJdbcTemplateSecondary;}
 
     /**
      * Возвращает новое значение id, следующее за текущим значением sequenceName

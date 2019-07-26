@@ -17,6 +17,9 @@
     <jdbc:embedded-database id="dataSource" type="HSQL">
         <jdbc:script location="classpath:script/hsql_init.sql" encoding="UTF-8"/>
     </jdbc:embedded-database>
+    <bean id="dataSourceSecondary" class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy"/>
+    </bean>
 
 	<!--Uncomment for Oracle testing-->
 	<!--<bean id="dataSource" class="oracle.jdbc.pool.OracleDataSource" destroy-method="close">

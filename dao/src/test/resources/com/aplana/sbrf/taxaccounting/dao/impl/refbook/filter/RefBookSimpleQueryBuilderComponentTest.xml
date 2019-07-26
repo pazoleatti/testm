@@ -10,5 +10,8 @@
     <import resource="classpath:com/aplana/sbrf/taxaccounting/dao.xml"/>
 
     <jdbc:embedded-database id="dataSource" type="HSQL" />
+    <bean id="dataSourceSecondary" class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy"/>
+    </bean>
 
 </beans>

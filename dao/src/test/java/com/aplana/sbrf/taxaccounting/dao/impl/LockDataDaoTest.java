@@ -36,7 +36,7 @@ public class LockDataDaoTest {
     @Autowired
     private LockDataDao dao;
     @Autowired
-    private NamedParameterJdbcTemplate jdbc;
+    private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
     @Test
     public void test_get_onExistentLock() {
@@ -156,7 +156,7 @@ public class LockDataDaoTest {
      * Метод предназначен для проверки обработки исключительных ситуаций
      */
     private void dropTable() {
-        jdbc.update("DROP TABLE lock_data", new HashMap<String, Object>());
+        namedParameterJdbcTemplate.update("DROP TABLE lock_data", new HashMap<String, Object>());
     }
 
     @Test
