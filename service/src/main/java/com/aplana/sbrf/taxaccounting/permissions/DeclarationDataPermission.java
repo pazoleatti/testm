@@ -377,7 +377,7 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
             DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.fetchOne(targetDomainObject.getDepartmentReportPeriodId());
             if (targetDomainObject.getState() == State.CREATED) {
                 if (VIEW.isGranted(currentUser, targetDomainObject, logger)) {
-                    if (PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER)) {
+                    if (PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER, TARole.N_ROLE_OPER_2NDFL_FL)) {
                         if (departmentReportPeriod.isActive()) {
                             return true;
                         }
