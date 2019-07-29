@@ -1,7 +1,11 @@
 <div id="ndflReport" class="flex-column">
     <div>
         <!--Заголовок-->
-        <div class="content-header pull-left">
+        <div data-ng-show="declarationData.declarationType === APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_FL.id" class="content-header pull-left">
+            <h1><a href="index.html#/taxes/2ndflFLJournal">{{::'move_back' |
+                translate}}</a>— {{declarationTypeName}}, №{{declarationDataId}}</h1>
+        </div>
+        <div data-ng-show="declarationData.declarationType !== APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_FL.id" class="content-header pull-left">
             <h1><a href="index.html#/taxes/ndflReportJournal">{{::'move_back' |
                 translate}}</a>— {{declarationTypeName}}, №{{declarationDataId}}</h1>
         </div>
