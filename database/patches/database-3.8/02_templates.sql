@@ -175,14 +175,14 @@ PROMPT Fill service tables...
 --3.8-ytrofimov-2, 3.8-ytrofimov-4, 3.8-ytrofimov-5
 HOST "&2\sqlldr" &3 control=database-3.8/templates/ldr/ndfl/blob_data.ldr log=&4/02_02_ndfl_blob_data.txt bad=&5/02_02_ndfl_blob_data.bad
 
---3.8-dnovikov-4, 3.8-dnovikov-6,3.7-ytrofimov-7 (3.7-hotfix-07)
+--3.8-dnovikov-4, 3.8-dnovikov-6
 HOST "&2\sqlldr" &3 control=database-3.8/templates/ldr/ndfl/template.ldr log=&4/02_03_ndfl_template.txt bad=&5/02_03_ndfl_template.bad
 
---3.8-ytrofimov-1, 3.8-ytrofimov-6, 3.8-dnovikov-7, 3.7.1-ytrofimov-1,3.8-dnovikov-9
+--3.8-ytrofimov-1, 3.8-ytrofimov-6, 3.8-dnovikov-7, 3.7.1-ytrofimov-1 3.8-dnovikov-9
 HOST "&2\sqlldr" &3 control=database-3.8/templates/ldr/ndfl/template_script.ldr log=&4/02_04_ndfl_template_script.txt bad=&5/02_04_ndfl_template_script.bad
 
 --kno
-HOST "&2\sqlldr" &3 control=database-3.8/kno/kno.ldr log=&4/02_05_ndfl_kno.txt bad=&5/02_05_ndfl_kno.bad
+HOST "&2\sqlldr" &3 control=database-3.8/kno/kno.ldr log=&4/02_03_ndfl_template.txt bad=&5/02_03_ndfl_template.bad
 
 BEGIN
 	insert into blob_names_tmp(id, blob_data_id, name)
@@ -261,26 +261,4 @@ exception when others then
 end;
 
 /
-
---3.7.1-skononova-6
-DECLARE
-	v_run_condition number(1);
-	v_task_name varchar2(128):='drop table KNO_TEMP';  
-BEGIN
-	select count(*) into v_run_condition from user_tables where table_name = 'KNO_TEMP';
-	IF v_run_condition=1 THEN
-		execute immediate 'drop table KNO_TEMP ';
-		dbms_output.put_line(v_task_name||'[INFO ]:'||' Success');
-	ELSE
-		dbms_output.put_line(v_task_name||'[WARNING]:'||' changes had already been implemented');
-	END IF;
-
-EXCEPTION
-	when OTHERS then
-		dbms_output.put_line(v_task_name||'[FATAL]:'||sqlerrm);	
-END;
-/
-
-COMMIT;
-
 
