@@ -124,7 +124,7 @@ class Report2NdflFL extends AbstractScriptClass {
         if (createParams.declaration2Ndfl1Ids && !declarationDataFiles) {
             logger.error("Не выполнена операция: \"Создание отчетной формы 2-НДФЛ(ФЛ) Сотрудник: $person.fullName, " +
                     "Отчетный период: $reportPeriod.taxPeriod.year $reportPeriod.name. Причина: " +
-                    "Ни один xml файл из файлов привязанных к налоговым формам не соответствует требованиям.");
+                    "Ни к одной налоговой не привязан XML файл, или они не соответствует требованиям.")
         }
     }
 
@@ -133,14 +133,14 @@ class Report2NdflFL extends AbstractScriptClass {
         if (declarationDataFiles.size() == 1) {
             return declarationDataFiles.get(0);
         } else {
-            throw new ServiceException("XML файл, привязанный к налоговой форме ${declarationDescription(declaration2Ndfl1)} не соответствует требованиям.")
+            throw new ServiceException("К налоговой форме ${declarationDescription(declaration2Ndfl1)} не привязан XML файл, или он не соответствует требованиям.")
         }
     }
 
     void validateXml(DeclarationData declaration2Ndfl1, File xmlFile, String fileName) {
         def logger = new Logger()
         if (!validateXMLService.validate(declaration2Ndfl1, logger, xmlFile, fileName, null)) {
-            throw new ServiceException("XML файл, привязанный к налоговой форме ${declarationDescription(declaration2Ndfl1)} не соответствует требованиям.")
+            throw new ServiceException("К налоговой форме ${declarationDescription(declaration2Ndfl1)} не привязан XML файл, или он не соответствует требованиям.")
         }
     }
 
