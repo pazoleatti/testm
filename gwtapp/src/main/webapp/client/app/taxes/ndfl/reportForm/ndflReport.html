@@ -152,8 +152,13 @@
                                 <div class="span6">
                                     <label class="control-label">{{::'title.person' | translate}}:</label>
                                 </div>
-                                <div class="span6">
-                                    <a class="font-normal info-text" href="{{'index.html#/personRegistry/personCard/' + declarationData.personId}}" target="_blank">{{declarationData.person}}</a>
+                                <div class="span6"
+                                     ng-if="permissionChecker.check(declarationData, APP_CONSTANTS.DECLARATION_PERMISSION.PERSON_VIEW)">
+                                    <a class="font-normal info-text" href="{{'index.html#/personRegistry/personCard/' + declarationData.personId}}">{{declarationData.person}}</a>
+                                </div>
+                                <div class="span6"
+                                     ng-if="!permissionChecker.check(declarationData, APP_CONSTANTS.DECLARATION_PERMISSION.PERSON_VIEW)">
+                                    <label class="font-normal info-text">{{declarationData.person}}</label>
                                 </div>
                             </div>
                             <div class="row-fluid"
