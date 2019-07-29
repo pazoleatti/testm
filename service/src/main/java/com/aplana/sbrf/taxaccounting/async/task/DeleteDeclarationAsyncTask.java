@@ -64,7 +64,7 @@ public class DeleteDeclarationAsyncTask extends AbstractDeclarationAsyncTask {
     @Override
     protected BusinessLogicResult executeBusinessLogic(final AsyncTaskData taskData, Logger logger) {
         long declarationDataId = (Long) taskData.getParams().get("declarationDataId");
-        taskData.getParams().put("standardDeclarationDescription", declarationDataService.getStandardDeclarationDescription(declarationDataId));
+        taskData.getParams().put("fullDeclarationDescription", declarationDataService.getFullDeclarationDescription(declarationDataId));
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(taskData.getUserId()));
 
@@ -106,11 +106,11 @@ public class DeleteDeclarationAsyncTask extends AbstractDeclarationAsyncTask {
     }
 
     private String getMessage(AsyncTaskData taskData, boolean isSuccess) {
-        String standardDeclarationDescription = (String) taskData.getParams().get("standardDeclarationDescription");
+        String fullDeclarationDescription = (String) taskData.getParams().get("fullDeclarationDescription");
         if (isSuccess) {
-            return String.format(SUCCESS, standardDeclarationDescription);
+            return String.format(SUCCESS, fullDeclarationDescription);
         } else {
-            return String.format(FAIL, "Удаление", standardDeclarationDescription);
+            return String.format(FAIL, "Удаление", fullDeclarationDescription);
         }
     }
 
