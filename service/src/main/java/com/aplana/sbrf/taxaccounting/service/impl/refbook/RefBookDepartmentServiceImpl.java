@@ -51,7 +51,7 @@ public class RefBookDepartmentServiceImpl implements RefBookDepartmentService {
 
     @Override
     @Transactional(readOnly = true)
-    @PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'N_ROLE_OPER')")
+    @PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'N_ROLE_OPER', 'N_ROLE_OPER_2NDFL_FL')")
     public PagingResult<RefBookDepartment> findDepartments(String name, PagingParams pagingParams) {
         return refBookDepartmentDao.findDepartments(name, pagingParams);
     }
