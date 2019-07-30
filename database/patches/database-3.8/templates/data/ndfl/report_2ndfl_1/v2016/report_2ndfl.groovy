@@ -1366,6 +1366,24 @@ class Report2Ndfl extends AbstractScriptClass {
             if (value == null) value = "00"
             field.setValue(value)
         }
+
+        void processNumIntFieldWithDashes(PDField field, String value) {
+            if (value == null) value = "-"
+            COSDictionary fieldDict = field.getCOSObject()
+            int maxLength = fieldDict.getInt(COSName.MAX_LEN)
+
+            StringBuilder printingValue = new StringBuilder(value)
+            for (int i = 0; i < maxLength - value.length(); i++) {
+                printingValue.insert(0, "-")
+            }
+            field.setValue(printingValue.toString())
+        }
+
+        void processNumFractFieldWithDashes(PDField field, String value) {
+            if (value == null) value = "--"
+            field.setValue(value)
+        }
+
     }
 
     @TypeChecked(TypeCheckingMode.SKIP)
@@ -1506,12 +1524,12 @@ class Report2Ndfl extends AbstractScriptClass {
             for (int i = 1; i <= 6; i++) {
                 if (pageVisitor.ПредВычССИList && pageVisitor.ПредВычССИList.size() >= i) {
                     processField(pageVisitor.acroForm.getField("deductionCode" + (i)), pageVisitor.ПредВычССИList.get(i - 1).@КодВычет)
-                    processNumIntField(pageVisitor.acroForm.getField("deductionIntPart" + (i)), pageVisitor.ПредВычССИList.get(i - 1).@СумВычет.split("\\.")[0])
-                    processNumFractField(pageVisitor.acroForm.getField("deductionFractPart" + (i)), pageVisitor.ПредВычССИList.get(i - 1).@СумВычет.split("\\.")[1])
+                    processNumIntFieldWithDashes(pageVisitor.acroForm.getField("deductionIntPart" + (i)), pageVisitor.ПредВычССИList.get(i - 1).@СумВычет.split("\\.")[0])
+                    processNumFractFieldWithDashes(pageVisitor.acroForm.getField("deductionFractPart" + (i)), pageVisitor.ПредВычССИList.get(i - 1).@СумВычет.split("\\.")[1])
                 } else {
                     processField(pageVisitor.acroForm.getField("deductionCode" + (i)), null)
-                    processNumIntField(pageVisitor.acroForm.getField("deductionIntPart" + (i)), null)
-                    processNumFractField(pageVisitor.acroForm.getField("deductionFractPart" + (i)), null)
+                    processNumIntFieldWithDashes(pageVisitor.acroForm.getField("deductionIntPart" + (i)), null)
+                    processNumFractFieldWithDashes(pageVisitor.acroForm.getField("deductionFractPart" + (i)), null)
                 }
             }
             if (pageVisitor.УведВыч) {
@@ -1540,21 +1558,21 @@ class Report2Ndfl extends AbstractScriptClass {
                     processField(pageVisitor.acroForm.getField("month" + i), !pageVisitor.СведСумДохDataList.get(i - 1).duplicate ? pageVisitor.СведСумДохDataList.get(i - 1).month : null)
                     processField(pageVisitor.acroForm.getField("incomeCode" + i), !pageVisitor.СведСумДохDataList.get(i - 1).duplicate ? pageVisitor.СведСумДохDataList?.get(i - 1)?.incomeCode : null)
 
-                    processNumIntField(pageVisitor.acroForm.getField("incomeSumIntPart" + i), pageVisitor.СведСумДохDataList?.get(i - 1)?.incomeSum && !pageVisitor.СведСумДохDataList.get(i - 1).duplicate ? pageVisitor.СведСумДохDataList?.get(i - 1)?.incomeSum?.split("\\.")[0] : null)
-                    processNumFractField(pageVisitor.acroForm.getField("incomeSumFractPart" + i), pageVisitor.СведСумДохDataList?.get(i - 1)?.incomeSum && !pageVisitor.СведСумДохDataList.get(i - 1).duplicate ? pageVisitor.СведСумДохDataList?.get(i - 1)?.incomeSum?.split("\\.")[1] : null)
+                    processNumIntFieldWithDashes(pageVisitor.acroForm.getField("incomeSumIntPart" + i), pageVisitor.СведСумДохDataList?.get(i - 1)?.incomeSum && !pageVisitor.СведСумДохDataList.get(i - 1).duplicate ? pageVisitor.СведСумДохDataList?.get(i - 1)?.incomeSum?.split("\\.")[0] : null)
+                    processNumFractFieldWithDashes(pageVisitor.acroForm.getField("incomeSumFractPart" + i), pageVisitor.СведСумДохDataList?.get(i - 1)?.incomeSum && !pageVisitor.СведСумДохDataList.get(i - 1).duplicate ? pageVisitor.СведСумДохDataList?.get(i - 1)?.incomeSum?.split("\\.")[1] : null)
 
                     processField(pageVisitor.acroForm.getField("deductionCode" + i), pageVisitor.СведСумДохDataList?.get(i - 1)?.deductionCode)
 
-                    processNumIntField(pageVisitor.acroForm.getField("deductionSumIntPart" + i), pageVisitor.СведСумДохDataList?.get(i - 1)?.deductionSum ? pageVisitor.СведСумДохDataList?.get(i - 1)?.deductionSum?.split("\\.")[0] : null)
-                    processNumFractField(pageVisitor.acroForm.getField("deductionSumFractPart" + i), pageVisitor.СведСумДохDataList?.get(i - 1)?.deductionSum ? pageVisitor.СведСумДохDataList?.get(i - 1)?.deductionSum?.split("\\.")[1] : null)
+                    processNumIntFieldWithDashes(pageVisitor.acroForm.getField("deductionSumIntPart" + i), pageVisitor.СведСумДохDataList?.get(i - 1)?.deductionSum ? pageVisitor.СведСумДохDataList?.get(i - 1)?.deductionSum?.split("\\.")[0] : null)
+                    processNumFractFieldWithDashes(pageVisitor.acroForm.getField("deductionSumFractPart" + i), pageVisitor.СведСумДохDataList?.get(i - 1)?.deductionSum ? pageVisitor.СведСумДохDataList?.get(i - 1)?.deductionSum?.split("\\.")[1] : null)
                 } else {
                     processField(pageVisitor.acroForm.getField("month" + i), null)
                     processField(pageVisitor.acroForm.getField("incomeCode" + i), null)
-                    processNumIntField(pageVisitor.acroForm.getField("incomeSumIntPart" + i), null)
-                    processNumFractField(pageVisitor.acroForm.getField("incomeSumFractPart" + i), null)
+                    processNumIntFieldWithDashes(pageVisitor.acroForm.getField("incomeSumIntPart" + i), null)
+                    processNumFractFieldWithDashes(pageVisitor.acroForm.getField("incomeSumFractPart" + i), null)
                     processField(pageVisitor.acroForm.getField("deductionCode" + i), null)
-                    processNumIntField(pageVisitor.acroForm.getField("deductionSumIntPart" + i), null)
-                    processNumFractField(pageVisitor.acroForm.getField("deductionSumFractPart" + i), null)
+                    processNumIntFieldWithDashes(pageVisitor.acroForm.getField("deductionSumIntPart" + i), null)
+                    processNumFractFieldWithDashes(pageVisitor.acroForm.getField("deductionSumFractPart" + i), null)
                 }
             }
         }
