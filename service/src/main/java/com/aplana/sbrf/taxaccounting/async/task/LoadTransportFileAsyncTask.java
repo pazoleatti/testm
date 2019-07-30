@@ -74,7 +74,7 @@ public class LoadTransportFileAsyncTask extends AbstractAsyncTask {
             if (e.getMessage() != null && !e.getMessage().isEmpty()) {
                 exceptionMessage += e.getMessage();
             }
-            return "Ошибка загрузки файла \"" + fileName + "\"" + archive + ". " + exceptionMessage;
+            return "Загрузка файла \"" + fileName + "\"" + archive + " завершена с ошибкой. " + exceptionMessage;
         }
     }
 
