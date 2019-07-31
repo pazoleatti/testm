@@ -10,12 +10,8 @@
     <tx:jta-transaction-manager/>
 
     <jee:jndi-lookup id="actualDataSource" jndi-name="java:comp/env/jdbc/TaxAccDS"/>
-    <jee:jndi-lookup id="dataSourceSecondary" jndi-name="java:comp/env/jdbc/TaxAccDSSecondary" />
     <bean id="namedParameterJdbcTemplate" class="org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate">
         <constructor-arg index="0" ref="dataSource"/>
-    </bean>
-    <bean id="namedParameterJdbcTemplateSecondary" class="org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate">
-        <constructor-arg index="0" ref="dataSourceSecondary"/>
     </bean>
 
     <bean id="dataSource" primary="true" class="net.ttddyy.dsproxy.support.ProxyDataSource">
