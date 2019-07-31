@@ -6,17 +6,22 @@
 		                  http://www.springframework.org/schema/beans/spring-beans.xsd
 		                  http://www.springframework.org/schema/jee
 		                  http://www.springframework.org/schema/jee/spring-jee.xsd">
+    <beans>
+        <bean id="transactionManager" class="org.springframework.transaction.jta.WebSphereUowTransactionManager">
+            <property name="allowCustomIsolationLevels" value="true"/>
+        </bean>
 
-    <bean id="transactionManager" class="org.springframework.transaction.jta.WebSphereUowTransactionManager">
-        <property name="allowCustomIsolationLevels" value="true"/>
-    </bean>
+        <jee:jndi-lookup id="dataSource" jndi-name="java:comp/env/jdbc/TaxAccDS" />
+        <bean id="namedParameterJdbcTemplate" class="org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate">
+            <constructor-arg index="0" ref="dataSource"/>
+        </bean>
+    </beans>
 
-    <jee:jndi-lookup id="dataSource" jndi-name="java:comp/env/jdbc/TaxAccDS" />
-    <jee:jndi-lookup id="dataSourceSecondary" jndi-name="java:comp/env/jdbc/TaxAccDSSecondary" />
-    <bean id="namedParameterJdbcTemplate" class="org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate">
-        <constructor-arg index="0" ref="dataSource"/>
-    </bean>
-    <bean id="namedParameterJdbcTemplateSecondary" class="org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate">
-        <constructor-arg index="0" ref="dataSourceSecondary"/>
-    </bean>
+    <beans profile="jms">
+        <jee:jndi-lookup id="dataSourceSecondary" jndi-name="java:comp/env/jdbc/TaxAccDSSecondary" />
+        <bean id="namedParameterJdbcTemplateSecondary" class="org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate">
+            <constructor-arg index="0" ref="dataSourceSecondary"/>
+        </bean>
+    </beans>
+
 </beans>
