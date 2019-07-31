@@ -53,8 +53,8 @@
 		</Arg>
 	</New>
 
-	<New id="fundFromNdflSubsystemQueue" class="org.mortbay.jetty.plus.naming.Resource">
-		<Arg>java:comp/env/jms/FundFromNdflSubsystemQueue</Arg>
+	<New id="edoResponseQueue" class="org.mortbay.jetty.plus.naming.Resource">
+		<Arg>java:comp/env/jms/EdoResponseQueue</Arg>
 		<Arg>
 			<New class="org.apache.activemq.command.ActiveMQQueue">
 				<Arg>FROM.NDFL</Arg>
@@ -62,8 +62,8 @@
 		</Arg>
 	</New>
 
-	<New id="fundToNdflSubsystemQueue" class="org.mortbay.jetty.plus.naming.Resource">
-		<Arg>java:comp/env/jms/FundToNdflSubsystemQueue</Arg>
+	<New id="edoRequestQueue" class="org.mortbay.jetty.plus.naming.Resource">
+		<Arg>java:comp/env/jms/EdoRequestQueue</Arg>
 		<Arg>
 			<New class="org.apache.activemq.command.ActiveMQQueue">
 				<Arg>TO.NDFL</Arg>
