@@ -652,7 +652,7 @@ class DeclarationType extends AbstractScriptClass {
     /**
      * Возвращает тип документа для 2 и 6НДФЛ
      */
-    def getDocumentContentTypeFromFileName() {
+    TransportMessageContentType getDocumentContentTypeFromFileName() {
         TransportMessageContentType documentContentType = null
 
         if (isNdfl2ResponseProt(UploadFileName)) {
