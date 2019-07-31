@@ -354,7 +354,7 @@ class DeclarationType extends AbstractScriptClass {
 /**
  * Возвращает имя отчетного файла для 6НДФЛ
  */
-    def getFileName(Map<String, Map<String, List<String>>> contentMap, TransportMessageContentType documentContentType) {
+    String getFileName(Map<String, Map<String, List<String>>> contentMap, TransportMessageContentType documentContentType) {
         if (TransportMessageContentType.RECEIPT_DOCUMENT == documentContentType) {
             Map<String, List<String>> names = contentMap.get(NDFL2_KV_FILE_TAG)
             return names.get(NDFL2_KV_FILE_ATTR).find {String name -> name.startsWith(NDFL6_FILENAME_PREFIX)}
