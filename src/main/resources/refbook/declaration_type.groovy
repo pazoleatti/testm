@@ -66,6 +66,7 @@ class DeclarationType extends AbstractScriptClass {
     NdflPersonService ndflPersonService
     LogBusinessService logBusinessService
     String version
+    Map<String, Object> paramMap
 
     private DeclarationType() {
     }
@@ -131,6 +132,7 @@ class DeclarationType extends AbstractScriptClass {
         if (scriptClass.getBinding().hasVariable("logBusinessService")) {
             this.logBusinessService = (LogBusinessService) scriptClass.getProperty("logBusinessService")
         }
+        this.paramMap = getSafeProperty("paramMap") as Map<String, Object>
     }
 
     @Override
@@ -677,7 +679,6 @@ class DeclarationType extends AbstractScriptClass {
      */
     def importNdflResponse() {
         TransportMessageContentType documentContentType = getDocumentContentTypeFromFileName()
-        String processResultMsg = null
 
         if (documentContentType == null) {
             handleErrorMessage("Не удалось определить тип файла ответа \"$UploadFileName\"")
@@ -748,16 +749,13 @@ class DeclarationType extends AbstractScriptClass {
         // Проверить ОНФ на отсутствие ранее загруженного Файла ответа по условию: "Имя Файла ответа" не найдено в ОНФ."Файлы и комментарии"
         def beforeUploadDeclarationDataList = declarationService.findDeclarationDataByFileNameAndFileType(UploadFileName, null)
         if (!beforeUploadDeclarationDataList.isEmpty()) {
-            processResultMsg = "Файл ответа \"$UploadFileName\" уже загружен"
-            if (!isAutoUpload()) {
-                logger.info(processResultMsg)
-
-                //todo 6 альтерантивынй: вопрос к аналитику, задать 31.07
-                //todo точно не ошибка? А то если ошибка - на до делать return (см. следующее todo)
-                // return
+            String msg = "Файл ответа \"$UploadFileName\" уже загружен"
+            logger.info(msg)
+            logFormAttachResponseEvent(declarationData.id, msg)
+            if (isAutoUpload()) {
+                storeAutoUploadingContext(TransportMessageState.CONFIRMED, documentContentType, msg)
             }
-            //todo
-//            return
+            return
         }
 
         DeclarationTemplate declarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId)
@@ -828,18 +826,11 @@ class DeclarationType extends AbstractScriptClass {
                             )
 
                             if (ndflRefIds.isEmpty()) {
-                                processResultMsg = "В реестре справок формы" +
+                                String msg = "В реестре справок формы" +
                                         "\"${formTypeCode}\" \"${declarationData.kpp}\" \"${declarationData.oktmo}\"" +
                                         "не найдено справки \"${entry.ref}\""
-                                if (isAutoUpload()) {
-                                    storeAutoUploadingContext(TransportMessageState.ERROR, documentContentType, processResultMsg)
-
-                                    //todo 7.a.ii.1.b.ii альтернативный: если это ошибка для автоматического режима, то надо ли продолжать выполнение?
-                                    //return
-                                }
-                                //todo 7.a.ii.1.b.ii альтернативный: где появится это уведомление, если auto ?
-                                //todo точно ли информационное, а не ошибка?
-                                logger.info(processResultMsg)
+                                handleErrorMessage(msg)
+                                return
                             } else {
                                 def ndflRef = ndflRefProvider.getRecordData(ndflRefIds.get(0))
 
@@ -867,18 +858,11 @@ class DeclarationType extends AbstractScriptClass {
                             )
 
                             if (ndflRefIds.isEmpty()) {
-                                processResultMsg = "В реестре справок формы" +
+                                String msg = "В реестре справок формы" +
                                         "\"${formTypeCode}\" \"${declarationData.kpp}\" \"${declarationData.oktmo}\"" +
                                         "не найдено справки \"${entry.ref}\""
-                                if (isAutoUpload()) {
-                                    storeAutoUploadingContext(TransportMessageState.ERROR, documentContentType, processResultMsg)
-
-                                    //todo 7.a.ii.1.b.ii альтернативный: если это ошибка для автоматического режима, то надо ли продолжать выполнение?
-                                    //return
-                                }
-                                //todo 7.a.ii.1.b.ii альтернативный: где появится это уведомление, если auto ?
-                                //todo точно ли информационное, а не ошибка?
-                                logger.info(processResultMsg)
+                                handleErrorMessage(msg)
+                                return
                             } else {
                                 def ndflRef = ndflRefProvider.getRecordData(ndflRefIds.get(0))
 
@@ -897,22 +881,6 @@ class DeclarationType extends AbstractScriptClass {
                             }
                         }
                     }
-                }
-
-                def departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
-                def departmentName = departmentService.get(declarationData.departmentId)
-
-                msgBuilder.append("Выполнена загрузка ответа ФНС для формы: ")
-                        .append("№: \"").append(declarationData.id).append("\"")
-                        .append(", Период: \"").append(departmentReportPeriod.reportPeriod.getTaxPeriod().getYear() + " - " + departmentReportPeriod.reportPeriod.getName()).append("\"")
-                        .append(", Подразделение: \"").append(departmentName.getName()).append("\"")
-                        .append(", Вид: \"").append(declarationTemplate.type.getName()).append("\"")
-
-                if (logger.containsLevel(LogLevel.ERROR)) {
-                    logger.error(msgBuilder.toString())
-                    return
-                } else {
-                    logger.info(msgBuilder.toString())
                 }
             }
         }
@@ -995,13 +963,14 @@ class DeclarationType extends AbstractScriptClass {
             }
         }
 
-        if (processResultMsg != null) {
-            logFormAttachResponseEvent(declarationData.id, processResultMsg)
-            if (isAutoUpload()) {
-                storeAutoUploadingContext(TransportMessageState.CONFIRMED, documentContentType, StringUtils.EMPTY)
-            }
-        } else if (isAutoUpload()) {
-            storeAutoUploadingContext(TransportMessageState.CONFIRMED, documentContentType, processResultMsg)
+        String fullFormDesc = declarationService.getFullDeclarationDescription(declarationData.getId())
+        String msg = "Выполнена загрузка ответа ФНС для формы: $fullFormDesc"
+
+        msgBuilder.append(msg)
+        logger.info(msgBuilder.toString())
+        logFormAttachResponseEvent(declarationData.id, msg)
+        if (isAutoUpload()) {
+            storeAutoUploadingContext(TransportMessageState.CONFIRMED, documentContentType, StringUtils.EMPTY)
         }
 
         declarationService.createPdfReport(logger, declarationData, userInfo)
@@ -1015,9 +984,9 @@ class DeclarationType extends AbstractScriptClass {
 
     private void storeAutoUploadingContext(TransportMessageState messageState, TransportMessageContentType contentType,
                                            String message) {
-        int responseContentCode = contentType.getIntValue()
-        int transportMessageHandleResultCode = messageState.getIntValue()
-        // todo put into autoUploadingContext exchangeParam?
+        paramMap.put("transportMessageHandleResultCode", messageState.getIntValue())
+        paramMap.put("responseContentCode", contentType.getIntValue())
+        paramMap.put("responseMessage", message)
     }
 
     private void logFormAttachResponseEvent(Long declarationId, String message) {
