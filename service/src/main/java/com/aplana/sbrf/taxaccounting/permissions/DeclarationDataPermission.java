@@ -123,6 +123,11 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
 
     public static final SendEdoPermission SEND_EDO = new SendEdoPermission(1 << 15);
 
+    /**
+     * Право на просмотр карточки ФЛ
+     */
+    public static final PersonViewPermission PERSON_VIEW = new PersonViewPermission(1 << 16);
+
     private static final String DATE_FORMAT = "dd.MM.yyyy";
 
     public DeclarationDataPermission(long mask) {
@@ -235,7 +240,9 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
                 // Подразделение формы = (ТБ подразделения пользователя + все дочерние + иерархия подразделений от подразделения, для которого являемся исполнителем, вверх до ТБ и всех дочерних вниз)
                 List<Integer> departments = departmentService.findAllAvailableIds(taUser);
                 if (departments.contains(targetDomainObject.getDepartmentId())) {
-                    return true;
+                    if (declarationType.getId() != DeclarationType.NDFL_2_FL) {
+                        return true;
+                    }
                 }
             }
 
@@ -255,6 +262,13 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
                             return true;
                         }
                     }
+                }
+            }
+
+            // Оператор выдачи 2-НДФЛ клиенту по запросу (НДФЛ)
+            if (PermissionUtils.hasRole(currentUser, TARole.N_ROLE_OPER_2NDFL_FL)) {
+                if (declarationType.getId() == DeclarationType.NDFL_2_FL) {
+                    return true;
                 }
             }
 
@@ -363,7 +377,7 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
             DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.fetchOne(targetDomainObject.getDepartmentReportPeriodId());
             if (targetDomainObject.getState() == State.CREATED) {
                 if (VIEW.isGranted(currentUser, targetDomainObject, logger)) {
-                    if (PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER)) {
+                    if (PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER, TARole.N_ROLE_OPER_2NDFL_FL)) {
                         if (departmentReportPeriod.isActive()) {
                             return true;
                         }
@@ -774,6 +788,21 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
                         StringUtils.join(errMsgs, ", "));
             }
             return false;
+        }
+    }
+
+    /**
+     * Право на просмотр карточки ФЛ
+     */
+    public static final class PersonViewPermission extends DeclarationDataPermission {
+
+        public PersonViewPermission(long mask) {
+            super(mask);
+        }
+
+        @Override
+        protected boolean isGrantedInternal(User currentUser, DeclarationData targetDomainObject, Logger logger) {
+            return PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER);
         }
     }
 }

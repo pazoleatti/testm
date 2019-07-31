@@ -99,7 +99,8 @@
                 IDENTIFY: 1 << 11,
                 CONSOLIDATE: 1 << 12,
                 EDIT: 1 << 13,
-                UPDATE_DOC_STATE: 1 << 14
+                UPDATE_DOC_STATE: 1 << 14,
+                PERSON_VIEW: 1 << 16
             },
             USER_ACTIVITY: {
                 YES: {id: 1, name: 'Да'},

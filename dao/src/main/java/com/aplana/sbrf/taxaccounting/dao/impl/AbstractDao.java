@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.IdentityObject;
 import com.google.common.collect.Iterables;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
@@ -39,11 +40,35 @@ public abstract class AbstractDao {
     @Autowired
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
+    @Autowired(required = false)
+    private NamedParameterJdbcTemplate namedParameterJdbcTemplateSecondary;
+
+    @Autowired
+    private Environment environment;
+
     protected JdbcTemplate getJdbcTemplate() {
         return (JdbcTemplate) namedParameterJdbcTemplate.getJdbcOperations();
     }
 
+    protected JdbcTemplate getJdbcTemplateSecondary() {
+        for (String profile : environment.getActiveProfiles()) {
+            if(profile.equalsIgnoreCase("jms")) {
+                return (JdbcTemplate) namedParameterJdbcTemplateSecondary.getJdbcOperations();
+            }
+        }
+        return (JdbcTemplate) namedParameterJdbcTemplate.getJdbcOperations();
+    }
+
     protected NamedParameterJdbcTemplate getNamedParameterJdbcTemplate() {
+        return namedParameterJdbcTemplate;
+    }
+
+    protected NamedParameterJdbcTemplate getNamedParameterJdbcTemplateSecondary() {
+        for (String profile : environment.getActiveProfiles()) {
+            if(profile.equalsIgnoreCase("jms")) {
+                return namedParameterJdbcTemplateSecondary;
+            }
+        }
         return namedParameterJdbcTemplate;
     }
 
