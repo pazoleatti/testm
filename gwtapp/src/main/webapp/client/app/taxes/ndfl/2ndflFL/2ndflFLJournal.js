@@ -175,11 +175,6 @@
                         return "<a href='index.html#/personRegistry/personCard/" + row.personId + "' target='_blank'>" + value + "</a>";
                     }
                     return value;
-
-                    if (PermissionChecker.check($scope.$parent.user, APP_CONSTANTS.DECLARATION_PERMISSION.PERSON_VIEW)) {
-                        return "<a href='index.html#/personRegistry/personCard/" + row.personId + "'>" + value + "</a>";
-                    }
-                    return value;
                 }
 
                 /**
