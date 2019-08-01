@@ -854,7 +854,7 @@ class Check extends AbstractScriptClass {
                         calculatedTaxEvaluated = calculatedTaxEvaluated.setScale(0, BigDecimal.ROUND_HALF_UP)
                     }
 
-                    if (calculatedTax.subtract(calculatedTaxEvaluated).subtract(prepayment).abs() >= (new BigDecimal("1"))) {
+                    if (calculatedTax.subtract(calculatedTaxEvaluated).abs() >= (new BigDecimal("1"))) {
                         createErrorMessage(logger, documentNode, "«Сумма налога исчисленная» рассчитана некорректно", "В \"Разделе 2 . \"Общие суммы дохода и налога по итогам налогового периода\" для «Ставки» ${taxRateAttribute.getValue()}% не корректно указана «Сумма налога исчисленная» : ${calculatedTax} корректное значение «Сумма налога исчисленная» равно ${calculatedTaxEvaluated}")
                     }
                 }
