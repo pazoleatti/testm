@@ -51,6 +51,7 @@ class Report2NdflFL extends AbstractScriptClass {
     Department department
     Create2NdflFLParams createParams
     Map<Long, File> result = [:]
+    Date currentDate = new Date()
 
     @TypeChecked(TypeCheckingMode.SKIP)
     Report2NdflFL(scriptClass) {
@@ -123,7 +124,7 @@ class Report2NdflFL extends AbstractScriptClass {
         if (createParams.declaration2Ndfl1Ids && !declarationDataFiles) {
             logger.error("Не выполнена операция: \"Создание отчетной формы 2-НДФЛ(ФЛ) Сотрудник: $person.fullName, " +
                     "Отчетный период: $reportPeriod.taxPeriod.year $reportPeriod.name. Причина: " +
-                    "Ни один xml файл из файлов привязанных к налоговым формам не соответствует требованиям.");
+                    "Ни к одной налоговой не привязан XML файл, или они не соответствует требованиям.")
         }
     }
 
@@ -132,14 +133,14 @@ class Report2NdflFL extends AbstractScriptClass {
         if (declarationDataFiles.size() == 1) {
             return declarationDataFiles.get(0);
         } else {
-            throw new ServiceException("XML файл, привязанный к налоговой форме ${declarationDescription(declaration2Ndfl1)} не соответствует требованиям.")
+            throw new ServiceException("К налоговой форме ${declarationDescription(declaration2Ndfl1)} не привязан XML файл, или он не соответствует требованиям.")
         }
     }
 
     void validateXml(DeclarationData declaration2Ndfl1, File xmlFile, String fileName) {
         def logger = new Logger()
         if (!validateXMLService.validate(declaration2Ndfl1, logger, xmlFile, fileName, null)) {
-            throw new ServiceException("XML файл, привязанный к налоговой форме ${declarationDescription(declaration2Ndfl1)} не соответствует требованиям.")
+            throw new ServiceException("К налоговой форме ${declarationDescription(declaration2Ndfl1)} не привязан XML файл, или он не соответствует требованиям.")
         }
     }
 
@@ -316,7 +317,6 @@ class Report2NdflFL extends AbstractScriptClass {
                         deductionData.month = СведСумДох.@Месяц
                         deductionData.incomeCode = СведСумДох.@КодДоход
                         deductionData.incomeSum = СведСумДох.@СумДоход
-                        deductionData.taxRate = СведДох.@Ставка
                         deductionData.deductionCode = СвСумВыч.@КодВычет
                         deductionData.deductionSum = СвСумВыч.@СумВычет
                         СведСумДохDataList << deductionData
@@ -464,28 +464,28 @@ class Report2NdflFL extends AbstractScriptClass {
         @Override
         void accept(PageVisitor pageVisitor) {
             processField((PDTextField) pageVisitor.acroForm.getField("year"), pageVisitor.xmlRoot.Документ[0].@ОтчетГод, "", createStyle(9.5f, true))
-            processField((PDTextField) pageVisitor.acroForm.getField("dateDay"), pageVisitor.xmlRoot.Документ[0].@ДатаДок.substring(0, 2), "", createStyle(9.5f, true))
-            processField((PDTextField) pageVisitor.acroForm.getField("dateMonth"), pageVisitor.xmlRoot.Документ[0].@ДатаДок.substring(3, 5), "", createStyle(9.5f, true))
-            processField((PDTextField) pageVisitor.acroForm.getField("dateYear"), pageVisitor.xmlRoot.Документ[0].@ДатаДок.substring(6), "", createStyle(9.5f, true))
-            processField((PDTextField) pageVisitor.acroForm.getField("oktmo"), pageVisitor.xmlRoot.Документ[0].СвНА[0].@ОКТМО, "", createStyle(8.5f, false))
-            processField((PDTextField) pageVisitor.acroForm.getField("phone"), pageVisitor.xmlRoot.Документ[0].СвНА[0].@Тлф, "", createStyle(8.5f, false))
-            processField((PDTextField) pageVisitor.acroForm.getField("inn"), pageVisitor.xmlRoot.Документ[0].СвНА[0].СвНАЮЛ[0].@ИННЮЛ, "", createStyle(8.5f, false))
-            processField((PDTextField) pageVisitor.acroForm.getField("kpp"), pageVisitor.xmlRoot.Документ[0].СвНА[0].СвНАЮЛ[0].@КПП, "", createStyle(8.5f, false))
-            processField((PDTextField) pageVisitor.acroForm.getField("orgName"), pageVisitor.xmlRoot.Документ[0].СвНА[0].СвНАЮЛ[0].@НаимОрг, "", createStyle(8.5f, false))
-            processField((PDTextField) pageVisitor.acroForm.getField("reorgCode"), pageVisitor.xmlRoot.Документ[0].СвНА[0].СвНАЮЛ[0].СвРеоргЮЛ[0]?.@ФормРеорг, "-", createStyle(8.5f, false))
-            processField((PDTextField) pageVisitor.acroForm.getField("innReorg"), pageVisitor.xmlRoot.Документ[0].СвНА[0].СвНАЮЛ[0].СвРеоргЮЛ[0]?.@ИННЮЛ, "-", createStyle(8.5f, false))
-            processField((PDTextField) pageVisitor.acroForm.getField("kppReorg"), pageVisitor.xmlRoot.Документ[0].СвНА[0].СвНАЮЛ[0].СвРеоргЮЛ[0]?.@КПП, "-", createStyle(8.5f, false))
-            processField((PDTextField) pageVisitor.acroForm.getField("innFl"), pageVisitor.reference.ПолучДох[0].@ИННФЛ, "", createStyle(8.5f, false))
-            processField((PDTextField) pageVisitor.acroForm.getField("lastName"), pageVisitor.reference.ПолучДох[0].ФИО[0].@Фамилия, "", createStyle(8.5f, false))
-            processField((PDTextField) pageVisitor.acroForm.getField("firstName"), pageVisitor.reference.ПолучДох[0].ФИО[0].@Имя, "", createStyle(8.5f, false))
-            processField((PDTextField) pageVisitor.acroForm.getField("middleName"), pageVisitor.reference.ПолучДох[0].ФИО[0].@Отчество, "", createStyle(8.5f, false))
-            processField((PDTextField) pageVisitor.acroForm.getField("taxpayerState"), pageVisitor.reference.ПолучДох[0].@Статус, "", createStyle(8.5f, false))
+            processField((PDTextField) pageVisitor.acroForm.getField("dateDay"), currentDate.format("dd"), "", createStyle(9.5f, true))
+            processField((PDTextField) pageVisitor.acroForm.getField("dateMonth"), currentDate.format("MM"), "", createStyle(9.5f, true))
+            processField((PDTextField) pageVisitor.acroForm.getField("dateYear"), currentDate.format("yyyy"), "", createStyle(9.5f, true))
+            processField((PDTextField) pageVisitor.acroForm.getField("oktmo"), pageVisitor.xmlRoot.Документ[0].СвНА[0].@ОКТМО?.toUpperCase(), "", createStyle(8.5f, false))
+            processField((PDTextField) pageVisitor.acroForm.getField("phone"), pageVisitor.xmlRoot.Документ[0].СвНА[0].@Тлф?.toUpperCase(), "", createStyle(8.5f, false))
+            processField((PDTextField) pageVisitor.acroForm.getField("inn"), pageVisitor.xmlRoot.Документ[0].СвНА[0].СвНАЮЛ[0].@ИННЮЛ?.toUpperCase(), "", createStyle(8.5f, false))
+            processField((PDTextField) pageVisitor.acroForm.getField("kpp"), pageVisitor.xmlRoot.Документ[0].СвНА[0].СвНАЮЛ[0].@КПП?.toUpperCase(), "", createStyle(8.5f, false))
+            processField((PDTextField) pageVisitor.acroForm.getField("orgName"), pageVisitor.xmlRoot.Документ[0].СвНА[0].СвНАЮЛ[0].@НаимОрг?.toUpperCase(), "", createStyle(8.5f, false))
+            processField((PDTextField) pageVisitor.acroForm.getField("reorgCode"), pageVisitor.xmlRoot.Документ[0].СвНА[0].СвНАЮЛ[0].СвРеоргЮЛ[0]?.@ФормРеорг?.toUpperCase(), "-", createStyle(8.5f, false))
+            processField((PDTextField) pageVisitor.acroForm.getField("innReorg"), pageVisitor.xmlRoot.Документ[0].СвНА[0].СвНАЮЛ[0].СвРеоргЮЛ[0]?.@ИННЮЛ?.toUpperCase(), "-", createStyle(8.5f, false))
+            processField((PDTextField) pageVisitor.acroForm.getField("kppReorg"), pageVisitor.xmlRoot.Документ[0].СвНА[0].СвНАЮЛ[0].СвРеоргЮЛ[0]?.@КПП?.toUpperCase(), "-", createStyle(8.5f, false))
+            processField((PDTextField) pageVisitor.acroForm.getField("innFl"), pageVisitor.reference.ПолучДох[0].@ИННФЛ?.toUpperCase(), "", createStyle(8.5f, false))
+            processField((PDTextField) pageVisitor.acroForm.getField("lastName"), pageVisitor.reference.ПолучДох[0].ФИО[0].@Фамилия?.toUpperCase(), "", createStyle(8.5f, false))
+            processField((PDTextField) pageVisitor.acroForm.getField("firstName"), pageVisitor.reference.ПолучДох[0].ФИО[0].@Имя?.toUpperCase(), "", createStyle(8.5f, false))
+            processField((PDTextField) pageVisitor.acroForm.getField("middleName"), pageVisitor.reference.ПолучДох[0].ФИО[0].@Отчество?.toUpperCase(), "", createStyle(8.5f, false))
+            processField((PDTextField) pageVisitor.acroForm.getField("taxpayerState"), pageVisitor.reference.ПолучДох[0].@Статус?.toUpperCase(), "", createStyle(8.5f, false))
             processField((PDTextField) pageVisitor.acroForm.getField("birthDay"), pageVisitor.reference.ПолучДох[0].@ДатаРожд.substring(0, 2), "", createStyle(8.5f, false))
             processField((PDTextField) pageVisitor.acroForm.getField("birthMonth"), pageVisitor.reference.ПолучДох[0].@ДатаРожд.substring(3, 5), "", createStyle(8.5f, false))
             processField((PDTextField) pageVisitor.acroForm.getField("birthYear"), pageVisitor.reference.ПолучДох[0].@ДатаРожд.substring(6), "", createStyle(8.5f, false))
-            processField((PDTextField) pageVisitor.acroForm.getField("citizenship"), pageVisitor.reference.ПолучДох[0].@Гражд, "", createStyle(8.5f, false))
-            processField((PDTextField) pageVisitor.acroForm.getField("idDocCode"), pageVisitor.reference.ПолучДох[0].УдЛичнФЛ[0].@КодУдЛичн, "", createStyle(8.5f, false))
-            processField((PDTextField) pageVisitor.acroForm.getField("idDocNumber"), pageVisitor.reference.ПолучДох[0].УдЛичнФЛ[0].@СерНомДок, "", createStyle(8.5f, false))
+            processField((PDTextField) pageVisitor.acroForm.getField("citizenship"), pageVisitor.reference.ПолучДох[0].@Гражд?.toUpperCase(), "", createStyle(8.5f, false))
+            processField((PDTextField) pageVisitor.acroForm.getField("idDocCode"), pageVisitor.reference.ПолучДох[0].УдЛичнФЛ[0].@КодУдЛичн?.toUpperCase(), "", createStyle(8.5f, false))
+            processField((PDTextField) pageVisitor.acroForm.getField("idDocNumber"), pageVisitor.reference.ПолучДох[0].УдЛичнФЛ[0].@СерНомДок?.toUpperCase(), "", createStyle(8.5f, false))
         }
     }
 
@@ -528,7 +528,7 @@ class Report2NdflFL extends AbstractScriptClass {
             processField((PDTextField) pageVisitor.acroForm.getField("overholdingTax"), pageVisitor.СведДох ? pageVisitor.СведДох?.СумИтНалПер[0]?.@НалУдержЛиш : null, "0", createStyle(8.5f, false))
             processField((PDTextField) pageVisitor.acroForm.getField("notHoldingTax"), pageVisitor.СведДох ? pageVisitor.СведДох?.СумИтНалПер[0]?.@НалНеУдерж : null, "0", createStyle(8.5f, false))
 
-            processField((PDTextField) pageVisitor.acroForm.getField("signatory"), createParams.signatory, "", createStyle(8.5f, false))
+            processField((PDTextField) pageVisitor.acroForm.getField("signatory"), createParams.signatory?.toUpperCase(), "", createStyle(8.5f, false))
         }
     }
 
