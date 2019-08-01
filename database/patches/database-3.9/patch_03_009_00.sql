@@ -28,10 +28,10 @@ end;
 /
  
 begin 
-	select count(1) into :v_cnt from version_history where status='OK' and version='03.008.00';
+	select count(1) into :v_cnt from version_history where status='OK' and version='03.008.01';
 	if :v_cnt = 0 then
-		dbms_output.put_line('Error: 03.008.00 not installed. Check log-files.');
-		raise_application_error(-20999,'Error: 03.008.00 not installed. Check log-files.');
+		dbms_output.put_line('Error: 03.008.01 not installed. Check log-files.');
+		raise_application_error(-20999,'Error: 03.008.01 not installed. Check log-files.');
 	end if;
 
   	select count(1) into :v_cnt from version_history where status='OK' and version='03.009.00';
