@@ -33,7 +33,7 @@ public enum ConfigurationParam {
     TAX_MESSAGE_RECEIPT_WAITING_TIME("Период ожидания технологической квитанции из ФП \"Фонды\", сек", ConfigurationParamGroup.COMMON, true, null, 0),
     TAX_MESSAGE_RETRY_COUNT("Максимальное число повторных отправок сообщений в ФП \"Фонды\" при неполучении технологической квитанции", ConfigurationParamGroup.COMMON, true, null, 0),
     NDFL_SUBSYSTEM_ID("Обозначение системы НДФЛ для внешнего взаимодействия", ConfigurationParamGroup.COMMON, true, null, 0),
-    TARGET_SUBSYSTEM_ID("Система для отправки ОНФ в ФНС", ConfigurationParamGroup.COMMON, true, null, 0),
+    EDO_SUBSYSTEM_ID("Система для отправки ОНФ в ФНС", ConfigurationParamGroup.COMMON, true, null, 0),
     DOCUMENTS_SENDING_ENABLED("Отправлять документы в ФП \"Фонды\" (1 - Отправлять, 0 - Не отправлять)", ConfigurationParamGroup.COMMON, true, null, 0),
     DOCUMENTS_RECEPTION_ENABLED("Получать документы из ФП \"Фонды\" (1 - Получать, 0 - Не получать)", ConfigurationParamGroup.COMMON, true, null, 0),
 

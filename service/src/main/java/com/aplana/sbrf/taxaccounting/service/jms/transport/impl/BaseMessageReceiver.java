@@ -1,8 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.jms.transport.impl;
 
-import com.aplana.sbrf.taxaccounting.model.jms.TaxMessageReceipt;
-import com.aplana.sbrf.taxaccounting.service.TransactionHelper;
-import com.aplana.sbrf.taxaccounting.service.TransactionLogic;
+import com.aplana.sbrf.taxaccounting.service.EdoMessageService;
 import com.aplana.sbrf.taxaccounting.service.jms.JmsBaseConfig;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -12,11 +10,6 @@ import org.springframework.jms.annotation.JmsListener;
 import org.springframework.jms.config.JmsListenerEndpointRegistry;
 import org.springframework.messaging.Message;
 import org.springframework.stereotype.Component;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-import java.io.StringReader;
 
 /**
  * Получатель сообщений.
@@ -31,29 +24,14 @@ public class BaseMessageReceiver {
     private JmsListenerEndpointRegistry jmsListenerEndpointRegistry;
 
     @Autowired
-    private TransactionHelper transactionHelper;
+    private EdoMessageService edoMessageService;
 
     @JmsListener(destination = JmsBaseConfig.TO_NDFL_QUEUE, id="messageReceiver", containerFactory = "jmsListenerContainerFactory")
     public void handleMessage(Message<String> message) {
         final String messageContent = message.getPayload();
-        transactionHelper.executeInNewTransaction(new TransactionLogic<Object>() {
-            @Override
-            public Object execute() {
-                try {
-                    JAXBContext jaxbContext = JAXBContext.newInstance(TaxMessageReceipt.class);
-                    Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-
-                    StringReader messageReader = new StringReader(messageContent);
-                    TaxMessageReceipt taxMessageReceipt = (TaxMessageReceipt) jaxbUnmarshaller.unmarshal(messageReader);
-                } catch (JAXBException e) {
-                    LOG.warn("Ошибка парсинга XML сообщения: " + messageContent, e);
-                }
-                return null;
-            }
-        });
-
         System.out.println("Raw message: " + messageContent);
         System.out.println("Headers: " + message.getHeaders());
+        edoMessageService.accept(messageContent);
     }
 
     public void switchJmsListener() {

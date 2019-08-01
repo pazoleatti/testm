@@ -619,7 +619,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
             }
         }
         // Проверка параметра, который должен быть id в справочнике "Подсистемы АС УН"
-        if (configParam.equals(ConfigurationParam.NDFL_SUBSYSTEM_ID) || configParam.equals(ConfigurationParam.TARGET_SUBSYSTEM_ID)) {
+        if (configParam.equals(ConfigurationParam.NDFL_SUBSYSTEM_ID) || configParam.equals(ConfigurationParam.EDO_SUBSYSTEM_ID)) {
             if (!checkSubsystemIdString(param.getValue())) {
                 logger.error(SUBSYSTEM_PARAM_ERROR, param.getValue());
             }

@@ -2,18 +2,8 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.TransportMessageDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
-import com.aplana.sbrf.taxaccounting.model.BlobData;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.Subsystem;
-import com.aplana.sbrf.taxaccounting.model.TARole;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
-import com.aplana.sbrf.taxaccounting.model.messaging.DeclarationShortInfo;
-import com.aplana.sbrf.taxaccounting.model.messaging.TransportMessage;
-import com.aplana.sbrf.taxaccounting.model.messaging.TransportMessageContentType;
-import com.aplana.sbrf.taxaccounting.model.messaging.TransportMessageFilter;
-import com.aplana.sbrf.taxaccounting.model.messaging.TransportMessageState;
-import com.aplana.sbrf.taxaccounting.model.messaging.TransportMessageType;
+import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.messaging.*;
 import com.google.common.base.Joiner;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -186,6 +176,11 @@ public class TransportMessageDaoImpl extends AbstractDao implements TransportMes
                         ":content_type, :state, :body, :blob_id, :source_file_name, :initiator_user_id, :explanation, :declaration_id)",
                 params, keyHolder, new String[]{"ID"});
         transportMessage.setId(keyHolder.getKey().longValue());
+    }
+
+    @Override
+    public void update(TransportMessage transportMessage) {
+        throw new IllegalStateException("Not implemented yet");
     }
 
 
