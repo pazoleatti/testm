@@ -70,5 +70,20 @@
         </sql>
     </changeSet>
 
+    <changeSet id="3.9-skononova-5" author="skononova">
+        <sql>
+		create or replace view vw_ref_book_attach_file_type as 
+		select id, code, name from ref_book_attach_file_type;
+
+		grant select on vw_ref_book_attach_file_type to TAXREC_UNSTABLE ;
+		grant references on ref_book_attach_file_type to TAXREC_UNSTABLE ;
+
+		comment on table vw_ref_book_attach_file_type is 'Категории прикрепленных файлов';
+		comment on column vw_ref_book_attach_file_type.id is 'Идентификатор';
+		comment on column vw_ref_book_attach_file_type.code is 'Код';
+		comment on column vw_ref_book_attach_file_type.name is 'Наименование';
+        </sql>
+    </changeSet>
+
 
 </databaseChangeLog>

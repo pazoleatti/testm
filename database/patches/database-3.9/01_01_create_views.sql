@@ -19,3 +19,22 @@ comment on column vw_declaration_data_file.note is 'Комментарий к ф
 comment on column vw_declaration_data_file.file_type_id is 'Категория файла';
 
 /
+
+--3.9-skononova-5
+begin
+	dbms_output.put_line ('Create vw_ref_book_attach_file_type');
+end;
+/
+create or replace view vw_ref_book_attach_file_type as 
+select id, code, name from ref_book_attach_file_type;
+
+grant select on vw_ref_book_attach_file_type to &2 ;
+grant references on ref_book_attach_file_type to &2 ;
+
+comment on table vw_ref_book_attach_file_type is 'Категории прикрепленных файлов';
+comment on column vw_ref_book_attach_file_type.id is 'Идентификатор';
+comment on column vw_ref_book_attach_file_type.code is 'Код';
+comment on column vw_ref_book_attach_file_type.name is 'Наименование';
+
+/
+
