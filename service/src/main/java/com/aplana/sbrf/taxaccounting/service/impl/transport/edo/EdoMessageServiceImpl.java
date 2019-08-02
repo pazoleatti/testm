@@ -97,8 +97,8 @@ public class EdoMessageServiceImpl implements EdoMessageService {
                 return storeIncomingMessage(xmlMessage);
             }
         });
-        validateMessage(xmlMessage);
-        acceptMessage(xmlMessage, transportMessage);
+        validateIncomeMessage(xmlMessage);
+        handleIncomeMessage(xmlMessage, transportMessage);
     }
 
     private TransportMessage storeIncomingMessage(String message) {
@@ -117,59 +117,24 @@ public class EdoMessageServiceImpl implements EdoMessageService {
         return transportMessage;
     }
 
-    private void validateMessage(String message) {
+    private void validateIncomeMessage(String message) {
         //todo implement me! (cм. Unmarshaller#setSchema)
     }
 
-    private void acceptMessage(String xmlMessage, TransportMessage transportMessage) {
+    private void handleIncomeMessage(String xmlMessage, TransportMessage transportMessage) {
         BaseMessage taxMessage = getTaxMessage(xmlMessage);
-        enrichTransportBaseMessage(transportMessage, taxMessage);
+        try {
+            enrichTransportBaseMessage(transportMessage, taxMessage);
+            validateSenderAndRecipient(xmlMessage, taxMessage);
 
-        if (!ndflSubsystemIsRecipient(taxMessage)) {
-            throw new IllegalStateException("НДФЛ не является получателем транспортного сообщения: " + xmlMessage);
-        }
-
-        if (!senderIsEdo(taxMessage)) {
-            throw new IllegalStateException("Отправителем транспортного сообщения не является ЭДО, сообщение: " + xmlMessage);
-        }
-
-        if (isMessageFromFns(taxMessage)) {
-            throw new IllegalStateException("Получение ответов из ФНС еще не реализовано");
-        } else if (isEdoTechReceipt(taxMessage)) {
-            TransportMessage sourceTransportMessage;
-            try {
-                transportMessage.setContentType(TransportMessageContentType.TECH_RECEIPT);
-
-                sourceTransportMessage = getSourceTransportMessage(taxMessage);
-                if (sourceTransportMessage == null) {
-                    transportMessage.setState(TransportMessageState.ERROR);
-                    transportMessage.setExplanation(new Date() + " Для данной технологической квитанции не найдено" +
-                            "исходное сообщение");
-                    throw new IllegalStateException("Не найдено исходное транспортное сообщение для" +
-                            "технологической кватинации #" + taxMessage.getUuid());
-                }
-            } finally {
-                transportMessageService.save(transportMessage);
+            if (isMessageFromFns(taxMessage)) {
+                throw new IllegalStateException("Получение ответов из ФНС еще не реализовано");
+            } else if (isEdoTechReceipt(taxMessage)) {
+                TaxMessageReceipt taxMessageReceipt = (TaxMessageReceipt) taxMessage;
+                handleEdoTechReceipt(transportMessage, taxMessageReceipt);
             }
-
-            TaxMessageReceipt taxMessageReceipt = (TaxMessageReceipt) taxMessage;
-            TransportMessageState incomeTransportMessageState =
-                    TransportMessageState.fromInt(taxMessageReceipt.getStatus().getCode());
-            if (TransportMessageState.CONFIRMED == incomeTransportMessageState) {
-                sourceTransportMessage.setState(TransportMessageState.CONFIRMED);
-            } else if (TransportMessageState.ERROR == incomeTransportMessageState) {
-                sourceTransportMessage.setState(TransportMessageState.ERROR);
-
-                String sourceTransportMessageExplanation = sourceTransportMessage.getExplanation();
-                String taxMessageErrorDetail = new Date() + " " + taxMessageReceipt.getStatus().getDetail();
-                if (StringUtils.isEmpty(sourceTransportMessageExplanation)) {
-                    sourceTransportMessage.setExplanation(taxMessageErrorDetail);
-                } else {
-                    sourceTransportMessage.setExplanation(sourceTransportMessageExplanation + "\n-----------------\n" +
-                            taxMessageErrorDetail);
-                }
-            }
-            transportMessageService.save(sourceTransportMessage);
+        } finally {
+            transportMessageService.save(transportMessage);
         }
     }
 
@@ -202,12 +167,21 @@ public class EdoMessageServiceImpl implements EdoMessageService {
     private void enrichTransportBaseMessage(TransportMessage transportMessage, BaseMessage taxMessageReceipt) {
         transportMessage.setMessageUuid(taxMessageReceipt.getUuid());
         transportMessage.setSenderSubsystem(new Subsystem(taxMessageReceipt.getSource()));
-        // todo save? Или в конце сценария?
     }
+
+    private void validateSenderAndRecipient(String xmlMessage, BaseMessage taxMessage) {
+        if (!ndflSubsystemIsRecipient(taxMessage)) {
+            throw new IllegalStateException("НДФЛ не является получателем транспортного сообщения: " + xmlMessage);
+        }
+
+        if (!senderIsEdo(taxMessage)) {
+            throw new IllegalStateException("Отправителем транспортного сообщения не является ЭДО, сообщение: " + xmlMessage);
+        }
+    }
+
     private boolean ndflSubsystemIsRecipient(BaseMessage taxMessageReceipt) {
         return taxMessageReceipt.getDestination() == getConfigIntValue(ConfigurationParam.NDFL_SUBSYSTEM_ID);
     }
-
     private boolean senderIsEdo(BaseMessage taxMessageReceipt) {
         return taxMessageReceipt.getSource() == getConfigIntValue(ConfigurationParam.EDO_SUBSYSTEM_ID);
     }
@@ -218,6 +192,69 @@ public class EdoMessageServiceImpl implements EdoMessageService {
 
     private boolean isEdoTechReceipt(BaseMessage taxMessage) {
         return taxMessage instanceof TaxMessageReceipt;
+    }
+
+    private void handleEdoTechReceipt(TransportMessage transportMessage, TaxMessageReceipt taxMessageReceipt) {
+        transportMessage.setContentType(TransportMessageContentType.TECH_RECEIPT);
+
+        TransportMessage sourceTransportMessage = getSourceTransportMessage(taxMessageReceipt);
+        if (sourceTransportMessage == null) {
+            transportMessage.setState(TransportMessageState.ERROR);
+            transportMessage.setExplanation(new Date() + " Для данной технологической квитанции не найдено" +
+                    "исходное сообщение");
+            throw new IllegalStateException("Не найдено исходное транспортное сообщение для" +
+                    "технологической кватинации #" + taxMessageReceipt.getUuid());
+        }
+
+        updateSourceTransportMessageState(taxMessageReceipt, sourceTransportMessage);
+        updateDeclarationState(taxMessageReceipt, sourceTransportMessage.getDeclaration());
+    }
+
+    private void updateSourceTransportMessageState(TaxMessageReceipt taxMessageReceipt, TransportMessage transportMessage) {
+        TransportMessageState messageState = TransportMessageState.fromInt(taxMessageReceipt.getStatus().getCode());
+        if (TransportMessageState.CONFIRMED == messageState) {
+            transportMessage.setState(TransportMessageState.CONFIRMED);
+        } else if (TransportMessageState.ERROR == messageState) {
+            transportMessage.setState(TransportMessageState.ERROR);
+
+            String sourceTransportMessageExplanation = transportMessage.getExplanation();
+            String taxMessageErrorDetail = new Date() + " " + taxMessageReceipt.getStatus().getDetail();
+            if (StringUtils.isEmpty(sourceTransportMessageExplanation)) {
+                transportMessage.setExplanation(taxMessageErrorDetail);
+            } else {
+                transportMessage.setExplanation(sourceTransportMessageExplanation + "\n-----------------\n" +
+                        taxMessageErrorDetail);
+            }
+        }
+        transportMessageService.save(transportMessage);
+    }
+
+    private void updateDeclarationState(TaxMessageReceipt taxMessageReceipt, DeclarationShortInfo declarationShortInfo) {
+        DeclarationData declarationData = declarationDataService.get(declarationShortInfo.getId());
+
+        TransportMessageState incomeTransportMessageState =
+                TransportMessageState.fromInt(taxMessageReceipt.getStatus().getCode());
+        boolean declarationStateChanged = false;
+        List<Long> confirmedDocStates = Arrays.asList(SENDING_TO_EDO.getId(), NOT_SENT.getId(), EXPORTED.getId());
+        List<Long> errorDocStates = Arrays.asList(SENDING_TO_EDO.getId(), EXPORTED.getId());
+        if (TransportMessageState.CONFIRMED == incomeTransportMessageState
+                && confirmedDocStates.contains(declarationData.getDocStateId())) {
+            LOG.info("Статус декларации #" + declarationData.getId() + " изменен с #" + declarationData.getId() +
+                    " на " + SENT_TO_EDO.getId());
+            declarationData.setDocStateId(SENT_TO_EDO.getId());
+            declarationStateChanged = true;
+        } else if (TransportMessageState.ERROR == incomeTransportMessageState
+                && errorDocStates.contains(declarationData.getDocStateId())) {
+            LOG.info("Статус декларации #" + declarationData.getId() + " изменен с #" + declarationData.getId() +
+                    " на " + NOT_SENT.getId());
+            declarationData.setDocStateId(NOT_SENT.getId());
+            declarationStateChanged = true;
+        }
+
+        if (declarationStateChanged) {
+            //todo loggerID ?
+//            logBusinessService.logFormEvent(declarationData.getId(), FormDataEvent.CHANGE_STATUS_ED, );
+        }
     }
 
     private int getConfigIntValue(ConfigurationParam param) {
