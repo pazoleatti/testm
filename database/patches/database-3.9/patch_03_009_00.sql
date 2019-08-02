@@ -45,6 +45,9 @@ end;
 
 PROMPT ## Beginning Installing Patch
 
+PROMPT ## 01_ddl_tables_views_synonyms
+@database-3.9/01_ddl_tables_views_synonyms.sql &3 &6
+
 PROMPT ## 02_templates
 @database-3.9/02_templates.sql "_log/3.9_03_templates.txt" "&4" "&5" "../_log" "../_bad"
 
