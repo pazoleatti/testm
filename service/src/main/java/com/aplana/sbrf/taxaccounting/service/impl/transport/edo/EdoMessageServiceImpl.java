@@ -261,7 +261,7 @@ public class EdoMessageServiceImpl implements EdoMessageService {
                         copyToDocumentExchangeDirectory(tmpXmlFile, declarationXmlFile.getFileName());
                         TaxMessageDocument message = buildEdoMessage(declarationXmlFile.getFileName(), userInfo);
                         sendToEdo(message);
-                        declarationDataService.updateDocState(declarationData.getId(), SENT_EDO.getId());
+                        declarationDataService.updateDocState(declarationData.getId(), SENDING_TO_EDO.getId());
                         logSuccessToLogger();
                     }
                 }

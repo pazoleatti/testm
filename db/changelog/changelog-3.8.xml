@@ -299,6 +299,38 @@
 			<column name="script" valueClobFile="templates-3.8/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl_check.groovy"/>
 			<where>DECLARATION_TEMPLATE_ID = 101 and EVENT_ID = 5</where>
 		</update>
-	</changeSet>
+    </changeSet>
+
+    <changeSet id="3.7-ytrofimov-7" author="ytrofimov">
+		<update tableName="DECLARATION_TEMPLATE">
+			<column name="CREATE_SCRIPT" valueClobFile="templates-3.8/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl.groovy"/>
+			<where>declaration_type_id = 101</where>
+		</update>
+    </changeSet>
+
+	<!--https://jira.aplana.com/browse/SBRFNDFL-8053 Предоставить права пользователю НВ для доступа к декларациям 6-НДФЛ-->
+
+    <changeSet id="3.8-skononova-8" author="skononova">
+		<sql>
+			create or replace view vw_log_business as
+			select id, log_date, event_id, user_login, roles,declaration_data_id, note, user_department_name, person_id,
+			log_id from log_business;
+			grant select on vw_log_business to TAXREC_UNSTABLE;
+
+			comment on column vw_log_business.id is 'Идентификатор';
+			comment on column vw_log_business.log_date is 'Дата события';
+			comment on column vw_log_business.event_id is 'Идентификатор события';
+			comment on column vw_log_business.user_login is 'Логин пользователя';
+			comment on column vw_log_business.roles is 'Список ролей пользователя';
+			comment on column vw_log_business.declaration_data_id is 'Идентификатор формы';
+			comment on column vw_log_business.note is 'Текст сообщения';
+			comment on column vw_log_business.user_department_name is 'Подразделение пользователя';
+			comment on column vw_log_business.person_id is 'Идентификатор ФЛ';
+			comment on column vw_log_business.log_id is 'Ссылка на уведомления';
+
+			comment on table vw_log_business is 'Журнал событий налоговых форм';
+		</sql>
+
+    </changeSet>
 
 </databaseChangeLog>

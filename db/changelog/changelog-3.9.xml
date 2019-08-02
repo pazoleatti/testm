@@ -25,4 +25,10 @@
         </update>
     </changeSet>
 
+    <changeSet id="3.9-adudenko-2" author="adudenko">
+        <sql>
+            insert into ref_book_doc_state(id, name) values(9, 'Отправлено в ЭДО');
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>

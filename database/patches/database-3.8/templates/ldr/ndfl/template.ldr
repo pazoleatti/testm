@@ -22,3 +22,4 @@ begindata
  105|105|01.01.2016|0|8|6|||database-3.8/templates/data/ndfl/report_2ndfl_fl/v2016/report_2ndfl_fl.groovy|2 НДФЛ (ФЛ)|
  102|102|01.01.2016|0|7|3|f6b8a069-97d5-4c3f-80fc-1fbb2e44fd71|790782e0-2282-41f4-8735-7b50904703ac|database-3.8/templates/data/ndfl/report_2ndfl_1/v2016/report_2ndfl.groovy|2-НДФЛ (1)|
  104|104|01.01.2016|0|7|4|f076d3e3-9374-4184-b376-5b13c04b01bb|7b2630a5-b0de-433a-9370-133427917d18|database-3.8/templates/data/ndfl/report_2ndfl_1/v2016/report_2ndfl.groovy|2-НДФЛ (2)|
+ 101|101|01.01.2016|0|2|2|||database-3.8/templates/data/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl.groovy|РНУ_НДФЛ (консолидированная)|
