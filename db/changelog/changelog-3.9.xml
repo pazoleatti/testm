@@ -31,4 +31,10 @@
         </sql>
     </changeSet>
 
+    <changeSet id="3.9-skononova-1" author="skononova">
+        <sql>
+            update ref_book_doc_state set name='Отправлен в ЭДО' where id=9;
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>
