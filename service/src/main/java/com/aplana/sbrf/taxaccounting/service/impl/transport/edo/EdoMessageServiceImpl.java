@@ -234,26 +234,29 @@ public class EdoMessageServiceImpl implements EdoMessageService {
 
         TransportMessageState incomeTransportMessageState =
                 TransportMessageState.fromInt(taxMessageReceipt.getStatus().getCode());
-        boolean declarationStateChanged = false;
+        RefBookDocState newDeclarationState = null;
         List<Long> confirmedDocStates = Arrays.asList(SENDING_TO_EDO.getId(), NOT_SENT.getId(), EXPORTED.getId());
         List<Long> errorDocStates = Arrays.asList(SENDING_TO_EDO.getId(), EXPORTED.getId());
         if (TransportMessageState.CONFIRMED == incomeTransportMessageState
                 && confirmedDocStates.contains(declarationData.getDocStateId())) {
-            LOG.info("Статус декларации #" + declarationData.getId() + " изменен с #" + declarationData.getId() +
-                    " на " + SENT_TO_EDO.getId());
-            declarationData.setDocStateId(SENT_TO_EDO.getId());
-            declarationStateChanged = true;
+            newDeclarationState = SENT_TO_EDO;
         } else if (TransportMessageState.ERROR == incomeTransportMessageState
                 && errorDocStates.contains(declarationData.getDocStateId())) {
-            LOG.info("Статус декларации #" + declarationData.getId() + " изменен с #" + declarationData.getId() +
-                    " на " + NOT_SENT.getId());
-            declarationData.setDocStateId(NOT_SENT.getId());
-            declarationStateChanged = true;
+            newDeclarationState = NOT_SENT;
         }
 
-        if (declarationStateChanged) {
-            //todo loggerID ?
-//            logBusinessService.logFormEvent(declarationData.getId(), FormDataEvent.CHANGE_STATUS_ED, );
+        if (newDeclarationState != null) {
+            Logger localLogger = new Logger(); //todo
+            declarationDataService.updateDocState(declarationData.getId(), newDeclarationState.getId());
+            LOG.info("Статус декларации #" + declarationData.getId() + " изменен с " +
+                    declarationData.getDocStateId() + " на " + newDeclarationState.getId());
+            logBusinessService.logFormEvent(
+                    declarationData.getId(),
+                    FormDataEvent.CHANGE_STATUS_ED,
+                    localLogger.getLogId(),
+                    "Изменено \"Состояние ЭД\" на основании полученной технологической квитанции от ЭДО",
+                    taUserService.getSystemUserInfo()
+            );
         }
     }
 
