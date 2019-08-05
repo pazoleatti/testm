@@ -141,6 +141,13 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
         return isValid(logger, xmlFileName, xmlFile, xsdFileName, xsdStream, VALIDATION_TIMEOUT);
     }
 
+    @Override
+    public boolean validate(Logger logger, String data, String xsdFileName, InputStream xsdStream) {
+        InputStream dataInputStream = IOUtils.toInputStream(data);
+        File tempFile = createTempFile(dataInputStream, "validation_file", "xml");
+        return isValid(logger, StringUtils.EMPTY, tempFile, xsdFileName, xsdStream, VALIDATION_TIMEOUT);
+    }
+
     private boolean isValid(Logger logger, String xmlFileName, File xmlFile, String xsdFileName, InputStream xsdStream, long timeout) {
         String[] params = new String[StringUtils.isNotBlank(xmlFileName) ? 4 : 3];
 

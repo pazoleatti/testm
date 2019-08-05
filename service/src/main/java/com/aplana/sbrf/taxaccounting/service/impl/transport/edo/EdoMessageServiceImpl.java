@@ -2,7 +2,10 @@ package com.aplana.sbrf.taxaccounting.service.impl.transport.edo;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.model.jms.*;
+import com.aplana.sbrf.taxaccounting.model.jms.BaseMessage;
+import com.aplana.sbrf.taxaccounting.model.jms.TaxMessageDocument;
+import com.aplana.sbrf.taxaccounting.model.jms.TaxMessageReceipt;
+import com.aplana.sbrf.taxaccounting.model.jms.TaxMessageTechDocument;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.messaging.*;
@@ -97,8 +100,12 @@ public class EdoMessageServiceImpl implements EdoMessageService {
                 return storeIncomingMessage(xmlMessage);
             }
         });
-        validateIncomeMessage(xmlMessage);
-        handleIncomeMessage(xmlMessage, transportMessage);
+        try {
+            validateIncomeMessage(xmlMessage, transportMessage);
+            handleIncomeMessage(xmlMessage, transportMessage);
+        } finally {
+            transportMessageService.save(transportMessage);
+        }
     }
 
     private TransportMessage storeIncomingMessage(String message) {
@@ -117,24 +124,27 @@ public class EdoMessageServiceImpl implements EdoMessageService {
         return transportMessage;
     }
 
-    private void validateIncomeMessage(String message) {
-        //todo implement me! (cм. Unmarshaller#setSchema)
+    private void validateIncomeMessage(String message, TransportMessage transportMessage) {
+        Logger validationLogger = new Logger();
+        RefBook declarationTemplateRefBook = commonRefBookService.get(RefBook.Id.DECLARATION_TEMPLATE.getId());
+        BlobData xsd = blobDataService.get(declarationTemplateRefBook.getXsdId());
+        if (!validateXMLService.validate(validationLogger, message, xsd.getName(), xsd.getInputStream())) {
+            String errorMessage = "Входящее сообщение не соответствует xsd схеме.";
+            failHandleEdoTechReceipt(transportMessage, errorMessage);
+            throw new IllegalStateException(errorMessage);
+        }
     }
 
     private void handleIncomeMessage(String xmlMessage, TransportMessage transportMessage) {
         BaseMessage taxMessage = getTaxMessage(xmlMessage);
-        try {
-            enrichTransportBaseMessage(transportMessage, taxMessage);
-            validateSenderAndRecipient(xmlMessage, taxMessage);
+        enrichTransportBaseMessage(transportMessage, taxMessage);
+        validateSenderAndRecipient(xmlMessage, taxMessage);
 
-            if (isMessageFromFns(taxMessage)) {
-                throw new IllegalStateException("Получение ответов из ФНС еще не реализовано");
-            } else if (isEdoTechReceipt(taxMessage)) {
-                TaxMessageReceipt taxMessageReceipt = (TaxMessageReceipt) taxMessage;
-                handleEdoTechReceipt(transportMessage, taxMessageReceipt);
-            }
-        } finally {
-            transportMessageService.save(transportMessage);
+        if (isMessageFromFns(taxMessage)) {
+            throw new IllegalStateException("Получение ответов из ФНС еще не реализовано");
+        } else if (isEdoTechReceipt(taxMessage)) {
+            TaxMessageReceipt taxMessageReceipt = (TaxMessageReceipt) taxMessage;
+            handleEdoTechReceipt(transportMessage, taxMessageReceipt);
         }
     }
 
