@@ -38,3 +38,33 @@ comment on column vw_ref_book_attach_file_type.name is 'Наименование
 
 /
 
+--3.9-skononova-6
+begin
+	dbms_output.put_line ('Create vw_department_declaration_type');
+end;
+/
+
+create or replace view vw_department_declaration_type as 
+select id, department_id, declaration_type_id from department_declaration_type;
+grant select on  vw_department_declaration_type to &2;
+grant references on  department_declaration_type to &2;		
+
+comment on table vw_department_declaration_type is 'Сведения о налоговых формах, с которыми можно работать в подразделении';
+comment on column vw_department_declaration_type.id is 'Идентификатор'; 
+comment on column vw_department_declaration_type.department_id is 'Идентификатор прдразделения';
+comment on column vw_department_declaration_type.declaration_type_id is 'Вид налоговой формы';
+
+begin
+	dbms_output.put_line ('Create vw_department_decl_type_perf');
+end;
+/
+
+create or replace view vw_department_decl_type_perf as 
+select department_decl_type_id, performer_dep_id from department_decl_type_performer;
+grant select on vw_department_decl_type_perf to &2;
+grant references on vw_department_decl_type_perf to &2;		
+
+comment on table vw_department_decl_type_perf is 'Назначения нескольких исполнителей для связки НФ-подразделение';
+comment on column vw_department_decl_type_perf.department_decl_type_id is 'Идентификатор связи подразделения с формой'; 
+comment on column vw_department_decl_type_perf.performer_dep_id is 'Исполнитель';
+
