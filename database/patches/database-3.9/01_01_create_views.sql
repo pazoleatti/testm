@@ -47,7 +47,7 @@ end;
 create or replace view vw_department_declaration_type as 
 select id, department_id, declaration_type_id from department_declaration_type;
 grant select on  vw_department_declaration_type to &2;
-grant references on  department_declaration_type to &2;		
+grant references on  department_declaration_type to &2;		  
 
 comment on table vw_department_declaration_type is 'Сведения о налоговых формах, с которыми можно работать в подразделении';
 comment on column vw_department_declaration_type.id is 'Идентификатор'; 
@@ -68,3 +68,23 @@ comment on table vw_department_decl_type_perf is 'Назначения неск�
 comment on column vw_department_decl_type_perf.department_decl_type_id is 'Идентификатор связи подразделения с формой'; 
 comment on column vw_department_decl_type_perf.performer_dep_id is 'Исполнитель';
 
+begin
+	dbms_output.put_line ('Create vw_department_declaration_data');
+end;
+/
+create or replace view vw_declaration_data as
+select id, declaration_template_id, tax_organ_code, kpp, oktmo,department_report_period_id, state, last_data_modified, correction_num, created_date,file_name  from declaration_data;
+grant select on vw_declaration_data to &2;
+grant references on declaration_data to &2;
+comment on column vw_declaration_data.id is 'Идентификатор';
+comment on column vw_declaration_data.declaration_template_id is 'Ссылка на шаблон налоговой формы';
+comment on column vw_declaration_data.tax_organ_code is 'Налоговый орган';
+comment on column vw_declaration_data.kpp is 'КПП';
+comment on column vw_declaration_data.oktmo is 'ОКТМО';
+comment on column vw_declaration_data.department_report_period_id is 'Идентификатор отчетного периода подразделения';
+comment on column vw_declaration_data.state is 'Статус (состояние формы)';
+comment on column vw_declaration_data.file_name is 'Имя файла';
+comment on column vw_declaration_data.last_data_modified is 'Дата последних изменений данных формы';
+comment on column vw_declaration_data.created_date is 'Дата создания формы';
+comment on column vw_declaration_data.correction_num is 'Номер коррекции';
+comment on table vw_declaration_data is 'Налоговые формы';

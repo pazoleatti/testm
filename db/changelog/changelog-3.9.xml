@@ -89,7 +89,7 @@
     <changeSet id="3.9-skononova-6" author="skononova">
         <sql>
 		create or replace view vw_declaration_data as
-		select id, declaration_template_id, tax_organ_code, kpp, oktmo,department_report_period_id, state, last_data_modified, correction_num, created_date  from declaration_data;
+		select id, declaration_template_id, tax_organ_code, kpp, oktmo,department_report_period_id, state, last_data_modified, correction_num, created_date,file_name  from declaration_data;
 		grant select on vw_declaration_data to TAXREC_UNSTABLE;
 		grant references on declaration_data to TAXREC_UNSTABLE;
 		comment on column vw_declaration_data.id is 'Идентификатор';
@@ -99,6 +99,7 @@
 		comment on column vw_declaration_data.oktmo is 'ОКТМО';
 		comment on column vw_declaration_data.department_report_period_id is 'Идентификатор отчетного периода подразделения';
 		comment on column vw_declaration_data.state is 'Статус (состояние формы)';
+		comment on column vw_declaration_data.file_name is 'Имя файла';
 		comment on column vw_declaration_data.last_data_modified is 'Дата последних изменений данных формы';
 		comment on column vw_declaration_data.created_date is 'Дата создания формы';
 		comment on column vw_declaration_data.correction_num is 'Номер коррекции';
@@ -126,5 +127,6 @@
 
         </sql>
     </changeSet>
+
 
 </databaseChangeLog>
