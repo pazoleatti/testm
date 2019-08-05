@@ -128,5 +128,20 @@
         </sql>
     </changeSet>
 
+    <changeSet id="3.9-adudenko-4" author="adudenko">
+        <insert tableName="blob_data">
+            <column name="id" value="448c3350-d00e-45ff-afda-2d2388d43808"/>
+            <column name="name" value="tax-message_2.0.xsd"/>
+            <column name="data" valueBlobFile="templates-3.9/refbook/tax-message_2.0.xsd"/>
+            <column name="creation_date" valueDate="2019-08-05"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="3.9-adudenko-5" author="adudenko">
+        <update tableName="ref_book">
+            <column name="xsd_id" value="448c3350-d00e-45ff-afda-2d2388d43808"/>
+            <where>id=207</where>
+        </update>
+    </changeSet>
 
 </databaseChangeLog>
