@@ -183,7 +183,7 @@ public class EdoMessageServiceImpl implements EdoMessageService {
         return taxMessageReceipt.getDestination() == getConfigIntValue(ConfigurationParam.NDFL_SUBSYSTEM_ID);
     }
     private boolean senderIsEdo(BaseMessage taxMessageReceipt) {
-        return taxMessageReceipt.getSource() == getConfigIntValue(ConfigurationParam.EDO_SUBSYSTEM_ID);
+        return taxMessageReceipt.getSource() == getConfigIntValue(ConfigurationParam.TARGET_SUBSYSTEM_ID);
     }
 
     private boolean isMessageFromFns(BaseMessage taxMessage) {
@@ -373,7 +373,7 @@ public class EdoMessageServiceImpl implements EdoMessageService {
             taxMessageDocument.setFormatVersion("2.0");
             taxMessageDocument.setUuid(UUID.randomUUID().toString().toLowerCase());
             taxMessageDocument.setSource(getConfigIntValue(ConfigurationParam.NDFL_SUBSYSTEM_ID));
-            taxMessageDocument.setDestination(getConfigIntValue(ConfigurationParam.EDO_SUBSYSTEM_ID));
+            taxMessageDocument.setDestination(getConfigIntValue(ConfigurationParam.TARGET_SUBSYSTEM_ID));
             taxMessageDocument.setLogin(userInfo.getUser().getLogin());
             taxMessageDocument.setFilename(fileName);
             return taxMessageDocument;
@@ -396,7 +396,7 @@ public class EdoMessageServiceImpl implements EdoMessageService {
             transportMessage.setDateTime(LocalDateTime.fromDateFields(message.getDateTime()));
             transportMessage.setMessageUuid(message.getUuid());
             transportMessage.setSenderSubsystem(new Subsystem(getConfigIntValue(ConfigurationParam.NDFL_SUBSYSTEM_ID)));
-            transportMessage.setReceiverSubsystem(new Subsystem(getConfigIntValue(ConfigurationParam.EDO_SUBSYSTEM_ID)));
+            transportMessage.setReceiverSubsystem(new Subsystem(getConfigIntValue(ConfigurationParam.TARGET_SUBSYSTEM_ID)));
             transportMessage.setInitiatorUser(userInfo.getUser());
             transportMessage.setBody(messageXml);
             transportMessage.setBlob(blobDataService.get(declarationXmlFile.getUuid()));
