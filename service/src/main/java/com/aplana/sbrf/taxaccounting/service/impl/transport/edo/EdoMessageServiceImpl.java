@@ -153,7 +153,6 @@ public class EdoMessageServiceImpl implements EdoMessageService {
 
     private BaseMessage getTaxMessage(String message) {
         try {
-//            JAXBContext jaxbContext = JAXBContext.newInstance(BaseMessage.class); //todo
             JAXBContext jaxbContext = JAXBContext.newInstance(TaxMessageReceipt.class, TaxMessageDocument.class);
             Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 
@@ -208,6 +207,8 @@ public class EdoMessageServiceImpl implements EdoMessageService {
 
         updateSourceTransportMessageState(taxMessageReceipt, sourceTransportMessage);
         updateDeclarationState(taxMessageReceipt, sourceTransportMessage.getDeclaration());
+
+        transportMessage.setState(TransportMessageState.CONFIRMED);
     }
 
     private void updateSourceTransportMessageState(TaxMessageReceipt taxMessageReceipt, TransportMessage transportMessage) {
@@ -246,7 +247,7 @@ public class EdoMessageServiceImpl implements EdoMessageService {
         }
 
         if (newDeclarationState != null) {
-            Logger localLogger = new Logger(); //todo
+            Logger localLogger = new Logger();
             declarationDataService.updateDocState(declarationData.getId(), newDeclarationState.getId());
             LOG.info("Статус декларации #" + declarationData.getId() + " изменен с " +
                     declarationData.getDocStateId() + " на " + newDeclarationState.getId());
