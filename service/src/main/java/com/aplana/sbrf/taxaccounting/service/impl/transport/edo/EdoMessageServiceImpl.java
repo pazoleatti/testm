@@ -198,17 +198,20 @@ public class EdoMessageServiceImpl implements EdoMessageService {
 
         TransportMessage sourceTransportMessage = getSourceTransportMessage(taxMessageReceipt);
         if (sourceTransportMessage == null) {
-            transportMessage.setState(TransportMessageState.ERROR);
-            transportMessage.setExplanation(new Date() + " Для данной технологической квитанции не найдено" +
-                    "исходное сообщение");
-            throw new IllegalStateException("Не найдено исходное транспортное сообщение для" +
-                    "технологической кватинации #" + taxMessageReceipt.getUuid());
+            String errorMessage = "Для данной технологической квитанции не найдено исходное сообщение";
+            failHandleEdoTechReceipt(transportMessage, errorMessage);
+            throw new IllegalStateException(errorMessage + ". UUID сообщения = " + taxMessageReceipt.getUuid());
         }
 
         updateSourceTransportMessageState(taxMessageReceipt, sourceTransportMessage);
-        updateDeclarationState(taxMessageReceipt, sourceTransportMessage.getDeclaration());
+        updateDeclarationState(transportMessage, taxMessageReceipt, sourceTransportMessage.getDeclaration());
 
         transportMessage.setState(TransportMessageState.CONFIRMED);
+    }
+
+    private void failHandleEdoTechReceipt(TransportMessage transportMessage, String message) {
+        transportMessage.setState(TransportMessageState.ERROR);
+        transportMessage.setExplanation(new Date() + " " + message);
     }
 
     private void updateSourceTransportMessageState(TaxMessageReceipt taxMessageReceipt, TransportMessage transportMessage) {
@@ -230,8 +233,16 @@ public class EdoMessageServiceImpl implements EdoMessageService {
         transportMessageService.save(transportMessage);
     }
 
-    private void updateDeclarationState(TaxMessageReceipt taxMessageReceipt, DeclarationShortInfo declarationShortInfo) {
+    private void updateDeclarationState(TransportMessage transportMessage, TaxMessageReceipt taxMessageReceipt,
+                                        DeclarationShortInfo declarationShortInfo) {
         DeclarationData declarationData = declarationDataService.get(declarationShortInfo.getId());
+        if (declarationData == null) {
+            String errorMessage = "Не удалось найти налоговую форму № " + declarationShortInfo.getId() +
+                    " для изменения \"Состояние ЭД\" на " + SENT_TO_EDO.getName() +". " +
+                    "Идентификатор транспортного сообщения: " + transportMessage.getMessageUuid();
+            failHandleEdoTechReceipt(transportMessage, errorMessage);
+            throw new IllegalStateException(errorMessage);
+        }
 
         TransportMessageState incomeTransportMessageState =
                 TransportMessageState.fromInt(taxMessageReceipt.getStatus().getCode());
