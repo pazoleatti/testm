@@ -51,7 +51,7 @@ grant references on  department_declaration_type to &2;
 
 comment on table vw_department_declaration_type is 'Сведения о налоговых формах, с которыми можно работать в подразделении';
 comment on column vw_department_declaration_type.id is 'Идентификатор'; 
-comment on column vw_department_declaration_type.department_id is 'Идентификатор прдразделения';
+comment on column vw_department_declaration_type.department_id is 'Идентификатор подразделения';
 comment on column vw_department_declaration_type.declaration_type_id is 'Вид налоговой формы';
 
 begin
