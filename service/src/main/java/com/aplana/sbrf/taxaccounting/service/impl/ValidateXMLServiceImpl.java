@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -143,8 +144,12 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
 
     @Override
     public boolean validate(Logger logger, String data, String xsdFileName, InputStream xsdStream) {
-        InputStream dataInputStream = IOUtils.toInputStream(data);
-        File tempFile = createTempFile(dataInputStream, "validation_file", "xml");
+        File tempFile;
+        try (InputStream dataInputStream = IOUtils.toInputStream(data, StandardCharsets.UTF_8.toString())) {
+            tempFile = createTempFile(dataInputStream, "validation_file", "xml");
+        } catch (IOException e) {
+            throw new IllegalStateException("Ошибка чтения входящего сообщения.", e);
+        }
         return isValid(logger, StringUtils.EMPTY, tempFile, xsdFileName, xsdStream, VALIDATION_TIMEOUT);
     }
 
