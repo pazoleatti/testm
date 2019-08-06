@@ -11,6 +11,7 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.messaging.*;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDocState;
+import com.aplana.sbrf.taxaccounting.model.result.UploadTransportDataResult;
 import com.aplana.sbrf.taxaccounting.model.util.AppFileUtils;
 import com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission;
 import com.aplana.sbrf.taxaccounting.service.*;
@@ -23,6 +24,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jetbrains.annotations.NotNull;
 import org.joda.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
@@ -58,6 +60,7 @@ public class EdoMessageServiceImpl implements EdoMessageService {
     private final LockDataService lockDataService;
     private final TransactionHelper transactionHelper;
     private final TAUserService taUserService;
+    private final UploadTransportDataService uploadTransportDataService;
     @Autowired(required = false)
     private MessageSender messageSender;
 
@@ -65,7 +68,7 @@ public class EdoMessageServiceImpl implements EdoMessageService {
     public EdoMessageServiceImpl(DeclarationDataService declarationDataService, DeclarationTemplateService declarationTemplateService, DeclarationLocker declarationLocker,
                                  BlobDataService blobDataService, ConfigurationService configurationService, ValidateXMLService validateXMLService,
                                  TransportMessageService transportMessageService, CommonRefBookService commonRefBookService,
-                                 LogBusinessService logBusinessService, LockDataService lockDataService, TransactionHelper transactionHelper, TAUserService taUserService) {
+                                 LogBusinessService logBusinessService, LockDataService lockDataService, TransactionHelper transactionHelper, TAUserService taUserService, RefBookScriptingService refBookScriptingService, UploadTransportDataService uploadTransportDataService) {
         this.declarationDataService = declarationDataService;
         this.declarationTemplateService = declarationTemplateService;
         this.declarationLocker = declarationLocker;
@@ -78,6 +81,7 @@ public class EdoMessageServiceImpl implements EdoMessageService {
         this.lockDataService = lockDataService;
         this.transactionHelper = transactionHelper;
         this.taUserService = taUserService;
+        this.uploadTransportDataService = uploadTransportDataService;
     }
 
     @Override
@@ -141,7 +145,8 @@ public class EdoMessageServiceImpl implements EdoMessageService {
         validateSenderAndRecipient(xmlMessage, taxMessage);
 
         if (isMessageFromFns(taxMessage)) {
-            throw new IllegalStateException("Получение ответов из ФНС еще не реализовано");
+            TaxMessageTechDocument taxMessageTechDocument = (TaxMessageTechDocument) taxMessage;
+            handleFnsResponse(transportMessage, taxMessageTechDocument);
         } else if (isEdoTechReceipt(taxMessage)) {
             TaxMessageReceipt taxMessageReceipt = (TaxMessageReceipt) taxMessage;
             handleEdoTechReceipt(transportMessage, taxMessageReceipt);
@@ -280,6 +285,35 @@ public class EdoMessageServiceImpl implements EdoMessageService {
                     taUserService.getSystemUserInfo()
             );
         }
+    }
+
+    private void handleFnsResponse(TransportMessage transportMessage, TaxMessageTechDocument taxMessageTechDocument) {
+        FileWrapper sharedFileNameFromFns = getFileFromFnsFileSharing(taxMessageTechDocument);
+        BlobData fnsResponseBlobData = storeFileInTransportMessage(transportMessage, sharedFileNameFromFns);
+
+        Logger transportFileImporterLogger = new Logger();
+        UploadTransportDataResult uploadTransportDataResult = uploadTransportDataService.processTransportFileUploading(
+                transportFileImporterLogger,
+                taUserService.getSystemUserInfo(),
+                fnsResponseBlobData.getName(),
+                fnsResponseBlobData.getInputStream(),
+                true
+        );
+
+        // todo handle result of upload transport file
+    }
+
+    private BlobData storeFileInTransportMessage(TransportMessage transportMessage, FileWrapper sharedFileNameFromFns) {
+        String fnsResponseBlobId = blobDataService.create(sharedFileNameFromFns.getInputStream(), sharedFileNameFromFns.getName());
+        BlobData fnsResponseBlobData = blobDataService.get(fnsResponseBlobId);
+        transportMessage.setBlob(fnsResponseBlobData);
+        return fnsResponseBlobData;
+    }
+
+    @NotNull
+    private FileWrapper getFileFromFnsFileSharing(TaxMessageTechDocument taxMessageTechDocument) {
+        String fileNamePath = taxMessageTechDocument.getFileName();
+        return ResourceUtils.getSharedResource(fileNamePath);
     }
 
     private int getConfigIntValue(ConfigurationParam param) {
