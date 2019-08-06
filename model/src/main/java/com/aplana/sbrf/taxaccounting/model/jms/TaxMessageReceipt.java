@@ -9,17 +9,21 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
- * Сообщение для отправки в ЭДО
+ * Технологическая квитанция
  */
 @Getter
 @Setter
 @XmlAccessorType(XmlAccessType.NONE)
-@XmlRootElement(name = "TaxMessageDocument")
-public class TaxMessageDocument extends BaseMessage {
+@XmlRootElement(name = "TaxMessageReceipt")
+public class TaxMessageReceipt extends BaseMessage {
 
     @XmlElement(name = "login")
     private String login;
 
     @XmlElement(name = "filename")
     private String filename;
+
+    @XmlElement(name = "status")
+    private MessageStatus status;
+
 }

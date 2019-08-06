@@ -37,7 +37,7 @@ public enum TransportMessageState {
                 return state;
             }
         }
-        throw new IllegalArgumentException(String.valueOf(intValue));
+        throw new IllegalArgumentException("Неизвестный статус транспортного сообщения \"" + intValue + "\"");
     }
 
     @JsonValue
