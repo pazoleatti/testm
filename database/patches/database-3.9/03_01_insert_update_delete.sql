@@ -25,3 +25,21 @@ end;
 /
 COMMIT;
 
+-- 3.9-adudenko-5
+
+declare 
+  v_task_name varchar2(128):='insert_update_delete block #2 - merge into ref_book';  
+begin
+	update ref_book set xsd_id='448c3350-d00e-45ff-afda-2d2388d43808' where id=207;
+	
+	CASE SQL%ROWCOUNT 
+	WHEN 0 THEN dbms_output.put_line(v_task_name||'[WARNING]:'||' No changes was done');
+	ELSE dbms_output.put_line(v_task_name||'[INFO]:'||' Success');
+	END CASE; 
+
+EXCEPTION
+  when OTHERS then 
+    dbms_output.put_line(v_task_name||'[FATAL]:'||sqlerrm);		
+end;
+/
+COMMIT;

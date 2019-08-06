@@ -142,13 +142,14 @@ PROMPT Fill tables
 PROMPT ======================
 
 PROMPT Fill service tables...
---HOST "&2\sqlldr" &3 control=database-3.8/templates/ldr/refbook/blob_data.ldr log=&4/02_01_refbook_blob_data.txt bad=&5/02_01_refbook_blob_data.bad
+--3.9-adudenko-4
+HOST "&2\sqlldr" &3 control=database-3.9/templates/ldr/refbook/blob_data.ldr log=&4/02_01_refbook_blob_data.txt bad=&5/02_01_refbook_blob_data.bad
 
 --3.8-ytrofimov-2, 3.8-ytrofimov-4, 3.8-ytrofimov-5
---HOST "&2\sqlldr" &3 control=database-3.8/templates/ldr/ndfl/blob_data.ldr log=&4/02_02_ndfl_blob_data.txt bad=&5/02_02_ndfl_blob_data.bad
+--HOST "&2\sqlldr" &3 control=database-3.9/templates/ldr/ndfl/blob_data.ldr log=&4/02_02_ndfl_blob_data.txt bad=&5/02_02_ndfl_blob_data.bad
 
 --3.8-dnovikov-4, 3.8-dnovikov-6
---HOST "&2\sqlldr" &3 control=database-3.8/templates/ldr/ndfl/template.ldr log=&4/02_03_ndfl_template.txt bad=&5/02_03_ndfl_template.bad
+--HOST "&2\sqlldr" &3 control=database-3.9/templates/ldr/ndfl/template.ldr log=&4/02_03_ndfl_template.txt bad=&5/02_03_ndfl_template.bad
 
 --3.9-avoynov-1, 3.9-avoynov-2, 3.9-adudenko-1
 HOST "&2\sqlldr" &3 control=database-3.9/templates/ldr/ndfl/template_script.ldr log=&4/02_04_ndfl_template_script.txt bad=&5/02_04_ndfl_template_script.bad
