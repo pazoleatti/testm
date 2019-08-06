@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
+import com.aplana.sbrf.taxaccounting.model.result.UploadTransportDataResult;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import com.aplana.sbrf.taxaccounting.utils.ApplicationInfo;
@@ -20,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Nullable;
 import java.io.*;
 import java.nio.charset.Charset;
 import java.util.HashMap;
@@ -130,6 +132,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
      * @param fileName имя файла
      * @return тип ТФ
      */
+    @Nullable
     public static TransportFileType getFileType(String fileName) {
         if (fileName.length() == 63 && "xml".equals(FilenameUtils.getExtension(fileName))) {
             // ТФ РНУ НДФЛ
@@ -164,7 +167,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
             // ТФ РНУ НДФЛ, файла ответа 6-НДФЛ, файла ответа 2-НДФЛ
             TransportFileType fileType = getFileType(fileName);
             if (fileType != null) {
-                createTaskToImportTF(userInfo, fileType, archiveName, fileName, fileBlobUuid, fileSize, logger);
+                createTaskToImportTF(userInfo, archiveName, fileName, fileBlobUuid, fileSize, logger);
             } else {
                 logger.error("Некорректное имя или формат файла \"%s\"", fileName);
             }
@@ -229,7 +232,6 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
      * //TODO: метод один на 3 типа файлов, потому что и асинхронная задача у нас для этого одна
      *
      * @param userInfo     текущий пользователь
-     * @param fileType     тип ТФ
      * @param archiveName  название входящего архива с файлами (может быть null)
      * @param fileName     название файла
      * @param fileBlobUuid идентификатор временного блоба, в который сохранен файл
@@ -237,7 +239,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
      * @param logger       логгер
      */
     @PreAuthorize("hasAnyRole('N_ROLE_OPER', 'N_ROLE_CONTROL_NS', 'N_ROLE_CONTROL_UNP')")
-    private void createTaskToImportTF(TAUserInfo userInfo, TransportFileType fileType, String archiveName, String fileName, String fileBlobUuid, long fileSize, Logger logger) {
+    private void createTaskToImportTF(TAUserInfo userInfo, String archiveName, String fileName, String fileBlobUuid, long fileSize, Logger logger) {
         LOG.info(String.format("UploadTransportDataServiceImpl.createTaskToImportTF. fileName: %s; fileBlobUuid: %s", fileName, fileBlobUuid));
         int userId = userInfo.getUser().getId();
         String key = LockData.LockObjects.LOAD_TRANSPORT_DATA.name() + "_" + UUID.randomUUID().toString().toLowerCase();
@@ -246,7 +248,6 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
             try {
                 Map<String, Object> params = new HashMap<String, Object>();
                 params.put("blobDataId", fileBlobUuid);
-                params.put("fileType", fileType);
                 params.put("fileSize", fileSize);
                 if (archiveName != null) {
                     params.put("archiveName", archiveName);
@@ -310,7 +311,8 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
     }
 
     @Override
-    public String processTransportFileUploading(Logger logger, TAUserInfo userInfo, TransportFileType fileType, String fileName, InputStream inputStream, long taskId) {
+    public UploadTransportDataResult processTransportFileUploading(Logger logger, TAUserInfo userInfo, String fileName,
+                                                                   InputStream inputStream, boolean autoUpload) {
         // Дополнительные проверки, на случай, если блоб криво сохранился в БД
         if (fileName == null) {
             throw new ServiceLoggerException(NO_FILE_NAME_ERROR, logEntryService.save(logger.getEntries()));
@@ -320,7 +322,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
         }
 
         File dataFile = null;
-        StringBuilder msgBuilder = new StringBuilder();
+        UploadTransportDataResult uploadTransportDataResult = new UploadTransportDataResult();
         LockData fileLock = lockDataService.lock(LockData.LockObjects.FILE.name() + "_" + fileName,
                 userInfo.getUser().getId(),
                 String.format(DescriptionTemplate.FILE.getText(), fileName));
@@ -340,11 +342,12 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
 
                 dataFileInputStream = new BufferedInputStream(new FileInputStream(dataFile));
                 Map<String, Object> additionalParameters = new HashMap<>();
+                additionalParameters.put("autoUpload", autoUpload);
                 additionalParameters.put("ImportInputStream", dataFileInputStream);
                 additionalParameters.put("UploadFileName", fileName);
                 additionalParameters.put("dataFile", dataFile);
-                additionalParameters.put("fileType", fileType);
-                additionalParameters.put("msgBuilder", msgBuilder);
+                additionalParameters.put("fileType", getFileType(fileName));
+                additionalParameters.put("uploadTransportDataResult", uploadTransportDataResult);
                 refBookScriptingService.executeScript(userInfo, RefBook.Id.DECLARATION_TEMPLATE.getId(), FormDataEvent.IMPORT_TRANSPORT_FILE, logger, additionalParameters);
             } catch (Exception e) {
                 LOG.error("Непредвиденная ошибка при обработке файла", e);
@@ -359,6 +362,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
             }
             logger.info("Завершена обработка файла \"%s\"", fileName);
         }
-        return msgBuilder.toString();
+
+        return uploadTransportDataResult;
     }
 }

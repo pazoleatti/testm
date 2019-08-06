@@ -1,9 +1,9 @@
 package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
-import com.aplana.sbrf.taxaccounting.model.TransportFileType;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
+import com.aplana.sbrf.taxaccounting.model.result.UploadTransportDataResult;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -46,11 +46,11 @@ public interface UploadTransportDataService {
      *
      * @param logger      логгер для области уведомлений
      * @param userInfo    пользователь
-     * @param fileType    тип ТФ
      * @param fileName    имя файла
      * @param inputStream содержимое файла
-     * @param taskId      идентификатор асинхронной задачи, которая занимается обработкой файла (необходим для логирования)
-     * @return сообщение о результате выполнения загрузки файла, которое используеся в оповещениях
+     * @param autoUpload  признак обработки ТФ в автоматическом режиме
+     * @return объект, содержащий результаты выполнения загрузки файла
      */
-    String processTransportFileUploading(Logger logger, TAUserInfo userInfo, TransportFileType fileType, String fileName, InputStream inputStream, long taskId);
+    UploadTransportDataResult processTransportFileUploading(Logger logger, TAUserInfo userInfo, String fileName,
+                                                            InputStream inputStream, boolean autoUpload);
 }

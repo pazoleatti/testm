@@ -11,6 +11,7 @@ import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
+import com.aplana.sbrf.taxaccounting.model.result.UploadTransportDataResult
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
 import com.aplana.sbrf.taxaccounting.script.SharedConstants
 import com.aplana.sbrf.taxaccounting.script.dao.BlobDataService
@@ -66,7 +67,7 @@ class DeclarationType extends AbstractScriptClass {
     NdflPersonService ndflPersonService
     LogBusinessService logBusinessService
     String version
-    Map<String, Object> paramMap
+    UploadTransportDataResult uploadTransportDataResult
 
     private DeclarationType() {
     }
@@ -132,7 +133,7 @@ class DeclarationType extends AbstractScriptClass {
         if (scriptClass.getBinding().hasVariable("logBusinessService")) {
             this.logBusinessService = (LogBusinessService) scriptClass.getProperty("logBusinessService")
         }
-        this.paramMap = getSafeProperty("paramMap") as Map<String, Object>
+        this.uploadTransportDataResult = getSafeProperty("uploadTransportDataResult") as UploadTransportDataResult
     }
 
     @Override
@@ -968,6 +969,7 @@ class DeclarationType extends AbstractScriptClass {
 
         msgBuilder.append(msg)
         logger.info(msgBuilder.toString())
+        uploadTransportDataResult.setNotificationMessage(msgBuilder.toString())
         logFormAttachResponseEvent(declarationData.id, msg)
         if (isAutoUpload()) {
             storeAutoUploadingContext(TransportMessageState.CONFIRMED, documentContentType, StringUtils.EMPTY)
@@ -984,9 +986,9 @@ class DeclarationType extends AbstractScriptClass {
 
     private void storeAutoUploadingContext(TransportMessageState messageState, TransportMessageContentType contentType,
                                            String message) {
-        paramMap.put("transportMessageHandleResultCode", messageState.getIntValue())
-        paramMap.put("responseContentCode", contentType.getIntValue())
-        paramMap.put("responseMessage", message)
+        uploadTransportDataResult.setMessageState(messageState)
+        uploadTransportDataResult.setContentType(contentType)
+        uploadTransportDataResult.setProcessMessageResult(message)
     }
 
     private void logFormAttachResponseEvent(Long declarationId, String message) {

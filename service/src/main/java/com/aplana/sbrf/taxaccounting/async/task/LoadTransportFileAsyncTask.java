@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.async.AsyncManager;
 import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.result.UploadTransportDataResult;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.UploadTransportDataService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +30,7 @@ public class LoadTransportFileAsyncTask extends AbstractAsyncTask {
     @Autowired
     private UploadTransportDataService uploadTransportDataService;
 
-    private String msg = "";
+    private String notificationMsg = "";
 
     @Override
     public String createDescription(TAUserInfo userInfo, Map<String, Object> params) {
@@ -42,10 +43,11 @@ public class LoadTransportFileAsyncTask extends AbstractAsyncTask {
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(taskData.getUserId()));
         final String blobDataId = (String) params.get("blobDataId");
-        final TransportFileType fileType = (TransportFileType) params.get("fileType");
         BlobData blobData = blobDataService.get(blobDataId);
         asyncManager.updateState(taskData.getId(), AsyncTaskState.FILES_UPLOADING);
-        msg = uploadTransportDataService.processTransportFileUploading(logger, userInfo, fileType, blobData.getName(), blobData.getInputStream(), taskData.getId());
+        UploadTransportDataResult uploadTransportDataResult = uploadTransportDataService.processTransportFileUploading(
+                logger, userInfo, blobData.getName(), blobData.getInputStream(), false);
+        notificationMsg = uploadTransportDataResult.getNotificationMessage();
         return new BusinessLogicResult(true, null);
     }
 
@@ -54,7 +56,7 @@ public class LoadTransportFileAsyncTask extends AbstractAsyncTask {
         String fileName = getFileName(taskData);
         final String archiveName = (String) taskData.getParams().get("archiveName");
         String archive = archiveName == null ? "" : String.format(" (из архива \"%s\")", archiveName);
-        return "Загрузка файла \"" + fileName + "\"" + archive + " завершена" + (msg.isEmpty() ? "" : (": " + msg));
+        return "Загрузка файла \"" + fileName + "\"" + archive + " завершена" + (notificationMsg.isEmpty() ? "" : (": " + notificationMsg));
     }
 
 
