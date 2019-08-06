@@ -136,17 +136,17 @@
 	</resource-ref>
 
 	<message-destination-ref>
-		<message-destination-ref-name>java:comp/env/jms/FundFromNdflSubsystemQueue</message-destination-ref-name>
+		<message-destination-ref-name>java:comp/env/jms/EdoResponseQueue</message-destination-ref-name>
 		<message-destination-type>javax.jms.Queue</message-destination-type>
 		<message-destination-usage>Produces</message-destination-usage>
-		<message-destination-link>java:comp/env/jms/FundFromNdflSubsystemQueue</message-destination-link>
+		<message-destination-link>java:comp/env/jms/EdoResponseQueue</message-destination-link>
 	</message-destination-ref>
 
 	<message-destination-ref>
-		<message-destination-ref-name>java:comp/env/jms/FundToNdflSubsystemQueue</message-destination-ref-name>
+		<message-destination-ref-name>java:comp/env/jms/EdoRequestQueue</message-destination-ref-name>
 		<message-destination-type>javax.jms.Queue</message-destination-type>
 		<message-destination-usage>Consumes</message-destination-usage>
-		<message-destination-link>java:comp/env/jms/FundToNdflSubsystemQueue</message-destination-link>
+		<message-destination-link>java:comp/env/jms/EdoRequestQueue</message-destination-link>
 	</message-destination-ref>
 
 	<security-role>

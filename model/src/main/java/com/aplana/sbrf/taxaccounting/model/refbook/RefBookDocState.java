@@ -18,7 +18,8 @@ public class RefBookDocState extends RefBookSimple<Long> {
     public final static RefBookDocState WORKED_OUT = new RefBookDocState(5, "Успешно отработан");
     public final static RefBookDocState REQUIRES_CLARIFICATION = new RefBookDocState(6, "Требует уточнения");
     public final static RefBookDocState ERROR = new RefBookDocState(7, "Ошибка");
-    public final static RefBookDocState SENT_EDO = new RefBookDocState(8, "Отправка в ЭДО");
+    public final static RefBookDocState SENDING_TO_EDO = new RefBookDocState(8, "Отправка в ЭДО");
+    public final static RefBookDocState SENT_TO_EDO = new RefBookDocState(9, "Отправлен в ЭДО");
 
     //Наименование состояния
     private String name;

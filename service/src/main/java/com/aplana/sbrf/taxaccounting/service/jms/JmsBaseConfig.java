@@ -11,7 +11,6 @@ import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.jms.support.converter.SimpleMessageConverter;
 import org.springframework.jms.support.destination.BeanFactoryDestinationResolver;
-import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
@@ -24,9 +23,9 @@ import javax.naming.NamingException;
 @Profile(value = {"development", "jms"})
 public class JmsBaseConfig {
 
-        public static final String FROM_NDFL_QUEUE = "fundFromNdflSubsystemQueue";
+        public static final String FROM_NDFL_QUEUE = "EdoResponseQueue";
 
-        public static final String TO_NDFL_QUEUE = "fundToNdflSubsystemQueue";
+        public static final String TO_NDFL_QUEUE = "EdoRequestQueue";
 
         /**
          * Конвертер сообщений из xml в объектные модели
@@ -74,20 +73,20 @@ public class JmsBaseConfig {
         }
 
         /**
-         * Очередь входящих запросов, получается по JNDI у вебсферы.
+         * Очередь исходящих запросов, получается по JNDI у вебсферы.
          */
         @Bean(name = JmsBaseConfig.FROM_NDFL_QUEUE)
-        public Destination fundFromNdflSubsystemQueue() throws NamingException {
+        public Destination edoResponsesQueue() throws NamingException {
                 return (Destination) new InitialContext()
-                        .lookup("java:comp/env/jms/FundFromNdflSubsystemQueue");
+                        .lookup("java:comp/env/jms/" + FROM_NDFL_QUEUE);
         }
 
         /**
-         * Очередь исходящих запросо, получается по JNDI у вебсферы.
+         * Очередь входящих запросов, получается по JNDI у вебсферы.
          */
         @Bean(name = JmsBaseConfig.TO_NDFL_QUEUE)
-        public Destination fundToNdflSubsystemQueue() throws NamingException {
+        public Destination edoRequestsQueue() throws NamingException {
                 return (Destination) new InitialContext()
-                        .lookup("java:comp/env/jms/FundToNdflSubsystemQueue");
+                        .lookup("java:comp/env/jms/" + TO_NDFL_QUEUE);
         }
 }

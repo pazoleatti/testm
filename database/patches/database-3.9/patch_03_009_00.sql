@@ -28,10 +28,10 @@ end;
 /
  
 begin 
-	select count(1) into :v_cnt from version_history where status='OK' and version='03.008.00';
+	select count(1) into :v_cnt from version_history where status='OK' and version='03.008.01';
 	if :v_cnt = 0 then
-		dbms_output.put_line('Error: 03.008.00 not installed. Check log-files.');
-		raise_application_error(-20999,'Error: 03.008.00 not installed. Check log-files.');
+		dbms_output.put_line('Error: 03.008.01 not installed. Check log-files.');
+		raise_application_error(-20999,'Error: 03.008.01 not installed. Check log-files.');
 	end if;
 
   	select count(1) into :v_cnt from version_history where status='OK' and version='03.009.00';
@@ -45,8 +45,14 @@ end;
 
 PROMPT ## Beginning Installing Patch
 
+PROMPT ## 01_ddl_tables_views_synonyms
+@database-3.9/01_ddl_tables_views_synonyms.sql &3 &6
+
 PROMPT ## 02_templates
-@database-3.9/02_templates.sql "_log/3.8_03_templates.txt" "&4" "&5" "../_log" "../_bad"
+@database-3.9/02_templates.sql "_log/3.9_03_templates.txt" "&4" "&5" "../_log" "../_bad"
+
+PROMPT ## 03_update
+@database-3.9/03_update_dml.sql 
 
  
 PROMPT ## 06_check_index_constraints

@@ -102,7 +102,7 @@ public class Declaration2NdflFLSqlBuilder {
         String orderedSql = baseQuery + " order by " + pagingParams.getProperty() + " " + pagingParams.getDirection();
         String numberedSql = "select rownum rn, ordered.* from (" + orderedSql + ") ordered";
         query = "select * from (" + numberedSql + ") where rn between :start and :end";
-        countQuery = "select count(*) from (" + query + ")";
+        countQuery = "select count(*) from (" + baseQuery + ")";
         params.addValue("start", pagingParams.getStartIndex() + 1);
         params.addValue("end", pagingParams.getStartIndex() + pagingParams.getCount());
     }

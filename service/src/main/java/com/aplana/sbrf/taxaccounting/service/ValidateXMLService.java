@@ -31,4 +31,15 @@ public interface ValidateXMLService {
      * @return файл корректен?
      */
     boolean validate(Logger logger, String xmlFileName, File xmlFile, String xsdFileName, InputStream xsdStream);
+
+    /**
+     * Валидирует произвольный XML в виде строки по произвольной xsd-схеме с использованием схематрона (schematron)
+     *
+     * @param logger      логгер, в который пишутся ошибки валидации
+     * @param data        содержимое XML в виде строки
+     * @param xsdFileName название xsd-файла
+     * @param xsdStream   содержимое xsd
+     * @return файл корректен?
+     */
+    boolean validate(Logger logger, String data, String xsdFileName, InputStream xsdStream);
 }

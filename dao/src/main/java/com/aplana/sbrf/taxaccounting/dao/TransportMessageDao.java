@@ -41,4 +41,11 @@ public interface TransportMessageDao {
      * @param transportMessage Транспортное сообщение
      */
     void create(TransportMessage transportMessage);
+
+    /**
+     * Обновляет Транспортное сообщение
+     *
+     * @param transportMessage Транспортное сообщение
+     */
+    void update(TransportMessage transportMessage);
 }

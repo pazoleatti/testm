@@ -174,3 +174,26 @@ comment on column vw_declaration_data.last_data_modified is 'Дата после
 comment on column vw_declaration_data.created_date is 'Дата создания формы';
 comment on table vw_declaration_data is 'Налоговые формы';
 /
+
+begin
+	dbms_output.put_line ('Create vw_log_business');                                                                         
+end;
+/
+create or replace view vw_log_business as 
+select id, log_date, event_id, user_login, roles,declaration_data_id, note, user_department_name, person_id, 
+log_id from log_business;
+grant select on vw_log_business to &2;
+
+
+comment on column vw_log_business.id is 'Идентификатор';
+comment on column vw_log_business.log_date is 'Дата события';
+comment on column vw_log_business.event_id is 'Идентификатор события';
+comment on column vw_log_business.user_login is 'Логин пользователя';
+comment on column vw_log_business.roles is 'Список ролей пользователя';
+comment on column vw_log_business.declaration_data_id is 'Идентификатор формы';
+comment on column vw_log_business.note is 'Текст сообщения';
+comment on column vw_log_business.user_department_name is 'Подразделение пользователя';
+comment on column vw_log_business.person_id is 'Идентификатор ФЛ';
+comment on column vw_log_business.log_id is 'Ссылка на уведомления';
+
+comment on table vw_log_business is 'Журнал событий налоговых форм';

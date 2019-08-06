@@ -11,6 +11,6 @@
 	<resource-ref name="jdbc/TaxAccDSSecondary" binding-name="jdbc/TaxAccDS-3.9"/>
 
 	<resource-ref name="jms/FundConnectionFactory" binding-name="jms/FundConnectionFactory" />
-	<resource-ref name="jms/FundFromNdflSubsystemQueue" binding-name="jms/FundFromNdflSubsystemQueue" />
-	<resource-ref name="jms/FundToNdflSubsystemQueue" binding-name="jms/FundToNdflSubsystemQueue" />
+	<resource-ref name="jms/EdoResponseQueue" binding-name="jms/EdoResponseQueue" />
+	<resource-ref name="jms/EdoRequestQueue" binding-name="jms/EdoRequestQueue" />
 </web-bnd>

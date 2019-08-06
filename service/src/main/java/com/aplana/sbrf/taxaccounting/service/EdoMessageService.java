@@ -7,7 +7,7 @@ import com.aplana.sbrf.taxaccounting.service.impl.transport.edo.SendToEdoResult;
 import java.util.List;
 
 /**
- * Сервис для отправки сообщений в ЭДО
+ * Сервис сообщений c ЭДО
  */
 public interface EdoMessageService {
 
@@ -18,4 +18,6 @@ public interface EdoMessageService {
      * @param logger             логгер
      */
     SendToEdoResult sendToEdo(List<Long> declarationDataIds, TAUserInfo userInfo, Logger logger);
+
+    void accept(String message);
 }

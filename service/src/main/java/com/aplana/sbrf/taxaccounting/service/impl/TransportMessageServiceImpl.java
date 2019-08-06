@@ -34,4 +34,9 @@ public class TransportMessageServiceImpl implements TransportMessageService {
     public void create(TransportMessage transportMessage) {
         transportMessageDao.create(transportMessage);
     }
+
+    @Override
+    public void save(TransportMessage transportMessage) {
+        transportMessageDao.update(transportMessage);
+    }
 }

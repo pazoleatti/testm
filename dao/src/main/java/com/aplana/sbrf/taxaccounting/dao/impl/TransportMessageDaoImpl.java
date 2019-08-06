@@ -2,18 +2,8 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.TransportMessageDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
-import com.aplana.sbrf.taxaccounting.model.BlobData;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.Subsystem;
-import com.aplana.sbrf.taxaccounting.model.TARole;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
-import com.aplana.sbrf.taxaccounting.model.messaging.DeclarationShortInfo;
-import com.aplana.sbrf.taxaccounting.model.messaging.TransportMessage;
-import com.aplana.sbrf.taxaccounting.model.messaging.TransportMessageContentType;
-import com.aplana.sbrf.taxaccounting.model.messaging.TransportMessageFilter;
-import com.aplana.sbrf.taxaccounting.model.messaging.TransportMessageState;
-import com.aplana.sbrf.taxaccounting.model.messaging.TransportMessageType;
+import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.messaging.*;
 import com.google.common.base.Joiner;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -186,6 +176,43 @@ public class TransportMessageDaoImpl extends AbstractDao implements TransportMes
                         ":content_type, :state, :body, :blob_id, :source_file_name, :initiator_user_id, :explanation, :declaration_id)",
                 params, keyHolder, new String[]{"ID"});
         transportMessage.setId(keyHolder.getKey().longValue());
+    }
+
+    @Override
+    public void update(TransportMessage transportMessage) {
+        String sql = "UPDATE transport_message SET " +
+                "MESSAGE_UUID = :messageUuid," +
+                "SENDER_SUBSYSTEM_ID = :senderSubsystemId," +
+                "RECEIVER_SUBSYSTEM_ID = :receiverSubsystemId," +
+                "CONTENT_TYPE = :contentType," +
+                "STATE = :state," +
+                "BODY = :body," +
+                "BLOB_ID = :blobId," +
+                "SOURCE_FILE_NAME = :sourceFileName," +
+                "INITIATOR_USER_ID = :initiatorUserId," +
+                "EXPLANATION = :explanation," +
+                "DECLARATION_ID = :declarationId " +
+                "WHERE ID = :id";
+
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("messageUuid", transportMessage.getMessageUuid());
+        params.addValue("senderSubsystemId",
+                transportMessage.getSenderSubsystem() != null ? transportMessage.getSenderSubsystem().getId() : null);
+        params.addValue("receiverSubsystemId",
+                transportMessage.getReceiverSubsystem() != null ? transportMessage.getReceiverSubsystem().getId() : null);
+        params.addValue("contentType", transportMessage.getContentType().getIntValue());
+        params.addValue("state", transportMessage.getState().getIntValue());
+        params.addValue("body", transportMessage.getBody());
+        params.addValue("blobId",
+                transportMessage.getBlob() != null ? transportMessage.getBlob().getUuid() : null);
+        params.addValue("sourceFileName", transportMessage.getSourceFileName());
+        params.addValue("initiatorUserId", transportMessage.getInitiatorUser().getId());
+        params.addValue("explanation", transportMessage.getExplanation());
+        params.addValue("declarationId",
+                transportMessage.getDeclaration() != null ? transportMessage.getDeclaration().getId() : null);
+        params.addValue("id", transportMessage.getId());
+
+        getNamedParameterJdbcTemplate().update(sql, params);
     }
 
 
