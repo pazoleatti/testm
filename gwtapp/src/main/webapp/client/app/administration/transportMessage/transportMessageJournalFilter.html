@@ -15,6 +15,7 @@
                             </div>
                             <div class="span8">
                                 <input type="text"
+                                       oninput="this.value=this.value.replace(/[^0-9]/g,'');"
                                        class="form-control"
                                        maxlength="18"
                                        placeholder="{{'filter.placeholder.search' | translate}}"
