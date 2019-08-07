@@ -22,10 +22,7 @@ import javax.naming.NamingException;
 @EnableJms
 @Profile(value = {"development", "jms"})
 public class JmsBaseConfig {
-
-        public static final String FROM_NDFL_QUEUE_JNDI_NAME = "EdoResponseQueue";
-
-        public static final String TO_NDFL_QUEUE_JNDI_NAME = "EdoRequestQueue";
+        public static final String TO_NDFL_QUEUE_JNDI_NAME = "jms/EdoRequestQueue";
 
         @Autowired
         private ConfigurationService configurationService;
@@ -74,31 +71,4 @@ public class JmsBaseConfig {
                         .lookup("java:comp/env/jms/FundConnectionFactory");
         }
 
-//        /**
-//         * Очередь исходящих запросов, получается по JNDI у вебсферы.
-//         */
-//        @Bean(name = FROM_NDFL_QUEUE_NAME)
-//        public Destination edoResponsesQueue() throws NamingException {
-//                com.aplana.sbrf.taxaccounting.model.Configuration configuration =
-//                        configurationService.fetchByEnum(ConfigurationParam.JNDI_QUEUE_OUT);
-//
-//                String jndiQueueOutConfigValue = configuration.getValue();
-//                if (StringUtils.isEmpty(jndiQueueOutConfigValue)) {
-//                        jndiQueueOutConfigValue = FROM_NDFL_QUEUE_NAME;
-//                }
-//
-//
-//                return (Destination) new InitialContext()
-//                        .lookup("java:comp/env/jms/" + jndiQueueOutConfigValue);
-//        }
-//
-//        /**
-//         * Очередь входящих запросов, получается по JNDI у вебсферы.
-//         */
-//        @Bean(name = "EdoRequestQueue")
-//        public Destination edoRequestsQueue() throws NamingException {
-//
-//                return (Destination) new InitialContext()
-//                        .lookup("java:comp/env/jms/" + TO_NDFL_QUEUE_NAME);
-//        }
 }
