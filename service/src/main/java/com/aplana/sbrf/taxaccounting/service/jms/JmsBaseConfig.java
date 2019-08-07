@@ -13,7 +13,6 @@ import org.springframework.jms.support.converter.SimpleMessageConverter;
 import org.springframework.jms.support.destination.BeanFactoryDestinationResolver;
 
 import javax.jms.ConnectionFactory;
-import javax.jms.Destination;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
@@ -72,21 +71,31 @@ public class JmsBaseConfig {
                         .lookup("java:comp/env/jms/FundConnectionFactory");
         }
 
-        /**
-         * Очередь исходящих запросов, получается по JNDI у вебсферы.
-         */
-        @Bean(name = JmsBaseConfig.FROM_NDFL_QUEUE)
-        public Destination edoResponsesQueue() throws NamingException {
-                return (Destination) new InitialContext()
-                        .lookup("java:comp/env/jms/" + FROM_NDFL_QUEUE);
-        }
-
-        /**
-         * Очередь входящих запросов, получается по JNDI у вебсферы.
-         */
-        @Bean(name = JmsBaseConfig.TO_NDFL_QUEUE)
-        public Destination edoRequestsQueue() throws NamingException {
-                return (Destination) new InitialContext()
-                        .lookup("java:comp/env/jms/" + TO_NDFL_QUEUE);
-        }
+//        /**
+//         * Очередь исходящих запросов, получается по JNDI у вебсферы.
+//         */
+//        @Bean(name = FROM_NDFL_QUEUE_DEFAULT_JNDI)
+//        public Destination edoResponsesQueue(ConfigurationService configurationService) throws NamingException {
+//                com.aplana.sbrf.taxaccounting.model.Configuration configuration =
+//                        configurationService.fetchByEnum(ConfigurationParam.JNDI_QUEUE_OUT);
+//
+//                String jndiQueueOutConfigValue = configuration.getValue();
+//                if (StringUtils.isEmpty(jndiQueueOutConfigValue)) {
+//                        jndiQueueOutConfigValue = FROM_NDFL_QUEUE_DEFAULT_JNDI;
+//                }
+//
+//
+//                return (Destination) new InitialContext()
+//                        .lookup("java:comp/env/jms/" + FROM_NDFL_QUEUE_DEFAULT_JNDI);
+//        }
+//
+//        /**
+//         * Очередь входящих запросов, получается по JNDI у вебсферы.
+//         */
+//        @Bean(name = "EdoRequestQueue")
+//        public Destination edoRequestsQueue() throws NamingException {
+//
+//                return (Destination) new InitialContext()
+//                        .lookup("java:comp/env/jms/" + TO_NDFL_QUEUE_DEFAULT_JNDI);
+//        }
 }
