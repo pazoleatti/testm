@@ -17,6 +17,11 @@ public class SubsystemServiceImpl implements SubsystemService {
     private SubsystemDao subsystemDao;
 
     @Override
+    public Subsystem findById(long id) {
+        return subsystemDao.findById(id);
+    }
+
+    @Override
     public PagingResult<Subsystem> findByName(String name) {
         return subsystemDao.findByName(name);
     }

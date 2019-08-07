@@ -1,11 +1,9 @@
 package com.aplana.sbrf.taxaccounting.service.impl.transport.edo;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.ConfigurationParameterAbsentException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.model.jms.BaseMessage;
-import com.aplana.sbrf.taxaccounting.model.jms.TaxMessageDocument;
-import com.aplana.sbrf.taxaccounting.model.jms.TaxMessageReceipt;
-import com.aplana.sbrf.taxaccounting.model.jms.TaxMessageTechDocument;
+import com.aplana.sbrf.taxaccounting.model.jms.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.messaging.*;
@@ -41,12 +39,17 @@ import javax.xml.transform.Result;
 import javax.xml.transform.stream.StreamResult;
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import static com.aplana.sbrf.taxaccounting.model.refbook.RefBookDocState.*;
 
 @Service
 public class EdoMessageServiceImpl implements EdoMessageService {
     private static final Log LOG = LogFactory.getLog(EdoMessageService.class);
+
+    private static final String MESSAGE_FORMAT_VERSION = "2.0";
 
     private final DeclarationDataService declarationDataService;
     private final DeclarationTemplateService declarationTemplateService;
@@ -61,14 +64,17 @@ public class EdoMessageServiceImpl implements EdoMessageService {
     private final TransactionHelper transactionHelper;
     private final TAUserService taUserService;
     private final UploadTransportDataService uploadTransportDataService;
+    private final SubsystemService subsystemService;
     @Autowired(required = false)
     private MessageSender messageSender;
+
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
     @Autowired
     public EdoMessageServiceImpl(DeclarationDataService declarationDataService, DeclarationTemplateService declarationTemplateService, DeclarationLocker declarationLocker,
                                  BlobDataService blobDataService, ConfigurationService configurationService, ValidateXMLService validateXMLService,
                                  TransportMessageService transportMessageService, CommonRefBookService commonRefBookService,
-                                 LogBusinessService logBusinessService, LockDataService lockDataService, TransactionHelper transactionHelper, TAUserService taUserService, RefBookScriptingService refBookScriptingService, UploadTransportDataService uploadTransportDataService) {
+                                 LogBusinessService logBusinessService, LockDataService lockDataService, TransactionHelper transactionHelper, TAUserService taUserService, RefBookScriptingService refBookScriptingService, UploadTransportDataService uploadTransportDataService, SubsystemService subsystemService) {
         this.declarationDataService = declarationDataService;
         this.declarationTemplateService = declarationTemplateService;
         this.declarationLocker = declarationLocker;
@@ -82,6 +88,7 @@ public class EdoMessageServiceImpl implements EdoMessageService {
         this.transactionHelper = transactionHelper;
         this.taUserService = taUserService;
         this.uploadTransportDataService = uploadTransportDataService;
+        this.subsystemService = subsystemService;
     }
 
     @Override
@@ -89,9 +96,9 @@ public class EdoMessageServiceImpl implements EdoMessageService {
         SendToEdoResult result = new SendToEdoResult();
         for (long declarationId : declarationDataIds) {
             DeclarationData declarationData = declarationDataService.get(declarationId);
-            SendToEdoContext sendToEdoContext = new SendToEdoContext(declarationData, userInfo, logger);
-            sendToEdoContext.sendToEdo();
-            result.put(sendToEdoContext.resultLogLevel, declarationData);
+            SendDeclarationToEdoContext sendDeclarationToEdoContext = new SendDeclarationToEdoContext(declarationData, userInfo, logger);
+            sendDeclarationToEdoContext.sendToEdo();
+            result.put(sendDeclarationToEdoContext.resultLogLevel, declarationData);
         }
         return result;
     }
@@ -134,7 +141,7 @@ public class EdoMessageServiceImpl implements EdoMessageService {
         BlobData xsd = blobDataService.get(declarationTemplateRefBook.getXsdId());
         if (!validateXMLService.validate(validationLogger, message, xsd.getName(), xsd.getInputStream())) {
             String errorMessage = "Входящее сообщение не соответствует xsd схеме.";
-            failHandleEdoTechReceipt(transportMessage, errorMessage);
+            failHandleEdoMessage(transportMessage, errorMessage);
             throw new IllegalStateException(errorMessage);
         }
     }
@@ -214,7 +221,7 @@ public class EdoMessageServiceImpl implements EdoMessageService {
         TransportMessage sourceTransportMessage = getSourceTransportMessage(taxMessageReceipt);
         if (sourceTransportMessage == null) {
             String errorMessage = "Для данной технологической квитанции не найдено исходное сообщение";
-            failHandleEdoTechReceipt(transportMessage, errorMessage);
+            failHandleEdoMessage(transportMessage, errorMessage);
             throw new IllegalStateException(errorMessage + ". UUID сообщения = " + taxMessageReceipt.getUuid());
         }
 
@@ -224,9 +231,9 @@ public class EdoMessageServiceImpl implements EdoMessageService {
         transportMessage.setState(TransportMessageState.CONFIRMED);
     }
 
-    private void failHandleEdoTechReceipt(TransportMessage transportMessage, String message) {
+    private void failHandleEdoMessage(TransportMessage transportMessage, String errorMessage) {
         transportMessage.setState(TransportMessageState.ERROR);
-        transportMessage.setExplanation(new Date() + " " + message);
+        transportMessage.setExplanation(new Date() + " " + errorMessage);
     }
 
     private void updateSourceTransportMessageState(TaxMessageReceipt taxMessageReceipt, TransportMessage transportMessage) {
@@ -255,7 +262,7 @@ public class EdoMessageServiceImpl implements EdoMessageService {
             String errorMessage = "Не удалось найти налоговую форму № " + declarationShortInfo.getId() +
                     " для изменения \"Состояние ЭД\" на " + SENT_TO_EDO.getName() +". " +
                     "Идентификатор транспортного сообщения: " + transportMessage.getMessageUuid();
-            failHandleEdoTechReceipt(transportMessage, errorMessage);
+            failHandleEdoMessage(transportMessage, errorMessage);
             throw new IllegalStateException(errorMessage);
         }
 
@@ -300,7 +307,26 @@ public class EdoMessageServiceImpl implements EdoMessageService {
                 true
         );
 
-        // todo handle result of upload transport file
+        if (uploadTransportDataResult.getContentType() == null || uploadTransportDataResult.getMessageState() == null) {
+            throw new IllegalStateException("В результате работы алгоритма обработки ответа от ФНС" +
+                    "произошла непредвинная ошибка.");
+        }
+        transportMessage.setContentType(uploadTransportDataResult.getContentType());
+
+        TaxMessageReceipt taxMessageReceipt = buildTaxMessageReceipt(
+                taxMessageTechDocument.getUuid(),
+                uploadTransportDataResult.getMessageState(),
+                uploadTransportDataResult.getProcessMessageResult()
+        );
+
+        try {
+            sendTechReceiptToEdo(transportMessage, taxMessageReceipt);
+
+            transportMessage.setState(uploadTransportDataResult.getMessageState());
+            sharedFileNameFromFns.delete();
+        } catch (Exception e) {
+            failHandleEdoMessage(transportMessage, e.getMessage());
+        }
     }
 
     private BlobData storeFileInTransportMessage(TransportMessage transportMessage, FileWrapper sharedFileNameFromFns) {
@@ -316,6 +342,64 @@ public class EdoMessageServiceImpl implements EdoMessageService {
         return ResourceUtils.getSharedResource(fileNamePath);
     }
 
+    private TaxMessageReceipt buildTaxMessageReceipt(String incomeMessageUuid, TransportMessageState messageState, String message) {
+        MessageStatus messageStatus = new MessageStatus();
+        messageStatus.setCode(messageState.getIntValue());
+        messageStatus.setDetail(message);
+
+        TaxMessageReceipt taxMessageReceipt = new TaxMessageReceipt();
+        taxMessageReceipt.setFormatVersion(MESSAGE_FORMAT_VERSION);
+        taxMessageReceipt.setUuid(incomeMessageUuid);
+        taxMessageReceipt.setSource(getConfigIntValue(ConfigurationParam.NDFL_SUBSYSTEM_ID));
+        taxMessageReceipt.setDestination(getConfigIntValue(ConfigurationParam.TARGET_SUBSYSTEM_ID));
+        taxMessageReceipt.setStatus(messageStatus);
+
+        return taxMessageReceipt;
+    }
+
+    private void sendTechReceiptToEdo(TransportMessage transportMessage, TaxMessageReceipt taxMessageReceipt) {
+        String messageXml = toXml(taxMessageReceipt);
+        Integer taxMessageRetryCount = configurationService.getParamIntValue(ConfigurationParam.TAX_MESSAGE_RETRY_COUNT);
+        Integer taxMessageReceiptWaitingSec =
+                configurationService.getParamIntValue(ConfigurationParam.TAX_MESSAGE_RECEIPT_WAITING_TIME);
+        try {
+            trySendTechReceiptToEdo(messageXml, 1, taxMessageRetryCount, taxMessageReceiptWaitingSec);
+        } catch (ConfigurationParameterAbsentException e) {
+            throw new ServiceException("В параметре: \"" + ConfigurationParam.JNDI_QUEUE_OUT.getCaption() +
+                    "\" не прописано наименование очереди.");
+        } catch (Exception e) {
+            long senderSubsystemId = transportMessage.getSenderSubsystem().getId();
+            // SenderSubsystem в транспортном сообщении не имеет имени, т.к. оно не заоплняется на этапе инициалазации
+            Subsystem senderSubsystem = subsystemService.findById(senderSubsystemId);
+            throw new ServiceException("Не удалось отправить XML-сообщение c идентификатором: " +
+                    transportMessage.getMessageUuid() + " в систему: " + senderSubsystem.getName() + " .");
+        }
+    }
+
+    private void trySendTechReceiptToEdo(final String messageXml, int attemptNumber, final Integer retryCount,
+                                         final Integer waitingSec) {
+        try {
+            messageSender.sendMessage(messageXml);
+        } catch (ConfigurationParameterAbsentException e) {
+            throw e;
+        } catch (Exception e) {
+            if (attemptNumber < retryCount) {
+                LOG.info("Неуспешная попытка " + attemptNumber + " отправить сообщение." +
+                        " Повторная попытка отправки сообщения будет осуществлена через " + waitingSec +
+                        " секунде еще " + retryCount + " раз через раз.");
+                final int newAttemptNumber = ++attemptNumber;
+                scheduler.schedule(new Runnable() {
+                    @Override
+                    public void run() {
+                        trySendTechReceiptToEdo(messageXml, newAttemptNumber, retryCount, waitingSec);
+                    }
+                }, waitingSec, TimeUnit.SECONDS);
+            } else {
+                throw e;
+            }
+        }
+    }
+
     private int getConfigIntValue(ConfigurationParam param) {
         Configuration configuration = configurationService.fetchByEnum(param);
         if (configuration != null) {
@@ -329,7 +413,19 @@ public class EdoMessageServiceImpl implements EdoMessageService {
         }
     }
 
-    private class SendToEdoContext {
+    private String toXml(Object obj) {
+        Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
+        marshaller.setClassesToBeBound(obj.getClass());
+        Map<String, Object> props = new HashMap<>();
+        props.put(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+        marshaller.setMarshallerProperties(props);
+        Writer writer = new StringWriter();
+        Result result = new StreamResult(writer);
+        marshaller.marshal(obj, result);
+        return writer.toString();
+    }
+
+    private class SendDeclarationToEdoContext {
         DeclarationData declarationData;
         DeclarationTemplate declarationTemplate;
         TAUserInfo userInfo;
@@ -337,7 +433,7 @@ public class EdoMessageServiceImpl implements EdoMessageService {
         DeclarationDataFile declarationXmlFile;
         LogLevel resultLogLevel = LogLevel.ERROR;
 
-        SendToEdoContext(DeclarationData declarationData, TAUserInfo userInfo, Logger logger) {
+        SendDeclarationToEdoContext(DeclarationData declarationData, TAUserInfo userInfo, Logger logger) {
             this.declarationData = declarationData;
             declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
             this.userInfo = userInfo;
@@ -426,25 +522,13 @@ public class EdoMessageServiceImpl implements EdoMessageService {
 
         private TaxMessageDocument buildEdoMessage(String fileName, TAUserInfo userInfo) {
             TaxMessageDocument taxMessageDocument = new TaxMessageDocument();
-            taxMessageDocument.setFormatVersion("2.0");
+            taxMessageDocument.setFormatVersion(MESSAGE_FORMAT_VERSION);
             taxMessageDocument.setUuid(UUID.randomUUID().toString().toLowerCase());
             taxMessageDocument.setSource(getConfigIntValue(ConfigurationParam.NDFL_SUBSYSTEM_ID));
             taxMessageDocument.setDestination(getConfigIntValue(ConfigurationParam.TARGET_SUBSYSTEM_ID));
             taxMessageDocument.setLogin(userInfo.getUser().getLogin());
             taxMessageDocument.setFilename(fileName);
             return taxMessageDocument;
-        }
-
-        private String toXml(Object obj) {
-            Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
-            marshaller.setClassesToBeBound(TaxMessageDocument.class);
-            Map<String, Object> props = new HashMap<>();
-            props.put(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-            marshaller.setMarshallerProperties(props);
-            Writer writer = new StringWriter();
-            Result result = new StreamResult(writer);
-            marshaller.marshal(obj, result);
-            return writer.toString();
         }
 
         private void createTransportMessage(TaxMessageDocument message, String messageXml) {

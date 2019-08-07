@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.jms.transport.impl;
 
 import com.aplana.sbrf.taxaccounting.model.Configuration;
 import com.aplana.sbrf.taxaccounting.model.ConfigurationParam;
+import com.aplana.sbrf.taxaccounting.model.exception.ConfigurationParameterAbsentException;
 import com.aplana.sbrf.taxaccounting.service.ConfigurationService;
 import com.aplana.sbrf.taxaccounting.service.jms.transport.MessageSender;
 import org.apache.commons.lang3.StringUtils;
@@ -23,10 +24,10 @@ public class BaseMessageSenderImpl implements MessageSender {
     private ConfigurationService configurationService;
 
     @Override
-    public void sendMessage(String message) {
+    public void sendMessage(String message) throws ConfigurationParameterAbsentException {
         Configuration configuration = configurationService.fetchByEnum(ConfigurationParam.JNDI_QUEUE_OUT);
         if (configuration == null || StringUtils.isEmpty(configuration.getValue())) {
-            throw new IllegalStateException("не задан конфигурационный параметр: \"" +
+            throw new ConfigurationParameterAbsentException("не задан конфигурационный параметр: \"" +
                     ConfigurationParam.JNDI_QUEUE_OUT.getCaption() + "\"");
         }
 
