@@ -4,6 +4,9 @@ import com.aplana.sbrf.taxaccounting.model.Configuration;
 import com.aplana.sbrf.taxaccounting.model.ConfigurationParam;
 import com.aplana.sbrf.taxaccounting.service.ConfigurationService;
 import com.aplana.sbrf.taxaccounting.service.jms.transport.MessageSender;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.jms.core.JmsTemplate;
@@ -12,6 +15,7 @@ import org.springframework.stereotype.Service;
 @Service
 @Profile({"jms", "development"})
 public class BaseMessageSenderImpl implements MessageSender {
+    private static final Log LOG = LogFactory.getLog(BaseMessageSenderImpl.class);
 
     @Autowired
     private JmsTemplate jmsTemplate;
@@ -19,14 +23,15 @@ public class BaseMessageSenderImpl implements MessageSender {
     private ConfigurationService configurationService;
 
     @Override
-    public void sendMessage(String fileName) {
+    public void sendMessage(String message) {
         Configuration configuration = configurationService.fetchByEnum(ConfigurationParam.JNDI_QUEUE_OUT);
-        if (configuration == null) {
+        if (configuration == null || StringUtils.isEmpty(configuration.getValue())) {
             throw new IllegalStateException("не задан конфигурационный параметр: \"" +
                     ConfigurationParam.JNDI_QUEUE_OUT.getCaption() + "\"");
         }
 
-        System.out.println(fileName);
-        jmsTemplate.convertAndSend(configuration.getValue(), fileName);
+        LOG.debug("Попытка отправить сообщение '" + message + "' в очередь" + configuration.getValue());
+        jmsTemplate.convertAndSend(configuration.getValue(), message);
+        LOG.info("Сообщение '" + message + "' успешно отправлено в очередь " + configuration.getValue());
     }
 }

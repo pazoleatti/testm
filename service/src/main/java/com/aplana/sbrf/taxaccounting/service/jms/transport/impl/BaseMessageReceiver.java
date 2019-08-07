@@ -26,7 +26,7 @@ public class BaseMessageReceiver {
     @Autowired
     private EdoMessageService edoMessageService;
 
-    @JmsListener(destination = JmsBaseConfig.TO_NDFL_QUEUE, id="messageReceiver", containerFactory = "jmsListenerContainerFactory")
+    @JmsListener(destination = JmsBaseConfig.TO_NDFL_QUEUE_DEFAULT_JNDI, id="messageReceiver", containerFactory = "jmsListenerContainerFactory")
     public void handleMessage(Message<String> message) {
         final String messageContent = message.getPayload();
         System.out.println("Raw message: " + messageContent);
