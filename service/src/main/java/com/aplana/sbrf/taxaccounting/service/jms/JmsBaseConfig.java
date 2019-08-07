@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.jms;
 
-import org.springframework.beans.factory.BeanFactory;
+import com.aplana.sbrf.taxaccounting.service.ConfigurationService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -10,10 +11,9 @@ import org.springframework.jms.config.JmsListenerContainerFactory;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.jms.support.converter.SimpleMessageConverter;
-import org.springframework.jms.support.destination.BeanFactoryDestinationResolver;
+import org.springframework.jms.support.destination.JndiDestinationResolver;
 
 import javax.jms.ConnectionFactory;
-import javax.jms.Destination;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
@@ -23,10 +23,12 @@ import javax.naming.NamingException;
 @Profile(value = {"development", "jms"})
 public class JmsBaseConfig {
 
-        public static final String FROM_NDFL_QUEUE_NAME = "EdoResponseQueue";
+        public static final String FROM_NDFL_QUEUE_JNDI_NAME = "EdoResponseQueue";
 
-        public static final String TO_NDFL_QUEUE_NAME = "EdoRequestQueue";
+        public static final String TO_NDFL_QUEUE_JNDI_NAME = "EdoRequestQueue";
 
+        @Autowired
+        private ConfigurationService configurationService;
         /**
          * Конвертер сообщений из xml в объектные модели
          */
@@ -36,13 +38,13 @@ public class JmsBaseConfig {
         }
 
         @Bean
-        public BeanFactoryDestinationResolver destinationResolver(BeanFactory beanFactory) {
-                return new BeanFactoryDestinationResolver(beanFactory);
+        public JndiDestinationResolver destinationResolver() {
+                return new JndiDestinationResolver();
         }
 
         @Bean
         public JmsTemplate jmsTemplate(MessageConverter messageConverter,
-                                       BeanFactoryDestinationResolver destinationResolver) throws NamingException {
+                                       JndiDestinationResolver destinationResolver) throws NamingException {
                 JmsTemplate jmsTemplate = new JmsTemplate(connectionFactory());
                 jmsTemplate.setMessageConverter(messageConverter);
                 jmsTemplate.setDestinationResolver(destinationResolver);
@@ -53,7 +55,7 @@ public class JmsBaseConfig {
         @Bean
         public JmsListenerContainerFactory<?> jmsListenerContainerFactory(ConnectionFactory connectionFactory,
                                                                           MessageConverter messageConverter,
-                                                                          BeanFactoryDestinationResolver destinationResolver) {
+                                                                          JndiDestinationResolver destinationResolver) {
 
                 DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
                 factory.setConnectionFactory(connectionFactory);
@@ -72,22 +74,31 @@ public class JmsBaseConfig {
                         .lookup("java:comp/env/jms/FundConnectionFactory");
         }
 
-        /**
-         * Очередь исходящих запросов, получается по JNDI у вебсферы.
-         */
-        @Bean(name = FROM_NDFL_QUEUE_NAME)
-        public Destination edoResponsesQueue() throws NamingException {
-                return (Destination) new InitialContext()
-                        .lookup("java:comp/env/jms/" + FROM_NDFL_QUEUE_NAME);
-        }
-
-        /**
-         * Очередь входящих запросов, получается по JNDI у вебсферы.
-         */
-        @Bean(name = "EdoRequestQueue")
-        public Destination edoRequestsQueue() throws NamingException {
-
-                return (Destination) new InitialContext()
-                        .lookup("java:comp/env/jms/" + TO_NDFL_QUEUE_NAME);
-        }
+//        /**
+//         * Очередь исходящих запросов, получается по JNDI у вебсферы.
+//         */
+//        @Bean(name = FROM_NDFL_QUEUE_NAME)
+//        public Destination edoResponsesQueue() throws NamingException {
+//                com.aplana.sbrf.taxaccounting.model.Configuration configuration =
+//                        configurationService.fetchByEnum(ConfigurationParam.JNDI_QUEUE_OUT);
+//
+//                String jndiQueueOutConfigValue = configuration.getValue();
+//                if (StringUtils.isEmpty(jndiQueueOutConfigValue)) {
+//                        jndiQueueOutConfigValue = FROM_NDFL_QUEUE_NAME;
+//                }
+//
+//
+//                return (Destination) new InitialContext()
+//                        .lookup("java:comp/env/jms/" + jndiQueueOutConfigValue);
+//        }
+//
+//        /**
+//         * Очередь входящих запросов, получается по JNDI у вебсферы.
+//         */
+//        @Bean(name = "EdoRequestQueue")
+//        public Destination edoRequestsQueue() throws NamingException {
+//
+//                return (Destination) new InitialContext()
+//                        .lookup("java:comp/env/jms/" + TO_NDFL_QUEUE_NAME);
+//        }
 }
