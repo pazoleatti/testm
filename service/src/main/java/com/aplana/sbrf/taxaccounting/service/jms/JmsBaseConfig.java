@@ -22,9 +22,9 @@ import javax.naming.NamingException;
 @Profile(value = {"development", "jms"})
 public class JmsBaseConfig {
 
-        public static final String FROM_NDFL_QUEUE = "EdoResponseQueue";
+        public static final String FROM_NDFL_QUEUE_DEFAULT_JNDI = "java:comp/env/jms/EdoResponseQueue";
 
-        public static final String TO_NDFL_QUEUE = "EdoRequestQueue";
+        public static final String TO_NDFL_QUEUE_DEFAULT_JNDI = "java:comp/env/jms/EdoRequestQueue";
 
         /**
          * Конвертер сообщений из xml в объектные модели
