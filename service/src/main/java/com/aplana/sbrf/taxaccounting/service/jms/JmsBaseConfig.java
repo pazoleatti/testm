@@ -1,8 +1,5 @@
 package com.aplana.sbrf.taxaccounting.service.jms;
 
-import com.aplana.sbrf.taxaccounting.model.ConfigurationParam;
-import com.aplana.sbrf.taxaccounting.service.ConfigurationService;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -79,18 +76,9 @@ public class JmsBaseConfig {
          * Очередь исходящих запросов, получается по JNDI у вебсферы.
          */
         @Bean(name = FROM_NDFL_QUEUE_NAME)
-        public Destination edoResponsesQueue(ConfigurationService configurationService) throws NamingException {
-                com.aplana.sbrf.taxaccounting.model.Configuration configuration =
-                        configurationService.fetchByEnum(ConfigurationParam.JNDI_QUEUE_OUT);
-
-                String jndiQueueOutConfigValue = configuration.getValue();
-                if (StringUtils.isEmpty(jndiQueueOutConfigValue)) {
-                        jndiQueueOutConfigValue = FROM_NDFL_QUEUE_NAME;
-                }
-
-
+        public Destination edoResponsesQueue() throws NamingException {
                 return (Destination) new InitialContext()
-                        .lookup("java:comp/env/jms/" + jndiQueueOutConfigValue);
+                        .lookup("java:comp/env/jms/" + FROM_NDFL_QUEUE_NAME);
         }
 
         /**
