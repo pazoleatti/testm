@@ -126,8 +126,8 @@ class DeclarationType extends AbstractScriptClass {
         if (scriptClass.getBinding().hasVariable("logBusinessService")) {
             this.logBusinessService = (LogBusinessService) scriptClass.getProperty("logBusinessService")
         }
-        if (scriptClass.getBinding().hasVariable("auditService")) {
-            this.auditService = (AuditService) scriptClass.getProperty("auditService")
+        if (scriptClass.getBinding().hasVariable("auditServiceImpl")) {
+            this.auditService = (AuditService) scriptClass.getProperty("auditServiceImpl")
         }
     }
 
