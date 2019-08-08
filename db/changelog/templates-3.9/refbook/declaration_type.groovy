@@ -17,6 +17,7 @@ import com.aplana.sbrf.taxaccounting.script.SharedConstants
 import com.aplana.sbrf.taxaccounting.script.dao.BlobDataService
 import com.aplana.sbrf.taxaccounting.script.service.*
 import com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils
+import com.aplana.sbrf.taxaccounting.service.AuditService
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService
 import com.aplana.sbrf.taxaccounting.service.LogBusinessService
 import com.aplana.sbrf.taxaccounting.service.impl.TAAbstractScriptingServiceImpl
@@ -68,6 +69,7 @@ class DeclarationType extends AbstractScriptClass {
     LogBusinessService logBusinessService
     String version
     UploadTransportDataResult uploadTransportDataResult
+    AuditService auditService
 
     private DeclarationType() {
     }
@@ -134,6 +136,9 @@ class DeclarationType extends AbstractScriptClass {
             this.logBusinessService = (LogBusinessService) scriptClass.getProperty("logBusinessService")
         }
         this.uploadTransportDataResult = getSafeProperty("uploadTransportDataResult") as UploadTransportDataResult
+        if (scriptClass.getBinding().hasVariable("auditServiceImpl")) {
+            this.auditService = (AuditService) scriptClass.getProperty("auditServiceImpl")
+        }
     }
 
     @Override
@@ -960,6 +965,7 @@ class DeclarationType extends AbstractScriptClass {
                 def docStateId = docStateProvider.getUniqueRecordIds(new Date(), "KND = '${nextKnd}'").get(0)
                 if (declarationData.docStateId != docStateId) {
                     declarationService.setDocStateId(declarationData.id, docStateId)
+                    auditService.add(FormDataEvent.CHANGE_STATUS_ED, userInfo, declarationData, "Изменение \"Состояние ЭД\", для отчетной формы:  №$declarationData.id.", null)
                 }
             }
         }
@@ -970,6 +976,7 @@ class DeclarationType extends AbstractScriptClass {
         msgBuilder.append(msg)
         logger.info(msgBuilder.toString())
         uploadTransportDataResult.setNotificationMessage(msgBuilder.toString())
+        auditService.add(null, userInfo, declarationData, "Загрузка файла ответа ФНС $UploadFileName, для отчетной формы: №$declarationData.id.", null)
         logFormAttachResponseEvent(declarationData.id, msg)
         if (isAutoUpload()) {
             storeAutoUploadingContext(TransportMessageState.CONFIRMED, documentContentType, StringUtils.EMPTY)
