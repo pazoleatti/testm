@@ -14,4 +14,4 @@ CREATION_DATE DATE "DD.MM.RR",
 DECLARATION_TEMPLATE_ID)
 begindata
  448c3350-d00e-45ff-afda-2d2388d43808|tax-message_2.0.xsd|database-3.9/templates/data/refbook/tax-message_2.0.xsd|05.08.2019||
-
+ 352adf59-372b-4020-98fe-8960dd5bc972|refbook_declaration_type.groovy|database-3.9/templates/data/refbook/declaration_type.groovy|01.01.2016||

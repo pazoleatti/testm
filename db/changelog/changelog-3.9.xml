@@ -128,14 +128,6 @@
         </sql>
     </changeSet>
 
-    <changeSet id="3.9-adudenko-3" author="adudenko" runAlways="true">
-        <update tableName="BLOB_DATA">
-            <column name="data"
-                    valueBlobFile="templates-3.9/refbook/declaration_type.groovy"/>
-            <where>id in (select script_id from ref_book r where r.id = 207)</where>
-        </update>
-    </changeSet>
-
     <changeSet id="3.9-adudenko-4" author="adudenko">
         <insert tableName="blob_data">
             <column name="id" value="448c3350-d00e-45ff-afda-2d2388d43808"/>
@@ -149,6 +141,14 @@
         <update tableName="ref_book">
             <column name="xsd_id" value="448c3350-d00e-45ff-afda-2d2388d43808"/>
             <where>id=207</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="3.9-avoynov-3" author="avoynov">
+        <update tableName="BLOB_DATA">
+            <column name="data"
+                    valueBlobFile="templates-3.9/refbook/declaration_type.groovy"/>
+            <where>id in (select script_id from ref_book r where r.id = 207)</where>
         </update>
     </changeSet>
 

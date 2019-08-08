@@ -349,10 +349,11 @@ public class CommonRefBookServiceImpl implements CommonRefBookService {
         refBookScriptingService.executeScript(userInfo, refBookId, FormDataEvent.SAVE, logger, scriptParams);
         Date versionFrom = record.containsKey(RefBook.RECORD_VERSION_FROM_ALIAS) ? record.get(RefBook.RECORD_VERSION_FROM_ALIAS).getDateValue() : null;
         Date versionTo = record.containsKey(RefBook.RECORD_VERSION_TO_ALIAS) ? record.get(RefBook.RECORD_VERSION_TO_ALIAS).getDateValue() : null;
-        record.remove(RefBook.RECORD_VERSION_FROM_ALIAS);
-        record.remove(RefBook.RECORD_VERSION_TO_ALIAS);
+        Map<String, RefBookValue> recordToSave = new HashMap<>(record); // Создаем копию записи без дат актуальности для корректного формирования записи в Журнал Аудита
+        recordToSave.remove(RefBook.RECORD_VERSION_FROM_ALIAS);
+        recordToSave.remove(RefBook.RECORD_VERSION_TO_ALIAS);
 
-        refBookFactory.getDataProvider(refBookId).updateRecordVersion(logger, recordId, versionFrom, versionTo, record);
+        refBookFactory.getDataProvider(refBookId).updateRecordVersion(logger, recordId, versionFrom, versionTo, recordToSave);
         String uuid = logEntryService.save(logger.getEntries());
         if (logger.containsLevel(LogLevel.ERROR)) {
             throw new ServiceLoggerException("Не удалось сохранить запись справочника!", uuid);

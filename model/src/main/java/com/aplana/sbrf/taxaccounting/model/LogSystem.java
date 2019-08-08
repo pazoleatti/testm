@@ -17,7 +17,7 @@ public class LogSystem implements Serializable {
 
 	private Long id;
 	private String ip;
-	private int eventId;
+	private Integer eventId;
     private String userLogin;
 	private String roles;
 	private String formDepartmentName;
