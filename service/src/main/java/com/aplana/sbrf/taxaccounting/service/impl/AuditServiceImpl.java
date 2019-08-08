@@ -63,6 +63,13 @@ public class AuditServiceImpl implements AuditService {
 
     @Override
     @Transactional
+    public void add(final FormDataEvent event, final TAUserInfo userInfo, final String note) {
+        add(event, userInfo, null, null, null, null, null,
+                null, null, note != null ? note.substring(0, Math.min(note.length(), 2000)) : null, null);
+    }
+
+    @Override
+    @Transactional
     public void add(final FormDataEvent event, final TAUserInfo userInfo, final Integer departmentId, final Integer reportPeriodId,
                     final String declarationTypeName, final String formTypeName, final AuditFormType auditFormType, final Integer formKindId, final String note, final String logId) {
         ReportPeriod reportPeriod = null;
@@ -148,7 +155,7 @@ public class AuditServiceImpl implements AuditService {
                      String declarationTypeName, String formTypeName, AuditFormType auditFormType, Integer formKindId, String note, String logId) {
         LogSystem log = new LogSystem();
         log.setIp(userInfo.getIp());
-        log.setEventId(event.getCode());
+        log.setEventId(event != null ? event.getCode() : null);
         log.setUserLogin(userInfo.getUser().getLogin());
 
         StringBuilder roles = new StringBuilder();

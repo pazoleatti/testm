@@ -1,13 +1,25 @@
 package com.aplana.sbrf.taxaccounting.service;
 
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.AuditFormType;
+import com.aplana.sbrf.taxaccounting.model.DeclarationData;
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 
 import java.util.Date;
 
 /**
  * Сервис для работы с журналом аудита
  */
+@ScriptExposed
 public interface AuditService {
+
+    /**
+     * Создание записи в ЖА
+     * @param event событие {@link FormDataEvent} (обязательное)
+     * @param userInfo информация о пользователе, который совершает событие (обязательное)
+     * @param note пояснение (обязательное)
+     */
+    void add(FormDataEvent event, TAUserInfo userInfo, String note);
 
     /**
      * Добавить информацию об логировании
@@ -40,7 +52,7 @@ public interface AuditService {
 
     /**
      * Логгирование для НФ/деклараций(т.к. нужно еще инфо о корр. периоде добавлять)
-     * @param event событие {@link FormDataEvent} (обязательное)
+     * @param event событие {@link FormDataEvent} (необязательное)
      * @param userInfo информация о пользователе, который совершает событие (обязательное)
      * @param declarationData декларация (обязательное)
      * @param note пояснение (необязательное)

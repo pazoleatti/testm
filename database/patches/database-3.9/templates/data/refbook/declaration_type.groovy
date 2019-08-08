@@ -4,14 +4,11 @@ import com.aplana.sbrf.taxaccounting.AbstractScriptClass
 import com.aplana.sbrf.taxaccounting.model.*
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
-import com.aplana.sbrf.taxaccounting.model.messaging.TransportMessageContentType
-import com.aplana.sbrf.taxaccounting.model.messaging.TransportMessageState
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
-import com.aplana.sbrf.taxaccounting.model.result.UploadTransportDataResult
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
 import com.aplana.sbrf.taxaccounting.script.SharedConstants
 import com.aplana.sbrf.taxaccounting.script.dao.BlobDataService
@@ -24,7 +21,6 @@ import com.aplana.sbrf.taxaccounting.service.impl.TAAbstractScriptingServiceImpl
 import groovy.transform.TypeChecked
 import groovy.transform.TypeCheckingMode
 import org.apache.commons.io.IOUtils
-import org.apache.commons.lang3.StringUtils
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 import org.xml.sax.Attributes
@@ -64,11 +60,9 @@ class DeclarationType extends AbstractScriptClass {
     DeclarationTemplateService declarationTemplateService
     OutputStream outputStream
     int reportYear
-    boolean autoUpload
     NdflPersonService ndflPersonService
     LogBusinessService logBusinessService
     String version
-    UploadTransportDataResult uploadTransportDataResult
     AuditService auditService
 
     private DeclarationType() {
@@ -119,9 +113,6 @@ class DeclarationType extends AbstractScriptClass {
         if (scriptClass.getBinding().hasVariable("reportYear")) {
             this.reportYear = (int) scriptClass.getProperty("reportYear")
         }
-        if (scriptClass.getBinding().hasVariable("autoUpload")) {
-            this.autoUpload = (boolean) scriptClass.getProperty("autoUpload")
-        }
         if (scriptClass.getBinding().hasVariable("ndflPersonService")) {
             this.ndflPersonService = (NdflPersonService) scriptClass.getProperty("ndflPersonService")
         }
@@ -135,9 +126,8 @@ class DeclarationType extends AbstractScriptClass {
         if (scriptClass.getBinding().hasVariable("logBusinessService")) {
             this.logBusinessService = (LogBusinessService) scriptClass.getProperty("logBusinessService")
         }
-        this.uploadTransportDataResult = getSafeProperty("uploadTransportDataResult") as UploadTransportDataResult
-        if (scriptClass.getBinding().hasVariable("auditServiceImpl")) {
-            this.auditService = (AuditService) scriptClass.getProperty("auditServiceImpl")
+        if (scriptClass.getBinding().hasVariable("auditService")) {
+            this.auditService = (AuditService) scriptClass.getProperty("auditService")
         }
     }
 
@@ -253,7 +243,6 @@ class DeclarationType extends AbstractScriptClass {
     String ERROR_NAME_FORMAT = "Имя транспортного файла «%s» не соответствует формату!"
     String ERROR_NOT_FOUND_FORM = "Не найдена форма, содержащая «%s», для файла ответа «%s»"
 
-    final String ANSWER_ERROR_PATTERN = "TR_SOSH_"
     final String NDFL2_PATTERN_PROT_1 = "PROT_NO_NDFL2"
     final String NDFL2_PATTERN_PROT_2 = "прот_NO_NDFL2"
     final String NDFL2_PATTERN_REESTR_1 = "REESTR_NO_NDFL2"
@@ -360,22 +349,22 @@ class DeclarationType extends AbstractScriptClass {
 /**
  * Возвращает имя отчетного файла для 6НДФЛ
  */
-    String getFileName(Map<String, Map<String, List<String>>> contentMap, TransportMessageContentType documentContentType) {
-        if (TransportMessageContentType.RECEIPT_DOCUMENT == documentContentType) {
+    def getFileName(Map<String, Map<String, List<String>>> contentMap, String fileName) {
+        if (fileName.startsWith(ANSWER_PATTERN_NDFL_1)) {
             Map<String, List<String>> names = contentMap.get(NDFL2_KV_FILE_TAG)
             return names.get(NDFL2_KV_FILE_ATTR).find {String name -> name.startsWith(NDFL6_FILENAME_PREFIX)}
         }
 
-        if (TransportMessageContentType.REJECTION_NOTICE == documentContentType) {
+        if (fileName.startsWith(ANSWER_PATTERN_NDFL_2)) {
             Map<String, List<String>> names = contentMap.get(NDFL2_UO_FILE_TAG)
             return names.get(NDFL2_UO_FILE_ATTR).find {String name -> name.startsWith(NDFL6_FILENAME_PREFIX)}
         }
 
-        if (TransportMessageContentType.ENTRY_NOTICE == documentContentType) {
+        if (fileName.startsWith(ANSWER_PATTERN_NDFL_3)) {
             return contentMap.get(NDFL2_IV_FILE_TAG).get(NDFL2_IV_FILE_ATTR).get(0)
         }
 
-        if (TransportMessageContentType.CORRECTION_NOTICE == documentContentType) {
+        if (fileName.startsWith(ANSWER_PATTERN_NDFL_4)) {
             Map<String, List<String>> names = contentMap.get(NDFL2_UU_FILE_TAG)
             return names.get(NDFL2_UU_FILE_ATTR).find {String name -> name.startsWith(NDFL6_FILENAME_PREFIX)}
         }
@@ -656,47 +645,9 @@ class DeclarationType extends AbstractScriptClass {
     }
 
     /**
-     * Возвращает тип документа для 2 и 6НДФЛ
-     */
-    TransportMessageContentType getDocumentContentTypeFromFileName() {
-        TransportMessageContentType documentContentType = null
-
-        if (isNdfl2ResponseProt(UploadFileName)) {
-            documentContentType = TransportMessageContentType.NDFL2_ACCEPTANCE_PROTOCOL
-        } else if (isNdfl2ResponseReestr(UploadFileName)) {
-            documentContentType = TransportMessageContentType.RECEIVED_DOCUMENTS_REGISTRY
-        } else if (UploadFileName.startsWith(ANSWER_PATTERN_NDFL_1)) {
-            documentContentType = TransportMessageContentType.RECEIPT_DOCUMENT
-        } else if (UploadFileName.startsWith(ANSWER_PATTERN_NDFL_2)) {
-            documentContentType = TransportMessageContentType.REJECTION_NOTICE
-        } else if (UploadFileName.startsWith(ANSWER_PATTERN_NDFL_3)) {
-            documentContentType = TransportMessageContentType.ENTRY_NOTICE
-        } else if (UploadFileName.startsWith(ANSWER_PATTERN_NDFL_4)) {
-            documentContentType = TransportMessageContentType.CORRECTION_NOTICE
-        } else if (UploadFileName.startsWith(ANSWER_ERROR_PATTERN)) {
-            documentContentType = TransportMessageContentType.ERROR_MESSAGE
-        }
-
-        return documentContentType
-    }
-
-    /**
      * Загрузка ответов ФНС 2 и 6 НДФЛ
      */
     def importNdflResponse() {
-        TransportMessageContentType documentContentType = getDocumentContentTypeFromFileName()
-
-        if (documentContentType == null) {
-            handleErrorMessage("Не удалось определить тип файла ответа \"$UploadFileName\"")
-            return
-        }
-
-        if (!isAutoUpload() && TransportMessageContentType.ERROR_MESSAGE == documentContentType) {
-            logger.error("Загрузка файла $UploadFileName завершена. Для данного файла не может быть определена" +
-                    "налоговая форма, так как тип файла: \"Сообщение об ошибке\"")
-            return
-        }
-
         // Прочитать Имя отчетного файла из файла ответа
         Map<Object, Object> ndfl2ContentMap = [:]
         Map<String, String> ndfl2ContentReestrMap = [:]
@@ -723,11 +674,11 @@ class DeclarationType extends AbstractScriptClass {
                 return
             }
 
-            reportFileName = getFileName(ndfl6Content, documentContentType)
+            reportFileName = getFileName(ndfl6Content, (String) UploadFileName)
         }
 
         if (reportFileName == null || reportFileName == "") {
-            handleErrorMessage("Не найдено имя отчетного файла в файле ответа \"$UploadFileName\"")
+            logger.error("Не найдено имя отчетного файла в файле ответа  \"%s\"", UploadFileName)
             return
         }
 
@@ -737,8 +688,7 @@ class DeclarationType extends AbstractScriptClass {
         List<DeclarationData> declarationDataList = declarationService.findDeclarationDataByFileNameAndFileType(reportFileName, fileTypeId)
 
         if (declarationDataList.isEmpty()) {
-            String msg = String.format(ERROR_NOT_FOUND_FORM, reportFileName, UploadFileName)
-            handleErrorMessage(msg)
+            logger.error(ERROR_NOT_FOUND_FORM, reportFileName, UploadFileName)
             return
         }
         if (declarationDataList.size() > 1) {
@@ -746,8 +696,7 @@ class DeclarationType extends AbstractScriptClass {
             declarationDataList.each { DeclarationData declData ->
                 result += "\"${AttachFileType.OUTGOING_TO_FNS.title}\", \"${declData.kpp}\", \"${declData.oktmo}\" "
             }
-            String msg = String.format(ERROR_NOT_FOUND_FORM + ": " + result, reportFileName, UploadFileName)
-            handleErrorMessage(msg)
+            logger.error(ERROR_NOT_FOUND_FORM + ": " + result, reportFileName, UploadFileName)
             return
         }
         DeclarationData declarationData = declarationDataList.get(0)
@@ -755,12 +704,6 @@ class DeclarationType extends AbstractScriptClass {
         // Проверить ОНФ на отсутствие ранее загруженного Файла ответа по условию: "Имя Файла ответа" не найдено в ОНФ."Файлы и комментарии"
         def beforeUploadDeclarationDataList = declarationService.findDeclarationDataByFileNameAndFileType(UploadFileName, null)
         if (!beforeUploadDeclarationDataList.isEmpty()) {
-            String msg = "Файл ответа \"$UploadFileName\" уже загружен"
-            logger.info(msg)
-            logFormAttachResponseEvent(declarationData.id, msg)
-            if (isAutoUpload()) {
-                storeAutoUploadingContext(TransportMessageState.CONFIRMED, documentContentType, msg)
-            }
             return
         }
 
@@ -797,21 +740,21 @@ class DeclarationType extends AbstractScriptClass {
             }
 
             if (!templateFile) {
-                handleErrorMessage("Для файла ответа \"$UploadFileName\" не найдена xsd схема")
+                logger.error("Для файл ответа \"%s\" не найдена xsd схема", UploadFileName)
                 return
             }
 
             declarationService.validateDeclaration(logger, dataFile, UploadFileName, templateFile.blobDataId)
 
             if (logger.containsLevel(LogLevel.ERROR)) {
-                handleErrorMessage("Файл ответа \"$UploadFileName\" не соответствует формату")
+                logger.error("Файл ответа \"%s\" не соответствует формату", UploadFileName)
                 return
             }
         }
 
         if (NDFL2_1 == formTypeCode || NDFL2_2 == formTypeCode) {
             if (isNdfl2ResponseReestr(UploadFileName)) {
-                // Ничего не делаль: Переход к шагу 8 ОС
+                // Ничего не делаль: Переход к шагу 6 ОС
             }
 
             if (isNdfl2ResponseProt(UploadFileName)) {
@@ -823,7 +766,7 @@ class DeclarationType extends AbstractScriptClass {
                 // Если значение в строке "КОЛИЧЕСТВО СВЕДЕНИЙ С ОШИБКАМИ" > 0
                 if (errorCount > 0) {
                     if (!notCorrect) {
-                        logger.warn("Не найден раздел \"ДОКУМЕНТЫ С ВЫЯВЛЕННЫМИ И НЕИСПРАВЛЕННЫМИ ОШИБКАМИ\" в файле ответа \"%s\"", UploadFileName)
+                        logger.error("Не найден раздел \"ДОКУМЕНТЫ С ВЫЯВЛЕННЫМИ И НЕИСПРАВЛЕННЫМИ ОШИБКАМИ\" в файле ответа \"%s\"", UploadFileName)
                     } else {
                         notCorrect.each { Map<String, String> entry ->
                             def ndflRefIds = ndflRefProvider.getUniqueRecordIds(
@@ -832,11 +775,7 @@ class DeclarationType extends AbstractScriptClass {
                             )
 
                             if (ndflRefIds.isEmpty()) {
-                                String msg = "В реестре справок формы" +
-                                        "\"${formTypeCode}\" \"${declarationData.kpp}\" \"${declarationData.oktmo}\"" +
-                                        "не найдено справки \"${entry.ref}\""
-                                handleErrorMessage(msg)
-                                return
+                                logger.error("В реестре справок формы \"${formTypeCode}\" \"${declarationData.kpp}\" \"${declarationData.oktmo}\" не найдено справки \"${entry.ref}\"", UploadFileName)
                             } else {
                                 def ndflRef = ndflRefProvider.getRecordData(ndflRefIds.get(0))
 
@@ -852,10 +791,7 @@ class DeclarationType extends AbstractScriptClass {
 
                 if (correctAddressCount > 0) {
                     if (!correctAddresses) {
-                        String msg = "Не найден раздел \"СВЕДЕНИЯ С ИСПРАВЛЕННЫМИ АДРЕСАМИ\"" +
-                                "в файле ответа \"$UploadFileName\""
-                        handleErrorMessage(msg)
-                        return
+                        logger.error("Не найден раздел \"СВЕДЕНИЯ С ИСПРАВЛЕННЫМИ АДРЕСАМИ\" в файле ответа \"%s\"", UploadFileName)
                     } else {
                         correctAddresses.each { Map<String, String> entry ->
                             List<Long> ndflRefIds = ndflRefProvider.getUniqueRecordIds(
@@ -864,11 +800,7 @@ class DeclarationType extends AbstractScriptClass {
                             )
 
                             if (ndflRefIds.isEmpty()) {
-                                String msg = "В реестре справок формы" +
-                                        "\"${formTypeCode}\" \"${declarationData.kpp}\" \"${declarationData.oktmo}\"" +
-                                        "не найдено справки \"${entry.ref}\""
-                                handleErrorMessage(msg)
-                                return
+                                logger.error("В реестре справок формы \"${formTypeCode}\" \"${declarationData.kpp}\" \"${declarationData.oktmo}\" не найдено справки \"${entry.ref}\"", UploadFileName)
                             } else {
                                 def ndflRef = ndflRefProvider.getRecordData(ndflRefIds.get(0))
 
@@ -888,6 +820,19 @@ class DeclarationType extends AbstractScriptClass {
                         }
                     }
                 }
+
+                if (logger.containsLevel(LogLevel.ERROR)) {
+                    return
+                }
+                def departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
+                def departmentName = departmentService.get(declarationData.departmentId)
+
+                msgBuilder.append("Выполнена загрузка ответа ФНС для формы: ")
+                        .append("№: \"").append(declarationData.id).append("\"")
+                        .append(", Период: \"").append(departmentReportPeriod.reportPeriod.getTaxPeriod().getYear() + " - " + departmentReportPeriod.reportPeriod.getName()).append("\"")
+                        .append(", Подразделение: \"").append(departmentName.getName()).append("\"")
+                        .append(", Вид: \"").append(declarationTemplate.type.getName()).append("\"")
+                logger.info(msgBuilder.toString())
             }
         }
         // "Дата-время файла" = "Дата и время документа" раздела Параметры файла ответа
@@ -970,37 +915,11 @@ class DeclarationType extends AbstractScriptClass {
             }
         }
 
-        String fullFormDesc = declarationService.getFullDeclarationDescription(declarationData.getId())
-        String msg = "Выполнена загрузка ответа ФНС для формы: $fullFormDesc"
-
-        msgBuilder.append(msg)
-        logger.info(msgBuilder.toString())
-        uploadTransportDataResult.setNotificationMessage(msgBuilder.toString())
         auditService.add(null, userInfo, declarationData, "Загрузка файла ответа ФНС $UploadFileName, для отчетной формы: №$declarationData.id.", null)
-        logFormAttachResponseEvent(declarationData.id, msg)
-        if (isAutoUpload()) {
-            storeAutoUploadingContext(TransportMessageState.CONFIRMED, documentContentType, StringUtils.EMPTY)
-        }
+        logBusinessService.logFormEvent(declarationData.id, FormDataEvent.ATTACH_RESPONSE_FILE, logger.getLogId(),
+                "Загружен файл ответа: $UploadFileName, для формы № $declarationData.id.", userInfo ?: declarationService.getSystemUserInfo())
 
         declarationService.createPdfReport(logger, declarationData, userInfo)
-    }
-
-    private void handleErrorMessage(String msg) {
-        isAutoUpload()
-                ? storeAutoUploadingContext(TransportMessageState.ERROR, TransportMessageContentType.UNKNOWN, msg)
-                : logger.error(msg)
-    }
-
-    private void storeAutoUploadingContext(TransportMessageState messageState, TransportMessageContentType contentType,
-                                           String message) {
-        uploadTransportDataResult.setMessageState(messageState)
-        uploadTransportDataResult.setContentType(contentType)
-        uploadTransportDataResult.setProcessMessageResult(message)
-    }
-
-    private void logFormAttachResponseEvent(Long declarationId, String message) {
-        logBusinessService.logFormEvent(declarationId, FormDataEvent.ATTACH_RESPONSE_FILE, logger.getLogId(),
-                message, userInfo ?: declarationService.getSystemUserInfo())
     }
 
     /**
