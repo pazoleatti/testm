@@ -60,6 +60,8 @@ public class EdoMessageServiceImpl implements EdoMessageService {
     private final TAUserService taUserService;
     @Autowired(required = false)
     private MessageSender messageSender;
+    @Autowired
+    private AuditService auditService;
 
     @Autowired
     public EdoMessageServiceImpl(DeclarationDataService declarationDataService, DeclarationTemplateService declarationTemplateService, DeclarationLocker declarationLocker,
@@ -325,6 +327,7 @@ public class EdoMessageServiceImpl implements EdoMessageService {
                         sendToEdo(message);
                         declarationDataService.updateDocState(declarationData.getId(), SENDING_TO_EDO.getId());
                         logSuccessToLogger();
+                        auditService.add(null, this.userInfo, declarationData, "Отправка в ЭДО отчетной формы: " + declarationData.getId(), null);
                     }
                 }
             } catch (Exception e) {
