@@ -322,6 +322,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
         }
 
         File dataFile = null;
+        StringBuilder msgBuilder = new StringBuilder();
         UploadTransportDataResult uploadTransportDataResult = new UploadTransportDataResult();
         LockData fileLock = lockDataService.lock(LockData.LockObjects.FILE.name() + "_" + fileName,
                 userInfo.getUser().getId(),
@@ -347,6 +348,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
                 additionalParameters.put("UploadFileName", fileName);
                 additionalParameters.put("dataFile", dataFile);
                 additionalParameters.put("fileType", getFileType(fileName));
+                additionalParameters.put("msgBuilder", msgBuilder);
                 additionalParameters.put("uploadTransportDataResult", uploadTransportDataResult);
                 refBookScriptingService.executeScript(userInfo, RefBook.Id.DECLARATION_TEMPLATE.getId(), FormDataEvent.IMPORT_TRANSPORT_FILE, logger, additionalParameters);
             } catch (Exception e) {

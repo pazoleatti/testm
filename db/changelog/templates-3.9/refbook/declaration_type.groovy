@@ -1275,6 +1275,7 @@ class DeclarationType extends AbstractScriptClass {
                         .append(", Вид: \"").append(declarationType.getName()).append("\"")
                         .append(", АСНУ: \"").append(asnuProvider.getRecordData(asnuId).get("NAME").getStringValue()).append("\"")
                 logger.info(msgBuilder.toString())
+                uploadTransportDataResult.setNotificationMessage(msgBuilder.toString())
             }
         }
     }
