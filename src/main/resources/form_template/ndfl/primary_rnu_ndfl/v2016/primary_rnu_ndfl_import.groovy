@@ -1092,10 +1092,9 @@ class Import extends AbstractScriptClass {
     void transformOperationId() {
         Set<String> operationsSet = operationsGrouped.keySet()
         if (!operationsSet.isEmpty()) {
-            List<String> persistedOperationIdList = ndflPersonService.findIncomeOperationId(Collections.list(operationsSet))
-            operationsForTransform.removeAll(persistedOperationIdList)
-
-            for (String operationId : operationsForTransform) {
+            List<String> persistedOperationIdList = ndflPersonService.findIncomeOperationId(new ArrayList<String>(operationsSet))
+            operationsSet.removeAll(persistedOperationIdList)
+            for (String operationId : operationsSet) {
                 List<NdflPersonOperation> operations = operationsGrouped.get(operationId)
                 String uuid = UUID.randomUUID().toString()
                 for (NdflPersonOperation operation : operations) {
