@@ -6,11 +6,15 @@ import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.messaging.TransportMessage;
 import com.aplana.sbrf.taxaccounting.model.messaging.TransportMessageFilter;
 import com.aplana.sbrf.taxaccounting.service.TransportMessageService;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class TransportMessageServiceImpl implements TransportMessageService {
+
+    private static final Log LOG = LogFactory.getLog(TransportMessageServiceImpl.class);
 
     @Autowired
     private TransportMessageDao transportMessageDao;
@@ -33,6 +37,7 @@ public class TransportMessageServiceImpl implements TransportMessageService {
     @Override
     public void create(TransportMessage transportMessage) {
         transportMessageDao.create(transportMessage);
+        LOG.info("Сохранено транспортное сообщение: " + transportMessage);
     }
 
     @Override
