@@ -31,6 +31,4 @@ public class TaxMessageTechDocument extends BaseMessage {
 
     @XmlElement(name = "status")
     private MessageStatus status;
-
-    // todo additionalData
 }
