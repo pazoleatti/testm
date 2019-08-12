@@ -181,7 +181,8 @@ public class EdoMessageServiceImpl implements EdoMessageService {
 
     private BaseMessage getTaxMessage(String message) {
         try {
-            JAXBContext jaxbContext = JAXBContext.newInstance(TaxMessageReceipt.class, TaxMessageDocument.class);
+            Class[] taxMessageClasses = {TaxMessageReceipt.class, TaxMessageDocument.class, TaxMessageTechDocument.class};
+            JAXBContext jaxbContext = JAXBContext.newInstance(taxMessageClasses);
             Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 
             StringReader messageReader = new StringReader(message);
