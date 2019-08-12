@@ -98,7 +98,7 @@ public class TransportMessage {
 
         String prefix;
         switch (this.contentType) {
-            case RECEIPT_DOCUMENT:
+            case TECH_RECEIPT:
                 prefix = "TaxMessageReceipt";
                 break;
             case NDFL6:
