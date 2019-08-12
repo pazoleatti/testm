@@ -64,15 +64,17 @@ public class SendEdoAsyncTask extends AbstractAsyncTask {
             List errorDeclarations = result.getDeclarationsByLogLevel(LogLevel.ERROR);
             if (isEmpty(errorDeclarations)) {
                 if (isEmpty(warnDeclarations)) {
-                    return "Выполнена отправка в ЭДО.";
+                    return "Выполнена операция \"Отправка xml-файлов в ЭДО\".";
                 } else {
-                    return "Выполнена отправка в ЭДО (присутствуют нефатальные ошибки).";
+                    return "Выполнена операция \"Отправка xml-файлов в ЭДО\" (присутствуют нефатальные ошибки).";
                 }
             } else {
                 if (!isEmpty(succeedDeclarations) || !isEmpty(warnDeclarations)) {
-                    return "Частично выполнена отправка в ЭДО (для некоторых форм имеются фатальные ошибки).";
+                    return "Частично выполнена операция \"Отправка xml-файлов в ЭДО\" " +
+                            "(для некоторых форм имеются фатальные ошибки).";
                 } else {
-                    return "Не выполнена отправка в ЭДО (для всех форм имеются фатальные ошибки).";
+                    return "Не выполнена операция \"Отправка xml-файлов в ЭДО\" " +
+                            "(для всех форм имеются фатальные ошибки).";
                 }
             }
         } else {
