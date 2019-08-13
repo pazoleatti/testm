@@ -527,6 +527,7 @@ public class EdoMessageServiceImpl implements EdoMessageService {
             try {
                 messageSender.sendMessage(messageXml);
             } catch (Exception e) {
+                LOG.error("В процессе отправки сообщения в ЭДО произошла ошибка", e);
                 throw new ServiceException("файл не удалось поместить в системную очередь для отправки");
             }
             createTransportMessage(message, messageXml);
