@@ -97,7 +97,7 @@
         <div class="span10 strong">{{message.initiatorUser | userFormatter}}</div>
     </div>
     <!-- Пояснение -->
-    <div class="row-fluid shifted" style="margin-bottom: 10px;">
+    <div data-ng-if="message.state == 2" class="row-fluid shifted" style="margin-bottom: 10px;">
         <div class="span2 text-right">
             <label for="message-explanation">{{::'transportMessages.title.explanation' | translate}}:</label>
         </div>
