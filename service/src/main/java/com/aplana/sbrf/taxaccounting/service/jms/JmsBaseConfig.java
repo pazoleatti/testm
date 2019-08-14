@@ -65,7 +65,7 @@ public class JmsBaseConfig {
         /**
          * Фабрика соединений с MQ для очередей, получается по JNDI у вебсферы.
          */
-        @Bean(name = "fundConnectionFactory")
+        @Bean(name = "FundConnectionFactory-unstable2")
         public ConnectionFactory connectionFactory() throws NamingException {
                 return (ConnectionFactory) new InitialContext()
                         .lookup("java:comp/env/jms/FundConnectionFactory-unstable2");
