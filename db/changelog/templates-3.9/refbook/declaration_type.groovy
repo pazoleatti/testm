@@ -965,8 +965,8 @@ class DeclarationType extends AbstractScriptClass {
                 def docStateId = docStateProvider.getUniqueRecordIds(new Date(), "KND = '${nextKnd}'").get(0)
                 if (declarationData.docStateId != docStateId) {
                     declarationService.setDocStateId(declarationData.id, docStateId)
-                    auditService.add(FormDataEvent.CHANGE_STATUS_ED, userInfo ?: declarationService.getSystemUserInfo(),
-                            declarationData, "Изменение \"Состояние ЭД\", для отчетной формы:  №$declarationData.id.", null)
+                    auditService.add(FormDataEvent.CHANGE_STATUS_ED, userInfo(), declarationData,
+                            "Изменение \"Состояние ЭД\", для отчетной формы:  №$declarationData.id.", null)
                 }
             }
         }
@@ -977,7 +977,7 @@ class DeclarationType extends AbstractScriptClass {
         msgBuilder.append(msg)
         logger.info(msgBuilder.toString())
         uploadTransportDataResult.setNotificationMessage(msgBuilder.toString())
-        auditService.add(null, userInfo ?: declarationService.getSystemUserInfo(), declarationData,
+        auditService.add(null, userInfo(), declarationData,
                 "Загрузка файла ответа ФНС $UploadFileName, для отчетной формы: №$declarationData.id.", null)
         logger.info("Создана запись в Журнале Аудита")
         logFormAttachResponseEvent(declarationData.id, msg)
@@ -986,7 +986,11 @@ class DeclarationType extends AbstractScriptClass {
             storeAutoUploadingContext(TransportMessageState.CONFIRMED, documentContentType, StringUtils.EMPTY)
         }
 
-        declarationService.createPdfReport(logger, declarationData, userInfo)
+        declarationService.createPdfReport(logger, declarationData, userInfo())
+    }
+
+    private TAUserInfo userInfo() {
+        userInfo ?: declarationService.getSystemUserInfo()
     }
 
     private void handleErrorMessage(String msg) {
@@ -1004,7 +1008,7 @@ class DeclarationType extends AbstractScriptClass {
 
     private void logFormAttachResponseEvent(Long declarationId, String message) {
         logBusinessService.logFormEvent(declarationId, FormDataEvent.ATTACH_RESPONSE_FILE, logger.getLogId(),
-                message, userInfo ?: declarationService.getSystemUserInfo())
+                message, userInfo())
     }
 
     /**
