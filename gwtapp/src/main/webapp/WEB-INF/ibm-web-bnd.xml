@@ -10,7 +10,7 @@
     <resource-ref name="jdbc/TaxAccDS" binding-name="jdbc/DataSourceUnstable2"/>
 	<resource-ref name="jdbc/TaxAccDSSecondary" binding-name="jdbc/TaxAccDS-3.9"/>
 
-	<resource-ref name="jms/FundConnectionFactory" binding-name="jms/FundConnectionFactory" />
-	<resource-ref name="jms/EdoResponseQueue" binding-name="jms/EdoResponseQueue" />
-	<resource-ref name="jms/EdoRequestQueue" binding-name="jms/EdoRequestQueue" />
+<!--	<resource-ref name="jms/FundConnectionFactory" binding-name="jms/FundConnectionFactory" />-->
+<!--	<resource-ref name="jms/EdoResponseQueue" binding-name="jms/EdoResponseQueue" />-->
+<!--	<resource-ref name="jms/EdoRequestQueue" binding-name="jms/EdoRequestQueue" />-->
 </web-bnd>
