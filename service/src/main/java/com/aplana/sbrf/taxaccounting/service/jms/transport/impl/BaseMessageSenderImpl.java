@@ -13,15 +13,23 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
+
 @Service
 @Profile({"jms", "development"})
 public class BaseMessageSenderImpl implements MessageSender {
     private static final Log LOG = LogFactory.getLog(BaseMessageSenderImpl.class);
+    private static final long MESSAGE_TTL_SECONDS = 30;
 
     @Autowired
     private JmsTemplate jmsTemplate;
     @Autowired
     private ConfigurationService configurationService;
+
+    @PostConstruct
+    private void init() {
+        jmsTemplate.setTimeToLive(30 * 1000);
+    }
 
     @Override
     public void sendMessage(String message) throws ConfigurationParameterAbsentException {
