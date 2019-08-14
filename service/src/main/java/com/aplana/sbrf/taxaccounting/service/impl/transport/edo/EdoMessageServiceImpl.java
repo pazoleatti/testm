@@ -305,12 +305,13 @@ public class EdoMessageServiceImpl implements EdoMessageService {
         TaxMessageReceipt taxMessageReceipt;
         UploadTransportDataResult uploadTransportDataResult;
         FileWrapper sharedFileNameFromFns = null;
+        Logger transportFileImporterLogger = new Logger();
         try {
             sharedFileNameFromFns = getFileFromFnsFileSharing(incomeTransportMessage.getMessageUuid(),
                     taxMessageTechDoc);
             BlobData fnsResponseBlobData = storeFileInTransportMessage(incomeTransportMessage, sharedFileNameFromFns);
 
-            Logger transportFileImporterLogger = new Logger();
+            LOG.info("Запущена процедура разбора файла от ФНС в автоматическом режиме");
             uploadTransportDataResult = uploadTransportDataService.processTransportFileUploading(
                     transportFileImporterLogger,
                     taUserService.getSystemUserInfo(),
@@ -323,9 +324,12 @@ public class EdoMessageServiceImpl implements EdoMessageService {
                 throw new IllegalStateException("В результате работы алгоритма обработки ответа от ФНС " +
                         "произошла непредвинная ошибка.");
             }
+            LOG.info("Процедура обработки файла от ФНС в автоматическом режиме завершена с результатом: " +
+                    uploadTransportDataResult);
             incomeTransportMessage.setContentType(uploadTransportDataResult.getContentType());
         } catch (Exception e) {
-            LOG.info("В результате обработки ответа от ФНС произошла ошибка", e);
+            LOG.warn("В результате обработки ответа от ФНС произошла ошибка, логгер скрипта #" +
+                    transportFileImporterLogger.getLogId(), e);
 
             failHandleEdoMessage(incomeTransportMessage, e.getMessage());
 
@@ -359,6 +363,8 @@ public class EdoMessageServiceImpl implements EdoMessageService {
         String fnsResponseBlobId = blobDataService.create(sharedFileNameFromFns.getInputStream(), sharedFileNameFromFns.getName());
         BlobData fnsResponseBlobData = blobDataService.get(fnsResponseBlobId);
         transportMessage.setBlob(fnsResponseBlobData);
+        LOG.info("Файл ФНС '" + sharedFileNameFromFns.getName() + "'сохранен в БД и установлен ТС #" +
+                transportMessage.getMessageUuid());
         return fnsResponseBlobData;
     }
 
@@ -371,7 +377,9 @@ public class EdoMessageServiceImpl implements EdoMessageService {
                 " для транспортно сообщения № " + messageUuid;
         if (directory.exists()) {
             try {
-                return ResourceUtils.getSharedResource(sharingFolderPath + "/" + fileName);
+                FileWrapper sharedResource = ResourceUtils.getSharedResource(sharingFolderPath + "/" + fileName);
+                LOG.info("Прочитан файл от ФНС из папки обмена " + sharedResource.getName());
+                return sharedResource;
             } catch (Exception e) {
                 throw new ServiceException(errorMessage);
             }
@@ -410,6 +418,8 @@ public class EdoMessageServiceImpl implements EdoMessageService {
                 configurationService.getParamIntValue(ConfigurationParam.TAX_MESSAGE_RECEIPT_WAITING_TIME);
         try {
             trySendTechReceiptToEdo(xmlMessage, 1, taxMessageRetryCount, taxMessageReceiptWaitingSec);
+            LOG.info("Ответная технологическая квитанция отправлена в ЭДО для сообщения #" +
+                    transportMessage.getMessageUuid());
         } catch (ConfigurationParameterAbsentException e) {
             throw new ServiceException("В параметре: \"" + ConfigurationParam.JNDI_QUEUE_OUT.getCaption() +
                     "\" не прописано наименование очереди.");
@@ -453,6 +463,8 @@ public class EdoMessageServiceImpl implements EdoMessageService {
         transportMessage.setContentType(TransportMessageContentType.TECH_RECEIPT);
         transportMessage.setSourceFileName(attachFileName);
         transportMessageService.create(transportMessage);
+        LOG.info("Транспортное сообщение овтетной технологической квитанции создано #" +
+                transportMessage.getMessageUuid());
     }
 
     private int getConfigIntValue(ConfigurationParam param) {
