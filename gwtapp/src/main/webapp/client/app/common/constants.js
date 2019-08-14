@@ -246,7 +246,8 @@
             },
             CONFIGURATION_PARAM: {
                 REPORT_PERIOD_YEAR_MIN: "REPORT_PERIOD_YEAR_MIN",
-                REPORT_PERIOD_YEAR_MAX: "REPORT_PERIOD_YEAR_MAX"
+                REPORT_PERIOD_YEAR_MAX: "REPORT_PERIOD_YEAR_MAX",
+                DOCUMENTS_SENDING_ENABLED: "DOCUMENTS_SENDING_ENABLED"
             },
             ASYNC_HANDLER_CLASS_NAME: {
                 UPLOAD_REFBOOK_ASYNC_TASK: "UploadRefBookAsyncTask"
