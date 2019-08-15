@@ -1562,11 +1562,17 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     public void setPdfDataBlobs(Logger logger,
                                 DeclarationData declarationData, TAUserInfo userInfo, LockStateLogger stateLogger) {
+        boolean isSystemUser = userInfo == null || userService.getSystemUserInfo().equals(userInfo);
         LOG.info(String.format("Удаление старых отчетов налоговой формы %s", declarationData.getId()));
         reportService.deleteDec(asList(declarationData.getId()), asList(DeclarationReportType.PDF_DEC, DeclarationReportType.JASPER_DEC));
-        LOG.info(String.format("Получение данных налоговой формы %s", declarationData.getId()));
+        LOG.info(String.format("Получение данных налоговой формы %s под пользователем %s", declarationData.getId(), userInfo));
         stateLogger.updateState(AsyncTaskState.GET_FORM_DATA);
-        String xmlUuid = reportService.getReportFileUuidSafe(declarationData.getId(), DeclarationReportType.XML_DEC);
+        String xmlUuid;
+        if (isSystemUser) {
+            xmlUuid = reportService.getReportFileUuid(declarationData.getId(), DeclarationReportType.XML_DEC);
+        } else {
+            xmlUuid = reportService.getReportFileUuidSafe(declarationData.getId(), DeclarationReportType.XML_DEC);
+        }
         if (xmlUuid != null) {
             File pdfFile = null;
             JRSwapFile jrSwapFile = new JRSwapFile(System.getProperty("java.io.tmpdir"), 1024, 100);
@@ -1593,7 +1599,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 reportService.attachReportToDeclaration(declarationData.getId(), blobDataService.create(pdfFile.getPath(), fileName), DeclarationReportType.PDF_DEC);
 
                 // не сохраняем jasper-отчет, если есть XLSX-отчет
-                if (reportService.getReportFileUuidSafe(declarationData.getId(), DeclarationReportType.EXCEL_DEC) == null) {
+                if ( (!isSystemUser && reportService.getReportFileUuidSafe(declarationData.getId(), DeclarationReportType.EXCEL_DEC) == null ) ||
+                        (isSystemUser && reportService.getReportFileUuid(declarationData.getId(), DeclarationReportType.EXCEL_DEC) == null)
+                ) {
                     LOG.info(String.format("Сохранение Jasper-макета в базе данных для налоговой формы %s", declarationData.getId()));
                     stateLogger.updateState(AsyncTaskState.SAVING_JASPER);
                     reportService.attachReportToDeclaration(declarationData.getId(), saveJPBlobData(jasperPrint), DeclarationReportType.JASPER_DEC);
