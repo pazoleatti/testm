@@ -233,6 +233,11 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
             }
 
             TAUser taUser = taUserService.getUser(currentUser.getUsername());
+            TAUserInfo systemUserInfo = taUserService.getSystemUserInfo();
+            if (systemUserInfo.getUser().equals(taUser)) {
+                return true;
+            }
+
             DeclarationType declarationType = declarationTypeDao.get(targetDomainObject.getDeclarationTemplateId());
 
             // Контролёр НС
