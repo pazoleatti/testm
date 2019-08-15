@@ -69,11 +69,11 @@
             '$scope', '$timeout', '$window', '$stateParams', 'ShowToDoDialog', '$http', 'DeclarationDataResource',
             '$filter', '$logPanel', '$dialogs', '$rootScope', 'RefBookValuesResource', 'APP_CONSTANTS', '$state',
             '$interval', 'acceptDeclarationData', 'getPageImage', 'checkDeclarationData',
-            'moveToCreatedDeclarationData', '$aplanaModal',
+            'moveToCreatedDeclarationData', '$aplanaModal', 'CommonParamResource',
             function ($scope, $timeout, $window, $stateParams, $showToDoDialog, $http, DeclarationDataResource, $filter,
                       $logPanel, $dialogs, $rootScope, RefBookValuesResource, APP_CONSTANTS, $state, $interval,
                       acceptDeclarationData, getPageImage, checkDeclarationData,
-                      moveToCreatedDeclarationData, $aplanaModal) {
+                      moveToCreatedDeclarationData, $aplanaModal, CommonParamResource) {
 
                 if ($stateParams.uuid) {
                     $logPanel.open('log-panel-container', $stateParams.uuid);
@@ -450,5 +450,16 @@
                 $scope.downloadPdf = function () {
                     $window.open("controller/rest/declarationData/" + $stateParams.declarationDataId + "/pdf", '_blank');
                 };
+
+
+                /**
+                 * @description Получение конфигурационного параметра "Отправлять документы в ФП "Фонды""
+                 */
+                 $scope.documentsSendingEnabled = CommonParamResource.query({
+                     codes: [APP_CONSTANTS.CONFIGURATION_PARAM.DOCUMENTS_SENDING_ENABLED],
+                     projection: "allByEnums"
+                 }, function (configurationsByCode) {
+                     $scope.documentsSendingEnabled = configurationsByCode[APP_CONSTANTS.CONFIGURATION_PARAM.DOCUMENTS_SENDING_ENABLED].value;
+                 });
             }]);
 }());
