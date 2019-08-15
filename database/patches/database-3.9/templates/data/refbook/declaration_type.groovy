@@ -986,7 +986,10 @@ class DeclarationType extends AbstractScriptClass {
             storeAutoUploadingContext(TransportMessageState.CONFIRMED, documentContentType, StringUtils.EMPTY)
         }
 
-        declarationService.createPdfReport(logger, declarationData, userInfo())
+        if (NDFL2_1 == formTypeCode || NDFL2_2 == formTypeCode) {
+            declarationService.createPdfReport(logger, declarationData, userInfo())
+            logger.info("Выполнено обновление печатного представления содержимого для формы № $declarationData.id")
+        }
     }
 
     private TAUserInfo userInfo() {
