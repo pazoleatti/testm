@@ -45,7 +45,7 @@
 		</Arg>
 	</New>
 	<New id="fundConnectionFactory" class="org.mortbay.jetty.plus.naming.Resource">
-		<Arg>java:comp/env/jms/FundConnectionFactory</Arg>
+		<Arg>java:comp/env/jms/FundConnectionFactory-unstable2</Arg>
 		<Arg>
 			<New class="org.apache.activemq.ActiveMQConnectionFactory">
 				<Arg>tcp://localhost:61616</Arg>
