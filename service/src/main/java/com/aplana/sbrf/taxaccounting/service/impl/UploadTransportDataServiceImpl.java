@@ -321,6 +321,11 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
             throw new ServiceLoggerException(EMPTY_INPUT_STREAM_ERROR, logEntryService.save(logger.getEntries()));
         }
 
+        TransportFileType fileType = getFileType(fileName);
+        if (fileType == null) {
+            throw new ServiceException("Некорректное имя или формат файла \"" + fileName + "\"");
+        }
+
         File dataFile = null;
         StringBuilder msgBuilder = new StringBuilder();
         UploadTransportDataResult uploadTransportDataResult = new UploadTransportDataResult();
@@ -347,7 +352,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
                 additionalParameters.put("ImportInputStream", dataFileInputStream);
                 additionalParameters.put("UploadFileName", fileName);
                 additionalParameters.put("dataFile", dataFile);
-                additionalParameters.put("fileType", getFileType(fileName));
+                additionalParameters.put("fileType", fileType);
                 additionalParameters.put("msgBuilder", msgBuilder);
                 additionalParameters.put("uploadTransportDataResult", uploadTransportDataResult);
                 refBookScriptingService.executeScript(userInfo, RefBook.Id.DECLARATION_TEMPLATE.getId(), FormDataEvent.IMPORT_TRANSPORT_FILE, logger, additionalParameters);
