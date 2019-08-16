@@ -334,6 +334,8 @@ public class EdoMessageServiceImpl implements EdoMessageService {
             );
 
             if (uploadTransportDataResult.getContentType() == null || uploadTransportDataResult.getMessageState() == null) {
+                LOG.error("Непредвинная ошибка обработки ответа ФНС, реузльтат = " + uploadTransportDataResult +
+                        ", содержимое логгера скрипта: " + transportFileImporterLogger.getEntries());
                 throw new IllegalStateException("В результате работы алгоритма обработки ответа от ФНС " +
                         "произошла непредвинная ошибка.");
             }
@@ -341,8 +343,7 @@ public class EdoMessageServiceImpl implements EdoMessageService {
                     uploadTransportDataResult);
             incomeTransportMessage.setContentType(uploadTransportDataResult.getContentType());
         } catch (Exception e) {
-            LOG.warn("В результате обработки ответа от ФНС произошла ошибка, логгер скрипта #" +
-                    transportFileImporterLogger.getLogId(), e);
+            LOG.warn("В результате обработки ответа от ФНС произошла ошибка", e);
 
             failHandleEdoMessage(incomeTransportMessage, e.getMessage());
 
