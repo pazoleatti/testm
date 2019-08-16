@@ -693,10 +693,10 @@
         .filter('idNameFormatter', function () {
             return function (record) {
                 if (!record) return '';
-                if (!record.id && !record.name) return '';
-                if (!record.id) return record.name;
-                if (!record.name) return '(' + record.id + ')';
-                return "(" + record.id + ") " + record.name;
+                if (!record.id && !record.shortName) return '';
+                if (!record.id) return record.shortName;
+                if (!record.shortName) return '(' + record.id + ')';
+                return "(" + record.id + ") " + record.shortName;
             };
         })
 
