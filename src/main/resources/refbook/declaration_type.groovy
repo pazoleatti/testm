@@ -580,7 +580,7 @@ class DeclarationType extends AbstractScriptClass {
             }
         } catch (Exception exception) {
             exception.printStackTrace()
-            logger.error("Файл «%s» не загружен: Некорректный формат файла", UploadFileName)
+            logger.error("Файл «%s» не загружен: Некорректное формат файла", UploadFileName)
             return null
         } finally {
             IOUtils.closeQuietly(ImportInputStream)
@@ -684,7 +684,6 @@ class DeclarationType extends AbstractScriptClass {
      * Загрузка ответов ФНС 2 и 6 НДФЛ
      */
     def importNdflResponse() {
-        logger.info("Запущен импорт ответа 2НДФЛ/6НДФЛ")
         TransportMessageContentType documentContentType = getDocumentContentTypeFromFileName()
 
         if (documentContentType == null) {
@@ -731,7 +730,6 @@ class DeclarationType extends AbstractScriptClass {
             handleErrorMessage("Не найдено имя отчетного файла в файле ответа \"$UploadFileName\"")
             return
         }
-        logger.info("Определено имя отчетного файла = \"$reportFileName\" для файла ответа \"$UploadFileName\"")
 
         // Выполнить поиск ОНФ, для которой пришел файл ответа по условию
         def fileTypeProvider = refBookFactory.getDataProvider(RefBook.Id.ATTACH_FILE_TYPE.getId())
@@ -753,7 +751,6 @@ class DeclarationType extends AbstractScriptClass {
             return
         }
         DeclarationData declarationData = declarationDataList.get(0)
-        logger.info("Определено отчетная форма №\"$declarationData.id\" для файла ответа \"$UploadFileName\"")
 
         // Проверить ОНФ на отсутствие ранее загруженного Файла ответа по условию: "Имя Файла ответа" не найдено в ОНФ."Файлы и комментарии"
         def beforeUploadDeclarationDataList = declarationService.findDeclarationDataByFileNameAndFileType(UploadFileName, null)
@@ -783,8 +780,9 @@ class DeclarationType extends AbstractScriptClass {
                 SAXParser saxParser = factory.newSAXParser()
                 saxParser.parse((InputStream) inputStream, handl)
             } catch (Exception e) {
-                logger.warn("Произошла исключительная ситуация во время валидации файла по XSD: $e.message")
+
                 e.printStackTrace()
+
             } finally {
                 IOUtils.closeQuietly(inputStream)
             }
@@ -920,7 +918,6 @@ class DeclarationType extends AbstractScriptClass {
         declarationDataFile.setDate(fileDate)
 
         declarationService.saveFile(declarationDataFile)
-        logger.info("Файл ответа сохранен в форме №$declarationData.id")
 
         def declarationDataFileMaxWeight = declarationService.findFileWithMaxWeight(declarationData.id)
         Integer prevWeight
@@ -968,10 +965,8 @@ class DeclarationType extends AbstractScriptClass {
                 def docStateId = docStateProvider.getUniqueRecordIds(new Date(), "KND = '${nextKnd}'").get(0)
                 if (declarationData.docStateId != docStateId) {
                     declarationService.setDocStateId(declarationData.id, docStateId)
-                    logger.info("Изменение состояния ЭД для формы №$declarationData.id")
                     auditService.add(FormDataEvent.CHANGE_STATUS_ED, userInfo(), declarationData,
                             "Изменение \"Состояние ЭД\", для отчетной формы:  №$declarationData.id.", null)
-                    logger.info("Состояние ЭД изменно для формы №$declarationData.id на $docStateId")
                 }
             }
         }
@@ -1051,7 +1046,6 @@ class DeclarationType extends AbstractScriptClass {
         String guid
         Integer year
         Long declarationDataId
-        logger.info("Запущен импорт РНУ НДФЛ файла")
 
         if (UploadFileName != null
                 && UploadFileName.toLowerCase().endsWith(NAME_EXTENSION_DEC)
