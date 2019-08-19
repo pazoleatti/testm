@@ -79,6 +79,21 @@ public class EdoMessageServiceImpl implements EdoMessageService {
     @Autowired
     private AuditService auditService;
 
+    private static final String TRANSPORT_MESSAGE_CHANGE_NOTE_FORMAT = "Изменение статуса Транспортного сообщения № %s, " + // <Объект."Номер">
+            "Идентификатор сообщения: %s, " + // <Объект.\"Идентификатор сообщения\">
+            "Тип сообщения: %s, " + // <Объект."Тип сообщения">
+            "Статус сообщения: %s"; // <Объект."Статус сообщения">
+
+    private static final String SYSTEM_ERROR_NOTE_FORMAT = "Системная ошибка при обработке транспортного сообщения № %s, " + // <Объект."Номер">
+            "Идентификатор сообщения: %s, " + //<Объект."Идентификатор сообщения">
+            "Тип сообщения: %s, " + // <Объект."Тип сообщения">
+            "Статус сообщения: %s"; // <Объект."Статус сообщения">
+
+    private static final String TRANSPORT_MESSAGE_CREATE_NOTE_FORMAT = "Создание Транспортного сообщения № %s, " + // 3. <Объект."Номер">
+            "Идентификатор сообщения: %s, " + // <Объект."Идентификатор сообщения">
+            "Тип сообщения: %s, " + // <Объект."Тип сообщения">
+            "Статус сообщения: %s"; // <Объект."Статус сообщения">
+
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
     @Autowired
@@ -132,6 +147,9 @@ public class EdoMessageServiceImpl implements EdoMessageService {
         try {
             validateIncomeMessage(xmlMessage, transportMessage);
             handleIncomeMessage(xmlMessage, transportMessage);
+        } catch (Exception e) {
+            sendAuditOnTransportMessage(SYSTEM_ERROR_NOTE_FORMAT, transportMessage);
+            throw e;
         } finally {
             transportMessageService.save(transportMessage);
         }
@@ -167,6 +185,7 @@ public class EdoMessageServiceImpl implements EdoMessageService {
     private void handleIncomeMessage(String xmlMessage, TransportMessage incomeTransportMessage) {
         BaseMessage taxMessage = getTaxMessage(xmlMessage);
         enrichTransportBaseMessage(incomeTransportMessage, taxMessage);
+        sendAuditOnTransportMessage(TRANSPORT_MESSAGE_CREATE_NOTE_FORMAT, incomeTransportMessage);
         validateSenderAndRecipient(xmlMessage, taxMessage);
 
         if (isMessageFromFns(taxMessage)) {
@@ -245,10 +264,12 @@ public class EdoMessageServiceImpl implements EdoMessageService {
         }
 
         updateSourceTransportMessageState(taxMessageReceipt, sourceTransportMessage);
+        sendAuditOnTransportMessage(TRANSPORT_MESSAGE_CHANGE_NOTE_FORMAT, transportMessage); // 9.e
         updateDeclarationState(transportMessage, taxMessageReceipt, sourceTransportMessage.getDeclaration());
-
+        auditService.add(null, taUserService.getSystemUserInfo(), "Изменение \"Состояние ЭД\", для отчетной формы: № " + transportMessage.getId()); // 9.i
         transportMessage.setState(TransportMessageState.CONFIRMED);
         transportMessage.setDeclaration(sourceTransportMessage.getDeclaration());
+        sendAuditOnTransportMessage(TRANSPORT_MESSAGE_CHANGE_NOTE_FORMAT, transportMessage); // 9.k
     }
 
     private void failHandleEdoMessage(TransportMessage transportMessage, String errorMessage) {
@@ -364,6 +385,7 @@ public class EdoMessageServiceImpl implements EdoMessageService {
             createTechReceiptOutcomeTransportMessage(taxMessageReceipt, xmlMessage, taxMessageTechDoc.getFileName());
 
             incomeTransportMessage.setState(uploadTransportDataResult.getMessageState());
+            sendAuditOnTransportMessage(TRANSPORT_MESSAGE_CHANGE_NOTE_FORMAT, incomeTransportMessage); // 8.h
             if (sharedFileNameFromFns != null) {
                 sharedFileNameFromFns.delete();
                 LOG.info("Файл ФНС \"" + sharedFileNameFromFns.getName() + "\" удален из папки обмена");
@@ -503,6 +525,15 @@ public class EdoMessageServiceImpl implements EdoMessageService {
                     .build();
             transportMessage.setDeclaration(declarationShortInfo);
         }
+    }
+
+    private void sendAuditOnTransportMessage(String noteFormat, TransportMessage transportMessage) {
+        String note = String.format(noteFormat,
+                transportMessage.getId(),
+                transportMessage.getMessageUuid(),
+                transportMessage.getType(),
+                transportMessage.getState());
+        auditService.add(null, taUserService.getSystemUserInfo(), note);
     }
 
     private int getConfigIntValue(ConfigurationParam param) {
