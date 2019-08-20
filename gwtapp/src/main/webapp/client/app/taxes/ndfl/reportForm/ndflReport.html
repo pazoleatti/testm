@@ -302,7 +302,7 @@
                         </button>
                     </span>
                     <!-- Отправить в ЭДО -->
-                    <span data-ng-if="documentsSendingEnabled == 1">
+                    <span data-ng-if="documentsSendingEnabled == 1 && !isCurrentForm2NDFLFL">
                         <button type="button" class="btn btn-default"
                                 data-ng-click="sendEdo()"
                                 data-ng-disabled="!permissionChecker.check(declarationData, APP_CONSTANTS.DECLARATION_PERMISSION.UPDATE_DOC_STATE)">
