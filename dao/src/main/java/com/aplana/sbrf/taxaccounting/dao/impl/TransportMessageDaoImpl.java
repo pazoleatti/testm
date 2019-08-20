@@ -186,7 +186,6 @@ public class TransportMessageDaoImpl extends AbstractDao implements TransportMes
                 "RECEIVER_SUBSYSTEM_ID = :receiverSubsystemId," +
                 "CONTENT_TYPE = :contentType," +
                 "STATE = :state," +
-                "BODY = :body," +
                 "BLOB_ID = :blobId," +
                 "SOURCE_FILE_NAME = :sourceFileName," +
                 "INITIATOR_USER_ID = :initiatorUserId," +
@@ -202,7 +201,6 @@ public class TransportMessageDaoImpl extends AbstractDao implements TransportMes
                 transportMessage.getReceiverSubsystem() != null ? transportMessage.getReceiverSubsystem().getId() : null);
         params.addValue("contentType", transportMessage.getContentType().getIntValue());
         params.addValue("state", transportMessage.getState().getIntValue());
-        params.addValue("body", transportMessage.getBody());
         params.addValue("blobId",
                 transportMessage.getBlob() != null ? transportMessage.getBlob().getUuid() : null);
         params.addValue("sourceFileName", transportMessage.getSourceFileName());
