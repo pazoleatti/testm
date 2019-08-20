@@ -52,5 +52,5 @@ public interface TransportMessageService {
      *
      * @param transportMessage транспортное сообщение
      */
-    void save(TransportMessage transportMessage);
+    void update(TransportMessage transportMessage);
 }

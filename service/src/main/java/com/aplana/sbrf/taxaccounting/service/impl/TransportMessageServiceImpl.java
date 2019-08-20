@@ -41,7 +41,7 @@ public class TransportMessageServiceImpl implements TransportMessageService {
     }
 
     @Override
-    public void save(TransportMessage transportMessage) {
+    public void update(TransportMessage transportMessage) {
         transportMessageDao.update(transportMessage);
     }
 }

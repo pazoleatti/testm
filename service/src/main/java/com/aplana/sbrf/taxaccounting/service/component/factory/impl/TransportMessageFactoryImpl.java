@@ -19,13 +19,13 @@ public class TransportMessageFactoryImpl implements TransportMessageFactory {
     @Autowired
     private ConfigurationService configurationService;
 
-    public TransportMessage createOutcomeMessageToEdo(BaseMessage baseIncomeXmlMessage, String messageBody) {
+    public TransportMessage createOutcomeMessageToEdo(BaseMessage baseXmlMessage, String messageBody) {
         TransportMessage transportMessage = new TransportMessage();
-        transportMessage.setDateTime(LocalDateTime.fromDateFields(baseIncomeXmlMessage.getDateTime()));
+        transportMessage.setDateTime(LocalDateTime.fromDateFields(baseXmlMessage.getDateTime()));
         transportMessage.setBody(messageBody);
         transportMessage.setState(TransportMessageState.SENT);
         transportMessage.setType(TransportMessageType.OUTGOING);
-        transportMessage.setMessageUuid(baseIncomeXmlMessage.getUuid());
+        transportMessage.setMessageUuid(baseXmlMessage.getUuid());
         transportMessage.setReceiverSubsystem(new Subsystem(getConfigIntValue(ConfigurationParam.TARGET_SUBSYSTEM_ID)));
         transportMessage.setSenderSubsystem(new Subsystem(getConfigIntValue(ConfigurationParam.NDFL_SUBSYSTEM_ID)));
         return transportMessage;

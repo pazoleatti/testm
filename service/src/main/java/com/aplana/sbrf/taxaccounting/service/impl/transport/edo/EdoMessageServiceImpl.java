@@ -151,7 +151,7 @@ public class EdoMessageServiceImpl implements EdoMessageService {
             sendAuditOnTransportMessage(SYSTEM_ERROR_NOTE_FORMAT, transportMessage);
             throw e;
         } finally {
-            transportMessageService.save(transportMessage);
+            transportMessageService.update(transportMessage);
         }
     }
 
@@ -173,8 +173,8 @@ public class EdoMessageServiceImpl implements EdoMessageService {
 
     private void validateIncomeMessage(String message, TransportMessage transportMessage) {
         Logger validationLogger = new Logger();
-        RefBook declarationTemplateRefBook = commonRefBookService.get(RefBook.Id.DECLARATION_TEMPLATE.getId());
-        BlobData xsd = blobDataService.get(declarationTemplateRefBook.getXsdId());
+        RefBook declarationTypeRefBook = commonRefBookService.get(RefBook.Id.DECLARATION_TEMPLATE.getId());
+        BlobData xsd = blobDataService.get(declarationTypeRefBook.getXsdId());
         if (!validateXMLService.validate(validationLogger, message, xsd.getName(), xsd.getInputStream())) {
             String errorMessage = "Входящее сообщение не соответствует xsd схеме.";
             failHandleEdoMessage(transportMessage, errorMessage);
@@ -293,7 +293,7 @@ public class EdoMessageServiceImpl implements EdoMessageService {
                         taxMessageErrorDetail);
             }
         }
-        transportMessageService.save(transportMessage);
+        transportMessageService.update(transportMessage);
     }
 
     private void updateDeclarationState(TransportMessage transportMessage, TaxMessageReceipt taxMessageReceipt,

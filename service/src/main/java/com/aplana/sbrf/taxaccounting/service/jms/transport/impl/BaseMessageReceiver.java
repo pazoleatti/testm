@@ -29,8 +29,7 @@ public class BaseMessageReceiver {
     @JmsListener(destination = JmsBaseConfig.TO_NDFL_QUEUE_JNDI_NAME, id="messageReceiver", containerFactory = "jmsListenerContainerFactory")
     public void handleMessage(Message<String> message) {
         final String messageContent = message.getPayload();
-        System.out.println("Raw message: " + messageContent);
-        System.out.println("Headers: " + message.getHeaders());
+        LOG.debug("Получено сообщение в очередь " +  JmsBaseConfig.TO_NDFL_QUEUE_JNDI_NAME + ": " + messageContent);
         edoMessageService.accept(messageContent);
     }
 

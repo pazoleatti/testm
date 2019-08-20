@@ -43,7 +43,9 @@ public interface TransportMessageDao {
     void create(TransportMessage transportMessage);
 
     /**
-     * Обновляет Транспортное сообщение
+     * Обновляет Транспортное сообщение за исключением параметров, которые определяются при создании:
+     * - дата и время сообщения;
+     * - тип сообщения.
      *
      * @param transportMessage Транспортное сообщение
      */

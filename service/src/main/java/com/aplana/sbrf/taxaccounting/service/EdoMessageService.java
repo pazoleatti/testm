@@ -19,5 +19,9 @@ public interface EdoMessageService {
      */
     SendToEdoResult sendToEdo(List<Long> declarationDataIds, TAUserInfo userInfo, Logger logger);
 
+    /**
+     * Принимает сообщения от ЭДО
+     * @param message XML-сообщение, полученное от ЭДО
+     */
     void accept(String message);
 }
