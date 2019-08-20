@@ -139,6 +139,13 @@
 		<res-auth>Container</res-auth>
 		<res-sharing-scope>Shareable</res-sharing-scope>
 	</resource-ref>
+	<resource-ref>
+		<description />
+		<res-ref-name>jms/EdoRequestQueue</res-ref-name>
+		<res-type>javax.jms.Destination</res-type>
+		<res-auth>Container</res-auth>
+		<res-sharing-scope>Shareable</res-sharing-scope>
+	</resource-ref>
 
 	<security-role>
 		<description>Все аутентифицированные пользователи</description>	
