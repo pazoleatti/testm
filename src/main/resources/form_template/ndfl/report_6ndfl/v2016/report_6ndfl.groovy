@@ -214,6 +214,23 @@ class Report6Ndfl extends AbstractScriptClass {
                     }
                 }
                 НДФЛ6() {
+                    // TODO: SBRFNDFL-8293
+                    // Создать и инициализировать набор числовых значений сумм доходов и вычетов
+                    def actualValues = new ActualValues()
+                    actualValues.taxWithheldTotal = BigInteger.ZERO
+                    actualValues.taxNotWithheldTotal = BigInteger.ZERO
+                    actualValues.taxRefundTotal = BigInteger.ZERO
+                    actualValues.incomeAccrued = BigDecimal.ZERO
+                    actualValues.incomeAccruedDividends = BigDecimal.ZERO
+                    actualValues.incomeAccruedDividends = BigDecimal.ZERO
+                    actualValues.taxDeduction = BigDecimal.ZERO
+                    actualValues.taxCalculated = BigInteger.ZERO
+                    actualValues.taxCalсulatedDividends = BigInteger.ZERO
+                    actualValues.paymentAdvance = BigInteger.ZERO
+                    actualValues.numberOfIndividuals = 0
+                    actualValues.incomeActual = BigDecimal.ZERO
+                    actualValues.taxRefund = BigInteger.ZERO
+
                     def section2Block = new Section2Block(incomeList)
                     if (!section2Block.isEmpty()) {
                         section2Block.adjustRefundTax(incomeList)
@@ -229,18 +246,41 @@ class Report6Ndfl extends AbstractScriptClass {
                                            УдержНалИт  : generalBlock.incomeWithholdingTotal,
                                            НеУдержНалИт: generalBlock.incomeNotHoldingTotal] as Map<String, Object>
 
+                    // TODO: SBRFNDFL-8293
+                    actualValues.numberOfIndividuals = generalBlock.personCount
+                    actualValues.taxWithheldTotal = generalBlock.incomeWithholdingTotal
+                    actualValues.taxNotWithheldTotal = generalBlock.incomeNotHoldingTotal
+
                     if (declarationData.taxRefundReflectionMode == TaxRefundReflectionMode.NORMAL) {
                         ОбобщПоказAttrs.put("ВозврНалИт", generalBlock.refoundTotal)
+
+                        // TODO: SBRFNDFL-8293
+                        actualValues.taxRefundTotal = generalBlock.refoundTotal
                     } else if (declarationData.taxRefundReflectionMode == TaxRefundReflectionMode.AS_NEGATIVE_WITHHOLDING_TAX) {
                         if (section2Block.isEmpty()) {
                             ОбобщПоказAttrs.put("ВозврНалИт", section2Block.СуммаВНкРаспределению)
+
+                            // TODO: SBRFNDFL-8293
+                            actualValues.taxRefundTotal = section2Block.СуммаВНкРаспределению
                         } else {
                             ОбобщПоказAttrs.put("ВозврНалИт", 0)
+
+                            // TODO: SBRFNDFL-8293
+                            actualValues.taxRefundTotal = BigDecimal.ZERO
                         }
                     }
                     ОбобщПоказ(ОбобщПоказAttrs) {
                         generalBlock.rows.eachWithIndex { row, index ->
                             ScriptUtils.checkInterrupted()
+
+                            // TODO: SBRFNDFL-8293
+                            actualValues.incomeAccrued = ScriptUtils.round(row.accruedSum, 2)
+                            actualValues.incomeAccruedDividends = ScriptUtils.round(row.accruedSumForDividend, 2)
+                            actualValues.taxDeduction = ScriptUtils.round(row.deductionsSum, 2)
+                            actualValues.taxCalculated = row.calculatedTaxSum
+                            actualValues.taxCalсulatedDividends = row.calculatedTaxSumForDividend
+                            actualValues.paymentAdvance = row.prepaymentsSum
+
                             СумСтавка(Ставка: row.rate,
                                     НачислДох: ScriptUtils.round(row.accruedSum, 2),
                                     НачислДохДив: ScriptUtils.round(row.accruedSumForDividend, 2),
@@ -260,12 +300,27 @@ class Report6Ndfl extends AbstractScriptClass {
                                             "\"Дата дохода\": ${formatDate(row.incomeDate)}; исходное значение \"Дата удержания налога\": ${formatDate(row.taxDate)} заменено на \"00.00.0000\".",
                                             "Замена значений \"Дата удержания налога\" на 00.00.0000", "")
                                 }
+
+                                // TODO: SBRFNDFL-8293
+                                actualValues.incomeActual += row.incomeSum
+                                actualValues.taxRefund += row.withholdingTaxSum
+
                                 СумДата(ДатаФактДох: formatDate(row.incomeDate),
                                         ДатаУдержНал: replaceTaxDate && isZeroDate(row.taxTransferDate) ? DATE_ZERO_AS_STRING : formatDate(row.taxDate),
                                         СрокПрчслНал: isZeroDate(row.taxTransferDate) ? DATE_ZERO_AS_STRING : formatDate(row.taxTransferDate),
                                         ФактДоход: row.incomeSum,
                                         УдержНал: row.withholdingTaxSum) {}
                             }
+                        }
+
+                        // TODO: SBRFNDFL-8293
+                        // Все суммы нулевые; вывести уведомление
+                        if (isAllActualValuesAreZeros(actualValues)) {
+                            logger.warnExp("Внимание! Созданная отчетная форма: \"$declarationTemplate.name\": " +
+                                    "Период: \"${formatPeriod(departmentReportPeriod)}\", Подразделение: \"$department.name\", " +
+                                    "Вид: \"$declarationTemplate.name\", № $declarationData.id, Налоговый орган: \"$departmentConfig.taxOrganCode\", " +
+                                    "КПП: \"$departmentConfig.kpp\", ОКТМО: \"$departmentConfig.oktmo.code\" имеет нулевые значения показателей.",
+                                    "", "")
                         }
                     }
                 }
@@ -967,6 +1022,55 @@ class Report6Ndfl extends AbstractScriptClass {
             this.incomeDate = incomeDate
             this.taxDate = taxDate
             this.taxTransferDate = taxTransferDate
+        }
+    }
+
+    /**
+     * Актуальные числовые значения сумм доходов и вычетов (SBRFNDFL-8293)
+     *
+     * @author Vtornikov Alexey
+     * @since 2019-08-20
+     */
+    class ActualValues {
+        BigInteger taxWithheldTotal         // УдержНалИт (сумма удержанного налога итого)
+        BigInteger taxNotWithheldTotal      // НеУдержНалИт (сумма не удержанного налога итого)
+        BigInteger taxRefundTotal           // ВозврНалИт (сумма налога возвращенная итого)
+        BigDecimal incomeAccrued            // НачислДох (сумма начисленного дохода)
+        BigDecimal incomeAccruedDividends  // НачислДохДив (сумма начисленного дохода в виде дивидендов)
+        BigDecimal taxDeduction             // ВычетНал (сумма налоговых вычетов)
+        BigInteger taxCalculated            // ИсчислНал (сумма исчисленного налога)
+        BigInteger taxCalсulatedDividends  // ИсчислНалДив (сумма исчисленного налога по дивидендам)
+        BigInteger paymentAdvance           // АвансПлат (сумма фиксированного авансового платежа)
+        int numberOfIndividuals            // КолФЛДоход (количество физлиц, получивших доход)
+        BigDecimal incomeActual             // ФактДоход (сумма фактически полученного дохода)
+        BigInteger taxRefund                // УдержНал (сумма удержанного налога)
+    }
+
+    /**
+     * Проверить все суммы на равенство 0 (SBRFNDFL-8293)
+     *
+     * @author Vtornikov Alexey
+     * @since 2019-08-20
+     * @param Актуальные числовые значения сумм доходов и вычетов
+     * @return true (все значения нулевые)/false (есть ненулевые значения; какие - неважно)
+     */
+    boolean isAllActualValuesAreZeros(ActualValues actualValues) {
+        if (actualValues.taxWithheldTotal.compareTo(BigInteger.ZERO) == 0 &&
+            actualValues.taxNotWithheldTotal.compareTo(BigInteger.ZERO) == 0 &&
+            actualValues.taxRefundTotal.compareTo(BigInteger.ZERO) == 0 &&
+            actualValues.incomeAccrued.compareTo(BigDecimal.ZERO) == 0 &&
+            actualValues.incomeAccruedDividends.compareTo(BigDecimal.ZERO) == 0 &&
+            actualValues.taxDeduction.compareTo(BigDecimal.ZERO) == 0 &&
+            actualValues.taxCalculated.compareTo(BigInteger.ZERO) == 0 &&
+            actualValues.taxCalсulatedDividends.compareTo(BigInteger.ZERO) == 0 &&
+            actualValues.paymentAdvance.compareTo(BigInteger.ZERO) == 0 &&
+            actualValues.numberOfIndividuals == 0 &&
+            actualValues.incomeActual.compareTo(BigDecimal.ZERO) == 0 &&
+            actualValues.taxRefund.compareTo(BigInteger.ZERO) == 0) {
+            return true
+        }
+        else {
+            return false
         }
     }
 }
