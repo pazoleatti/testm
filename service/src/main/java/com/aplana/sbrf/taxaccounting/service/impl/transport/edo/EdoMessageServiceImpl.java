@@ -336,7 +336,6 @@ public class EdoMessageServiceImpl implements EdoMessageService {
     }
 
     private void handleFnsResponse(TransportMessage incomeTransportMessage, TaxMessageTechDocument taxMessageTechDoc) {
-        TaxMessageReceipt taxMessageReceipt;
         UploadTransportDataResult uploadTransportDataResult;
         FileWrapper sharedFileNameFromFns = null;
         Logger transportFileImporterLogger = new Logger();
@@ -373,11 +372,21 @@ public class EdoMessageServiceImpl implements EdoMessageService {
             uploadTransportDataResult.setProcessMessageResult(e.getMessage());
         }
 
-        taxMessageReceipt = buildTaxMessageReceipt(
+        TaxMessageReceipt taxMessageReceipt = buildTaxMessageReceipt(
                 taxMessageTechDoc.getUuid(),
                 uploadTransportDataResult.getMessageState(),
                 uploadTransportDataResult.getProcessMessageResult()
         );
+
+        if (sharedFileNameFromFns != null) {
+            try {
+                sharedFileNameFromFns.delete();
+            } catch (Exception e) {
+                LOG.warn("Ошибка удаления файла " + sharedFileNameFromFns.getName() +
+                        " из папки обмена для транспортного сообщения #" + incomeTransportMessage.getMessageUuid(), e);
+            }
+            LOG.info("Файл ФНС \"" + sharedFileNameFromFns.getName() + "\" удален из папки обмена");
+        }
 
         try {
             String xmlMessage = toXml(taxMessageReceipt);
@@ -386,10 +395,6 @@ public class EdoMessageServiceImpl implements EdoMessageService {
 
             incomeTransportMessage.setState(uploadTransportDataResult.getMessageState());
             sendAuditOnTransportMessage(TRANSPORT_MESSAGE_CHANGE_NOTE_FORMAT, incomeTransportMessage); // 8.h
-            if (sharedFileNameFromFns != null) {
-                sharedFileNameFromFns.delete();
-                LOG.info("Файл ФНС \"" + sharedFileNameFromFns.getName() + "\" удален из папки обмена");
-            }
         } catch (Exception e) {
             failHandleEdoMessage(incomeTransportMessage, e.getMessage());
         }
