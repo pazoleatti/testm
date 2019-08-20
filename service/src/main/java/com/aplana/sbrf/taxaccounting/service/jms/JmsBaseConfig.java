@@ -22,7 +22,7 @@ import javax.naming.NamingException;
 @EnableJms
 @Profile(value = {"development", "jms"})
 public class JmsBaseConfig {
-        public static final String TO_NDFL_QUEUE_JNDI_NAME = "jms/EdoRequestQueue-unstable2";
+        public static final String TO_NDFL_QUEUE_JNDI_NAME = "java:comp/env/jms/EdoRequestQueue";
 
         @Autowired
         private ConfigurationService configurationService;
@@ -65,10 +65,10 @@ public class JmsBaseConfig {
         /**
          * Фабрика соединений с MQ для очередей, получается по JNDI у вебсферы.
          */
-        @Bean(name = "FundConnectionFactory-unstable2")
+        @Bean(name = "FundConnectionFactory")
         public ConnectionFactory connectionFactory() throws NamingException {
                 return (ConnectionFactory) new InitialContext()
-                        .lookup("java:comp/env/jms/FundConnectionFactory-unstable2");
+                        .lookup("java:comp/env/jms/FundConnectionFactory");
         }
 
 }
