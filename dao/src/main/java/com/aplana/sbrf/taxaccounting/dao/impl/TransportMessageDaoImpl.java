@@ -96,7 +96,7 @@ public class TransportMessageDaoImpl extends AbstractDao implements TransportMes
             }
             if (StringUtils.isNotEmpty(filter.getUser())) {
                 conditions.add(" ((lower(u.login) like :user) or (lower(u.name) like :user)) ");
-                params.addValue("user", "%" + filter.getUser() + "%");
+                params.addValue("user", "%" + filter.getUser().toLowerCase() + "%");
             }
             if (filter.getSenderSubsystemId() != null) {
                 conditions.add(" (tm.sender_subsystem_id = :senderId) ");
