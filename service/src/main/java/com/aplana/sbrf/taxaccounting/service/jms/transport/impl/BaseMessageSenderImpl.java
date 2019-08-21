@@ -10,26 +10,19 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
+import org.springframework.jms.JmsException;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Service;
-
-import javax.annotation.PostConstruct;
 
 @Service
 @Profile({"jms", "development"})
 public class BaseMessageSenderImpl implements MessageSender {
     private static final Log LOG = LogFactory.getLog(BaseMessageSenderImpl.class);
-    private static final long MESSAGE_TTL_SECONDS = 30;
 
     @Autowired
     private JmsTemplate jmsTemplate;
     @Autowired
     private ConfigurationService configurationService;
-
-    @PostConstruct
-    private void init() {
-        jmsTemplate.setTimeToLive(30 * 1000);
-    }
 
     @Override
     public void sendMessage(String message) throws ConfigurationParameterAbsentException {
@@ -39,8 +32,12 @@ public class BaseMessageSenderImpl implements MessageSender {
                     ConfigurationParam.JNDI_QUEUE_OUT.getCaption() + "\"");
         }
 
-        LOG.debug("Попытка отправить сообщение '" + message + "' в очередь" + configuration.getValue());
-        jmsTemplate.convertAndSend(configuration.getValue(), message);
-        LOG.info("Сообщение '" + message + "' успешно отправлено в очередь " + configuration.getValue());
+        LOG.debug(String.format("Попытка отправить сообщение '%s' в очередь%s", message, configuration.getValue()));
+        try {
+            jmsTemplate.convertAndSend(configuration.getValue(), message);
+        } catch (JmsException e) {
+            throw new RuntimeException(e);
+        }
+        LOG.info(String.format("Сообщение '%s' успешно отправлено в очередь %s", message, configuration.getValue()));
     }
 }

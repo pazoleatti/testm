@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.jms;
 
-import com.aplana.sbrf.taxaccounting.service.ConfigurationService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.aplana.sbrf.taxaccounting.service.jms.transport.impl.BaseMessageReceiver;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -9,11 +8,14 @@ import org.springframework.jms.annotation.EnableJms;
 import org.springframework.jms.config.DefaultJmsListenerContainerFactory;
 import org.springframework.jms.config.JmsListenerContainerFactory;
 import org.springframework.jms.core.JmsTemplate;
+import org.springframework.jms.listener.DefaultMessageListenerContainer;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.jms.support.converter.SimpleMessageConverter;
 import org.springframework.jms.support.destination.JndiDestinationResolver;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.jms.ConnectionFactory;
+import javax.jms.Destination;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
@@ -22,10 +24,9 @@ import javax.naming.NamingException;
 @EnableJms
 @Profile(value = {"development", "jms"})
 public class JmsBaseConfig {
-        public static final String TO_NDFL_QUEUE_JNDI_NAME = "jms/EdoRequestQueue-unstable2";
 
-        @Autowired
-        private ConfigurationService configurationService;
+        public static final String TO_NDFL_QUEUE_JNDI_NAME = "edoRequestQueue";
+
         /**
          * Конвертер сообщений из xml в объектные модели
          */
@@ -65,10 +66,21 @@ public class JmsBaseConfig {
         /**
          * Фабрика соединений с MQ для очередей, получается по JNDI у вебсферы.
          */
-        @Bean(name = "FundConnectionFactory-unstable2")
+        @Bean(name = "FundConnectionFactory")
         public ConnectionFactory connectionFactory() throws NamingException {
                 return (ConnectionFactory) new InitialContext()
-                        .lookup("java:comp/env/jms/FundConnectionFactory-unstable2");
+                        .lookup("java:comp/env/jms/FundConnectionFactory");
+        }
+
+        @Bean(name = "EdoRequestQueue")
+        public DefaultMessageListenerContainer jmsContainer(ConnectionFactory connectionFactory, BaseMessageReceiver baseMessageReceiver, PlatformTransactionManager transactionManager) throws NamingException {
+                DefaultMessageListenerContainer container = new DefaultMessageListenerContainer();
+                container.setConnectionFactory(connectionFactory);
+                container.setMessageListener(baseMessageReceiver);
+                container.setDestination((Destination) new InitialContext().lookup("java:comp/env/jms/EdoRequestQueue"));
+                container.setSessionTransacted(true);
+                container.setTransactionManager(transactionManager);
+                return container;
         }
 
 }
