@@ -176,7 +176,8 @@ public class EdoMessageServiceImpl implements EdoMessageService {
         RefBook declarationTypeRefBook = commonRefBookService.get(RefBook.Id.DECLARATION_TEMPLATE.getId());
         BlobData xsd = blobDataService.get(declarationTypeRefBook.getXsdId());
         if (!validateXMLService.validate(validationLogger, message, xsd.getName(), xsd.getInputStream())) {
-            String errorMessage = "Входящее сообщение не соответствует xsd схеме.";
+            String errorMessage = "Входящее XML сообщение из ФП \"Фонды\", на основании которого было создано" +
+                    "Транспортное Сообщение №:" + transportMessage.getId() + " не соответствует XSD схеме.";
             failHandleEdoMessage(transportMessage, errorMessage);
             throw new IllegalStateException(errorMessage);
         }
