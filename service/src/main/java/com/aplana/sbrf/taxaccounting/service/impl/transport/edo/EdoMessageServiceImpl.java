@@ -266,8 +266,19 @@ public class EdoMessageServiceImpl implements EdoMessageService {
 
         updateSourceTransportMessageState(taxMessageReceipt, sourceTransportMessage);
         sendAuditOnTransportMessage(TRANSPORT_MESSAGE_CHANGE_NOTE_FORMAT, transportMessage); // 9.e
-        updateDeclarationState(transportMessage, taxMessageReceipt, sourceTransportMessage.getDeclaration());
-        auditService.add(null, taUserService.getSystemUserInfo(), "Изменение \"Состояние ЭД\", для отчетной формы: № " + transportMessage.getId()); // 9.i
+
+        DeclarationData declarationData = declarationDataService.get(sourceTransportMessage.getDeclaration().getId());
+        if (declarationData == null) {
+            String errorMessage = "Не удалось найти налоговую форму № " + sourceTransportMessage.getDeclaration().getId() +
+                    " для изменения \"Состояние ЭД\" на " + SENT_TO_EDO.getName() +". " +
+                    "Идентификатор транспортного сообщения: " + transportMessage.getMessageUuid();
+            failHandleEdoMessage(transportMessage, errorMessage);
+            throw new IllegalStateException(errorMessage);
+        }
+        updateDeclarationState(declarationData, taxMessageReceipt.getStatus());
+        auditService.add(null, taUserService.getSystemUserInfo(), declarationData,
+                "Изменение \"Состояние ЭД\", для отчетной формы: № " + declarationData.getId(), null); // 9.i
+
         transportMessage.setState(TransportMessageState.CONFIRMED);
         transportMessage.setDeclaration(sourceTransportMessage.getDeclaration());
         sendAuditOnTransportMessage(TRANSPORT_MESSAGE_CHANGE_NOTE_FORMAT, transportMessage); // 9.k
@@ -297,19 +308,9 @@ public class EdoMessageServiceImpl implements EdoMessageService {
         transportMessageService.update(transportMessage);
     }
 
-    private void updateDeclarationState(TransportMessage transportMessage, TaxMessageReceipt taxMessageReceipt,
-                                        DeclarationShortInfo declarationShortInfo) {
-        DeclarationData declarationData = declarationDataService.get(declarationShortInfo.getId());
-        if (declarationData == null) {
-            String errorMessage = "Не удалось найти налоговую форму № " + declarationShortInfo.getId() +
-                    " для изменения \"Состояние ЭД\" на " + SENT_TO_EDO.getName() +". " +
-                    "Идентификатор транспортного сообщения: " + transportMessage.getMessageUuid();
-            failHandleEdoMessage(transportMessage, errorMessage);
-            throw new IllegalStateException(errorMessage);
-        }
-
+    private void updateDeclarationState(DeclarationData declarationData, MessageStatus messageStatus) {
         TransportMessageState incomeTransportMessageState =
-                TransportMessageState.fromInt(taxMessageReceipt.getStatus().getCode());
+                TransportMessageState.fromInt(messageStatus.getCode());
         RefBookDocState newDeclarationState = null;
         List<Long> confirmedDocStates = Arrays.asList(SENDING_TO_EDO.getId(), NOT_SENT.getId(), EXPORTED.getId());
         List<Long> errorDocStates = Arrays.asList(SENDING_TO_EDO.getId(), EXPORTED.getId());
