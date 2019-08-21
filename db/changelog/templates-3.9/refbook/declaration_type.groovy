@@ -965,7 +965,7 @@ class DeclarationType extends AbstractScriptClass {
                 def docStateId = docStateProvider.getUniqueRecordIds(new Date(), "KND = '${nextKnd}'").get(0)
                 if (declarationData.docStateId != docStateId) {
                     declarationService.setDocStateId(declarationData.id, docStateId)
-                    auditService.add(FormDataEvent.CHANGE_STATUS_ED, userInfo(), declarationData,
+                    auditService.add(null, userInfo(), declarationData,
                             "Изменение \"Состояние ЭД\", для отчетной формы:  №$declarationData.id.", null)
                 }
             }
