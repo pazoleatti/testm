@@ -1,0 +1,300 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- edited with XMLSpy v2011 rel. 2 (http://www.altova.com) by TeaM DJiNN2 (TeaM DJiNN2) -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+	<xs:element name="TaxMessageDocument" type="TaxMessageDocumentType">
+		<xs:annotation>
+			<xs:documentation>Сообщение о файле ЭД</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="TaxMessageTechDocument" type="TaxMessageTechDocumentType">
+		<xs:annotation>
+			<xs:documentation>Сообщение о файле ТД</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="TaxMessageReceipt" type="TaxMessageReceiptType">
+		<xs:annotation>
+			<xs:documentation>Квитанция о результатах обработки файла из общей папки обмена</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:complexType name="BaseMessageType">
+		<xs:annotation>
+			<xs:documentation>Общие данные сообщения</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="UUID" type="UUIDType">
+				<xs:annotation>
+					<xs:documentation>Уникальный идентификатор сообщения.
+                        Для квитанций он в точности должен совпадать с UUID исходного сообщения.
+                    </xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="datetime" type="xs:dateTime">
+				<xs:annotation>
+					<xs:documentation>Дата и время передачи сообщения</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="source" type="SubsystemType">
+				<xs:annotation>
+					<xs:documentation>Код ФП отправителя</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="destination" type="SubsystemType">
+				<xs:annotation>
+					<xs:documentation>Код ФП получателя</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+		<xs:attribute name="formatVersion" use="required">
+			<xs:annotation>
+				<xs:documentation>Версия формата</xs:documentation>
+			</xs:annotation>
+			<xs:simpleType>
+				<xs:restriction base="xs:string">
+					<xs:minLength value="1"/>
+					<xs:maxLength value="5"/>
+					<xs:enumeration value="2.0"/>
+				</xs:restriction>
+			</xs:simpleType>
+		</xs:attribute>
+	</xs:complexType>
+	<xs:complexType name="TaxMessageTechDocumentType">
+		<xs:annotation>
+			<xs:documentation>Сообщение с данными о файле ТД, помещенном в общую папку обмена</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="BaseMessageType">
+				<xs:sequence>
+					<xs:element name="parentDocument" type="UUIDType" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>Уникальный идентификатор из исходного сообщения с ЭД.
+                                Служит для определения связи ЭД и ТД
+                            </xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="parentFileName" type="FileDataType" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>Имя исходного файла ЭД, на котороый получен из ФНС передаваемый ТД.</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="documentType" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>Код формы передаваемого документа</xs:documentation>
+						</xs:annotation>
+						<xs:simpleType>
+							<xs:restriction base="xs:string">
+								<xs:minLength value="3"/>
+								<xs:maxLength value="50"/>
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:element>
+					<xs:element name="filename" type="FileDataType">
+						<xs:annotation>
+							<xs:documentation>Данные о файле, помещенном в общую папку обмена</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="status" type="StatusType">
+						<xs:annotation>
+							<xs:documentation>Результат обработки файла, в зависимости от вида ТД.
+                                Если пришло подтверждение приема из ФНС, то код 1-Принят.
+                                Если пришел отказ от ФНС, то код 2-Отказ</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="additionalData" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>Сопроводительная информация.
+							Служит для передачи уникальных параметров ФП-получателю
+                            </xs:documentation>
+						</xs:annotation>
+						<xs:complexType>
+							<xs:choice>
+								<xs:element name="taxRecData">
+									<xs:annotation>
+										<xs:documentation>Сопроводительные данные для ФП "Налоговая выверка"</xs:documentation>
+									</xs:annotation>
+									<xs:complexType>
+										<xs:annotation>
+											<xs:documentation>Дата квитанции</xs:documentation>
+										</xs:annotation>
+										<xs:attribute name="receiptDate" type="xs:date" use="optional"/>
+									</xs:complexType>
+								</xs:element>
+								<xs:element name="personsTaxData">
+									<xs:annotation>
+										<xs:documentation>Сопроводительные данные для ФП "НДФЛ"</xs:documentation>
+									</xs:annotation>
+								</xs:element>
+								<xs:element name="countryReportData">
+									<xs:annotation>
+										<xs:documentation>Сопроводительные данные для ФП "Страновая отчетность"</xs:documentation>
+									</xs:annotation>
+								</xs:element>
+							</xs:choice>
+						</xs:complexType>
+					</xs:element>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="TaxMessageDocumentType">
+		<xs:annotation>
+			<xs:documentation>Сообщение с данными о файле ЭД, помещенном в общую папку обмена</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="BaseMessageType">
+				<xs:sequence>
+					<xs:element name="login">
+						<xs:annotation>
+							<xs:documentation>Логин пользователя, направившего файл</xs:documentation>
+						</xs:annotation>
+						<xs:simpleType>
+							<xs:restriction base="xs:string">
+								<xs:minLength value="1"/>
+								<xs:maxLength value="255"/>
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:element>
+					<xs:element name="filename" type="FileDataType">
+						<xs:annotation>
+							<xs:documentation>Данные о файле помещенном в общей папке обмена</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="parentDocument" type="UUIDType" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>Уникальный идентификатор из исходного сообщения с ЭД.
+                                Служит для определения связи исходящего ЭД и ответного ЭД для 06 ДО
+                            </xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="documentType" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>Код формы передаваемого документа</xs:documentation>
+						</xs:annotation>
+						<xs:simpleType>
+							<xs:restriction base="xs:string">
+								<xs:minLength value="3"/>
+								<xs:maxLength value="50"/>
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:element>
+					<xs:element name="documentURL" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>Ссылка на карточку документа в системе-источнике</xs:documentation>
+						</xs:annotation>
+						<xs:simpleType>
+							<xs:restriction base="xs:string">
+								<xs:maxLength value="255"/>
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:element>
+					<xs:element name="additionalData" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>Сопроводительная информация.
+							Служит для передачи уникальных параметров ФП-получателю
+                            </xs:documentation>
+						</xs:annotation>
+						<xs:complexType>
+							<xs:choice>
+								<xs:element name="taxRecData">
+									<xs:annotation>
+										<xs:documentation>Сопроводительные данные для ФП "Налоговая выверка"</xs:documentation>
+									</xs:annotation>
+									<xs:complexType>
+										<xs:attribute name="receiptDate" type="xs:date" use="optional"/>
+									</xs:complexType>
+								</xs:element>
+								<xs:element name="personsTaxData">
+									<xs:annotation>
+										<xs:documentation>Сопроводительные данные для ФП "НДФЛ"</xs:documentation>
+									</xs:annotation>
+								</xs:element>
+								<xs:element name="countryReportData">
+									<xs:annotation>
+										<xs:documentation>Сопроводительные данные для ФП "Страновая отчетность"</xs:documentation>
+									</xs:annotation>
+								</xs:element>
+							</xs:choice>
+						</xs:complexType>
+					</xs:element>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="TaxMessageReceiptType">
+		<xs:annotation>
+			<xs:documentation>Квитанция с данными об обработке файла из общей папки обмена</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="BaseMessageType">
+				<xs:sequence>
+					<xs:element name="status" type="StatusType">
+						<xs:annotation>
+							<xs:documentation>Детализация статуса.
+                                Если код 1-Успех, то будет записан URL для перехода в ПД.
+                                Если код 2-Ошибка, то будет детализация ошибки.
+                            </xs:documentation>
+						</xs:annotation>
+					</xs:element>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:simpleType name="FileDataType">
+		<xs:annotation>
+			<xs:documentation>Имя файла вместе с расширением. Имя должно быть уникальным</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="255"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="UUIDType">
+		<xs:annotation>
+			<xs:documentation>Уникальный идентификатор сообщения (квитанции)</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:length value="36" fixed="true"/>
+			<xs:pattern value="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="SubsystemType">
+		<xs:annotation>
+			<xs:documentation>Тип ФП источника или получателя сообщения и файла</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:int"/>
+	</xs:simpleType>
+	<xs:complexType name="StatusType">
+		<xs:annotation>
+			<xs:documentation>Статус обработки файла</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="code">
+				<xs:annotation>
+					<xs:documentation>Код статуса</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:int">
+						<xs:enumeration value="1">
+							<xs:annotation>
+								<xs:documentation>Успех</xs:documentation>
+							</xs:annotation>
+						</xs:enumeration>
+						<xs:enumeration value="2">
+							<xs:annotation>
+								<xs:documentation>Ошибка</xs:documentation>
+							</xs:annotation>
+						</xs:enumeration>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="detail">
+				<xs:annotation>
+					<xs:documentation>Детализация статуса</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:maxLength value="2000"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+</xs:schema>
