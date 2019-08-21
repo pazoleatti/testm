@@ -130,7 +130,7 @@
                         rowList: APP_CONSTANTS.COMMON.PAGINATION,
                         sortname: 'id',
                         viewrecords: true,
-                        sortorder: "asc",
+                        sortorder: "desc",
                         hidegrid: false,
                         multiselect: true,
                         ondblClickRow: function (rowId) {
