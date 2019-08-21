@@ -214,7 +214,6 @@ class Report6Ndfl extends AbstractScriptClass {
                     }
                 }
                 НДФЛ6() {
-                    // TODO: SBRFNDFL-8293
                     // Создать и инициализировать набор числовых значений сумм доходов и вычетов
                     def actualValues = new ActualValues()
                     actualValues.taxWithheldTotal = BigInteger.ZERO
@@ -246,34 +245,25 @@ class Report6Ndfl extends AbstractScriptClass {
                                            УдержНалИт  : generalBlock.incomeWithholdingTotal,
                                            НеУдержНалИт: generalBlock.incomeNotHoldingTotal] as Map<String, Object>
 
-                    // TODO: SBRFNDFL-8293
                     actualValues.numberOfIndividuals = generalBlock.personCount
                     actualValues.taxWithheldTotal = generalBlock.incomeWithholdingTotal
                     actualValues.taxNotWithheldTotal = generalBlock.incomeNotHoldingTotal
 
                     if (declarationData.taxRefundReflectionMode == TaxRefundReflectionMode.NORMAL) {
                         ОбобщПоказAttrs.put("ВозврНалИт", generalBlock.refoundTotal)
-
-                        // TODO: SBRFNDFL-8293
                         actualValues.taxRefundTotal = generalBlock.refoundTotal
                     } else if (declarationData.taxRefundReflectionMode == TaxRefundReflectionMode.AS_NEGATIVE_WITHHOLDING_TAX) {
                         if (section2Block.isEmpty()) {
                             ОбобщПоказAttrs.put("ВозврНалИт", section2Block.СуммаВНкРаспределению)
-
-                            // TODO: SBRFNDFL-8293
                             actualValues.taxRefundTotal = section2Block.СуммаВНкРаспределению
                         } else {
                             ОбобщПоказAttrs.put("ВозврНалИт", 0)
-
-                            // TODO: SBRFNDFL-8293
                             actualValues.taxRefundTotal = BigDecimal.ZERO
                         }
                     }
                     ОбобщПоказ(ОбобщПоказAttrs) {
                         generalBlock.rows.eachWithIndex { row, index ->
                             ScriptUtils.checkInterrupted()
-
-                            // TODO: SBRFNDFL-8293
                             actualValues.incomeAccrued = ScriptUtils.round(row.accruedSum, 2)
                             actualValues.incomeAccruedDividends = ScriptUtils.round(row.accruedSumForDividend, 2)
                             actualValues.taxDeduction = ScriptUtils.round(row.deductionsSum, 2)
@@ -301,7 +291,6 @@ class Report6Ndfl extends AbstractScriptClass {
                                             "Замена значений \"Дата удержания налога\" на 00.00.0000", "")
                                 }
 
-                                // TODO: SBRFNDFL-8293
                                 actualValues.incomeActual += row.incomeSum
                                 actualValues.taxRefund += row.withholdingTaxSum
 
@@ -312,16 +301,16 @@ class Report6Ndfl extends AbstractScriptClass {
                                         УдержНал: row.withholdingTaxSum) {}
                             }
                         }
-
-                        // TODO: SBRFNDFL-8293
-                        // Все суммы нулевые; вывести уведомление
-                        if (isAllActualValuesAreZeros(actualValues)) {
-                            logger.warnExp("Внимание! Созданная отчетная форма: \"$declarationTemplate.name\": " +
-                                    "Период: \"${formatPeriod(departmentReportPeriod)}\", Подразделение: \"$department.name\", " +
-                                    "Вид: \"$declarationTemplate.name\", № $declarationData.id, Налоговый орган: \"$departmentConfig.taxOrganCode\", " +
-                                    "КПП: \"$departmentConfig.kpp\", ОКТМО: \"$departmentConfig.oktmo.code\" имеет нулевые значения показателей.",
-                                    "", "")
-                        }
+                    }
+                    // Все суммы нулевые; вывести уведомление
+                    boolean isValuesAreZeros = isAllActualValuesAreZeros(actualValues)
+                    println("----> ${declarationData.id}")
+                    if (isValuesAreZeros) {
+                        logger.warnExp("Внимание! Созданная отчетная форма: \"$declarationTemplate.name\": " +
+                                "Период: \"${formatPeriod(departmentReportPeriod)}\", Подразделение: \"$department.name\", " +
+                                "Вид: \"$declarationTemplate.name\", № $declarationData.id, Налоговый орган: \"$departmentConfig.taxOrganCode\", " +
+                                "КПП: \"$departmentConfig.kpp\", ОКТМО: \"$departmentConfig.oktmo.code\" имеет нулевые значения показателей.",
+                                "", "")
                     }
                 }
             }
@@ -1047,7 +1036,7 @@ class Report6Ndfl extends AbstractScriptClass {
     }
 
     /**
-     * Проверить все суммы на равенство 0 (SBRFNDFL-8293)
+     * Проверить все суммы на равенство 0
      *
      * @author Vtornikov Alexey
      * @since 2019-08-20
