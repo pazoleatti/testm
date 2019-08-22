@@ -42,6 +42,7 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.Result;
 import javax.xml.transform.stream.StreamResult;
 import java.io.*;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -93,6 +94,8 @@ public class EdoMessageServiceImpl implements EdoMessageService {
             "Идентификатор сообщения: %s, " + // <Объект."Идентификатор сообщения">
             "Тип сообщения: %s, " + // <Объект."Тип сообщения">
             "Статус сообщения: %s"; // <Объект."Статус сообщения">
+
+    private static final String MESSAGE_EXPLANATION_DATE_FORMAT = "dd.MM.YY HH:mm";
 
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
@@ -285,8 +288,9 @@ public class EdoMessageServiceImpl implements EdoMessageService {
     }
 
     private void failHandleEdoMessage(TransportMessage transportMessage, String errorMessage) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat(MESSAGE_EXPLANATION_DATE_FORMAT);
         transportMessage.setState(TransportMessageState.ERROR);
-        transportMessage.setExplanation(new Date() + " " + errorMessage);
+        transportMessage.setExplanation(dateFormat.format(new Date()) + " " + errorMessage);
     }
 
     private void updateSourceTransportMessageState(TaxMessageReceipt taxMessageReceipt, TransportMessage transportMessage) {
@@ -296,8 +300,9 @@ public class EdoMessageServiceImpl implements EdoMessageService {
         } else if (TransportMessageState.ERROR == messageState) {
             transportMessage.setState(TransportMessageState.ERROR);
 
+            SimpleDateFormat dateFormat = new SimpleDateFormat(MESSAGE_EXPLANATION_DATE_FORMAT);
             String sourceTransportMessageExplanation = transportMessage.getExplanation();
-            String taxMessageErrorDetail = new Date() + " " + taxMessageReceipt.getStatus().getDetail();
+            String taxMessageErrorDetail = dateFormat.format(new Date()) + " " + taxMessageReceipt.getStatus().getDetail();
             if (StringUtils.isEmpty(sourceTransportMessageExplanation)) {
                 transportMessage.setExplanation(taxMessageErrorDetail);
             } else {
