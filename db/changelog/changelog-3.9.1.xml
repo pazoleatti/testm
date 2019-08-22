@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-8293 Реализовать формирование 6-НДФЛ с нулевыми показателями -->
+    <changeSet id="3.9.1-avtornikov-1" author="avtornikov" runAlways="true">
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="CREATE_SCRIPT" valueClobFile="templates-3.9.1/ndfl/report_6ndfl/v2016/report_6ndfl.groovy"/>
+            <where>declaration_type_id = 103</where>
+        </update>
+    </changeSet>
+
+</databaseChangeLog>
