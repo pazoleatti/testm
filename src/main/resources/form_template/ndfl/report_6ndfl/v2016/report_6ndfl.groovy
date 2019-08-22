@@ -66,6 +66,8 @@ class Report6Ndfl extends AbstractScriptClass {
     String applicationVersion
     Map<String, Object> paramMap
 
+    ActualValues actualValues;
+
     @TypeChecked(TypeCheckingMode.SKIP)
     Report6Ndfl(scriptClass) {
         super(scriptClass)
@@ -214,22 +216,6 @@ class Report6Ndfl extends AbstractScriptClass {
                     }
                 }
                 НДФЛ6() {
-                    // Создать и инициализировать набор числовых значений сумм доходов и вычетов
-                    def actualValues = new ActualValues()
-                    actualValues.taxWithheldTotal = BigInteger.ZERO
-                    actualValues.taxNotWithheldTotal = BigInteger.ZERO
-                    actualValues.taxRefundTotal = BigInteger.ZERO
-                    actualValues.incomeAccrued = BigDecimal.ZERO
-                    actualValues.incomeAccruedDividends = BigDecimal.ZERO
-                    actualValues.incomeAccruedDividends = BigDecimal.ZERO
-                    actualValues.taxDeduction = BigDecimal.ZERO
-                    actualValues.taxCalculated = BigInteger.ZERO
-                    actualValues.taxCalсulatedDividends = BigInteger.ZERO
-                    actualValues.paymentAdvance = BigInteger.ZERO
-                    actualValues.numberOfIndividuals = 0
-                    actualValues.incomeActual = BigDecimal.ZERO
-                    actualValues.taxRefund = BigInteger.ZERO
-
                     def section2Block = new Section2Block(incomeList)
                     if (!section2Block.isEmpty()) {
                         section2Block.adjustRefundTax(incomeList)
@@ -245,31 +231,31 @@ class Report6Ndfl extends AbstractScriptClass {
                                            УдержНалИт  : generalBlock.incomeWithholdingTotal,
                                            НеУдержНалИт: generalBlock.incomeNotHoldingTotal] as Map<String, Object>
 
-                    actualValues.numberOfIndividuals = generalBlock.personCount
-                    actualValues.taxWithheldTotal = generalBlock.incomeWithholdingTotal
-                    actualValues.taxNotWithheldTotal = generalBlock.incomeNotHoldingTotal
+                    actualValues.numberOfIndividuals += generalBlock.personCount
+                    actualValues.taxWithheldTotal += generalBlock.incomeWithholdingTotal
+                    actualValues.taxNotWithheldTotal += generalBlock.incomeNotHoldingTotal
 
                     if (declarationData.taxRefundReflectionMode == TaxRefundReflectionMode.NORMAL) {
                         ОбобщПоказAttrs.put("ВозврНалИт", generalBlock.refoundTotal)
-                        actualValues.taxRefundTotal = generalBlock.refoundTotal
+                        actualValues.taxRefundTotal += generalBlock.refoundTotal
                     } else if (declarationData.taxRefundReflectionMode == TaxRefundReflectionMode.AS_NEGATIVE_WITHHOLDING_TAX) {
                         if (section2Block.isEmpty()) {
                             ОбобщПоказAttrs.put("ВозврНалИт", section2Block.СуммаВНкРаспределению)
-                            actualValues.taxRefundTotal = section2Block.СуммаВНкРаспределению
+                            actualValues.taxRefundTotal += section2Block.СуммаВНкРаспределению
                         } else {
                             ОбобщПоказAttrs.put("ВозврНалИт", 0)
-                            actualValues.taxRefundTotal = BigDecimal.ZERO
+                            actualValues.taxRefundTotal += BigDecimal.ZERO
                         }
                     }
                     ОбобщПоказ(ОбобщПоказAttrs) {
                         generalBlock.rows.eachWithIndex { row, index ->
                             ScriptUtils.checkInterrupted()
-                            actualValues.incomeAccrued = ScriptUtils.round(row.accruedSum, 2)
-                            actualValues.incomeAccruedDividends = ScriptUtils.round(row.accruedSumForDividend, 2)
-                            actualValues.taxDeduction = ScriptUtils.round(row.deductionsSum, 2)
-                            actualValues.taxCalculated = row.calculatedTaxSum
-                            actualValues.taxCalсulatedDividends = row.calculatedTaxSumForDividend
-                            actualValues.paymentAdvance = row.prepaymentsSum
+                            actualValues.incomeAccrued += ScriptUtils.round(row.accruedSum, 2)
+                            actualValues.incomeAccruedDividends += ScriptUtils.round(row.accruedSumForDividend, 2)
+                            actualValues.taxDeduction += ScriptUtils.round(row.deductionsSum, 2)
+                            actualValues.taxCalculated += row.calculatedTaxSum
+                            actualValues.taxCalсulatedDividends += row.calculatedTaxSumForDividend
+                            actualValues.paymentAdvance += row.prepaymentsSum
 
                             СумСтавка(Ставка: row.rate,
                                     НачислДох: ScriptUtils.round(row.accruedSum, 2),
@@ -301,16 +287,6 @@ class Report6Ndfl extends AbstractScriptClass {
                                         УдержНал: row.withholdingTaxSum) {}
                             }
                         }
-                    }
-                    // Все суммы нулевые; вывести уведомление
-                    boolean isValuesAreZeros = isAllActualValuesAreZeros(actualValues)
-                    println("----> ${declarationData.id}")
-                    if (isValuesAreZeros) {
-                        logger.warnExp("Внимание! Созданная отчетная форма: \"$declarationTemplate.name\": " +
-                                "Период: \"${formatPeriod(departmentReportPeriod)}\", Подразделение: \"$department.name\", " +
-                                "Вид: \"$declarationTemplate.name\", № $declarationData.id, Налоговый орган: \"$departmentConfig.taxOrganCode\", " +
-                                "КПП: \"$departmentConfig.kpp\", ОКТМО: \"$departmentConfig.oktmo.code\" имеет нулевые значения показателей.",
-                                "", "")
                     }
                 }
             }
@@ -434,6 +410,23 @@ class Report6Ndfl extends AbstractScriptClass {
             declarationData.state = State.CREATED
 
             prevDeclarationData = declarationService.findPrev(declarationData, RefBookDocState.ACCEPTED, RefBookDocState.WORKED_OUT)
+
+            // Создать и инициализировать набор числовых значений сумм доходов и вычетов
+            actualValues = new ActualValues();
+            actualValues.taxWithheldTotal = BigInteger.ZERO
+            actualValues.taxNotWithheldTotal = BigInteger.ZERO
+            actualValues.taxRefundTotal = BigInteger.ZERO
+            actualValues.incomeAccrued = BigDecimal.ZERO
+            actualValues.incomeAccruedDividends = BigDecimal.ZERO
+            actualValues.incomeAccruedDividends = BigDecimal.ZERO
+            actualValues.taxDeduction = BigDecimal.ZERO
+            actualValues.taxCalculated = BigInteger.ZERO
+            actualValues.taxCalсulatedDividends = BigInteger.ZERO
+            actualValues.paymentAdvance = BigInteger.ZERO
+            actualValues.numberOfIndividuals = 0
+            actualValues.incomeActual = BigDecimal.ZERO
+            actualValues.taxRefund = BigInteger.ZERO
+
             File zipFile = null
             Xml xml = null
             try {
@@ -464,10 +457,20 @@ class Report6Ndfl extends AbstractScriptClass {
                         sourceService.addDeclarationConsolidationInfo(declarationData.id, singletonList(sourceKnf.id))
 
                         if (!prevDeclarationData || prevDeclarationData.adjustNegativeValues == declarationData.adjustNegativeValues) {
-                            logger.info("Успешно выполнено создание отчетной формы \"$declarationTemplate.name\": " +
-                                    "Период: \"${formatPeriod(departmentReportPeriod)}\", Подразделение: \"$department.name\", " +
-                                    "Вид: \"$declarationTemplate.name\", № $declarationData.id, Налоговый орган: \"$departmentConfig.taxOrganCode\", " +
-                                    "КПП: \"$departmentConfig.kpp\", ОКТМО: \"$departmentConfig.oktmo.code\".")
+                            if (isAllActualValuesAreZeros()) {
+                                // Успех; в форме 6-НДФЛ все значения показателей нулевые
+                                logger.warnExp("Внимание! Созданная отчетная форма: \"$declarationTemplate.name\": " +
+                                        "Период: \"${formatPeriod(departmentReportPeriod)}\", Подразделение: \"$department.name\", " +
+                                        "Вид: \"$declarationTemplate.name\", № $declarationData.id, Налоговый орган: \"$departmentConfig.taxOrganCode\", " +
+                                        "КПП: \"$departmentConfig.kpp\", ОКТМО: \"$departmentConfig.oktmo.code\" имеет нулевые значения показателей.",
+                                        "", "")
+                            } else {
+                                // Успех; в форме 6-НДФЛ не все значения показателей нулевые
+                                logger.info("Успешно выполнено создание отчетной формы \"$declarationTemplate.name\": " +
+                                        "Период: \"${formatPeriod(departmentReportPeriod)}\", Подразделение: \"$department.name\", " +
+                                        "Вид: \"$declarationTemplate.name\", № $declarationData.id, Налоговый орган: \"$departmentConfig.taxOrganCode\", " +
+                                        "КПП: \"$departmentConfig.kpp\", ОКТМО: \"$departmentConfig.oktmo.code\".")
+                            }
                         } else {
                             logger.info("Выполнено создание отчетной формы \"$declarationTemplate.name\": " +
                                     "Период: \"${formatPeriod(departmentReportPeriod)}\", Подразделение: \"$department.name\", " +
@@ -1040,10 +1043,9 @@ class Report6Ndfl extends AbstractScriptClass {
      *
      * @author Vtornikov Alexey
      * @since 2019-08-20
-     * @param Актуальные числовые значения сумм доходов и вычетов
      * @return true (все значения нулевые)/false (есть ненулевые значения; какие - неважно)
      */
-    boolean isAllActualValuesAreZeros(ActualValues actualValues) {
+    boolean isAllActualValuesAreZeros() {
         if (actualValues.taxWithheldTotal.compareTo(BigInteger.ZERO) == 0 &&
             actualValues.taxNotWithheldTotal.compareTo(BigInteger.ZERO) == 0 &&
             actualValues.taxRefundTotal.compareTo(BigInteger.ZERO) == 0 &&
