@@ -46,8 +46,8 @@ public class AuditServiceImpl implements AuditService {
     @Autowired
     private ServerInfo serverInfo;
 
-    private static final String RP_NAME_PATTERN = "%s %s";
-    private static final String RP_NAME_WITH_CORR_PATTERN = "%s %s%s";
+    private static final String RP_NAME_PATTERN = "%s, %s";
+    private static final String RP_NAME_WITH_CORR_PATTERN = "%s, %s%s";
     private static final ThreadLocal<SimpleDateFormat> SDF_YYYY = new ThreadLocal<SimpleDateFormat>() {
         @Override
         protected SimpleDateFormat initialValue() {
