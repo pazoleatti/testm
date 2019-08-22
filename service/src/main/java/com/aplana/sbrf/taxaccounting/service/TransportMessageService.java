@@ -38,6 +38,15 @@ public interface TransportMessageService {
     PagingResult<TransportMessage> findByFilter(TransportMessageFilter filter, @Nullable PagingParams pagingParams);
 
     /**
+     * Получить список сообщений с фильтрацией и пагинацией с учетом подразделений, доступных пользователю.
+     *
+     * @param filter       параметры фильтрации
+     * @param pagingParams параметры пагинации
+     * @return список Транспортных сообщений, подходящих под параметры фильтрации с постраничным разбиением.
+     */
+    PagingResult<TransportMessage> findByFilterWithUserDepartments(TransportMessageFilter filter, @Nullable PagingParams pagingParams);
+
+    /**
      * Создает Транспортное сообщение
      *
      * @param transportMessage Транспортное сообщение

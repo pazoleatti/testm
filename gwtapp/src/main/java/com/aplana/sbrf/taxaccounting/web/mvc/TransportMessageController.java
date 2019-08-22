@@ -38,12 +38,12 @@ public class TransportMessageController {
     }
 
     /**
-     * Выгрузка Транспортных сообщений по фильтру и с пагинацией.
+     * Выгрузка Транспортных сообщений по фильтру и с пагинацией с учетом доступных пользователю подразделений.
      */
     @GetMapping("/rest/transportMessages")
     public JqgridPagedList<TransportMessage> getMessagesByFilter(@RequestParam(required = false) TransportMessageFilter filter,
                                                                  @RequestParam(required = false) PagingParams pagingParams) {
-        PagingResult<TransportMessage> messages = transportMessageService.findByFilter(filter, pagingParams);
+        PagingResult<TransportMessage> messages = transportMessageService.findByFilterWithUserDepartments(filter, pagingParams);
         return JqgridPagedResourceAssembler.buildPagedList(messages, pagingParams);
     }
 

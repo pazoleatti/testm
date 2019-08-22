@@ -265,7 +265,7 @@ public class EdoMessageServiceImpl implements EdoMessageService {
         }
 
         updateSourceTransportMessageState(taxMessageReceipt, sourceTransportMessage);
-        sendAuditOnTransportMessage(TRANSPORT_MESSAGE_CHANGE_NOTE_FORMAT, transportMessage); // 9.e
+        sendAuditOnTransportMessage(TRANSPORT_MESSAGE_CHANGE_NOTE_FORMAT, sourceTransportMessage); // 9.e
 
         DeclarationData declarationData = declarationDataService.get(sourceTransportMessage.getDeclaration().getId());
         if (declarationData == null) {
