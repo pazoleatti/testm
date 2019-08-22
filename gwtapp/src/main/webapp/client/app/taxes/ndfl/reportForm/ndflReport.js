@@ -103,6 +103,7 @@
                                             $scope.declarationTypeName = declarationType.name;
                                         }
                                     });
+                                    $scope.isCurrentForm2NDFLFL = $scope.declarationData.declarationType === APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_FL.id
                                 }
                             }
                         }
