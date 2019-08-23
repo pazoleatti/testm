@@ -201,9 +201,13 @@ public class EdoMessageServiceImpl implements EdoMessageService {
         }
     }
 
-    private TransportMessage getSourceTransportMessage(TransportMessageFilter transportMessageFilter) {
-        List<TransportMessage> sourceTransportMessages = transportMessageService.findByFilter(transportMessageFilter, null);
+    private TransportMessage getSourceTransportMessage(BaseMessage taxMessage) {
         TransportMessage result = null;
+
+        TransportMessageFilter transportMessageFilter = new TransportMessageFilter();
+        transportMessageFilter.setMessageUuid(taxMessage.getUuid());
+        List<TransportMessage> sourceTransportMessages = transportMessageService.findByFilter(transportMessageFilter, null);
+
         if (!CollectionUtils.isEmpty(sourceTransportMessages)) {
             result = sourceTransportMessages.get(0);
         }
@@ -256,9 +260,7 @@ public class EdoMessageServiceImpl implements EdoMessageService {
     private void handleEdoTechReceipt(TransportMessage transportMessage, TaxMessageReceipt taxMessageReceipt) {
         transportMessage.setContentType(TransportMessageContentType.TECH_RECEIPT);
 
-        TransportMessageFilter transportMessageFilter = new TransportMessageFilter();
-        transportMessageFilter.setMessageUuid(taxMessageReceipt.getUuid());
-        TransportMessage sourceTransportMessage = getSourceTransportMessage(transportMessageFilter);
+        TransportMessage sourceTransportMessage = getSourceTransportMessage(taxMessageReceipt);
         if (sourceTransportMessage == null) {
             String errorMessage = "Для данной технологической квитанции не найдено исходное сообщение";
             failHandleEdoMessage(transportMessage, errorMessage);
@@ -401,15 +403,6 @@ public class EdoMessageServiceImpl implements EdoMessageService {
             createTechReceiptOutcomeTransportMessage(taxMessageReceipt, xmlMessage, taxMessageTechDoc.getFileName());
 
             incomeTransportMessage.setState(uploadTransportDataResult.getMessageState());
-
-            TransportMessageFilter transportMessageFilter = new TransportMessageFilter();
-            transportMessageFilter.setFileName(taxMessageTechDoc.getParentFileName());
-            TransportMessage sourceTransportMessage = getSourceTransportMessage(transportMessageFilter);
-            if (sourceTransportMessage == null) {
-                throw new IllegalStateException("Для данного ответа из ФНС не найдено исходное сообщение.");
-            }
-            populateTransportMessageWithDeclaration(incomeTransportMessage, sourceTransportMessage.getSourceFileName());
-
             sendAuditOnTransportMessage(TRANSPORT_MESSAGE_CHANGE_NOTE_FORMAT, incomeTransportMessage); // 8.h
         } catch (Exception e) {
             failHandleEdoMessage(incomeTransportMessage, e.getMessage());
@@ -420,6 +413,7 @@ public class EdoMessageServiceImpl implements EdoMessageService {
         String fnsResponseBlobId = blobDataService.create(sharedFileNameFromFns.getInputStream(), sharedFileNameFromFns.getName());
         BlobData fnsResponseBlobData = blobDataService.get(fnsResponseBlobId);
         transportMessage.setBlob(fnsResponseBlobData);
+        populateTransportMessageWithDeclaration(transportMessage, sharedFileNameFromFns.getName());
         LOG.info("Файл ФНС '" + sharedFileNameFromFns.getName() + "'сохранен в БД и установлен ТС #" +
                 transportMessage.getMessageUuid());
         return fnsResponseBlobData;
