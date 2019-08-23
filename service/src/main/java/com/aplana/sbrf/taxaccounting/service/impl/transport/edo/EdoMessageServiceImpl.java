@@ -12,9 +12,6 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDocState;
 import com.aplana.sbrf.taxaccounting.model.result.UploadTransportDataResult;
 import com.aplana.sbrf.taxaccounting.model.util.AppFileUtils;
 import com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission;
-import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
-import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
-import com.aplana.sbrf.taxaccounting.script.service.DeclarationService;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.component.factory.TransportMessageFactory;
 import com.aplana.sbrf.taxaccounting.service.component.lock.locker.DeclarationLocker;
@@ -71,10 +68,6 @@ public class EdoMessageServiceImpl implements EdoMessageService {
     private final UploadTransportDataService uploadTransportDataService;
     private final SubsystemService subsystemService;
     private final TransportMessageFactory transportMessageFactory;
-    private final RefBookFactory refBookFactory;
-    private final DeclarationService declarationService;
-    private final DepartmentService departmentService;
-    private final PeriodService periodService;
     @Autowired(required = false)
     private MessageSender messageSender;
     @Autowired
@@ -104,8 +97,7 @@ public class EdoMessageServiceImpl implements EdoMessageService {
                                  BlobDataService blobDataService, ConfigurationService configurationService, ValidateXMLService validateXMLService,
                                  TransportMessageService transportMessageService, CommonRefBookService commonRefBookService, LogBusinessService logBusinessService,
                                  LockDataService lockDataService, TransactionHelper transactionHelper, TAUserService taUserService, UploadTransportDataService uploadTransportDataService,
-                                 SubsystemService subsystemService, TransportMessageFactory transportMessageFactory, RefBookFactory refBookFactory, DeclarationService declarationService,
-                                 DepartmentService departmentService, PeriodService periodService) {
+                                 SubsystemService subsystemService, TransportMessageFactory transportMessageFactory) {
         this.declarationDataService = declarationDataService;
         this.declarationTemplateService = declarationTemplateService;
         this.declarationLocker = declarationLocker;
@@ -121,10 +113,6 @@ public class EdoMessageServiceImpl implements EdoMessageService {
         this.uploadTransportDataService = uploadTransportDataService;
         this.subsystemService = subsystemService;
         this.transportMessageFactory = transportMessageFactory;
-        this.refBookFactory = refBookFactory;
-        this.declarationService = declarationService;
-        this.departmentService = departmentService;
-        this.periodService = periodService;
     }
 
     @Override
@@ -201,17 +189,27 @@ public class EdoMessageServiceImpl implements EdoMessageService {
         }
     }
 
-    private TransportMessage getSourceTransportMessage(BaseMessage taxMessage) {
+    private TransportMessage getSourceTransportMessage(TransportMessageFilter transportMessageFilter) {
+        List<TransportMessage> sourceTransportMessages = transportMessageService
+                .findByFilter(transportMessageFilter, null);
         TransportMessage result = null;
-
-        TransportMessageFilter transportMessageFilter = new TransportMessageFilter();
-        transportMessageFilter.setMessageUuid(taxMessage.getUuid());
-        List<TransportMessage> sourceTransportMessages = transportMessageService.findByFilter(transportMessageFilter, null);
-
         if (!CollectionUtils.isEmpty(sourceTransportMessages)) {
             result = sourceTransportMessages.get(0);
         }
         return result;
+    }
+
+    private TransportMessage geSourceTransportMessageFromEdoTechDoc(TaxMessageTechDocument taxMessageTechDoc) {
+        TransportMessageFilter transportMessageFilter = new TransportMessageFilter();
+        transportMessageFilter.setMessageUuid(taxMessageTechDoc.getParentDocument());
+        transportMessageFilter.setTypeId(TransportMessageType.OUTGOING.getIntValue());
+        return getSourceTransportMessage(transportMessageFilter);
+    }
+
+    private TransportMessage getSourceMessageFromEdoTechReceipt(TaxMessageReceipt taxMessageReceipt) {
+        TransportMessageFilter transportMessageFilter = new TransportMessageFilter();
+        transportMessageFilter.setMessageUuid(taxMessageReceipt.getUuid());
+        return getSourceTransportMessage(transportMessageFilter);
     }
 
     private BaseMessage getTaxMessage(String message) {
@@ -231,7 +229,6 @@ public class EdoMessageServiceImpl implements EdoMessageService {
         transportMessage.setMessageUuid(taxMessageReceipt.getUuid());
         transportMessage.setSenderSubsystem(new Subsystem(taxMessageReceipt.getSource()));
     }
-
     private void validateSenderAndRecipient(String xmlMessage, BaseMessage taxMessage) {
         if (!ndflSubsystemIsRecipient(taxMessage)) {
             throw new IllegalStateException("НДФЛ не является получателем транспортного сообщения: " + xmlMessage);
@@ -260,7 +257,7 @@ public class EdoMessageServiceImpl implements EdoMessageService {
     private void handleEdoTechReceipt(TransportMessage transportMessage, TaxMessageReceipt taxMessageReceipt) {
         transportMessage.setContentType(TransportMessageContentType.TECH_RECEIPT);
 
-        TransportMessage sourceTransportMessage = getSourceTransportMessage(taxMessageReceipt);
+        TransportMessage sourceTransportMessage = getSourceMessageFromEdoTechReceipt(taxMessageReceipt);
         if (sourceTransportMessage == null) {
             String errorMessage = "Для данной технологической квитанции не найдено исходное сообщение";
             failHandleEdoMessage(transportMessage, errorMessage);
@@ -347,8 +344,20 @@ public class EdoMessageServiceImpl implements EdoMessageService {
     private void handleFnsResponse(TransportMessage incomeTransportMessage, TaxMessageTechDocument taxMessageTechDoc) {
         UploadTransportDataResult uploadTransportDataResult;
         FileWrapper sharedFileNameFromFns = null;
+        DeclarationShortInfo declarationShortInfo = null;
         Logger transportFileImporterLogger = new Logger();
         try {
+            TransportMessage sourceTransportMessage = geSourceTransportMessageFromEdoTechDoc(taxMessageTechDoc);
+            if (sourceTransportMessage == null) {
+                throw new IllegalStateException("Для данного ответа из ФНС не найдено исходное сообщение.");
+            }
+
+            declarationShortInfo = sourceTransportMessage.getDeclaration();
+            if (!declarationDataService.existDeclarationData(declarationShortInfo.getId())) {
+                throw new IllegalStateException("Не удалось определить налоговую форму в исходящем ТС.");
+            }
+            incomeTransportMessage.setDeclaration(declarationShortInfo);
+
             sharedFileNameFromFns = getFileFromFnsFileSharing(incomeTransportMessage.getMessageUuid(),
                     taxMessageTechDoc);
             BlobData fnsResponseBlobData = storeFileInTransportMessage(incomeTransportMessage, sharedFileNameFromFns);
@@ -400,7 +409,8 @@ public class EdoMessageServiceImpl implements EdoMessageService {
         try {
             String xmlMessage = toXml(taxMessageReceipt);
             sendTechReceiptToEdo(incomeTransportMessage, xmlMessage);
-            createTechReceiptOutcomeTransportMessage(taxMessageReceipt, xmlMessage, taxMessageTechDoc.getFileName());
+            createTechReceiptOutcomeTransportMessage(
+                    taxMessageReceipt, xmlMessage, taxMessageTechDoc.getFileName(), declarationShortInfo);
 
             incomeTransportMessage.setState(uploadTransportDataResult.getMessageState());
             sendAuditOnTransportMessage(TRANSPORT_MESSAGE_CHANGE_NOTE_FORMAT, incomeTransportMessage); // 8.h
@@ -413,7 +423,6 @@ public class EdoMessageServiceImpl implements EdoMessageService {
         String fnsResponseBlobId = blobDataService.create(sharedFileNameFromFns.getInputStream(), sharedFileNameFromFns.getName());
         BlobData fnsResponseBlobData = blobDataService.get(fnsResponseBlobId);
         transportMessage.setBlob(fnsResponseBlobData);
-        populateTransportMessageWithDeclaration(transportMessage, sharedFileNameFromFns.getName());
         LOG.info("Файл ФНС '" + sharedFileNameFromFns.getName() + "'сохранен в БД и установлен ТС #" +
                 transportMessage.getMessageUuid());
         return fnsResponseBlobData;
@@ -508,40 +517,15 @@ public class EdoMessageServiceImpl implements EdoMessageService {
     }
 
     private void createTechReceiptOutcomeTransportMessage(TaxMessageReceipt taxMessageReceipt, String message,
-                                                          String attachFileName) {
+                                                          String attachFileName, DeclarationShortInfo declarationInfo) {
         TransportMessage transportMessage = transportMessageFactory.createOutcomeMessageToEdo(taxMessageReceipt, message);
         transportMessage.setInitiatorUser(taUserService.getSystemUserInfo().getUser());
         transportMessage.setContentType(TransportMessageContentType.TECH_RECEIPT);
         transportMessage.setSourceFileName(attachFileName);
-        populateTransportMessageWithDeclaration(transportMessage, attachFileName);
+        transportMessage.setDeclaration(declarationInfo);
         transportMessageService.create(transportMessage);
         LOG.info("Транспортное сообщение овтетной технологической квитанции создано #" +
                 transportMessage.getMessageUuid());
-    }
-
-    private void populateTransportMessageWithDeclaration(TransportMessage transportMessage, String sourceFileName) {
-        RefBookDataProvider fileTypeProvider = refBookFactory.getDataProvider(RefBook.Id.ATTACH_FILE_TYPE.getId());
-        Long fileTypeId = fileTypeProvider.getUniqueRecordIds(new Date(), "CODE = " + AttachFileType.OUTGOING_TO_FNS.getCode()).get(0);
-        List<DeclarationData> declarationDataList = declarationService.findDeclarationDataByFileNameAndFileType(sourceFileName, fileTypeId);
-        if (declarationDataList.size() > 0) {
-            DeclarationData declarationData = declarationDataList.get(0);
-            int departmentId = declarationData.getDepartmentId();
-            String departmentName = departmentId == 0 ?
-                    departmentService.getDepartment(departmentId).getName() :
-                    departmentService.getParentsHierarchy(departmentId);
-
-            ReportPeriod reportPeriod = periodService.fetchReportPeriod(declarationData.getReportPeriodId());
-            DeclarationShortInfo declarationShortInfo = DeclarationShortInfo.builder()
-                    .id(declarationData.getId())
-                    .departmentName(departmentName)
-                    .reportPeriodName(reportPeriod != null ? reportPeriod.getName() : "")
-                    .typeName(declarationData.getKnfType().getName())
-                    .build();
-            transportMessage.setDeclaration(declarationShortInfo);
-        } else {
-            LOG.warn("Невозможно дполнить ТС информацией о декларации, т.к. для файла '" + sourceFileName +
-                    "' не найдено ни одной декларации");
-        }
     }
 
     private void sendAuditOnTransportMessage(String noteFormat, TransportMessage transportMessage) {
