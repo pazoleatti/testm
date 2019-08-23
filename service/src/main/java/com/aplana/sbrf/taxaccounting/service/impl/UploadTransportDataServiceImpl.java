@@ -212,6 +212,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
                         params.put("blobDataId", fileBlobUuid);
                         params.put("refBookName", refBook.getName());
                         params.put("fileSize", fileSize);
+                        params.put("userIP", userInfo.getIp());
                         if (archiveName != null) {
                             params.put("archiveName", archiveName);
                         }
@@ -249,6 +250,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
                 Map<String, Object> params = new HashMap<String, Object>();
                 params.put("blobDataId", fileBlobUuid);
                 params.put("fileSize", fileSize);
+                params.put("userIP", userInfo.getIp());
                 if (archiveName != null) {
                     params.put("archiveName", archiveName);
                 }

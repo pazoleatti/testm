@@ -42,6 +42,7 @@ public class LoadTransportFileAsyncTask extends AbstractAsyncTask {
         Map<String, Object> params = taskData.getParams();
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(taskData.getUserId()));
+        userInfo.setIp((String) params.get("userIP"));
         final String blobDataId = (String) params.get("blobDataId");
         BlobData blobData = blobDataService.get(blobDataId);
         asyncManager.updateState(taskData.getId(), AsyncTaskState.FILES_UPLOADING);

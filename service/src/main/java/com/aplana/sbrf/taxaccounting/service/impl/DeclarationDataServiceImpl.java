@@ -2455,6 +2455,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         } else {
             Map<String, Object> params = new HashMap<>();
             params.put("noLockDeclarationDataIds", declarationDataIds);
+            params.put("userIP", userInfo.getIp());
             asyncManager.createTask(OperationType.SEND_EDO, userInfo, params, logger);
         }
         return new ActionResult(logEntryService.save(logger.getEntries()));
