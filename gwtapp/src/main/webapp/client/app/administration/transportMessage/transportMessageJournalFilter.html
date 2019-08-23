@@ -122,6 +122,22 @@
                                  class="span8">
                             </div>
                         </div>
+
+                        <!-- Вид формы (SBRFNDFL-8318) -->
+                        <div class="row-fluid form-group">
+                            <div class="span4">
+                                <label class="control-label">
+                                    {{::'transportMessages.title.declarationType' | translate}}:
+                                </label>
+                            </div>
+                            <div class="span8"
+                                 data-ng-controller="SelectDeclarationTypeCtrl"
+                                 data-ui-select2="declarationTypeSelect.options"
+                                 data-ng-init="initSelectWithAllReportDeclarationTypes()"
+                                 data-ng-model="searchFilter.params.declarationTypes">
+                            </div>
+                        </div>
+
                     </div>
                     <div class="span4">
                         <!-- Подразделение формы -->
