@@ -286,6 +286,8 @@ public class EdoMessageServiceImpl implements EdoMessageService {
     }
 
     private void failHandleEdoMessage(TransportMessage transportMessage, String errorMessage) {
+        LOG.info(String.format("В результате обработки ответа от ЭДО возникла ошибка: '%s' , ТС №%d",
+                errorMessage, transportMessage.getId()));
         SimpleDateFormat dateFormat = new SimpleDateFormat(MESSAGE_EXPLANATION_DATE_FORMAT);
         transportMessage.setState(TransportMessageState.ERROR);
         transportMessage.setExplanation(dateFormat.format(new Date()) + " " + errorMessage);
@@ -542,6 +544,9 @@ public class EdoMessageServiceImpl implements EdoMessageService {
                     .typeName(declarationData.getKnfType().getName())
                     .build();
             transportMessage.setDeclaration(declarationShortInfo);
+        } else {
+            LOG.warn("Невозможно дполнить ТС информацией о декларации, т.к. для файла '" + sourceFileName +
+                    "' не найдено ни одной декларации");
         }
     }
 
