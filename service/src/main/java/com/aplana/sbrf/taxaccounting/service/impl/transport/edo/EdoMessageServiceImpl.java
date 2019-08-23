@@ -587,7 +587,7 @@ public class EdoMessageServiceImpl implements EdoMessageService {
                         sendToEdo(message);
                         declarationDataService.updateDocState(declarationData.getId(), SENDING_TO_EDO.getId());
                         logSuccessToLogger();
-                        auditService.add(null, taUserService.getSystemUserInfo(), declarationData, "Отправка в ЭДО отчетной формы: № " + declarationData.getId(), null);
+                        auditService.add(null, userInfo, declarationData, "Отправка в ЭДО отчетной формы: № " + declarationData.getId(), null);
                     }
                 }
             } catch (Exception e) {
