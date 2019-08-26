@@ -532,8 +532,8 @@ public class EdoMessageServiceImpl implements EdoMessageService {
         String note = String.format(noteFormat,
                 transportMessage.getId(),
                 transportMessage.getMessageUuid(),
-                transportMessage.getType(),
-                transportMessage.getState());
+                transportMessage.getType().getText(),
+                transportMessage.getState().getText());
         auditService.add(null, taUserService.getSystemUserInfo(), note);
     }
 

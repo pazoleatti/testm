@@ -11,25 +11,26 @@ public enum TransportMessageState {
     /**
      * Подтверждено
      */
-    CONFIRMED(1),
+    CONFIRMED(1, "Подтверждено"),
     /**
      * Ошибка
      */
-    ERROR(2),
+    ERROR(2, "Ошибка"),
     /**
      * Отправлено
      */
-    SENT(3),
+    SENT(3, "Отправлено"),
     /**
      * Получено
      */
-    RECEIVED(4),
+    RECEIVED(4, "Получено"),
     /**
      * Дубликат
      */
-    DUPLICATE(5);
+    DUPLICATE(5, "Дубликат");
 
     private int intValue;
+    private String text;
 
     public static TransportMessageState fromInt(int intValue) {
         for (TransportMessageState state : values()) {
@@ -38,6 +39,10 @@ public enum TransportMessageState {
             }
         }
         throw new IllegalArgumentException("Неизвестный статус транспортного сообщения \"" + intValue + "\"");
+    }
+
+    public String getText() {
+        return text;
     }
 
     @JsonValue
