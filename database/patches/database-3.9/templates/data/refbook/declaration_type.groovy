@@ -771,31 +771,8 @@ class DeclarationType extends AbstractScriptClass {
         String formTypeCode = formType.CODE.stringValue
 
         // Выполнить проверку структуры файла ответа на соответствие XSD
-        InputStream inputStream = null
         if (NDFL6 == formTypeCode) {
-            SAXHandler handl = new SAXHandler('Файл', 'Файл', true)
-            try {
-                inputStream = new FileInputStream((File) dataFile)
-                SAXParserFactory factory = SAXParserFactory.newInstance()
-                SAXParser saxParser = factory.newSAXParser()
-                saxParser.parse((InputStream) inputStream, handl)
-            } catch (Exception e) {
-
-                e.printStackTrace()
-
-            } finally {
-                IOUtils.closeQuietly(inputStream)
-            }
-            handl.getListValueAttributesTag().get('xsi:noNamespaceSchemaLocation')
-
-            DeclarationTemplateFile templateFile = null
-            for (DeclarationTemplateFile tf : declarationTemplate.declarationTemplateFiles) {
-                if (tf.fileName.equals(handl.getListValueAttributesTag().get('xsi:noNamespaceSchemaLocation'))) {
-                    templateFile = tf
-                    break
-                }
-            }
-
+            DeclarationTemplateFile templateFile = getDeclarationTemplateFile(declarationTemplate)
             if (!templateFile) {
                 handleErrorMessage("Для файла ответа \"$UploadFileName\" не найдена xsd схема")
                 return
@@ -989,6 +966,14 @@ class DeclarationType extends AbstractScriptClass {
         if (NDFL2_1 == formTypeCode || NDFL2_2 == formTypeCode) {
             declarationService.createPdfReport(logger, declarationData, userInfo())
             logger.info("Выполнено обновление печатного представления содержимого для формы № $declarationData.id")
+        }
+    }
+
+    /** Взятие XSD-схемы декларации 6-НДФЛ по первым символом имени загружаемого файла **/
+    private DeclarationTemplateFile getDeclarationTemplateFile(DeclarationTemplate declarationTemplate) {
+        def uploadFileNamePrefix = UploadFileName.substring(0, 3)
+        return declarationTemplate.declarationTemplateFiles.find {
+            file -> file.fileName.startsWith(uploadFileNamePrefix)
         }
     }
 
