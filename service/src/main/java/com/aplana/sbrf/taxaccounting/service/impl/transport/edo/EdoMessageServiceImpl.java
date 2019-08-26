@@ -358,7 +358,7 @@ public class EdoMessageServiceImpl implements EdoMessageService {
             }
             incomeTransportMessage.setDeclaration(declarationShortInfo);
 
-            sharedFileNameFromFns = getFileFromFnsFileSharing(incomeTransportMessage.getMessageUuid(),
+            sharedFileNameFromFns = getFileFromFnsFileSharing(incomeTransportMessage.getId(),
                     taxMessageTechDoc);
             BlobData fnsResponseBlobData = storeFileInTransportMessage(incomeTransportMessage, sharedFileNameFromFns);
 
@@ -429,12 +429,12 @@ public class EdoMessageServiceImpl implements EdoMessageService {
     }
 
     @NotNull
-    private FileWrapper getFileFromFnsFileSharing(String messageUuid, TaxMessageTechDocument taxMessageTechDocument) {
+    private FileWrapper getFileFromFnsFileSharing(Long messageId, TaxMessageTechDocument taxMessageTechDocument) {
         String fileName = taxMessageTechDocument.getFileName();
         String sharingFolderPath = getTargetSystemSharingFolder();
         FileWrapper directory = ResourceUtils.getSharedResource(sharingFolderPath, false);
         String errorMessage = "В папке обмена не обнаружен файл: " + fileName +
-                " для транспортно сообщения № " + messageUuid;
+                " для транспортного сообщения № " + messageId;
         if (directory.exists()) {
             try {
                 FileWrapper sharedResource = ResourceUtils.getSharedResource(sharingFolderPath + "/" + fileName);
