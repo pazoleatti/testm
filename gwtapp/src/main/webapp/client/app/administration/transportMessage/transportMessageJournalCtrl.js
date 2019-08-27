@@ -56,11 +56,18 @@
                                     senderSubsystemId: params.senderSubsystem ? params.senderSubsystem.id : null,
                                     receiverSubsystemId: params.receiverSubsystem ? params.receiverSubsystem.id : null,
                                     contentTypeIds: $filter('idExtractor')(params.contentTypes),
+
+                                    // Вид формы (SBRFNDFL-8318)
+                                    declarationTypes: $filter('idExtractor')(params.declarationTypes),
+
                                     departmentIds: $filter('idExtractor')(params.departmentIds),
                                     declarationId: params.declarationId,
                                     fileName: params.fileName,
                                     dateFrom: params.dateFrom,
-                                    dateTo: params.dateTo
+                                    dateTo: params.dateTo,
+
+                                    // SBRFNDFL-8318
+                                    declarationType: params.declarationType
                                 }
                             }
                         },
