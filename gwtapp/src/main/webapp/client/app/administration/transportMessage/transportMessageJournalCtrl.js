@@ -42,7 +42,10 @@
                                     declarationId: params.declarationId,
                                     fileName: params.fileName,
                                     dateFrom: params.dateFrom,
-                                    dateTo: params.dateTo
+                                    dateTo: params.dateTo,
+
+                                    // SBRFNDFL-8318
+                                    declarationType: params.declarationType
                                 }
                             }
                         },
