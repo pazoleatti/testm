@@ -526,6 +526,8 @@ public class EdoMessageServiceImpl implements EdoMessageService {
         transportMessageService.create(transportMessage);
         LOG.info("Транспортное сообщение овтетной технологической квитанции создано #" +
                 transportMessage.getMessageUuid());
+
+        sendAuditOnTransportMessage(TRANSPORT_MESSAGE_CREATE_NOTE_FORMAT, transportMessage);
     }
 
     private void sendAuditOnTransportMessage(String noteFormat, TransportMessage transportMessage) {
