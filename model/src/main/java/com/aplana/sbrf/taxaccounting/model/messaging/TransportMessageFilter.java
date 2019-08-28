@@ -16,7 +16,7 @@ public class TransportMessageFilter {
     private Integer receiverSubsystemId;
     private List<Integer> contentTypeIds;
 
-    // SBRFNDFL-8318
+    // Вид формы (SBRFNDFL-8318)
     private List<Integer> declarationTypes;
 
     private List<Integer> departmentIds;

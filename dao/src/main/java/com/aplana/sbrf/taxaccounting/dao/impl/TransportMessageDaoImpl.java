@@ -111,9 +111,10 @@ public class TransportMessageDaoImpl extends AbstractDao implements TransportMes
                 params.addValue("contentTypes", filter.getContentTypeIds());
             }
 
-            // SBRFNDFL-8318
+            // Вид формы (SBRFNDFL-8318)
             if (CollectionUtils.isNotEmpty(filter.getDeclarationTypes())) {
-                System.out.println("***!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!***");
+                conditions.add(" (declaration_template.id in (:declarationTypes)) ");
+                params.addValue("declarationTypes", filter.getDeclarationTypes());
             }
 
             if (StringUtils.isNotEmpty(filter.getDeclarationId())) {

@@ -18,6 +18,13 @@
             }
         }])
 
+        // Вид формы (SBRFNDFL-8318)
+//        .filter('tmDeclarationTypeFormatter', ['APP_CONSTANTS', function (APP_CONSTANTS) {
+//            return function (declarationTypeId) {
+//                return APP_CONSTANTS.TRANSPORT_MESSAGE_DECLARATION_TYPE[declarationTypeId];
+//            }
+//        }])
+
         .filter('tmStateFormatter', ['APP_CONSTANTS', function (APP_CONSTANTS) {
             return function (stateId) {
                 return APP_CONSTANTS.TRANSPORT_MESSAGE_STATE[stateId];
