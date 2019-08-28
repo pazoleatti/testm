@@ -140,7 +140,8 @@ public class EdoMessageServiceImpl implements EdoMessageService {
             handleIncomeMessage(xmlMessage, transportMessage);
         } catch (Exception e) {
             sendAuditOnTransportMessage(SYSTEM_ERROR_NOTE_FORMAT, transportMessage);
-            throw e;
+            LOG.warn("В результате обработки файла ответа от ЭДО произошла исключительная ситуация." +
+                    "Создано сообщение в ЖА", e);
         } finally {
             transportMessageService.update(transportMessage);
         }
@@ -342,7 +343,7 @@ public class EdoMessageServiceImpl implements EdoMessageService {
     }
 
     private void handleFnsResponse(TransportMessage incomeTransportMessage, TaxMessageTechDocument taxMessageTechDoc) {
-        UploadTransportDataResult uploadTransportDataResult;
+        UploadTransportDataResult uploadTransportDataResult = null;
         FileWrapper sharedFileNameFromFns = null;
         DeclarationShortInfo declarationShortInfo = null;
         Logger transportFileImporterLogger = new Logger();
@@ -388,6 +389,18 @@ public class EdoMessageServiceImpl implements EdoMessageService {
             uploadTransportDataResult = new UploadTransportDataResult();
             uploadTransportDataResult.setMessageState(TransportMessageState.ERROR);
             uploadTransportDataResult.setProcessMessageResult(e.getMessage());
+        } finally {
+            if (uploadTransportDataResult != null) {
+                if (StringUtils.isNotEmpty(uploadTransportDataResult.getProcessMessageResult())) {
+                    sendNotification("");
+                } else if (StringUtils.isNotEmpty(uploadTransportDataResult.getNotificationMessage())
+                        && declarationShortInfo != null) {
+                    String fullDeclarationDesc = declarationDataService
+                            .getFullDeclarationDescription(declarationShortInfo.getId());
+                    sendNotification("Загрузка файла полученного от ЭДО  " + sharedFileNameFromFns.getName() +
+                            "  завершена. Выполнена загрузка ответа ФНС для формы №" + fullDeclarationDesc);
+                }
+            }
         }
 
         TaxMessageReceipt taxMessageReceipt = buildTaxMessageReceipt(
@@ -417,6 +430,10 @@ public class EdoMessageServiceImpl implements EdoMessageService {
         } catch (Exception e) {
             failHandleEdoMessage(incomeTransportMessage, e.getMessage());
         }
+    }
+
+    private void sendNotification() {
+
     }
 
     private BlobData storeFileInTransportMessage(TransportMessage transportMessage, FileWrapper sharedFileNameFromFns) {
