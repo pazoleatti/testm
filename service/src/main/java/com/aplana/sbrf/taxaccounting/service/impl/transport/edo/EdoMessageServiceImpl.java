@@ -140,7 +140,8 @@ public class EdoMessageServiceImpl implements EdoMessageService {
             handleIncomeMessage(xmlMessage, transportMessage);
         } catch (Exception e) {
             sendAuditOnTransportMessage(SYSTEM_ERROR_NOTE_FORMAT, transportMessage);
-            throw e;
+            LOG.warn("В результате обработки файла ответа от ЭДО произошла исключительная ситуация." +
+                    "Создано сообщение в ЖА", e);
         } finally {
             transportMessageService.update(transportMessage);
         }
