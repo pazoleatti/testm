@@ -130,12 +130,20 @@
                                     {{::'transportMessages.title.declarationType' | translate}}:
                                 </label>
                             </div>
-                            <div class="span8"
-                                 data-ng-controller="SelectDeclarationTypeCtrl"
+                            <div data-ng-controller="SelectDeclarationTypeCtrl"
                                  data-ui-select2="declarationTypeSelect.options"
                                  data-ng-init="initSelectWithAllReportDeclarationTypes()"
-                                 data-ng-model="searchFilter.params.declarationTypes">
+                                 data-ng-model="searchFilter.params.declarationTypes"
+                                 class="span8">
                             </div>
+<!--
+                            <div data-ng-controller="SelectByKeyValueCtrl"
+                                 data-ui-select2="select.options"
+                                 data-ng-init="initMultipleSelect(APP_CONSTANTS.TRANSPORT_MESSAGE_DECLARATION_TYPE)"
+                                 data-ng-model="searchFilter.params.declarationTypes"
+                                 class="span8">
+                            </div>
+-->
                         </div>
 
                     </div>
