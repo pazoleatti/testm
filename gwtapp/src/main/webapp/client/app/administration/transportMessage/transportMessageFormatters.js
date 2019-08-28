@@ -24,31 +24,51 @@
             }
         }])
 
-        .filter('tmNdflReportLinkFormatter', function () {
-            return function (declarationId) {
-                if (!declarationId) return '';
-                return '<a href="index.html#/taxes/ndfl/ndflReport/' + declarationId + '">' + declarationId + '</a>';
-            }
-        })
+        .filter('tmNdflReportLinkFormatter', ['APP_CONSTANTS', 'PermissionChecker', '$rootScope',
+            function (APP_CONSTANTS, PermissionChecker, $rootScope) {
+                return function (declarationId) {
+                    if (!declarationId) return '';
+                    if (PermissionChecker.check($rootScope.user, APP_CONSTANTS.USER_PERMISSION.VIEW_TAXES_NDFL)) {
+                        return '<a href="index.html#/taxes/ndfl/ndflReport/' + declarationId + '">' + declarationId + '</a>';
+                    } else {
+                        return declarationId;
+                    }
+                }
+        }])
 
-        .filter('tmGridBodyFileLinkFormatter', function () {
-            return function (fileName, options) {
-                if (!fileName || !options) return '';
-                return '<a target="_self" href="controller/rest/transportMessages/' + options.rowId + '/bodyFile">' + fileName + '</a>';
-            }
-        })
+        .filter('tmGridBodyFileLinkFormatter', ['APP_CONSTANTS', 'PermissionChecker', '$rootScope',
+            function (APP_CONSTANTS, PermissionChecker, $rootScope) {
+                return function (fileName, options) {
+                    if (!fileName || !options) return '';
+                    if (PermissionChecker.check($rootScope.user, APP_CONSTANTS.USER_PERMISSION.VIEW_TAXES_NDFL)) {
+                        return '<a target="_self" href="controller/rest/transportMessages/' + options.rowId + '/bodyFile">' + fileName + '</a>';
+                    } else {
+                        return fileName;
+                    }
+                }
+        }])
 
-        .filter('tmGridFileLinkFormatter', function () {
-            return function (file, options) {
-                if (!file || !file.name || !options) return '';
-                return '<a target="_self" href="controller/rest/transportMessages/' + options.rowId + '/file">' + file.name + '</a>'
-            }
-        })
+        .filter('tmGridFileLinkFormatter', ['APP_CONSTANTS', 'PermissionChecker', '$rootScope',
+            function (APP_CONSTANTS, PermissionChecker, $rootScope) {
+                return function (file, options) {
+                    if (!file || !file.name || !options) return '';
+                    if (PermissionChecker.check($rootScope.user, APP_CONSTANTS.USER_PERMISSION.VIEW_TAXES_NDFL)) {
+                        return '<a target="_self" href="controller/rest/transportMessages/' + options.rowId + '/file">' + file.name + '</a>'
+                    } else {
+                        return file.name;
+                    }
+                }
+        }])
 
-        .filter('tmWindowFileLinkFormatter', function () {
-            return function (message) {
-                if (!message || !message.blob || !message.blob.name) return '';
-                return '<a target="_self" href="controller/rest/transportMessages/' + message.id + '/file">' + message.blob.name + '</a>'
-            }
-        })
+        .filter('tmWindowFileLinkFormatter', ['APP_CONSTANTS', 'PermissionChecker', '$rootScope',
+            function (APP_CONSTANTS, PermissionChecker, $rootScope) {
+                return function (message) {
+                    if (!message || !message.blob || !message.blob.name) return '';
+                    if (PermissionChecker.check($rootScope.user, APP_CONSTANTS.USER_PERMISSION.VIEW_TAXES_NDFL)) {
+                        return '<a target="_self" href="controller/rest/transportMessages/' + message.id + '/file">' + message.blob.name + '</a>'
+                    } else {
+                        return message.blob.name
+                    }
+                }
+        }])
 }());

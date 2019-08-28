@@ -7,11 +7,7 @@
             <!-- Номер формы -->
             <div class="row-fluid">
                 <div class="span4 text-right">{{::'transportMessages.title.declarationId' | translate}}:</div>
-                <div class="span8">
-                    <a data-ng-href="index.html#/taxes/ndfl/ndflReport/{{message.declaration.id}}">
-                        {{message.declaration.id}}
-                    </a>
-                </div>
+                <div class="span8" data-ng-bind-html="message.declaration.id | tmNdflReportLinkFormatter"></div>
             </div>
             <!-- Период формы -->
             <div class="row-fluid">
