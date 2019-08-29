@@ -9,8 +9,26 @@
         .controller('transportMessageJournalCtrl', ['$scope', '$filter', '$http', '$aplanaModal', 'transportMessageResource', 'APP_CONSTANTS',
             function ($scope, $filter, $http, $aplanaModal, transportMessageResource, APP_CONSTANTS) {
 
+                function getDefaultFilterParams() {
+                    return {};
+                }
+
+                // поля со значениями null, undefined или "" будут считаться эквивалентными
+                function stringify(value) {
+                    return JSON.stringify(value, function (key, value) {
+                        return value ? value : undefined;
+                    });
+                }
+
                 $scope.searchFilter = {
-                    params: {}
+                    params: getDefaultFilterParams(),
+                    isClear: false,
+                    isClearByFilterParams: function () {
+                        $scope.searchFilter.isClear = stringify($scope.searchFilter.params) !== stringify(getDefaultFilterParams());
+                    },
+                    resetFilterParams: function () {
+                        $scope.searchFilter.params = getDefaultFilterParams();
+                    }
                 };
 
                 /**

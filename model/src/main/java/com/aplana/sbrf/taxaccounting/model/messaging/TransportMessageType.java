@@ -9,10 +9,11 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public enum TransportMessageType {
 
-    OUTGOING(0),
-    INCOMING(1);
+    OUTGOING(0, "Исходящее"),
+    INCOMING(1, "Входящее");
 
     private int intValue;
+    private String text;
 
     public static TransportMessageType fromInt(int intValue) {
         for (TransportMessageType type : values()) {
@@ -21,6 +22,10 @@ public enum TransportMessageType {
             }
         }
         throw new IllegalArgumentException(String.valueOf(intValue));
+    }
+
+    public String getText() {
+        return text;
     }
 
     @JsonValue

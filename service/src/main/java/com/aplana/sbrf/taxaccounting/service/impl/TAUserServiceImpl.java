@@ -17,6 +17,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -39,7 +41,17 @@ public class TAUserServiceImpl implements TAUserService {
     @SuppressWarnings("unused") // https://jira.codehaus.org/browse/SONARJAVA-117
     private void init() {
         systemUserInfo = new TAUserInfo();
-        systemUserInfo.setIp("127.0.0.1");
+        InetAddress inetAddress = null;
+        try {
+            inetAddress = InetAddress.getLocalHost();
+        } catch (UnknownHostException e) {
+            LOG.error("UnknownHost", e);
+        }
+        String ipValue = "127.0.0.1";
+        if (inetAddress != null) {
+            ipValue = inetAddress.getHostAddress();
+        }
+        systemUserInfo.setIp(ipValue);
         systemUserInfo.setUser(getUser(TAUser.SYSTEM_USER_ID));
 
     }

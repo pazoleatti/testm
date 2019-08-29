@@ -181,6 +181,11 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
      */
     public static final Permission<TAUser> VIEW_TAXES_NDFL_FORMS = new ViewTaxesNdflFormsPermission(1L << 34);
 
+    /**
+    * Право доступа к пункту меню "Администрирование->Обмен с ФП АС Учет Налогов"
+    */
+    public static final Permission<TAUser> VIEW_TRANSPORT_MESSAGE_JOURNAL = new ViewTransportMessageJournalPermission(1L << 35);
+
     public UserPermission(long mask) {
         super(mask);
     }
@@ -693,6 +698,22 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
         @Override
         protected boolean isGrantedInternal(User user, TAUser targetDomainObject, Logger logger) {
             return PermissionUtils.hasRole(user, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_OPER_2NDFL_FL);
+        }
+    }
+
+    /**
+     * Право доступа к пункту меню:
+     * "Администрирование->Обмен с ФП АС Учет Налогов"
+     */
+    public static final class ViewTransportMessageJournalPermission extends UserPermission {
+
+        public ViewTransportMessageJournalPermission(long mask) {
+            super(mask);
+        }
+
+        @Override
+        protected boolean isGrantedInternal(User currentUser, TAUser entity, Logger logger) {
+            return PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.ROLE_ADMIN);
         }
     }
 }

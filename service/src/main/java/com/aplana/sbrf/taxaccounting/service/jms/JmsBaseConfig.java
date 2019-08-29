@@ -25,7 +25,8 @@ import javax.naming.NamingException;
 @Profile(value = {"development", "jms"})
 public class JmsBaseConfig {
 
-        public static final String TO_NDFL_QUEUE_JNDI_NAME = "edoRequestQueue";
+        public static final String TO_NDFL_QUEUE_JNDI_NAME = "EdoRequestQueue";
+        public static final String CONNECTION_FACTORY_NAME = "FundConnectionFactory";
 
         /**
          * Конвертер сообщений из xml в объектные модели
@@ -66,18 +67,18 @@ public class JmsBaseConfig {
         /**
          * Фабрика соединений с MQ для очередей, получается по JNDI у вебсферы.
          */
-        @Bean(name = "FundConnectionFactory")
+        @Bean(name = CONNECTION_FACTORY_NAME)
         public ConnectionFactory connectionFactory() throws NamingException {
                 return (ConnectionFactory) new InitialContext()
-                        .lookup("java:comp/env/jms/FundConnectionFactory");
+                        .lookup("java:comp/env/jms/" + CONNECTION_FACTORY_NAME);
         }
 
-        @Bean(name = "EdoRequestQueue")
+        @Bean(name = TO_NDFL_QUEUE_JNDI_NAME)
         public DefaultMessageListenerContainer jmsContainer(ConnectionFactory connectionFactory, BaseMessageReceiver baseMessageReceiver, PlatformTransactionManager transactionManager) throws NamingException {
                 DefaultMessageListenerContainer container = new DefaultMessageListenerContainer();
                 container.setConnectionFactory(connectionFactory);
                 container.setMessageListener(baseMessageReceiver);
-                container.setDestination((Destination) new InitialContext().lookup("java:comp/env/jms/EdoRequestQueue"));
+                container.setDestination((Destination) new InitialContext().lookup("java:comp/env/jms/" + TO_NDFL_QUEUE_JNDI_NAME));
                 container.setSessionTransacted(true);
                 container.setTransactionManager(transactionManager);
                 return container;

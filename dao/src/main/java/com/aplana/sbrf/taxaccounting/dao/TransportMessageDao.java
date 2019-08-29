@@ -27,6 +27,15 @@ public interface TransportMessageDao {
     String findMessageBodyById(Long id);
 
     /**
+     *  Подсчет количества Транспортных сообщений по номеру формы и направлению движения сообщения
+     *
+     * @param declarationId идентефикатор формы
+     * @param type Направление движения сообщения (0 - исходящее, 1 - входящее)
+     * @return Транспортное сообщение, подходящее под условия
+     */
+    Integer countByDeclarationIdAndType(Long declarationId, int type);
+
+    /**
      * Получить список сообщений с фильтрацией и пагинацией.
      *
      * @param filter       параметры фильтрации

@@ -72,6 +72,17 @@ public class TransportMessageDaoImpl extends AbstractDao implements TransportMes
     }
 
     @Override
+    public Integer countByDeclarationIdAndType(Long declarationId, int type) {
+        String sql = "select count(*) from transport_message where declaration_id = :declarationId and type = :type";
+
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("declarationId", declarationId);
+        params.addValue("type", type);
+
+        return getNamedParameterJdbcTemplate().queryForObject(sql, params, Integer.class);
+    }
+
+    @Override
     public PagingResult<TransportMessage> findByFilter(TransportMessageFilter filter, PagingParams pagingParams) {
 
         List<String> conditions = new ArrayList<>();

@@ -133,7 +133,11 @@
                         }, {
                             name: $filter('translate')('menu.administration.asyncTaskList'),
                             href: $state.href('asyncTaskList')
-                        }, {
+                        });
+                    }
+
+                    if ($scope.permissionChecker.check($scope.security.user, $scope.APP_CONSTANTS.USER_PERMISSION.VIEW_TRANSPORT_MESSAGE_JOURNAL)) {
+                        $scope.treeAdministration.push({
                             name: $filter('translate')('menu.administration.transportMessageJournal'),
                             href: $state.href('transportMessageJournal')
                         });

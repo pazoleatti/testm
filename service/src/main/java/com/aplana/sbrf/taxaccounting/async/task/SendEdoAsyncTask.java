@@ -49,6 +49,7 @@ public class SendEdoAsyncTask extends AbstractAsyncTask {
         Map<String, Object> params = taskData.getParams();
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(taskData.getUserId()));
+        userInfo.setIp((String) params.get("userIP"));
         List<Long> declarationDataIds = (List<Long>) params.get("noLockDeclarationDataIds");
         SendToEdoResult result = declarationDataService.sendToEdo(declarationDataIds, userInfo, logger);
         params.put("result", result);

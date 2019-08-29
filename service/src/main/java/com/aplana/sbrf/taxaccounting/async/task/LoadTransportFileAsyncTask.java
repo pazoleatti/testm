@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.result.UploadTransportDataResult;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.UploadTransportDataService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -42,6 +43,7 @@ public class LoadTransportFileAsyncTask extends AbstractAsyncTask {
         Map<String, Object> params = taskData.getParams();
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(taskData.getUserId()));
+        userInfo.setIp((String) params.get("userIP"));
         final String blobDataId = (String) params.get("blobDataId");
         BlobData blobData = blobDataService.get(blobDataId);
         asyncManager.updateState(taskData.getId(), AsyncTaskState.FILES_UPLOADING);
@@ -56,7 +58,7 @@ public class LoadTransportFileAsyncTask extends AbstractAsyncTask {
         String fileName = getFileName(taskData);
         final String archiveName = (String) taskData.getParams().get("archiveName");
         String archive = archiveName == null ? "" : String.format(" (из архива \"%s\")", archiveName);
-        return "Загрузка файла \"" + fileName + "\"" + archive + " завершена" + (notificationMsg.isEmpty() ? "" : (": " + notificationMsg));
+        return "Загрузка файла \"" + fileName + "\"" + archive + " завершена" + (StringUtils.isEmpty(notificationMsg) ? "" : (": " + notificationMsg));
     }
 
 
