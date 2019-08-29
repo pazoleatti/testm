@@ -15,13 +15,22 @@ import java.util.List;
 public interface LogBusinessDao {
 
     /**
-     * Возвращяет дату последней записи в историю формы о событию
+     * Возвращяет дату последней записи в историю формы о событии
      *
      * @param declarationId идентификатор формы
      * @param event         требуемое событие
      * @return список событий
      */
     Date getMaxLogDateByDeclarationIdAndEvent(Long declarationId, FormDataEvent event);
+
+    /**
+     * Возвращает последнюю запись в историю формы о событии
+     *
+     * @param declarationId идентификатор формы
+     * @param event         требуемое событие
+     * @return событие
+     */
+    LogBusinessDTO getLastByDeclarationIdAndEvent(Long declarationId, FormDataEvent event);
 
     /**
      * Возвращяет список записей историй событий для ФЛ

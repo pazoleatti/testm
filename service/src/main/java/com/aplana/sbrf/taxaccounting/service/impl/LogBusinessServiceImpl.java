@@ -52,6 +52,11 @@ public class LogBusinessServiceImpl implements LogBusinessService {
     }
 
     @Override
+    public LogBusinessDTO getLastByDeclarationIdAndEvent(Long declarationId, FormDataEvent event) {
+        return logBusinessDao.getLastByDeclarationIdAndEvent(declarationId, event);
+    }
+
+    @Override
     public List<LogBusinessDTO> findAllByDeclarationId(long declarationId, PagingParams pagingParams) {
         return logBusinessDao.findAllByDeclarationId(declarationId, pagingParams);
     }

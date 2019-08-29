@@ -45,13 +45,22 @@ public interface LogBusinessService {
     void create(LogBusiness logBusiness);
 
     /**
-     * Возвращяет дату последней записи в историю формы о событию
+     * Возвращяет дату последней записи в историю формы о событии
      *
      * @param declarationId идентификатор формы
      * @param event         требуемое событие
      * @return список событий
      */
     Date getMaxLogDateByDeclarationIdAndEvent(long declarationId, FormDataEvent event);
+
+    /**
+     * Возвращает последнюю запись в историю формы о событии
+     *
+     * @param declarationId идентификатор формы
+     * @param event         требуемое событие
+     * @return событие
+     */
+    LogBusinessDTO getLastByDeclarationIdAndEvent(Long declarationId, FormDataEvent event);
 
     /**
      * Получить информацию об истории событий налоговой формы

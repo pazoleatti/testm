@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.impl.transport.edo;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.dto.LogBusinessDTO;
 import com.aplana.sbrf.taxaccounting.model.exception.ConfigurationParameterAbsentException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.jms.*;
@@ -68,6 +69,8 @@ public class EdoMessageServiceImpl implements EdoMessageService {
     private final UploadTransportDataService uploadTransportDataService;
     private final SubsystemService subsystemService;
     private final TransportMessageFactory transportMessageFactory;
+    private final NotificationService notificationService;
+    private final LogEntryService logEntryService;
     @Autowired(required = false)
     private MessageSender messageSender;
     @Autowired
@@ -97,7 +100,7 @@ public class EdoMessageServiceImpl implements EdoMessageService {
                                  BlobDataService blobDataService, ConfigurationService configurationService, ValidateXMLService validateXMLService,
                                  TransportMessageService transportMessageService, CommonRefBookService commonRefBookService, LogBusinessService logBusinessService,
                                  LockDataService lockDataService, TransactionHelper transactionHelper, TAUserService taUserService, UploadTransportDataService uploadTransportDataService,
-                                 SubsystemService subsystemService, TransportMessageFactory transportMessageFactory) {
+                                 SubsystemService subsystemService, TransportMessageFactory transportMessageFactory, NotificationService notificationService, LogEntryService logEntryService) {
         this.declarationDataService = declarationDataService;
         this.declarationTemplateService = declarationTemplateService;
         this.declarationLocker = declarationLocker;
@@ -113,6 +116,8 @@ public class EdoMessageServiceImpl implements EdoMessageService {
         this.uploadTransportDataService = uploadTransportDataService;
         this.subsystemService = subsystemService;
         this.transportMessageFactory = transportMessageFactory;
+        this.notificationService = notificationService;
+        this.logEntryService = logEntryService;
     }
 
     @Override
@@ -168,8 +173,8 @@ public class EdoMessageServiceImpl implements EdoMessageService {
         RefBook declarationTypeRefBook = commonRefBookService.get(RefBook.Id.DECLARATION_TEMPLATE.getId());
         BlobData xsd = blobDataService.get(declarationTypeRefBook.getXsdId());
         if (!validateXMLService.validate(validationLogger, message, xsd.getName(), xsd.getInputStream())) {
-            String errorMessage = "Входящее XML сообщение из ФП \"Фонды\", на основании которого было создано" +
-                    "Транспортное Сообщение №:" + transportMessage.getId() + " не соответствует XSD схеме.";
+            String errorMessage = "Входящее XML сообщение из ФП \"Фонды\", на основании которого было создано " +
+                    "Транспортное Сообщение №:" + transportMessage.getId() + ", не соответствует XSD схеме.";
             failHandleEdoMessage(transportMessage, errorMessage);
             throw new IllegalStateException(errorMessage);
         }
@@ -343,10 +348,11 @@ public class EdoMessageServiceImpl implements EdoMessageService {
     }
 
     private void handleFnsResponse(TransportMessage incomeTransportMessage, TaxMessageTechDocument taxMessageTechDoc) {
-        UploadTransportDataResult uploadTransportDataResult;
+        UploadTransportDataResult uploadTransportDataResult = new UploadTransportDataResult();
         FileWrapper sharedFileNameFromFns = null;
         DeclarationShortInfo declarationShortInfo = null;
         Logger transportFileImporterLogger = new Logger();
+        boolean isUploadStarted = false;
         try {
             TransportMessage sourceTransportMessage = geSourceTransportMessageFromEdoTechDoc(taxMessageTechDoc);
             if (sourceTransportMessage == null) {
@@ -364,6 +370,7 @@ public class EdoMessageServiceImpl implements EdoMessageService {
             BlobData fnsResponseBlobData = storeFileInTransportMessage(incomeTransportMessage, sharedFileNameFromFns);
 
             LOG.info("Запущена процедура разбора файла от ФНС в автоматическом режиме");
+            isUploadStarted = true;
             uploadTransportDataResult = uploadTransportDataService.processTransportFileUploading(
                     transportFileImporterLogger,
                     taUserService.getSystemUserInfo(),
@@ -386,9 +393,17 @@ public class EdoMessageServiceImpl implements EdoMessageService {
 
             failHandleEdoMessage(incomeTransportMessage, e.getMessage());
 
-            uploadTransportDataResult = new UploadTransportDataResult();
             uploadTransportDataResult.setMessageState(TransportMessageState.ERROR);
             uploadTransportDataResult.setProcessMessageResult(e.getMessage());
+        } finally {
+            if (isUploadStarted) {
+                sendNotification(
+                        uploadTransportDataResult.getMessageState(),
+                        transportFileImporterLogger,
+                        declarationShortInfo.getId(),
+                        sharedFileNameFromFns.getName()
+                );
+            }
         }
 
         TaxMessageReceipt taxMessageReceipt = buildTaxMessageReceipt(
@@ -417,6 +432,43 @@ public class EdoMessageServiceImpl implements EdoMessageService {
             sendAuditOnTransportMessage(TRANSPORT_MESSAGE_CHANGE_NOTE_FORMAT, incomeTransportMessage); // 8.h
         } catch (Exception e) {
             failHandleEdoMessage(incomeTransportMessage, e.getMessage());
+        }
+    }
+
+    private void sendNotification(TransportMessageState handleState, Logger logger, Long declarationId, String fileName) {
+        LogBusinessDTO lastSendToEdoLog =
+                logBusinessService.getLastByDeclarationIdAndEvent(declarationId, FormDataEvent.SEND_EDO);
+
+        if (lastSendToEdoLog != null) {
+            LOG.info(String.format("Отправка нотификации пользователю '%s' о завершении автоматической " +
+                    "обработки ответа от ФНС", lastSendToEdoLog.getUserName()));
+            TAUser declarationSender = taUserService.getUser(lastSendToEdoLog.getUserName());
+
+            String fullDeclarationDescription = declarationDataService.getFullDeclarationDescription(declarationId);
+            String notificationMessage;
+            if (TransportMessageState.CONFIRMED == handleState) {
+                notificationMessage = String.format("Загрузка файла полученного от ЭДО \"%s\" завершена. " +
+                        "Выполнена загрузка ответа ФНС для формы %s", fileName, fullDeclarationDescription);
+            } else if (TransportMessageState.ERROR == handleState) {
+                notificationMessage = String.format("Загрузка файла \"%s\" завершена с ошибкой. " +
+                        "Выполнена загрузка ответа ФНС для формы %s", fileName, fullDeclarationDescription);
+            } else {
+                LOG.error("Не определ результат обработки ответа от ФНС для файла ответа " + fileName);
+                return;
+            }
+
+            Notification notification = new Notification();
+            notification.setUserId(declarationSender.getId());
+            notification.setCreateDate(new Date());
+            notification.setText(notificationMessage);
+            notification.setLogId(logEntryService.save(logger));
+            notification.setNotificationType(NotificationType.DEFAULT);
+
+            notificationService.create(Collections.singletonList(notification));
+
+            LOG.info(String.format("Нотификация пользователю '%s' успешно отправлена", lastSendToEdoLog.getUserName()));
+        } else {
+            LOG.warn("Не найдена запись в истории формы об отправке в ЭДО");
         }
     }
 

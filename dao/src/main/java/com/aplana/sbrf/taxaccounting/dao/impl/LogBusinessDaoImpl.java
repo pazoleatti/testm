@@ -83,6 +83,31 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
     }
 
     @Override
+    public LogBusinessDTO getLastByDeclarationIdAndEvent(Long declarationId, FormDataEvent event) {
+        String query = "select * from (\n" +
+                "  select\n" +
+                "    id,\n" +
+                "    log_date,\n" +
+                "    event_id,\n" +
+                "    user_login user_name,\n" +
+                "    roles,\n" +
+                "    user_department_name,\n" +
+                "    declaration_data_id,\n" +
+                "    person_id,\n" +
+                "    note,\n" +
+                "    log_id\n" +
+                "  from log_business where declaration_data_id = ? and event_id = ? order by log_date desc\n" +
+                ") where rownum < 2";
+
+        try {
+            return (LogBusinessDTO)
+                    getJdbcTemplate().queryForObject(query, logBusinessDTORowMapper, declarationId, event.getCode());
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
+    }
+
+    @Override
     public void create(LogBusiness logBusiness) {
         Long id = logBusiness.getId();
         if (id == null) {
