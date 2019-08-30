@@ -49,7 +49,7 @@ public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentCon
      * Возвращяет все пары КПП/ОКТМО по настройкам подразделений, актуальные на дату relevanceDate, или
      * пересекающиеся с периодом reportPeriodId, но не имеющая старших версий из другого ТБ
      */
-    private final static String ACTUAL_KPP_OKTMO_SELECT = "" +
+    private final static String ACTUAL_KPP_OKTMO_SELECT_WITH_PERIOD = "" +
             "  select dc.kpp, dc.oktmo_id, max(dc.start_date) start_date \n" +
             "  from department_config dc\n" +
             "  join report_period rp on rp.id = :reportPeriodId\n" +
@@ -59,6 +59,17 @@ public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentCon
             "       and (:departmentId is null or not exists (select * from department_config where kpp = dc.kpp and oktmo_id = dc.oktmo_id and start_date > dc.start_date and department_id != :departmentId))\n" +
             "  )\n" +
             "  group by dc.kpp, dc.oktmo_id\n";
+
+    /**
+     * Возвращяет все пары КПП/ОКТМО по настройкам подразделений, актуальные на дату relevanceDate
+     */
+    private final static String ACTUAL_KPP_OKTMO_SELECT_WITHOUT_PERIOD =
+            "select dc.kpp, dc.oktmo_id, max(dc.start_date) start_date \n" +
+                    "from department_config dc\n" +
+                    "where\n" +
+                    "  department_id = :departmentId\n" +
+                    "  and (dc.start_date <= sysdate and sysdate <= dc.end_date)\n" +
+                    "group by dc.kpp, dc.oktmo_id\n";
 
     @Override
     public DepartmentConfig findById(long id) {
@@ -304,7 +315,7 @@ public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentCon
         params.addValue("reportPeriodId", declaration.getReportPeriodId());
         params.addValue("departmentId", declaration.getDepartmentId());
         params.addValue("relevanceDate", relevanceDate);
-        String baseSelect = "with actual_kpp_oktmo as (" + ACTUAL_KPP_OKTMO_SELECT + "),\n" +
+        String baseSelect = "with actual_kpp_oktmo as (" + ACTUAL_KPP_OKTMO_SELECT_WITH_PERIOD + "),\n" +
                 "actual_department_config as (\n" +
                 "  select " + ALL_FIELDS +
                 "  from department_config dc\n" +
@@ -343,7 +354,10 @@ public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentCon
         params.addValue("reportPeriodId", filter.getReportPeriodId());
         params.addValue("departmentId", filter.getDepartmentId());
         params.addValue("relevanceDate", filter.getRelevanceDate());
-        String withSelect = "with actual_kpp_oktmo as (" + ACTUAL_KPP_OKTMO_SELECT + "),\n" +
+
+        String actualKppOktmoWithSelect = filter.getReportPeriodId() != null ?
+                ACTUAL_KPP_OKTMO_SELECT_WITH_PERIOD : ACTUAL_KPP_OKTMO_SELECT_WITHOUT_PERIOD;
+        String withSelect = "with actual_kpp_oktmo as (" + actualKppOktmoWithSelect + "),\n" +
                 "actual_department_config as (\n" +
                 "  select dc.id, dc.kpp, oktmo.code oktmo_code, dc.start_date, dc.end_date\n" +
                 "  from department_config dc\n" +
