@@ -4,21 +4,21 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
 
-    <changeSet id="3.9-adudenko-1" author="adudenko" runAlways="true">
+    <changeSet id="3.9-adudenko-1" author="adudenko">
         <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
             <column name="script" valueClobFile="templates-3.9/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_import.groovy"/>
             <where>DECLARATION_TEMPLATE_ID = 100 and EVENT_ID = 7</where>
         </update>
     </changeSet>
 
-    <changeSet id="3.9-avoynov-1" author="avoynov" runAlways="true">
+    <changeSet id="3.9-avoynov-1" author="avoynov">
         <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
             <column name="script" valueClobFile="templates-3.9\ndfl\primary_rnu_ndfl\v2016\primary_rnu_ndfl_update_persons_data.groovy"/>
             <where>DECLARATION_TEMPLATE_ID = 100 and EVENT_ID = 11</where>
         </update>
     </changeSet>
 
-    <changeSet id="3.9-avoynov-2" author="avoynov" runAlways="true">
+    <changeSet id="3.9-avoynov-2" author="avoynov">
         <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
             <column name="script" valueClobFile="templates-3.9\ndfl\consolidated_rnu_ndfl\v2016\consolidated_rnu_ndfl_update_persons_data.groovy"/>
             <where>DECLARATION_TEMPLATE_ID = 101 and EVENT_ID = 11</where>
@@ -37,14 +37,14 @@
         </sql>
     </changeSet>
 
-    <changeSet id="3.9-skononova-2" author="skononova" runAlways="true">
+    <changeSet id="3.9-skononova-2" author="skononova">
         <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
             <column name="script" valueClobFile="templates-3.9/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_update_persons_data.groovy"/>
             <where>DECLARATION_TEMPLATE_ID = 100 and EVENT_ID = 11</where>
         </update>
     </changeSet>
 
-    <changeSet id="3.9-skononova-3" author="skononova" runAlways="true">
+    <changeSet id="3.9-skononova-3" author="skononova">
         <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
             <column name="script" valueClobFile="templates-3.9/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl_update_persons_data.groovy"/>
             <where>DECLARATION_TEMPLATE_ID = 101 and EVENT_ID = 11</where>
@@ -144,7 +144,7 @@
         </update>
     </changeSet>
 
-    <changeSet id="3.9-avoynov-3" author="avoynov" runAlways="true">
+    <changeSet id="3.9-avoynov-3" author="avoynov">
         <update tableName="BLOB_DATA">
             <column name="data"
                     valueBlobFile="templates-3.9/refbook/declaration_type.groovy"/>
@@ -152,7 +152,7 @@
         </update>
     </changeSet>
 
-    <changeSet id="3.9-ytrofimov-1" author="ytrofimov" runAlways="true">
+    <changeSet id="3.9-ytrofimov-1" author="ytrofimov">
         <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
             <column name="script" valueClobFile="templates-3.9/ndfl/report_2ndfl_1/v2016/report_2ndfll_check.groovy"/>
             <where>DECLARATION_TEMPLATE_ID = 102 and EVENT_ID = 5</where>
