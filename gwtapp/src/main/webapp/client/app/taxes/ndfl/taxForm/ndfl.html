@@ -39,6 +39,15 @@
                     </li>
                     <li role="menuitem">
                         <div class="row menuitem">
+                            <a ng-click="createRnuNdflByAllPersonsReportMenu()" ng-show="declarationData.hasNdflPersons">
+                                {{::'link.ndfl.reporting.formForFLsMenu' | translate}}</a>
+                            <div ng-show="!declarationData.hasNdflPersons">
+                                {{::'link.ndfl.reporting.formForFLsMenu' | translate}}
+                            </div>
+                        </div>
+                    </li>
+                    <li role="menuitem">
+                        <div class="row menuitem">
                             <a ng-click="createRnuNdflByAllPersonsReport()" ng-show="declarationData.hasNdflPersons">
                                 {{::'link.ndfl.reporting.formForFLs' | translate}}</a>
                             <div ng-show="!declarationData.hasNdflPersons">

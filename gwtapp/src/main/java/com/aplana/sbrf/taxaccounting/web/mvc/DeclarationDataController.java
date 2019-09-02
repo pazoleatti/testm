@@ -870,12 +870,14 @@ public class DeclarationDataController {
      *
      * @param declarationDataId идентификатор декларации
      */
-    @PostMapping(value = "/actions/declarationData/{declarationDataId}/specific/{alias}")
+    @PostMapping(value = "/actions/declarationData/{declarationDataId}/specific/{alias}/{typeReportId}")
     public String createSpecificReport(@PathVariable("declarationDataId") long declarationDataId, @PathVariable String alias,
-                                       @RequestBody(required = false) Ndfl2_6DataReportParams params) {
+                                       @RequestBody(required = false) Ndfl2_6DataReportParams params, @PathVariable("typeReportId") long typeReportId) {
         TAUserInfo userInfo = securityService.currentUserInfo();
         Map<String, Object> reportParams = new HashMap<>();
         reportParams.put("params", params);
+        reportParams.put("typeReportId", typeReportId);
+
         return declarationService.createTaskToCreateSpecificReport(declarationDataId, alias, reportParams, userInfo);
     }
 

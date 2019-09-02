@@ -4,7 +4,7 @@
     /**
      * @description Модуль, содержащий типовые селекты
      */
-    angular.module('app.select.common', ['ui.select2', 'app.formatters'])
+    angular.module('app.select.common', ['ui.select2', 'app.formatters', 'app.ndflFL'])
     /**
      * Сервис для получения настройки select2 с учётом url
      */
@@ -1272,5 +1272,26 @@
                 }
             }
         ])
+
+        /**
+         * Контроллер для выбор режима формирования отчета "РНУ НДФЛ по всем ФЛ"
+         */
+        .controller('SelectReportGenerationTypeCtrl', ['$scope', '$rootScope', 'APP_CONSTANTS', 'GetSelectOption',
+            function ($scope, $rootScope, APP_CONSTANTS, GetSelectOption) {
+                $scope.reportGenerationTypeSelect = {};
+
+                /**
+                 * Инициализировать список с видами форм, которые можно создать
+                 */
+                $scope.initSelectWithReportGenerationTypesForCreate = function () {
+                    $scope.reportGenerationTypeSelect = GetSelectOption.getBasicSingleSelectOptions(false);
+                    $scope.reportGenerationTypeSelect.options.data.results = [];
+                        $scope.reportGenerationTypeSelect.options.data.results.push(APP_CONSTANTS.NDFL_PERSON_REPORT_GENERATION_TYPE.ALL_DATA);
+                        $scope.reportGenerationTypeSelect.options.data.results.push(APP_CONSTANTS.NDFL_PERSON_REPORT_GENERATION_TYPE.BY_FILTER_SELECTED);
+                        $scope.reportGenerationTypeSelect.options.data.results.push(APP_CONSTANTS.NDFL_PERSON_REPORT_GENERATION_TYPE.SELECTED_ON_PAGE);
+
+                };
+
+            }])
     ;
 }());
