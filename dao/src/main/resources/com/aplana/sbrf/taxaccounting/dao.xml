@@ -10,7 +10,7 @@
 		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
 
 
-    <beans profile="jms">
+    <beans profile="production">
         <bean id="namedParameterJdbcTemplateSecondary"
               class="org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate">
             <constructor-arg index="0" ref="dataSourceSecondary"/>
