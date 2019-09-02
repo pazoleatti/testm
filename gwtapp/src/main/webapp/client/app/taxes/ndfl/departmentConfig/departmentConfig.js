@@ -124,7 +124,8 @@
                             $filter('translate')('departmentConfig.header.reorgKpp'),
                             $filter('translate')('departmentConfig.header.reorgInn'),
                             $filter('translate')('departmentConfig.header.reorgSuccessorKpp'),
-                            $filter('translate')('departmentConfig.header.reorgSuccessorName')
+                            $filter('translate')('departmentConfig.header.reorgSuccessorName'),
+                            $filter('translate')('departmentConfig.header.relatedKppOktmo')
                         ],
                         colModel: [
                             {name: 'id', index: 'id', hidden: true, key: true},
@@ -178,7 +179,13 @@
                             {name: 'reorgKpp', index: 'reorg_kpp', width: 150},
                             {name: 'reorgInn', index: 'reorg_inn', width: 150},
                             {name: 'reorgSuccessorKpp', index: 'reorg_successor_kpp', width: 150},
-                            {name: 'reorgSuccessorName', index: 'reorg_successor_name', width: 150}
+                            {name: 'reorgSuccessorName', index: 'reorg_successor_name', width: 150},
+                            {
+                                name: 'relatedKppOktmo',
+                                index: 'related_kpp_oktmo',
+                                width: 150,
+                                formatter: $filter('kppOktmoPairFormatter')
+                            }
                         ],
                         rowNum: APP_CONSTANTS.COMMON.PAGINATION[0],
                         rowList: APP_CONSTANTS.COMMON.PAGINATION,

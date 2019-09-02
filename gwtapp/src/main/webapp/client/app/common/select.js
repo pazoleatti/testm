@@ -1191,18 +1191,22 @@
                 $scope.kppOkmtoPairsSelect = {};
 
                 /**
-                 * Определение пар КПП/ОКТМО по параметрам Тербанк и период
+                 * Определение пар КПП/ОКТМО по параметрам Тербанк и период, если он задан
                  *
                  * @param modelPath путь в scope до модели со значением select2
                  * @param knf КНФ, из которой брать пары КПП/ОКТМО
                  * @param departmentModelPath путь в scope до модели подразделения
                  * @param periodModelPath путь в scope до модели периода
+                 * @param endDate путь в scope до даты окончания действия настройки подразделения
                  */
-                $scope.initSelectKppOktmoPairsByParams = function (modelPath, knf, departmentModelPath, periodModelPath) {
+                $scope.initSelectKppOktmoPairsByParams = function (modelPath, knf, departmentModelPath, periodModelPath, endDate) {
                     if (!knf && (departmentModelPath || periodModelPath)) {
-                        var fields = [periodModelPath];
+                        var fields = [];
                         if (departmentModelPath) {
                             fields.push(departmentModelPath);
+                        }
+                        if (periodModelPath) {
+                            fields.push(periodModelPath);
                         }
                         $scope.$watchCollection("[" + fields.join(", ") + "]", function (newValues, oldValues) {
                             // при изменении зависимых параметров сбрасываем значение
@@ -1227,7 +1231,8 @@
                             filter: {
                                 declarationId: knf && knf.id,
                                 departmentId: knf ? knf.departmentId : (departmentModelPath ? _.deep($scope, departmentModelPath).id : null),
-                                reportPeriodId: knf ? knf.reportPeriodId : _.deep($scope, periodModelPath).id
+                                reportPeriodId: knf ? knf.reportPeriodId : (periodModelPath ? _.deep($scope, periodModelPath).id : null),
+                                relevanceDate: _.deep($scope, endDate)
                             }
                         };
                     }
