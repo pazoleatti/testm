@@ -69,7 +69,7 @@ public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentCon
                     "from department_config dc\n" +
                     "where\n" +
                     "  department_id = :departmentId\n" +
-                    "  and (dc.start_date <= sysdate and sysdate <= dc.end_date)\n" +
+                    "  and (dc.start_date <= :relevanceDate and :relevanceDate <= dc.end_date)\n" +
                     "group by dc.kpp, dc.oktmo_id\n";
 
     @Override

@@ -30,7 +30,7 @@ public class KppOktmoPairFilter {
     /**
      * Дата актуальности настроек подразделений
      */
-    Date relevanceDate = new Date();
+    Date relevanceDate;
 
     public KppOktmoPairFilter name(String name) {
         this.name = name;
