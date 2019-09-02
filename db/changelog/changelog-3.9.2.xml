@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-8418 Добавить поля "Учитывать КПП/ОКТМО" -->
+    <changeSet id="3.9.2-adudenko-1" author="adudenko" >
+        <sql>
+            alter table department_config add related_kpp varchar2(9 char);
+            alter table department_config add related_oktmo_id varchar2(11 char);
+            comment on column department_config.related_kpp is 'Поле для формирования настройки подразделения Учитывать в КПП/ОКТМО';
+            comment on column department_config.related_oktmo_id is 'Поле для формирования настройки подразделения Учитывать в КПП/ОКТМО';
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>
