@@ -990,7 +990,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     public String createTaskToCreateRnuNdflByAllPersonsReport(long declarationDataId, TAUserInfo userInfo,
                                                               RnuNdflAllPersonsReportFilter searchFilter,
-                                                              RnuNdflAllPersonsReportFilter formFilter) {
+                                                              RnuNdflAllPersonsReportSelectedRows selectedRows) {
         LOG.info(String.format("DeclarationDataServiceImpl.createTaskToCreateRnuNdflByAllPersonsReport by %s. declarationDataId: %s",
                 userInfo, declarationDataId));
         Logger logger = new Logger();
@@ -1002,7 +1002,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         params.put("alias", reportAlias);
         params.put("viewParamValues", new LinkedHashMap<String, String>());
         params.put("searchFilter", ObjectUtils.defaultIfNull(searchFilter, new RnuNdflAllPersonsReportFilter()));
-        params.put("formFilter", ObjectUtils.defaultIfNull(formFilter, new RnuNdflAllPersonsReportFilter()));
+        params.put("selectedRows", ObjectUtils.defaultIfNull(selectedRows, new RnuNdflAllPersonsReportSelectedRows()));
         params.put("subreportParamValues", Collections.emptyMap());
 
         asyncManager.createTask(OperationType.getOperationTypeBySubreport(reportAlias), userInfo, params, logger);
@@ -1558,7 +1558,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 scriptSpecificReportHolder.setViewParamValues(specificReportContext.getViewParamValues());
                 params.put("scriptSpecificReportHolder", scriptSpecificReportHolder);
                 params.put("searchFilter", specificReportContext.getSearchFilter());
-                params.put("formFilter", specificReportContext.getFormFilter());
+                params.put("selectedRows", specificReportContext.getSelectedRows());
                 stateLogger.updateState(AsyncTaskState.BUILDING_REPORT);
                 if (!declarationDataScriptingService.executeScript(
                         specificReportContext.getUserInfo(), specificReportContext.getDeclarationData(),

@@ -272,7 +272,7 @@ public interface DeclarationDataService {
 
 
     //todo javadoc
-    String createTaskToCreateRnuNdflByAllPersonsReport(long declarationDataId, TAUserInfo userInfo, RnuNdflAllPersonsReportFilter searchFilter, RnuNdflAllPersonsReportFilter formFilter);
+    String createTaskToCreateRnuNdflByAllPersonsReport(long declarationDataId, TAUserInfo userInfo, RnuNdflAllPersonsReportFilter searchFilter, RnuNdflAllPersonsReportSelectedRows selectedRows);
 
     /**
      * Формирование отчета в xlsx

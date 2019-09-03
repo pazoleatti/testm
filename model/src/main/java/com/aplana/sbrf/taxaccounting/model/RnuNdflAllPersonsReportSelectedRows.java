@@ -8,12 +8,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
-public class RnuNdflAllPersonsReportFilter implements Serializable {
-    private NdflPersonFilter person;
-    private NdflPersonIncomeDTO income;
-    private NdflPersonDeductionDTO deduction;
-    private NdflPersonPrepaymentDTO prepayment;
+public class RnuNdflAllPersonsReportSelectedRows implements Serializable {
+    private List<NdflPersonFilter> persons;
+    private List<NdflPersonIncomeDTO> incomes;
+    private List<NdflPersonDeductionDTO> deductions;
+    private List<NdflPersonPrepaymentDTO> prepayments;
 }

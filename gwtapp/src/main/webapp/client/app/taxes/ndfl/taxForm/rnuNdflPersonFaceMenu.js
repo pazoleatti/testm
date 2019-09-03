@@ -14,7 +14,7 @@
             function ($scope, $http, $state, $stateParams, $modalInstance, $filter,
                       RefBookValuesResource, APP_CONSTANTS, $shareData, $dialogs, $webStorage, $logPanel) {
 
-            $scope.reportData = {dataType: APP_CONSTANTS.NDFL_PERSON_REPORT_GENERATION_TYPE.ALL_DATA};
+                $scope.reportData = {dataType: APP_CONSTANTS.NDFL_PERSON_REPORT_GENERATION_TYPE.ALL_DATA};
                 //todo
                  if (!$shareData.filterIsClear) {
                     // $scope.declarationData.dataType = APP_CONSTANTS.NDFL_PERSON_REPORT_GENERATION_TYPE.ALL_DATA;
@@ -46,7 +46,7 @@
                             $http({
                                 method: "POST",
                                 url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/report/rnuNdflAllPersons/byFilter",
-                                data: $scope.searchFilter
+                                data: JSON.stringify($shareData.filter)
                             }).success(function (response) {
                                 if (response) {
                                     $logPanel.open('log-panel-container', response);
@@ -56,8 +56,9 @@
                         case APP_CONSTANTS.NDFL_PERSON_REPORT_GENERATION_TYPE.SELECTED_ON_PAGE.id:
                             $http({
                                 method: "POST",
-                                //todo how ?
-                                url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/report/rnuNdflAllPersons/bySelected"
+                                url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/report/rnuNdflAllPersons/bySelected",
+                                // todo $shareData.selectedRow.getActiveTab().getSelectedRows() ...
+                                data: {}
                             }).success(function (response) {
                                 if (response) {
                                     $logPanel.open('log-panel-container', response);
@@ -75,6 +76,7 @@
                 $scope.close = function () {
                     $modalInstance.dismiss();
                 };
-            }]);
+            }
+        ]);
 }());
 

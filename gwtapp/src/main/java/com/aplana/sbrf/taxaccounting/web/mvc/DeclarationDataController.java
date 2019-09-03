@@ -896,9 +896,9 @@ public class DeclarationDataController {
 
     @PostMapping(value = "/actions/declarationData/{declarationDataId}/report/rnuNdflAllPersons/bySelected")
     public String createRnuNdfllAllPersonsReportBySelected(@PathVariable("declarationDataId") long declarationDataId,
-                                                           @RequestBody RnuNdflAllPersonsReportFilter filter) {
+                                                           @RequestBody RnuNdflAllPersonsReportSelectedRows selectedRows) {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        return declarationService.createTaskToCreateRnuNdflByAllPersonsReport(declarationDataId,  userInfo, null, filter);
+        return declarationService.createTaskToCreateRnuNdflByAllPersonsReport(declarationDataId,  userInfo, null, selectedRows);
     }
 
     /**

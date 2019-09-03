@@ -16,6 +16,6 @@ public class SpecificReportContext {
     private Map<String, String> viewParamValues;
     private DataRow<Cell> selectedRecord;
     private RnuNdflAllPersonsReportFilter searchFilter;
-    private RnuNdflAllPersonsReportFilter formFilter;
+    private RnuNdflAllPersonsReportSelectedRows selectedRows;
     private TAUserInfo userInfo;
 }

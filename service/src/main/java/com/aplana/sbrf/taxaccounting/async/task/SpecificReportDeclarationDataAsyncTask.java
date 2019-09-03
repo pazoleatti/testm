@@ -75,7 +75,7 @@ public class SpecificReportDeclarationDataAsyncTask extends AbstractDeclarationA
                     .selectedRecord(selectedRecord)
                     .userInfo(userInfo)
                     .searchFilter((RnuNdflAllPersonsReportFilter) params.get("searchFilter"))
-                    .formFilter((RnuNdflAllPersonsReportFilter) params.get("formFilter"))
+                    .selectedRows((RnuNdflAllPersonsReportSelectedRows) params.get("selectedRows"))
                     .build();
             String uuid = declarationDataService.createSpecificReport(specificReportContext, new LockStateLogger() {
                 @Override
