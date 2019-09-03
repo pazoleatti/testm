@@ -60,6 +60,7 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -1000,8 +1001,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         params.put("declarationDataId", declarationDataId);
         params.put("alias", reportAlias);
         params.put("viewParamValues", new LinkedHashMap<String, String>());
-        params.put("searchFilter", searchFilter);
-        params.put("formFilter", formFilter);
+        params.put("searchFilter", ObjectUtils.defaultIfNull(searchFilter, new RnuNdflAllPersonsReportFilter()));
+        params.put("formFilter", ObjectUtils.defaultIfNull(formFilter, new RnuNdflAllPersonsReportFilter()));
+        params.put("subreportParamValues", Collections.emptyMap());
 
         asyncManager.createTask(OperationType.getOperationTypeBySubreport(reportAlias), userInfo, params, logger);
 

@@ -7,9 +7,11 @@ import com.aplana.sbrf.taxaccounting.model.result.NdflPersonPrepaymentDTO;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
+
 @Data
 @NoArgsConstructor
-public class RnuNdflAllPersonsReportFilter {
+public class RnuNdflAllPersonsReportFilter implements Serializable {
     private NdflPersonFilter ndflPersonFilter;
     private NdflPersonIncomeDTO personIncome;
     private NdflPersonDeductionDTO ndflPersonDeductionDTO;
