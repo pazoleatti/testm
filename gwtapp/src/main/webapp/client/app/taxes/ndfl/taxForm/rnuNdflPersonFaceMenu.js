@@ -15,8 +15,7 @@
                       RefBookValuesResource, APP_CONSTANTS, $shareData, $dialogs, $webStorage, $logPanel) {
 
             $scope.reportData = {dataType: APP_CONSTANTS.NDFL_PERSON_REPORT_GENERATION_TYPE.ALL_DATA};
-
-
+                //todo
                  if (!$shareData.filterIsClear) {
                     // $scope.declarationData.dataType = APP_CONSTANTS.NDFL_PERSON_REPORT_GENERATION_TYPE.ALL_DATA;
                 } else {
@@ -24,36 +23,46 @@
                 }
 
 
-
-
                 /**
-                 * @description Создание рну ндфл для физ лица
+                 * @description Создание РНУ НДФЛ для ФЛ
                  */
                 $scope.formationRNU = function () {
 
                     console.log($scope.reportData.dataType.id + ' = ' + $scope.reportData.dataType.name);
 
                     var typeReportId = $scope.reportData.dataType.id;
-
                     switch (typeReportId) {
-                        case 1:
+                        case APP_CONSTANTS.NDFL_PERSON_REPORT_GENERATION_TYPE.ALL_DATA.id:
                             $http({
                                 method: "POST",
-                                url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/specific/" +
-                                    APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.RNU_NDFL_PERSON_ALL_DB + "/" + typeReportId
+                                url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/report/rnuNdflAllPersons"
                             }).success(function (response) {
                                 if (response) {
                                     $logPanel.open('log-panel-container', response);
                                 }
                             });
                             break;
-                        case 2:
-                            console.log($shareData.filterIsClear);
-                            if (!$shareData.filterIsClear) {
-                            }
+                        case APP_CONSTANTS.NDFL_PERSON_REPORT_GENERATION_TYPE.BY_FILTER_SELECTED.id:
+                            $http({
+                                method: "POST",
+                                url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/report/rnuNdflAllPersons/byFilter",
+                                data: $scope.searchFilter
+                            }).success(function (response) {
+                                if (response) {
+                                    $logPanel.open('log-panel-container', response);
+                                }
+                            });
                             break;
-                        case 3:
-                            console.log($shareData.selectedRow.getActiveTab().getSelectedRows().length);
+                        case APP_CONSTANTS.NDFL_PERSON_REPORT_GENERATION_TYPE.SELECTED_ON_PAGE.id:
+                            $http({
+                                method: "POST",
+                                //todo how ?
+                                url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/report/rnuNdflAllPersons/bySelected"
+                            }).success(function (response) {
+                                if (response) {
+                                    $logPanel.open('log-panel-container', response);
+                                }
+                            });
                             break;
                     }
 
@@ -66,8 +75,6 @@
                 $scope.close = function () {
                     $modalInstance.dismiss();
                 };
-
             }]);
-
 }());
 

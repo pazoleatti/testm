@@ -55,6 +55,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.aplana.sbrf.taxaccounting.model.SubreportAliasConstants.RNU_NDFL_PERSON_DB;
 import static org.apache.commons.lang3.CharEncoding.UTF_8;
 
 /**
@@ -63,6 +64,7 @@ import static org.apache.commons.lang3.CharEncoding.UTF_8;
 @RestController
 public class DeclarationDataController {
     private static final int DEFAULT_IMAGE_RESOLUTION = 150;
+    private static final String RNU_NDFL_ALL_PERSONS_REPORT_ALIAS = "rnu_ndfl_person_all_db";
 
     private DeclarationDataService declarationService;
     private SecurityService securityService;
@@ -862,7 +864,7 @@ public class DeclarationDataController {
         TAUserInfo userInfo = securityService.currentUserInfo();
         Map<String, Object> reportParams = new HashMap<>();
         reportParams.put("PERSON_ID", ndflPersonId);
-        return declarationService.createTaskToCreateSpecificReport(declarationDataId, SubreportAliasConstants.RNU_NDFL_PERSON_DB, reportParams, userInfo);
+        return declarationService.createTaskToCreateSpecificReport(declarationDataId, RNU_NDFL_PERSON_DB, reportParams, userInfo);
     }
 
     /**
@@ -876,9 +878,27 @@ public class DeclarationDataController {
         TAUserInfo userInfo = securityService.currentUserInfo();
         Map<String, Object> reportParams = new HashMap<>();
         reportParams.put("params", params);
-        reportParams.put("typeReportId", typeReportId);
-
         return declarationService.createTaskToCreateSpecificReport(declarationDataId, alias, reportParams, userInfo);
+    }
+
+    @PostMapping(value = "/actions/declarationData/{declarationDataId}/report/rnuNdflAllPersons")
+    public String createRnuNdflAllPersonsReport(@PathVariable("declarationDataId") long declarationDataId) {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        return declarationService.createTaskToCreateRnuNdflByAllPersonsReport(declarationDataId, userInfo, null, null);
+    }
+
+    @PostMapping(value = "/actions/declarationData/{declarationDataId}/report/rnuNdflAllPersons/byFilter")
+    public String createRnuNdfllAllPersonsReportByFilter(@PathVariable("declarationDataId") long declarationDataId,
+                                                         @RequestBody RnuNdflAllPersonsReportFilter filter) {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        return declarationService.createTaskToCreateRnuNdflByAllPersonsReport(declarationDataId, userInfo, filter, null);
+    }
+
+    @PostMapping(value = "/actions/declarationData/{declarationDataId}/report/rnuNdflAllPersons/bySelected")
+    public String createRnuNdfllAllPersonsReportBySelected(@PathVariable("declarationDataId") long declarationDataId,
+                                                           @RequestBody RnuNdflAllPersonsReportFilter filter) {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        return declarationService.createTaskToCreateRnuNdflByAllPersonsReport(declarationDataId,  userInfo, null, filter);
     }
 
     /**

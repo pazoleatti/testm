@@ -81,6 +81,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipInputStream;
 
+import static com.aplana.sbrf.taxaccounting.model.SubreportAliasConstants.RNU_NDFL_PERSON_ALL_DB;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
@@ -986,6 +987,28 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
+    public String createTaskToCreateRnuNdflByAllPersonsReport(long declarationDataId, TAUserInfo userInfo,
+                                                              RnuNdflAllPersonsReportFilter searchFilter,
+                                                              RnuNdflAllPersonsReportFilter formFilter) {
+        LOG.info(String.format("DeclarationDataServiceImpl.createTaskToCreateRnuNdflByAllPersonsReport by %s. declarationDataId: %s",
+                userInfo, declarationDataId));
+        Logger logger = new Logger();
+
+        String reportAlias = RNU_NDFL_PERSON_ALL_DB;
+        reportService.deleteSubreport(declarationDataId, reportAlias);
+        Map<String, Object> params = new HashMap<>();
+        params.put("declarationDataId", declarationDataId);
+        params.put("alias", reportAlias);
+        params.put("viewParamValues", new LinkedHashMap<String, String>());
+        params.put("searchFilter", searchFilter);
+        params.put("formFilter", formFilter);
+
+        asyncManager.createTask(OperationType.getOperationTypeBySubreport(reportAlias), userInfo, params, logger);
+
+        return logEntryService.save(logger.getEntries());
+    }
+
+    @Override
     public String createTaskToCreateReportXlsx(final TAUserInfo userInfo, final long declarationDataId) {
         LOG.info(String.format("DeclarationDataServiceImpl.createReportXlsx by %s. declarationDataId: %s",
                 userInfo, declarationDataId));
@@ -1499,9 +1522,13 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    public String createSpecificReport(Logger logger, DeclarationData declarationData, DeclarationReportType ddReportType, Map<String, Object> subreportParamValues, Map<String, String> viewParamValues, DataRow<Cell> selectedRecord, TAUserInfo userInfo, LockStateLogger stateLogger) {
+    public String createSpecificReport(SpecificReportContext specificReportContext, LockStateLogger stateLogger) {
+        Logger logger = specificReportContext.getLogger();
         LOG.info(String.format("DeclarationDataServiceImpl.createSpecificReport by %s. declarationData: %s; ddReportType: %s; subreportParamValues: %s; viewParamValues: %s; selectedRecord: %s",
-                userInfo, declarationData, ddReportType, subreportParamValues, viewParamValues, selectedRecord));
+                specificReportContext.getUserInfo(), specificReportContext.getDeclarationData(),
+                specificReportContext.getDdReportType(), specificReportContext.getSubreportParamValues(),
+                specificReportContext.getViewParamValues(), specificReportContext.getSelectedRecord()));
+        Map<String, Object> subreportParamValues = specificReportContext.getSubreportParamValues();
         Map<String, Object> params = new HashMap<>();
         ScriptSpecificDeclarationDataReportHolder scriptSpecificReportHolder = new ScriptSpecificDeclarationDataReportHolder();
         File reportFile = null;
@@ -1515,6 +1542,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 subreportParamValues.put("font", font);
             }
 
+            DeclarationReportType ddReportType = specificReportContext.getDdReportType();
             if (ddReportType.getSubreport().getBlobDataId() != null) {
                 inputStream = blobDataService.get(ddReportType.getSubreport().getBlobDataId()).getInputStream();
             }
@@ -1524,11 +1552,15 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 scriptSpecificReportHolder.setFileInputStream(inputStream);
                 scriptSpecificReportHolder.setFileName(ddReportType.getSubreport().getAlias());
                 scriptSpecificReportHolder.setSubreportParamValues(subreportParamValues);
-                scriptSpecificReportHolder.setSelectedRecord(selectedRecord);
-                scriptSpecificReportHolder.setViewParamValues(viewParamValues);
+                scriptSpecificReportHolder.setSelectedRecord(specificReportContext.getSelectedRecord());
+                scriptSpecificReportHolder.setViewParamValues(specificReportContext.getViewParamValues());
                 params.put("scriptSpecificReportHolder", scriptSpecificReportHolder);
+                params.put("searchFilter", specificReportContext.getSearchFilter());
+                params.put("formFilter", specificReportContext.getFormFilter());
                 stateLogger.updateState(AsyncTaskState.BUILDING_REPORT);
-                if (!declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.CREATE_SPECIFIC_REPORT, logger, params)) {
+                if (!declarationDataScriptingService.executeScript(
+                        specificReportContext.getUserInfo(), specificReportContext.getDeclarationData(),
+                        FormDataEvent.CREATE_SPECIFIC_REPORT, logger, params)) {
                     throw new ServiceException("Не предусмотрена возможность формирования отчета \"%s\"", ddReportType.getSubreport().getName());
                 }
                 if (logger.containsLevel(LogLevel.ERROR)) {

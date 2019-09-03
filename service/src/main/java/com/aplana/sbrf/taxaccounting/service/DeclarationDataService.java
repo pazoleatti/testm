@@ -115,7 +115,7 @@ public interface DeclarationDataService {
      *
      * @return uuid записи с данными из таблицы BLOB_DATA
      */
-    String createSpecificReport(Logger logger, DeclarationData declarationData, DeclarationReportType ddReportType, Map<String, Object> subreportParamValues, Map<String, String> viewParamValues, DataRow<Cell> selectedRecord, TAUserInfo userInfo, LockStateLogger stateLogger);
+    String createSpecificReport(SpecificReportContext specificReportContext, LockStateLogger stateLogger);
 
     /**
      * Подготовить данные для спец. отчета
@@ -269,6 +269,10 @@ public interface DeclarationDataService {
      * @return результат с даннымми для представления об операции формирования отчета
      */
     String createTaskToCreateSpecificReport(final long declarationDataId, String alias, Map<String, Object> reportParams, TAUserInfo userInfo);
+
+
+    //todo javadoc
+    String createTaskToCreateRnuNdflByAllPersonsReport(long declarationDataId, TAUserInfo userInfo, RnuNdflAllPersonsReportFilter searchFilter, RnuNdflAllPersonsReportFilter formFilter);
 
     /**
      * Формирование отчета в xlsx

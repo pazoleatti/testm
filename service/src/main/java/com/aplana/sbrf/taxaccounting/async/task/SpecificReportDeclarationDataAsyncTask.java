@@ -66,7 +66,18 @@ public class SpecificReportDeclarationDataAsyncTask extends AbstractDeclarationA
         }
 
         if (declarationData != null) {
-            String uuid = declarationDataService.createSpecificReport(logger, declarationData, ddReportType, subreportParamValues, viewParamValues, selectedRecord, userInfo, new LockStateLogger() {
+            SpecificReportContext specificReportContext = SpecificReportContext.builder()
+                    .logger(logger)
+                    .declarationData(declarationData)
+                    .ddReportType(ddReportType)
+                    .subreportParamValues(subreportParamValues)
+                    .viewParamValues(viewParamValues)
+                    .selectedRecord(selectedRecord)
+                    .userInfo(userInfo)
+                    .searchFilter((RnuNdflAllPersonsReportFilter) params.get("searchFilter"))
+                    .formFilter((RnuNdflAllPersonsReportFilter) params.get("formFilter"))
+                    .build();
+            String uuid = declarationDataService.createSpecificReport(specificReportContext, new LockStateLogger() {
                 @Override
                 public void updateState(AsyncTaskState state) {
                     asyncManager.updateState(taskData.getId(), state);

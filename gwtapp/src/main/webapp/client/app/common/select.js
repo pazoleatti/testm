@@ -1286,12 +1286,11 @@
                 $scope.initSelectWithReportGenerationTypesForCreate = function () {
                     $scope.reportGenerationTypeSelect = GetSelectOption.getBasicSingleSelectOptions(false);
                     $scope.reportGenerationTypeSelect.options.data.results = [];
-                        $scope.reportGenerationTypeSelect.options.data.results.push(APP_CONSTANTS.NDFL_PERSON_REPORT_GENERATION_TYPE.ALL_DATA);
-                        $scope.reportGenerationTypeSelect.options.data.results.push(APP_CONSTANTS.NDFL_PERSON_REPORT_GENERATION_TYPE.BY_FILTER_SELECTED);
-                        $scope.reportGenerationTypeSelect.options.data.results.push(APP_CONSTANTS.NDFL_PERSON_REPORT_GENERATION_TYPE.SELECTED_ON_PAGE);
+                    $scope.reportGenerationTypeSelect.options.data.results.push(APP_CONSTANTS.NDFL_PERSON_REPORT_GENERATION_TYPE.ALL_DATA);
+                    $scope.reportGenerationTypeSelect.options.data.results.push(APP_CONSTANTS.NDFL_PERSON_REPORT_GENERATION_TYPE.BY_FILTER_SELECTED);
+                    $scope.reportGenerationTypeSelect.options.data.results.push(APP_CONSTANTS.NDFL_PERSON_REPORT_GENERATION_TYPE.SELECTED_ON_PAGE);
 
                 };
-
-            }])
-    ;
+            }
+        ]);
 }());
