@@ -872,9 +872,9 @@ public class DeclarationDataController {
      *
      * @param declarationDataId идентификатор декларации
      */
-    @PostMapping(value = "/actions/declarationData/{declarationDataId}/specific/{alias}/{typeReportId}")
+    @PostMapping(value = "/actions/declarationData/{declarationDataId}/specific/{alias}")
     public String createSpecificReport(@PathVariable("declarationDataId") long declarationDataId, @PathVariable String alias,
-                                       @RequestBody(required = false) Ndfl2_6DataReportParams params, @PathVariable("typeReportId") long typeReportId) {
+                                       @RequestBody(required = false) Ndfl2_6DataReportParams params) {
         TAUserInfo userInfo = securityService.currentUserInfo();
         Map<String, Object> reportParams = new HashMap<>();
         reportParams.put("params", params);
