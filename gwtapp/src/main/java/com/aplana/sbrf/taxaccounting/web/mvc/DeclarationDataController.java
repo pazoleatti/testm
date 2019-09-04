@@ -881,22 +881,42 @@ public class DeclarationDataController {
         return declarationService.createTaskToCreateSpecificReport(declarationDataId, alias, reportParams, userInfo);
     }
 
+    /**
+     * Формирование спецотчета РНУ НДФЛ по всем ФЛ, по всем данным
+     *
+     * @param declarationDataId идентификатор декларации
+     * @return результат с даннымми для представления об операции формирования отчета
+     */
     @PostMapping(value = "/actions/declarationData/{declarationDataId}/report/rnuNdflAllPersons")
     public String createRnuNdflAllPersonsReport(@PathVariable("declarationDataId") long declarationDataId) {
         TAUserInfo userInfo = securityService.currentUserInfo();
         return declarationService.createTaskToCreateRnuNdflByAllPersonsReport(declarationDataId, userInfo, null, null);
     }
 
+    /**
+     * Формирование спецотчета РНУ НДФЛ по всем ФЛ, по отобранным по фильтру
+     *
+     * @param declarationDataId идентификатор декларации
+     * @param filter параметры фильтрации на форме
+     * @return результат с даннымми для представления об операции формирования отчета
+     */
     @PostMapping(value = "/actions/declarationData/{declarationDataId}/report/rnuNdflAllPersons/byFilter")
-    public String createRnuNdfllAllPersonsReportByFilter(@PathVariable("declarationDataId") long declarationDataId,
-                                                         @RequestBody RnuNdflAllPersonsReportFilter filter) {
+    public String createRnuNdflAllPersonsReportByFilter(@PathVariable("declarationDataId") long declarationDataId,
+                                                        @RequestBody RnuNdflAllPersonsReportFilter filter) {
         TAUserInfo userInfo = securityService.currentUserInfo();
         return declarationService.createTaskToCreateRnuNdflByAllPersonsReport(declarationDataId, userInfo, filter, null);
     }
 
+    /**
+     * Формирование спецотчета РНУ НДФЛ по всем ФЛ, по выбранным на странице
+     *
+     * @param declarationDataId идентификатор декларации
+     * @param selectedRows информация о выбранных строках в форме
+     * @return результат с даннымми для представления об операции формирования отчета
+     */
     @PostMapping(value = "/actions/declarationData/{declarationDataId}/report/rnuNdflAllPersons/bySelected")
-    public String createRnuNdfllAllPersonsReportBySelected(@PathVariable("declarationDataId") long declarationDataId,
-                                                           @RequestBody RnuNdflAllPersonsReportSelectedRows selectedRows) {
+    public String createRnuNdflAllPersonsReportBySelected(@PathVariable("declarationDataId") long declarationDataId,
+                                                          @RequestBody RnuNdflAllPersonsReportSelectedRows selectedRows) {
         TAUserInfo userInfo = securityService.currentUserInfo();
         return declarationService.createTaskToCreateRnuNdflByAllPersonsReport(declarationDataId,  userInfo, null, selectedRows);
     }
