@@ -136,7 +136,8 @@
                                 name: 'bodyFileName',
                                 index: 'has_body',
                                 formatter: $filter('tmGridBodyFileLinkFormatter'),
-                                width: 250
+                                width: 250,
+                                sortable: false
                             }, {
                                 name: 'blob',
                                 index: 'blob_name',
