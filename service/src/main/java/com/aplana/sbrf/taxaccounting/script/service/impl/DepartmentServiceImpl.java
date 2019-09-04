@@ -80,6 +80,11 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
+    public Map<Long, String> getParentTBbyPersonIdList(List<Long> personIdList) {
+        return departmentDao.getDepartmentTBByPersonIdList(personIdList);
+    }
+
+    @Override
     public List<Integer> fetchAllTBIdsByPerformer(int performerDepartmentId) {
         return departmentDao.findAllTBIdsByPerformerId(performerDepartmentId);
     }
