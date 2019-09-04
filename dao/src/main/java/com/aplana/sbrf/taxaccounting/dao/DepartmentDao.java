@@ -4,8 +4,8 @@ import com.aplana.sbrf.taxaccounting.model.*;
 
 import javax.validation.constraints.NotNull;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * DAO для работы с информацией по подразделениям банка
@@ -152,6 +152,15 @@ public interface DepartmentDao extends PermissionDao {
      * @return ТБ
      */
     Department getDepartmentTB(int departmentId);
+
+    /**
+     * Получение ТБ для подразделения по списку физлиц (тип = 2)
+     * Реализовано для ускорения производительности скрипта формирования XSLX
+     *
+     * @param personIdList список идентификаторов физлиц
+     * @return список значений Идентификатор физлица - Название ТБ
+     */
+    Map<Long, String> getDepartmentTBByPersonIdList(List<Long> personIdList);
 
     /**
      * Получение ТБ для подразделения (тип = 2) + все дочерние подразделения
