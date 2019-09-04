@@ -1001,8 +1001,12 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         params.put("declarationDataId", declarationDataId);
         params.put("alias", reportAlias);
         params.put("viewParamValues", new LinkedHashMap<String, String>());
-        params.put("searchFilter", ObjectUtils.defaultIfNull(searchFilter, new RnuNdflAllPersonsReportFilter()));
-        params.put("selectedRows", ObjectUtils.defaultIfNull(selectedRows, new RnuNdflAllPersonsReportSelectedRows()));
+        if (searchFilter != null) {
+            params.put("searchFilter", searchFilter);
+        }
+        if (selectedRows != null) {
+            params.put("selectedRows", selectedRows);
+        }
         params.put("subreportParamValues", Collections.emptyMap());
 
         asyncManager.createTask(OperationType.getOperationTypeBySubreport(reportAlias), userInfo, params, logger);
