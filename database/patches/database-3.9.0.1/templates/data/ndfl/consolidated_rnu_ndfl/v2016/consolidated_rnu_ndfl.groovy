@@ -2618,12 +2618,12 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
             CellStyle textRightStyle = styler.createBorderStyleRightAlignedTypeText()
             CellStyle textLeftStyle = styler.createBorderStyleLeftAlignedTypeText()
             FlIncomeData summaryFlIncomeData = new FlIncomeData(new HashSet<Long>(), new BigDecimal(0).setScale(2), new BigDecimal(0).setScale(2))
-            Map<Long, String> ndflPersonDepartmentMap = departmentService.getParentTBbyPersonIdList(ndflPersonIncomeList.ndflPersonId)
+            Map<Long, String> ndflPersonDepartmentMap = departmentService.getParentTBbyIncomeSourceIdList(ndflPersonIncomeList.sourceId)
             for (NdflPersonIncome npi in ndflPersonIncomeList) {
                 ScriptUtils.checkInterrupted()
                 if (npi.incomeAccruedDate) {
                     String period = getPeriod(npi.incomeAccruedDate)
-                    String parentTBName = (npi.ndflPersonId) ? ndflPersonDepartmentMap.get(npi.ndflPersonId) : ""
+                    String parentTBName = (npi.ndflPersonId) ? ndflPersonDepartmentMap.get(npi.sourceId) : ""
                     XlsxReportRowKey rowKey = new XlsxReportRowKey(npi.kpp, npi.oktmo, parentTBName, period)
                     if (flIncomeDataMap.get(rowKey) == null) {
                         flIncomeDataMap.put(rowKey, new FlIncomeData(new HashSet<Long>(), new BigDecimal(0).setScale(2), new BigDecimal(0).setScale(2)))
