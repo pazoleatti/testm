@@ -18,6 +18,7 @@ import org.intellij.lang.annotations.Language;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Repository;
@@ -27,7 +28,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -245,6 +245,39 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
                             "select d.* from department d, tree where d.id = tree.id and tree.type = ?",
                     new Object[]{departmentId, typeIdTerbank},
                     new DepartmentJdbcMapper()
+            );
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
+    }
+
+    @Override
+    public Map<Long, String> getDepartmentTBByPersonIdList(List<Long> personIdList) {
+        int typeIdTerbank = DepartmentType.TERR_BANK.getCode();
+        try {
+            String sqlQuery = "select np.id, " +
+                    "(select name from department d_p " +
+                    "where d_p.type = ? " +
+                    "start with d_p.id=dep.id " +
+                    "connect by prior d_p.parent_id= d_p.id) tb " +
+                    "from ndfl_person np " +
+                    "left join declaration_data dd on np.declaration_data_id = dd.id " +
+                    "inner join department_report_period drp on dd.department_report_period_id = drp.id " +
+                    "left join department dep on drp.department_id = dep.id " +
+                    "where " +
+                    SqlUtils.transformToSqlInStatementViaTmpTable("np.id", personIdList);
+            return getJdbcTemplate().query(sqlQuery,
+                    new Object[]{typeIdTerbank},
+                    new ResultSetExtractor<Map<Long, String>>() {
+                        @Override
+                        public Map<Long, String> extractData(ResultSet rs) throws SQLException, DataAccessException {
+                            HashMap<Long, String> mapRet = new HashMap<>();
+                            while(rs.next()){
+                                mapRet.put(rs.getLong("id"), rs.getString("tb"));
+                            }
+                            return mapRet;
+                        }
+                    }
             );
         } catch (EmptyResultDataAccessException e) {
             return null;

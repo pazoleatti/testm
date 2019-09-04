@@ -163,4 +163,11 @@
         </update>
     </changeSet>
 
+    <changeSet id="3.9-avoynov-4" author="avoynov">
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="CREATE_SCRIPT" valueClobFile="templates-3.9/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl.groovy"/>
+            <where>declaration_type_id = 101</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>
