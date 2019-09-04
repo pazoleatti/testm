@@ -271,7 +271,15 @@ public interface DeclarationDataService {
     String createTaskToCreateSpecificReport(final long declarationDataId, String alias, Map<String, Object> reportParams, TAUserInfo userInfo);
 
 
-    //todo javadoc
+    /**
+     * Формирование спецотчета "РНУ НДФЛ по всем ФЛ"
+     *
+     * @param declarationDataId идентификатор декларации
+     * @param userInfo          информация о пользователе, выполняющего действие
+     * @param searchFilter      параметры фильтрации на форме
+     * @param selectedRows      информация о выбранных строках в форме
+     * @return результат с даннымми для представления об операции формирования отчета
+     */
     String createTaskToCreateRnuNdflByAllPersonsReport(long declarationDataId, TAUserInfo userInfo, RnuNdflAllPersonsReportFilter searchFilter, RnuNdflAllPersonsReportSelectedRows selectedRows);
 
     /**
