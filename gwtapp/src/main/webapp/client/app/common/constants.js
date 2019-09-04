@@ -181,6 +181,12 @@
                 BY_FILTER_SELECTED: {id: 2, name: "по отобранным по фильтру"},
                 SELECTED_ON_PAGE: {id: 3, name: "по выбранным на странице"},
             },
+            NDFL_PERSON_REPORT_ACTIVE_TAB: {
+                PERSONS: {id: 1, name: "Реквизиты"},
+                INCOMES: {id: 2, name: "Сведения о доходах и НДФЛ"},
+                DEDUCTIONS: {id: 3, name: "Сведения о вычетах"},
+                PREPAYMENTS: {id: 4, name: "Сведения о доходах в виде авансовых платежей"}
+            },
             SUBREPORT_ALIAS_CONSTANTS: {
                 RNU_NDFL_PERSON_DB: "rnu_ndfl_person_db", // РНУ НДФЛ по физическому лицу
                 RNU_NDFL_PERSON_ALL_DB: "rnu_ndfl_person_all_db", // РНУ НДФЛ по всем ФЛ

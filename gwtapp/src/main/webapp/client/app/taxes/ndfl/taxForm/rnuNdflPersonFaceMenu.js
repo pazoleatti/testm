@@ -15,13 +15,6 @@
                       RefBookValuesResource, APP_CONSTANTS, $shareData, $dialogs, $webStorage, $logPanel) {
 
                 $scope.reportData = {dataType: APP_CONSTANTS.NDFL_PERSON_REPORT_GENERATION_TYPE.ALL_DATA};
-                //todo
-                 if (!$shareData.filterIsClear) {
-                    // $scope.declarationData.dataType = APP_CONSTANTS.NDFL_PERSON_REPORT_GENERATION_TYPE.ALL_DATA;
-                } else {
-                    // $scope.declarationData.dataType = APP_CONSTANTS.NDFL_PERSON_REPORT_GENERATION_TYPE.BY_FILTER_SELECTED;
-                }
-
 
                 /**
                  * @description Создание РНУ НДФЛ для ФЛ
@@ -57,8 +50,7 @@
                             $http({
                                 method: "POST",
                                 url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/report/rnuNdflAllPersons/bySelected",
-                                // todo $shareData.selectedRow.getActiveTab().getSelectedRows() ...
-                                data: {}
+                                data: getSelectedRowsData($shareData.selectedRow.getActiveTab())
                             }).success(function (response) {
                                 if (response) {
                                     $logPanel.open('log-panel-container', response);
@@ -68,6 +60,25 @@
                     }
 
                     $modalInstance.dismiss();
+
+                    function getSelectedRowsData(activeTab) {
+                        var result = {"persons": [], "incomes": [], "deductions": [], "prepayments": []};
+                        switch (activeTab.getSection()) {
+                            case APP_CONSTANTS.NDFL_PERSON_REPORT_ACTIVE_TAB.PERSONS.id:
+                                result.persons = activeTab.getSelectedRows();
+                                break;
+                            case APP_CONSTANTS.NDFL_PERSON_REPORT_ACTIVE_TAB.INCOMES.id:
+                                result.incomes = activeTab.getSelectedRows();
+                                break;
+                            case APP_CONSTANTS.NDFL_PERSON_REPORT_ACTIVE_TAB.DEDUCTIONS.id:
+                                result.deductions = activeTab.getSelectedRows();
+                                break;
+                            case APP_CONSTANTS.NDFL_PERSON_REPORT_ACTIVE_TAB.PREPAYMENTS.id:
+                                result.prepayments = activeTab.getSelectedRows();
+                                break;
+                        }
+                        return result;
+                    }
                 };
 
                 /**
