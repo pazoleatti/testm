@@ -252,20 +252,21 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
     }
 
     @Override
-    public Map<Long, String> getDepartmentTBByPersonIdList(List<Long> personIdList) {
+    public Map<Long, String> getDepartmentTBByIncomeSourceIdList(List<Long> incomeSourceIdList) {
         int typeIdTerbank = DepartmentType.TERR_BANK.getCode();
         try {
-            String sqlQuery = "select np.id, " +
+            String sqlQuery = "select npi.id, " +
                     "(select name from department d_p " +
                     "where d_p.type = ? " +
                     "start with d_p.id=dep.id " +
                     "connect by prior d_p.parent_id= d_p.id) tb " +
-                    "from ndfl_person np " +
+                    "from ndfl_person_income npi " +
+                    "left join ndfl_person np on npi.ndfl_person_id = np.id " +
                     "left join declaration_data dd on np.declaration_data_id = dd.id " +
                     "inner join department_report_period drp on dd.department_report_period_id = drp.id " +
                     "left join department dep on drp.department_id = dep.id " +
                     "where " +
-                    SqlUtils.transformToSqlInStatementViaTmpTable("np.id", personIdList);
+                    SqlUtils.transformToSqlInStatementViaTmpTable("npi.id", incomeSourceIdList);
             return getJdbcTemplate().query(sqlQuery,
                     new Object[]{typeIdTerbank},
                     new ResultSetExtractor<Map<Long, String>>() {

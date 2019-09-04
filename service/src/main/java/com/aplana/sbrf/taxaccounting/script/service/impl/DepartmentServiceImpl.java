@@ -80,8 +80,8 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
-    public Map<Long, String> getParentTBbyPersonIdList(List<Long> personIdList) {
-        return departmentDao.getDepartmentTBByPersonIdList(personIdList);
+    public Map<Long, String> getParentTBbyIncomeSourceIdList(List<Long> incomeSourceIdList) {
+        return departmentDao.getDepartmentTBByIncomeSourceIdList(incomeSourceIdList);
     }
 
     @Override

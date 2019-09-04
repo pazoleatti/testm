@@ -154,13 +154,14 @@ public interface DepartmentDao extends PermissionDao {
     Department getDepartmentTB(int departmentId);
 
     /**
-     * Получение ТБ для подразделения по списку физлиц (тип = 2)
+     * Получение родительского территориального банка по списку идентификаторов
+     * источников при формировании консолидированной формы (тип = 2)
      * Реализовано для ускорения производительности скрипта формирования XSLX
      *
-     * @param personIdList список идентификаторов физлиц
-     * @return список значений Идентификатор физлица - Название ТБ
+     * @param incomeSourceIdList список идентификаторов источников при формировании консолидированной формы
+     * @return Cписок значений: Идентификатор источника - Название родительского территориального банка
      */
-    Map<Long, String> getDepartmentTBByPersonIdList(List<Long> personIdList);
+    Map<Long, String> getDepartmentTBByIncomeSourceIdList(List<Long> incomeSourceIdList);
 
     /**
      * Получение ТБ для подразделения (тип = 2) + все дочерние подразделения
