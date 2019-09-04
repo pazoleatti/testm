@@ -163,11 +163,21 @@
         </update>
     </changeSet>
 
-    <!-- Изменения по 3.9.0.1 -->
+    <!-- ********************************Изменения по 3.9.0.1 ***********************************************-->
+
+
     <changeSet id="3.9-avoynov-4" author="avoynov">
         <update tableName="DECLARATION_TEMPLATE">
             <column name="CREATE_SCRIPT" valueClobFile="templates-3.9/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl.groovy"/>
             <where>declaration_type_id = 101</where>
+        </update>
+    </changeSet>
+
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-8293 Реализовать формирование 6-НДФЛ с нулевыми показателями -->
+    <changeSet id="3.9.1-avtornikov-1" author="avtornikov">
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="CREATE_SCRIPT" valueClobFile="templates-3.9/ndfl/report_6ndfl/v2016/report_6ndfl.groovy"/>
+            <where>declaration_type_id = 103</where>
         </update>
     </changeSet>
 
