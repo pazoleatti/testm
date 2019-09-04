@@ -16,6 +16,8 @@ import com.aplana.sbrf.taxaccounting.model.Ndfl2_6DataReportParams
 import com.aplana.sbrf.taxaccounting.model.PagingResult
 import com.aplana.sbrf.taxaccounting.model.PrepareSpecificReportResult
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod
+import com.aplana.sbrf.taxaccounting.model.RnuNdflAllPersonsReportFilter
+import com.aplana.sbrf.taxaccounting.model.RnuNdflAllPersonsReportSelectedRows
 import com.aplana.sbrf.taxaccounting.model.ScriptSpecificDeclarationDataReportHolder
 import com.aplana.sbrf.taxaccounting.model.StringColumn
 import com.aplana.sbrf.taxaccounting.model.SubreportAliasConstants
@@ -38,6 +40,7 @@ import com.aplana.sbrf.taxaccounting.script.service.NdflPersonService
 import com.aplana.sbrf.taxaccounting.script.service.RefBookService
 import com.aplana.sbrf.taxaccounting.script.service.ReportPeriodService
 import com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils
+import form_template.ndfl.report_2ndfl_1.v2016.Report2Ndfl
 import groovy.transform.AutoClone
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
@@ -93,6 +96,11 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
     Set<String> kppList
     Date dateFrom, dateTo
     Date date = new Date()
+    /**
+     * Дополнительные спецотчеты (SBRFNDFL-8445)
+     */
+    RnuNdflAllPersonsReportFilter ndflAllPersonsReportFilter;
+    RnuNdflAllPersonsReportSelectedRows ndflAllPersonsReportSelectedRows;
 
     @TypeChecked(TypeCheckingMode.SKIP)
     ConsolidatedRnuNdfl(scriptClass) {
@@ -142,6 +150,15 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
         }
         if (scriptClass.getBinding().hasVariable("blobDataServiceDaoImpl")) {
             this.blobDataService = (BlobDataService) scriptClass.getProperty("blobDataServiceDaoImpl");
+        }
+        /**
+         * Дополнительные спецотчеты (SBRFNDFL-8445)
+         */
+        if (scriptClass.getBinding().hasVariable("searchFilter")) {
+            this.ndflAllPersonsReportFilter = (RnuNdflAllPersonsReportFilter) scriptClass.getProperty("searchFilter");
+        }
+        if (scriptClass.getBinding().hasVariable("selectedRows")) {
+            this.ndflAllPersonsReportSelectedRows = (RnuNdflAllPersonsReportSelectedRows) scriptClass.getProperty("selectedRows");
         }
     }
 
@@ -639,12 +656,68 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
         }
     }
 
+
+    /**
+     * SBRFNDFL-8445
+     *
+     * Виды спецотчетов
+     */
+    @TypeChecked(TypeCheckingMode.SKIP)
+    enum SpecificReportKindEnum {
+        ALL(0),
+        BY_FILTER(1),
+        BY_SELECTED(2)
+
+        SpecificReportKindEnum(int value) {
+            this.value = value;
+        }
+
+        private int value;
+        int getValue() {
+            value;
+        }
+    }
+
+    /**
+     * Определить вид спецотчета
+     */
+    int checkSpecialReportKind() {
+
+    }
+
+
     /**
      * Выгрузка в Excel РНУ-НДФЛ
      */
     public void exportAllDeclarationDataToExcel() {
-
         ScriptUtils.checkInterrupted();
+
+        /**
+         * Дополнительные спецотчеты (SBRFNDFL-8445)
+         */
+        int specificReportKind = checkSpecialReportKind()
+        if(ndflAllPersonsReportFilter == null && ndflAllPersonsReportSelectedRows == null) {
+            specificReportKind = 0
+        }
+        else {
+            if (ndflAllPersonsReportFilter != null) {
+                specificReportKind = 1
+            }
+            else {
+                specificReportKind = 2
+            }
+        }
+
+        switch(specificReportKind) {
+            case 0:
+                break
+            case 1:
+                println(ndflAllPersonsReportFilter)
+                break
+            case 2:
+                println(ndflAllPersonsReportSelectedRows)
+                break;
+        }
 
         ReportPeriod reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
         List<NdflPerson> ndflPersonList = ndflPersonService.findNdflPerson(declarationData.id)
