@@ -1197,9 +1197,9 @@
                  * @param knf КНФ, из которой брать пары КПП/ОКТМО
                  * @param departmentModelPath путь в scope до модели подразделения
                  * @param periodModelPath путь в scope до модели периода
-                 * @param endDate путь в scope до даты окончания действия настройки подразделения
+                 * @param endDatePath путь в scope до даты окончания действия настройки подразделения
                  */
-                $scope.initSelectKppOktmoPairsByParams = function (modelPath, knf, departmentModelPath, periodModelPath, endDate) {
+                $scope.initSelectKppOktmoPairsByParams = function (modelPath, knf, departmentModelPath, periodModelPath, endDatePath) {
                     if (!knf && (departmentModelPath || periodModelPath)) {
                         var fields = [];
                         if (departmentModelPath) {
@@ -1232,7 +1232,7 @@
                                 declarationId: knf && knf.id,
                                 departmentId: knf ? knf.departmentId : (departmentModelPath ? _.deep($scope, departmentModelPath).id : null),
                                 reportPeriodId: knf ? knf.reportPeriodId : (periodModelPath ? _.deep($scope, periodModelPath).id : null),
-                                relevanceDate: _.deep($scope, endDate)
+                                relevanceDate: endDatePath ? _.deep($scope, endDatePath) : null
                             }
                         };
                     }
