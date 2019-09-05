@@ -1,11 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.impl.print.departmentConfigs;
 
 import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.refbook.DepartmentConfig;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookOktmo;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookPresentPlace;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookReorganization;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookSignatoryMark;
+import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.service.impl.print.AbstractReportBuilder;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
@@ -34,7 +30,7 @@ public class DepartmentConfigsReportBuilder extends AbstractReportBuilder {
     private List<String> header = asList("Дата начала действия настройки", "Дата окончания действия настройки", "КПП", "ОКТМО", "Код НО (конечного)", "Код по месту представления",
             "Наименование для титульного листа", "Контактный телефон", "Признак подписанта", "Фамилия подписанта", "Имя подписанта",
             "Отчество подписанта", "Документ полномочий подписанта", "Код формы реорганизации", "КПП реорганизованной организации", "ИНН реорганизованной организации",
-            "КПП подразделения правопреемника", "Наименование подразделения правопреемника");
+            "КПП подразделения правопреемника", "Наименование подразделения правопреемника", "Учитывать в КПП/ОКТМО");
 
     private int curRowIndex;
     private StyleBuilder styleBuilder;
@@ -53,7 +49,7 @@ public class DepartmentConfigsReportBuilder extends AbstractReportBuilder {
 
     @Override
     protected void cellAlignment() {
-        List<Integer> widthList = Arrays.asList(16, 16, 11, 12, 8, 8, 25, 22, 12, 20, 20, 20, 34, 15, 15, 15, 15, 25);
+        List<Integer> widthList = Arrays.asList(16, 16, 11, 12, 8, 8, 25, 22, 12, 20, 20, 20, 34, 15, 15, 15, 15, 25, 25);
         for (int i = 0; i < header.size(); i++) {
             sheet.autoSizeColumn(i);
             sheet.setColumnWidth(i, widthList.get(i) * 269);
@@ -105,6 +101,7 @@ public class DepartmentConfigsReportBuilder extends AbstractReportBuilder {
         createCellValue(colIndex++, departmentConfig.getReorgInn(), "reorgInn", CellType.STRING, CellStyle.ALIGN_CENTER);
         createCellValue(colIndex++, departmentConfig.getReorgSuccessorKpp(), "reorgSuccessorKpp", CellType.STRING, CellStyle.ALIGN_CENTER);
         createCellValue(colIndex++, departmentConfig.getReorgSuccessorName(), "reorgSuccessorName", CellType.STRING, CellStyle.ALIGN_LEFT);
+        createCellValue(colIndex++, toString(departmentConfig), "relatedKppOktmo", CellType.STRING, CellStyle.ALIGN_CENTER);
     }
 
     private String toString(RefBookOktmo oktmo) {
@@ -121,6 +118,13 @@ public class DepartmentConfigsReportBuilder extends AbstractReportBuilder {
 
     private String toString(RefBookReorganization reorganization) {
         return reorganization != null ? reorganization.getCode() : null;
+    }
+
+    private String toString(DepartmentConfig departmentConfig) {
+        RelatedKppOktmo relatedKppOktmo = departmentConfig.getRelatedKppOktmo();
+        return relatedKppOktmo != null && relatedKppOktmo.getKpp() != null && relatedKppOktmo.getOktmo() != null
+                ? String.format("%s / %s", relatedKppOktmo.getKpp(), relatedKppOktmo.getOktmo())
+                : null;
     }
 
     private Cell createCellValue(int colIndex, Object value, String propName, CellType cellType, short align) {
