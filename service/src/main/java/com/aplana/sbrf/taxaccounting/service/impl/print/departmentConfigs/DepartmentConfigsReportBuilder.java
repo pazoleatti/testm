@@ -123,7 +123,7 @@ public class DepartmentConfigsReportBuilder extends AbstractReportBuilder {
     private String toString(DepartmentConfig departmentConfig) {
         RelatedKppOktmo relatedKppOktmo = departmentConfig.getRelatedKppOktmo();
         return relatedKppOktmo != null && relatedKppOktmo.getKpp() != null && relatedKppOktmo.getOktmo() != null
-                ? String.format("%s / %s", relatedKppOktmo.getKpp(), relatedKppOktmo.getOktmo())
+                ? String.format("%s/%s", relatedKppOktmo.getKpp(), relatedKppOktmo.getOktmo())
                 : null;
     }
 
