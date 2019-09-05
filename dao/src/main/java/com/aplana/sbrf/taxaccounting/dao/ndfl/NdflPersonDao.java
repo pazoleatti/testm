@@ -82,6 +82,17 @@ public interface NdflPersonDao {
     List<NdflPerson> findAllByDeclarationId(long declarationDataId);
 
     /**
+     * Возвращает данные по спецотчету по выделенным записям (SBRFNDFL-8445)
+     */
+    List<NdflPerson> findAllPersonByInpList(List<String> inpList);
+
+    List<NdflPersonIncome> findAllPersonIncomeBySelectedByInpList(List<String> inpList);
+
+    List<NdflPersonDeduction> findAllNdflPersonDeductionBySelectedByInpList(List<String> inpList);
+
+    List<NdflPersonPrepayment> findAllNdflPersonPrepaymentBySelectedByInpList(List<String> inpList);
+
+    /**
      * Возвращяет список строк из раздела 1 по списку ид форм
      *
      * @param declarationDataIds список ид форм

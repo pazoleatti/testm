@@ -13,6 +13,7 @@ import com.aplana.sbrf.taxaccounting.model.Department
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormSources
 import com.aplana.sbrf.taxaccounting.model.Ndfl2_6DataReportParams
+import com.aplana.sbrf.taxaccounting.model.PagingParams
 import com.aplana.sbrf.taxaccounting.model.PagingResult
 import com.aplana.sbrf.taxaccounting.model.PrepareSpecificReportResult
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod
@@ -28,6 +29,9 @@ import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
+import com.aplana.sbrf.taxaccounting.model.result.NdflPersonDeductionDTO
+import com.aplana.sbrf.taxaccounting.model.result.NdflPersonIncomeDTO
+import com.aplana.sbrf.taxaccounting.model.result.NdflPersonPrepaymentDTO
 import com.aplana.sbrf.taxaccounting.model.util.Pair
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
@@ -40,7 +44,6 @@ import com.aplana.sbrf.taxaccounting.script.service.NdflPersonService
 import com.aplana.sbrf.taxaccounting.script.service.RefBookService
 import com.aplana.sbrf.taxaccounting.script.service.ReportPeriodService
 import com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils
-import form_template.ndfl.report_2ndfl_1.v2016.Report2Ndfl
 import groovy.transform.AutoClone
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
@@ -101,6 +104,13 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
      */
     RnuNdflAllPersonsReportFilter ndflAllPersonsReportFilter;
     RnuNdflAllPersonsReportSelectedRows ndflAllPersonsReportSelectedRows;
+
+    /**
+     * В пакетах com.aplana.sbrf.taxaccounting.script.service и com.aplana.sbrf.taxaccounting.service
+     * есть классы с совпадающим именем: NdflPersonService
+     * Первый нужен для отбора всех или выделенных записей, второй - для записей по фильтру
+     */
+    com.aplana.sbrf.taxaccounting.service.NdflPersonService ndflPersonServiceTaxAccounting;
 
     @TypeChecked(TypeCheckingMode.SKIP)
     ConsolidatedRnuNdfl(scriptClass) {
@@ -658,80 +668,141 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
 
 
     /**
-     * SBRFNDFL-8445
-     *
-     * Виды спецотчетов
+     * Виды спецотчетов (SBRFNDFL-8445)
      */
     @TypeChecked(TypeCheckingMode.SKIP)
-    enum SpecificReportKindEnum {
-        ALL(0),
-        BY_FILTER(1),
-        BY_SELECTED(2)
-
-        SpecificReportKindEnum(int value) {
-            this.value = value;
-        }
-
-        private int value;
-        int getValue() {
-            value;
-        }
+    enum SubreportKindEnum {
+        ALL, BY_FILTER, BY_SELECTED
     }
 
     /**
-     * Определить вид спецотчета
+     * Определить вид спецотчета (SBRFNDFL-8445)
      */
-    int checkSpecialReportKind() {
-
+    SubreportKindEnum checkSubreportKind() {
+        if (ndflAllPersonsReportFilter != null) {
+            return SubreportKindEnum.BY_FILTER
+        }
+        if (ndflAllPersonsReportSelectedRows != null) {
+            return SubreportKindEnum.BY_SELECTED
+        }
+        return SubreportKindEnum.ALL
     }
 
+    /**
+     * Сформировать список ИНП ФЛ в зависимости от текущей вкладки (SBRFNDFL-8445)
+     */
+    List<String> createNdflPersonInpList(SubreportKindEnum subreportKind) {
+        List<String> inpList = new ArrayList<>();
+        switch(subreportKind) {
+            // Для спецотчета по фильтру в коллекции только одна запись
+            case SubreportKindEnum.BY_FILTER:
+                if(ndflAllPersonsReportFilter == null) return null
+
+                if (ndflAllPersonsReportFilter.person != null) {
+                    inpList.add(ndflAllPersonsReportFilter.person.getInp())
+                } else if (ndflAllPersonsReportFilter.income != null) {
+                    inpList.add(ndflAllPersonsReportFilter.income.getInp())
+                } else if (ndflAllPersonsReportFilter.deduction != null) {
+                    inpList.add(ndflAllPersonsReportFilter.deduction.getInp())
+                } else if (ndflAllPersonsReportFilter.prepayment != null) {
+                        inpList.add(ndflAllPersonsReportFilter.prepayment.getInp())
+                }
+                return inpList
+            // Для спецотчета по выбранным записям в коллекции >= 1 запись
+            case SubreportKindEnum.BY_SELECTED:
+                if(ndflAllPersonsReportSelectedRows == null) return null
+
+                if (!ndflAllPersonsReportSelectedRows.persons.isEmpty()) {
+                    for (int i = 0; i < ndflAllPersonsReportSelectedRows.persons.size(); i++) {
+                        inpList.add(ndflAllPersonsReportSelectedRows.persons.get(i).getInp())
+                    }
+                } else if (!ndflAllPersonsReportSelectedRows.incomes.isEmpty()) {
+                    for (int i = 0; i < ndflAllPersonsReportSelectedRows.incomes.size(); i++) {
+                        inpList.add(ndflAllPersonsReportSelectedRows.incomes.get(i).getInp())
+                    }
+                } else if (!ndflAllPersonsReportSelectedRows.deductions.isEmpty()) {
+                    for (int i = 0; i < ndflAllPersonsReportSelectedRows.deductions.size(); i++) {
+                        inpList.add(ndflAllPersonsReportSelectedRows.deductions.get(i).getInp())
+                    }
+                } else if (!ndflAllPersonsReportSelectedRows.prepayments.isEmpty()) {
+                    for (int i = 0; i < ndflAllPersonsReportSelectedRows.prepayments.size(); i++) {
+                        inpList.add(ndflAllPersonsReportSelectedRows.prepayments.get(i).getInp())
+                    }
+                }
+                return inpList
+        }
+    }
 
     /**
      * Выгрузка в Excel РНУ-НДФЛ
      */
     public void exportAllDeclarationDataToExcel() {
+
         ScriptUtils.checkInterrupted();
 
-        /**
-         * Дополнительные спецотчеты (SBRFNDFL-8445)
-         */
-        int specificReportKind = checkSpecialReportKind()
-        if(ndflAllPersonsReportFilter == null && ndflAllPersonsReportSelectedRows == null) {
-            specificReportKind = 0
-        }
-        else {
-            if (ndflAllPersonsReportFilter != null) {
-                specificReportKind = 1
-            }
-            else {
-                specificReportKind = 2
-            }
-        }
-
-        switch(specificReportKind) {
-            case 0:
-                break
-            case 1:
-                println(ndflAllPersonsReportFilter)
-                break
-            case 2:
-                println(ndflAllPersonsReportSelectedRows)
-                break;
-        }
-
+        // Общие данные для всех спецотчетов
         ReportPeriod reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
-        List<NdflPerson> ndflPersonList = ndflPersonService.findNdflPerson(declarationData.id)
-        ndflPersonList.sort { it.rowNum }
-        List<NdflPersonIncome> ndflPersonIncomeList = ndflPersonService.findNdflPersonIncome(declarationData.id)
-        ndflPersonIncomeList.sort { it.rowNum }
-        List<NdflPersonDeduction> ndflPersonDeductionList = ndflPersonService.findNdflPersonDeduction(declarationData.id)
-        ndflPersonDeductionList.sort { it.rowNum }
-        List<NdflPersonPrepayment> ndflPersonPrepaymentList = ndflPersonService.findNdflPersonPrepayment(declarationData.id)
-        ndflPersonPrepaymentList.sort { it.rowNum }
         String departmentName = departmentService.get(declarationData.departmentId)?.name
         String reportDate = getReportPeriodEndDate().format("dd.MM.yyyy") + " г."
         String period = getProvider(RefBook.Id.PERIOD_CODE.getId()).getRecordData(reportPeriod.dictTaxPeriodId)?.NAME?.value
         String year = getReportPeriodEndDate().format("yyyy") + " г."
+
+        // Данные для формирования содержимого отчета
+        List<NdflPerson> ndflPersonList
+        List<NdflPersonIncome> ndflPersonIncomeList
+        List<NdflPersonDeduction> ndflPersonDeductionList
+        List<NdflPersonPrepayment> ndflPersonPrepaymentList
+
+        // Тип спецотчета (один из ALL/BY_FILTER/BY_SELECTED)
+        SubreportKindEnum subreportKind = checkSubreportKind()
+
+        // Список ИНП ФЛ отобранных для формирования спецотчета
+        List<String> inpList;
+        if (subreportKind == SubreportKindEnum.BY_FILTER || subreportKind == SubreportKindEnum.BY_SELECTED) {
+            inpList = createNdflPersonInpList(subreportKind)
+            // TODO: проверить что вернулось (например, по фильтру ничего не отобрано или нет выделенных записей)
+            if(inpList == null || inpList.isEmpty()) {
+                println("ОШИБКА: список INP пуст")
+            }
+        }
+
+        // Спецотчеты (SBRFNDFL-8445)
+        switch(subreportKind) {
+            // По всем
+            case subreportKind.ALL:
+                ndflPersonList = ndflPersonService.findNdflPerson(declarationData.id)
+                ndflPersonList.sort { it.rowNum }
+                ndflPersonIncomeList = ndflPersonService.findNdflPersonIncome(declarationData.id)
+                ndflPersonIncomeList.sort { it.rowNum }
+                ndflPersonDeductionList = ndflPersonService.findNdflPersonDeduction(declarationData.id)
+                ndflPersonDeductionList.sort { it.rowNum }
+                ndflPersonPrepaymentList = ndflPersonService.findNdflPersonPrepayment(declarationData.id)
+                ndflPersonPrepaymentList.sort { it.rowNum }
+                break
+            // По фильтру
+            case subreportKind.BY_FILTER:
+                // Убирать разбиение на страницы; все - в одну коллекцию
+                PagingParams pagingParams = new PagingParams()
+                pagingParams.setNoPaging()
+                /*
+                PagingResult<NdflPerson> ndflPerson = ndflPersonServiceTaxAccounting.findPersonByFilter(ndflAllPersonsReportFilter.person, pagingParams)
+                PagingResult<NdflPersonIncomeDTO> ndflPersonIncomeDTO = ndflPersonServiceTaxAccounting.findPersonIncomeByFilter(ndflAllPersonsReportFilter.income, pagingParams)
+                PagingResult<NdflPersonDeductionDTO> ndflPersonDeductionDTO = ndflPersonServiceTaxAccounting.findPersonDeductionsByFilter(ndflAllPersonsReportFilter.deduction, pagingParams)
+                PagingResult<NdflPersonPrepaymentDTO> ndflPersonPrepaymentDTO = ndflPersonServiceTaxAccounting.findPersonPrepaymentByFilter(ndflAllPersonsReportFilter.prepayment, pagingParams)
+                */
+                break
+            // По отмеченным записям
+            case subreportKind.BY_SELECTED:
+                ndflPersonList = ndflPersonService.findNdflPersonBySelected(inpList)
+                ndflPersonList.sort {it.rowNum}
+                ndflPersonIncomeList = ndflPersonService.findNdflPersonIncomeBySelected(inpList)
+                ndflPersonIncomeList.sort {it.rowNum}
+                ndflPersonDeductionList = ndflPersonService.findNdflPersonDeductionBySelected(inpList)
+                ndflPersonDeductionList.sort {it.rowNum}
+                ndflPersonPrepaymentList = ndflPersonService.findNdflPersonPrepaymentBySelected(inpList);
+                ndflPersonPrepaymentList.sort{it.rowNum}
+                break
+        }
 
         SheetFillerContext context = new SheetFillerContext(departmentName, reportDate, period, year, ndflPersonList, ndflPersonIncomeList, ndflPersonDeductionList, ndflPersonPrepaymentList)
 

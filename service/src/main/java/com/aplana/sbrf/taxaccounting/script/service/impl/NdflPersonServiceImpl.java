@@ -73,6 +73,29 @@ public class NdflPersonServiceImpl implements NdflPersonService {
         return ndflPersonDao.findAllByDeclarationId(declarationDataId);
     }
 
+    /**
+     * Возвращает данные по спецотчету по выделенным записям (SBRFNDFL-8445)
+     */
+    @Override
+    public List<NdflPerson> findNdflPersonBySelected(List<String> inpList) {
+        return ndflPersonDao.findAllPersonByInpList(inpList);
+    }
+
+    @Override
+    public List<NdflPersonIncome> findNdflPersonIncomeBySelected(List<String> inpList) {
+        return ndflPersonDao.findAllPersonIncomeBySelectedByInpList(inpList);
+    }
+
+    @Override
+    public List<NdflPersonDeduction> findNdflPersonDeductionBySelected(List<String> inpList) {
+        return ndflPersonDao.findAllNdflPersonDeductionBySelectedByInpList(inpList);
+    }
+
+    @Override
+    public List<NdflPersonPrepayment> findNdflPersonPrepaymentBySelected(List<String> inpList) {
+        return ndflPersonDao.findAllNdflPersonPrepaymentBySelectedByInpList(inpList);
+    }
+
     @Override
     public List<NdflPerson> findAllNdflPersonsByDeclarationIds(List<Long> declarationDataIds) {
         return ndflPersonDao.findAllByDeclarationIdIn(declarationDataIds);
