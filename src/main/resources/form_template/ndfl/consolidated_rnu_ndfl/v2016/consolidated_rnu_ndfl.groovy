@@ -17,12 +17,12 @@ import com.aplana.sbrf.taxaccounting.model.PagingParams
 import com.aplana.sbrf.taxaccounting.model.PagingResult
 import com.aplana.sbrf.taxaccounting.model.PrepareSpecificReportResult
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod
-import com.aplana.sbrf.taxaccounting.model.RnuNdflAllPersonsReportFilter
 import com.aplana.sbrf.taxaccounting.model.RnuNdflAllPersonsReportSelectedRows
 import com.aplana.sbrf.taxaccounting.model.ScriptSpecificDeclarationDataReportHolder
 import com.aplana.sbrf.taxaccounting.model.StringColumn
 import com.aplana.sbrf.taxaccounting.model.SubreportAliasConstants
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
+import com.aplana.sbrf.taxaccounting.model.filter.NdflFilter
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome
@@ -102,7 +102,7 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
     /**
      * Дополнительные спецотчеты (SBRFNDFL-8445)
      */
-    RnuNdflAllPersonsReportFilter ndflAllPersonsReportFilter;
+    NdflFilter ndflAllPersonsReportFilter;
     RnuNdflAllPersonsReportSelectedRows ndflAllPersonsReportSelectedRows;
 
     /**
@@ -165,7 +165,7 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
          * Дополнительные спецотчеты (SBRFNDFL-8445)
          */
         if (scriptClass.getBinding().hasVariable("searchFilter")) {
-            this.ndflAllPersonsReportFilter = (RnuNdflAllPersonsReportFilter) scriptClass.getProperty("searchFilter");
+            this.ndflAllPersonsReportFilter = (NdflFilter) scriptClass.getProperty("searchFilter");
         }
         if (scriptClass.getBinding().hasVariable("selectedRows")) {
             this.ndflAllPersonsReportSelectedRows = (RnuNdflAllPersonsReportSelectedRows) scriptClass.getProperty("selectedRows");

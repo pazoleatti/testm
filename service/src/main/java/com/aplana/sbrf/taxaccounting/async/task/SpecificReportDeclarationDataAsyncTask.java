@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.async.task;
 
 import com.aplana.sbrf.taxaccounting.async.AsyncManager;
+import com.aplana.sbrf.taxaccounting.model.filter.NdflFilter;
 import com.aplana.sbrf.taxaccounting.service.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -74,7 +75,7 @@ public class SpecificReportDeclarationDataAsyncTask extends AbstractDeclarationA
                     .viewParamValues(viewParamValues)
                     .selectedRecord(selectedRecord)
                     .userInfo(userInfo)
-                    .searchFilter((RnuNdflAllPersonsReportFilter) params.get("searchFilter"))
+                    .searchFilter((NdflFilter) params.get("searchFilter"))
                     .selectedRows((RnuNdflAllPersonsReportSelectedRows) params.get("selectedRows"))
                     .build();
             String uuid = declarationDataService.createSpecificReport(specificReportContext, new LockStateLogger() {

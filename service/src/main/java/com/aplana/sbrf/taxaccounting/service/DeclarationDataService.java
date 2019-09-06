@@ -280,7 +280,7 @@ public interface DeclarationDataService {
      * @param selectedRows      информация о выбранных строках в форме
      * @return результат с даннымми для представления об операции формирования отчета
      */
-    String createTaskToCreateRnuNdflByAllPersonsReport(long declarationDataId, TAUserInfo userInfo, RnuNdflAllPersonsReportFilter searchFilter, RnuNdflAllPersonsReportSelectedRows selectedRows);
+    String createTaskToCreateRnuNdflByAllPersonsReport(long declarationDataId, TAUserInfo userInfo, NdflFilter searchFilter, RnuNdflAllPersonsReportSelectedRows selectedRows);
 
     /**
      * Формирование отчета в xlsx

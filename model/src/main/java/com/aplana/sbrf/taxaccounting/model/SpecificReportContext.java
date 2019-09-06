@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.model;
 
+import com.aplana.sbrf.taxaccounting.model.filter.NdflFilter;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import lombok.Builder;
 import lombok.Getter;
@@ -15,7 +16,7 @@ public class SpecificReportContext {
     private Map<String, Object> subreportParamValues;
     private Map<String, String> viewParamValues;
     private DataRow<Cell> selectedRecord;
-    private RnuNdflAllPersonsReportFilter searchFilter;
+    private NdflFilter searchFilter;
     private RnuNdflAllPersonsReportSelectedRows selectedRows;
     private TAUserInfo userInfo;
 }

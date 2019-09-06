@@ -60,7 +60,6 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -989,7 +988,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     public String createTaskToCreateRnuNdflByAllPersonsReport(long declarationDataId, TAUserInfo userInfo,
-                                                              RnuNdflAllPersonsReportFilter searchFilter,
+                                                              NdflFilter searchFilter,
                                                               RnuNdflAllPersonsReportSelectedRows selectedRows) {
         LOG.info(String.format("DeclarationDataServiceImpl.createTaskToCreateRnuNdflByAllPersonsReport by %s. declarationDataId: %s",
                 userInfo, declarationDataId));
