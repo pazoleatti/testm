@@ -762,7 +762,7 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
             inpList = createNdflPersonInpList(subreportKind)
             // TODO: проверить что вернулось (например, по фильтру ничего не отобрано или нет выделенных записей)
             if(inpList == null || inpList.isEmpty()) {
-                println("ОШИБКА: список INP пуст")
+                logger.error("Список ФЛ для формирования спецотчета %s пуст", subreportKind.name())
             }
         }
 
