@@ -902,7 +902,7 @@ public class DeclarationDataController {
      */
     @PostMapping(value = "/actions/declarationData/{declarationDataId}/report/rnuNdflAllPersons/byFilter")
     public String createRnuNdflAllPersonsReportByFilter(@PathVariable("declarationDataId") long declarationDataId,
-                                                        @RequestBody RnuNdflAllPersonsReportFilter filter) {
+                                                        @RequestBody NdflFilter filter) {
         TAUserInfo userInfo = securityService.currentUserInfo();
         return declarationService.createTaskToCreateRnuNdflByAllPersonsReport(declarationDataId, userInfo, filter, null);
     }
