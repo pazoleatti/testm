@@ -904,6 +904,8 @@ public class DeclarationDataController {
     public String createRnuNdflAllPersonsReportByFilter(@PathVariable("declarationDataId") long declarationDataId,
                                                         @RequestBody NdflFilter filter) {
         TAUserInfo userInfo = securityService.currentUserInfo();
+        // Добавить к фильтру идентификатор формы (SBRFNDFL-8445)
+        filter.setDeclarationDataId(declarationDataId);
         return declarationService.createTaskToCreateRnuNdflByAllPersonsReport(declarationDataId, userInfo, filter, null);
     }
 
