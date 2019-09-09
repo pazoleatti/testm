@@ -400,6 +400,15 @@
                 };
 
                 /**
+                 * @description Определяет заполнен ли филбтр
+                 * @returns true если заполнен
+                 */
+                $scope.isFilterClear = function () {
+                    return (isEmpty($scope.ndflFilter.person) && isEmpty($scope.ndflFilter.income) &&
+                    isEmpty($scope.ndflFilter.deduction) && isEmpty($scope.ndflFilter.prepayment));
+                };
+
+                /**
                  * @description Формирование рну ндфл для всех ФЛ на основе Меню выбора
                  */
                 $scope.createRnuNdflByAllPersonsReportMenu = function () {
@@ -409,12 +418,12 @@
                         title: $filter('translate')('rnuPersonFaceMenu.title'),
                         templateUrl: 'client/app/taxes/ndfl/taxForm/rnuNdflPersonFaceMenu.html',
                         controller: 'rnuNdflPersonFaceMenuFormCtrl',
-                        windowClass: 'modal600',
+                        windowClass: 'modal500',
                         resolve: {
                             $shareData: function () {
                                 return {
                                     filter: $scope.searchFilter.params,
-                                    filterIsClear:  $scope.searchFilter.isClear,
+                                    filterIsClear: $scope.isFilterClear(),
                                     selectedRow:  $scope.ndflTabsCtrl
                                 };
                             }

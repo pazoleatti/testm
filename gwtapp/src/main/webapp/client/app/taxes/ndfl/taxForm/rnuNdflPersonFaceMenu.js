@@ -14,14 +14,15 @@
             function ($scope, $http, $state, $stateParams, $modalInstance, $filter,
                       RefBookValuesResource, APP_CONSTANTS, $shareData, $dialogs, $webStorage, $logPanel) {
 
-                $scope.reportData = {dataType: APP_CONSTANTS.NDFL_PERSON_REPORT_GENERATION_TYPE.ALL_DATA};
+                $scope.reportData = {dataType: APP_CONSTANTS.NDFL_PERSON_REPORT_GENERATION_TYPE.ALL_DATA, filterIsClear: $shareData.filter.filterIsClear};
+
+                $scope.filterIsClear = $shareData.filterIsClear;
+                $scope.selectedRows = $shareData.selectedRow.getActiveTab().getSelectedRows();
 
                 /**
                  * @description Создание РНУ НДФЛ для ФЛ
                  */
                 $scope.formationRNU = function () {
-
-                    console.log($scope.reportData.dataType.id + ' = ' + $scope.reportData.dataType.name);
 
                     var typeReportId = $scope.reportData.dataType.id;
                     switch (typeReportId) {

@@ -6,10 +6,10 @@
 
                 <div>
                     <div data-aplana-field>
-                        <div style="width: 355px;"
+                        <div style="width: 250px; left: 125px"
                              data-ng-controller="SelectReportGenerationTypeCtrl"
                              data-ui-select2="reportGenerationTypeSelect.options"
-                             data-ng-init="initSelectWithReportGenerationTypesForCreate(reportData.dataType)"
+                             data-ng-init="initSelectWithReportGenerationTypesForCreate(filterIsClear, selectedRows)"
                              data-ng-model="reportData.dataType"
                              data-required>
                         </div>
