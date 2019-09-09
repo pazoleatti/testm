@@ -1923,6 +1923,38 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     @Override
+    public long getNdflPersonAllSectionMaxCount(long declarationDataId) {
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("declarationDataId", declarationDataId);
+        String maxCnt = "select max(cnt)\n" +
+                "from (\n" +
+                "\tselect count(id) cnt from ndfl_person where declaration_data_id = :declarationDataId\n" +
+                "\tunion all\n" +
+                "\tselect \n" +
+                "\t  count(id) cnt\n" +
+                "\tfrom\n" +
+                "\t  ndfl_person_income\n" +
+                "\twhere\n" +
+                "\t  ndfl_person_id in (select id from ndfl_person where declaration_data_id = :declarationDataId)\n" +
+                "\tunion all\n" +
+                "\tselect\n" +
+                "\t  count(id) cnt\n" +
+                "\tfrom \n" +
+                "\t  ndfl_person_deduction\n" +
+                "\twhere\n" +
+                "\t  ndfl_person_id in (select id from ndfl_person where declaration_data_id = :declarationDataId)\n" +
+                "\tunion all\n" +
+                "\tselect\n" +
+                "\t  count(id) cnt\n" +
+                "\tfrom\n" +
+                "\t  ndfl_person_prepayment\n" +
+                "\twhere\n" +
+                "\t  ndfl_person_id in (select id from ndfl_person where declaration_data_id = :declarationDataId)\n" +
+                ")";
+        return getNamedParameterJdbcTemplate().queryForObject(maxCnt, parameters, Long.class);
+    }
+
+    @Override
     public int getNdflPersonReferencesCount(Long declarationDataId) {
         String query = "select nr.id from ndfl_references nr where declaration_data_id = :declarationDataId";
         Map<String, Object> parameters = new HashMap<String, Object>();

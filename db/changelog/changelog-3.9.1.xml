@@ -21,4 +21,12 @@
         </update>
     </changeSet>
 
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-8245 Реализовать прерывание создания асинхронной задачи
+    и вывод сообщения в случае превышения данных в отчете более 1 мл строк -->
+    <changeSet id="3.9.1-adudenko-1" author="adudenko">
+        <sql>
+            update async_task_type set limit_kind = 'Количество строк в любом разделе НФ', task_limit = 1000000 where id = 26;
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>

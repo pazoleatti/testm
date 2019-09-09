@@ -360,6 +360,15 @@ public interface NdflPersonDao {
     int getNdflPersonCount(Long declarationDataId);
 
     /**
+     * Получить максимальное количество элементов среди всех разделов конкретной декларации
+     * (NDFL_PERSON, NDFL_PERSON_INCOME, NDFL_PERSON_DEDUCTION, NDFL_PERSON_PREPAYMEN)
+     *
+     * @param declarationDataId идентификатор налоговой формы
+     * @return максимальное количество элемнтов
+     */
+    long getNdflPersonAllSectionMaxCount(long declarationDataId);
+
+    /**
      * Получить число справок ФЛ в NDFL_REFERENCES
      *
      * @param declarationDataId идентификатор налоговой формы
