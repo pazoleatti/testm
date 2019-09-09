@@ -5,12 +5,16 @@ import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.consolidation.ConsolidationIncome;
 import com.aplana.sbrf.taxaccounting.model.consolidation.ConsolidationSourceDataSearchFilter;
+import com.aplana.sbrf.taxaccounting.model.filter.NdflFilter;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonOperation;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment;
+import com.aplana.sbrf.taxaccounting.model.result.NdflPersonDeductionDTO;
+import com.aplana.sbrf.taxaccounting.model.result.NdflPersonIncomeDTO;
+import com.aplana.sbrf.taxaccounting.model.result.NdflPersonPrepaymentDTO;
 import com.aplana.sbrf.taxaccounting.script.service.NdflPersonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -74,7 +78,35 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     }
 
     /**
-     * Возвращает данные по спецотчету по выделенным записям (SBRFNDFL-8445)
+     * Возвращает данные по спецотчету по фильтру (SBRFNDFL-8445)
+     *
+     * @param ndflFilter значения фильтра
+     * @return список NdflPerson заполненый данными из таблицы NDFL_PERSON
+     */
+    @Override
+    public PagingResult<NdflPerson> findPersonByFilter(NdflFilter ndflFilter, PagingParams pagingParams) {
+        return ndflPersonDao.fetchNdflPersonByParameters(ndflFilter, pagingParams);
+    }
+
+    @Override
+    public PagingResult<NdflPersonIncomeDTO> findIncomeByFilter(NdflFilter ndflFilter, PagingParams pagingParams) {
+        return ndflPersonDao.fetchPersonIncomeByParameters(ndflFilter, pagingParams);
+    }
+
+    @Override
+    public PagingResult<NdflPersonDeductionDTO> findDeductionByFilter(NdflFilter ndflFilter, PagingParams pagingParams) {
+        return ndflPersonDao.fetchPersonDeductionByParameters(ndflFilter, pagingParams);
+    }
+
+    @Override
+    public PagingResult<NdflPersonPrepaymentDTO> findPrepaymentByFilter(NdflFilter ndflFilter, PagingParams pagingParams) {
+        return ndflPersonDao.fetchPersonPrepaymentByParameters(ndflFilter, pagingParams);
+    }
+
+
+    /**
+     * Возвращает данные по спецотчету по выбранным записям (SBRFNDFL-8445)
+     * @param inpList список ИНП отобранных записей
      */
     @Override
     public List<NdflPerson> findNdflPersonBySelected(List<String> inpList) {
@@ -95,6 +127,7 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     public List<NdflPersonPrepayment> findNdflPersonPrepaymentBySelected(List<String> inpList) {
         return ndflPersonDao.findAllNdflPersonPrepaymentBySelectedByInpList(inpList);
     }
+
 
     @Override
     public List<NdflPerson> findAllNdflPersonsByDeclarationIds(List<Long> declarationDataIds) {
