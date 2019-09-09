@@ -4,8 +4,8 @@ import com.aplana.sbrf.taxaccounting.model.*;
 
 import javax.validation.constraints.NotNull;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * DAO для работы с информацией по подразделениям банка
@@ -152,6 +152,16 @@ public interface DepartmentDao extends PermissionDao {
      * @return ТБ
      */
     Department getDepartmentTB(int departmentId);
+
+    /**
+     * Получение родительского территориального банка по списку идентификаторов
+     * источников при формировании консолидированной формы (тип = 2)
+     * Реализовано для ускорения производительности скрипта формирования XSLX
+     *
+     * @param incomeSourceIdList список идентификаторов источников при формировании консолидированной формы
+     * @return Cписок значений: Идентификатор источника - Название родительского территориального банка
+     */
+    Map<Long, String> getDepartmentTBByIncomeSourceIdList(List<Long> incomeSourceIdList);
 
     /**
      * Получение ТБ для подразделения (тип = 2) + все дочерние подразделения
