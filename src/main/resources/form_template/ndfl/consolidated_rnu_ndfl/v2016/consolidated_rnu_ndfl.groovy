@@ -812,6 +812,8 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
         }
 
         // Проверка на максимальное количество строк (SBRFNDFL-8449)
+        // Предназначена для типов BY_FILTER и BY_SELECTED, т.к. проверка
+        // для типа ALL выполняется на этапе создания асинхронной задачи
         final int MAX_ROWS_ON_LIST = 1_000_000
         String tooMuchRows = ""
         if(ndflPersonList.size() >= MAX_ROWS_ON_LIST) {

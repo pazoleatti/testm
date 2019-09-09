@@ -17,12 +17,12 @@ import com.aplana.sbrf.taxaccounting.model.PagingParams
 import com.aplana.sbrf.taxaccounting.model.PagingResult
 import com.aplana.sbrf.taxaccounting.model.PrepareSpecificReportResult
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod
-import com.aplana.sbrf.taxaccounting.model.RnuNdflAllPersonsReportFilter
 import com.aplana.sbrf.taxaccounting.model.RnuNdflAllPersonsReportSelectedRows
 import com.aplana.sbrf.taxaccounting.model.ScriptSpecificDeclarationDataReportHolder
 import com.aplana.sbrf.taxaccounting.model.StringColumn
 import com.aplana.sbrf.taxaccounting.model.SubreportAliasConstants
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
+import com.aplana.sbrf.taxaccounting.model.filter.NdflFilter
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome
@@ -102,15 +102,8 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
     /**
      * Дополнительные спецотчеты (SBRFNDFL-8445)
      */
-    RnuNdflAllPersonsReportFilter ndflAllPersonsReportFilter;
+    NdflFilter ndflAllPersonsReportFilter;
     RnuNdflAllPersonsReportSelectedRows ndflAllPersonsReportSelectedRows;
-
-    /**
-     * В пакетах com.aplana.sbrf.taxaccounting.script.service и com.aplana.sbrf.taxaccounting.service
-     * есть классы с совпадающим именем: NdflPersonService
-     * Первый нужен для отбора всех или выделенных записей, второй - для записей по фильтру
-     */
-    com.aplana.sbrf.taxaccounting.service.NdflPersonService ndflPersonServiceTaxAccounting;
 
     @TypeChecked(TypeCheckingMode.SKIP)
     ConsolidatedRnuNdfl(scriptClass) {
@@ -165,7 +158,7 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
          * Дополнительные спецотчеты (SBRFNDFL-8445)
          */
         if (scriptClass.getBinding().hasVariable("searchFilter")) {
-            this.ndflAllPersonsReportFilter = (RnuNdflAllPersonsReportFilter) scriptClass.getProperty("searchFilter");
+            this.ndflAllPersonsReportFilter = (NdflFilter) scriptClass.getProperty("searchFilter");
         }
         if (scriptClass.getBinding().hasVariable("selectedRows")) {
             this.ndflAllPersonsReportSelectedRows = (RnuNdflAllPersonsReportSelectedRows) scriptClass.getProperty("selectedRows");
@@ -689,48 +682,59 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
     }
 
     /**
-     * Сформировать список ИНП ФЛ в зависимости от текущей вкладки (SBRFNDFL-8445)
+     * Сформировать из текущей вкладки список ИНП ФЛ для отобранных записей (SBRFNDFL-8445)
+     * (только для SubreportKindEnum.BY_SELECTED)
      */
-    List<String> createNdflPersonInpList(SubreportKindEnum subreportKind) {
+    List<String> createNdflPersonInpList() {
         List<String> inpList = new ArrayList<>();
-        switch(subreportKind) {
-            // Для спецотчета по фильтру в коллекции только одна запись
-            case SubreportKindEnum.BY_FILTER:
-                if(ndflAllPersonsReportFilter == null) return null
 
-                if (ndflAllPersonsReportFilter.person != null) {
-                    inpList.add(ndflAllPersonsReportFilter.person.getInp())
-                } else if (ndflAllPersonsReportFilter.income != null) {
-                    inpList.add(ndflAllPersonsReportFilter.income.getInp())
-                } else if (ndflAllPersonsReportFilter.deduction != null) {
-                    inpList.add(ndflAllPersonsReportFilter.deduction.getInp())
-                } else if (ndflAllPersonsReportFilter.prepayment != null) {
-                        inpList.add(ndflAllPersonsReportFilter.prepayment.getInp())
-                }
-                return inpList
-            // Для спецотчета по выбранным записям в коллекции >= 1 запись
-            case SubreportKindEnum.BY_SELECTED:
-                if(ndflAllPersonsReportSelectedRows == null) return null
-
-                if (!ndflAllPersonsReportSelectedRows.persons.isEmpty()) {
-                    for (int i = 0; i < ndflAllPersonsReportSelectedRows.persons.size(); i++) {
-                        inpList.add(ndflAllPersonsReportSelectedRows.persons.get(i).getInp())
-                    }
-                } else if (!ndflAllPersonsReportSelectedRows.incomes.isEmpty()) {
-                    for (int i = 0; i < ndflAllPersonsReportSelectedRows.incomes.size(); i++) {
-                        inpList.add(ndflAllPersonsReportSelectedRows.incomes.get(i).getInp())
-                    }
-                } else if (!ndflAllPersonsReportSelectedRows.deductions.isEmpty()) {
-                    for (int i = 0; i < ndflAllPersonsReportSelectedRows.deductions.size(); i++) {
-                        inpList.add(ndflAllPersonsReportSelectedRows.deductions.get(i).getInp())
-                    }
-                } else if (!ndflAllPersonsReportSelectedRows.prepayments.isEmpty()) {
-                    for (int i = 0; i < ndflAllPersonsReportSelectedRows.prepayments.size(); i++) {
-                        inpList.add(ndflAllPersonsReportSelectedRows.prepayments.get(i).getInp())
-                    }
-                }
-                return inpList
+        if (!ndflAllPersonsReportSelectedRows.persons.isEmpty()) {
+            for (int i = 0; i < ndflAllPersonsReportSelectedRows.persons.size(); i++) {
+                inpList.add(ndflAllPersonsReportSelectedRows.persons.get(i).getInp())
+            }
+        } else if (!ndflAllPersonsReportSelectedRows.incomes.isEmpty()) {
+            for (int i = 0; i < ndflAllPersonsReportSelectedRows.incomes.size(); i++) {
+                inpList.add(ndflAllPersonsReportSelectedRows.incomes.get(i).getInp())
+            }
+        } else if (!ndflAllPersonsReportSelectedRows.deductions.isEmpty()) {
+            for (int i = 0; i < ndflAllPersonsReportSelectedRows.deductions.size(); i++) {
+                inpList.add(ndflAllPersonsReportSelectedRows.deductions.get(i).getInp())
+            }
+        } else if (!ndflAllPersonsReportSelectedRows.prepayments.isEmpty()) {
+            for (int i = 0; i < ndflAllPersonsReportSelectedRows.prepayments.size(); i++) {
+                inpList.add(ndflAllPersonsReportSelectedRows.prepayments.get(i).getInp())
+            }
         }
+        return inpList
+    }
+
+    /**
+     * Сформировать списки для каждой из вкладок (SBRFNDFL-8445)
+     * @param personIncomeDTOS
+     * @return
+     */
+    List<NdflPersonIncome> prepareNdflPersonIncomeList(ArrayList<NdflPersonIncomeDTO> personIncomeDTOS) {
+        List<NdflPersonIncome> ndflPersonIncomeList = new ArrayList<>()
+        for (int i = 0; i < personIncomeDTOS.size(); i++) {
+            ndflPersonIncomeList.add(personIncomeDTOS.get(i).toIncome())
+        }
+        return ndflPersonIncomeList
+    }
+
+    List<NdflPersonDeduction> prepareNdflPersonDeductionList(ArrayList<NdflPersonDeductionDTO> personDeductionDTOS) {
+        List<NdflPersonDeduction> ndflPersonDeductionList = new ArrayList()
+        for(int i = 0; i < personDeductionDTOS.size(); i++) {
+            ndflPersonDeductionList.add(personDeductionDTOS.get(i).toDeduction())
+        }
+        return ndflPersonDeductionList
+    }
+
+    List<NdflPersonPrepayment> prepareNdflPersonPrepaymentList(ArrayList<NdflPersonPrepaymentDTO> personPrepaymentDTOS) {
+        List<NdflPersonPrepayment> ndflPersonPrepaymentList= new ArrayList<>()
+        for (int i = 0; i < personPrepaymentDTOS.size(); i++) {
+            ndflPersonPrepaymentList.add(personPrepaymentDTOS.get(i).toPrepayment())
+        }
+        return ndflPersonPrepaymentList
     }
 
     /**
@@ -739,8 +743,9 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
     public void exportAllDeclarationDataToExcel() {
 
         ScriptUtils.checkInterrupted();
-
         // Общие данные для всех спецотчетов
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
+        Department department = departmentService.get(departmentReportPeriod.departmentId)
         ReportPeriod reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
         String departmentName = departmentService.get(declarationData.departmentId)?.name
         String reportDate = getReportPeriodEndDate().format("dd.MM.yyyy") + " г."
@@ -753,16 +758,15 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
         List<NdflPersonDeduction> ndflPersonDeductionList
         List<NdflPersonPrepayment> ndflPersonPrepaymentList
 
-        // Тип спецотчета (один из ALL/BY_FILTER/BY_SELECTED)
+        // Тип спецотчета (ALL/BY_FILTER/BY_SELECTED)
         SubreportKindEnum subreportKind = checkSubreportKind()
 
         // Список ИНП ФЛ отобранных для формирования спецотчета
         List<String> inpList;
-        if (subreportKind == SubreportKindEnum.BY_FILTER || subreportKind == SubreportKindEnum.BY_SELECTED) {
-            inpList = createNdflPersonInpList(subreportKind)
-            // TODO: проверить что вернулось (например, по фильтру ничего не отобрано или нет выделенных записей)
-            if(inpList == null || inpList.isEmpty()) {
-                println("ОШИБКА: список INP пуст")
+        if (subreportKind == SubreportKindEnum.BY_SELECTED) {
+            inpList = createNdflPersonInpList()
+            if(inpList.isEmpty()) {
+                logger.error("На текущей вкладке либо нет записей, либо ни одна запись не отмечена [спецотчет: %s]", subreportKind.name())
             }
         }
 
@@ -781,17 +785,20 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
                 break
             // По фильтру
             case subreportKind.BY_FILTER:
-                // Убирать разбиение на страницы; все - в одну коллекцию
-                PagingParams pagingParams = new PagingParams()
-                pagingParams.setNoPaging()
-                /*
-                PagingResult<NdflPerson> ndflPerson = ndflPersonServiceTaxAccounting.findPersonByFilter(ndflAllPersonsReportFilter.person, pagingParams)
-                PagingResult<NdflPersonIncomeDTO> ndflPersonIncomeDTO = ndflPersonServiceTaxAccounting.findPersonIncomeByFilter(ndflAllPersonsReportFilter.income, pagingParams)
-                PagingResult<NdflPersonDeductionDTO> ndflPersonDeductionDTO = ndflPersonServiceTaxAccounting.findPersonDeductionsByFilter(ndflAllPersonsReportFilter.deduction, pagingParams)
-                PagingResult<NdflPersonPrepaymentDTO> ndflPersonPrepaymentDTO = ndflPersonServiceTaxAccounting.findPersonPrepaymentByFilter(ndflAllPersonsReportFilter.prepayment, pagingParams)
-                */
+                // Убирать разбиение на страницы
+                PagingParams pagingParams = new PagingParams(0, Integer.MAX_VALUE);
+                pagingParams.setProperty("row_num")
+                pagingParams.setDirection("asc");
+                ndflPersonList = ndflPersonService.findPersonByFilter(ndflAllPersonsReportFilter, pagingParams)
+                ndflPersonList.sort { it.rowNum }
+                ndflPersonIncomeList = prepareNdflPersonIncomeList(ndflPersonService.findIncomeByFilter(ndflAllPersonsReportFilter, pagingParams))
+                ndflPersonIncomeList.sort { it.rowNum }
+                ndflPersonDeductionList = prepareNdflPersonDeductionList(ndflPersonService.findDeductionByFilter(ndflAllPersonsReportFilter, pagingParams))
+                ndflPersonDeductionList.sort {it.rowNum }
+                ndflPersonPrepaymentList = prepareNdflPersonPrepaymentList(ndflPersonService.findPrepaymentByFilter(ndflAllPersonsReportFilter, pagingParams))
+                ndflPersonPrepaymentList.sort {it.rowNum}
                 break
-            // По отмеченным записям
+            // По выбранным записям
             case subreportKind.BY_SELECTED:
                 ndflPersonList = ndflPersonService.findNdflPersonBySelected(inpList)
                 ndflPersonList.sort {it.rowNum}
@@ -802,6 +809,56 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
                 ndflPersonPrepaymentList = ndflPersonService.findNdflPersonPrepaymentBySelected(inpList);
                 ndflPersonPrepaymentList.sort{it.rowNum}
                 break
+        }
+
+        // Проверка на максимальное количество строк (SBRFNDFL-8449)
+        // Предназначена для типов BY_FILTER и BY_SELECTED, т.к. проверка
+        // для типа ALL выполняется на этапе создания асинхронной задачи
+        final int MAX_ROWS_ON_LIST = 1_000_000
+        String tooMuchRows = ""
+        if(ndflPersonList.size() >= MAX_ROWS_ON_LIST) {
+            tooMuchRows = String.format("Спецотчет \"%s\" не сформирован, т.к. в форме %d, период %d, подразделение %s для листа \"Реквизиты\" число строк %d отчета превышает максимально допустимое значение %d",
+                    scriptSpecificReportHolder.declarationSubreport?.name,
+                    declarationData.id,
+                    departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + ", " + departmentReportPeriod.getReportPeriod().getName(),
+                    department.name,
+                    ndflPersonList.size(),
+                    MAX_ROWS_ON_LIST)
+            logger.error(tooMuchRows)
+            throw new ServiceException(tooMuchRows)
+        }
+        if(ndflPersonIncomeList.size() >= MAX_ROWS_ON_LIST) {
+            tooMuchRows = String.format("Спецотчет \"%s\" не сформирован, т.к. в форме %d, период %d, подразделение %s для листа \"Свед о дох\" число строк %d отчета превышает максимально допустимое значение %d",
+                    scriptSpecificReportHolder.declarationSubreport?.name,
+                    declarationData.id,
+                    departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + ", " + departmentReportPeriod.getReportPeriod().getName(),
+                    department.name,
+                    ndflPersonIncomeList.size(),
+                    MAX_ROWS_ON_LIST)
+            logger.error(tooMuchRows)
+            throw new ServiceException(tooMuchRows)
+        }
+        if(ndflPersonDeductionList.size() >= MAX_ROWS_ON_LIST) {
+            tooMuchRows = String.format("Спецотчет \"%s\" не сформирован, т.к. в форме %d, период %d, подразделение %s для листа \"Свед о вычет\" число строк %d отчета превышает максимально допустимое значение %d",
+                    scriptSpecificReportHolder.declarationSubreport?.name,
+                    declarationData.id,
+                    departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + ", " + departmentReportPeriod.getReportPeriod().getName(),
+                    department.name,
+                    ndflPersonDeductionList.size(),
+                    MAX_ROWS_ON_LIST)
+            logger.error(tooMuchRows)
+            throw new ServiceException(tooMuchRows)
+        }
+        if(ndflPersonPrepaymentList.size() >= MAX_ROWS_ON_LIST) {
+            tooMuchRows = String.format("Спецотчет \"%s\" не сформирован, т.к. в форме %d, период %d, подразделение %s для листа \"Аванс платеж\" число строк %d отчета превышает максимально допустимое значение %d",
+                    scriptSpecificReportHolder.declarationSubreport?.name,
+                    declarationData.id,
+                    departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + ", " + departmentReportPeriod.getReportPeriod().getName(),
+                    department.name,
+                    ndflPersonPrepaymentList.size(),
+                    MAX_ROWS_ON_LIST)
+            logger.error(tooMuchRows)
+            throw new ServiceException(tooMuchRows)
         }
 
         SheetFillerContext context = new SheetFillerContext(departmentName, reportDate, period, year, ndflPersonList, ndflPersonIncomeList, ndflPersonDeductionList, ndflPersonPrepaymentList)
