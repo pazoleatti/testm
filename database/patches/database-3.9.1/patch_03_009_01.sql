@@ -48,7 +48,9 @@ PROMPT ## Beginning Installing Patch
 PROMPT ## 02_templates
 @database-3.9.1/02_templates.sql "_log/3.9_1_03_templates.txt" "&4" "&5" "../_log" "../_bad"
 
- 
+PROMPT ## 03_update_dml.sql 
+@database-3.9.1/03_update_dml.sql
+
 PROMPT ## 06_check_index_constraints
 @database-3.9.1/06_check_index_constraints.sql
 
