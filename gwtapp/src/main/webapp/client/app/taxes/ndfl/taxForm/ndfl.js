@@ -21,6 +21,7 @@
             'app.filesComments',
             'app.rest',
             'app.rnuNdflPersonFace',
+            'app.rnuNdflPersonFaceMenu',
             'app.returnToCreatedDialog',
             'app.createNdfl2_6DataReport'])
         .config(['$stateProvider', function ($stateProvider) {
@@ -392,6 +393,29 @@
                             $shareData: function () {
                                 return {
                                     declarationDataId: $scope.declarationDataId
+                                };
+                            }
+                        }
+                    });
+                };
+
+                /**
+                 * @description Формирование рну ндфл для всех ФЛ на основе Меню выбора
+                 */
+                $scope.createRnuNdflByAllPersonsReportMenu = function () {
+                    var row = $scope.ndflTabsCtrl.getActiveTab().getSelectedRows()[0];
+
+                    $aplanaModal.open({
+                        title: $filter('translate')('rnuPersonFaceMenu.title'),
+                        templateUrl: 'client/app/taxes/ndfl/taxForm/rnuNdflPersonFaceMenu.html',
+                        controller: 'rnuNdflPersonFaceMenuFormCtrl',
+                        windowClass: 'modal600',
+                        resolve: {
+                            $shareData: function () {
+                                return {
+                                    filter: $scope.searchFilter.params,
+                                    filterIsClear:  $scope.searchFilter.isClear,
+                                    selectedRow:  $scope.ndflTabsCtrl
                                 };
                             }
                         }

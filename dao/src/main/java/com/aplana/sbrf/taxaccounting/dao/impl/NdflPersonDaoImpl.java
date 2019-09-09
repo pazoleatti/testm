@@ -109,6 +109,66 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                 new NdflPersonDaoImpl.NdflPersonRowMapper());
     }
 
+
+    /**
+     * Возвращает данные по спецотчету по выделенным записям (SBRFNDFL-8445)
+     */
+    @Override
+    public List<NdflPerson> findAllPersonByInpList(List<String> inpList) {
+        return selectIn("select " + createColumns(NdflPerson.COLUMNS, "np") + ", r.record_id, rba.NAME as asnu_name " +
+                " from ndfl_person np " +
+                " left join REF_BOOK_PERSON r on np.person_id = r.id " +
+                " left join ref_book_asnu rba on np.asnu_id = rba.id" +
+                " where np.inp in (:inpList)",
+                inpList,
+                "inpList",
+                new NdflPersonDaoImpl.NdflPersonRowMapper()
+        );
+    }
+
+    @Override
+    public List<NdflPersonIncome> findAllPersonIncomeBySelectedByInpList(List<String> inpList) {
+        return selectIn("select " + createColumns(NdflPersonIncome.COLUMNS, "npi") + ", np.inp, rba.NAME as asnu_name " +
+                "from ndfl_person_income npi " +
+                "inner join ndfl_person np on npi.ndfl_person_id = np.id " +
+                "left join ref_book_asnu rba on npi.asnu_id = rba.id " +
+                "where np.inp in (:inpList)",
+                inpList,
+                "inpList",
+                new NdflPersonDaoImpl.NdflPersonIncomeRowMapper()
+        );
+    }
+
+    @Override
+    public List<NdflPersonDeduction> findAllNdflPersonDeductionBySelectedByInpList(List<String> inpList) {
+        return selectIn("select " + createColumns(NdflPersonDeduction.COLUMNS, "npd") + ", np.inp, rba.NAME as asnu_name " +
+                "from ndfl_person_deduction npd "
+                + " inner join ndfl_person np on npd.ndfl_person_id = np.id"
+                + " left join ref_book_asnu rba on npd.asnu_id = rba.id"
+                + " where np.inp in (:inpList)",
+                inpList,
+                "inpList",
+                new NdflPersonDaoImpl.NdflPersonDeductionRowMapper()
+        );
+    }
+
+    @Override
+    public List<NdflPersonPrepayment> findAllNdflPersonPrepaymentBySelectedByInpList(List<String> inpList) {
+        try {
+            return selectIn("select " + createColumns(NdflPersonPrepayment.COLUMNS, "npp") + ", np.inp, rba.NAME as asnu_name " +
+                    "from ndfl_person_prepayment npp "
+                    + " inner join ndfl_person np on npp.ndfl_person_id = np.id"
+                    + " left join ref_book_asnu rba on npp.asnu_id = rba.id"
+                    + " where np.inp in (:inpList)",
+                    inpList,
+                    "inpList",
+                    new NdflPersonDaoImpl.NdflPersonPrepaymentRowMapper());
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<NdflPersonPrepayment>();
+        }
+    }
+
+
     @Override
     public List<NdflPerson> findAllByDeclarationIdIn(List<Long> declarationDataIds) {
         return selectIn("select " + createColumns(NdflPerson.COLUMNS, "np") + ", r.record_id, rba.NAME as asnu_name " +
@@ -1860,6 +1920,38 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         Map<String, Object> parameters = new HashMap<String, Object>();
         parameters.put("declarationDataId", declarationDataId);
         return getCount(query, parameters);
+    }
+
+    @Override
+    public long getNdflPersonAllSectionMaxCount(long declarationDataId) {
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("declarationDataId", declarationDataId);
+        String maxCnt = "select max(cnt)\n" +
+                "from (\n" +
+                "\tselect count(id) cnt from ndfl_person where declaration_data_id = :declarationDataId\n" +
+                "\tunion all\n" +
+                "\tselect \n" +
+                "\t  count(id) cnt\n" +
+                "\tfrom\n" +
+                "\t  ndfl_person_income\n" +
+                "\twhere\n" +
+                "\t  ndfl_person_id in (select id from ndfl_person where declaration_data_id = :declarationDataId)\n" +
+                "\tunion all\n" +
+                "\tselect\n" +
+                "\t  count(id) cnt\n" +
+                "\tfrom \n" +
+                "\t  ndfl_person_deduction\n" +
+                "\twhere\n" +
+                "\t  ndfl_person_id in (select id from ndfl_person where declaration_data_id = :declarationDataId)\n" +
+                "\tunion all\n" +
+                "\tselect\n" +
+                "\t  count(id) cnt\n" +
+                "\tfrom\n" +
+                "\t  ndfl_person_prepayment\n" +
+                "\twhere\n" +
+                "\t  ndfl_person_id in (select id from ndfl_person where declaration_data_id = :declarationDataId)\n" +
+                ")";
+        return getNamedParameterJdbcTemplate().queryForObject(maxCnt, parameters, Long.class);
     }
 
     @Override

@@ -1,13 +1,18 @@
 package com.aplana.sbrf.taxaccounting.script.service;
 
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.consolidation.ConsolidationIncome;
 import com.aplana.sbrf.taxaccounting.model.consolidation.ConsolidationSourceDataSearchFilter;
+import com.aplana.sbrf.taxaccounting.model.filter.NdflFilter;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment;
+import com.aplana.sbrf.taxaccounting.model.result.NdflPersonDeductionDTO;
+import com.aplana.sbrf.taxaccounting.model.result.NdflPersonIncomeDTO;
+import com.aplana.sbrf.taxaccounting.model.result.NdflPersonPrepaymentDTO;
 import com.aplana.sbrf.taxaccounting.service.ScriptExposed;
 
 import java.math.BigDecimal;
@@ -52,6 +57,33 @@ public interface NdflPersonService {
      * @param declarationDataId идентификатор формы РНУ
      */
     List<NdflPerson> findNdflPerson(long declarationDataId);
+
+
+    /**
+     * Возвращает данные по спецотчету по фильтру (SBRFNDFL-8445)
+     *
+     * @param ndflFilter значения фильтра
+     * @return список NdflPerson заполненый данными из таблицы NDFL_PERSON
+     */
+    PagingResult<NdflPerson> findPersonByFilter(NdflFilter ndflFilter, PagingParams pagingParams);
+
+    PagingResult<NdflPersonIncomeDTO> findIncomeByFilter(NdflFilter ndflFilter, PagingParams pagingParams);
+
+    PagingResult<NdflPersonDeductionDTO> findDeductionByFilter(NdflFilter ndflFilter, PagingParams pagingParams);
+
+    PagingResult<NdflPersonPrepaymentDTO> findPrepaymentByFilter(NdflFilter ndflFilter, PagingParams pagingParams);
+
+
+    /**
+     * Возвращает данные по спецотчету по выбранным записям (SBRFNDFL-8445)
+     */
+    List<NdflPerson> findNdflPersonBySelected(List<String> inpList);
+
+    List<NdflPersonIncome> findNdflPersonIncomeBySelected(List<String> inpList);
+
+    List<NdflPersonDeduction> findNdflPersonDeductionBySelected(List<String> inpList);
+
+    List<NdflPersonPrepayment> findNdflPersonPrepaymentBySelected(List<String> inpList);
 
     /**
      * Возвращяет список строк из раздела 1 по списку ид форм

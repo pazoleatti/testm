@@ -390,7 +390,14 @@ public class DeclarationDataServiceImplTest {
         });
         ReflectionTestUtils.setField(declarationDataService, "blobDataService", blobDataService);
 
-        declarationDataService.createSpecificReport(logger, declarationData, specificReport, new HashMap<String, Object>(), null, null, userInfo, new LockStateLogger() {
+        SpecificReportContext specificReportContext = SpecificReportContext.builder()
+                .logger(logger)
+                .declarationData(declarationData)
+                .ddReportType(specificReport)
+                .subreportParamValues(Collections.<String, Object>emptyMap())
+                .userInfo(userInfo)
+                .build();
+        declarationDataService.createSpecificReport(specificReportContext, new LockStateLogger() {
             @Override
             public void updateState(AsyncTaskState state) {
                 //Nothing

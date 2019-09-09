@@ -1,0 +1,43 @@
+<form class="form-horizontal" data-aplana-submit-valid="save()">
+    <div class="modal-body">
+        <table class="horizontal-input-table gray-label-table auto-width-uneditable-input-table nowrap-label-table">
+            <tbody>
+            <tr>
+
+                <div>
+                    <div data-aplana-field>
+                        <div style="width: 355px;"
+                             data-ng-controller="SelectReportGenerationTypeCtrl"
+                             data-ui-select2="reportGenerationTypeSelect.options"
+                             data-ng-init="initSelectWithReportGenerationTypesForCreate(reportData.dataType)"
+                             data-ng-model="reportData.dataType"
+                             data-required>
+                        </div>
+                        <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
+                            translate}}
+                        </div>
+                    </div>
+                </div>
+
+            </tr>
+
+            </tbody>
+        </table>
+
+    </div>
+
+    <div class="modal-footer">
+    <!--Кнопка Сформировать-->
+        <button type="button" class="btn btn-default" id="formationButton" ng-click="formationRNU()">
+            <span data-translate-once="common.button.formation"></span>
+            <span class="btn-icon-ok"></span>
+        </button>
+
+    <!--Кнопка Выход-->
+        <button type="button" class="btn btn-default-nonBg iconed-btn" id="closeButton" ng-click="close()">
+            <span data-translate-once="button.cancel"></span>
+            <span class="btn-icon-noneBg-close"></span>
+        </button>
+
+    </div>
+</form>

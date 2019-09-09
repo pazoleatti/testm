@@ -4,13 +4,15 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.io.Serializable;
+
 /**
  * Общий фильтр по форме НДФЛ
  */
 @Getter
 @Setter
 @ToString
-public class NdflFilter {
+public class NdflFilter implements Serializable {
     /**
      * id формы
      */

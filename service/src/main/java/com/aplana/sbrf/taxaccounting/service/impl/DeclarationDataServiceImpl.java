@@ -81,6 +81,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipInputStream;
 
+import static com.aplana.sbrf.taxaccounting.model.SubreportAliasConstants.RNU_NDFL_PERSON_ALL_DB;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
@@ -986,6 +987,33 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
+    public String createTaskToCreateRnuNdflByAllPersonsReport(long declarationDataId, TAUserInfo userInfo,
+                                                              NdflFilter searchFilter,
+                                                              RnuNdflAllPersonsReportSelectedRows selectedRows) {
+        LOG.info(String.format("DeclarationDataServiceImpl.createTaskToCreateRnuNdflByAllPersonsReport by %s. declarationDataId: %s",
+                userInfo, declarationDataId));
+        Logger logger = new Logger();
+
+        String reportAlias = RNU_NDFL_PERSON_ALL_DB;
+        reportService.deleteSubreport(declarationDataId, reportAlias);
+        Map<String, Object> params = new HashMap<>();
+        params.put("declarationDataId", declarationDataId);
+        params.put("alias", reportAlias);
+        params.put("viewParamValues", new LinkedHashMap<String, String>());
+        if (searchFilter != null) {
+            params.put("searchFilter", searchFilter);
+        }
+        if (selectedRows != null) {
+            params.put("selectedRows", selectedRows);
+        }
+        params.put("subreportParamValues", Collections.emptyMap());
+
+        asyncManager.createTask(OperationType.getOperationTypeBySubreport(reportAlias), userInfo, params, logger);
+
+        return logEntryService.save(logger.getEntries());
+    }
+
+    @Override
     public String createTaskToCreateReportXlsx(final TAUserInfo userInfo, final long declarationDataId) {
         LOG.info(String.format("DeclarationDataServiceImpl.createReportXlsx by %s. declarationDataId: %s",
                 userInfo, declarationDataId));
@@ -1499,9 +1527,13 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    public String createSpecificReport(Logger logger, DeclarationData declarationData, DeclarationReportType ddReportType, Map<String, Object> subreportParamValues, Map<String, String> viewParamValues, DataRow<Cell> selectedRecord, TAUserInfo userInfo, LockStateLogger stateLogger) {
+    public String createSpecificReport(SpecificReportContext specificReportContext, LockStateLogger stateLogger) {
+        Logger logger = specificReportContext.getLogger();
         LOG.info(String.format("DeclarationDataServiceImpl.createSpecificReport by %s. declarationData: %s; ddReportType: %s; subreportParamValues: %s; viewParamValues: %s; selectedRecord: %s",
-                userInfo, declarationData, ddReportType, subreportParamValues, viewParamValues, selectedRecord));
+                specificReportContext.getUserInfo(), specificReportContext.getDeclarationData(),
+                specificReportContext.getDdReportType(), specificReportContext.getSubreportParamValues(),
+                specificReportContext.getViewParamValues(), specificReportContext.getSelectedRecord()));
+        Map<String, Object> subreportParamValues = specificReportContext.getSubreportParamValues();
         Map<String, Object> params = new HashMap<>();
         ScriptSpecificDeclarationDataReportHolder scriptSpecificReportHolder = new ScriptSpecificDeclarationDataReportHolder();
         File reportFile = null;
@@ -1515,6 +1547,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 subreportParamValues.put("font", font);
             }
 
+            DeclarationReportType ddReportType = specificReportContext.getDdReportType();
             if (ddReportType.getSubreport().getBlobDataId() != null) {
                 inputStream = blobDataService.get(ddReportType.getSubreport().getBlobDataId()).getInputStream();
             }
@@ -1524,11 +1557,15 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 scriptSpecificReportHolder.setFileInputStream(inputStream);
                 scriptSpecificReportHolder.setFileName(ddReportType.getSubreport().getAlias());
                 scriptSpecificReportHolder.setSubreportParamValues(subreportParamValues);
-                scriptSpecificReportHolder.setSelectedRecord(selectedRecord);
-                scriptSpecificReportHolder.setViewParamValues(viewParamValues);
+                scriptSpecificReportHolder.setSelectedRecord(specificReportContext.getSelectedRecord());
+                scriptSpecificReportHolder.setViewParamValues(specificReportContext.getViewParamValues());
                 params.put("scriptSpecificReportHolder", scriptSpecificReportHolder);
+                params.put("searchFilter", specificReportContext.getSearchFilter());
+                params.put("selectedRows", specificReportContext.getSelectedRows());
                 stateLogger.updateState(AsyncTaskState.BUILDING_REPORT);
-                if (!declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.CREATE_SPECIFIC_REPORT, logger, params)) {
+                if (!declarationDataScriptingService.executeScript(
+                        specificReportContext.getUserInfo(), specificReportContext.getDeclarationData(),
+                        FormDataEvent.CREATE_SPECIFIC_REPORT, logger, params)) {
                     throw new ServiceException("Не предусмотрена возможность формирования отчета \"%s\"", ddReportType.getSubreport().getName());
                 }
                 if (logger.containsLevel(LogLevel.ERROR)) {
@@ -1983,7 +2020,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 if (declarationTemplate.getDeclarationFormKind().equals(DeclarationFormKind.REPORTS)) {
                     return (long) ndflPersonDao.getNdflPersonReferencesCount(declarationDataId);
                 } else if (declarationTemplate.getDeclarationFormKind().equals(DeclarationFormKind.CONSOLIDATED)) {
-                    Logger logger = new Logger();
                     Long personCount = 0L;
                     try {
                         List<Relation> relationList = sourceService.getDeclarationSourcesInfo(declarationData.getId());
@@ -2000,16 +2036,21 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     return (long) ndflPersonDao.getNdflPersonCount(declarationDataId);
                 }
             case SPECIFIC_REPORT_DEC:
-                Map<String, Object> exchangeParams = new HashMap<String, Object>();
-                ScriptTaskComplexityHolder taskComplexityHolder = new ScriptTaskComplexityHolder();
-                taskComplexityHolder.setAlias((String) params.get("alias"));
-                taskComplexityHolder.setValue(0L);
-                exchangeParams.put("taskComplexityHolder", taskComplexityHolder);
-                declarationDataScriptingService.executeScript(userInfo, get(declarationDataId, userInfo), FormDataEvent.CALCULATE_TASK_COMPLEXITY, new Logger(), exchangeParams);
-                return taskComplexityHolder.getValue();
+                String alias = (String) params.get("alias");
+                if (RNU_NDFL_PERSON_ALL_DB.equals(alias) && !isReportByAllData(params)) {
+                    return 0L;
+                } else {
+                    return ndflPersonDao.getNdflPersonAllSectionMaxCount(declarationDataId);
+                }
             default:
                 throw new ServiceException("Неверный тип отчета(%s)", asyncTaskType);
         }
+    }
+
+    private boolean isReportByAllData(Map<String, Object> params) {
+        Object searchFilter = params.get("searchFilter");
+        Object selectedRows = params.get("selectedRows");
+        return searchFilter == null && selectedRows == null;
     }
 
     private void checkSources(DeclarationData dd, Logger logger) {

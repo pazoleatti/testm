@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
@@ -14,7 +15,7 @@ import java.util.Date;
 @Setter
 @ToString
 @NoArgsConstructor
-public class NdflPersonFilter {
+public class NdflPersonFilter implements Serializable {
     /**
      * Общий фильтр
      */

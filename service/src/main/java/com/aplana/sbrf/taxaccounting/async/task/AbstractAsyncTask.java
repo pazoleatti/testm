@@ -47,7 +47,7 @@ public abstract class AbstractAsyncTask implements AsyncTask {
     @Autowired
     private LogEntryService logEntryService;
     @Autowired
-    private AsyncTaskTypeDao asyncTaskTypeDao;
+    protected AsyncTaskTypeDao asyncTaskTypeDao;
     @Autowired
     protected TAUserService userService;
     @Autowired
