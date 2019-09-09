@@ -2020,7 +2020,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 if (declarationTemplate.getDeclarationFormKind().equals(DeclarationFormKind.REPORTS)) {
                     return (long) ndflPersonDao.getNdflPersonReferencesCount(declarationDataId);
                 } else if (declarationTemplate.getDeclarationFormKind().equals(DeclarationFormKind.CONSOLIDATED)) {
-                    Logger logger = new Logger();
                     Long personCount = 0L;
                     try {
                         List<Relation> relationList = sourceService.getDeclarationSourcesInfo(declarationData.getId());
@@ -2037,16 +2036,21 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     return (long) ndflPersonDao.getNdflPersonCount(declarationDataId);
                 }
             case SPECIFIC_REPORT_DEC:
-                Map<String, Object> exchangeParams = new HashMap<String, Object>();
-                ScriptTaskComplexityHolder taskComplexityHolder = new ScriptTaskComplexityHolder();
-                taskComplexityHolder.setAlias((String) params.get("alias"));
-                taskComplexityHolder.setValue(0L);
-                exchangeParams.put("taskComplexityHolder", taskComplexityHolder);
-                declarationDataScriptingService.executeScript(userInfo, get(declarationDataId, userInfo), FormDataEvent.CALCULATE_TASK_COMPLEXITY, new Logger(), exchangeParams);
-                return taskComplexityHolder.getValue();
+                String alias = (String) params.get("alias");
+                if (RNU_NDFL_PERSON_ALL_DB.equals(alias) && !isReportByAllData(params)) {
+                    return 0L;
+                } else {
+                    return ndflPersonDao.getNdflPersonAllSectionMaxCount(declarationDataId);
+                }
             default:
                 throw new ServiceException("Неверный тип отчета(%s)", asyncTaskType);
         }
+    }
+
+    private boolean isReportByAllData(Map<String, Object> params) {
+        Object searchFilter = params.get("searchFilter");
+        Object selectedRows = params.get("selectedRows");
+        return searchFilter == null && selectedRows == null;
     }
 
     private void checkSources(DeclarationData dd, Logger logger) {

@@ -1342,6 +1342,26 @@ public class NdflPersonDaoTest {
                 .isEmpty();
     }
 
+    @Test
+    public void test_getMaxCountBetweenDeclarationSections() {
+        // 3 persons and 3 ndfl_person_incomes
+        long result1 = ndflPersonDao.getNdflPersonAllSectionMaxCount(1);
+        assertThat(result1).isEqualTo(3);
+
+        // 2 persons and 6 ndfl_person_incomes and in ndfl_person_prepayments
+        List<NdflPerson> declaration100 = ndflPersonDao.findAllByDeclarationId(100);
+        long result2 = ndflPersonDao.getNdflPersonAllSectionMaxCount(100);
+        assertThat(result2)
+                .isGreaterThan(declaration100.size())
+                .isEqualTo(6);
+
+        // 3 persons and 9 ndfl_person_incomes ndfl_person_deductions
+        List<NdflPerson> declaration50000 = ndflPersonDao.findAllByDeclarationId(50000);
+        long result3 = ndflPersonDao.getNdflPersonAllSectionMaxCount(50000);
+        assertThat(result3)
+                .isGreaterThan(declaration50000.size())
+                .isEqualTo(9);
+    }
 
     private static Date toDate(String dateStr) {
         try {
