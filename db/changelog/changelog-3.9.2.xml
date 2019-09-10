@@ -14,12 +14,23 @@
         </sql>
     </changeSet>
 
-    <!-- https://jira.aplana.com/browse/SBRFNDFL-8461 Поправить алгоритм загрузки выгрузки настройки подразделений -->
-    <changeSet id="3.9.2-adudenko-2" author="adudenko" runAlways="true">
-        <update tableName="blob_data">
-            <column name="data"
-                    valueBlobFile="templates-3.9.2/refbook/department_configs.groovy"/>
-            <where>id = (select script_id from ref_book r where r.id = 951)</where>
+    <!-- https://jira.aplana.com/projects/SBRFNDFL/issues/SBRFNDFL-8281 Реализовать проверку на необходимость формирования ОНФ если настройка подразделения закрыта -->
+    <changeSet id="3.9.2-mchernyakov-1" author="mchernyakov" runAlways="true">
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="CREATE_SCRIPT" valueClobFile="templates-3.9.2/ndfl/report_6ndfl/v2016/report_6ndfl.groovy"/>
+            <where>declaration_type_id = 103</where>
+        </update>
+    </changeSet>
+    <changeSet id="3.9.2-mchernyakov-2" author="mchernyakov" runAlways="true">
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="CREATE_SCRIPT" valueClobFile="templates-3.9.2/ndfl/report_2ndfl_1/v2016/report_2ndfl.groovy"/>
+            <where>declaration_type_id = 102</where>
+        </update>
+    </changeSet>
+    <changeSet id="3.9.2-mchernyakov-3" author="mchernyakov" runAlways="true">
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="CREATE_SCRIPT" valueClobFile="templates-3.9.2/ndfl/report_2ndfl_1/v2016/report_2ndfl.groovy"/>
+            <where>declaration_type_id = 104</where>
         </update>
     </changeSet>
 
