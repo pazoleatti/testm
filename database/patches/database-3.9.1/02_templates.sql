@@ -148,7 +148,7 @@ PROMPT Fill service tables...
 --
 --HOST "&2\sqlldr" &3 control=database-3.9/templates/ldr/ndfl/blob_data.ldr log=&4/02_02_ndfl_blob_data.txt bad=&5/02_02_ndfl_blob_data.bad
 
---3.9.1-avtornikov-1
+--3.9.1-avtornikov-1, 3.9.1-avtornikov-2, 3.9.1-avtornikov-3
 HOST "&2\sqlldr" &3 control=database-3.9.1/templates/ldr/ndfl/template.ldr log=&4/3_9_1_02_03_ndfl_template.txt bad=&5/02_03_ndfl_template.bad
 
 --
