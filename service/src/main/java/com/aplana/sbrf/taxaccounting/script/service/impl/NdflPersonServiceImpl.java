@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.nio.LongBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -78,10 +79,11 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     }
 
     /**
-     * Возвращает данные по спецотчету по фильтру (SBRFNDFL-8445)
+     * Возвращает данные по спецотчету по фильтру для вкладок "Реквизиты", "Сведения о доходах и НДФЛ",
+     * "Сведения о вычетах" и "Авансовые платежи" соответственно (SBRFNDFL-8445)
      *
      * @param ndflFilter значения фильтра
-     * @return список NdflPerson заполненый данными из таблицы NDFL_PERSON
+     * @return список NdflPerson/NdflPersonIncomeDTO/NdflPersonDeductionDTO/NdflPersonPrepaymentDTO заполненый данными
      */
     @Override
     public PagingResult<NdflPerson> findPersonByFilter(NdflFilter ndflFilter, PagingParams pagingParams) {
@@ -126,6 +128,116 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     @Override
     public List<NdflPersonPrepayment> findNdflPersonPrepaymentBySelected(List<String> inpList) {
         return ndflPersonDao.findAllNdflPersonPrepaymentBySelectedByInpList(inpList);
+    }
+
+    /**
+     * Реализации выборки данных для спецотчетов "По выделенным" (SBRFNDFL-8445)
+     *
+     * Выборка для вкладки "Реквизиты" по списку идентификаторов записей и номеру формы
+     * @return список ФЛ
+     */
+    public List<NdflPerson> findNdflPersonBySelectedById(List<Long> idList, Long declarationId) {
+        return ndflPersonDao.findNdflPersonBySelectedById(idList, declarationId);
+    }
+
+    /**
+     * Реализации выборки данных для спецотчетов "По выделенным" (SBRFNDFL-8445)
+     *
+     * Выборка для вкладки "Реквизиты" по списку ИНП физлиц и номеру формы
+     * @return список ФЛ
+     */
+    public List<NdflPerson> findNdflPersonBySelectedByInp(List<String> inpList, Long declarationId) {
+        return ndflPersonDao.findNdflPersonBySelectedByInp(inpList, declarationId);
+    }
+
+    /**
+     * Реализации выборки данных для спецотчетов "По выделенным" (SBRFNDFL-8445)
+     *
+     * Выборка для вкладки "Сведения о доходах и НДФЛ" по списку идентификаторов записей и номеру формы
+     * @return список доходов и НДФЛ
+     */
+    public List<NdflPersonIncome> findNdflPersonIncomeBySelectedById(List<Long> idList, Long declarationId) {
+        return ndflPersonDao.findNdflPersonIncomeBySelectedById(idList, declarationId);
+    }
+
+    /**
+     * Реализации выборки данных для спецотчетов "По выделенным" (SBRFNDFL-8445)
+     *
+     * Выборка для вкладки "Сведения о доходах и НДФЛ" по списку ИНП физлиц и номеру формы
+     * @return список доходов и НДФЛ
+     */
+    public List<NdflPersonIncome> findNdflPersonIncomeBySelectedByInp(List<String> inpList, Long declarationId) {
+        return ndflPersonDao.findNdflPersonIncomeBySelectedByInp(inpList, declarationId);
+    }
+
+    /**
+     * Реализации выборки данных для спецотчетов "По выделенным" (SBRFNDFL-8445)
+     *
+     * Выборка для вкладки "Сведения о вычетах" по списку идентификаторов записей и номеру формы
+     * @return список вычетов
+     */
+    public List<NdflPersonDeduction> findNdflPersonDeductionBySelectedById(List<Long> idList, Long declarationId) {
+        return ndflPersonDao.findNdflPersonDeductionBySelectedById(idList, declarationId);
+    }
+
+    /**
+     * Реализации выборки данных для спецотчетов "По выделенным" (SBRFNDFL-8445)
+     *
+     * Выборка для вкладки "Сведения о вычетах" по списку ИНП физлиц и номеру формы
+     * @return список вычетов
+     */
+    public List<NdflPersonDeduction> findNdflPersonDeductionBySelectedByInp(List<String> inpList, Long declarationId) {
+        return ndflPersonDao.findNdflPersonDeductionBySelectedByInp(inpList, declarationId);
+    }
+
+    /**
+     * Реализации выборки данных для спецотчетов "По выделенным" (SBRFNDFL-8445)
+     *
+     * Выборка для вкладки "Авансовые платежи" по списку идентификаторов записей и номеру формы
+     * @return список авансовых платежей
+     */
+    public List<NdflPersonPrepayment> findNdflPersonPrepaymentBySelectedById(List<Long> idList, Long declarationId) {
+        return ndflPersonDao.findNdflPersonPrepaymentBySelectedById(idList, declarationId);
+    }
+
+    /**
+     * Реализации выборки данных для спецотчетов "По выделенным" (SBRFNDFL-8445)
+     *
+     * Выборка для вкладки "Авансовые платежи" по списку ИНП физлиц и номеру формы
+     * @return список авансовых платежей
+     */
+    public List<NdflPersonPrepayment> findNdflPersonPrepaymentBySelectedByInp(List<String> inpList, Long declarationId) {
+        return ndflPersonDao.findNdflPersonPrepaymentBySelectedByInp(inpList, declarationId);
+    }
+
+    /**
+     * Реализации выборки данных для спецотчетов "По выделенным" (SBRFNDFL-8445)
+     *
+     * Выборка для вкладки "Сведения о вычетах" по списку операций и номеру формы
+     * @return список вычетов
+     */
+    public List<NdflPersonDeduction> findNdflPersonDeductionBySelectedByOperationId(List<String> operationIdList, Long declarationId) {
+        return ndflPersonDao.findNdflPersonDeductionBySelectedByOperationId(operationIdList, declarationId);
+    }
+
+    /**
+     * Реализации выборки данных для спецотчетов "По выделенным" (SBRFNDFL-8445)
+     *
+     * Выборка для вкладки "Авансовые платежи" по списку операций и номеру формы
+     * @return список авансовых платежей
+     */
+    public List<NdflPersonPrepayment> findNdflPersonPrepaymentBySelectedByOperationId(List<String> operationIdList, Long declarationId) {
+        return ndflPersonDao.findNdflPersonPrepaymentBySelectedByOperationId(operationIdList, declarationId);
+    }
+
+    /**
+     * Реализации выборки данных для спецотчетов "По выделенным" (SBRFNDFL-8445)
+     *
+     * Выборка для вкладки "Сведения о доходах и НДФЛ" по списку операций и номеру формы
+     * @return список доходов и НДФЛ
+     */
+    public List<NdflPersonIncome> findNdflPersonIncomeBySelectedByOperationId(List<String> operationIdList, Long declarationId) {
+        return ndflPersonDao.findNdflPersonIncomeBySelectedByOperationId(operationIdList, declarationId);
     }
 
 
