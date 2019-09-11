@@ -418,7 +418,7 @@
                         title: $filter('translate')('rnuPersonFaceMenu.title'),
                         templateUrl: 'client/app/taxes/ndfl/taxForm/rnuNdflPersonFaceMenu.html',
                         controller: 'rnuNdflPersonFaceMenuFormCtrl',
-                        windowClass: 'modal500',
+                        windowClass: 'modal450',
                         resolve: {
                             $shareData: function () {
                                 return {
