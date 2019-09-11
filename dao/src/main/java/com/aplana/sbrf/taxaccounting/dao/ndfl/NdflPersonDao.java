@@ -95,6 +95,32 @@ public interface NdflPersonDao {
     List<NdflPersonPrepayment> findAllNdflPersonPrepaymentBySelectedByInpList(List<String> inpList);
 
     /**
+     * Реализации выборки данных для спецотчетов "По выделенным" отдельно по id записи и по ИПН ФЛ (SBRFNDFL-8445)
+     */
+    List<NdflPerson> findNdflPersonBySelectedById(List<Long> idList, Long declarationId);
+
+    List<NdflPerson> findNdflPersonBySelectedByInp(List<String> inpList, Long declarationId);
+
+    List<NdflPersonIncome> findNdflPersonIncomeBySelectedById(List<Long> idList, Long declarationId);
+
+    List<NdflPersonIncome> findNdflPersonIncomeBySelectedByInp(List<String> inpList, Long declarationId);
+
+    List<NdflPersonDeduction> findNdflPersonDeductionBySelectedById(List<Long> idList, Long declarationId);
+
+    List<NdflPersonDeduction> findNdflPersonDeductionBySelectedByInp(List<String> inpList, Long declarationId);
+
+    List<NdflPersonPrepayment> findNdflPersonPrepaymentBySelectedById(List<Long> idList, Long declarationId);
+
+    List<NdflPersonPrepayment> findNdflPersonPrepaymentBySelectedByInp(List<String> inpList, Long declarationId);
+
+    List<NdflPersonDeduction> findNdflPersonDeductionBySelectedByOperationId(List<String> operationIdList, Long declarationId);
+
+    List<NdflPersonPrepayment> findNdflPersonPrepaymentBySelectedByOperationId(List<String> operationIdList, Long declarationId);
+
+    List<NdflPersonIncome> findNdflPersonIncomeBySelectedByOperationId(List<String> operationIdList, Long declarationId);
+
+
+    /**
      * Возвращяет список строк из раздела 1 по списку ид форм
      *
      * @param declarationDataIds список ид форм
