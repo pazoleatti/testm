@@ -1200,31 +1200,41 @@
                  * @param endDatePath путь в scope до даты окончания действия настройки подразделения
                  */
                 $scope.initSelectKppOktmoPairsByParams = function (modelPath, knf, departmentModelPath, periodModelPath, endDatePath) {
-                    if (!knf && (departmentModelPath || periodModelPath)) {
-                        var fields = [];
-                        if (departmentModelPath) {
-                            fields.push(departmentModelPath);
+                    if (!knf) {
+                        if (departmentModelPath && periodModelPath) {
+                            $scope.$watchCollection("[" + departmentModelPath + "," + periodModelPath + "]", function (newValues, oldValues) {
+                                // при изменении зависимых параметров "подразделение" и "период" сбрасываем значение
+                                var department = newValues && newValues[0],
+                                    oldDepartment = oldValues && oldValues[0];
+                                var period = newValues && newValues[1],
+                                    oldPeriod = oldValues && oldValues[1];
+
+                                if (department && (!oldDepartment || department.id !== oldDepartment.id) ||
+                                    period && (!oldPeriod || period.id !== oldPeriod.id)
+                                ) {
+                                    _.deep($scope, modelPath, []);
+                                }
+                            });
+                        } else if (departmentModelPath && endDatePath) {
+                            $scope.$watchCollection("[" + departmentModelPath + "," + endDatePath + "]", function (newValues, oldValues) {
+                                // при изменении зависимых параметров "подразделение" и "дата окончания действия настройки подразделения"
+                                // сбрасываем значение
+                                var department = newValues && newValues[0],
+                                    oldDepartment = oldValues && oldValues[0];
+                                var endDate = newValues && new Date(newValues[1]).setHours(0, 0, 0, 0),
+                                    oldEndDate = oldValues && new Date(oldValues[1]).setHours(0, 0, 0, 0);
+
+                                if (department && (!oldDepartment || department.id !== oldDepartment.id) ||
+                                    endDate && (!oldEndDate || endDate !== oldEndDate)
+                                ) {
+                                    _.deep($scope, modelPath, null);
+                                }
+                            });
                         }
-                        if (periodModelPath) {
-                            fields.push(periodModelPath);
-                        }
-                        $scope.$watchCollection("[" + fields.join(", ") + "]", function (newValues, oldValues) {
-                            // при изменении зависимых параметров сбрасываем значение
-                            var department = newValues && newValues[0], oldDepartment = oldValues && oldValues[0];
-                            var period = newValues && newValues[1], oldPeriod = oldValues && oldValues[1];
-                            if (department && (!oldDepartment || department.id !== oldDepartment.id) ||
-                                period && (!oldPeriod || period.id !== oldPeriod.id)
-                            ) {
-                                _.deep($scope, modelPath, []);
-                            }
-                        });
                     }
 
-                    $scope.kppOkmtoPairsSelect = GetSelectOption.getAjaxSelectOptions(true, true, "controller/rest/departmentConfig/kppOktmoPairsSelect",
-                        getFilter, {
-                            property: "kpp, oktmo",
-                            direction: "asc"
-                        }, "kppOktmoPairFormatter");
+                    $scope.kppOkmtoPairsSelect = getKppOktmoSelector(true);
+                    $scope.kppOkmtoPairSelect = getKppOktmoSelector(false);
 
                     function getFilter() {
                         return {
@@ -1235,6 +1245,14 @@
                                 relevanceDate: endDatePath ? _.deep($scope, endDatePath) : null
                             }
                         };
+                    }
+
+                    function getKppOktmoSelector(isMultiple) {
+                        return GetSelectOption.getAjaxSelectOptions(isMultiple, true, "controller/rest/departmentConfig/kppOktmoPairsSelect",
+                            getFilter, {
+                                property: "kpp, oktmo",
+                                direction: "asc"
+                                }, "kppOktmoPairFormatter");
                     }
                 };
             }

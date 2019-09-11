@@ -216,7 +216,7 @@
                         </div>
                     </div>
                     <!--Учитывать в КПП/ОКТМО:-->
-                    <div class="row-fluid form-group">
+                    <div class="row-fluid form-group" data-ng-if="record.department.name && record.endDate">
                         <div class="span4">
                             <label class="control-label">
                                 {{::'departmentConfig.modal.field.relatedKppOktmo.label' | translate}}:
@@ -228,7 +228,7 @@
                         <div data-ng-if="mode !== 'VIEW'" class="span8">
                             <div data-aplana-field>
                                 <div data-ng-controller="SelectKppOktmoPairsCtrl"
-                                     data-ui-select2="kppOkmtoPairsSelect.options"
+                                     data-ui-select2="kppOkmtoPairSelect.options"
                                      data-ng-model="record.relatedKppOktmoPairs"
                                      data-ng-init="initSelectKppOktmoPairsByParams('record.relatedKppOktmoPairs', null, 'record.department', null, 'record.endDate')">
                                 </div>
