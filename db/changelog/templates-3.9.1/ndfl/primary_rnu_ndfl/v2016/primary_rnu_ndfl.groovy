@@ -626,7 +626,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
     }
 
     /**
-     * Виды спецотчетов (SBRFNDFL-8445)
+     * Виды спецотчетов "По выделенным" (SBRFNDFL-8445)
      */
     @TypeChecked(TypeCheckingMode.SKIP)
     enum SubreportKindEnum {
@@ -634,49 +634,75 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
     }
 
     /**
+     * Виды вкладок для спецотчета "По выделенным" (SBRFNDFL-8445)
+     */
+    @TypeChecked(TypeCheckingMode.SKIP)
+    enum CurrentTabKind {
+        PERSONS, INCOMES, DEDUCTIONS, PREPAYMENTS, NOT_SELECTED_OR_EMPTY
+    }
+
+    /**
      * Определить вид спецотчета (SBRFNDFL-8445)
      */
     SubreportKindEnum checkSubreportKind() {
-        if (ndflAllPersonsReportFilter != null) {
-            return SubreportKindEnum.BY_FILTER
-        }
-        if (ndflAllPersonsReportSelectedRows != null) {
-            return SubreportKindEnum.BY_SELECTED
-        }
+        if (ndflAllPersonsReportFilter != null) return SubreportKindEnum.BY_FILTER
+        if (ndflAllPersonsReportSelectedRows != null) return SubreportKindEnum.BY_SELECTED
         return SubreportKindEnum.ALL
     }
 
     /**
-     * Сформировать из текущей вкладки список ИНП ФЛ для отобранных записей (SBRFNDFL-8445)
-     * (только для SubreportKindEnum.BY_SELECTED)
+     * Определить вид вкладки для спецотчета "По выделенным" (SBRFNDFL-8445)
      */
-    List<String> createNdflPersonInpList() {
-        List<String> inpList = new ArrayList<>();
+    CurrentTabKind checkCurrentTabKind() {
+        if(!ndflAllPersonsReportSelectedRows.persons.isEmpty()) return CurrentTabKind.PERSONS
+        if(!ndflAllPersonsReportSelectedRows.incomes.isEmpty()) return CurrentTabKind.INCOMES
+        if(!ndflAllPersonsReportSelectedRows.deductions.isEmpty()) return CurrentTabKind.DEDUCTIONS
+        if(!ndflAllPersonsReportSelectedRows.prepayments.isEmpty()) return CurrentTabKind.PREPAYMENTS
+        return CurrentTabKind.NOT_SELECTED_OR_EMPTY
+    }
 
-        if (!ndflAllPersonsReportSelectedRows.persons.isEmpty()) {
-            for (int i = 0; i < ndflAllPersonsReportSelectedRows.persons.size(); i++) {
-                inpList.add(ndflAllPersonsReportSelectedRows.persons.get(i).getInp())
-            }
-        } else if (!ndflAllPersonsReportSelectedRows.incomes.isEmpty()) {
-            for (int i = 0; i < ndflAllPersonsReportSelectedRows.incomes.size(); i++) {
-                inpList.add(ndflAllPersonsReportSelectedRows.incomes.get(i).getInp())
-            }
-        } else if (!ndflAllPersonsReportSelectedRows.deductions.isEmpty()) {
-            for (int i = 0; i < ndflAllPersonsReportSelectedRows.deductions.size(); i++) {
-                inpList.add(ndflAllPersonsReportSelectedRows.deductions.get(i).getInp())
-            }
-        } else if (!ndflAllPersonsReportSelectedRows.prepayments.isEmpty()) {
-            for (int i = 0; i < ndflAllPersonsReportSelectedRows.prepayments.size(); i++) {
-                inpList.add(ndflAllPersonsReportSelectedRows.prepayments.get(i).getInp())
-            }
+    /**
+     * Список идентификаторов записей в форме отобранных для формирования спецотчета (SBRFNDFL-8445)
+     * (только для SubreportKindEnum.BY_SELECTED)
+     *
+     * @param currentTabKind вид вкладки
+     *
+     * Внимание: для вкладки PERSONS идентификаторы имеют тип String; для остальных вкладок - тип Long
+     */
+    List<Long> createNdflPersonIdList(CurrentTabKind currentTabKind) {
+        List<Long> idList = new ArrayList<>()
+
+        switch(currentTabKind) {
+            case currentTabKind.PERSONS:
+                for(int i = 0; i < ndflAllPersonsReportSelectedRows.persons.size(); i++) {
+                    idList.add(Long.valueOf(ndflAllPersonsReportSelectedRows.persons.get(i).getId()))
+                }
+                break
+            case currentTabKind.INCOMES:
+                for(int i = 0; i < ndflAllPersonsReportSelectedRows.incomes.size(); i++) {
+                    idList.add(ndflAllPersonsReportSelectedRows.incomes.get(i).getNdflPersonId())
+                }
+                break
+            case currentTabKind.DEDUCTIONS:
+                for(int i = 0; i < ndflAllPersonsReportSelectedRows.deductions.size(); i++) {
+                    idList.add(ndflAllPersonsReportSelectedRows.deductions.get(i).getNdflPersonId())
+                }
+                break
+            case currentTabKind.PREPAYMENTS:
+                for(int i = 0; i < ndflAllPersonsReportSelectedRows.prepayments.size(); i++) {
+                    idList.add(ndflAllPersonsReportSelectedRows.prepayments.get(i).getNdflPersonId())
+                }
+                break
         }
-        return inpList
+        return idList
     }
 
     /**
      * Сформировать списки для каждой из вкладок (SBRFNDFL-8445)
-     * @param personIncomeDTOS
-     * @return
+     * (только для SubreportKindEnum.BY_FILTER)
+     *
+     * @param одна из коллекций personIncomeDTOS/NdflPersonDeductionDTO/NdflPersonPrepaymentDTO
+     * @return список для вывода в excel
      */
     List<NdflPersonIncome> prepareNdflPersonIncomeList(ArrayList<NdflPersonIncomeDTO> personIncomeDTOS) {
         List<NdflPersonIncome> ndflPersonIncomeList = new ArrayList<>()
@@ -725,15 +751,6 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         // Тип спецотчета (ALL/BY_FILTER/BY_SELECTED)
         SubreportKindEnum subreportKind = checkSubreportKind()
 
-        // Список ИНП ФЛ отобранных для формирования спецотчета
-        List<String> inpList;
-        if (subreportKind == SubreportKindEnum.BY_SELECTED) {
-            inpList = createNdflPersonInpList()
-            if(inpList.isEmpty()) {
-                logger.error("На текущей вкладке либо нет записей, либо ни одна запись не отмечена [спецотчет: %s]", subreportKind.name())
-            }
-        }
-
         // Спецотчеты (SBRFNDFL-8445)
         switch(subreportKind) {
             // По всем
@@ -764,14 +781,110 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
                 break
             // По выбранным записям
             case subreportKind.BY_SELECTED:
-                ndflPersonList = ndflPersonService.findNdflPersonBySelected(inpList)
-                ndflPersonList.sort {it.rowNum}
-                ndflPersonIncomeList = ndflPersonService.findNdflPersonIncomeBySelected(inpList)
-                ndflPersonIncomeList.sort {it.rowNum}
-                ndflPersonDeductionList = ndflPersonService.findNdflPersonDeductionBySelected(inpList)
-                ndflPersonDeductionList.sort {it.rowNum}
-                ndflPersonPrepaymentList = ndflPersonService.findNdflPersonPrepaymentBySelected(inpList);
-                ndflPersonPrepaymentList.sort{it.rowNum}
+                // Текущая вкладка
+                CurrentTabKind currentTabKind = checkCurrentTabKind()
+                // Список идентификаторов записей на текущей вкладке
+                List<Long> idList = new ArrayList<>()
+
+                switch(currentTabKind) {
+                    case currentTabKind.NOT_SELECTED_OR_EMPTY:
+                        String failureMessage = String.format("Спецотчет не сформирован, т.к. в форме нет выделенных записей либо форма пуста")
+                        logger.error(failureMessage)
+                        return
+                    case currentTabKind.PERSONS:
+                        // Сначала - список выбранных на вкладке идентификаторов записей
+                        idList = createNdflPersonIdList(currentTabKind)
+                        ndflPersonList = ndflPersonService.findNdflPersonBySelectedById(idList, declarationData.id)
+                        ndflPersonList.sort {it.rowNum}
+                        ndflPersonIncomeList = ndflPersonService.findNdflPersonIncomeBySelectedByInp(ndflPersonList.inp, declarationData.id)
+                        ndflPersonIncomeList.sort {it.rowNum}
+                        ndflPersonDeductionList = ndflPersonService.findNdflPersonDeductionBySelectedByInp(ndflPersonList.inp, declarationData.id)
+                        ndflPersonDeductionList.sort {it.rowNum}
+                        ndflPersonPrepaymentList = ndflPersonService.findNdflPersonPrepaymentBySelectedByInp(ndflPersonList.inp, declarationData.id);
+                        ndflPersonPrepaymentList.sort{it.rowNum}
+                        break
+                    case currentTabKind.INCOMES:
+                        // Сначала - список выбранных на вкладке идентификаторов записей
+                        idList = createNdflPersonIdList(currentTabKind)
+                        ndflPersonIncomeList = ndflPersonService.findNdflPersonIncomeBySelectedById(idList, declarationData.id)
+                        ndflPersonIncomeList.sort {it.rowNum}
+                        // Найти записи в разделе PERSONS (1): раздел 1, графа 2 == выбранная строка из раздела 2, графа 2
+                        List<Long> ndflPersonIdList = new ArrayList<>()
+                        for(int i = 0; i < ndflPersonIncomeList.size(); i++) {
+                            if(!ndflPersonIdList.contains(ndflPersonIncomeList.get(i).getNdflPersonId())) {
+                                ndflPersonIdList.add(ndflPersonIncomeList.get(i).getNdflPersonId())
+                            }
+                        }
+                        ndflPersonList = ndflPersonService.findNdflPersonBySelectedById(ndflPersonIdList, declarationData.id)
+                        ndflPersonList.sort {it.rowNum}
+                        // Найти записи в разделе DEDUCTIONS (3): раздел 3, графа 9 == выбранная строка из раздела 2, графа 3
+                        List<String> operationIdList = new ArrayList<>()
+                        for(int i = 0; i < ndflPersonIncomeList.size(); i++) {
+                            if(!operationIdList.contains(ndflPersonIncomeList.get(i).getOperationId())) {
+                                operationIdList.add(ndflPersonIncomeList.get(i).getOperationId())
+                            }
+                        }
+                        ndflPersonDeductionList = ndflPersonService.findNdflPersonDeductionBySelectedByOperationId(operationIdList, declarationData.id)
+                        ndflPersonDeductionList.sort {it.rowNum}
+                        // Найти запись в разделе PREPAYMENTS (4): раздел 4 графа 3 = выбранная строка из раздела 2, графа 3
+                        ndflPersonPrepaymentList = ndflPersonService.findNdflPersonPrepaymentBySelectedByOperationId(operationIdList, declarationData.id);
+                        ndflPersonPrepaymentList.sort {it.rowNum}
+                        break
+                    case currentTabKind.DEDUCTIONS:
+                        // Сначала - список выбранных на вкладке идентификаторов записей
+                        idList = createNdflPersonIdList(currentTabKind)
+                        ndflPersonDeductionList = ndflPersonService.findNdflPersonDeductionBySelectedById(idList, declarationData.id)
+                        ndflPersonDeductionList.sort {it.rowNum}
+                        // Найти записи в разделе PERSONS (1): раздел 1, графа 2 == выбранная строка из раздела 3, графа 2
+                        List<Long> ndflPersonIdList = new ArrayList<>()
+                        for(int i = 0; i < ndflPersonDeductionList.size(); i++) {
+                            if(!ndflPersonIdList.contains(ndflPersonDeductionList.get(i).getNdflPersonId())) {
+                                ndflPersonIdList.add(ndflPersonDeductionList.get(i).getNdflPersonId())
+                            }
+                        }
+                        ndflPersonList = ndflPersonService.findNdflPersonBySelectedById(ndflPersonIdList, declarationData.id)
+                        ndflPersonList.sort {it.rowNum}
+                        // Найти записи в разделе INCOMES (2): раздел 2, графа 3 == выбранная строка из раздела 3, графа 9
+                        List<String> operationIdList = new ArrayList<>()
+                        for(int i = 0; i < ndflPersonDeductionList.size(); i++) {
+                            if(!operationIdList.contains(ndflPersonDeductionList.get(i).getOperationId())) {
+                                operationIdList.add(ndflPersonDeductionList.get(i).getOperationId())
+                            }
+                        }
+                        ndflPersonIncomeList = ndflPersonService.findNdflPersonIncomeBySelectedByOperationId(operationIdList, declarationData.id)
+                        ndflPersonIncomeList.sort {it.rowNum}
+                        // Найти запись в разделе PREPAYMENTS (4): раздел 4 графа 3 = выбранная строка из раздела 3, графа 9
+                        ndflPersonPrepaymentList = ndflPersonService.findNdflPersonPrepaymentBySelectedByOperationId(operationIdList, declarationData.id);
+                        ndflPersonPrepaymentList.sort {it.rowNum}
+                        break
+                    case currentTabKind.PREPAYMENTS:
+                        // Сначала - список выбранных на вкладке идентификаторов записей
+                        idList = createNdflPersonIdList(currentTabKind)
+                        ndflPersonPrepaymentList = ndflPersonService.findNdflPersonPrepaymentBySelectedById(idList, declarationData.id);
+                        ndflPersonPrepaymentList.sort {it.rowNum}
+                        // Найти записи в разделе PERSONS (1): раздел 1, графа 2 == выбранная строка из раздела 2, графа 2
+                        List<Long> ndflPersonIdList = new ArrayList<>()
+                        for(int i = 0; i < ndflPersonIncomeList.size(); i++) {
+                            if(!ndflPersonIdList.contains(ndflPersonIncomeList.get(i).getNdflPersonId())) {
+                                ndflPersonIdList.add(ndflPersonIncomeList.get(i).getNdflPersonId())
+                            }
+                        }
+                        ndflPersonList = ndflPersonService.findNdflPersonBySelectedById(ndflPersonIdList, declarationData.id)
+                        ndflPersonList.sort {it.rowNum}
+                        // Найти записи в разделе INCOMES (2): раздел 2, графа 3 == выбранная строка из раздела 4, графа 3
+                        List<String> operationIdList = new ArrayList<>()
+                        for(int i = 0; i < ndflPersonDeductionList.size(); i++) {
+                            if(!operationIdList.contains(ndflPersonDeductionList.get(i).getOperationId())) {
+                                operationIdList.add(ndflPersonDeductionList.get(i).getOperationId())
+                            }
+                        }
+                        ndflPersonIncomeList = ndflPersonService.findNdflPersonIncomeBySelectedByOperationId(operationIdList, declarationData.id)
+                        ndflPersonIncomeList.sort {it.rowNum}
+                        // Найти записи в разделе DEDUCTIONS (3): раздел 3, графа 9 == выбранная строка из раздела 2, графа 3
+                        ndflPersonDeductionList = ndflPersonService.findNdflPersonDeductionBySelectedByOperationId(operationIdList, declarationData.id)
+                        ndflPersonDeductionList.sort {it.rowNum}
+                        break
+                }
                 break
         }
 
