@@ -21,6 +21,7 @@
             'app.filesComments',
             'app.rest',
             'app.rnuNdflPersonFace',
+            'app.rnuNdflPersonFaceMenu',
             'app.returnToCreatedDialog',
             'app.createNdfl2_6DataReport'])
         .config(['$stateProvider', function ($stateProvider) {
@@ -392,6 +393,38 @@
                             $shareData: function () {
                                 return {
                                     declarationDataId: $scope.declarationDataId
+                                };
+                            }
+                        }
+                    });
+                };
+
+                /**
+                 * @description Определяет заполнен ли филбтр
+                 * @returns true если заполнен
+                 */
+                $scope.isFilterClear = function () {
+                    return (isEmpty($scope.ndflFilter.person) && isEmpty($scope.ndflFilter.income) &&
+                    isEmpty($scope.ndflFilter.deduction) && isEmpty($scope.ndflFilter.prepayment));
+                };
+
+                /**
+                 * @description Формирование рну ндфл для всех ФЛ на основе Меню выбора
+                 */
+                $scope.createRnuNdflByAllPersonsReportMenu = function () {
+                    var row = $scope.ndflTabsCtrl.getActiveTab().getSelectedRows()[0];
+
+                    $aplanaModal.open({
+                        title: $filter('translate')('rnuPersonFaceMenu.title'),
+                        templateUrl: 'client/app/taxes/ndfl/taxForm/rnuNdflPersonFaceMenu.html',
+                        controller: 'rnuNdflPersonFaceMenuFormCtrl',
+                        windowClass: 'modal450',
+                        resolve: {
+                            $shareData: function () {
+                                return {
+                                    filter: $scope.searchFilter.params,
+                                    filterIsClear: $scope.isFilterClear(),
+                                    selectedRow:  $scope.ndflTabsCtrl
                                 };
                             }
                         }

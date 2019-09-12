@@ -82,6 +82,45 @@ public interface NdflPersonDao {
     List<NdflPerson> findAllByDeclarationId(long declarationDataId);
 
     /**
+     * Возвращает данные по спецотчету по выбранным записям (SBRFNDFL-8445)
+     *
+     * @param inpList список ИНП отобранных записей
+     */
+    List<NdflPerson> findAllPersonByInpList(List<String> inpList);
+
+    List<NdflPersonIncome> findAllPersonIncomeBySelectedByInpList(List<String> inpList);
+
+    List<NdflPersonDeduction> findAllNdflPersonDeductionBySelectedByInpList(List<String> inpList);
+
+    List<NdflPersonPrepayment> findAllNdflPersonPrepaymentBySelectedByInpList(List<String> inpList);
+
+    /**
+     * Реализации выборки данных для спецотчетов "По выделенным" отдельно по id записи и по ИПН ФЛ (SBRFNDFL-8445)
+     */
+    List<NdflPerson> findNdflPersonBySelectedById(List<Long> idList, Long declarationId);
+
+    List<NdflPerson> findNdflPersonBySelectedByInp(List<String> inpList, Long declarationId);
+
+    List<NdflPersonIncome> findNdflPersonIncomeBySelectedById(List<Long> idList, Long declarationId);
+
+    List<NdflPersonIncome> findNdflPersonIncomeBySelectedByInp(List<String> inpList, Long declarationId);
+
+    List<NdflPersonDeduction> findNdflPersonDeductionBySelectedById(List<Long> idList, Long declarationId);
+
+    List<NdflPersonDeduction> findNdflPersonDeductionBySelectedByInp(List<String> inpList, Long declarationId);
+
+    List<NdflPersonPrepayment> findNdflPersonPrepaymentBySelectedById(List<Long> idList, Long declarationId);
+
+    List<NdflPersonPrepayment> findNdflPersonPrepaymentBySelectedByInp(List<String> inpList, Long declarationId);
+
+    List<NdflPersonDeduction> findNdflPersonDeductionBySelectedByOperationId(List<String> operationIdList, Long declarationId);
+
+    List<NdflPersonPrepayment> findNdflPersonPrepaymentBySelectedByOperationId(List<String> operationIdList, Long declarationId);
+
+    List<NdflPersonIncome> findNdflPersonIncomeBySelectedByOperationId(List<String> operationIdList, Long declarationId);
+
+
+    /**
      * Возвращяет список строк из раздела 1 по списку ид форм
      *
      * @param declarationDataIds список ид форм
@@ -212,7 +251,7 @@ public interface NdflPersonDao {
     PagingResult<NdflPerson> fetchNdflPersonByParameters(long declarationDataId, Map<String, Object> parameters, PagingParams pagingParams);
 
     /**
-     * Найти все NdflPerson по заданным параметрам
+     * Найти все NdflPerson по заданным параметрам (SBRFNDFL-8445)
      *
      * @param ndflFilter   значения фильтра
      * @param pagingParams параметры вывода результата
@@ -347,6 +386,15 @@ public interface NdflPersonDao {
      * @return число ФЛ
      */
     int getNdflPersonCount(Long declarationDataId);
+
+    /**
+     * Получить максимальное количество элементов среди всех разделов конкретной декларации
+     * (NDFL_PERSON, NDFL_PERSON_INCOME, NDFL_PERSON_DEDUCTION, NDFL_PERSON_PREPAYMEN)
+     *
+     * @param declarationDataId идентификатор налоговой формы
+     * @return максимальное количество элемнтов
+     */
+    long getNdflPersonAllSectionMaxCount(long declarationDataId);
 
     /**
      * Получить число справок ФЛ в NDFL_REFERENCES

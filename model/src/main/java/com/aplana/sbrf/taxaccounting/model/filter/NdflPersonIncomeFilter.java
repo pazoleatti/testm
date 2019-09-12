@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -18,7 +19,7 @@ import java.util.List;
 @Setter
 @ToString
 @NoArgsConstructor
-public class NdflPersonIncomeFilter {
+public class NdflPersonIncomeFilter implements Serializable {
     /**
      * Общий фильтр
      */

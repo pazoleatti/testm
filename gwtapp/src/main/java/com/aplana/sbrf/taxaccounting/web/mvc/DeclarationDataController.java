@@ -55,6 +55,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.aplana.sbrf.taxaccounting.model.SubreportAliasConstants.RNU_NDFL_PERSON_DB;
 import static org.apache.commons.lang3.CharEncoding.UTF_8;
 
 /**
@@ -63,6 +64,7 @@ import static org.apache.commons.lang3.CharEncoding.UTF_8;
 @RestController
 public class DeclarationDataController {
     private static final int DEFAULT_IMAGE_RESOLUTION = 150;
+    private static final String RNU_NDFL_ALL_PERSONS_REPORT_ALIAS = "rnu_ndfl_person_all_db";
 
     private DeclarationDataService declarationService;
     private SecurityService securityService;
@@ -862,7 +864,7 @@ public class DeclarationDataController {
         TAUserInfo userInfo = securityService.currentUserInfo();
         Map<String, Object> reportParams = new HashMap<>();
         reportParams.put("PERSON_ID", ndflPersonId);
-        return declarationService.createTaskToCreateSpecificReport(declarationDataId, SubreportAliasConstants.RNU_NDFL_PERSON_DB, reportParams, userInfo);
+        return declarationService.createTaskToCreateSpecificReport(declarationDataId, RNU_NDFL_PERSON_DB, reportParams, userInfo);
     }
 
     /**
@@ -877,6 +879,48 @@ public class DeclarationDataController {
         Map<String, Object> reportParams = new HashMap<>();
         reportParams.put("params", params);
         return declarationService.createTaskToCreateSpecificReport(declarationDataId, alias, reportParams, userInfo);
+    }
+
+    /**
+     * Формирование спецотчета РНУ НДФЛ по всем ФЛ, по всем данным
+     *
+     * @param declarationDataId идентификатор декларации
+     * @return результат с даннымми для представления об операции формирования отчета
+     */
+    @PostMapping(value = "/actions/declarationData/{declarationDataId}/report/rnuNdflAllPersons")
+    public String createRnuNdflAllPersonsReport(@PathVariable("declarationDataId") long declarationDataId) {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        return declarationService.createTaskToCreateRnuNdflByAllPersonsReport(declarationDataId, userInfo, null, null);
+    }
+
+    /**
+     * Формирование спецотчета РНУ НДФЛ по всем ФЛ, по отобранным по фильтру
+     *
+     * @param declarationDataId идентификатор декларации
+     * @param filter параметры фильтрации на форме
+     * @return результат с даннымми для представления об операции формирования отчета
+     */
+    @PostMapping(value = "/actions/declarationData/{declarationDataId}/report/rnuNdflAllPersons/byFilter")
+    public String createRnuNdflAllPersonsReportByFilter(@PathVariable("declarationDataId") long declarationDataId,
+                                                        @RequestBody NdflFilter filter) {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        // Добавить к фильтру идентификатор формы (SBRFNDFL-8445)
+        filter.setDeclarationDataId(declarationDataId);
+        return declarationService.createTaskToCreateRnuNdflByAllPersonsReport(declarationDataId, userInfo, filter, null);
+    }
+
+    /**
+     * Формирование спецотчета РНУ НДФЛ по всем ФЛ, по выбранным на странице
+     *
+     * @param declarationDataId идентификатор декларации
+     * @param selectedRows информация о выбранных строках в форме
+     * @return результат с даннымми для представления об операции формирования отчета
+     */
+    @PostMapping(value = "/actions/declarationData/{declarationDataId}/report/rnuNdflAllPersons/bySelected")
+    public String createRnuNdflAllPersonsReportBySelected(@PathVariable("declarationDataId") long declarationDataId,
+                                                          @RequestBody RnuNdflAllPersonsReportSelectedRows selectedRows) {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        return declarationService.createTaskToCreateRnuNdflByAllPersonsReport(declarationDataId,  userInfo, null, selectedRows);
     }
 
     /**

@@ -430,6 +430,7 @@
         "logBusiness.title.note": "Текст события",
         "logBusiness.title.logId": "Протокол",
         "rnuPersonFace.title": "РНУ НДФЛ по физическому лицу",
+        "rnuPersonFaceMenu.title": "Выбор режима формирования отчета РНУ НДФЛ по всем ФЛ",
         "rnuPersonFace.": "РНУ НДФЛ по физическому лицу",
         "rnuPersonFace.error.dateInterval": "Дата начала интервала должна быть меньше даты конца",
         "rnuPersonFace.error.dateIntervalOutOfBounds": "Значение поля \"Дата рождения\" должно входить в интервал дат \"от 01.01.1900 до 31.12.2099\".",
