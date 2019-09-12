@@ -54,10 +54,7 @@
                             oktmo: {id: $scope.record.oktmo.id, code: $scope.record.oktmo.code},
                             presentPlace: {id: $scope.record.presentPlace.id},
                             signatoryMark: {id: $scope.record.signatoryMark.id},
-                            reorganization: $scope.record.reorganization ? {id: $scope.record.reorganization.id} : undefined,
-                            relatedKppOktmo: $scope.record.relatedKppOktmoPairs.length > 0
-                                ? {kpp: $scope.record.relatedKppOktmoPairs[0].kpp, oktmo: $scope.record.relatedKppOktmoPairs[0].oktmo}
-                                : undefined
+                            reorganization: $scope.record.reorganization ? {id: $scope.record.reorganization.id} : undefined
                         }))
                     }).then(function (response) {
                         if (response.data.uuid) {

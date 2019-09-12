@@ -182,7 +182,7 @@
                             {name: 'reorgSuccessorName', index: 'reorg_successor_name', width: 150},
                             {
                                 name: 'relatedKppOktmo',
-                                index: 'related_kpp_oktmo',
+                                index: 'related_kpp',
                                 width: 150,
                                 formatter: $filter('kppOktmoPairFormatter')
                             }

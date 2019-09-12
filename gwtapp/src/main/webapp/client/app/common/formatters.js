@@ -674,7 +674,7 @@
          */
         .filter('kppOktmoPairFormatter', function () {
             return function (kppOktmoPair) {
-                if (kppOktmoPair.kpp && kppOktmoPair.oktmo) {
+                if (kppOktmoPair && kppOktmoPair.kpp && kppOktmoPair.oktmo) {
                     return kppOktmoPair.kpp + ' / ' + kppOktmoPair.oktmo + (kppOktmoPair.relevance ? ' (' + kppOktmoPair.relevance + ')' : '');
                 } else {
                     return ''

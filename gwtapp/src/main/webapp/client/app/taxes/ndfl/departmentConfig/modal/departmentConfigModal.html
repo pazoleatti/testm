@@ -223,15 +223,15 @@
                             </label>
                         </div>
                         <div data-ng-if="mode === 'VIEW'" class="span8 info-text">
-                            {{record.relatedKppOktmoPairs}}
+                            {{record.relatedKppOktmo | kppOktmoPairFormatter}}
                         </div>
                         <div data-ng-if="mode !== 'VIEW'" class="span8">
                             <div data-aplana-field>
                                 <div data-ng-controller="SelectKppOktmoPairsCtrl"
                                      data-ui-select2="kppOkmtoPairSelect.options"
-                                     data-ng-model="record.relatedKppOktmoPairs"
+                                     data-ng-model="record.relatedKppOktmo"
                                      data-ng-disabled="!record.department.name || !record.endDate"
-                                     data-ng-init="initSelectKppOktmoPairsByParams('record.relatedKppOktmoPairs', null, 'record.department', null, 'record.endDate')">
+                                     data-ng-init="initSelectKppOktmoPairsByParams('record.relatedKppOktmo', null, 'record.department', null, 'record.endDate')">
                                 </div>
                             </div>
                         </div>
