@@ -271,7 +271,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                             "inner join ndfl_person np on npi.ndfl_person_id = np.id " +
                             "left join ref_book_asnu rba on npi.asnu_id = rba.id " +
                             "where " +
-                            SqlUtils.transformToSqlInStatement("np.inp", inpList) +
+                            SqlUtils.transformToSqlInStatementForString("np.inp", inpList) +
                             " and np.declaration_data_id = :declarationId",
                     params,
                     new NdflPersonDaoImpl.NdflPersonIncomeRowMapper()
@@ -327,7 +327,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                             + " inner join ndfl_person np on npd.ndfl_person_id = np.id"
                             + " left join ref_book_asnu rba on npd.asnu_id = rba.id"
                             + " where " +
-                            SqlUtils.transformToSqlInStatement("np.inp", inpList) +
+                            SqlUtils.transformToSqlInStatementForString("np.inp", inpList) +
                             " and np.declaration_data_id = :declarationId",
                             params,
                     new NdflPersonDaoImpl.NdflPersonDeductionRowMapper()
@@ -383,7 +383,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                     + " inner join ndfl_person np on npp.ndfl_person_id = np.id"
                     + " left join ref_book_asnu rba on npp.asnu_id = rba.id"
                     + " where " +
-                            SqlUtils.transformToSqlInStatement("np.inp", inpList) +
+                            SqlUtils.transformToSqlInStatementForString("np.inp", inpList) +
                             " and np.declaration_data_id = :declarationId",
                     params,
                     new NdflPersonDaoImpl.NdflPersonPrepaymentRowMapper()
@@ -411,7 +411,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                             + " inner join ndfl_person np on npd.ndfl_person_id = np.id"
                             + " left join ref_book_asnu rba on npd.asnu_id = rba.id"
                             + " where " +
-                            SqlUtils.transformToSqlInStatement("npd.operation_id", operationIdList) +
+                            SqlUtils.transformToSqlInStatementForString("npd.operation_id", operationIdList) +
                             " and np.declaration_data_id = :declarationId",
                     params,
                     new NdflPersonDaoImpl.NdflPersonDeductionRowMapper()
