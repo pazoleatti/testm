@@ -5,7 +5,7 @@
                                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
 
     <!-- https://jira.aplana.com/browse/SBRFNDFL-8293 Реализовать формирование 6-НДФЛ с нулевыми показателями -->
-    <changeSet id="3.9.1-avtornikov-1" author="avtornikov" runAlways="true">
+    <changeSet id="3.9.1-avtornikov-1" author="avtornikov">
         <update tableName="DECLARATION_TEMPLATE">
             <column name="CREATE_SCRIPT" valueClobFile="templates-3.9.1/ndfl/report_6ndfl/v2016/report_6ndfl.groovy"/>
             <where>declaration_type_id = 103</where>
@@ -14,7 +14,7 @@
 
 
     <!--  https://jira.aplana.com/browse/SBRFNDFL-8445 Реализовать изменения в формировании отчета "РНУ по всем ФЛ" (консолидированные) -->
-    <changeSet id="3.9.1-avtornikov-2" author="avtornikov" runAlways="true">
+    <changeSet id="3.9.1-avtornikov-2" author="avtornikov">
         <update tableName="DECLARATION_TEMPLATE">
             <column name="CREATE_SCRIPT" valueClobFile="templates-3.9.1\ndfl\consolidated_rnu_ndfl\v2016\consolidated_rnu_ndfl.groovy"/>
             <where>declaration_type_id = 101</where>
@@ -22,7 +22,7 @@
     </changeSet>
 
     <!--  https://jira.aplana.com/browse/SBRFNDFL-8445 Реализовать изменения в формировании отчета "РНУ по всем ФЛ" (первичные) -->
-    <changeSet id="3.9.1-avtornikov-3" author="avtornikov" runAlways="true">
+    <changeSet id="3.9.1-avtornikov-3" author="avtornikov">
         <update tableName="DECLARATION_TEMPLATE">
             <column name="CREATE_SCRIPT" valueClobFile="templates-3.9.1\ndfl\primary_rnu_ndfl\v2016\primary_rnu_ndfl.groovy"/>
             <where>declaration_type_id = 100</where>
