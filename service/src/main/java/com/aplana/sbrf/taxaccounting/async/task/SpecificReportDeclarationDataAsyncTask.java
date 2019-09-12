@@ -1,13 +1,12 @@
 package com.aplana.sbrf.taxaccounting.async.task;
 
 import com.aplana.sbrf.taxaccounting.async.AsyncManager;
-import com.aplana.sbrf.taxaccounting.service.LockStateLogger;
+import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.filter.NdflFilter;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
-import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
-import com.aplana.sbrf.taxaccounting.service.ReportService;
-import com.aplana.sbrf.taxaccounting.service.TAUserService;
+import com.aplana.sbrf.taxaccounting.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -41,6 +40,23 @@ public class SpecificReportDeclarationDataAsyncTask extends AbstractDeclarationA
         return AsyncTaskType.SPECIFIC_REPORT_DEC;
     }
 
+
+    @Override
+    protected AsyncQueue checkTask(Long value, String taskName, String msg) throws AsyncTaskException {
+        AsyncTaskTypeData taskTypeData = asyncTaskTypeDao.findById(getAsyncTaskType().getId());
+        if (taskTypeData == null) {
+            throw new AsyncTaskException(String.format("Cannot find task parameters for \"%s\"", taskName));
+        }
+        Long taskLimit = taskTypeData.getTaskLimit();
+        if (taskLimit != null && taskLimit != 0 && value != 0 && taskLimit < value) {
+            String errorText = "Количество строк в одном из разделов формы превышает пороговое значение = "
+                    + taskLimit + " строк";
+            throw new ServiceException(errorText, taskName);
+        } else {
+            return AsyncQueue.SHORT;
+        }
+    }
+
     @Override
     protected BusinessLogicResult executeBusinessLogic(final AsyncTaskData taskData, Logger logger) {
         Map<String, Object> params = taskData.getParams();
@@ -66,7 +82,18 @@ public class SpecificReportDeclarationDataAsyncTask extends AbstractDeclarationA
         }
 
         if (declarationData != null) {
-            String uuid = declarationDataService.createSpecificReport(logger, declarationData, ddReportType, subreportParamValues, viewParamValues, selectedRecord, userInfo, new LockStateLogger() {
+            SpecificReportContext specificReportContext = SpecificReportContext.builder()
+                    .logger(logger)
+                    .declarationData(declarationData)
+                    .ddReportType(ddReportType)
+                    .subreportParamValues(subreportParamValues)
+                    .viewParamValues(viewParamValues)
+                    .selectedRecord(selectedRecord)
+                    .userInfo(userInfo)
+                    .searchFilter((NdflFilter) params.get("searchFilter"))
+                    .selectedRows((RnuNdflAllPersonsReportSelectedRows) params.get("selectedRows"))
+                    .build();
+            String uuid = declarationDataService.createSpecificReport(specificReportContext, new LockStateLogger() {
                 @Override
                 public void updateState(AsyncTaskState state) {
                     asyncManager.updateState(taskData.getId(), state);

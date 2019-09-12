@@ -177,6 +177,17 @@
                 REPORT_2_NDFL_2: {id: 104, name: "2-НДФЛ (2)"},
                 REPORT_2_NDFL_FL: {id: 105, name: "2-НДФЛ (ФЛ)"}
             },
+            NDFL_PERSON_REPORT_GENERATION_TYPE: {
+                ALL_DATA: {id: 1, name: "по всем данным"},
+                BY_FILTER_SELECTED: {id: 2, name: "по отобранным по фильтру"},
+                SELECTED_ON_PAGE: {id: 3, name: "по выбранным на странице"},
+            },
+            NDFL_PERSON_REPORT_ACTIVE_TAB: {
+                PERSONS: {id: 1, name: "Реквизиты"},
+                INCOMES: {id: 2, name: "Сведения о доходах и НДФЛ"},
+                DEDUCTIONS: {id: 3, name: "Сведения о вычетах"},
+                PREPAYMENTS: {id: 4, name: "Сведения о доходах в виде авансовых платежей"}
+            },
             SUBREPORT_ALIAS_CONSTANTS: {
                 RNU_NDFL_PERSON_DB: "rnu_ndfl_person_db", // РНУ НДФЛ по физическому лицу
                 RNU_NDFL_PERSON_ALL_DB: "rnu_ndfl_person_all_db", // РНУ НДФЛ по всем ФЛ
@@ -361,7 +372,6 @@
                 12: "2-НДФЛ (1)",
                 13: "2-НДФЛ (2)"
             },
-
             TRANSPORT_MESSAGE_STATE: {
                 1: "Подтверждено",
                 2: "Ошибка",

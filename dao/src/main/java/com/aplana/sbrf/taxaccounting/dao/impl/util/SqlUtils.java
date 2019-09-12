@@ -232,7 +232,7 @@ public final class SqlUtils extends AbstractDao {
         if (tableIndex > 1) {
             throw new IllegalArgumentException(String.format("table %s not exists", tableName));
         }
-        truncateTable(tableName); // нужно т.к. в одной транзакции могут быть несколько запросов
+        deleteTable(tableName); // нужно т.к. в одной транзакции могут быть несколько запросов
         saveCollectionAsTable(collection, tableName);
         return tableName;
     }
@@ -273,7 +273,7 @@ public final class SqlUtils extends AbstractDao {
      */
     private static String saveCollectionAsTable(final Collection<Pair<String, String>> collection) {
         String tableName = "TMP_STRING_PAIRS";// - global temporary table on commit delete rows
-        truncateTable(tableName); // нужно т.к. в одной транзакции могут быть несколько запросов
+        deleteTable(tableName); // нужно т.к. в одной транзакции могут быть несколько запросов
         savePairCollectionAsTable(collection, tableName);
         return tableName;
     }
@@ -302,9 +302,9 @@ public final class SqlUtils extends AbstractDao {
      *
      * @param tableName таблица
      */
-    private static void truncateTable(String tableName) {
+    private static void deleteTable(String tableName) {
         try {
-            repository.getJdbcTemplate().update("truncate table " + tableName);
+            repository.getJdbcTemplate().update("delete from " + tableName);
         } catch (DataAccessException e) {
             LOG.error(e.getMessage(), e);
         }

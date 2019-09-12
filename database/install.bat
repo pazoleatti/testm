@@ -22,6 +22,8 @@ cd PATCHES
 
 "%ORA_BIN%\sqlplus" %DBA_AUTH% @"database-3.9/patch_03_009_00.sql" %NDFL_USR% ../_log/patch_03_009_00.log %NSI_USR% %ORA_BIN% %DBA_AUTH% %TAXREC_USR%
 
+"%ORA_BIN%\sqlplus" %DBA_AUTH% @"database-3.9.0.1/patch_03_009_00_1.sql" %NDFL_USR% ../_log/patch_03_009_00_1.log %NSI_USR% %ORA_BIN% %DBA_AUTH% %TAXREC_USR%
+
 "%ORA_BIN%\sqlplus" %DBA_AUTH% @"database-3.9.1/patch_03_009_01.sql" %NDFL_USR% ../_log/patch_03_009_01.log %NSI_USR% %ORA_BIN% %DBA_AUTH% %TAXREC_USR%
 
 cd ..
