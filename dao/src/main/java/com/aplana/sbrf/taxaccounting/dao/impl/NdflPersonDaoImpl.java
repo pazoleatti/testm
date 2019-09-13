@@ -111,97 +111,11 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
 
     /**
-     * Возвращает данные по спецотчету по выделенным записям (SBRFNDFL-8445)
-     */
-    @Override
-    public List<NdflPerson> findAllPersonByInpList(List<String> inpList) {
-        return selectIn("select " + createColumns(NdflPerson.COLUMNS, "np") + ", r.record_id, rba.NAME as asnu_name " +
-                " from ndfl_person np " +
-                " left join REF_BOOK_PERSON r on np.person_id = r.id " +
-                " left join ref_book_asnu rba on np.asnu_id = rba.id" +
-                " where np.inp in (:inpList)",
-                inpList,
-                "inpList",
-                new NdflPersonDaoImpl.NdflPersonRowMapper()
-        );
-    }
-
-    @Override
-    public List<NdflPersonIncome> findAllPersonIncomeBySelectedByInpList(List<String> inpList) {
-        return selectIn("select " + createColumns(NdflPersonIncome.COLUMNS, "npi") + ", np.inp, rba.NAME as asnu_name " +
-                "from ndfl_person_income npi " +
-                "inner join ndfl_person np on npi.ndfl_person_id = np.id " +
-                "left join ref_book_asnu rba on npi.asnu_id = rba.id " +
-                "where np.inp in (:inpList)",
-                inpList,
-                "inpList",
-                new NdflPersonDaoImpl.NdflPersonIncomeRowMapper()
-        );
-    }
-
-    @Override
-    public List<NdflPersonDeduction> findAllNdflPersonDeductionBySelectedByInpList(List<String> inpList) {
-        return selectIn("select " + createColumns(NdflPersonDeduction.COLUMNS, "npd") + ", np.inp, rba.NAME as asnu_name " +
-                "from ndfl_person_deduction npd "
-                + " inner join ndfl_person np on npd.ndfl_person_id = np.id"
-                + " left join ref_book_asnu rba on npd.asnu_id = rba.id"
-                + " where np.inp in (:inpList)",
-                inpList,
-                "inpList",
-                new NdflPersonDaoImpl.NdflPersonDeductionRowMapper()
-        );
-    }
-
-    @Override
-    public List<NdflPersonPrepayment> findAllNdflPersonPrepaymentBySelectedByInpList(List<String> inpList) {
-        try {
-            return selectIn("select " + createColumns(NdflPersonPrepayment.COLUMNS, "npp") + ", np.inp, rba.NAME as asnu_name " +
-                    "from ndfl_person_prepayment npp "
-                    + " inner join ndfl_person np on npp.ndfl_person_id = np.id"
-                    + " left join ref_book_asnu rba on npp.asnu_id = rba.id"
-                    + " where np.inp in (:inpList)",
-                    inpList,
-                    "inpList",
-                    new NdflPersonDaoImpl.NdflPersonPrepaymentRowMapper());
-        } catch (EmptyResultDataAccessException e) {
-            return new ArrayList<NdflPersonPrepayment>();
-        }
-    }
-
-
-    /**
-     * Реализации выборки данных для спецотчетов "По выделенным" (SBRFNDFL-8445)
+     * Возвращает данные по спецотчету "По выбранным" для вкладки "Реквизиты" (SBRFNDFL-8445)
      *
-     * Выборка для вкладки "Реквизиты" по списку идентификаторов записей и номеру формы
-     * @return список ФЛ
-     */
-    @Override
-    public List<NdflPerson> findNdflPersonBySelectedById(List<Long> idList, Long declarationId) {
-        try {
-            MapSqlParameterSource params = new MapSqlParameterSource();
-            params.addValue("idList", idList);
-            params.addValue("declarationId", declarationId);
-            return getNamedParameterJdbcTemplate().query(
-                    "select " + createColumns(NdflPerson.COLUMNS, "np") + ", r.record_id, rba.NAME as asnu_name " +
-                            " from ndfl_person np " +
-                            " left join REF_BOOK_PERSON r on np.person_id = r.id " +
-                            " left join ref_book_asnu rba on np.asnu_id = rba.id" +
-                            " where " +
-                            SqlUtils.transformToSqlInStatement("np.id", idList) +
-                            " and np.declaration_data_id = :declarationId",
-                            params,
-                    new NdflPersonDaoImpl.NdflPersonRowMapper()
-            );
-        } catch (EmptyResultDataAccessException e) {
-            return new ArrayList<NdflPerson>();
-        }
-    }
-
-    /**
-     * Реализации выборки данных для спецотчетов "По выделенным" (SBRFNDFL-8445)
-     *
-     * Выборка для вкладки "Реквизиты" по списку ИНП физлиц и номеру формы
-     * @return список ФЛ
+     * @param inpList список ИНП выбранных записей в форме
+     * @param declarationId идентификатор формы
+     * @return Данные о физическом лице - получателе дохода
      */
     @Override
     public List<NdflPerson> findNdflPersonBySelectedByInp(List<String> inpList, Long declarationId) {
@@ -215,7 +129,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                             " left join REF_BOOK_PERSON r on np.person_id = r.id " +
                             " left join ref_book_asnu rba on np.asnu_id = rba.id" +
                             " where " +
-                            SqlUtils.transformToSqlInStatement("np.inp", inpList) +
+                            SqlUtils.transformToSqlInStatementForString("np.inp", inpList) +
                             " and np.declaration_data_id = :declarationId",
                             params,
                     new NdflPersonDaoImpl.NdflPersonRowMapper()
@@ -226,10 +140,11 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     /**
-     * Реализации выборки данных для спецотчетов "По выделенным" (SBRFNDFL-8445)
+     * Возвращает данные по спецотчету "По выбранным" для вкладки "Сведения о доходах и НДФЛ" (SBRFNDFL-8445)
      *
-     * Выборка для вкладки "Сведения о доходах и НДФЛ" по списку идентификаторов записей и номеру формы
-     * @return список доходов и НДФЛ
+     * @param idList список идентификаторов выбранных записей в форме
+     * @param declarationId идентификатор формы
+     * @return Данные для данных раздела 2 "Сведения о доходах и НДФЛ"
      */
     @Override
     public List<NdflPersonIncome> findNdflPersonIncomeBySelectedById(List<Long> idList, Long declarationId) {
@@ -254,10 +169,11 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     /**
-     * Реализации выборки данных для спецотчетов "По выделенным" (SBRFNDFL-8445)
+     * Возвращает данные по спецотчету "По выбранным" для вкладки "Сведения о доходах и НДФЛ" (SBRFNDFL-8445)
      *
-     * Выборка для вкладки "Сведения о доходах и НДФЛ" по списку ИНП физлиц и номеру формы
-     * @return список доходов и НДФЛ
+     * @param inpList список ИНП выбранных записей в форме
+     * @param declarationId идентификатор формы
+     * @return Данные для данных раздела 2 "Сведения о доходах и НДФЛ"
      */
     @Override
     public List<NdflPersonIncome> findNdflPersonIncomeBySelectedByInp(List<String> inpList, Long declarationId) {
@@ -282,10 +198,11 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     /**
-     * Реализации выборки данных для спецотчетов "По выделенным" (SBRFNDFL-8445)
+     * Возвращает данные по спецотчету "По выбранным" для вкладки "Сведения о вычетах" (SBRFNDFL-8445)
      *
-     * Выборка для вкладки "Сведения о вычетах" по списку идентификаторов записей и номеру формы
-     * @return список вычетов
+     * @param idList список идентификаторов выбранных записей в форме
+     * @param declarationId идентификатор формы
+     * @return Данные для данных раздела 3 "Сведения о вычетах"
      */
     @Override
     public List<NdflPersonDeduction> findNdflPersonDeductionBySelectedById(List<Long> idList, Long declarationId) {
@@ -310,10 +227,11 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     /**
-     * Реализации выборки данных для спецотчетов "По выделенным" (SBRFNDFL-8445)
+     * Возвращает данные по спецотчету "По выбранным" для вкладки "Сведения о вычетах" (SBRFNDFL-8445)
      *
-     * Выборка для вкладки "Сведения о вычетах" по списку ИНП физлиц и номеру формы
-     * @return список вычетов
+     * @param inpList список ИНП выбранных записей в форме
+     * @param declarationId идентификатор формы
+     * @return Данные для данных раздела 3 "Сведения о вычетах"
      */
     @Override
     public List<NdflPersonDeduction> findNdflPersonDeductionBySelectedByInp(List<String> inpList, Long declarationId) {
@@ -338,10 +256,11 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     /**
-     * Реализации выборки данных для спецотчетов "По выделенным" (SBRFNDFL-8445)
+     * Возвращает данные по спецотчету "По выбранным" для вкладки "Сведения о доходах в виде авансовых платежей" (SBRFNDFL-8445)
      *
-     * Выборка для вкладки "Авансовые платежи" по списку идентификаторов записей и номеру формы
-     * @return список авансовых платежей
+     * @param idList список идентификаторов выбранных записей в форме
+     * @param declarationId идентификатор формы
+     * @return Данные для данных раздела 4 "Сведения о доходах в виде авансовых платежей"
      */
     @Override
     public List<NdflPersonPrepayment> findNdflPersonPrepaymentBySelectedById(List<Long> idList, Long declarationId) {
@@ -366,10 +285,40 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     /**
-     * Реализации выборки данных для спецотчетов "По выделенным" (SBRFNDFL-8445)
+     * Возвращает данные по спецотчету "По выбранным" для вкладки "Сведения о доходах и НДФЛ" (SBRFNDFL-8445)
      *
-     * Выборка для вкладки "Авансовые платежи" по списку ИНП физлиц и номеру формы
-     * @return список авансовых платежей
+     * @param operationIdList список идентификаторов операций выбранных записей в форме
+     * @param declarationId идентификатор формы
+     * @return Данные для данных раздела 2 "Сведения о доходах и НДФЛ"
+     */
+    @Override
+    public List<NdflPersonIncome> findNdflPersonIncomeBySelectedByOperationId(List<String> operationIdList, Long declarationId) {
+        try {
+            MapSqlParameterSource params = new MapSqlParameterSource();
+            params.addValue("operationIdList", operationIdList);
+            params.addValue("declarationId", declarationId);
+            return getNamedParameterJdbcTemplate().query(
+                    "select " + createColumns(NdflPersonIncome.COLUMNS, "npi") + ", np.inp, rba.NAME as asnu_name " +
+                            "from ndfl_person_income npi " +
+                            "inner join ndfl_person np on npi.ndfl_person_id = np.id " +
+                            "left join ref_book_asnu rba on npi.asnu_id = rba.id " +
+                            "where " +
+                            SqlUtils.transformToSqlInStatementForString("npi.operation_id", operationIdList) +
+                            " and np.declaration_data_id = :declarationId",
+                    params,
+                    new NdflPersonDaoImpl.NdflPersonIncomeRowMapper()
+            );
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<NdflPersonIncome>();
+        }
+    }
+
+    /**
+     * Возвращает данные по спецотчету "По выбранным" для вкладки "Сведения о доходах в виде авансовых платежей" (SBRFNDFL-8445)
+     *
+     * @param inpList список ИНП выбранных записей в форме
+     * @param declarationId идентификатор формы
+     * @return Данные для данных раздела 4 "Сведения о доходах в виде авансовых платежей"
      */
     @Override
     public List<NdflPersonPrepayment> findNdflPersonPrepaymentBySelectedByInp(List<String> inpList, Long declarationId) {
@@ -394,10 +343,11 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     /**
-     * Реализации выборки данных для спецотчетов "По выделенным" (SBRFNDFL-8445)
+     * Возвращает данные по спецотчету "По выбранным" для вкладки "Сведения о вычетах" (SBRFNDFL-8445)
      *
-     * Выборка для вкладки "Сведения о вычетах" по списку операций и номеру формы
-     * @return список вычетов
+     * @param operationIdList список идентификаторов операций выбранных записей в форме
+     * @param declarationId идентификатор формы
+     * @return Данные для данных раздела 3 "Сведения о вычетах"
      */
     @Override
     public List<NdflPersonDeduction> findNdflPersonDeductionBySelectedByOperationId(List<String> operationIdList, Long declarationId) {
@@ -422,10 +372,11 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     /**
-     * Реализации выборки данных для спецотчетов "По выделенным" (SBRFNDFL-8445)
+     * Возвращает данные по спецотчету "По выбранным" для вкладки "Сведения о доходах в виде авансовых платежей" (SBRFNDFL-8445)
      *
-     * Выборка для вкладки "Авансовые платежи" по списку операций и номеру формы
-     * @return список авансовых платежей
+     * @param operationIdList список идентификаторов операций выбранных записей в форме
+     * @param declarationId идентификатор формы
+     * @return Данные для данных раздела 4 "Сведения о доходах в виде авансовых платежей"
      */
     @Override
     public List<NdflPersonPrepayment> findNdflPersonPrepaymentBySelectedByOperationId(List<String> operationIdList, Long declarationId) {
@@ -448,33 +399,6 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         }
     }
 
-    /**
-     * Реализации выборки данных для спецотчетов "По выделенным" (SBRFNDFL-8445)
-     *
-     * Выборка для вкладки "Сведения о доходах и НДФЛ" по списку операций и номеру формы
-     * @return список доходов и НДФЛ
-     */
-    @Override
-    public List<NdflPersonIncome> findNdflPersonIncomeBySelectedByOperationId(List<String> operationIdList, Long declarationId) {
-        try {
-            MapSqlParameterSource params = new MapSqlParameterSource();
-            params.addValue("operationIdList", operationIdList);
-            params.addValue("declarationId", declarationId);
-            return getNamedParameterJdbcTemplate().query(
-                    "select " + createColumns(NdflPersonIncome.COLUMNS, "npi") + ", np.inp, rba.NAME as asnu_name " +
-                            "from ndfl_person_income npi " +
-                            "inner join ndfl_person np on npi.ndfl_person_id = np.id " +
-                            "left join ref_book_asnu rba on npi.asnu_id = rba.id " +
-                            "where " +
-                            SqlUtils.transformToSqlInStatementForString("npi.operation_id", operationIdList) +
-                            " and np.declaration_data_id = :declarationId",
-                    params,
-                    new NdflPersonDaoImpl.NdflPersonIncomeRowMapper()
-            );
-        } catch (EmptyResultDataAccessException e) {
-            return new ArrayList<NdflPersonIncome>();
-        }
-    }
 
 
 

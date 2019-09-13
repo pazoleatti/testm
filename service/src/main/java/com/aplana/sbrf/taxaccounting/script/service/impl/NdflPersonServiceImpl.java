@@ -79,166 +79,163 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     }
 
     /**
-     * Возвращает данные по спецотчету по фильтру для вкладок "Реквизиты", "Сведения о доходах и НДФЛ",
-     * "Сведения о вычетах" и "Авансовые платежи" соответственно (SBRFNDFL-8445)
+     * Возвращает данные по спецотчету по фильтру для вкладки "Реквизиты" (SBRFNDFL-8445)
      *
      * @param ndflFilter значения фильтра
-     * @return список NdflPerson/NdflPersonIncomeDTO/NdflPersonDeductionDTO/NdflPersonPrepaymentDTO заполненый данными
+     * @param pagingParams параметры разбивки списка записей на страницы
+     * @return Данные о физическом лице - получателе дохода
      */
     @Override
     public PagingResult<NdflPerson> findPersonByFilter(NdflFilter ndflFilter, PagingParams pagingParams) {
         return ndflPersonDao.fetchNdflPersonByParameters(ndflFilter, pagingParams);
     }
 
+    /**
+     * Возвращает данные по спецотчету по фильтру для вкладки "Сведения о доходах и НДФЛ" (SBRFNDFL-8445)
+     *
+     * @param ndflFilter значения фильтра
+     * @param pagingParams параметры разбивки списка записей на страницы
+     * @return ДТО для данных раздела 2 "Сведения о доходах и НДФЛ"
+     */
     @Override
     public PagingResult<NdflPersonIncomeDTO> findIncomeByFilter(NdflFilter ndflFilter, PagingParams pagingParams) {
         return ndflPersonDao.fetchPersonIncomeByParameters(ndflFilter, pagingParams);
     }
 
+    /**
+     * Возвращает данные по спецотчету по фильтру для вкладки "Сведения о вычетах" (SBRFNDFL-8445)
+     *
+     * @param ndflFilter значения фильтра
+     * @param pagingParams параметры разбивки списка записей на страницы
+     * @return ДТО для данных раздела 3 "Сведения о вычетах"
+     */
     @Override
     public PagingResult<NdflPersonDeductionDTO> findDeductionByFilter(NdflFilter ndflFilter, PagingParams pagingParams) {
         return ndflPersonDao.fetchPersonDeductionByParameters(ndflFilter, pagingParams);
     }
 
+    /**
+     * Возвращает данные по спецотчету по фильтру для вкладки "Сведения о доходах в виде авансовых платежей" (SBRFNDFL-8445)
+     *
+     * @param ndflFilter значения фильтра
+     * @param pagingParams параметры разбивки списка записей на страницы
+     * @return ДТО для данных раздела 4 "Сведения о доходах в виде авансовых платежей"
+     */
     @Override
     public PagingResult<NdflPersonPrepaymentDTO> findPrepaymentByFilter(NdflFilter ndflFilter, PagingParams pagingParams) {
         return ndflPersonDao.fetchPersonPrepaymentByParameters(ndflFilter, pagingParams);
     }
 
-
     /**
-     * Возвращает данные по спецотчету по выбранным записям (SBRFNDFL-8445)
-     * @param inpList список ИНП отобранных записей
-     */
-    @Override
-    public List<NdflPerson> findNdflPersonBySelected(List<String> inpList) {
-        return ndflPersonDao.findAllPersonByInpList(inpList);
-    }
-
-    @Override
-    public List<NdflPersonIncome> findNdflPersonIncomeBySelected(List<String> inpList) {
-        return ndflPersonDao.findAllPersonIncomeBySelectedByInpList(inpList);
-    }
-
-    @Override
-    public List<NdflPersonDeduction> findNdflPersonDeductionBySelected(List<String> inpList) {
-        return ndflPersonDao.findAllNdflPersonDeductionBySelectedByInpList(inpList);
-    }
-
-    @Override
-    public List<NdflPersonPrepayment> findNdflPersonPrepaymentBySelected(List<String> inpList) {
-        return ndflPersonDao.findAllNdflPersonPrepaymentBySelectedByInpList(inpList);
-    }
-
-    /**
-     * Реализации выборки данных для спецотчетов "По выделенным" (SBRFNDFL-8445)
+     * Возвращает данные по спецотчету "По выбранным" для вкладки "Реквизиты" (SBRFNDFL-8445)
      *
-     * Выборка для вкладки "Реквизиты" по списку идентификаторов записей и номеру формы
-     * @return список ФЛ
-     */
-    public List<NdflPerson> findNdflPersonBySelectedById(List<Long> idList, Long declarationId) {
-        return ndflPersonDao.findNdflPersonBySelectedById(idList, declarationId);
-    }
-
-    /**
-     * Реализации выборки данных для спецотчетов "По выделенным" (SBRFNDFL-8445)
-     *
-     * Выборка для вкладки "Реквизиты" по списку ИНП физлиц и номеру формы
-     * @return список ФЛ
+     * @param inpList список ИНП выбранных записей в форме
+     * @param declarationId идентификатор формы
+     * @return Данные о физическом лице - получателе дохода
      */
     public List<NdflPerson> findNdflPersonBySelectedByInp(List<String> inpList, Long declarationId) {
         return ndflPersonDao.findNdflPersonBySelectedByInp(inpList, declarationId);
     }
 
     /**
-     * Реализации выборки данных для спецотчетов "По выделенным" (SBRFNDFL-8445)
+     * Возвращает данные по спецотчету "По выбранным" для вкладки "Сведения о доходах и НДФЛ" (SBRFNDFL-8445)
      *
-     * Выборка для вкладки "Сведения о доходах и НДФЛ" по списку идентификаторов записей и номеру формы
-     * @return список доходов и НДФЛ
+     * @param idList список идентификаторов выбранных записей в форме
+     * @param declarationId идентификатор формы
+     * @return Данные для данных раздела 2 "Сведения о доходах и НДФЛ"
      */
     public List<NdflPersonIncome> findNdflPersonIncomeBySelectedById(List<Long> idList, Long declarationId) {
         return ndflPersonDao.findNdflPersonIncomeBySelectedById(idList, declarationId);
     }
 
     /**
-     * Реализации выборки данных для спецотчетов "По выделенным" (SBRFNDFL-8445)
+     * Возвращает данные по спецотчету "По выбранным" для вкладки "Сведения о доходах и НДФЛ" (SBRFNDFL-8445)
      *
-     * Выборка для вкладки "Сведения о доходах и НДФЛ" по списку ИНП физлиц и номеру формы
-     * @return список доходов и НДФЛ
+     * @param inpList список ИНП выбранных записей в форме
+     * @param declarationId идентификатор формы
+     * @return Данные для данных раздела 2 "Сведения о доходах и НДФЛ"
      */
     public List<NdflPersonIncome> findNdflPersonIncomeBySelectedByInp(List<String> inpList, Long declarationId) {
         return ndflPersonDao.findNdflPersonIncomeBySelectedByInp(inpList, declarationId);
     }
 
     /**
-     * Реализации выборки данных для спецотчетов "По выделенным" (SBRFNDFL-8445)
+     * Возвращает данные по спецотчету "По выбранным" для вкладки "Сведения о вычетах" (SBRFNDFL-8445)
      *
-     * Выборка для вкладки "Сведения о вычетах" по списку идентификаторов записей и номеру формы
-     * @return список вычетов
+     * @param idList список идентификаторов выбранных записей в форме
+     * @param declarationId идентификатор формы
+     * @return Данные для данных раздела 3 "Сведения о вычетах"
      */
     public List<NdflPersonDeduction> findNdflPersonDeductionBySelectedById(List<Long> idList, Long declarationId) {
         return ndflPersonDao.findNdflPersonDeductionBySelectedById(idList, declarationId);
     }
 
     /**
-     * Реализации выборки данных для спецотчетов "По выделенным" (SBRFNDFL-8445)
+     * Возвращает данные по спецотчету "По выбранным" для вкладки "Сведения о вычетах" (SBRFNDFL-8445)
      *
-     * Выборка для вкладки "Сведения о вычетах" по списку ИНП физлиц и номеру формы
-     * @return список вычетов
+     * @param inpList список ИНП выбранных записей в форме
+     * @param declarationId идентификатор формы
+     * @return Данные для данных раздела 3 "Сведения о вычетах"
      */
     public List<NdflPersonDeduction> findNdflPersonDeductionBySelectedByInp(List<String> inpList, Long declarationId) {
         return ndflPersonDao.findNdflPersonDeductionBySelectedByInp(inpList, declarationId);
     }
 
     /**
-     * Реализации выборки данных для спецотчетов "По выделенным" (SBRFNDFL-8445)
+     * Возвращает данные по спецотчету "По выбранным" для вкладки "Сведения о доходах в виде авансовых платежей" (SBRFNDFL-8445)
      *
-     * Выборка для вкладки "Авансовые платежи" по списку идентификаторов записей и номеру формы
-     * @return список авансовых платежей
+     * @param idList список идентификаторов выбранных записей в форме
+     * @param declarationId идентификатор формы
+     * @return Данные для данных раздела 4 "Сведения о доходах в виде авансовых платежей"
      */
     public List<NdflPersonPrepayment> findNdflPersonPrepaymentBySelectedById(List<Long> idList, Long declarationId) {
         return ndflPersonDao.findNdflPersonPrepaymentBySelectedById(idList, declarationId);
     }
 
     /**
-     * Реализации выборки данных для спецотчетов "По выделенным" (SBRFNDFL-8445)
+     * Возвращает данные по спецотчету "По выбранным" для вкладки "Сведения о доходах в виде авансовых платежей" (SBRFNDFL-8445)
      *
-     * Выборка для вкладки "Авансовые платежи" по списку ИНП физлиц и номеру формы
-     * @return список авансовых платежей
+     * @param inpList список ИНП выбранных записей в форме
+     * @param declarationId идентификатор формы
+     * @return Данные для данных раздела 4 "Сведения о доходах в виде авансовых платежей"
      */
     public List<NdflPersonPrepayment> findNdflPersonPrepaymentBySelectedByInp(List<String> inpList, Long declarationId) {
         return ndflPersonDao.findNdflPersonPrepaymentBySelectedByInp(inpList, declarationId);
     }
 
     /**
-     * Реализации выборки данных для спецотчетов "По выделенным" (SBRFNDFL-8445)
+     * Возвращает данные по спецотчету "По выбранным" для вкладки "Сведения о доходах и НДФЛ" (SBRFNDFL-8445)
      *
-     * Выборка для вкладки "Сведения о вычетах" по списку операций и номеру формы
-     * @return список вычетов
+     * @param operationIdList список идентификаторов операций выбранных записей в форме
+     * @param declarationId идентификатор формы
+     * @return Данные для данных раздела 2 "Сведения о доходах и НДФЛ"
+     */
+    public List<NdflPersonIncome> findNdflPersonIncomeBySelectedByOperationId(List<String> operationIdList, Long declarationId) {
+        return ndflPersonDao.findNdflPersonIncomeBySelectedByOperationId(operationIdList, declarationId);
+    }
+
+    /**
+     * Возвращает данные по спецотчету "По выбранным" для вкладки "Сведения о вычетах" (SBRFNDFL-8445)
+     *
+     * @param operationIdList список идентификаторов операций выбранных записей в форме
+     * @param declarationId идентификатор формы
+     * @return Данные для данных раздела 3 "Сведения о вычетах"
      */
     public List<NdflPersonDeduction> findNdflPersonDeductionBySelectedByOperationId(List<String> operationIdList, Long declarationId) {
         return ndflPersonDao.findNdflPersonDeductionBySelectedByOperationId(operationIdList, declarationId);
     }
 
     /**
-     * Реализации выборки данных для спецотчетов "По выделенным" (SBRFNDFL-8445)
+     * Возвращает данные по спецотчету "По выбранным" для вкладки "Сведения о доходах в виде авансовых платежей" (SBRFNDFL-8445)
      *
-     * Выборка для вкладки "Авансовые платежи" по списку операций и номеру формы
-     * @return список авансовых платежей
+     * @param operationIdList список идентификаторов операций выбранных записей в форме
+     * @param declarationId идентификатор формы
+     * @return Данные для данных раздела 4 "Сведения о доходах в виде авансовых платежей"
      */
     public List<NdflPersonPrepayment> findNdflPersonPrepaymentBySelectedByOperationId(List<String> operationIdList, Long declarationId) {
         return ndflPersonDao.findNdflPersonPrepaymentBySelectedByOperationId(operationIdList, declarationId);
     }
 
-    /**
-     * Реализации выборки данных для спецотчетов "По выделенным" (SBRFNDFL-8445)
-     *
-     * Выборка для вкладки "Сведения о доходах и НДФЛ" по списку операций и номеру формы
-     * @return список доходов и НДФЛ
-     */
-    public List<NdflPersonIncome> findNdflPersonIncomeBySelectedByOperationId(List<String> operationIdList, Long declarationId) {
-        return ndflPersonDao.findNdflPersonIncomeBySelectedByOperationId(operationIdList, declarationId);
-    }
 
 
     @Override
