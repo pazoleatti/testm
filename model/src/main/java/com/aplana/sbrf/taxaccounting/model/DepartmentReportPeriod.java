@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model;
 
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookFormType;
+
 import java.io.Serializable;
 import java.util.Date;
 
@@ -33,6 +35,11 @@ public class DepartmentReportPeriod implements Serializable, SecuredEntity {
 	 * Дата сдачи корректировки
 	 */
     private Date correctionDate;
+
+	/**
+	 * Вид отчетности
+	 */
+	private RefBookFormType refBookFormType;
 
 	/**
 	 * Права доступа

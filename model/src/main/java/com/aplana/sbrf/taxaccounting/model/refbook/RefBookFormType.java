@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.model.refbook;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 /**
@@ -26,6 +25,9 @@ public class RefBookFormType extends RefBookSimple<Long> {
 
     //6-НДФЛ
     public final static RefBookFormType NDFL_6 = new RefBookFormType(5);
+
+    //Приложение 2
+    public final static RefBookFormType APPLICATION_2 = new RefBookFormType(6); //todo 6?
 
     public RefBookFormType(long id) {
         super(id);
