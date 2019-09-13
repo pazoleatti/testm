@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-8272 Реализовать добавление новых параметров в справочники -->
+    <changeSet id="3.10-adudenko-1" author="adudenko">
+        <sql>
+            insert into ref_book_form_type(id, code, name) values(7, 'Приложение 2', 'Приложение 2');
+            alter table department_report_period add form_type_id number(1);
+        </sql>
+    </changeSet>
+    <changeSet id="3.10-adudenko-2" author="adudenko">
+        <addForeignKeyConstraint baseColumnNames="form_type_id"
+                                 baseTableName="department_report_period"
+                                 constraintName="dpr_fk_ref_book_form_type_id"
+                                 onDelete="CASCADE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="ref_book_form_type"/>
+    </changeSet>
+
+</databaseChangeLog>

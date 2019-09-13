@@ -6,8 +6,6 @@ import lombok.Setter;
 
 /**
  * Виды налоговых форм
- *
- * @author dloshkarev
  */
 @Getter
 @Setter
@@ -27,7 +25,7 @@ public class RefBookFormType extends RefBookSimple<Long> {
     public final static RefBookFormType NDFL_6 = new RefBookFormType(5);
 
     //Приложение 2
-    public final static RefBookFormType APPLICATION_2 = new RefBookFormType(6); //todo 6?
+    public final static RefBookFormType APPLICATION_2 = new RefBookFormType(7);
 
     public RefBookFormType(long id) {
         super(id);

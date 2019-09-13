@@ -1,6 +1,8 @@
 package com.aplana.sbrf.taxaccounting.model;
 
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookFormType;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -14,73 +16,48 @@ public class DepartmentReportPeriod implements Serializable, SecuredEntity {
 	/**
 	 * Идентификатор
 	 */
+	@Getter
+	@Setter
     private Integer id;
 
 	/**
 	 * Отчетный период
 	 */
+	@Getter
+	@Setter
 	private ReportPeriod reportPeriod;
 
 	/**
 	 * Подразделение, к которому привязан отчетный период
 	 */
+	@Getter
+	@Setter
 	private Integer departmentId;
 
 	/**
 	 * Активность периода.
 	 */
+	@Getter
 	private boolean isActive;
 
 	/**
 	 * Дата сдачи корректировки
 	 */
+	@Getter
+	@Setter
     private Date correctionDate;
 
 	/**
 	 * Вид отчетности
 	 */
+	@Getter
+	@Setter
 	private RefBookFormType refBookFormType;
 
 	/**
 	 * Права доступа
 	 */
 	private long permissions;
-
-	public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public Integer getDepartmentId() {
-		return departmentId;
-	}
-
-	public void setDepartmentId(Integer departmentId) {
-		this.departmentId = departmentId;
-	}
-
-	public boolean isActive() {
-		return isActive;
-	}
-
-	public ReportPeriod getReportPeriod() {
-		return reportPeriod;
-	}
-
-	public void setReportPeriod(ReportPeriod reportPeriod) {
-		this.reportPeriod = reportPeriod;
-	}
-
-	public void setCorrectionDate(Date correctionDate) {
-		this.correctionDate = correctionDate;
-	}
-
-	public Date getCorrectionDate() {
-		return correctionDate;
-	}
 
 	@Override
 	public long getPermissions() {
