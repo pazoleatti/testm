@@ -829,10 +829,13 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
                     case currentTabKind.PERSONS:
                         // Список ИНП выбранных на вкладке записей
                         inpList = createNdflPersonInpList(currentTabKind)
+                        // Cписок идентификаторов выбранных на вкладке записей
+                        List<Long> idList = createNdflPersonIdList(currentTabKind)
 
-                        // Найти записи в разделе PERSONS (1): раздел 1, графа 2 == выбранная строка из раздела 1, графа 2
-                        // (ndfl_person.inp in :inpList)
-                        ndflPersonList = ndflPersonService.findNdflPersonBySelectedByInp(inpList, declarationData.id)
+
+                        // Найти записи в разделе PERSONS (1)
+                        // (ndfl_person.id in :idList)
+                        ndflPersonList = ndflPersonService.findByIdList(idList)
                         ndflPersonList.sort {it.rowNum}
                         // А затем - в оставшихся разделах
                         ndflPersonIncomeList = ndflPersonService.findNdflPersonIncomeBySelectedByInp(inpList, declarationData.id)
