@@ -193,10 +193,6 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
     public final static String RNU_NDFL_PERSON_ALL_DB = "rnu_ndfl_person_all_db.xlsx"
     public final static String REPORT_XLSX = "report.xlsx"
 
-    Map<Long, NdflPerson> ndflPersonCache = [:]
-    Map<Long, DeclarationData> declarationDataCache = [:]
-    Map<Integer, Department> departmentCache = [:]
-
     /**
      * Идентификатор шаблона РНУ-НДФЛ (консолидированная)
      */
@@ -432,6 +428,7 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
  * @return
  */
     def createXlsxReport() {
+        long time = System.currentTimeMillis()
         List<NdflPerson> ndflPersonList = ndflPersonService.findNdflPerson(declarationData.id)
 
         List<NdflPersonIncome> ndflPersonIncomeList = ndflPersonService.findNdflPersonIncome(declarationData.id)
@@ -456,6 +453,7 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
         } finally {
             writer.close()
         }
+        logForDebug("XLSX отчет создан (" + (System.currentTimeMillis() - time) + " мс)")
     }
 
     def createSpecificReport() {
@@ -487,7 +485,7 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
                 break
             case SubreportAliasConstants.RNU_NDFL_PERSON_ALL_DB:
                 exportAllDeclarationDataToExcel()
-                scriptSpecificReportHolder.setFileName("РНУ_НДФЛ_${declarationData.id}_${new Date().format('yyyy-MM-dd_HH-mm-ss')}.xlsx")
+                scriptSpecificReportHolder.setFileName("РНУ_НДФЛ_${declarationData.id}_${checkSubreportKind().getKind()}_${new Date().format('yyyy-MM-dd_HH-mm-ss')}.xlsx")
                 break
             case SubreportAliasConstants.RNU_RATE_REPORT:
                 createRateReport()
@@ -661,11 +659,23 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
 
 
     /**
-     * Виды спецотчетов "По выделенным" (SBRFNDFL-8445)
+     * Виды спецотчетов "По выделенным" (SBRFNDFL-8445, SBRFNDFL-8554)
      */
     @TypeChecked(TypeCheckingMode.SKIP)
     enum SubreportKindEnum {
-        ALL, BY_FILTER, BY_SELECTED
+        ALL ("По всем данным"),
+        BY_FILTER ("По отобранным по фильтру"),
+        BY_SELECTED ("По выбранным на странице")
+
+        private String kind
+
+        SubreportKindEnum (String kind) {
+            this.kind = kind
+        }
+
+        public String getKind() {
+            return kind
+        }
     }
 
     /**
@@ -2484,45 +2494,6 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
         }
     }
 
-
-    Department getPrimaryTB(NdflPersonIncome income) {
-        if (income.sourceId) {
-            NdflPersonIncome primaryIncome = ndflPersonService.getIncome(income.sourceId)
-            NdflPerson primaryPerson = getNdflPerson(primaryIncome.ndflPersonId)
-            DeclarationData primaryDeclaration = getDeclarationData(primaryPerson.declarationDataId)
-            Department parentTB = getDepartment(primaryDeclaration.departmentId)
-            return parentTB
-        }
-        return null
-    }
-
-    NdflPerson getNdflPerson(Long ndflPersonId) {
-        NdflPerson ndflPerson = ndflPersonCache.get(ndflPersonId)
-        if (!ndflPerson) {
-            ndflPerson = ndflPersonService.get(ndflPersonId)
-            ndflPersonCache.put(ndflPersonId, ndflPerson)
-        }
-        return ndflPerson
-    }
-
-    DeclarationData getDeclarationData(Long declarationDataId) {
-        DeclarationData declarationData = declarationDataCache.get(declarationDataId)
-        if (!declarationData) {
-            declarationData = declarationService.getDeclarationData(declarationDataId)
-            declarationDataCache.put(declarationDataId, declarationData)
-        }
-        return declarationData
-    }
-
-    Department getDepartment(Integer departmentId) {
-        Department department = departmentCache.get(departmentId)
-        if (!department) {
-            department = departmentService.getParentTB(departmentId)
-            departmentCache.put(departmentId, department)
-        }
-        return department
-    }
-
     /**
      * Класс инкапсулирующий данные
      */
@@ -3044,11 +3015,13 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
             CellStyle textRightStyle = styler.createBorderStyleRightAlignedTypeText()
             CellStyle textLeftStyle = styler.createBorderStyleLeftAlignedTypeText()
             FlIncomeData summaryFlIncomeData = new FlIncomeData(new HashSet<Long>(), new BigDecimal(0).setScale(2), new BigDecimal(0).setScale(2))
+            Map<Long, String> ndflPersonDepartmentMap = departmentService.getParentTBbyIncomeSourceIdList(ndflPersonIncomeList.sourceId)
             for (NdflPersonIncome npi in ndflPersonIncomeList) {
+                ScriptUtils.checkInterrupted()
                 if (npi.incomeAccruedDate) {
-                    Department primaryTB = getPrimaryTB(npi)
                     String period = getPeriod(npi.incomeAccruedDate)
-                    XlsxReportRowKey rowKey = new XlsxReportRowKey(npi.kpp, npi.oktmo, primaryTB?.name, period)
+                    String parentTBName = (npi.ndflPersonId) ? ndflPersonDepartmentMap.get(npi.sourceId) : ""
+                    XlsxReportRowKey rowKey = new XlsxReportRowKey(npi.kpp, npi.oktmo, parentTBName, period)
                     if (flIncomeDataMap.get(rowKey) == null) {
                         flIncomeDataMap.put(rowKey, new FlIncomeData(new HashSet<Long>(), new BigDecimal(0).setScale(2), new BigDecimal(0).setScale(2)))
                     }

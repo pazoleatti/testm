@@ -498,7 +498,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
                 break
             case SubreportAliasConstants.RNU_NDFL_PERSON_ALL_DB:
                 exportAllDeclarationDataToExcel()
-                scriptSpecificReportHolder.setFileName("РНУ_НДФЛ_${declarationData.id}_${new Date().format('yyyy-MM-dd_HH-mm-ss')}.xlsx")
+                scriptSpecificReportHolder.setFileName("РНУ_НДФЛ_${declarationData.id}_${checkSubreportKind().getKind()}_${new Date().format('yyyy-MM-dd_HH-mm-ss')}.xlsx")
                 break
             case SubreportAliasConstants.RNU_RATE_REPORT:
                 createRateReport()
@@ -626,11 +626,23 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
     }
 
     /**
-     * Виды спецотчетов "По выделенным" (SBRFNDFL-8445)
+     * Виды спецотчетов "По выделенным" (SBRFNDFL-8445, SBRFNDFL-8554)
      */
     @TypeChecked(TypeCheckingMode.SKIP)
     enum SubreportKindEnum {
-        ALL, BY_FILTER, BY_SELECTED
+        ALL ("По всем данным"),
+        BY_FILTER ("По отобранным по фильтру"),
+        BY_SELECTED ("По выбранным на странице")
+
+        private String kind
+
+        SubreportKindEnum (String kind) {
+            this.kind = kind
+        }
+
+        public String getKind() {
+            return kind
+        }
     }
 
     /**
