@@ -64,12 +64,21 @@ public class DepartmentConfig extends IdentityObject<Long> implements SecuredEnt
     private String reorgSuccessorName;
     // Код причины постановки организации по месту нахождения организации правопреемника
     private String reorgSuccessorKpp;
+    // Сочетание КПП/ОКТМО при формировании ОНФ для которой необходимо учитывать данные загруженные в систему
+    // с текущей парой КПП/ОКТМО
+    private RelatedKppOktmo relatedKppOktmo;
     // Права
     private long permissions;
 
     // Конструктор по всем полям для Lombok.Builder
     @Builder(toBuilder = true)
-    public DepartmentConfig(Long id, String kpp, RefBookOktmo oktmo, Date startDate, Date endDate, Integer rowOrd, RefBookDepartment department, String taxOrganCode, RefBookPresentPlace presentPlace, String name, String phone, RefBookSignatoryMark signatoryMark, String signatorySurName, String signatoryFirstName, String signatoryLastName, String approveDocName, String approveOrgName, RefBookReorganization reorganization, String reorgKpp, String reorgInn, String reorgSuccessorName, String reorgSuccessorKpp) {
+    public DepartmentConfig(Long id, String kpp, RefBookOktmo oktmo, Date startDate, Date endDate, Integer rowOrd,
+                            RefBookDepartment department, String taxOrganCode, RefBookPresentPlace presentPlace,
+                            String name, String phone, RefBookSignatoryMark signatoryMark, String signatorySurName,
+                            String signatoryFirstName, String signatoryLastName, String approveDocName,
+                            String approveOrgName, RefBookReorganization reorganization, String reorgKpp,
+                            String reorgInn, String reorgSuccessorName, String reorgSuccessorKpp,
+                            RelatedKppOktmo relatedKppOktmo) {
         super(id);
         this.kpp = kpp;
         this.oktmo = oktmo;
@@ -92,6 +101,7 @@ public class DepartmentConfig extends IdentityObject<Long> implements SecuredEnt
         this.reorgInn = reorgInn;
         this.reorgSuccessorName = reorgSuccessorName;
         this.reorgSuccessorKpp = reorgSuccessorKpp;
+        this.relatedKppOktmo = relatedKppOktmo;
     }
 
     // Fluent setters

@@ -674,7 +674,11 @@
          */
         .filter('kppOktmoPairFormatter', function () {
             return function (kppOktmoPair) {
-                return kppOktmoPair.kpp + ' / ' + kppOktmoPair.oktmo + (kppOktmoPair.relevance ? ' (' + kppOktmoPair.relevance + ')' : '');
+                if (kppOktmoPair && kppOktmoPair.kpp && kppOktmoPair.oktmo) {
+                    return kppOktmoPair.kpp + ' / ' + kppOktmoPair.oktmo + (kppOktmoPair.relevance ? ' (' + kppOktmoPair.relevance + ')' : '');
+                } else {
+                    return ''
+                }
             };
         })
 

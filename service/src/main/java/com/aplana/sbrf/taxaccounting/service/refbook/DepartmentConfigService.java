@@ -1,14 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.refbook;
 
-import com.aplana.sbrf.taxaccounting.model.BlobData;
-import com.aplana.sbrf.taxaccounting.model.DeclarationData;
-import com.aplana.sbrf.taxaccounting.model.KppOktmoPair;
-import com.aplana.sbrf.taxaccounting.model.KppOktmoPairFilter;
-import com.aplana.sbrf.taxaccounting.model.KppSelect;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.ReportFormCreationKppOktmoPair;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.action.DepartmentConfigsFilter;
 import com.aplana.sbrf.taxaccounting.model.action.ImportDepartmentConfigsAction;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
@@ -19,7 +11,6 @@ import com.aplana.sbrf.taxaccounting.model.result.ImportDepartmentConfigsResult;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.ScriptExposed;
 
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -95,7 +86,7 @@ public interface DepartmentConfigService {
     PagingResult<KppSelect> findAllKppByDepartmentIdAndKppContaining(int departmentId, String kpp, PagingParams pagingParams);
 
     /**
-     * Возвращяет пары КПП/ОКТМО для формы создания отчетности
+     * Возвращяет пары КПП/ОКТМО
      *
      * @param filter       фильтр
      * @param pagingParams параметры пагинации и сортировки

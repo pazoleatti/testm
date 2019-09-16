@@ -20,4 +20,6 @@
 	<logger name="net.ttddyy.dsproxy.listener.logging.CommonsQueryLoggingListener" level="DEBUG"/>
 	<!-- Чтобы убрать сообщения WARN bitronix.tm.twopc.Preparer executing transaction with 0 enlisted resource при локальном запуске -->
     <logger name="bitronix.tm.twopc.Preparer" level="error"/>
+	<!-- Чтобы убрать сообщения ERROR com.ibm.ws.webcontainer.internal.WebContainer, которые засоряют логи -->
+    <logger name="com.ibm.ws.webcontainer.internal.WebContainer" level="fatal"/>
 </configuration>

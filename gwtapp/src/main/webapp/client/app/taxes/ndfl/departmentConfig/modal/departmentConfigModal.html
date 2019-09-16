@@ -215,6 +215,27 @@
                             </div>
                         </div>
                     </div>
+                    <!--Учитывать в КПП/ОКТМО:-->
+                    <div class="row-fluid form-group">
+                        <div class="span4">
+                            <label class="control-label">
+                                {{::'departmentConfig.modal.field.relatedKppOktmo.label' | translate}}:
+                            </label>
+                        </div>
+                        <div data-ng-if="mode === 'VIEW'" class="span8 info-text">
+                            {{record.relatedKppOktmo | kppOktmoPairFormatter}}
+                        </div>
+                        <div data-ng-if="mode !== 'VIEW'" class="span8">
+                            <div data-aplana-field>
+                                <div data-ng-controller="SelectKppOktmoPairsCtrl"
+                                     data-ui-select2="kppOkmtoPairSelect.options"
+                                     data-ng-model="record.relatedKppOktmo"
+                                     data-ng-disabled="!record.department.name || !record.endDate"
+                                     data-ng-init="initSelectKppOktmoPairsByParams('record.relatedKppOktmo', null, 'record.department', null, 'record.endDate')">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

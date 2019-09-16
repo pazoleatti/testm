@@ -1,11 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.mapper;
 
-import com.aplana.sbrf.taxaccounting.model.refbook.DepartmentConfig;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDepartment;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookOktmo;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookPresentPlace;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookReorganization;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookSignatoryMark;
+import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import org.springframework.jdbc.core.RowMapper;
 
 import java.sql.ResultSet;
@@ -36,6 +31,7 @@ public class DepartmentConfigRowMapper implements RowMapper<DepartmentConfig> {
         departmentConfig.setSignatoryLastName(rs.getString("signatory_lastname"));
         departmentConfig.setApproveDocName(rs.getString("approve_doc_name"));
         departmentConfig.setApproveOrgName(rs.getString("approve_org_name"));
+        departmentConfig.setRelatedKppOktmo(mapRelatedKppOktmo(rs));
         return departmentConfig;
     }
 
@@ -85,5 +81,12 @@ public class DepartmentConfigRowMapper implements RowMapper<DepartmentConfig> {
         signatoryMark.setCode(rs.getInt("signatory_code"));
         signatoryMark.setName(rs.getString("signatory_name"));
         return signatoryMark;
+    }
+
+    private RelatedKppOktmo mapRelatedKppOktmo(ResultSet rs) throws SQLException {
+        RelatedKppOktmo relatedKppOktmo = new RelatedKppOktmo();
+        relatedKppOktmo.setKpp(rs.getString("related_kpp"));
+        relatedKppOktmo.setOktmo(rs.getString("related_oktmo_id"));
+        return relatedKppOktmo;
     }
 }
