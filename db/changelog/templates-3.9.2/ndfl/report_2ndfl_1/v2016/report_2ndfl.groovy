@@ -838,7 +838,8 @@ class Report2Ndfl extends AbstractScriptClass {
         }
         def missingDepartmentConfigs = kppOktmoPairs.findResults { it.first == null ? it.second : null }
         for (def departmentConfig : missingDepartmentConfigs) {
-            logger.error("Не удалось создать форму $declarationTemplate.name, за период ${formatPeriod(departmentReportPeriod)}, " +
+            // Заменить ошибку на предупреждение (SBRFNDFL-8557)
+            logger.warn("Не удалось создать форму $declarationTemplate.name, за период ${formatPeriod(departmentReportPeriod)}, " +
                     "подразделение: $department.name, КПП: $departmentConfig.kpp, ОКТМО: $departmentConfig.oktmo.code. " +
                     "В РНУ НДФЛ (консолидированная) № $sourceKnf.id для подразделения: $department.name за период ${formatPeriod(departmentReportPeriod)} " +
                     "отсутствуют операции для указанных КПП и ОКТМО")
