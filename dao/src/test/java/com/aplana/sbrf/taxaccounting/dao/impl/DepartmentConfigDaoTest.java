@@ -214,6 +214,17 @@ public class DepartmentConfigDaoTest {
     }
 
     @Test
+    public void findAllKppOktmoPairsByFilterTest3() {
+        List<ReportFormCreationKppOktmoPair> kppOktmoPairs = departmentConfigDao.findAllKppOktmoPairsByFilter(new KppOktmoPairFilter()
+                        .departmentId(2).relevanceDate(newDate(31, 12, 2017)),
+                PagingParams.getInstance(1, 10));
+        assertThat(kppOktmoPairs, containsInAnyOrder(
+                new ReportFormCreationKppOktmoPair("000000002", "111", "действует до 31.12.2017"),
+                new ReportFormCreationKppOktmoPair("000000003", "111", "действует до 31.12.2017"),
+                new ReportFormCreationKppOktmoPair("000000006", "111", "действует до 31.12.2017")));
+    }
+
+    @Test
     public void findAllKppOktmoPairsByFilterTestPaging() {
         PagingParams paging = PagingParams.getInstance(2, 2);
         paging.setProperty("kpp desc, oktmo");
