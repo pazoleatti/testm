@@ -51,4 +51,20 @@
         </update>
     </changeSet>
 
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-8557 Изменить фатальность уведомлений об ошибке при формировании 2-НДФЛ (1) и 6-НДФЛ для пары КПП+ОКТМО где отсутствуют операции -->
+    <changeSet id="3.9.2-avtornikov-1" author="avtornikov">
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="CREATE_SCRIPT" valueClobFile="templates-3.9.2/ndfl/report_2ndfl_1/v2016/report_2ndfl.groovy"/>
+            <where>declaration_type_id = 102</where>
+        </update>
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="CREATE_SCRIPT" valueClobFile="templates-3.9.2/ndfl/report_2ndfl_1/v2016/report_2ndfl.groovy"/>
+            <where>declaration_type_id = 104</where>
+        </update>
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="CREATE_SCRIPT" valueClobFile="templates-3.9.2/ndfl/report_6ndfl/v2016/report_6ndfl.groovy"/>
+            <where>declaration_type_id = 103</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>
