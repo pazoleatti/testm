@@ -315,7 +315,6 @@ class Check extends AbstractScriptClass {
         def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
         def periodCode = reportPeriodService.getReportPeriodTypeById(reportPeriod.getDictTaxPeriodId()).getCode()
         if(REGULAR_YEAR.equals(periodCode) || LIQUIDATION_YEAR.equals(periodCode)) {
-            // Проверка
             if (declarationData.declarationTemplateId == NDFL_2_1_DECLARATION_TYPE) {
                 interdocumentaryCheckData()
             }
@@ -325,6 +324,11 @@ class Check extends AbstractScriptClass {
             msgInfo = sprintf(msgInfo, declarationData.id, FORM_NAME_NDFL2, declarationData.kpp, declarationData.oktmo)
             logger.info(msgInfo + " междокументные проверки не выполняются. Форма должна быть годовой")
         }
+
+// Так было...
+//        if (declarationData.declarationTemplateId == NDFL_2_1_DECLARATION_TYPE) {
+//            interdocumentaryCheckData()
+//        }
     }
 
     def interdocumentaryCheckData() {
