@@ -941,9 +941,22 @@ public class DeclarationDataController {
         return declarationService.createPdfTask(userInfo, declarationDataId);
     }
 
-
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity handleAccessDeniedException() {
         return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+    }
+
+    /**
+     * Формирование выгрузки списка источники-приемники в xlsx
+     *
+     * @param declarationDataId идентификатор декларации
+     * @param sources        источники
+     * @param destinations   приемники
+     * @return Результат запуска задачи
+     */
+    @PostMapping(value = "/actions/declarationData/{declarationDataId}/unloadListInXlsx")
+    public String createUnloadListInExcel(@PathVariable("declarationDataId") long declarationDataId, @RequestParam boolean sources, @RequestParam boolean destinations ) {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        return declarationService.createTaskToCreateUnloadListInXlsx(userInfo, declarationDataId, sources, destinations);
     }
 }

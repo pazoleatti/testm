@@ -85,6 +85,7 @@
         "button.change": "Изменить",
         "button.edit": "Редактировать",
         "button.close": "Закрыть",
+        "button.unload": "Выгрузить",
         "button.today": "Сегодня",
         "button.clear": "Очистить",
         "button.select": "Выбрать",

@@ -70,6 +70,8 @@ public class MainLockKeyGeneratorImpl implements LockKeyGenerator {
             return String.format("DECLARATION_TEMPLATE_%s_6NDFL", declarationDataId);
         else if (operationType.equals(OperationType.DECLARATION_2NDFL_FL))
             return String.format("DECLARATION_TEMPLATE_%s_2NDFL_FL", declarationDataId);
+        else if (operationType.equals(OperationType.EXCEL_UNLOAD_LIST))
+            return String.format("DECLARATION_TEMPLATE_%s_REPORT_LINK_DECLARATION", declarationDataId);
         else if (operationType.equals(OperationType.EXPORT_REPORTS))
             return String.format("EXPORT_REPORTS_%s", declarationDataId);
         else if (operationType.equals(OperationType.UPDATE_DOC_STATE))

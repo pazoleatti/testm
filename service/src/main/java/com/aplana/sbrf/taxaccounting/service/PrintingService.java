@@ -105,4 +105,14 @@ public interface PrintingService {
      * @return uuid сформированного файла в базе.
      */
     String generateCsvNotifications(List<Notification> notifications);
+
+    /**
+     * Формирует excel-отчет списка источники-приемники
+     *
+     * @param declarationDataId  идентификатор декларации
+     * @param sources            источники
+     * @param destinations       приемники
+     * @return uuid на блоб файла
+     */
+    String generateExcelUnloadList(long declarationDataId, boolean sources, boolean destinations, TAUser user);
 }

@@ -135,6 +135,30 @@
                 $scope.close = function () {
                     $modalInstance.dismiss();
                 };
+
+                /**
+                 * Выгрузить в Excel
+                 */
+                $scope.unloadList = function () {
+                    $http({
+                        method: "POST",
+                        url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/unloadListInXlsx",
+                        params: {
+                            sources: $scope.gridFilter.showSources,
+                            destinations: $scope.gridFilter.showDestinations
+                        }
+                    }).then(function (response) {
+                        if (response.data) {
+                            $logPanel.open('log-panel-container', response.data);
+                        }
+                    });
+                    $modalInstance.dismiss();
+                };
+
+                $scope.getRawDatalength = function () {
+                    return $scope.$$childHead.$rawData.length;
+                };
+
             }])
 
         .filter('indexFormatter', function () {

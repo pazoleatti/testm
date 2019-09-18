@@ -29,6 +29,7 @@ import com.aplana.sbrf.taxaccounting.service.impl.print.logentry.LogEntryReportB
 import com.aplana.sbrf.taxaccounting.service.impl.print.persons.PersonsReportBuilder;
 import com.aplana.sbrf.taxaccounting.service.impl.print.refbook.RefBookCSVReportBuilder;
 import com.aplana.sbrf.taxaccounting.service.impl.print.refbook.RefBookExcelReportBuilder;
+import com.aplana.sbrf.taxaccounting.service.impl.print.sourcesAndDestinations.SourcesAndDestinationsReportBuilder;
 import com.aplana.sbrf.taxaccounting.service.impl.print.tausers.TAUsersReportBuilder;
 import com.aplana.sbrf.taxaccounting.service.impl.refbook.BatchIterator;
 import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
@@ -92,6 +93,8 @@ public class PrintingServiceImpl implements PrintingService {
     private RefBookTaxpayerStateDao refBookTaxpayerStateDao;
     @Autowired
     private RefBookAsnuDao refBookAsnuDao;
+    @Autowired
+    private SourceService sourceService;
 
     @Override
     public String generateCsvLogEntries(List<LogEntry> logEntries) {
@@ -512,6 +515,25 @@ public class PrintingServiceImpl implements PrintingService {
             reportPath = reportBuilder.createReport();
             String fileName = makeDepartmentConfigsExcelFileName(departmentId);
             return blobDataService.create(reportPath, fileName);
+        } catch (IOException e) {
+            LOG.error(e.getMessage(), e);
+            throw new ServiceException(e.getMessage());
+        } finally {
+            AppFileUtils.deleteTmp(reportPath);
+        }
+    }
+
+    @Override
+    public String generateExcelUnloadList(long declarationDataId, boolean sources, boolean destinations, TAUser user) {
+        List<Relation> relationList = new ArrayList<>();
+        if (sources) relationList.addAll(sourceService.getDeclarationSourcesInfo(declarationDataId));
+        if (destinations) relationList.addAll(sourceService.getDeclarationDestinationsInfo(declarationDataId));
+
+        SourcesAndDestinationsReportBuilder reportBuilder = new SourcesAndDestinationsReportBuilder(relationList, declarationDataId);
+        String reportPath = null;
+        try {
+            reportPath = reportBuilder.createReport();
+            return blobDataService.create(reportPath, declarationDataId + "_Источники приемники_" + FastDateFormat.getInstance("dd.MM.yyyy").format(new Date()) + ".xlsx");
         } catch (IOException e) {
             LOG.error(e.getMessage(), e);
             throw new ServiceException(e.getMessage());

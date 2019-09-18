@@ -292,6 +292,17 @@ public interface DeclarationDataService {
     String createTaskToCreateReportXlsx(TAUserInfo userInfo, long declarationDataId);
 
     /**
+     * Формирование выгрузки списка источники-приемники в xlsx
+     *
+     * @param userInfo           информация о пользователе, выполняющего действие
+     * @param declarationDataId  идентификатор декларации
+     * @param sources            источники
+     * @param destinations       приемники
+     * @return результат о формировании отчета
+     */
+    String createTaskToCreateUnloadListInXlsx(TAUserInfo userInfo, long declarationDataId, boolean sources, boolean destinations);
+
+    /**
      * Возвращает информацию о доступности скачивания отчетов
      *
      * @param userInfo          текущий пользователь

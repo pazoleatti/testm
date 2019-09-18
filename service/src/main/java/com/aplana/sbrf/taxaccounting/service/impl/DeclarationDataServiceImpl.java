@@ -1030,6 +1030,24 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
+    public String createTaskToCreateUnloadListInXlsx(final TAUserInfo userInfo, final long declarationDataId, final boolean sources, final boolean destinations) {
+        LOG.info(String.format("DeclarationDataServiceImpl.createUnloadListInXlsx by %s. declarationDataId: %s",
+                userInfo, declarationDataId));
+
+        Logger logger = new Logger();
+
+        reportService.deleteByDeclarationAndType(declarationDataId, DeclarationReportType.EXCEL_DEC);
+        Map<String, Object> params = new HashMap<>();
+        params.put("declarationDataId", declarationDataId);
+        params.put("sources", sources);
+        params.put("destinations", destinations);
+
+        asyncManager.createTask(OperationType.EXCEL_UNLOAD_LIST, userInfo, params, logger);
+
+        return logEntryService.save(logger.getEntries());
+    }
+
+    @Override
     public ReportAvailableResult checkAvailabilityReports(TAUserInfo userInfo, long declarationDataId) {
         ReportAvailableResult reportAvailableResult = new ReportAvailableResult();
         if (!existDeclarationData(declarationDataId)) {
@@ -2037,10 +2055,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 }
             case SPECIFIC_REPORT_DEC:
                 String alias = (String) params.get("alias");
-                if (RNU_NDFL_PERSON_ALL_DB.equals(alias) && isReportByAllData(params)) {
-                    return ndflPersonDao.getNdflPersonAllSectionMaxCount(declarationDataId);
-                } else {
+                if (RNU_NDFL_PERSON_ALL_DB.equals(alias) && !isReportByAllData(params)) {
                     return 0L;
+                } else {
+                    return ndflPersonDao.getNdflPersonAllSectionMaxCount(declarationDataId);
                 }
             default:
                 throw new ServiceException("Неверный тип отчета(%s)", asyncTaskType);

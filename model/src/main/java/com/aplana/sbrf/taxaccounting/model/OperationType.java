@@ -13,6 +13,7 @@ import lombok.Getter;
 public enum OperationType {
 
     EXCEL_DEC(AsyncTaskType.EXCEL_DEC, "Формирование xlsx"),
+    EXCEL_UNLOAD_LIST(AsyncTaskType.UNLOAD_LIST, "Выгрузка списка источники-приемники в xlsx"),
     PDF_DEC(AsyncTaskType.PDF_DEC, "Предварительный просмотр налоговой формы"),
     IDENTIFY_PERSON(AsyncTaskType.IDENTIFY_PERSON, "Идентификация ФЛ"),
     CONSOLIDATE(AsyncTaskType.CONSOLIDATE, "Консолидация данных в налоговую форму"),

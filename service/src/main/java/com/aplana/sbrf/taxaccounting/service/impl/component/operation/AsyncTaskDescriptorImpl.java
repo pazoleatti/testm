@@ -89,6 +89,8 @@ public class AsyncTaskDescriptorImpl implements AsyncTaskDescriptor {
             return declarationDataAsyncTaskDescriptor.createDescription(declarationDataId, "Формирование XLSX-отчета для НФ");
         else if (operationType.equals(OperationType.EXCEL_TEMPLATE_DEC))
             return declarationDataAsyncTaskDescriptor.createDescription(declarationDataId, "Выгрузка данных налоговой формы в виде шаблона ТФ (Excel)");
+        else if (operationType.equals(OperationType.EXCEL_UNLOAD_LIST))
+            return declarationDataAsyncTaskDescriptor.createDescription(declarationDataId, "Выгрузка списка источники-приемники в xlsx (Excel)");
         else if (operationType.equals(OperationType.PDF_DEC))
             return declarationDataAsyncTaskDescriptor.createDescription(declarationDataId, "Создание формы предварительного просмотра");
         else if (operationType.equals(OperationType.RNU_NDFL_PERSON_DB))
