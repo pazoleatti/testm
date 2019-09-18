@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.async.AsyncManager;
 import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.filter.NdflFilter;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
@@ -42,16 +43,27 @@ public class SpecificReportDeclarationDataAsyncTask extends AbstractDeclarationA
 
 
     @Override
-    protected AsyncQueue checkTask(Long value, String taskName, String msg) throws AsyncTaskException {
+    public AsyncQueue checkTaskLimit(String taskDescription, TAUserInfo userInfo, Map<String, Object> params, Logger logger) throws AsyncTaskException {
+        DeclarationData declarationData = getDeclaration(userInfo, params);
+
+        Long value = declarationDataService.getValueForCheckLimit(userInfo, declarationData.getId(), getAsyncTaskType(), params);
+        if (value == null) {
+            throw new AsyncTaskException(new ServiceLoggerException("Налоговая форма не сформирована", null));
+        }
+
         AsyncTaskTypeData taskTypeData = asyncTaskTypeDao.findById(getAsyncTaskType().getId());
         if (taskTypeData == null) {
-            throw new AsyncTaskException(String.format("Cannot find task parameters for \"%s\"", taskName));
+            throw new AsyncTaskException(String.format("Cannot find task parameters for \"%s\"", taskDescription));
         }
         Long taskLimit = taskTypeData.getTaskLimit();
         if (taskLimit != null && taskLimit != 0 && value != 0 && taskLimit < value) {
-            String errorText = "Количество строк в одном из разделов формы превышает пороговое значение = "
-                    + taskLimit + " строк";
-            throw new ServiceException(errorText, taskName);
+            String reportAlias = params.get("alias").toString();
+            String errorText = String.format("Невозможно выполнение задачи по формированию спецотчета: %s, для формы: %s. " +
+                    "Причина: Количество строк в одном из разделов формы превышает пороговое значение = %d строк",
+                    OperationType.getOperationTypeBySubreport(reportAlias).getName(),
+                    declarationDataService.getFullDeclarationDescription(declarationData.getId()),
+                    taskLimit);
+            throw new ServiceException(errorText, taskDescription);
         } else {
             return AsyncQueue.SHORT;
         }

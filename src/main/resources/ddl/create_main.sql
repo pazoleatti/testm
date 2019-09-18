@@ -1690,7 +1690,7 @@ CREATE TABLE department_config (
   reorg_successor_kpp   VARCHAR2(9 CHAR),
   reorg_successor_name  VARCHAR2(1000 CHAR),
   related_kpp           VARCHAR2(9 CHAR),
-  related_oktmo_id      VARCHAR2(11 CHAR)
+  related_oktmo         VARCHAR2(11 CHAR)
 );
 COMMENT ON TABLE department_config IS 'Настройки подразделений';
 COMMENT ON COLUMN department_config.ID IS 'Уникальный идентификатор';
@@ -1716,7 +1716,7 @@ COMMENT ON COLUMN department_config.APPROVE_ORG_NAME IS 'Наименовани�
 COMMENT ON COLUMN department_config.reorg_successor_kpp is 'Код причины постановки организации по месту нахождения организации правопреемника';
 COMMENT ON COLUMN department_config.reorg_successor_name is 'Наименование подразделения для титульного листа отчетных форм по реорганизованному подразделению';
 COMMENT ON COLUMN department_config.related_kpp is 'Поле для формирования настройки подразделения Учитывать в КПП/ОКТМО';
-COMMENT ON COLUMN department_config.related_oktmo_id is 'Поле для формирования настройки подразделения Учитывать в КПП/ОКТМО';
+COMMENT ON COLUMN department_config.related_oktmo is 'Поле для формирования настройки подразделения Учитывать в КПП/ОКТМО';
 
 create sequence seq_department_config start with 10000;
 

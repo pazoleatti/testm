@@ -2037,10 +2037,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 }
             case SPECIFIC_REPORT_DEC:
                 String alias = (String) params.get("alias");
-                if (RNU_NDFL_PERSON_ALL_DB.equals(alias) && !isReportByAllData(params)) {
-                    return 0L;
-                } else {
+                if (RNU_NDFL_PERSON_ALL_DB.equals(alias) && isReportByAllData(params)) {
                     return ndflPersonDao.getNdflPersonAllSectionMaxCount(declarationDataId);
+                } else {
+                    return 0L;
                 }
             default:
                 throw new ServiceException("Неверный тип отчета(%s)", asyncTaskType);
