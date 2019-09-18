@@ -148,7 +148,7 @@ HOST "&2\sqlldr" &3 control=database-3.9.2/templates/ldr/refbook/blob_data.ldr l
 --
 --HOST "&2\sqlldr" &3 control=database-3.9/templates/ldr/ndfl/blob_data.ldr log=&4/02_02_ndfl_blob_data.txt bad=&5/02_02_ndfl_blob_data.bad
 
---3.9.2-mchernyakov-1, 3.9.2-mchernyakov-2, 3.9.2-mchernyakov-3
+--3.9.2-mchernyakov-1, 3.9.2-mchernyakov-2, 3.9.2-mchernyakov-3, 3.9.2-avtornikov-1
 HOST "&2\sqlldr" &3 control=database-3.9.2/templates/ldr/ndfl/template.ldr log=&4/3_9_2_02_03_ndfl_template.txt bad=&5/3_9_2_02_03_ndfl_template.bad
 
 --3.9.2-mchernyakov-4
