@@ -86,7 +86,7 @@ public class DepartmentConfigRowMapper implements RowMapper<DepartmentConfig> {
     private RelatedKppOktmo mapRelatedKppOktmo(ResultSet rs) throws SQLException {
         RelatedKppOktmo relatedKppOktmo = new RelatedKppOktmo();
         relatedKppOktmo.setKpp(rs.getString("related_kpp"));
-        relatedKppOktmo.setOktmo(rs.getString("related_oktmo_id"));
+        relatedKppOktmo.setOktmo(rs.getString("related_oktmo"));
         return relatedKppOktmo;
     }
 }

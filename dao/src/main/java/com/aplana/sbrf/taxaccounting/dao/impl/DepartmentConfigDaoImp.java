@@ -39,7 +39,7 @@ public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentCon
             " dc.department_id, dep.name department_name, dc.tax_organ_code, pp.id present_place_id, pp.code present_place_code, pp.name present_place_name, dc.name, dc.phone," +
             " reorg.id reorg_id, reorg.code reorg_code, reorg.name reorg_name, dc.reorg_inn, reorg_kpp, sign.id signatory_id, sign.code signatory_code, sign.name signatory_name, " +
             " dc.signatory_surname, dc.signatory_firstname, dc.signatory_lastname, dc.approve_doc_name, dc.approve_org_name, dc.reorg_successor_kpp, dc.reorg_successor_name, " +
-            " dc.related_kpp, dc.related_oktmo_id ";
+            " dc.related_kpp, dc.related_oktmo ";
     private final static String ALL_FIELDS_JOINS = "" +
             "join department dep on dep.id = dc.department_id \n" +
             "join ref_book_oktmo oktmo on oktmo.id = dc.oktmo_id \n" +
@@ -425,10 +425,10 @@ public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentCon
         getNamedParameterJdbcTemplate().update("" +
                         "insert into department_config(id, kpp, oktmo_id, start_date, end_date, department_id, tax_organ_code, present_place_id, name,\n" +
                         "   phone, reorganization_id, reorg_inn, reorg_kpp, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name,\n" +
-                        "   approve_org_name, reorg_successor_kpp, reorg_successor_name, related_kpp, related_oktmo_id)" +
+                        "   approve_org_name, reorg_successor_kpp, reorg_successor_name, related_kpp, related_oktmo)" +
                         "values (seq_department_config.nextval, :kpp, :oktmo_id, :start_date, :end_date, :department_id, :tax_organ_code, :present_place_id, :name,\n" +
                         "   :phone, :reorganization_id, :reorg_inn, :reorg_kpp, :signatory_id, :signatory_surname, :signatory_firstname, :signatory_lastname, :approve_doc_name,\n" +
-                        "   :approve_org_name, :reorg_successor_kpp, :reorg_successor_name, :related_kpp, :related_oktmo_id)",
+                        "   :approve_org_name, :reorg_successor_kpp, :reorg_successor_name, :related_kpp, :related_oktmo)",
                 params, keyHolder, new String[]{"ID"});
         departmentConfig.setId(keyHolder.getKey().longValue());
     }
@@ -445,7 +445,7 @@ public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentCon
                         "present_place_id = :present_place_id, name = :name, phone = :phone, reorganization_id = :reorganization_id, reorg_inn = :reorg_inn, reorg_kpp = :reorg_kpp, " +
                         "signatory_id = :signatory_id, signatory_surname = :signatory_surname, signatory_firstname = :signatory_firstname, signatory_lastname = :signatory_lastname, " +
                         "approve_doc_name = :approve_doc_name, approve_org_name = :approve_org_name, reorg_successor_kpp = :reorg_successor_kpp, reorg_successor_name = :reorg_successor_name, " +
-                        "related_kpp = :related_kpp, related_oktmo_id = :related_oktmo_id\n" +
+                        "related_kpp = :related_kpp, related_oktmo = :related_oktmo\n" +
                         "where id = :id",
                 params);
     }
@@ -478,10 +478,10 @@ public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentCon
         params.addValue("reorg_successor_name", departmentConfig.getReorgSuccessorName());
         if (departmentConfig.getRelatedKppOktmo() != null) {
             params.addValue("related_kpp", departmentConfig.getRelatedKppOktmo().getKpp());
-            params.addValue("related_oktmo_id", departmentConfig.getRelatedKppOktmo().getOktmo());
+            params.addValue("related_oktmo", departmentConfig.getRelatedKppOktmo().getOktmo());
         } else {
             params.addValue("related_kpp", null);
-            params.addValue("related_oktmo_id", null);
+            params.addValue("related_oktmo", null);
         }
     }
 

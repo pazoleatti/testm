@@ -67,4 +67,11 @@
         </update>
     </changeSet>
 
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-8418 Добавить поля "Учитывать КПП/ОКТМО" : переименование колонки -->
+    <changeSet id="3.9.2-adudenko-3" author="adudenko" >
+        <sql>
+            alter table department_config rename column related_oktmo_id to related_oktmo;
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>
