@@ -93,4 +93,12 @@
         </update>
     </changeSet>
 
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-8560 Реализовать возможность ручной смены состояния ЭД если установлен статус "Отправка в ЭДО" -->
+    <changeSet id="3.9.2-adudenko-4" author="adudenko">
+        <sql>
+            alter table transport_message drop constraint tmess_state_ck;
+            alter table transport_message add constraint tmess_state_ck check (state between 1 and 6);
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>
