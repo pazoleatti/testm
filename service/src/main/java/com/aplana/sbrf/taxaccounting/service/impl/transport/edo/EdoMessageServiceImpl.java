@@ -162,14 +162,8 @@ public class EdoMessageServiceImpl implements EdoMessageService {
         filter.setDeclarationId(declarationId.toString());
 
         List<TransportMessage> transportMessages = transportMessageService.findByFilter(filter, null);
-        Collections.sort(transportMessages, new Comparator<TransportMessage>() {
-            @Override
-            public int compare(TransportMessage o1, TransportMessage o2) {
-                return o1.getDateTime().isBefore(o2.getDateTime()) ? 1 : 0;
-            }
-        });
-
         TransportMessage lastTransportMessage = transportMessages.get(0);
+
         try {
             lastTransportMessage.setState(TransportMessageState.CANCELED);
             transportMessageService.update(lastTransportMessage);
