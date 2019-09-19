@@ -6,6 +6,8 @@ import com.aplana.sbrf.taxaccounting.dao.DepartmentConfigDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.action.DepartmentConfigsFilter;
 import com.aplana.sbrf.taxaccounting.model.action.ImportDepartmentConfigsAction;
+import com.aplana.sbrf.taxaccounting.model.consolidation.ConsolidationIncome;
+import com.aplana.sbrf.taxaccounting.model.consolidation.ConsolidationSourceDataSearchFilter;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.DepartmentConfig;
@@ -97,6 +99,11 @@ public class DepartmentConfigServiceImpl implements DepartmentConfigService {
     @Override
     public List<DepartmentConfig> findAllByKppAndOktmo(String kpp, String oktmo) {
         return departmentConfigDao.findAllByKppAndOktmo(kpp, oktmo);
+    }
+
+    @Override
+    public List<DepartmentConfig> findAllByKppAndOktmoAndFilter(String kpp, String oktmo, ConsolidationSourceDataSearchFilter filter) {
+        return departmentConfigDao.findAllByKppAndOktmoAndFilter(kpp, oktmo, filter);
     }
 
     @Override

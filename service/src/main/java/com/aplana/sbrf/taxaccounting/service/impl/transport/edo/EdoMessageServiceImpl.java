@@ -31,7 +31,6 @@ import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -71,12 +70,13 @@ public class EdoMessageServiceImpl implements EdoMessageService {
     private final TransportMessageFactory transportMessageFactory;
     private final NotificationService notificationService;
     private final LogEntryService logEntryService;
+    private final EdoResponseHandler edoResponseHandler;
     @Autowired(required = false)
     private MessageSender messageSender;
     @Autowired
     private AuditService auditService;
 
-    private static final String TRANSPORT_MESSAGE_CHANGE_NOTE_FORMAT = "Изменение статуса Транспортного сообщения № %s, " + // <Объект."Номер">
+    static final String TRANSPORT_MESSAGE_CHANGE_NOTE_FORMAT = "Изменение статуса Транспортного сообщения № %s, " + // <Объект."Номер">
             "Идентификатор сообщения: %s, " + // <Объект.\"Идентификатор сообщения\">
             "Тип сообщения: %s, " + // <Объект."Тип сообщения">
             "Статус сообщения: %s"; // <Объект."Статус сообщения">
@@ -91,7 +91,7 @@ public class EdoMessageServiceImpl implements EdoMessageService {
             "Тип сообщения: %s, " + // <Объект."Тип сообщения">
             "Статус сообщения: %s"; // <Объект."Статус сообщения">
 
-    private static final String MESSAGE_EXPLANATION_DATE_FORMAT = "dd.MM.YY HH:mm";
+    static final String MESSAGE_EXPLANATION_DATE_FORMAT = "dd.MM.YY HH:mm";
 
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
@@ -100,7 +100,8 @@ public class EdoMessageServiceImpl implements EdoMessageService {
                                  BlobDataService blobDataService, ConfigurationService configurationService, ValidateXMLService validateXMLService,
                                  TransportMessageService transportMessageService, CommonRefBookService commonRefBookService, LogBusinessService logBusinessService,
                                  LockDataService lockDataService, TransactionHelper transactionHelper, TAUserService taUserService, UploadTransportDataService uploadTransportDataService,
-                                 SubsystemService subsystemService, TransportMessageFactory transportMessageFactory, NotificationService notificationService, LogEntryService logEntryService) {
+                                 SubsystemService subsystemService, TransportMessageFactory transportMessageFactory, NotificationService notificationService, LogEntryService logEntryService,
+                                 EdoResponseHandler edoResponseHandler) {
         this.declarationDataService = declarationDataService;
         this.declarationTemplateService = declarationTemplateService;
         this.declarationLocker = declarationLocker;
@@ -118,6 +119,7 @@ public class EdoMessageServiceImpl implements EdoMessageService {
         this.transportMessageFactory = transportMessageFactory;
         this.notificationService = notificationService;
         this.logEntryService = logEntryService;
+        this.edoResponseHandler = edoResponseHandler;
     }
 
     @Override
@@ -144,11 +146,40 @@ public class EdoMessageServiceImpl implements EdoMessageService {
             validateIncomeMessage(xmlMessage, transportMessage);
             handleIncomeMessage(xmlMessage, transportMessage);
         } catch (Exception e) {
-            sendAuditOnTransportMessage(SYSTEM_ERROR_NOTE_FORMAT, transportMessage);
+            transportMessageService.sendAuditMessage(SYSTEM_ERROR_NOTE_FORMAT, transportMessage);
             LOG.warn("В результате обработки файла ответа от ЭДО произошла исключительная ситуация." +
                     "Создано сообщение в ЖА", e);
         } finally {
             transportMessageService.update(transportMessage);
+        }
+    }
+
+    @Override
+    public void cancel(Long declarationId) {
+        TransportMessageFilter filter = new TransportMessageFilter();
+        filter.setTypeId(TransportMessageType.OUTGOING.getIntValue());
+        filter.setStateIds(Collections.singletonList(TransportMessageState.SENT.getIntValue()));
+        filter.setDeclarationId(declarationId.toString());
+
+        List<TransportMessage> transportMessages = transportMessageService.findByFilter(filter, null);
+        Collections.sort(transportMessages, new Comparator<TransportMessage>() {
+            @Override
+            public int compare(TransportMessage o1, TransportMessage o2) {
+                return o1.getDateTime().isBefore(o2.getDateTime()) ? 1 : 0;
+            }
+        });
+
+        TransportMessage lastTransportMessage = transportMessages.get(0);
+        try {
+            lastTransportMessage.setState(TransportMessageState.CANCELED);
+            transportMessageService.update(lastTransportMessage);
+        } catch (Exception e) {
+            LOG.warn("Произошла ошибка при смене статуса ТС на '" + TransportMessageState.CANCELED.getText() + "'", e);
+
+            String declarationFullDesc = declarationDataService.getFullDeclarationDescription(declarationId);
+            throw new ServiceException(String.format("Не выполнена операция изменения состояния ЭД для налоговой формы: " +
+                    "%s Причина: Не удалось изменить статус связанного с формой транспортного сообщения в журнале " +
+                    "\"Обмен с ФП АС Учет Налогов\". Номер сообщения: %d", declarationFullDesc, lastTransportMessage.getId()));
         }
     }
 
@@ -183,7 +214,7 @@ public class EdoMessageServiceImpl implements EdoMessageService {
     private void handleIncomeMessage(String xmlMessage, TransportMessage incomeTransportMessage) {
         BaseMessage taxMessage = getTaxMessage(xmlMessage);
         enrichTransportBaseMessage(incomeTransportMessage, taxMessage);
-        sendAuditOnTransportMessage(TRANSPORT_MESSAGE_CREATE_NOTE_FORMAT, incomeTransportMessage);
+        transportMessageService.sendAuditMessage(TRANSPORT_MESSAGE_CREATE_NOTE_FORMAT, incomeTransportMessage);
         validateSenderAndRecipient(xmlMessage, taxMessage);
 
         if (isMessageFromFns(taxMessage)) {
@@ -191,31 +222,20 @@ public class EdoMessageServiceImpl implements EdoMessageService {
             handleFnsResponse(incomeTransportMessage, taxMessageTechDocument);
         } else if (isEdoTechReceipt(taxMessage)) {
             TaxMessageReceipt taxMessageReceipt = (TaxMessageReceipt) taxMessage;
-            handleEdoTechReceipt(incomeTransportMessage, taxMessageReceipt);
+            try {
+                edoResponseHandler.handleTechReceipt(incomeTransportMessage, taxMessageReceipt);
+            } catch (ServiceException e) {
+                failHandleEdoMessage(incomeTransportMessage, e.getMessage());
+                throw e;
+            }
         }
-    }
-
-    private TransportMessage getSourceTransportMessage(TransportMessageFilter transportMessageFilter) {
-        List<TransportMessage> sourceTransportMessages = transportMessageService
-                .findByFilter(transportMessageFilter, null);
-        TransportMessage result = null;
-        if (!CollectionUtils.isEmpty(sourceTransportMessages)) {
-            result = sourceTransportMessages.get(0);
-        }
-        return result;
     }
 
     private TransportMessage geSourceTransportMessageFromEdoTechDoc(TaxMessageTechDocument taxMessageTechDoc) {
         TransportMessageFilter transportMessageFilter = new TransportMessageFilter();
         transportMessageFilter.setMessageUuid(taxMessageTechDoc.getParentDocument());
         transportMessageFilter.setTypeId(TransportMessageType.OUTGOING.getIntValue());
-        return getSourceTransportMessage(transportMessageFilter);
-    }
-
-    private TransportMessage getSourceMessageFromEdoTechReceipt(TaxMessageReceipt taxMessageReceipt) {
-        TransportMessageFilter transportMessageFilter = new TransportMessageFilter();
-        transportMessageFilter.setMessageUuid(taxMessageReceipt.getUuid());
-        return getSourceTransportMessage(transportMessageFilter);
+        return transportMessageService.findFirstByFilter(transportMessageFilter);
     }
 
     private BaseMessage getTaxMessage(String message) {
@@ -260,36 +280,6 @@ public class EdoMessageServiceImpl implements EdoMessageService {
         return taxMessage instanceof TaxMessageReceipt;
     }
 
-    private void handleEdoTechReceipt(TransportMessage transportMessage, TaxMessageReceipt taxMessageReceipt) {
-        transportMessage.setContentType(TransportMessageContentType.TECH_RECEIPT);
-
-        TransportMessage sourceTransportMessage = getSourceMessageFromEdoTechReceipt(taxMessageReceipt);
-        if (sourceTransportMessage == null) {
-            String errorMessage = "Для данной технологической квитанции не найдено исходное сообщение";
-            failHandleEdoMessage(transportMessage, errorMessage);
-            throw new IllegalStateException(errorMessage + ". UUID сообщения = " + taxMessageReceipt.getUuid());
-        }
-
-        updateSourceTransportMessageState(taxMessageReceipt, sourceTransportMessage);
-        sendAuditOnTransportMessage(TRANSPORT_MESSAGE_CHANGE_NOTE_FORMAT, sourceTransportMessage); // 9.e
-
-        DeclarationData declarationData = declarationDataService.get(sourceTransportMessage.getDeclaration().getId());
-        if (declarationData == null) {
-            String errorMessage = "Не удалось найти налоговую форму № " + sourceTransportMessage.getDeclaration().getId() +
-                    " для изменения \"Состояние ЭД\" на " + SENT_TO_EDO.getName() +". " +
-                    "Идентификатор транспортного сообщения: " + transportMessage.getMessageUuid();
-            failHandleEdoMessage(transportMessage, errorMessage);
-            throw new IllegalStateException(errorMessage);
-        }
-        updateDeclarationState(declarationData, taxMessageReceipt.getStatus());
-        auditService.add(null, taUserService.getSystemUserInfo(), declarationData,
-                "Изменение \"Состояние ЭД\", для отчетной формы: № " + declarationData.getId(), null); // 9.i
-
-        transportMessage.setState(TransportMessageState.CONFIRMED);
-        transportMessage.setDeclaration(sourceTransportMessage.getDeclaration());
-        sendAuditOnTransportMessage(TRANSPORT_MESSAGE_CHANGE_NOTE_FORMAT, transportMessage); // 9.k
-    }
-
     private void failHandleEdoMessage(TransportMessage transportMessage, String errorMessage) {
         LOG.info(String.format("В результате обработки ответа от ЭДО возникла ошибка: '%s' , ТС №%d",
                 errorMessage, transportMessage.getId()));
@@ -298,55 +288,7 @@ public class EdoMessageServiceImpl implements EdoMessageService {
         transportMessage.setExplanation(dateFormat.format(new Date()) + " " + errorMessage);
     }
 
-    private void updateSourceTransportMessageState(TaxMessageReceipt taxMessageReceipt, TransportMessage transportMessage) {
-        TransportMessageState messageState = TransportMessageState.fromInt(taxMessageReceipt.getStatus().getCode());
-        if (TransportMessageState.CONFIRMED == messageState) {
-            transportMessage.setState(TransportMessageState.CONFIRMED);
-        } else if (TransportMessageState.ERROR == messageState) {
-            transportMessage.setState(TransportMessageState.ERROR);
-
-            SimpleDateFormat dateFormat = new SimpleDateFormat(MESSAGE_EXPLANATION_DATE_FORMAT);
-            String sourceTransportMessageExplanation = transportMessage.getExplanation();
-            String taxMessageErrorDetail = dateFormat.format(new Date()) + " " + taxMessageReceipt.getStatus().getDetail();
-            if (StringUtils.isEmpty(sourceTransportMessageExplanation)) {
-                transportMessage.setExplanation(taxMessageErrorDetail);
-            } else {
-                transportMessage.setExplanation(sourceTransportMessageExplanation + "\n-----------------\n" +
-                        taxMessageErrorDetail);
-            }
-        }
-        transportMessageService.update(transportMessage);
-    }
-
-    private void updateDeclarationState(DeclarationData declarationData, MessageStatus messageStatus) {
-        TransportMessageState incomeTransportMessageState =
-                TransportMessageState.fromInt(messageStatus.getCode());
-        RefBookDocState newDeclarationState = null;
-        List<Long> confirmedDocStates = Arrays.asList(SENDING_TO_EDO.getId(), NOT_SENT.getId(), EXPORTED.getId());
-        List<Long> errorDocStates = Arrays.asList(SENDING_TO_EDO.getId(), EXPORTED.getId());
-        if (TransportMessageState.CONFIRMED == incomeTransportMessageState
-                && confirmedDocStates.contains(declarationData.getDocStateId())) {
-            newDeclarationState = SENT_TO_EDO;
-        } else if (TransportMessageState.ERROR == incomeTransportMessageState
-                && errorDocStates.contains(declarationData.getDocStateId())) {
-            newDeclarationState = NOT_SENT;
-        }
-
-        if (newDeclarationState != null) {
-            Logger localLogger = new Logger();
-            declarationDataService.updateDocState(declarationData.getId(), newDeclarationState.getId());
-            LOG.info("Статус декларации #" + declarationData.getId() + " изменен с " +
-                    declarationData.getDocStateId() + " на " + newDeclarationState.getId());
-            logBusinessService.logFormEvent(
-                    declarationData.getId(),
-                    FormDataEvent.CHANGE_STATUS_ED,
-                    localLogger.getLogId(),
-                    "Изменено \"Состояние ЭД\" на основании полученной технологической квитанции от ЭДО",
-                    taUserService.getSystemUserInfo()
-            );
-        }
-    }
-
+    //TODO следует перенести в EdoResponseHandler во избежании перегруженности сервисного класса
     private void handleFnsResponse(TransportMessage incomeTransportMessage, TaxMessageTechDocument taxMessageTechDoc) {
         UploadTransportDataResult uploadTransportDataResult = new UploadTransportDataResult();
         FileWrapper sharedFileNameFromFns = null;
@@ -429,7 +371,7 @@ public class EdoMessageServiceImpl implements EdoMessageService {
                     taxMessageReceipt, xmlMessage, taxMessageTechDoc.getFileName(), declarationShortInfo);
 
             incomeTransportMessage.setState(uploadTransportDataResult.getMessageState());
-            sendAuditOnTransportMessage(TRANSPORT_MESSAGE_CHANGE_NOTE_FORMAT, incomeTransportMessage); // 8.h
+            transportMessageService.sendAuditMessage(TRANSPORT_MESSAGE_CHANGE_NOTE_FORMAT, incomeTransportMessage); // 8.h
         } catch (Exception e) {
             failHandleEdoMessage(incomeTransportMessage, e.getMessage());
         }
@@ -580,16 +522,7 @@ public class EdoMessageServiceImpl implements EdoMessageService {
         LOG.info("Транспортное сообщение овтетной технологической квитанции создано #" +
                 transportMessage.getMessageUuid());
 
-        sendAuditOnTransportMessage(TRANSPORT_MESSAGE_CREATE_NOTE_FORMAT, transportMessage);
-    }
-
-    private void sendAuditOnTransportMessage(String noteFormat, TransportMessage transportMessage) {
-        String note = String.format(noteFormat,
-                transportMessage.getId(),
-                transportMessage.getMessageUuid(),
-                transportMessage.getType().getText(),
-                transportMessage.getState().getText());
-        auditService.add(null, taUserService.getSystemUserInfo(), note);
+        transportMessageService.sendAuditMessage(TRANSPORT_MESSAGE_CREATE_NOTE_FORMAT, transportMessage);
     }
 
     private int getConfigIntValue(ConfigurationParam param) {

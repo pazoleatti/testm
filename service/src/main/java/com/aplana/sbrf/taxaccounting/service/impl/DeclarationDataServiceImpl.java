@@ -2446,7 +2446,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
                 // Список состояний, при которых производится поиск транспортных сообщений
                 List<Long> suitableStateList = Arrays.asList(RefBookDocState.NOT_SENT.getId(), RefBookDocState.EXPORTED.getId(), RefBookDocState.ERROR.getId());
-                if (suitableStateList.contains(docStateId)) {
+                if (suitableStateList.contains(docStateId) && !isDeclarationSendingToEdo(declaration)) {
                     Integer transportMessageCount = transportMessageDao.countByDeclarationIdAndType(declaration.getId(), TransportMessageType.OUTGOING.getIntValue());
                     if (transportMessageCount > 0) {
                         logger.error("Не выполнена операция изменения состояния ЭД для налоговой формы: %s. " +
@@ -2458,23 +2458,39 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     }
                 }
 
-                updateDocState(declaration.getId(), docStateId);
+                try {
+                    if (isDeclarationSendingToEdo(declaration)) {
+                        edoMessageService.cancel(declaration.getId());
+                    }
+                    updateDocState(declaration.getId(), docStateId);
 
-                logger.info("%s для отчетной  налоговой формы: № %s, Период: \"%s, %s%s\", Подразделение: \"%s\" завершено. " +
-                                "Изменено \"Состояние ЭД\": \"%s\"->\"%s\".",
-                        AsyncTaskType.UPDATE_DOC_STATE.getDescription(),
-                        declaration.getId(),
-                        departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(),
-                        reportPeriodType.getName(),
-                        formatCorrectionDate(departmentReportPeriod.getCorrectionDate()),
-                        department.getName(),
-                        docStateBefore.getName(),
-                        docState.getName());
-                logBusinessService.logFormEvent(declaration.getId(), FormDataEvent.CHANGE_STATUS_ED, logger.getLogId(), "Состояние ЭД = " + docState.getName(), userInfo);
+                    logger.info("%s для отчетной  налоговой формы: № %s, Период: \"%s, %s%s\", " +
+                                    "Подразделение: \"%s\" завершено. Изменено \"Состояние ЭД\": \"%s\"->\"%s\".",
+                            AsyncTaskType.UPDATE_DOC_STATE.getDescription(),
+                            declaration.getId(),
+                            departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(),
+                            reportPeriodType.getName(),
+                            formatCorrectionDate(departmentReportPeriod.getCorrectionDate()),
+                            department.getName(),
+                            docStateBefore.getName(),
+                            docState.getName());
+
+                    logBusinessService.logFormEvent(declaration.getId(), FormDataEvent.CHANGE_STATUS_ED,
+                            logger.getLogId(), "Состояние ЭД = " + docState.getName(), userInfo);
+                } catch (ServiceException e) {
+                    LOG.error(String.format("Произошла ошибка при смене статуса ЭД декларации #%d с #%d на #%d",
+                            declaration.getId(), declaration.getDocStateId(), docStateId));
+
+                    logger.info(e.getMessage());
+                }
             } else {
                 logger.getEntries().addAll(localLogger.getEntries());
             }
         }
+    }
+
+    private boolean isDeclarationSendingToEdo(DeclarationData declaration) {
+        return RefBookDocState.SENDING_TO_EDO.getId().equals(declaration.getDocStateId());
     }
 
     @Override

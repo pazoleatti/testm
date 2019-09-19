@@ -24,4 +24,10 @@ public interface EdoMessageService {
      * @param message XML-сообщение, полученное от ЭДО
      */
     void accept(String message);
+
+    /**
+     * Отменить отправку данных ОНФ в ЭДО
+     * @param declarationId идентификатор декларации (ОНФ)
+     */
+    void cancel(Long declarationId);
 }
