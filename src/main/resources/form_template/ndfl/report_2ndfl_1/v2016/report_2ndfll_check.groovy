@@ -94,12 +94,6 @@ class Check extends AbstractScriptClass {
     final ATTR_KOL_FL_DOHOD6 = "КолФЛДоход"
     final ATTR_AVANS_PLAT6 = "АвансПлат"
 
-    // Коды периодов соответствующие году для междокументных проверок (SBRFDNFL-8571)
-    final REGULAR_YEAR = "34"
-    final LIQUIDATION_YEAR = "90"
-    // Наименование формы для которой выполняются междокументные проверки (SBRFDNFL-8571)
-    final FORM_NAME_NDFL2 = "2-НДФЛ (1)"
-
     // Кэш для справочников
     Map<String, Map<String, RefBookValue>> refBookCache = [:]
     // Кэш провайдеров
@@ -310,20 +304,8 @@ class Check extends AbstractScriptClass {
             withHoldingTaxChecker.check(logger)
         }
         // Междокументарные проверки
-
-        // Перед выполнением междокументных проверок получить код периода (SBRFDNFL-8571)
-        def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
-        def periodCode = reportPeriodService.getReportPeriodTypeById(reportPeriod.getDictTaxPeriodId()).getCode()
-        if(REGULAR_YEAR.equals(periodCode) || LIQUIDATION_YEAR.equals(periodCode)) {
-            // Проверка
-            if (declarationData.declarationTemplateId == NDFL_2_1_DECLARATION_TYPE) {
-                interdocumentaryCheckData()
-            }
-        }
-        else {
-            def msgInfo = "В налоговой форме №: %d, \"%s\", КПП: \"%s\", ОКТМО: \"%s\" "
-            msgInfo = sprintf(msgInfo, declarationData.id, FORM_NAME_NDFL2, declarationData.kpp, declarationData.oktmo)
-            logger.info(msgInfo + " междокументные проверки не выполняются. Форма должна быть годовой")
+        if (declarationData.declarationTemplateId == NDFL_2_1_DECLARATION_TYPE) {
+            interdocumentaryCheckData()
         }
     }
 
