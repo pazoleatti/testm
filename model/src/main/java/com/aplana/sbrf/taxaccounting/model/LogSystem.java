@@ -33,5 +33,7 @@ public class LogSystem implements Serializable {
     private Integer auditFormTypeId = 1;
     private String server;
     private int isError;
+    // Для ХП необходим id пользователя (для SBRFNDFL-8565)
+    private Integer userId;
 
 }

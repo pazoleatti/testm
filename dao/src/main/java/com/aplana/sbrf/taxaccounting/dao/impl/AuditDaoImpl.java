@@ -37,7 +37,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
                     logSystem.getAuditFormTypeId(),
                     logSystem.getServer(),
                     // Для ХП необходим id пользователя (для SBRFNDFL-8565)
-                    logSystem.getId()
+                    logSystem.getUserId()
             );
         } catch (DataAccessException e) {
             LOG.error("Ошибки при логировании.", e);
