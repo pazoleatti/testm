@@ -3,6 +3,8 @@ package com.aplana.sbrf.taxaccounting.service.refbook;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.action.DepartmentConfigsFilter;
 import com.aplana.sbrf.taxaccounting.model.action.ImportDepartmentConfigsAction;
+import com.aplana.sbrf.taxaccounting.model.consolidation.ConsolidationIncome;
+import com.aplana.sbrf.taxaccounting.model.consolidation.ConsolidationSourceDataSearchFilter;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.DepartmentConfig;
@@ -74,6 +76,16 @@ public interface DepartmentConfigService {
      * @return список настроек подразделений
      */
     List<DepartmentConfig> findAllByKppAndOktmo(String kpp, String oktmo);
+
+    /**
+     * Возвращяет список настроек подразделений по КПП/ОКТМО с учетом периода действия настройки подразделения у которого заполнено Учитывать в КПП/ОКТМО
+     *
+     * @param kpp   КПП
+     * @param oktmo код ОКТМО
+     * @param filter фильтр
+     * @return список настроек подразделений
+     */
+    List<DepartmentConfig> findAllByKppAndOktmoAndFilter(String kpp, String oktmo, ConsolidationSourceDataSearchFilter filter);
 
     /**
      * Возвращяет страницу из значений КПП тербанка по фильтру

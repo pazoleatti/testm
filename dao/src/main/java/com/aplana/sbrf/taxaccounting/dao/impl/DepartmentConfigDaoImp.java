@@ -13,6 +13,8 @@ import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.ReportFormCreationKppOktmoPair;
 import com.aplana.sbrf.taxaccounting.model.SecuredEntity;
 import com.aplana.sbrf.taxaccounting.model.action.DepartmentConfigsFilter;
+import com.aplana.sbrf.taxaccounting.model.consolidation.ConsolidationIncome;
+import com.aplana.sbrf.taxaccounting.model.consolidation.ConsolidationSourceDataSearchFilter;
 import com.aplana.sbrf.taxaccounting.model.refbook.DepartmentConfig;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import org.apache.commons.lang3.time.FastDateFormat;
@@ -26,6 +28,7 @@ import org.springframework.util.Assert;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -157,6 +160,16 @@ public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentCon
                 "select " + ALL_FIELDS + " from department_config dc\n" +
                 ALL_FIELDS_JOINS +
                 "where dc.kpp = ? and oktmo.code = ?", new DepartmentConfigRowMapper(), kpp, oktmo);
+    }
+
+    @Override
+    public List<DepartmentConfig> findAllByKppAndOktmoAndFilter(String kpp, String oktmo, ConsolidationSourceDataSearchFilter filter) {
+        String whereParam = "where dc.kpp = ? and oktmo.code = ? and (dc.related_kpp is not null and dc.related_oktmo is not null) and (\n" +
+                "    dc.start_date <= ? and (dc.end_date is null or ? <= dc.end_date) or (\n" +
+                "      dc.start_date <= ? and (dc.end_date is null or ? <= dc.end_date))) \n";
+        String departmentConfigsKppOktmoFilterSelect = "" +
+                "select " + ALL_FIELDS + " from department_config dc\n" + ALL_FIELDS_JOINS + whereParam;
+        return getJdbcTemplate().query(departmentConfigsKppOktmoFilterSelect, new DepartmentConfigRowMapper(), kpp, oktmo, filter.getCurrentDate(), filter.getCurrentDate(), filter.getPeriodEndDate(), filter.getPeriodStartDate());
     }
 
     @Override
