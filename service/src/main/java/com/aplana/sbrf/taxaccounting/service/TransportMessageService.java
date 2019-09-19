@@ -38,6 +38,15 @@ public interface TransportMessageService {
     PagingResult<TransportMessage> findByFilter(TransportMessageFilter filter, @Nullable PagingParams pagingParams);
 
     /**
+     * Получить первое найденное сообщение совпадающией с параметрами фильтрации
+     *
+     * @param filter       параметры фильтрации
+     * @return список Транспортных сообщений, подходящих под параметры фильтрации с постраничным разбиением.
+     */
+    @Nullable
+    TransportMessage findFirstByFilter(TransportMessageFilter filter);
+
+    /**
      * Получить список сообщений с фильтрацией и пагинацией с учетом подразделений, доступных пользователю.
      *
      * @param filter       параметры фильтрации
@@ -62,4 +71,12 @@ public interface TransportMessageService {
      * @param transportMessage транспортное сообщение
      */
     void update(TransportMessage transportMessage);
+
+    /**
+     * Отправка сообщения в ЖА с данными о транспортном сообщении
+     *
+     * @param noteFormat Текст сообщения
+     * @param transportMessage ТС, для которого отправляется сообщение в ЖА
+     */
+    void sendAuditMessage(String noteFormat, TransportMessage transportMessage);
 }
