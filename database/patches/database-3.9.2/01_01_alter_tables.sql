@@ -28,3 +28,24 @@ END;
 /
 
 COMMIT;
+
+-- 3.9.2-adudenko-4
+DECLARE
+	v_run_condition number(1);
+	v_task_name varchar2(128):='alter_tables block #2 - alter table transport_message';  
+BEGIN
+	select count(*) into v_run_condition from USER_CONSTRAINTS 
+			where CONSTRAINT_NAME='TMESS_STATE_CK' ;
+	IF v_run_condition>0 THEN
+           	execute immediate 'alter table TRANSPORT_MESSAGE drop constraint TMESS_STATE_CK';
+	END IF;
+        execute immediate 'alter table TRANSPORT_MESSAGE add constraint TMESS_STATE_CK CHECK (STATE between 1 and 6)';
+	dbms_output.put_line(v_task_name||'[INFO (tmess_state_ck)]:'||' Success');
+
+EXCEPTION
+	when OTHERS then
+		dbms_output.put_line(v_task_name||'[FATAL]:'||sqlerrm);	
+END;
+/
+
+COMMIT;
