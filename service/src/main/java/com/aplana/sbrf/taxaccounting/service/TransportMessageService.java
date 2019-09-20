@@ -38,7 +38,7 @@ public interface TransportMessageService {
     PagingResult<TransportMessage> findByFilter(TransportMessageFilter filter, @Nullable PagingParams pagingParams);
 
     /**
-     * Получить первое найденное сообщение совпадающией с параметрами фильтрации
+     * Получить первое найденное сообщение, совпадающее с параметрами фильтрации.
      *
      * @param filter       параметры фильтрации
      * @return список Транспортных сообщений, подходящих под параметры фильтрации с постраничным разбиением.
