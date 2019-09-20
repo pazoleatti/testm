@@ -490,6 +490,7 @@
         "uploadTransportData.description.loadAll": "Загружаются файлы из каталогов загрузки.",
 
         "filesComment.header": "Файлы и комментарии",
+        "filesComment.title.fileKind": "Вид файла",
         "filesComment.title.fileName": "Имя файла",
         "filesComment.title.fileType": "Тип файла",
         "filesComment.title.comment": "Комментарий",

@@ -101,4 +101,19 @@
         </sql>
     </changeSet>
 
+    <!--https://jira.aplana.com/browse/SBRFNDFL-8617 Добавить столбец отражающий имя входящего документа от ФНС в форму "Файлы и комментарии"-->
+    <changeSet id="3.9.2-ytrofimov-1" author="ytrofimov" >
+        <sql>
+            alter table declaration_data_file add file_kind varchar2(100 char);
+            comment on column declaration_data_file.file_kind is 'Наименование вида файла';
+        </sql>
+    </changeSet>
+    <changeSet id="3.9.2-ytrofimov-2" author="ytrofimov" runAlways="true">
+        <update tableName="BLOB_DATA">
+            <column name="data"
+                    valueBlobFile="templates-3.9.2/refbook/declaration_type.groovy"/>
+            <where>id in (select script_id from ref_book r where r.id = 207)</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>

@@ -667,6 +667,7 @@ class Report2Ndfl extends AbstractScriptClass {
         declarationDataFile.setUserDepartmentName(departmentService.getParentsHierarchyShortNames(createUser.getDepartmentId()))
         declarationDataFile.setFileTypeId(fileTypeId)
         declarationDataFile.setDate(currDate)
+        declarationDataFile.setFileKind("(1151078) 2-НДФЛ")
         declarationService.saveFile(declarationDataFile)
     }
 
