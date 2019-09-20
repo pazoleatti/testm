@@ -10,8 +10,10 @@ import com.aplana.sbrf.taxaccounting.model.messaging.TransportMessage;
 import com.aplana.sbrf.taxaccounting.model.messaging.TransportMessageContentType;
 import com.aplana.sbrf.taxaccounting.model.messaging.TransportMessageFilter;
 import com.aplana.sbrf.taxaccounting.model.messaging.TransportMessageState;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDocState;
 import com.aplana.sbrf.taxaccounting.service.*;
+import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -41,6 +43,8 @@ public class EdoResponseHandlerImpl implements EdoResponseHandler {
     private TAUserService taUserService;
     @Autowired
     private DeclarationDataService declarationDataService;
+    @Autowired
+    private CommonRefBookService commonRefBookService;
 
     @Override
     public void handleTechReceipt(TransportMessage transportMessage, TaxMessageReceipt taxMessageReceipt) {
@@ -116,11 +120,13 @@ public class EdoResponseHandlerImpl implements EdoResponseHandler {
             declarationDataService.updateDocState(declaration.getId(), newDeclarationState.getId());
             LOG.info("Статус декларации #" + declaration.getId() + " изменен с " +
                     declaration.getDocStateId() + " на " + newDeclarationState.getId());
+            RefBookDocState oldRefBookDocState = commonRefBookService.fetchRecord(RefBook.Id.DOC_STATE.getId(), declaration.getId());
+            RefBookDocState newRefBookDocState = commonRefBookService.fetchRecord(RefBook.Id.DOC_STATE.getId(), newDeclarationState.getId());
             logBusinessService.logFormEvent(
                     declaration.getId(),
                     FormDataEvent.CHANGE_STATUS_ED,
                     localLogger.getLogId(),
-                    "Изменено \"Состояние ЭД\" на основании полученной технологической квитанции от ЭДО",
+                    "Изменено \"Состояние ЭД\": \"[" + oldRefBookDocState.getName() + "]\" -> \"[" +  newRefBookDocState.getId() + "]\" на основании полученной технологической квитанции от ЭДО",
                     taUserService.getSystemUserInfo()
             );
         }
