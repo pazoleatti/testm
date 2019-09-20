@@ -264,6 +264,11 @@ public interface DeclarationDataDao extends PermissionDao {
     boolean existDeclarationData(DeclarationData declarationData);
 
     /**
+     * Возвращаает id НФ по критериям в зависимости от ее вида
+     */
+    Long getDeclarationData(DeclarationData declarationData);
+
+    /**
      * Находит налоговые формы операции из которых используются для создания Приложения 2 к НП
      *
      * @param reportYear отчетный год

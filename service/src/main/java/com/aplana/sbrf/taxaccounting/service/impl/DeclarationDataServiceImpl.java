@@ -32,6 +32,7 @@ import com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission;
 import com.aplana.sbrf.taxaccounting.permissions.logging.TargetIdAndLogger;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.script.service.DeclarationService;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.component.MoveToCreateFacade;
 import com.aplana.sbrf.taxaccounting.service.component.lock.locker.DeclarationLocker;
@@ -63,6 +64,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.poi.ss.formula.functions.T;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -208,6 +210,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     private RefBookPersonDao refBookPersonDao;
     @Autowired
     private TransportMessageDao transportMessageDao;
+    @Autowired
+    private DeclarationService declarationService;
 
     @Override
     public CreateResult<Long> create(TAUserInfo userInfo, CreateDeclarationDataAction action) {
@@ -371,10 +375,66 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                         SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
                         strCorrPeriod = ", с датой сдачи корректировки " + formatter.format(departmentReportPeriod.getCorrectionDate());
                     }
-                    String message = String.format("Налоговая форма с заданными параметрами: Период: \"%s\", Подразделение: \"%s\", " +
-                                    " Вид налоговой формы: \"%s\", Тип КНФ: \"%s\" уже существует!",
-                            departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + ", " + departmentReportPeriod.getReportPeriod().getName() + strCorrPeriod,
-                            department.getName(), declarationTemplate.getDeclarationFormKind().getName(), newDeclaration.getKnfType().getName());
+
+        // Доп проверка если Вид налоговой формы = «РНУ НДФЛ (консолидированная)»
+                    String message = "";
+                    int declarationTypeId = declarationTemplate.getType().getId();
+                    DeclarationData existDeclaration = new DeclarationData();
+                    existDeclaration = declarationDataDao.get(getDeclarationData(newDeclaration));
+                    Integer codePeriod = Integer.valueOf(reportPeriodService.getPeriodTypeById(departmentReportPeriod.getReportPeriod().getDictTaxPeriodId()).getCode());
+                    if (declarationTypeId == DeclarationType.NDFL_CONSOLIDATE) {
+
+                        if ( !RefBookKnfType.BY_KPP.equals(newDeclaration.getKnfType())) {
+                            if (declarationTemplate.getDeclarationFormKind().getId() == FormDataKind.CONSOLIDATED.getId()
+                                    && department.getId() == existDeclaration.getDepartmentId()
+                            && existDeclaration.getKnfType().equals(newDeclaration.getKnfType()) ){
+
+                                if (RefBookKnfType.ALL.equals(existDeclaration.getKnfType())
+                                        && (codePeriod == 34 || codePeriod == 90)
+                                        && newDeclaration.getReportPeriodId() == existDeclaration.getReportPeriodId()) {
+
+                                    message = String.format("В Системе уже существует налоговая форма № \"%s\" с заданными параметрами Период: \"%s\", Подразделение: \"%s\", " +
+                                                    " Вид налоговой формы: \"%s\", Тип КНФ: \"%s\" . Создание в Системе нескольких КНФ с одинаковыми параметрами невозможно.",
+                                            existDeclaration.getId(), departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + ", " + departmentReportPeriod.getReportPeriod().getName() + strCorrPeriod,
+                                            department.getName(), declarationTemplate.getDeclarationFormKind().getName(), newDeclaration.getKnfType().getName());
+                                };
+
+                            };
+
+                        } else {
+
+                            if (declarationTemplate.getDeclarationFormKind().getId() == FormDataKind.CONSOLIDATED.getId()
+                                    && department.getId() == existDeclaration.getDepartmentId()
+                                    && existDeclaration.getKnfType().equals(newDeclaration.getKnfType()) ) {
+                                List<String> existKppList = new ArrayList<>();
+                                existKppList = declarationService.getDeclarationDataKppList(existDeclaration.getId());
+                                HashSet<String> newKppList = new HashSet<>(newDeclaration.getIncludedKpps());
+                                String messageKpp = "";
+                                boolean isBelongKpp = false;
+                                for (String existKpp : existKppList) {
+                                    if (newKppList.contains(existKpp)){
+                                        if (!isBelongKpp) {
+                                            messageKpp = messageKpp + existKpp;
+                                            isBelongKpp = true;
+                                        } else {
+                                            messageKpp = messageKpp + "," + existKpp;
+                                        };
+                                    };
+                                }
+                                if (isBelongKpp) {
+                                    message = String.format("В Системе уже существует налоговая форма № \"%s\" с заданными параметрами Период: \"%s\", Подразделение: \"%s\", " +
+                                                    " Вид налоговой формы: \"%s\", Тип КНФ: \"%s\" , содержащая операции с КПП:  \"%s\". Создание в Системе нескольких КНФ с одинаковыми параметрами невозможно.",
+                                            existDeclaration.getId(), departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + ", " + departmentReportPeriod.getReportPeriod().getName() + strCorrPeriod,
+                                            department.getName(), declarationTemplate.getDeclarationFormKind().getName(), newDeclaration.getKnfType().getName(), messageKpp);
+                                };
+                            };
+                        };
+                    } else {
+                             message = String.format("Налоговая форма с заданными параметрами: Период: \"%s\", Подразделение: \"%s\", " +
+                                        " Вид налоговой формы: \"%s\", Тип КНФ: \"%s\" уже существует!",
+                                departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + ", " + departmentReportPeriod.getReportPeriod().getName() + strCorrPeriod,
+                                department.getName(), declarationTemplate.getDeclarationFormKind().getName(), newDeclaration.getKnfType().getName());
+                    };
                     logger.error(message);
                 }
                 doCreate(newDeclaration, declarationTemplate, logger, userInfo, true);
@@ -2196,6 +2256,11 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     public boolean existDeclarationData(long declarationDataId) {
         return declarationDataDao.existDeclarationData(declarationDataId);
+    }
+
+    @Override
+    public Long getDeclarationData(DeclarationData declarationData) {
+        return declarationDataDao.getDeclarationData(declarationData);
     }
 
     @Override
