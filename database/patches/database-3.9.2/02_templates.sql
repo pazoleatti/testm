@@ -142,7 +142,7 @@ PROMPT Fill tables
 PROMPT ======================
 
 PROMPT Fill service tables...
---3.9.2-adudenko-2
+--3.9.2-adudenko-2, 3.9.2-ytrofimov-2
 HOST "&2\sqlldr" &3 control=database-3.9.2/templates/ldr/refbook/blob_data.ldr log=&4/3_9_2_02_01_refbook_blob_data.txt bad=&5/3_9_2_02_01_refbook_blob_data.bad
 
 --

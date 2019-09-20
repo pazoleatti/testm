@@ -60,3 +60,25 @@ END;
 /
 
 COMMIT;
+
+--3.9.2-ytrofimov-1
+DECLARE
+	v_run_condition number(1);
+	v_task_name varchar2(128):='alter_tables block #4 - alter table declaration_data_file';  
+BEGIN
+	select decode(count(*),0,1,0) into v_run_condition from user_tab_columns where TABLE_NAME='DECLARATION_DATA_FILE' and COLUMN_NAME='FILE_KIND';
+	IF v_run_condition=1 THEN
+           	execute immediate 'alter table declaration_data_file add file_kind varchar2(100 char)';
+                execute immediate 'comment on column declaration_data_file.file_kind is ''Наименование вида файла''';
+		dbms_output.put_line(v_task_name||'[INFO (file_kind)]:'||' Success');
+	ELSE
+		dbms_output.put_line(v_task_name||'[WARNING (file_kind)]:'||' changes had already been implemented');
+	END IF;
+
+EXCEPTION
+	when OTHERS then
+		dbms_output.put_line(v_task_name||'[FATAL]:'||sqlerrm);	
+END;
+/
+commit;
+/
