@@ -161,7 +161,8 @@ public class EdoMessageServiceImpl implements EdoMessageService {
         filter.setStateIds(Collections.singletonList(TransportMessageState.SENT.getIntValue()));
         filter.setDeclarationId(declarationId.toString());
 
-        List<TransportMessage> transportMessages = transportMessageService.findByFilter(filter, null);
+        PagingParams pagingParams = PagingParams.getInstance(1, 1, "id", "desc");
+        List<TransportMessage> transportMessages = transportMessageService.findByFilter(filter, pagingParams);
         TransportMessage lastTransportMessage = transportMessages.get(0);
 
         try {
