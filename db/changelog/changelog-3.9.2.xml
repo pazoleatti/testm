@@ -101,4 +101,14 @@
         </sql>
     </changeSet>
 
+    <!--https://jira.aplana.com/browse/SBRFNDFL-8619 Убрать права на представление VW_DEPARTMENT_CONFIG у пользователя НСИ, предоставить права на него пользователю НВ"-->
+    <changeSet id="3.9.2-skononova-1" author="skononova">
+        <sql>
+		revoke select on vw_department_config from TAXNSI_UNSTABLE;
+		grant select on vw_department_config to TAXREC_UNSTABLE;
+        </sql>
+    </changeSet>
+
+
+
 </databaseChangeLog>
