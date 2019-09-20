@@ -329,8 +329,7 @@ class Calculate extends AbstractScriptClass {
 
         // Если Настройка Подразделения в части Учитывать в КПП/ОКТМО - заполнено, то производиться замена КПП/ОКТМО в КНФ
         for (def income : pickedRows ) {
-            List<DepartmentConfig> departmentConfigList = departmentConfigService.findAllByKppAndOktmo(income.kpp,income.oktmo)
-            departmentConfigList = departmentConfigList.findAll{it.relatedKppOktmo.kpp != null && it.relatedKppOktmo.oktmo!= null}
+            List<DepartmentConfig> departmentConfigList = departmentConfigService.findAllByKppAndOktmoAndFilter(income.kpp,income.oktmo, filter)
             if (departmentConfigList.size() > 0) {
                for (def dp : departmentConfigList) {
                    logger.info("У физического лица: " + income.inp + " в операции : " + income.operationId + " значение в поле:  \"Сведения о доходах и НДФЛ.КПП\": " +
