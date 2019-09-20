@@ -101,6 +101,16 @@
         </sql>
     </changeSet>
 
+    <!--https://jira.aplana.com/browse/SBRFNDFL-8619 Убрать права на представление VW_DEPARTMENT_CONFIG у пользователя НСИ, предоставить права на него пользователю НВ"-->
+    <changeSet id="3.9.2-skononova-1" author="skononova">
+        <sql>
+		revoke select on vw_department_config from TAXNSI_UNSTABLE;
+		grant select on vw_department_config to TAXREC_UNSTABLE;
+        </sql>
+    </changeSet>
+
+
+
     <!--https://jira.aplana.com/browse/SBRFNDFL-8617 Добавить столбец отражающий имя входящего документа от ФНС в форму "Файлы и комментарии"-->
     <changeSet id="3.9.2-ytrofimov-1" author="ytrofimov" >
         <sql>
