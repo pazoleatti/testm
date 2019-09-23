@@ -3,17 +3,8 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentConfigDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.mapper.DepartmentConfigRowMapper;
-import com.aplana.sbrf.taxaccounting.model.DeclarationData;
-import com.aplana.sbrf.taxaccounting.model.KppOktmoPair;
-import com.aplana.sbrf.taxaccounting.model.KppOktmoPairFilter;
-import com.aplana.sbrf.taxaccounting.model.KppSelect;
-import com.aplana.sbrf.taxaccounting.model.NamedParameterSql;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.ReportFormCreationKppOktmoPair;
-import com.aplana.sbrf.taxaccounting.model.SecuredEntity;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.action.DepartmentConfigsFilter;
-import com.aplana.sbrf.taxaccounting.model.consolidation.ConsolidationIncome;
 import com.aplana.sbrf.taxaccounting.model.consolidation.ConsolidationSourceDataSearchFilter;
 import com.aplana.sbrf.taxaccounting.model.refbook.DepartmentConfig;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
@@ -28,7 +19,6 @@ import org.springframework.util.Assert;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -72,7 +62,10 @@ public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentCon
                     "from department_config dc\n" +
                     "where\n" +
                     "  department_id = :departmentId\n" +
-                    "  and (dc.start_date <= :relevanceDate and :relevanceDate <= dc.end_date)\n" +
+                    "  and (\n" +
+                    "   (dc.start_date <= :relevanceDate and :relevanceDate <= dc.end_date)\n" +
+                    "   or dc.end_date is null\n" +
+                    "  )\n" +
                     "group by dc.kpp, dc.oktmo_id\n";
 
     @Override
