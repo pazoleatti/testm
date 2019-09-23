@@ -220,8 +220,10 @@ public class DepartmentConfigDaoTest {
                 PagingParams.getInstance(1, 10));
         assertThat(kppOktmoPairs, containsInAnyOrder(
                 new ReportFormCreationKppOktmoPair("000000002", "111", "действует до 31.12.2017"),
-                new ReportFormCreationKppOktmoPair("000000003", "111", "действует до 31.12.2017"),
-                new ReportFormCreationKppOktmoPair("000000006", "111", "действует до 31.12.2017")));
+                new ReportFormCreationKppOktmoPair("000000003", "111", null),
+                new ReportFormCreationKppOktmoPair("000000006", "111", "действует до 31.12.2017"),
+                new ReportFormCreationKppOktmoPair("000000004", "111", null),
+                new ReportFormCreationKppOktmoPair("000000005", "111", null)));
     }
 
     @Test
