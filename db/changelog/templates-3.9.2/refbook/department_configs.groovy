@@ -2,6 +2,7 @@ package refbook // department_configs_ref комментарий для лока
 
 import com.aplana.sbrf.taxaccounting.AbstractScriptClass
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.action.DepartmentConfigsFilter
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.log.Logger
 import com.aplana.sbrf.taxaccounting.model.refbook.*
@@ -598,12 +599,16 @@ class DepartmentConfigScript extends AbstractScriptClass {
                             relatedKppOktmo.setKpp(kpp)
                             relatedKppOktmo.setOktmo(oktmo)
                         }
-                        List<DepartmentConfig> existingDepartmentConfigList = departmentConfigService.findAllByKppAndOktmo(kpp, oktmo)
+                        DepartmentConfigsFilter filter = new DepartmentConfigsFilter()
+                        filter.kpp = kpp
+                        filter.oktmo = oktmo
+                        filter.relevanceDate = new Date()
+                        List<DepartmentConfig> existingDepartmentConfigList = departmentConfigService.findPageByFilter(filter, null)
                         if (!existingDepartmentConfigList.department.id.contains(departmentId)) {
-                            logError("Сообщение об ошибке = Значение в поле \"Учитывать в КПП/ОКТМО\" не принадлежит ТБ настройки подразделения.")
+                            logError("Значение в поле \"Учитывать в КПП/ОКТМО\" не принадлежит ТБ настройки подразделения или принадлежит не актуальной настройке подразделения")
                         }
                     } else {
-                        logError("Сочетание КПП/ОКТМО должно содержать 18 или 21 символа")
+                        logError("Сочетание КПП/ОКТМО должно содержать 18 или 21 символ")
                     }
                 }
             }
