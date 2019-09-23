@@ -1,10 +1,10 @@
-package refbook
+package refbook // department_configs_ref комментарий для локального поиска скрипта
 
-import com.aplana.sbrf.taxaccounting.AbstractScriptClass// department_configs_ref комментарий для локального поиска скрипта
-
+import com.aplana.sbrf.taxaccounting.AbstractScriptClass
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.log.Logger
+import com.aplana.sbrf.taxaccounting.model.refbook.*
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
 import com.aplana.sbrf.taxaccounting.script.SharedConstants
 import com.aplana.sbrf.taxaccounting.service.TransactionHelper
@@ -19,6 +19,7 @@ import org.joda.time.LocalDate
 import org.joda.time.format.DateTimeFormat
 
 import static com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils.checkInterrupted
+
 /**
  * Cкрипт Настроек подразделений
  */
@@ -596,6 +597,10 @@ class DepartmentConfigScript extends AbstractScriptClass {
                             relatedKppOktmo = new RelatedKppOktmo()
                             relatedKppOktmo.setKpp(kpp)
                             relatedKppOktmo.setOktmo(oktmo)
+                        }
+                        List<DepartmentConfig> existingDepartmentConfigList = departmentConfigService.findAllByKppAndOktmo(kpp, oktmo)
+                        if (!existingDepartmentConfigList.department.id.contains(departmentId)) {
+                            logError("Сообщение об ошибке = Значение в поле \"Учитывать в КПП/ОКТМО\" не принадлежит ТБ настройки подразделения.")
                         }
                     } else {
                         logError("Сочетание КПП/ОКТМО должно содержать 18 или 21 символа")
