@@ -220,7 +220,7 @@ public class DeclarationDataDaoTest {
         assertEquals("Банк", page.get(0).getDepartment());
         assertEquals("Принята", page.get(0).getState());
         assertEquals("Контролёр Банка", page.get(0).getCreationUserName());
-        assertEquals("2014: первый квартал, корр. (02.01.2014)", page.get(0).getReportPeriod());
+        assertEquals("2014: первый квартал, корр. (02.01.2014): 6 НДФЛ", page.get(0).getReportPeriod());
     }
 
     @Test

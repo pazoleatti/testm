@@ -196,18 +196,6 @@ public class ReportPeriodDaoTest {
     }
 
     @Test
-    public void getReportPeriodsByDateTest() {
-        List<ReportPeriod> periodList = new ArrayList<>();
-        periodList.add(reportPeriodDao.fetchOne(1));
-        periodList.add(reportPeriodDao.fetchOne(2));
-        Date startDate = new GregorianCalendar(2011, Calendar.JANUARY, 1).getTime();
-        Date endDate = new GregorianCalendar(2014, Calendar.JANUARY, 10).getTime();
-        List<ReportPeriod> actualPeriods = reportPeriodDao.getReportPeriodsByDate(startDate, endDate);
-        assertEquals(periodList.get(0).getId(), actualPeriods.get(0).getId());
-        assertEquals(periodList.get(1).getId(), actualPeriods.get(1).getId());
-    }
-
-    @Test
     public void getReportPeriodTypeById() {
         assertEquals(reportPeriodDao.getReportPeriodTypeById(21L).getCode(), "99");
     }
