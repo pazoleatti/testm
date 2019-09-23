@@ -757,7 +757,7 @@
                         title: $filter('translate')('sources.title.sourcesList'),
                         templateUrl: 'client/app/taxes/ndfl/formSources.html',
                         controller: 'sourcesFormCtrl',
-                        windowClass: 'modal1200'
+                        windowClass: 'modal1400'
                     });
                 };
 
