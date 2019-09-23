@@ -332,7 +332,6 @@ public class CommonRefBookServiceImpl implements CommonRefBookService {
     }
 
     @Override
-    @PreAuthorize("isAuthenticated()")
     @Transactional(readOnly = true)
     public <T extends RefBookSimple> T fetchRecord(Long refBookId, Long recordId) {
         return refBookSimpleDao.getRecord(get(refBookId), recordId);

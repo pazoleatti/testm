@@ -309,6 +309,7 @@ class Report6Ndfl extends AbstractScriptClass {
         declarationDataFile.setUserDepartmentName(departmentService.getParentsHierarchyShortNames(createUser.getDepartmentId()))
         declarationDataFile.setFileTypeId(fileTypeId)
         declarationDataFile.setDate(currDate)
+        declarationDataFile.setFileKind("(1151099) 6-НДФЛ")
         declarationService.saveFile(declarationDataFile)
     }
 
@@ -486,7 +487,12 @@ class Report6Ndfl extends AbstractScriptClass {
                 deleteTempFile(xml?.xmlFile)
             }
         }
-        logger.info("Количество успешно созданных форм: %d. Не удалось создать форм: %d.", createdForms.size(), requiredToCreateCount - createdForms.size())
+        // Уведомление (SBRFNDFL-8557)
+        if (createdForms.isEmpty()) {
+            logger.error("Количество успешно созданных форм: 0. Не удалось создать форм: %d", requiredToCreateCount)
+        } else {
+            logger.info("Количество успешно созданных форм: %d. Не удалось создать форм: %d.", createdForms.size(), requiredToCreateCount - createdForms.size())
+        }
     }
 
     boolean create(DeclarationData declaration) {

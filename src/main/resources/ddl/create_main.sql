@@ -1489,7 +1489,8 @@ create table declaration_data_file
    user_name            varchar2(512)   not null,
    user_department_name varchar2(4000)  not null,
    note                 varchar2(512),
-   file_type_id         number(18)      not null
+   file_type_id         number(18)      not null,
+   file_kind            varchar2(100)
 );
 
 comment on table declaration_data_file is 'Файлы налоговой формы';
@@ -1499,6 +1500,7 @@ comment on column declaration_data_file.user_name is 'Полное имя пол
 comment on column declaration_data_file.user_department_name is 'Наименование подразделения пользователя, прикрепившего файл';
 comment on column declaration_data_file.note is 'Комментарий к файлу';
 comment on column declaration_data_file.file_type_id is 'Категория файла';
+comment on column declaration_data_file.file_kind is 'Наименование вида файла';
 --------------------------------------------------------------------------------------------------------------------------
 create table state
 (

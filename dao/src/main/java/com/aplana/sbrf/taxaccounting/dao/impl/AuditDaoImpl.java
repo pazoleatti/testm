@@ -19,7 +19,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
         try {
             JdbcTemplate jt = getJdbcTemplate();
             jt.update(
-                    "call Add_Log_System_NDFL (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    "call Add_Log_System_NDFL (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                     logSystem.getIp(),
                     logSystem.getEventId(),
                     logSystem.getUserLogin(),
@@ -35,7 +35,9 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
                     logSystem.getFormTypeId(),
                     0,
                     logSystem.getAuditFormTypeId(),
-                    logSystem.getServer()
+                    logSystem.getServer(),
+                    // Для ХП необходим id пользователя (для SBRFNDFL-8565)
+                    logSystem.getUserId()
             );
         } catch (DataAccessException e) {
             LOG.error("Ошибки при логировании.", e);
