@@ -15,6 +15,7 @@ import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import com.aplana.sbrf.taxaccounting.utils.ApplicationInfo;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -134,7 +135,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
      */
     @Nullable
     public static TransportFileType getFileType(String fileName) {
-        if (fileName.length() == 63 && "xml".equals(FilenameUtils.getExtension(fileName))) {
+        if (fileName.length() == 63 && StringUtils.equalsIgnoreCase("xml", FilenameUtils.getExtension(fileName))) {
             // ТФ РНУ НДФЛ
             return TransportFileType.RNU_NDFL;
         } else if (fileName.startsWith("KV_NONDFL") || fileName.startsWith("UO_NONDFL") ||
@@ -160,7 +161,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
      * @param logger       логгер
      */
     private void processFileByFormat(TAUserInfo userInfo, String archiveName, String fileName, String fileBlobUuid, long fileSize, Logger logger) {
-        if (fileName.startsWith("FL") && "xml".equals(FilenameUtils.getExtension(fileName))) {
+        if (fileName.startsWith("FL") && StringUtils.equalsIgnoreCase("xml", FilenameUtils.getExtension(fileName))) {
             // Файл первичной загрузки ФЛ
             createTaskToImportXmlFL(userInfo, archiveName, fileName, fileBlobUuid, fileSize, logger);
         } else {

@@ -14,3 +14,6 @@ SCRIPT LOBFILE( L_0) TERMINATED BY EOF NULLIF L_0 = 'null'
 )
 begindata
  5|101|3|database-3.9.2/templates/data/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl_calculate.groovy|
+ 10|103|5|database-3.9.2/templates/data/ndfl/report_6ndfl/v2016/report_6ndfl_check.groovy|	
+ 8|102|5|database-3.9.2/templates/data/ndfl/report_2ndfl_1/v2016/report_2ndfll_check.groovy|
+ 12|104|5|database-3.9.2/templates/data/ndfl/report_2ndfl_1/v2016/report_2ndfll_check.groovy|

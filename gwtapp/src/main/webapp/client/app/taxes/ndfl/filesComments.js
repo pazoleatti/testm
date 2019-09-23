@@ -29,6 +29,7 @@
                         colNames: [
                             '',
                             '',
+                            $filter('translate')('filesComment.title.fileKind'),
                             $filter('translate')('filesComment.title.fileName'),
                             $filter('translate')('filesComment.title.fileType'),
                             $filter('translate')('filesComment.title.comment'),
@@ -39,6 +40,11 @@
                         colModel: [
                             {name: 'uuid', index: 'uuid', width: 176, key: true, hidden: true},
                             {name: 'permissions', index: 'permissions', hidden: true},
+                            {
+                                name: 'fileKind',
+                                index: 'fileKind',
+                                width: 210
+                            },
                             {name: 'fileName', index: 'fileName', width: 360, formatter: linkFileFormatter},
                             {
                                 name: 'fileTypeId', index: 'fileTypeId', width: 90,

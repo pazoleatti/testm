@@ -156,7 +156,9 @@ public class AuditServiceImpl implements AuditService {
         LogSystem log = new LogSystem();
         log.setIp(userInfo.getIp());
         log.setEventId(event != null ? event.getCode() : null);
-        log.setUserLogin(userInfo.getUser().getLogin());
+        // Реализовать передачу ФИО вместе с логином пользователя в ЖА АС "Учет налогов" (SBRFNDFL-8565)
+        log.setUserLogin(userInfo.getUser().getName() + " (" + userInfo.getUser().getLogin() + ")");
+        log.setUserId(userInfo.getUser().getId());
 
         StringBuilder roles = new StringBuilder();
         List<TARole> taRoles = userInfo.getUser().getRoles();

@@ -27,7 +27,12 @@ public enum TransportMessageState {
     /**
      * Дубликат
      */
-    DUPLICATE(5, "Дубликат");
+    DUPLICATE(5, "Дубликат"),
+
+    /**
+     * Отменено
+     */
+    CANCELED(6, "Отменено");
 
     private int intValue;
     private String text;

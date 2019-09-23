@@ -9,6 +9,8 @@ import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.ReportFormCreationKppOktmoPair;
 import com.aplana.sbrf.taxaccounting.model.action.DepartmentConfigsFilter;
+import com.aplana.sbrf.taxaccounting.model.consolidation.ConsolidationIncome;
+import com.aplana.sbrf.taxaccounting.model.consolidation.ConsolidationSourceDataSearchFilter;
 import com.aplana.sbrf.taxaccounting.model.refbook.DepartmentConfig;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 
@@ -98,6 +100,16 @@ public interface DepartmentConfigDao extends PermissionDao {
      * @return список настроек подразделений
      */
     List<DepartmentConfig> findAllByKppAndOktmo(String kpp, String oktmo);
+
+    /**
+     * Возвращяет список настроек подразделений по КПП/ОКТМО с учетом периода действия настройки подразделения у которого заполнено Учитывать в КПП/ОКТМО
+     *
+     * @param kpp   КПП
+     * @param oktmo код ОКТМО
+     * @param filter фильтр
+     * @return список настроек подразделений
+     */
+    List<DepartmentConfig> findAllByKppAndOktmoAndFilter(String kpp, String oktmo, ConsolidationSourceDataSearchFilter filter);
 
     /**
      * Возвращяет пары КПП и ОКТМО из настроек подразделений по определенным подразделениям

@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.messaging.TransportMessage;
 import com.aplana.sbrf.taxaccounting.model.messaging.TransportMessageFilter;
 import com.aplana.sbrf.taxaccounting.permissions.PermissionUtils;
+import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import com.aplana.sbrf.taxaccounting.service.TransportMessageService;
@@ -17,7 +18,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -29,6 +33,8 @@ public class TransportMessageServiceImpl implements TransportMessageService {
 
     @Autowired
     private TransportMessageDao transportMessageDao;
+    @Autowired
+    private AuditService auditService;
     @Autowired
     protected TAUserService userService;
     @Autowired
@@ -47,6 +53,18 @@ public class TransportMessageServiceImpl implements TransportMessageService {
     @Override
     public PagingResult<TransportMessage> findByFilter(TransportMessageFilter filter, PagingParams pagingParams) {
         return transportMessageDao.findByFilter(filter, pagingParams);
+    }
+
+    @Nullable
+    @Override
+    public TransportMessage findFirstByFilter(TransportMessageFilter filter) {
+        List<TransportMessage> sourceTransportMessages = transportMessageDao.findByFilter(filter, null);
+
+        TransportMessage result = null;
+        if (!CollectionUtils.isEmpty(sourceTransportMessages)) {
+            result = sourceTransportMessages.get(0);
+        }
+        return result;
     }
 
     @Override
@@ -79,13 +97,25 @@ public class TransportMessageServiceImpl implements TransportMessageService {
     }
 
     @Override
+    @Transactional
     public void create(TransportMessage transportMessage) {
         transportMessageDao.create(transportMessage);
         LOG.info("Сохранено транспортное сообщение: " + transportMessage);
     }
 
     @Override
+    @Transactional
     public void update(TransportMessage transportMessage) {
         transportMessageDao.update(transportMessage);
+    }
+
+    @Override
+    public void sendAuditMessage(String noteFormat, TransportMessage transportMessage) {
+        String note = String.format(noteFormat,
+                transportMessage.getId(),
+                transportMessage.getMessageUuid(),
+                transportMessage.getType().getText(),
+                transportMessage.getState().getText());
+        auditService.add(null, userService.getSystemUserInfo(), note);
     }
 }

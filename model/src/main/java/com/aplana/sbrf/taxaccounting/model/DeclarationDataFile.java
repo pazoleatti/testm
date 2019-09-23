@@ -1,5 +1,9 @@
 package com.aplana.sbrf.taxaccounting.model;
 
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
 import java.io.Serializable;
 import java.util.Date;
 
@@ -8,8 +12,10 @@ import java.util.Date;
  *
  * @author lhaziev
  */
+@Getter
+@Setter
+@ToString
 public class DeclarationDataFile implements Serializable, SecuredEntity {
-	private static final long serialVersionUID = -1566841683151489811L;
 
     private long declarationDataId;
     private String uuid;
@@ -21,78 +27,7 @@ public class DeclarationDataFile implements Serializable, SecuredEntity {
     private long fileTypeId;
     private String fileTypeName;
     private long permissions;
-
-    public long getDeclarationDataId() {
-        return declarationDataId;
-    }
-
-    public void setDeclarationDataId(long declarationDataId) {
-        this.declarationDataId = declarationDataId;
-    }
-
-    public String getUuid() {
-        return uuid;
-    }
-
-    public void setUuid(String uuid) {
-        this.uuid = uuid;
-    }
-
-    public String getFileName() {
-        return fileName;
-    }
-
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
-    }
-
-    public Date getDate() {
-        return date;
-    }
-
-    public void setDate(Date date) {
-        this.date = date;
-    }
-
-    public String getUserName() {
-        return userName;
-    }
-
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
-
-    public String getUserDepartmentName() {
-        return userDepartmentName;
-    }
-
-    public void setUserDepartmentName(String userDepartmentName) {
-        this.userDepartmentName = userDepartmentName;
-    }
-
-    public String getNote() {
-        return note;
-    }
-
-    public void setNote(String note) {
-        this.note = note;
-    }
-
-    public long getFileTypeId() {
-        return fileTypeId;
-    }
-
-    public void setFileTypeId(long fileTypeId) {
-        this.fileTypeId = fileTypeId;
-    }
-
-    public String getFileTypeName() {
-        return fileTypeName;
-    }
-
-    public void setFileTypeName(String fileTypeName) {
-        this.fileTypeName = fileTypeName;
-    }
+    private String fileKind;
 
     @Override
     public long getPermissions() {
@@ -104,18 +39,4 @@ public class DeclarationDataFile implements Serializable, SecuredEntity {
         this.permissions = permissions;
     }
 
-    @Override
-    public String toString() {
-        return "DeclarationDataFile{" +
-                "declarationDataId=" + declarationDataId +
-                ", uuid='" + uuid + '\'' +
-                ", fileName='" + fileName + '\'' +
-                ", date=" + date +
-                ", userName='" + userName + '\'' +
-                ", userDepartmentName='" + userDepartmentName + '\'' +
-                ", note='" + note + '\'' +
-                ", fileTypeId=" + fileTypeId +
-                ", fileTypeName='" + fileTypeName + '\'' +
-                '}';
-    }
 }
