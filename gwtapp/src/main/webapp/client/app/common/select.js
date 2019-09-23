@@ -1190,7 +1190,8 @@
             function ($scope, GetSelectOption) {
                 $scope.kppOkmtoPairsSelect = {};
                 // если этого не сделать, то это приводит к неправильному отображению списка, если поле не заполнено
-                if ($scope.mode !== 'CREATE' && !$scope.record.relatedKppOktmo.hasOwnProperty("kpp")) {
+                // (при создании подразделения)
+                if ($scope.mode !== 'CREATE' && $scope.record && !$scope.record.relatedKppOktmo.hasOwnProperty("kpp")) {
                     $scope.record.relatedKppOktmo = null;
                 }
 
