@@ -117,6 +117,9 @@
     <bean class="org.mockito.Mockito" factory-method="mock">
         <constructor-arg value="com.aplana.sbrf.taxaccounting.dao.TransportMessageDao" />
     </bean>
+    <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.script.service.DeclarationService" />
+    </bean>
     <!--<bean id="messageSender" class="com.aplana.sbrf.taxaccounting.service.jms.transport.impl.BaseMessageSenderImpl">
         
     </bean>-->
