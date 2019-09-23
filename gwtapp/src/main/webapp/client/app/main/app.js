@@ -483,6 +483,7 @@
         "sources.tableColumn.year": "Год",
         "sources.tableColumn.period": "Период",
         "sources.tableColumn.declarationState": "Состояние формы",
+        "sources.tableColumn.formType": "Вид отчетности",
 
         "uploadTransportData.title": "Загрузка файлов",
         "uploadTransportData.button.upload": "Загрузить файл",

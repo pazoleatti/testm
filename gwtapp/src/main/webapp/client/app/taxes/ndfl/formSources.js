@@ -48,6 +48,7 @@
                             $filter('translate')('sources.tableColumn.declarationType'),
                             $filter('translate')('sources.tableColumn.year'),
                             $filter('translate')('sources.tableColumn.period'),
+                            $filter('translate')('sources.tableColumn.formType'),
                             $filter('translate')('sources.tableColumn.declarationState')],
                         colModel: [
                             {
@@ -97,6 +98,7 @@
                             {name: 'declarationTypeName', index: 'declarationTypeName', width: 203, sortable: false},
                             {name: 'year', index: 'year', width: 40, sortable: false},
                             {name: 'periodName', index: 'periodName', width: 110, sortable: false},
+                            {name: 'formType', index: 'formType', width: 110, sortable: false},
                             {
                                 name: 'declarationState',
                                 index: 'declarationState',

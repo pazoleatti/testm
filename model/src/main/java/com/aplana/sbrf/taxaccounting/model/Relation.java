@@ -88,6 +88,16 @@ public class Relation implements Serializable {
     private Integer comparativePeriodYear;
     /** название подразделения-исполнителя */
     private List<String> performerNames;
+    /** Код вида отчетности */
+    private String formTypeCode;
+
+    public String getFormTypeCode() {
+        return formTypeCode;
+    }
+
+    public void setFormTypeCode(String formTypeCode) {
+        this.formTypeCode = formTypeCode;
+    }
 
     public State getDeclarationState() {
         return declarationState;
@@ -372,6 +382,8 @@ public class Relation implements Serializable {
             return false;
         if (comparativePeriodStartDate != null ? !comparativePeriodStartDate.equals(relation.comparativePeriodStartDate) : relation.comparativePeriodStartDate != null)
             return false;
+        if (formTypeCode != null ? !formTypeCode.equals(relation.formTypeCode) : relation.formTypeCode != null)
+            return false;
         return comparativePeriodYear != null ? comparativePeriodYear.equals(relation.comparativePeriodYear) : relation.comparativePeriodYear == null;
 
     }
@@ -404,6 +416,7 @@ public class Relation implements Serializable {
         result = 31 * result + (comparativePeriodName != null ? comparativePeriodName.hashCode() : 0);
         result = 31 * result + (comparativePeriodStartDate != null ? comparativePeriodStartDate.hashCode() : 0);
         result = 31 * result + (comparativePeriodYear != null ? comparativePeriodYear.hashCode() : 0);
+        result = 31 * result + (formTypeCode != null ? formTypeCode.hashCode() : 0);
         return result;
     }
 }
