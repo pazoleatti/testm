@@ -120,13 +120,13 @@ public class EdoResponseHandlerImpl implements EdoResponseHandler {
             declarationDataService.updateDocState(declaration.getId(), newDeclarationState.getId());
             LOG.info("Статус декларации #" + declaration.getId() + " изменен с " +
                     declaration.getDocStateId() + " на " + newDeclarationState.getId());
-            RefBookDocState oldRefBookDocState = commonRefBookService.fetchRecord(RefBook.Id.DOC_STATE.getId(), declaration.getId());
+            RefBookDocState oldRefBookDocState = commonRefBookService.fetchRecord(RefBook.Id.DOC_STATE.getId(), declaration.getDocStateId());
             RefBookDocState newRefBookDocState = commonRefBookService.fetchRecord(RefBook.Id.DOC_STATE.getId(), newDeclarationState.getId());
             logBusinessService.logFormEvent(
                     declaration.getId(),
                     FormDataEvent.CHANGE_STATUS_ED,
                     localLogger.getLogId(),
-                    "Изменено \"Состояние ЭД\": \"[" + oldRefBookDocState.getName() + "]\" -> \"[" +  newRefBookDocState.getId() + "]\" на основании полученной технологической квитанции от ЭДО",
+                    "Изменено \"Состояние ЭД\": \"[" + oldRefBookDocState.getName() + "]\" -> \"[" +  newRefBookDocState.getName() + "]\" на основании полученной технологической квитанции от ЭДО",
                     taUserService.getSystemUserInfo()
             );
         }
