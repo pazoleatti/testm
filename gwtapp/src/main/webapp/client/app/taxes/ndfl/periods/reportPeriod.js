@@ -145,10 +145,12 @@
                  */
                 $scope.initGrid = function () {
                     $scope.periodGridData = [];
+                    var taxFormTypeId = $scope.searchFilter.params.formType ? $scope.searchFilter.params.formType.id : null;
                     DepartmentReportPeriodResource.query({
                         filter: JSON.stringify({
                             yearStart: $scope.searchFilter.params.yearStart,
                             yearEnd: $scope.searchFilter.params.yearEnd,
+                            reportPeriod: taxFormTypeId ? { reportPeriodTaxFormTypeId: taxFormTypeId } : null,
                             departmentId: $scope.searchFilter.params.department.id
                         })
                     }, function (response) {
