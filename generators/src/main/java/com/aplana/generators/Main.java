@@ -6,6 +6,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 
 import java.io.File;
 import java.io.PrintStream;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Random;
 
@@ -69,6 +70,13 @@ public class Main {
     }
 
     private static String generateFileName(String originalFileName, int i) {
+        if (originalFileName.contains("FL_")) {
+            SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
+            Date now = new Date();
+            String strDate = sdfDate.format(now);
+            originalFileName = originalFileName.replaceAll(originalFileName.substring(originalFileName.length() - 56, originalFileName.length() - 37), strDate);
+        }
+
         return originalFileName.replaceAll(originalFileName.substring(originalFileName.length() - 36, originalFileName.length() - 4),
                 Integer.toString(i + 1).length() == 1 ?
                         RandomStringUtils.randomAlphanumeric(30) + "-" + Integer.toString(i + 1)

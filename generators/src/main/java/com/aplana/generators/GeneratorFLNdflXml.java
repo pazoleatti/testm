@@ -50,8 +50,6 @@ public class GeneratorFLNdflXml {
 
     private static final String ATTR_INN = "ИННФЛ";
 
-    private static final String ATTR_INN_INO = "ИННИно";
-
     private static final String ATTR_STATUS_FL = "СтатусФЛ";
 
     private static final String ATTR_REGION_CODE = "КодРегион";
@@ -337,7 +335,7 @@ public class GeneratorFLNdflXml {
             String idFlEnd = String.valueOf(Math.abs(1000000000 + random.nextInt(2000000000)));
             infoPartTag.getInfoPartTagAttributes().put(ATTR_ID_FL, templateIdFl + idFlEnd);
             writeElement(writer, TAG_INFO_PART, infoPartLevel, false, infoPartTag.getInfoPartTagAttributes());
-            generateFLData(infoPartTag.getFlDataTagAttributes(), infoPartTag.getFlDocTagAttributes());
+            generateFLData(infoPartTag.getFlDataTagAttributes(), infoPartTag.getFlDocTagAttributes(), infoPartTag.getSystemSourceTagAttributes());
             writeElement(writer, TAG_FL_DATA, infoPartLevel + 1, true, infoPartTag.getFlDataTagAttributes());
             writeElement(writer, TAG_FL_DOC, infoPartLevel + 1, true, infoPartTag.getFlDocTagAttributes());
             writeElement(writer, TAG_SYSTEM_SOURCE, infoPartLevel + 1, true, infoPartTag.getSystemSourceTagAttributes());
@@ -351,8 +349,9 @@ public class GeneratorFLNdflXml {
      *
      * @param flDataTagAttributes Атрибуты тега АнкетДаннФЛ
      * @param flDocTagAttributes  Атрибуты тега УдЛичнФЛ
+     * @param flSysTagAttributes Атрибуты тега СисИсточ
      */
-    private void generateFLData(Map<String, String> flDataTagAttributes, Map<String, String> flDocTagAttributes) {
+    private void generateFLData(Map<String, String> flDataTagAttributes, Map<String, String> flDocTagAttributes, Map<String, String> flSysTagAttributes) {
         FL fl = FL.generate();
         flDataTagAttributes.put(ATTR_SURNAME, fl.lastname);
         flDataTagAttributes.put(ATTR_NAME_1, fl.firstname);
@@ -360,5 +359,6 @@ public class GeneratorFLNdflXml {
         flDataTagAttributes.put(ATTR_BIRTHDAY, fl.birthday);
         flDataTagAttributes.put(ATTR_INN, fl.inn);
         flDocTagAttributes.put(ATTR_DUL_NUM, fl.dul);
+        flSysTagAttributes.put(ATTR_SYST_SOURSE_INP, fl.inp);
     }
 }
