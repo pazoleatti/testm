@@ -31,4 +31,20 @@
         </update>
     </changeSet>
 
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-8279 Реализовать добавление нового типа асинхронной задачи в справочник -->
+    <changeSet id="3.10-mchernyakov-01" author="mchernyakov">
+        <sql>
+           INSERT INTO ASYNC_TASK_TYPE(ID, NAME, HANDLER_BEAN, SHORT_QUEUE_LIMIT, TASK_LIMIT, LIMIT_KIND)
+                  VALUES ('45', 'Выгрузка списка источники-приемники в файл формата XLSX', 'CreateUnloadListAsyncTask',
+                          '3000', '1000000', 'количество отобранных для выгрузки в файл записей');
+        </sql>
+    </changeSet>
+
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-8279 Реализовать добавление нового типа событий в справочник -->
+    <changeSet id="3.10-mchernyakov-02" author="mchernyakov">
+        <sql>
+           INSERT INTO EVENT (ID, NAME) VALUES ('10015', 'Выгрузка списка источники приемники из налоговой формы');
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>
