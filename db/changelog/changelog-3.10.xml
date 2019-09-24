@@ -57,5 +57,12 @@
         </sql>
     </changeSet>
 
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-8283 Реализовать добавление нового поля Период  -->
+    <changeSet id="3.10-mchernyakov-03" author="mchernyakov">
+        <sql>
+            ALTER TABLE LOG_ENTRY ADD (PERIOD VARCHAR2(50 CHAR));
+            COMMENT ON COLUMN LOG_ENTRY.PERIOD IS 'Период';
+        </sql>
+    </changeSet>
 
 </databaseChangeLog>

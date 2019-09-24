@@ -462,6 +462,7 @@
         "logPanel.title.message": "Текст сообщения",
         "logPanel.title.type": "Тип",
         "logPanel.title.object": "Объект",
+        "logPanel.title.period": "Период",
         "logPanel.header.message": "Уведомления (всего: {0}; фатальных ошибок: {1})",
         "logPanel.header.unload": "Выгрузить",
         "logPanel.header.unload.title": "Выгрузить в файл MS Excel",

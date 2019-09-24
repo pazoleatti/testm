@@ -88,7 +88,8 @@
                                     $filter('translate')('logPanel.title.messageType'),
                                     $filter('translate')('logPanel.title.message'),
                                     $filter('translate')('logPanel.title.type'),
-                                    $filter('translate')('logPanel.title.object')],
+                                    $filter('translate')('logPanel.title.object'),
+                                    $filter('translate')('logPanel.title.period')],
                                 colModel: [
                                     {
                                         name: 'ord',
@@ -132,6 +133,14 @@
                                     {
                                         name: 'object',
                                         index: 'object',
+                                        width: 200,
+                                        sortable: false,
+                                        formatter: $filter('textColorFormatter'),
+                                        classes: 'grid-cell-white-space'
+                                    },
+                                    {
+                                        name: 'period',
+                                        index: 'period',
                                         width: 200,
                                         sortable: false,
                                         formatter: $filter('textColorFormatter'),

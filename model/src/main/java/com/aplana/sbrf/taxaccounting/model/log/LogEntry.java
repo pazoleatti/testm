@@ -46,6 +46,10 @@ public class LogEntry implements Serializable {
      */
     private String object;
     /**
+     * Период
+     */
+    private String period;
+    /**
      * Конструктор по-умолчанию
      * Напрямую использоваться не должен, создан для совместимости с GWT
      */
@@ -69,6 +73,15 @@ public class LogEntry implements Serializable {
         setMessage(message);
         setType(type);
         setObject(object);
+        this.date = new Date();
+    }
+
+    public LogEntry(LogLevel level, String message, String type, String object, String period) {
+        this.level = level;
+        setMessage(message);
+        setType(type);
+        setObject(object);
+        setPeriod(period);
         this.date = new Date();
     }
 
@@ -132,6 +145,14 @@ public class LogEntry implements Serializable {
         return object;
     }
 
+    public String getPeriod() {
+        return period;
+    }
+
+    public void setPeriod(String period) {
+        this.period = period;
+    }
+
     public void setObject(String object) {
         if (object != null && object.length() > MAX_OBJECT_LENGTH) {
             this.object = object.substring(0, MAX_OBJECT_LENGTH);
@@ -166,6 +187,7 @@ public class LogEntry implements Serializable {
         if (level != logEntry.level) return false;
         if (type != null ? type.equals(logEntry.type) : logEntry.type == null) return false;
         if (object != null ? object.equals(logEntry.object) : logEntry.object == null) return false;
+        if (period != null ? period.equals(logEntry.period) : logEntry.period == null) return false;
         return message != null ? message.equals(logEntry.message) : logEntry.message == null;
     }
 
@@ -178,6 +200,7 @@ public class LogEntry implements Serializable {
         result = 31 * result + (message != null ? message.hashCode() : 0);
         result = 31 * result + (type != null ? type.hashCode() : 0);
         result = 31 * result + (object != null ? object.hashCode() : 0);
+        result = 31 * result + (period != null ? period.hashCode() : 0);
         return result;
     }
 
@@ -191,6 +214,7 @@ public class LogEntry implements Serializable {
                 ", message='" + message + '\'' +
                 ", type='" + type + '\'' +
                 ", object='" + object + '\'' +
+                ", period='" + period + '\'' +
                 '}';
     }
 }

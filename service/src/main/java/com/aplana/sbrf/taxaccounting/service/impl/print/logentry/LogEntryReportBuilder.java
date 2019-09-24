@@ -25,9 +25,10 @@ public class LogEntryReportBuilder extends AbstractReportBuilder {
     private static final String FOURTH_COLUMN = "Текст сообщения";
     private static final String FIFTH_COLUMN = "Тип";
     private static final String SIXTH_COLUMN = "Объект";
+    private static final String SEVEN_COLUMN = "Период";
 
     // Шапка таблицы
-    private static final String[] headers = new String[]{FIRST_COLUMN, SECOND_COLUMN, THIRD_COLUMN, FOURTH_COLUMN, FIFTH_COLUMN, SIXTH_COLUMN};
+    private static final String[] headers = new String[]{FIRST_COLUMN, SECOND_COLUMN, THIRD_COLUMN, FOURTH_COLUMN, FIFTH_COLUMN, SIXTH_COLUMN, SEVEN_COLUMN};
     private static final String ENCODING = "windows-1251";
 
     // Список записей уведомления
