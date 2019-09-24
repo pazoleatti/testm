@@ -47,4 +47,15 @@
         </sql>
     </changeSet>
 
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-8645 Реализовать при удалении ОНФ удаление связанных ТС -->
+    <changeSet id="3.10-skononova-1" author="skononova">
+        <sql>
+	    ALTER TABLE transport_message DROP  CONSTRAINT tmess_declaration_id_fk;
+	    ALTER TABLE transport_message ADD  CONSTRAINT tmess_declaration_id_fk FOREIGN KEY (declaration_id)
+        	REFERENCES declaration_data (id) ON DELETE CASCADE ENABLE;
+
+        </sql>
+    </changeSet>
+
+
 </databaseChangeLog>
