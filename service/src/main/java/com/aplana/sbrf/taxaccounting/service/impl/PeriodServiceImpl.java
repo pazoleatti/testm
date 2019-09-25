@@ -357,7 +357,6 @@ public class PeriodServiceImpl implements PeriodService {
         }
     }
 
-    //todo
     private void checkHasBlockedDeclaration(DepartmentReportPeriod departmentReportPeriod, Logger logger) {
         List<Integer> departments = departmentService.getAllChildrenIds(departmentReportPeriod.getDepartmentId());
 
