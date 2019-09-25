@@ -949,43 +949,19 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
     }
 
     @Override
-    public Long getDeclarationData(DeclarationData declarationData) {
-        JdbcTemplate jt = getJdbcTemplate();
-        Long declarationDataId = 0L;
-
-        switch (declarationData.getDeclarationTemplateId()) {
-            case DeclarationType.NDFL_CONSOLIDATE:
-                declarationDataId = jt.queryForObject("SELECT id FROM declaration_data " +
-                                "WHERE declaration_template_id = ? AND department_report_period_id = ? AND knf_type_id = ?",
-                        Long.class, declarationData.getDeclarationTemplateId(), declarationData.getDepartmentReportPeriodId(), declarationData.getKnfType().getId());
-                break;
-            case DeclarationType.NDFL_PRIMARY:
-                if (declarationData.isManuallyCreated()) {
-                    declarationDataId = jt.queryForObject("SELECT id FROM declaration_data WHERE declaration_template_id = ?" +
-                                    " AND department_report_period_id = ? AND manually_created = ? AND asnu_id = ?",
-                            Long.class, declarationData.getDeclarationTemplateId(), declarationData.getDepartmentReportPeriodId(), 1, declarationData.getAsnuId());
-                }
-                break;
-            default:
-                MapSqlParameterSource params = new MapSqlParameterSource();
-                params.addValue("declarationTemplateId", declarationData.getDeclarationTemplateId());
-                params.addValue("taxOrganCode", declarationData.getTaxOrganCode() != null ? declarationData.getTaxOrganCode().toLowerCase() : null);
-                params.addValue("departmentReportPeriodId", declarationData.getDepartmentReportPeriodId());
-                params.addValue("kpp", declarationData.getKpp() != null ? declarationData.getKpp().toLowerCase() : null);
-                params.addValue("oktmo", declarationData.getOktmo() != null ? declarationData.getOktmo().toLowerCase() : null);
-                params.addValue("asnuId", declarationData.getAsnuId());
-                params.addValue("taxOrganCode", declarationData.getTaxOrganCode() != null ? declarationData.getTaxOrganCode().toLowerCase() : null);
-                params.addValue("note", declarationData.getNote() != null ? declarationData.getNote().toLowerCase() : null);
-                params.addValue("fileName", declarationData.getFileName() != null ? declarationData.getFileName().toLowerCase() : null);
-                params.addValue("docState", declarationData.getDocStateId());
-                declarationDataId = getNamedParameterJdbcTemplate().queryForObject("SELECT id FROM declaration_data WHERE declaration_template_id = :declarationTemplateId" +
-                                " AND department_report_period_id = :departmentReportPeriodId and (:taxOrganCode is null or lower(tax_organ_code) = :taxOrganCode) AND (:kpp is null or lower(kpp) = :kpp)" +
-                                " AND (:oktmo is null or lower(oktmo) = :oktmo) AND (:asnuId is null or asnu_id = :asnuId) AND (:note is null or lower(note) = :note) " +
-                                "AND (:fileName is null or lower(file_name) = :fileName) AND (:docState is null or doc_state_id = :docState)",
-                        params, Long.class);
+    public List<Long> findExistingDeclarationsForCreationCheck(DeclarationData declarationData) {
+        String sql = "SELECT id FROM declaration_data " +
+                "WHERE declaration_template_id = :declarationTemplateId AND department_report_period_id = :departmentReportPeriodId AND knf_type_id = :knfTypeId " +
+                "ORDER BY id DESC";
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("declarationTemplateId", declarationData.getDeclarationTemplateId());
+        params.addValue("departmentReportPeriodId", declarationData.getDepartmentReportPeriodId());
+        params.addValue("knfTypeId", declarationData.getKnfType().getId());
+        try {
+            return getNamedParameterJdbcTemplate().queryForList(sql, params, Long.class);
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<>();
         }
-
-        return declarationDataId;
     }
 
     private final class DeclarationDataRowMapper implements RowMapper<DeclarationData> {

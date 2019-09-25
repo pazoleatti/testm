@@ -554,11 +554,6 @@ public interface DeclarationDataService {
     boolean existDeclarationData(long declarationDataId);
 
     /**
-     * Возвращаает id НФ по критериям в зависимости от ее вида
-     */
-    Long getDeclarationData(DeclarationData declarationData);
-
-    /**
      * Проверка существования формы и ее типа
      *
      * @param userInfo          пользователь
