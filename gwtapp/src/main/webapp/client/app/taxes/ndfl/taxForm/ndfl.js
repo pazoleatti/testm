@@ -400,15 +400,6 @@
                 };
 
                 /**
-                 * @description Определяет заполнен ли филбтр
-                 * @returns true если заполнен
-                 */
-                $scope.isFilterClear = function () {
-                    return (isEmpty($scope.ndflFilter.person) && isEmpty($scope.ndflFilter.income) &&
-                    isEmpty($scope.ndflFilter.deduction) && isEmpty($scope.ndflFilter.prepayment));
-                };
-
-                /**
                  * @description Формирование рну ндфл для всех ФЛ на основе Меню выбора
                  */
                 $scope.createRnuNdflByAllPersonsReportMenu = function () {
@@ -423,8 +414,8 @@
                             $shareData: function () {
                                 return {
                                     filter: $scope.searchFilter.params,
-                                    filterIsClear: $scope.isFilterClear(),
-                                    selectedRow:  $scope.ndflTabsCtrl
+                                    filterIsClear: !$scope.searchFilter.isClear,
+                                    selectedRow: $scope.ndflTabsCtrl
                                 };
                             }
                         }

@@ -1,6 +1,7 @@
 package form_template.ndfl.consolidated_rnu_ndfl.v2016
 
 import com.aplana.sbrf.taxaccounting.AbstractScriptClass
+import com.aplana.sbrf.taxaccounting.dao.ndfl.NdflPersonDao
 import com.aplana.sbrf.taxaccounting.model.BlobData
 import com.aplana.sbrf.taxaccounting.model.Column
 import com.aplana.sbrf.taxaccounting.model.DataRow
@@ -192,10 +193,6 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
 
     public final static String RNU_NDFL_PERSON_ALL_DB = "rnu_ndfl_person_all_db.xlsx"
     public final static String REPORT_XLSX = "report.xlsx"
-
-    Map<Long, NdflPerson> ndflPersonCache = [:]
-    Map<Long, DeclarationData> declarationDataCache = [:]
-    Map<Integer, Department> departmentCache = [:]
 
     /**
      * Идентификатор шаблона РНУ-НДФЛ (консолидированная)
@@ -432,6 +429,7 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
  * @return
  */
     def createXlsxReport() {
+        long time = System.currentTimeMillis()
         List<NdflPerson> ndflPersonList = ndflPersonService.findNdflPerson(declarationData.id)
 
         List<NdflPersonIncome> ndflPersonIncomeList = ndflPersonService.findNdflPersonIncome(declarationData.id)
@@ -456,6 +454,7 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
         } finally {
             writer.close()
         }
+        logForDebug("XLSX отчет создан (" + (System.currentTimeMillis() - time) + " мс)")
     }
 
     def createSpecificReport() {
@@ -487,7 +486,7 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
                 break
             case SubreportAliasConstants.RNU_NDFL_PERSON_ALL_DB:
                 exportAllDeclarationDataToExcel()
-                scriptSpecificReportHolder.setFileName("РНУ_НДФЛ_${declarationData.id}_${new Date().format('yyyy-MM-dd_HH-mm-ss')}.xlsx")
+                scriptSpecificReportHolder.setFileName("РНУ_НДФЛ_${declarationData.id}_${checkSubreportKind().getKind()}_${new Date().format('yyyy-MM-dd_HH-mm-ss')}.xlsx")
                 break
             case SubreportAliasConstants.RNU_RATE_REPORT:
                 createRateReport()
@@ -661,11 +660,23 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
 
 
     /**
-     * Виды спецотчетов "По выделенным" (SBRFNDFL-8445)
+     * Виды спецотчетов "По выделенным" (SBRFNDFL-8445, SBRFNDFL-8554)
      */
     @TypeChecked(TypeCheckingMode.SKIP)
     enum SubreportKindEnum {
-        ALL, BY_FILTER, BY_SELECTED
+        ALL ("По всем данным"),
+        BY_FILTER ("По отобранным по фильтру"),
+        BY_SELECTED ("По выбранным на странице")
+
+        private String kind
+
+        SubreportKindEnum (String kind) {
+            this.kind = kind
+        }
+
+        public String getKind() {
+            return kind
+        }
     }
 
     /**
@@ -890,25 +901,13 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
                         ndflPersonList.sort {it.rowNum}
 
                         // Найти записи в разделе INCOMES (2): раздел 2 графа 3 == выбранная строка из раздела 2, графа 3
-                        // (ndfl_person_income.ndfl_person_id == ndfl_person.id)
-                        // (возможно, что ndflPersonIdList.size() >= ndflPersonList.size())
-                        List<Long> ndflPersonIdList = new ArrayList<>()
-                        for(int i= 0; i < ndflPersonList.size(); i++) {
-                            if(!ndflPersonIdList.contains(ndflPersonList.get(i).getId())) {
-                                ndflPersonIdList.add(ndflPersonList.get(i).getId())
-                            }
-                        }
-                        ndflPersonIncomeList = ndflPersonService.findNdflPersonIncomeBySelectedById(ndflPersonIdList, declarationData.id)
+                        // (для ndfl_person_income.operation_id)
+                        List<String> operationIdList = ndflAllPersonsReportSelectedRows.incomes.operationId
+                        ndflPersonIncomeList = ndflPersonService.findNdflPersonIncomeBySelectedByOperationId(operationIdList, declarationData.id)
                         ndflPersonIncomeList.sort {it.rowNum}
 
                         // Найти записи в разделе DEDUCTIONS (3): раздел 3, графа 9 == выбранная строка из раздела 2, графа 3
                         // (ndfl_person_income.operation_id == ndfl_person_deduction.operation_id)
-                        List<String> operationIdList = new ArrayList<>()
-                        for(int i = 0; i < ndflPersonIncomeList.size(); i++) {
-                            if(!operationIdList.contains(ndflPersonIncomeList.get(i).getOperationId())) {
-                                operationIdList.add(ndflPersonIncomeList.get(i).getOperationId())
-                            }
-                        }
                         ndflPersonDeductionList = ndflPersonService.findNdflPersonDeductionBySelectedByOperationId(operationIdList, declarationData.id)
                         ndflPersonDeductionList.sort {it.rowNum}
 
@@ -926,26 +925,16 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
                         ndflPersonList = ndflPersonService.findNdflPersonBySelectedByInp(inpList, declarationData.id)
                         ndflPersonList.sort {it.rowNum}
 
-                        // Найти записи в разделе DEDUCTIONS (3): раздел 3 графа 2 == выбранная строка из раздела 2, графа 2
-                        // (ndfl_person_deduction.ndfl_person_id == ndfl_person.id)
-                        // (возможно, что ndflPersonIdList.size() >= ndflPersonList.size())
-                        List<Long> ndflPersonIdList = new ArrayList<>()
-                        for(int i= 0; i < ndflPersonList.size(); i++) {
-                            if(!ndflPersonIdList.contains(ndflPersonList.get(i).getId())) {
-                                ndflPersonIdList.add(ndflPersonList.get(i).getId())
-                            }
-                        }
-                        ndflPersonDeductionList = ndflPersonService.findNdflPersonDeductionBySelectedById(ndflPersonIdList, declarationData.id)
+                        // Найти записи в разделе DEDUCTIONS (3): раздел 3 графа 9 == выбранная строка из раздела 2, графа 9
+                        // (для ndfl_person_deduction.id)
+                        List<Long> deductionIds = ndflAllPersonsReportSelectedRows.deductions.id
+                        ndflPersonDeductionList = ndflPersonService.findAllDeductionsByIdIn(deductionIds)
                         ndflPersonDeductionList.sort {it.rowNum}
+
+                        List<String> operationIdList = ndflAllPersonsReportSelectedRows.deductions.operationId
 
                         // Найти записи в разделе INCOMES (2): раздел 1, графа 3 == выбранная строка из раздела 3, графа 9
                         // (ndfl_person_deduction.operation_id = ndfl_person_income.operation_id)
-                        List<String> operationIdList = new ArrayList<>()
-                        for(int i = 0; i < ndflPersonDeductionList.size(); i++) {
-                            if(!operationIdList.contains(ndflPersonDeductionList.get(i).getOperationId())) {
-                                operationIdList.add(ndflPersonDeductionList.get(i).getOperationId())
-                            }
-                        }
                         ndflPersonIncomeList = ndflPersonService.findNdflPersonIncomeBySelectedByOperationId(operationIdList, declarationData.id)
                         ndflPersonIncomeList.sort {it.rowNum}
 
@@ -958,38 +947,26 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
                         // Список ИНП выбранных на вкладке записей
                         inpList = createNdflPersonInpList(currentTabKind)
 
-                        // Найти записи в разделе PERSONS (1): раздел 1, графа 2 == выбранная строка из раздела 2, графа 2
+                        // Найти записи в разделе PERSONS (1): раздел 1, графа 2 == выбранная строка из раздела 4, графа 2
                         // (ndfl_person.inp in :inpList)
                         ndflPersonList = ndflPersonService.findNdflPersonBySelectedByInp(inpList, declarationData.id)
                         ndflPersonList.sort {it.rowNum}
 
                         // Найти записи в разделе PREPAYMENTS (4): раздел 4, графа 3 = выбранная строка из раздела 4, графа 3
-                        // ndfl_person_prepayment.ndfl_person_id == ndfl_person.id)
-                        // (возможно, что ndflPersonIdList.size() >= ndflPersonList.size())
-                        List<Long> ndflPersonIdList = new ArrayList<>()
-                        for(int i= 0; i < ndflPersonList.size(); i++) {
-                            if(!ndflPersonIdList.contains(ndflPersonList.get(i).getId())) {
-                                ndflPersonIdList.add(ndflPersonList.get(i).getId())
-                            }
-                        }
-                        ndflPersonPrepaymentList = ndflPersonService.findNdflPersonPrepaymentBySelectedById(ndflPersonIdList, declarationData.id)
+                        // (для ndfl_person_prepayment.operation_id)
+                        List<String> operationIdList = ndflAllPersonsReportSelectedRows.prepayments.operationId
+                        ndflPersonPrepaymentList = ndflPersonService.findNdflPersonPrepaymentBySelectedByOperationId(operationIdList, declarationData.id)
                         ndflPersonPrepaymentList.sort {it.rowNum}
 
-                        // Найти записи в разделе DEDUCTIONS (3): раздел 3, графа 9 == выбранная строка из раздела 4, графа 3
-                        // (ndfl_person_prepayment.operation_id = ndfl_person_deduction.operation_id)
-                        List<String> operationIdList = new ArrayList<>()
-                        for(int i = 0; i < ndflPersonPrepaymentList.size(); i++) {
-                            if (!operationIdList.contains(ndflPersonPrepaymentList.get(i).getOperationId())) {
-                                operationIdList.add(ndflPersonPrepaymentList.get(i).getOperationId())
-                            }
-                        }
-                        ndflPersonDeductionList = ndflPersonService.findNdflPersonDeductionBySelectedByOperationId(operationIdList, declarationData.id)
-                        ndflPersonDeductionList.sort {it.rowNum}
-
-                        // Найти записи в разделе INCOMES (2): раздел 2, графа 3 == выбранная строка из раздела 4, графа 4
+                        // Найти записи в разделе INCOMES (2): раздел 2, графа 3 == выбранная строка из раздела 4, графа 3
                         // (ndfl_person_prepayment.operation_id = ndfl_person_income.operation_id)
                         ndflPersonIncomeList = ndflPersonService.findNdflPersonIncomeBySelectedByOperationId(operationIdList, declarationData.id)
                         ndflPersonIncomeList.sort {it.rowNum}
+
+                        // Найти записи в разделе DEDUCTIONS (3): раздел 3, графа 9 == выбранная строка из раздела 4, графа 3
+                        // (ndfl_person_prepayment.operation_id = ndfl_person_deduction.operation_id)
+                        ndflPersonDeductionList = ndflPersonService.findNdflPersonDeductionBySelectedByOperationId(operationIdList, declarationData.id)
+                        ndflPersonDeductionList.sort {it.rowNum}
                         break
                 }
                 break
@@ -2484,45 +2461,6 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
         }
     }
 
-
-    Department getPrimaryTB(NdflPersonIncome income) {
-        if (income.sourceId) {
-            NdflPersonIncome primaryIncome = ndflPersonService.getIncome(income.sourceId)
-            NdflPerson primaryPerson = getNdflPerson(primaryIncome.ndflPersonId)
-            DeclarationData primaryDeclaration = getDeclarationData(primaryPerson.declarationDataId)
-            Department parentTB = getDepartment(primaryDeclaration.departmentId)
-            return parentTB
-        }
-        return null
-    }
-
-    NdflPerson getNdflPerson(Long ndflPersonId) {
-        NdflPerson ndflPerson = ndflPersonCache.get(ndflPersonId)
-        if (!ndflPerson) {
-            ndflPerson = ndflPersonService.get(ndflPersonId)
-            ndflPersonCache.put(ndflPersonId, ndflPerson)
-        }
-        return ndflPerson
-    }
-
-    DeclarationData getDeclarationData(Long declarationDataId) {
-        DeclarationData declarationData = declarationDataCache.get(declarationDataId)
-        if (!declarationData) {
-            declarationData = declarationService.getDeclarationData(declarationDataId)
-            declarationDataCache.put(declarationDataId, declarationData)
-        }
-        return declarationData
-    }
-
-    Department getDepartment(Integer departmentId) {
-        Department department = departmentCache.get(departmentId)
-        if (!department) {
-            department = departmentService.getParentTB(departmentId)
-            departmentCache.put(departmentId, department)
-        }
-        return department
-    }
-
     /**
      * Класс инкапсулирующий данные
      */
@@ -3044,11 +2982,13 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
             CellStyle textRightStyle = styler.createBorderStyleRightAlignedTypeText()
             CellStyle textLeftStyle = styler.createBorderStyleLeftAlignedTypeText()
             FlIncomeData summaryFlIncomeData = new FlIncomeData(new HashSet<Long>(), new BigDecimal(0).setScale(2), new BigDecimal(0).setScale(2))
+            Map<Long, String> ndflPersonDepartmentMap = departmentService.getParentTBbyIncomeSourceIdList(ndflPersonIncomeList.sourceId)
             for (NdflPersonIncome npi in ndflPersonIncomeList) {
+                ScriptUtils.checkInterrupted()
                 if (npi.incomeAccruedDate) {
-                    Department primaryTB = getPrimaryTB(npi)
                     String period = getPeriod(npi.incomeAccruedDate)
-                    XlsxReportRowKey rowKey = new XlsxReportRowKey(npi.kpp, npi.oktmo, primaryTB?.name, period)
+                    String parentTBName = (npi.ndflPersonId) ? ndflPersonDepartmentMap.get(npi.sourceId) : ""
+                    XlsxReportRowKey rowKey = new XlsxReportRowKey(npi.kpp, npi.oktmo, parentTBName, period)
                     if (flIncomeDataMap.get(rowKey) == null) {
                         flIncomeDataMap.put(rowKey, new FlIncomeData(new HashSet<Long>(), new BigDecimal(0).setScale(2), new BigDecimal(0).setScale(2)))
                     }
