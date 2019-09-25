@@ -9,9 +9,11 @@ import com.aplana.sbrf.taxaccounting.model.action.OpenCorrectionPeriodAction;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookFormType;
 import com.aplana.sbrf.taxaccounting.model.result.*;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.service.*;
+import com.aplana.sbrf.taxaccounting.service.refbook.RefBookFormTypeService;
 import com.aplana.sbrf.taxaccounting.utils.SimpleDateUtils;
 import net.sf.jasperreports.web.actions.ActionException;
 import org.apache.commons.lang3.time.FastDateFormat;
@@ -75,6 +77,9 @@ public class PeriodServiceImpl implements PeriodService {
     @Autowired
     private LockDataService lockDataService;
 
+    @Autowired
+    private RefBookFormTypeService refBookFormTypeService;
+
     @Override
     @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).OPEN_DEPARTMENT_REPORT_PERIOD)")
     public OpenPeriodResult open(DepartmentReportPeriod departmentReportPeriod, TAUserInfo userInfo) {
@@ -84,7 +89,8 @@ public class PeriodServiceImpl implements PeriodService {
         try {
             TaxPeriod taxPeriod = reportPeriodDao.fetchOrCreateTaxPeriod(departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear());
             ReportPeriodType reportPeriodType = reportPeriodDao.getReportPeriodTypeById(departmentReportPeriod.getReportPeriod().getDictTaxPeriodId());
-            reportPeriod = reportPeriodService.fetchOrCreate(taxPeriod, reportPeriodType);
+            reportPeriod = reportPeriodService.fetchOrCreate(
+                    taxPeriod, reportPeriodType, departmentReportPeriod.getReportPeriod().getReportPeriodTaxFormTypeId());
             departmentReportPeriod.setIsActive(true);
             departmentReportPeriod.setReportPeriod(reportPeriod);
 
@@ -95,9 +101,9 @@ public class PeriodServiceImpl implements PeriodService {
             return new OpenPeriodResult(logEntryService.save(logger.getEntries()))
                     .error(e.getMessage());
         } catch (Exception e) {
-            throw new ServiceException(String.format("Ошибка при открытии периода \"%s:%s\" для подразделения \"%s\" и всех дочерних подразделений. Обратитесь к администратору.",
-                    departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(),
-                    reportPeriod != null ? reportPeriod.getName() : "null",
+            throw new ServiceException(String.format("Ошибка при открытии периода \"%s\" для подразделения \"%s\" " +
+                            "и всех дочерних подразделений. Обратитесь к администратору.",
+                    getPeriodString(departmentReportPeriod.getReportPeriod()),
                     departmentDao.getDepartment(departmentReportPeriod.getDepartmentId()).getName()), e);
         }
     }
@@ -121,9 +127,8 @@ public class PeriodServiceImpl implements PeriodService {
             return new OpenPeriodResult(logEntryService.save(logger.getEntries()))
                     .error(e.getMessage());
         } catch (Exception e) {
-            throw new ServiceException(String.format("Ошибка при открытии корректирующего периода \"%s:%s\" с периодом сдачи корректировки %s для подразделения \"%s\" и всех дочерних подразделений. Обратитесь к администратору.",
-                    correctionPeriod.getReportPeriod().getTaxPeriod().getYear(),
-                    correctionPeriod.getReportPeriod().getName(),
+            throw new ServiceException(String.format("Ошибка при открытии корректирующего периода \"%s\" с периодом сдачи корректировки %s для подразделения \"%s\" и всех дочерних подразделений. Обратитесь к администратору.",
+                    getPeriodString(correctionPeriod.getReportPeriod()),
                     FastDateFormat.getInstance("dd.MM.yyyy").format(correctionPeriod.getCorrectionDate()),
                     departmentDao.getDepartment(correctionPeriod.getDepartmentId()).getName()), e);
         }
@@ -352,6 +357,7 @@ public class PeriodServiceImpl implements PeriodService {
         }
     }
 
+    //todo
     private void checkHasBlockedDeclaration(DepartmentReportPeriod departmentReportPeriod, Logger logger) {
         List<Integer> departments = departmentService.getAllChildrenIds(departmentReportPeriod.getDepartmentId());
 
@@ -497,19 +503,25 @@ public class PeriodServiceImpl implements PeriodService {
     }
 
     private String periodDescription(DepartmentReportPeriod departmentReportPeriod) {
-        return String.format("\"%s:%s%s\"",
-                departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(),
-                departmentReportPeriod.getReportPeriod().getName(),
+        return String.format("\"%s%s\"",
+                getPeriodString(departmentReportPeriod.getReportPeriod()),
                 departmentReportPeriod.getCorrectionDate() != null ? " (корр. " + FastDateFormat.getInstance("dd.MM.yyyy").format(departmentReportPeriod.getCorrectionDate()) + ")" : "");
     }
 
     private String periodWithDescription(DepartmentReportPeriod departmentReportPeriod) {
-        return String.format("%s \"%s:%s\"%s",
+        return String.format("%s \"%s\"%s",
                 departmentReportPeriod.getCorrectionDate() == null ? "Период" : "Корректирующий период",
-                departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(),
-                departmentReportPeriod.getReportPeriod().getName(),
+                getPeriodString(departmentReportPeriod.getReportPeriod()),
                 departmentReportPeriod.getCorrectionDate() == null ? "" :
                         " с периодом сдачи корректировки " + FastDateFormat.getInstance("dd.MM.yyyy").format(departmentReportPeriod.getCorrectionDate()));
+    }
+
+    private String getPeriodString(ReportPeriod reportPeriod) {
+        Integer reportPeriodTaxFormTypeId = reportPeriod.getReportPeriodTaxFormTypeId();
+        RefBookFormType refBookFormType = refBookFormTypeService.findOne(reportPeriodTaxFormTypeId);
+
+        return String.format("%s:%s:%s",
+                reportPeriod.getTaxPeriod().getYear(), reportPeriod.getName(), refBookFormType.getCode());
     }
 
     private DepartmentReportPeriodFilter filterFor(DepartmentReportPeriod departmentReportPeriod) {
