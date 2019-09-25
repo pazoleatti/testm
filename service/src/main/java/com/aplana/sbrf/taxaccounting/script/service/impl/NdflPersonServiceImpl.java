@@ -151,6 +151,17 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     /**
      * Возвращает данные по спецотчету "По выбранным" для вкладки "Сведения о доходах и НДФЛ" (SBRFNDFL-8445)
      *
+     * @param operationIdList список идентификаторов операций выбранных записей в форме
+     * @param declarationId идентификатор формы
+     * @return Данные для данных раздела 2 "Сведения о доходах и НДФЛ"
+     */
+    public List<NdflPersonIncome> findNdflPersonIncomeSelectedByOperationId(List<String> operationIdList, Long declarationId) {
+        return ndflPersonDao.findNdflPersonIncomeSelectedByOperationId(operationIdList, declarationId);
+    }
+
+    /**
+     * Возвращает данные по спецотчету "По выбранным" для вкладки "Сведения о доходах и НДФЛ" (SBRFNDFL-8445)
+     *
      * @param inpList список ИНП выбранных записей в форме
      * @param declarationId идентификатор формы
      * @return Данные для данных раздела 2 "Сведения о доходах и НДФЛ"
@@ -236,6 +247,15 @@ public class NdflPersonServiceImpl implements NdflPersonService {
         return ndflPersonDao.findNdflPersonPrepaymentBySelectedByOperationId(operationIdList, declarationId);
     }
 
+    /**
+     * Найти строки раздела 3 "Сведения о вычетах" по списку идентификаторов (SBRFNDFL-8559)
+     *
+     * @param deductionIds список идентификаторов
+     * @return список вычетов по выбранным идентификаторам
+     */
+    public List<NdflPersonDeduction> findAllDeductionsByIdIn(List<Long> deductionIds) {
+        return ndflPersonDao.findAllDeductionsByIdIn(deductionIds);
+    }
 
 
     @Override

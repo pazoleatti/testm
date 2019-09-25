@@ -102,6 +102,15 @@ public interface NdflPersonDao {
     /**
      * Возвращает данные по спецотчету "По выбранным" для вкладки "Сведения о доходах и НДФЛ" (SBRFNDFL-8445)
      *
+     * @param operationIdList список идентификаторов операций выбранных записей в форме
+     * @param declarationId идентификатор формы
+     * @return Данные для данных раздела 2 "Сведения о доходах и НДФЛ"
+     */
+    List<NdflPersonIncome> findNdflPersonIncomeSelectedByOperationId(List<String> operationIdList, Long declarationId);
+
+    /**
+     * Возвращает данные по спецотчету "По выбранным" для вкладки "Сведения о доходах и НДФЛ" (SBRFNDFL-8445)
+     *
      * @param inpList список ИНП выбранных записей в форме
      * @param declarationId идентификатор формы
      * @return Данные для данных раздела 2 "Сведения о доходах и НДФЛ"
@@ -185,6 +194,14 @@ public interface NdflPersonDao {
      * Найти строки раздела 2 "Сведения о доходах и НДФЛ" по списку идентификаторов.
      */
     List<NdflPersonIncome> findAllIncomesByIdIn(List<Long> incomeIds);
+
+    /**
+     * Найти строки раздела 3 "Сведения о вычетах" по списку идентификаторов (SBRFNDFL-8559)
+     *
+     * @param deductionIds список идентификаторов
+     * @return список вычетов по выбранным идентификаторам
+     */
+    List<NdflPersonDeduction> findAllDeductionsByIdIn(List<Long> deductionIds);
 
     /**
      * Найти все "Сведения о доходах физического лица", привязанные к налоговой форме
