@@ -62,6 +62,25 @@
         <sql>
             ALTER TABLE LOG_ENTRY ADD (PERIOD VARCHAR2(50 CHAR));
             COMMENT ON COLUMN LOG_ENTRY.PERIOD IS 'Период';
+
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-8668 Создать сиквенсы для существующих налоговых периодов -->
+    <changeSet id="3.10-skononova-2" author="skononova"  runAlways="true" >
+        <sql  splitStatements="false">
+	declare
+	    cnt number;
+	begin
+		for tax_year in (select year from tax_period)
+		loop
+		    select count(*) into cnt from user_sequences where sequence_name='SEQ_NDFL_REFERENCES_'||
+			to_char(tax_year.year);
+		    if (cnt =0) then
+		        execute immediate 'CREATE SEQUENCE SEQ_NDFL_REFERENCES_'||to_char(tax_year.year)||
+					    ' MINVALUE 1 MAXVALUE 9999999999999999999999999999 
+		                            INCREMENT BY 1 START WITH 1 CACHE 20 NOORDER  NOCYCLE';    
+		    end if;
+		end loop;
+	end;
+	
         </sql>
     </changeSet>
 
