@@ -451,7 +451,9 @@ class Report2Ndfl extends AbstractScriptClass {
                         for (def rate : incomesByRate.keySet()) {
                             def rateIncomes = incomesByRate.get(rate)
                             def operationIds = rateIncomes.operationId.toSet()
-                            def rateDeductions = person.deductions.findAll { it.operationId in operationIds }
+                            def rateDeductions = сторнированиеВычетов(
+                                    person.deductions.findAll { it.operationId in operationIds }
+                            )
                             def ratePrepayments = person.prepayments.findAll { it.operationId in operationIds }
 
                             List<NdflPersonDeduction> deductions = rateDeductions.findAll {
@@ -733,9 +735,7 @@ class Report2Ndfl extends AbstractScriptClass {
      * Удаляет группы строк вычетов, в которых сумма вычетов занулена
      */
     List<NdflPersonDeduction> сторнированиеВычетов(List<NdflPersonDeduction> deductions) {
-        def deductionGroups = deductions.groupBy {
-            [it.typeCode, it.notifDate, it.notifNum, it.notifSource, it.incomeCode]
-        }
+        def deductionGroups = deductions.groupBy { it.typeCode }
         for (def iterator = deductionGroups.values().iterator(); iterator.hasNext();) {
             def deductionGroup = iterator.next()
             BigDecimal sum = 0
