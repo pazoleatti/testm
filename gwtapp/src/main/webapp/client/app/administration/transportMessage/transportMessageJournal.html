@@ -7,6 +7,31 @@
          class="container-grid box-shadow-block flex-fill flex-column"
          style="overflow-y: auto;">
         <div id="transportMessageGridTop" style="flex-shrink: 0;">
+            <div style="float: right; padding-top: 10px" ng-show="permissionChecker.check(user, APP_CONSTANTS.USER_PERMISSION.EXPORT_PERSONS)">
+                <!--Выгрузить в Excel-->
+                <span>
+                <button id="download-excel-button" type="button" class="btn btn-default"
+                        data-bs-dropdown
+                        data-placement="bottom-right"
+                        data-ng-disabled="!user.hasRole(APP_CONSTANTS.USER_ROLE.N_ROLE_CONTROL_UNP, APP_CONSTANTS.USER_ROLE.N_ROLE_CONTROL_NS)">
+                    <span>Выгрузить в Excel</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-block" role="menu"
+                    aria-labelledby="download-excel-button">
+                    <li role="menuitem">
+                        <a ng-click="downloadExcelAll()">{{::'transportMessages.excelButton.all' | translate}}</a>
+                    </li>
+                    <li role="menuitem">
+                        <a ng-class="transportMessageGrid.ctrl.getCountRecords() > 0 ? '' : 'disabled'"
+                           ng-click="downloadExcelByFilter()">{{::'transportMessages.excelButton.byFilter' | translate}}</a>
+                    </li>
+                    <li role="menuitem">
+                        <a ng-class="transportMessageGrid.value.length > 0 ? '' : 'disabled'"
+                           ng-click="downloadExcelBySelected()">{{::'transportMessages.exceldButton.selected' | translate}}</a>
+                    </li>
+                </ul>
+            </span>
+            </div>
             <!--Фильтр-->
             <span data-ng-include="'client/app/administration/transportMessage/transportMessageJournalFilter.html'"></span>
 

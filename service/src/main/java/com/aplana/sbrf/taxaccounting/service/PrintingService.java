@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.service;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
+import com.aplana.sbrf.taxaccounting.model.messaging.TransportMessage;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 
 import java.util.Date;
@@ -115,4 +116,13 @@ public interface PrintingService {
      * @return uuid на блоб файла
      */
     String generateExcelUnloadList(long declarationDataId, boolean sources, boolean destinations, TAUser user);
+
+
+    /**
+     * Формирует Excel со списком собщений "Обмена с ФП АС Учет Налогов"
+     *
+     * @return uuid идентификатор файла blobData
+     * @param transportMessages
+     */
+    String generateExcelTransportMessages(List<TransportMessage> transportMessages);
 }

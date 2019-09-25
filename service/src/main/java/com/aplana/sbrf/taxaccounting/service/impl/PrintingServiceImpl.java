@@ -1,11 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import au.com.bytecode.opencsv.CSVWriter;
-import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookAsnuDao;
-import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookCountryDao;
-import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDepartmentDao;
-import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDocTypeDao;
-import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookTaxpayerStateDao;
+import com.aplana.sbrf.taxaccounting.dao.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.action.DepartmentConfigsFilter;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
@@ -14,13 +10,8 @@ import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.refbook.DepartmentConfig;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDepartment;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
-import com.aplana.sbrf.taxaccounting.model.refbook.RegistryPersonDTO;
+import com.aplana.sbrf.taxaccounting.model.messaging.TransportMessage;
+import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.AppFileUtils;
 import com.aplana.sbrf.taxaccounting.model.util.DateUtils;
 import com.aplana.sbrf.taxaccounting.service.*;
@@ -31,6 +22,7 @@ import com.aplana.sbrf.taxaccounting.service.impl.print.refbook.RefBookCSVReport
 import com.aplana.sbrf.taxaccounting.service.impl.print.refbook.RefBookExcelReportBuilder;
 import com.aplana.sbrf.taxaccounting.service.impl.print.sourcesAndDestinations.SourcesAndDestinationsReportBuilder;
 import com.aplana.sbrf.taxaccounting.service.impl.print.tausers.TAUsersReportBuilder;
+import com.aplana.sbrf.taxaccounting.service.impl.print.transportMessages.ExcelTransportMessagesReportBuilder;
 import com.aplana.sbrf.taxaccounting.service.impl.refbook.BatchIterator;
 import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import com.aplana.sbrf.taxaccounting.service.refbook.DepartmentConfigService;
@@ -533,6 +525,24 @@ public class PrintingServiceImpl implements PrintingService {
         String reportPath = null;
         try {
             reportPath = reportBuilder.createReport();
+            return blobDataService.create(reportPath, declarationDataId + "_Источники приемники_" + FastDateFormat.getInstance("dd.MM.yyyy").format(new Date()) + ".xlsx");
+        } catch (IOException e) {
+            LOG.error(e.getMessage(), e);
+            throw new ServiceException(e.getMessage());
+        } finally {
+            AppFileUtils.deleteTmp(reportPath);
+        }
+    }
+
+    @Override
+    public String generateExcelTransportMessages(List<TransportMessage> transportMessages) {
+        List<Relation> relationList = new ArrayList<>();
+
+        ExcelTransportMessagesReportBuilder reportBuilder = new ExcelTransportMessagesReportBuilder(transportMessages);
+        String reportPath = null;
+        try {
+            reportPath = reportBuilder.createReport();
+            String declarationDataId ="";
             return blobDataService.create(reportPath, declarationDataId + "_Источники приемники_" + FastDateFormat.getInstance("dd.MM.yyyy").format(new Date()) + ".xlsx");
         } catch (IOException e) {
             LOG.error(e.getMessage(), e);

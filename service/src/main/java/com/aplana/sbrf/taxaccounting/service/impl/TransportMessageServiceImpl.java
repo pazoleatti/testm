@@ -1,17 +1,14 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.async.AsyncManager;
 import com.aplana.sbrf.taxaccounting.dao.TransportMessageDao;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.TARole;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.messaging.TransportMessage;
 import com.aplana.sbrf.taxaccounting.model.messaging.TransportMessageFilter;
+import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 import com.aplana.sbrf.taxaccounting.permissions.PermissionUtils;
-import com.aplana.sbrf.taxaccounting.service.AuditService;
-import com.aplana.sbrf.taxaccounting.service.DepartmentService;
-import com.aplana.sbrf.taxaccounting.service.TAUserService;
-import com.aplana.sbrf.taxaccounting.service.TransportMessageService;
+import com.aplana.sbrf.taxaccounting.service.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,9 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class TransportMessageServiceImpl implements TransportMessageService {
@@ -39,6 +34,11 @@ public class TransportMessageServiceImpl implements TransportMessageService {
     protected TAUserService userService;
     @Autowired
     protected DepartmentService departmentService;
+    @Autowired
+    private LogEntryService logEntryService;
+    @Autowired
+    private AsyncManager asyncManager;
+
 
     @Override
     public TransportMessage findById(Long id) {
@@ -117,5 +117,36 @@ public class TransportMessageServiceImpl implements TransportMessageService {
                 transportMessage.getType().getText(),
                 transportMessage.getState().getText());
         auditService.add(null, userService.getSystemUserInfo(), note);
+    }
+
+    private boolean checkExportAccess(TAUserInfo userInfo) {
+        TAUser user = userInfo.getUser();
+        return user.hasRole(TARole.N_ROLE_CONTROL_NS) ||user.hasRole(TARole.N_ROLE_CONTROL_UNP);
+    }
+
+    @Override
+    public ActionResult asyncExport(TransportMessageFilter filter, TAUserInfo userInfo) {
+        checkExportAccess(userInfo);
+        List<Long> transportMessageIds = transportMessageDao.findIdsByFilter(filter);
+        return asyncExport(transportMessageIds,userInfo);
+    }
+
+    @Override
+    public ActionResult asyncExport(List<Long> transportMessageIds, TAUserInfo userInfo) {
+        checkExportAccess(userInfo);
+        Logger logger = new Logger();
+        if (transportMessageIds.isEmpty()) {
+            logger.error("По заданым параметрам не найдено ни одного транспортного сообщения");
+        } else {
+            Map<String, Object> params = new HashMap<>();
+            params.put("transportMessageIds", transportMessageIds);
+            asyncManager.createTask(OperationType.EXPORT_TRANSPORT_MESSAGES, userInfo, params, logger);
+        }
+        return new ActionResult(logEntryService.save(logger.getEntries()));
+    }
+
+    @Override
+    public List<TransportMessage> findByIds(List<Long> transportMessageIds, TAUserInfo userInfo) {
+        return transportMessageDao.findByIds(transportMessageIds);
     }
 }

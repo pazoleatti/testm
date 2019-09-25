@@ -180,6 +180,57 @@
                         }
                     });
                 }
+
+
+
+                /**
+                 * @description Выгрузить в excel
+                 */
+                $scope.downloadExcelAll = function () {
+                    var selectedRows = $scope.transportMessageGrid.value;
+                    $http({
+                        method: "POST",
+                        url: "controller/actions/transportMessages/exportExcel",
+                        data: $filter('idExtractor')(selectedRows, 'declarationDataId')
+                    }).then(function (response) {
+                        if (response.data && response.data.uuid && response.data.uuid !== null) {
+                            $logPanel.open('log-panel-container', response.data.uuid);
+                        }
+                    });
+                };
+
+                /**
+                 * @description Выгрузить в Excel по фильтру
+                 */
+                $scope.downloadExcelByFilter = function () {
+                    $http({
+                        method: "POST",
+                        url: "controller/actions/transportMessages/exportExcelByFilter",
+                        params: {
+                            filter: JSON.stringify(getFilter())
+                        }
+                    }).then(function (response) {
+                        if (response.data && response.data.uuid && response.data.uuid !== null) {
+                            $logPanel.open('log-panel-container', response.data.uuid);
+                        }
+                    });
+                };
+
+                /**
+                 * @description Выгрузить в Excel по фильтру по выбранным
+                 */
+                $scope.downloadExcelBySelected = function () {
+                    var selectedRows = $scope.transportMessageGrid.value;
+                    $http({
+                        method: "POST",
+                        url: "controller/actions/transportMessages/exportExcelBySelected",
+                        data: $filter('idExtractor')(selectedRows, 'declarationDataId')
+                    }).then(function (response) {
+                        if (response.data && response.data.uuid && response.data.uuid !== null) {
+                            $logPanel.open('log-panel-container', response.data.uuid);
+                        }
+                    });
+                };
             }
         ])
 }());

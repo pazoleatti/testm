@@ -5,6 +5,8 @@ import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.messaging.TransportMessage;
 import com.aplana.sbrf.taxaccounting.model.messaging.TransportMessageFilter;
 
+import java.util.List;
+
 /**
  * Доступ к таблице TRANSPORT_MESSAGE.
  */
@@ -27,10 +29,10 @@ public interface TransportMessageDao {
     String findMessageBodyById(Long id);
 
     /**
-     *  Подсчет количества Транспортных сообщений по номеру формы и направлению движения сообщения
+     * Подсчет количества Транспортных сообщений по номеру формы и направлению движения сообщения
      *
      * @param declarationId идентефикатор формы
-     * @param type Направление движения сообщения (0 - исходящее, 1 - входящее)
+     * @param type          Направление движения сообщения (0 - исходящее, 1 - входящее)
      * @return Транспортное сообщение, подходящее под условия
      */
     Integer countByDeclarationIdAndType(Long declarationId, int type);
@@ -60,4 +62,22 @@ public interface TransportMessageDao {
      * @param transportMessage Транспортное сообщение
      */
     void update(TransportMessage transportMessage);
+
+
+
+    /**
+     * Получить список идентификаторов сообщений по фильтру.
+     *
+     * @param filter       параметры фильтрации*
+     * @return список Идентификаторов транспортных сообщений, подходящих под параметры фильтрации.
+     */
+    List<Long> findIdsByFilter(TransportMessageFilter filter);
+
+    /**
+     * Получить список сообщений согласно списку (если список пустой, то возвращает все сообщения)
+     *
+     * @param ids Список идентификаторов сообщений (может быть пустым null или size=0)
+     * @return список Транспортных сообщений, согласно указоному списку идентификаторов
+     */
+    List<TransportMessage> findByIds(List<Long> ids);
 }

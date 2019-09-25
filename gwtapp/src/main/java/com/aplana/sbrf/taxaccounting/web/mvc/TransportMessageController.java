@@ -1,13 +1,13 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
-import com.aplana.sbrf.taxaccounting.model.BlobData;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
 import com.aplana.sbrf.taxaccounting.model.messaging.TransportMessage;
 import com.aplana.sbrf.taxaccounting.model.messaging.TransportMessageFilter;
+import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.TransportMessageService;
+import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedList;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedResourceAssembler;
 import org.apache.commons.lang3.StringUtils;
@@ -19,6 +19,8 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Контроллер для объектов "Транспортное сообщение".
@@ -28,6 +30,8 @@ public class TransportMessageController {
 
     @Autowired
     private TransportMessageService transportMessageService;
+    @Autowired
+    private SecurityService securityService;
     @Autowired
     private BlobDataService blobDataService;
 
@@ -106,4 +110,33 @@ public class TransportMessageController {
         out.flush();
         out.close();
     }
+
+
+    /**
+     * Выгрузка отчетности по списку ид
+     */
+    @PostMapping(value = "/actions/transportMessages/exportExcel")
+    public ActionResult exportExcel() {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        return  transportMessageService.asyncExport(Collections.EMPTY_LIST, userInfo);
+    }
+
+    /**
+     * Выгрузка отчетности по списку ид
+     */
+    @PostMapping(value = "/actions/transportMessages/exportExcelBySelected")
+    public ActionResult exportExcelBySelected(@RequestBody List<Long> transportMessageIds) {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        return transportMessageService.asyncExport(transportMessageIds, userInfo);
+    }
+
+    /**
+     * Выгрузка отчетности по фильтру
+     */
+    @PostMapping(value = "/actions/transportMessages/exportByFilter")
+    public ActionResult exportExcelByFilter(@RequestParam TransportMessageFilter filter) {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        return transportMessageService.asyncExport(filter, userInfo);
+    }
+
 }

@@ -45,7 +45,8 @@ public enum OperationType {
     RETURN_DECLARATION(null, "Возврат формы из подготовлена/принята в создана"),
     EDIT(null, "Редактирование строки налоговой формы"),
     EDIT_FILE(null, "Добавление/удаление файлов/комментариев"),
-    TRANSFER(null, "Консолидация данных из формы");
+    TRANSFER(null, "Консолидация данных из формы"),
+    EXPORT_TRANSPORT_MESSAGES(AsyncTaskType.EXPORT_TRANSPORT_MESSAGES, "Выгрузка транспортных сообщений в Excel");
 
     /**
      * Идентификатор типа асинхронной задачи
