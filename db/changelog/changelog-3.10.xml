@@ -62,6 +62,8 @@
         <sql>
             ALTER TABLE LOG_ENTRY ADD (PERIOD VARCHAR2(50 CHAR));
             COMMENT ON COLUMN LOG_ENTRY.PERIOD IS 'Период';
+        </sql>
+    </changeSet>
 
     <!-- https://jira.aplana.com/browse/SBRFNDFL-8668 Создать сиквенсы для существующих налоговых периодов -->
     <changeSet id="3.10-skononova-2" author="skononova"  runAlways="true" >
