@@ -1539,7 +1539,8 @@ create table log_entry
     log_level     number(1)             not null,
     message       varchar2(2000 char),
     type          varchar2(255 char),
-    object        varchar2(255 char)
+    object        varchar2(255 char),
+    period        varchar2(50 char)
 );
 
 comment on table log_entry is 'Сообщения в журнале';
@@ -1550,6 +1551,7 @@ comment on column log_entry.log_level is 'Уровень важности (0 - �
 comment on column log_entry.message is 'Текст сообщения';
 comment on column log_entry.type is 'Тип';
 comment on column log_entry.object is 'Объект';
+comment on column log_entry.object is 'Период';
 
 create sequence seq_log_entry start with 1;
 --------------------------------------------------------------------------------------------------------------------------

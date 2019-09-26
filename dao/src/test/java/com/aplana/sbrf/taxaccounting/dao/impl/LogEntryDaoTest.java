@@ -9,7 +9,6 @@ import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +24,6 @@ import java.util.*;
 @ContextConfiguration({"LogEntryDaoTest.xml"})
 @Transactional
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-@Ignore
 public class LogEntryDaoTest {
     private static final int MAX_MESSAGE_SIZE = 2000;
 
@@ -65,7 +63,7 @@ public class LogEntryDaoTest {
         logger.error("E1");
         logger.error("E2");
         logger.warn("W1");
-        logger.warnExp("W2", "type", "obj");
+        logger.warnExp("W2", "type", "obj","period");
         logEntryDao.save(logger.getEntries(), UID_WITHOUT_LOG_ENTRY_2);
         List<LogEntry> lel = logEntryDao.fetch(UID_WITHOUT_LOG_ENTRY_2);
 
@@ -74,6 +72,7 @@ public class LogEntryDaoTest {
         Assert.assertEquals(lel.get(3).getLevel(), LogLevel.WARNING);
         Assert.assertEquals(lel.get(3).getType(), "type");
         Assert.assertEquals(lel.get(3).getObject(), "obj");
+        Assert.assertEquals(lel.get(3).getPeriod(), "period");
     }
 
     @Test
