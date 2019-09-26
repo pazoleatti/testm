@@ -265,8 +265,9 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
     @Override
     public List<ReportPeriod> findAllActive(List<Integer> departmentIds) {
         return getJdbcTemplate().query("" +
-                        "select rp.id, rp.name, rp.tax_period_id, tp.tax_type, tp.year, rp.start_date, rp.end_date, rp.dict_tax_period_id, " +
-                        "  rp.calendar_start_date\n" +
+                        "select\n " +
+                        "  rp.id, rp.name, rp.tax_period_id, tp.tax_type, tp.year, rp.start_date, rp.end_date,\n " +
+                        "  rp.dict_tax_period_id, rp.calendar_start_date, rp.form_type_id\n " +
                         "from report_period rp\n" +
                         "join tax_period tp on tp.id = rp.tax_period_id\n" +
                         "where rp.id in (\n" +
