@@ -337,7 +337,7 @@ public class TransportMessageDaoImpl extends AbstractDao implements TransportMes
                         .id(receiverSubsystemId)
                         .code(rs.getString("receiver_code"))
                         .name(rs.getString("receiver_name"))
-                        .shortName(rs.getString("receivefinr_short_name"))
+                        .shortName(rs.getString("receiver_short_name"))
                         .build();
                 message.setReceiverSubsystem(receiver);
             }

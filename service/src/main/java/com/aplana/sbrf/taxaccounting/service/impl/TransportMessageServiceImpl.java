@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.async.AsyncManager;
 import com.aplana.sbrf.taxaccounting.dao.TransportMessageDao;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.messaging.TransportMessage;
 import com.aplana.sbrf.taxaccounting.model.messaging.TransportMessageFilter;
@@ -16,6 +17,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Nullable;
@@ -121,7 +123,10 @@ public class TransportMessageServiceImpl implements TransportMessageService {
 
     private boolean checkExportAccess(TAUserInfo userInfo) {
         TAUser user = userInfo.getUser();
-        return user.hasRole(TARole.N_ROLE_CONTROL_NS) ||user.hasRole(TARole.N_ROLE_CONTROL_UNP);
+        if(user.hasRole(TARole.N_ROLE_CONTROL_NS) ||user.hasRole(TARole.N_ROLE_CONTROL_UNP)) {
+            return true;
+        }
+        throw new AccessDeniedException("Нет прав на выгрузку транспортных сообщений");
     }
 
     @Override

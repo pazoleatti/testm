@@ -69,7 +69,7 @@
                                     // SBRFNDFL-8318
                                     declarationType: params.declarationType
                                 }
-                            }
+                            };
                         },
                         colNames: [
                             $filter('translate')('transportMessages.title.id'),
@@ -182,6 +182,32 @@
                 }
 
 
+                function getFilter() {
+                    var params  = $scope.searchFilter.params;
+                    return {
+                        id: params.id,
+                        stateIds: $filter('idExtractor')(params.states),
+                        typeId: params.type ? params.type.id : null,
+                        messageUuid: params.messageUuid,
+                        user: params.user,
+                        senderSubsystemId: params.senderSubsystem ? params.senderSubsystem.id : null,
+                        receiverSubsystemId: params.receiverSubsystem ? params.receiverSubsystem.id : null,
+                        contentTypeIds: $filter('idExtractor')(params.contentTypes),
+
+                        // Вид формы (SBRFNDFL-8318)
+                        declarationTypes: $filter('idExtractor')(params.declarationTypes),
+
+                        departmentIds: $filter('idExtractor')(params.departmentIds),
+                        declarationId: params.declarationId,
+                        fileName: params.fileName,
+                        dateFrom: params.dateFrom,
+                        dateTo: params.dateTo,
+
+                        // SBRFNDFL-8318
+                        declarationType: params.declarationType
+                    };
+                }
+
 
                 /**
                  * @description Выгрузить в excel
@@ -224,7 +250,7 @@
                     $http({
                         method: "POST",
                         url: "controller/actions/transportMessages/exportExcelBySelected",
-                        data: $filter('idExtractor')(selectedRows, 'declarationDataId')
+                        data: $filter('idExtractor')(selectedRows, 'id')
                     }).then(function (response) {
                         if (response.data && response.data.uuid && response.data.uuid !== null) {
                             $logPanel.open('log-panel-container', response.data.uuid);

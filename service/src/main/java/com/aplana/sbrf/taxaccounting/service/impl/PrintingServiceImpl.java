@@ -542,8 +542,7 @@ public class PrintingServiceImpl implements PrintingService {
         String reportPath = null;
         try {
             reportPath = reportBuilder.createReport();
-            String declarationDataId ="";
-            return blobDataService.create(reportPath, declarationDataId + "_Источники приемники_" + FastDateFormat.getInstance("dd.MM.yyyy").format(new Date()) + ".xlsx");
+            return blobDataService.create(reportPath, "Список транспортных сообщений" + FastDateFormat.getInstance("dd-MM-yyyy_hh:mm:ss").format(new Date()) + ".xls");
         } catch (IOException e) {
             LOG.error(e.getMessage(), e);
             throw new ServiceException(e.getMessage());

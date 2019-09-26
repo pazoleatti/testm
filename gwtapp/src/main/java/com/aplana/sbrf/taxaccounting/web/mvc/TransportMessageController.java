@@ -113,16 +113,16 @@ public class TransportMessageController {
 
 
     /**
-     * Выгрузка отчетности по списку ид
+     * Выгрузка списка транспортных сообщений
      */
     @PostMapping(value = "/actions/transportMessages/exportExcel")
     public ActionResult exportExcel() {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        return  transportMessageService.asyncExport(Collections.EMPTY_LIST, userInfo);
+        return transportMessageService.asyncExport(Collections.EMPTY_LIST, userInfo);
     }
 
     /**
-     * Выгрузка отчетности по списку ид
+     * Выгрузка списка транспортных сообщений по списку ид
      */
     @PostMapping(value = "/actions/transportMessages/exportExcelBySelected")
     public ActionResult exportExcelBySelected(@RequestBody List<Long> transportMessageIds) {
@@ -131,9 +131,9 @@ public class TransportMessageController {
     }
 
     /**
-     * Выгрузка отчетности по фильтру
+     * Выгрузка списка транспортных сообщений по фильтру
      */
-    @PostMapping(value = "/actions/transportMessages/exportByFilter")
+    @PostMapping(value = "/actions/transportMessages/exportExcelByFilter")
     public ActionResult exportExcelByFilter(@RequestParam TransportMessageFilter filter) {
         TAUserInfo userInfo = securityService.currentUserInfo();
         return transportMessageService.asyncExport(filter, userInfo);
