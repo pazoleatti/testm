@@ -5,6 +5,8 @@ import com.aplana.sbrf.taxaccounting.dao.impl.util.FormatUtils;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevelType;
+import com.aplana.sbrf.taxaccounting.model.result.LogPeriodResult;
 import com.aplana.sbrf.taxaccounting.model.result.ReportPeriodResult;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -16,6 +18,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.text.Format;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -391,4 +395,75 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
             return new ArrayList<>();
         }
     }
-}
+
+    /**
+     * Маппер для представления значений из {@link ResultSet} в виде объекта LogPeriodResult
+     */
+    private class LogPeriodMapper implements RowMapper<LogPeriodResult> {
+        @Override
+        public LogPeriodResult mapRow(ResultSet rs, int index) throws SQLException {
+            LogPeriodResult logPeriodResult = new LogPeriodResult();
+            Integer id = SqlUtils.getInteger(rs, "id");
+            logPeriodResult.setId(id);
+            logPeriodResult.setCorrectionDate(rs.getDate("correction_date"));
+            logPeriodResult.setName(rs.getString("name"));
+            logPeriodResult.setYear(rs.getInt("year"));
+            return logPeriodResult;
+        }
+    }
+
+        @Override
+        public String createLogPeriodFormatById(Long id, Integer logLevelType) {
+            String period = "";
+            List<LogPeriodResult> rs = new ArrayList<>();
+            String sql = "select npo.id, drp.correction_date, rp.name, tp.year\n";
+            if (logLevelType == LogLevelType.INCOME.getId()) sql = sql + "from NDFL_PERSON_INCOME npo\n";
+            if (logLevelType == LogLevelType.DEDUCTION.getId()) sql = sql + "from NDFL_PERSON_DEDUCTION npo\n";
+            if (logLevelType == LogLevelType.PREPAYMENT.getId()) sql = sql + "from NDFL_PERSON_PREPAYMENT npo\n";
+            sql = sql + "left join ndfl_person np on np.id = npo.NDFL_PERSON_ID\n" +
+                    "left join declaration_data dd on dd.id = np.DECLARATION_DATA_ID\n" +
+                    "left join department_report_period drp on drp.id = dd.department_report_period_id\n" +
+                    "left join report_period rp on rp.id = drp.report_period_id\n" +
+                    "left join tax_period tp on tp.id = rp.tax_period_id\n" +
+                    "where npo.id = (\n" +
+                    "    select npo.SOURCE_ID \n";
+            if (logLevelType == LogLevelType.INCOME.getId()) sql = sql + "    from NDFL_PERSON_INCOME npo\n";
+            if (logLevelType == LogLevelType.DEDUCTION.getId()) sql = sql + "    from NDFL_PERSON_DEDUCTION npo\n";
+            if (logLevelType == LogLevelType.PREPAYMENT.getId()) sql = sql + "    from NDFL_PERSON_PREPAYMENT npo\n";
+                   sql = sql + "    left join ndfl_person np on np.id = npo.NDFL_PERSON_ID\n" +
+                    "    left join declaration_data dd on dd.id = np.DECLARATION_DATA_ID\n" +
+                    "    left join department_report_period drp on drp.id = dd.department_report_period_id\n" +
+                    "    where npo.id = :id)";
+
+            MapSqlParameterSource params = new MapSqlParameterSource("id", id);
+
+            try {
+                    rs = getNamedParameterJdbcTemplate().query(sql, params, new RowMapper<LogPeriodResult>() {
+                    private LogPeriodMapper logPeriodMapper = new LogPeriodMapper();
+                    @Override
+                    public LogPeriodResult mapRow(ResultSet resultSet, int i) throws SQLException {
+                        LogPeriodResult logPeriod = logPeriodMapper.mapRow(resultSet, i);
+                        LogPeriodResult lpr = new LogPeriodResult();
+                        lpr.setId(logPeriod.getId());
+                        lpr.setCorrectionDate(logPeriod.getCorrectionDate());
+                        lpr.setName(logPeriod.getName());
+                        lpr.setYear(logPeriod.getYear());
+                        return lpr;
+                    }
+                });
+
+                if (rs.size() > 0) {
+                    period = period + rs.get(0).getYear() + ": " + rs.get(0).getName() + "; ";
+                    if (rs.get(0).getCorrectionDate() != null) {
+                        Format formatter = new SimpleDateFormat("dd-MM-yy");
+                        period = period + formatter.format(rs.get(0).getCorrectionDate());
+                        ;
+                    }
+                }
+                return period;
+
+            } catch (EmptyResultDataAccessException e) {
+                return period;
+            }
+        }
+    }

@@ -501,6 +501,11 @@ public class PeriodServiceImpl implements PeriodService {
         return reportPeriodDao.fetchActiveByDepartment(departmentId);
     }
 
+    @Override
+    public String createLogPeriodFormatById(Long id,Integer logLevelType) {
+        return reportPeriodDao.createLogPeriodFormatById(id, logLevelType);
+    }
+
     private String periodDescription(DepartmentReportPeriod departmentReportPeriod) {
         return String.format("\"%s%s\"",
                 getPeriodString(departmentReportPeriod.getReportPeriod()),

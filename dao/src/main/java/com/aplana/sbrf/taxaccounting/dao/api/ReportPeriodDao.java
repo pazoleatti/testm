@@ -139,4 +139,14 @@ public interface ReportPeriodDao extends PermissionDao {
      * @return период с датой корректировкиhttps://jira.aplana.com/browse/SBRFNDFL-5117
      */
     List<ReportPeriodResult> fetchActiveByDepartment(Integer departmentId);
+
+    /**
+     * Получить сформированное поле периода
+     *
+     * @param id ПНФ
+     * @param logLevelType тип операции
+     * @return период для логов
+     */
+    String createLogPeriodFormatById(Long id,Integer logLevelType);
+
 }

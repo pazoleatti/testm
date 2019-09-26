@@ -20,6 +20,7 @@ import com.aplana.sbrf.taxaccounting.model.filter.Declaration2NdflFLFilter;
 import com.aplana.sbrf.taxaccounting.model.filter.NdflFilter;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevelType;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.messaging.TransportMessageType;
 import com.aplana.sbrf.taxaccounting.model.ndfl.*;
@@ -211,6 +212,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     private TransportMessageDao transportMessageDao;
     @Autowired
     private DeclarationService declarationService;
+    @Autowired
+    private PeriodService periodService;
 
     @Override
     public CreateResult<Long> create(TAUserInfo userInfo, CreateDeclarationDataAction action) {
@@ -2810,9 +2813,11 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 List<Long> changedPersonIds = updateAdditionalSortParams(incomeDTO.getNdflPersonId(), incomeDTO.getOperationId());
                 sortPersonRows(changedPersonIds);
 
+                String period = periodService.createLogPeriodFormatById(income.getId(), LogLevelType.INCOME.getId());
+
                 NdflPersonIncome incomeAfterUpdate = ndflPersonDao.fetchOneNdflPersonIncome(income.getId());
                 for (String message : changelogBuilder.build(declarationDataId, incomeBeforeUpdate.getRowNum(), incomeAfterUpdate.getRowNum())) {
-                    logger.info(message);
+                    logger.infoExp(message,null,null,period,false);
                 }
                 logBusinessService.logFormEvent(declarationDataId, FormDataEvent.NDFL_EDIT, logger.getLogId(), null, userInfo);
                 sendNotification(changelogBuilder.notificationMessage, logger.getLogId(), userInfo.getUser().getId());
@@ -3041,9 +3046,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 Collections.sort(ndflPerson.getDeductions(), NdflPersonDeduction.getComparator(ndflPerson));
                 ndflPersonDao.updateDeductions(updateRowNum(ndflPerson.getDeductions()));
 
+                String period = periodService.createLogPeriodFormatById(deduction.getId(), LogLevelType.DEDUCTION.getId());
                 NdflPersonDeduction deductionAfterUpdate = ndflPersonDao.fetchOneNdflPersonDeduction(deduction.getId());
                 for (String message : changelogBuilder.build(declarationDataId, deductionBeforeUpdate.getRowNum(), deductionAfterUpdate.getRowNum())) {
-                    logger.info(message);
+                    logger.infoExp(message,null,null,period,false);
                 }
                 logBusinessService.logFormEvent(declarationDataId, FormDataEvent.NDFL_EDIT, logger.getLogId(), null, userInfo);
             } else {
@@ -3076,9 +3082,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 Collections.sort(ndflPerson.getPrepayments(), NdflPersonPrepayment.getComparator(ndflPerson));
                 ndflPersonDao.updatePrepayments(updateRowNum(ndflPerson.getPrepayments()));
 
+                String period = periodService.createLogPeriodFormatById(prepayment.getId(), LogLevelType.PREPAYMENT.getId());
                 NdflPersonPrepayment prepaymentAfterUpdate = ndflPersonDao.fetchOneNdflPersonPrepayment(prepayment.getId());
                 for (String message : changelogBuilder.build(declarationDataId, prepaymentBeforeUpdate.getRowNum(), prepaymentAfterUpdate.getRowNum())) {
-                    logger.info(message);
+                    logger.infoExp(message,null,null,period,false);
                 }
                 logBusinessService.logFormEvent(declarationDataId, FormDataEvent.NDFL_EDIT, logger.getLogId(), null, userInfo);
             } else {
