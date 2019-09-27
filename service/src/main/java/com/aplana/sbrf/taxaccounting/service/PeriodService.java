@@ -166,9 +166,9 @@ public interface PeriodService {
     /**
      * Получить сформированное поле периода
      *
-     * @param id ПНФ
+     * @param idList ПНФ список
      * @param logLevelType тип операции
      * @return период для логов
      */
-    String createLogPeriodFormatById(Long id, Integer logLevelType);
+    String createLogPeriodFormatById(List<Long> idList, Integer logLevelType);
 }

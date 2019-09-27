@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.dao.PermissionDao;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriodType;
 import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
+import com.aplana.sbrf.taxaccounting.model.result.LogPeriodResult;
 import com.aplana.sbrf.taxaccounting.model.result.ReportPeriodResult;
 
 import java.util.List;
@@ -145,8 +146,8 @@ public interface ReportPeriodDao extends PermissionDao {
      *
      * @param id ПНФ
      * @param logLevelType тип операции
-     * @return период для логов
+     * @return список периодов для логов
      */
-    String createLogPeriodFormatById(Long id,Integer logLevelType);
+    List<LogPeriodResult> createLogPeriodFormatById(Long id, Integer logLevelType);
 
 }
