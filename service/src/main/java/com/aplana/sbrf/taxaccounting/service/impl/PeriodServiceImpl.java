@@ -506,14 +506,15 @@ public class PeriodServiceImpl implements PeriodService {
     public String createLogPeriodFormatById(List<Long> idList, Integer logLevelType) {
         String period = "";
         List<LogPeriodResult> maxPeriodList = new ArrayList<>();
+        List<LogPeriodResult> rsList = new ArrayList<>();
 
         for (Long id : idList) {
-            maxPeriodList.add(reportPeriodDao.createLogPeriodFormatById(id, logLevelType).get(0));
+            rsList = reportPeriodDao.createLogPeriodFormatById(id, logLevelType);
+            if (rsList.size() > 0) maxPeriodList.add(rsList.get(0));
         }
 
-        Collections.sort(maxPeriodList,new LogPeriodResult.CompDate(true));
-
         if (maxPeriodList.size() > 0) {
+            Collections.sort(maxPeriodList, new LogPeriodResult.CompDate(true));
             period = period + maxPeriodList.get(0).getYear() + ":" + maxPeriodList.get(0).getName() + ";";
             if (maxPeriodList.get(0).getCorrectionDate() != null) {
                 Format formatter = new SimpleDateFormat("dd-MM-yy");
