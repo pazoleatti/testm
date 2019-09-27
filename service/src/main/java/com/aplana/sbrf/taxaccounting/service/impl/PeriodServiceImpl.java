@@ -505,7 +505,7 @@ public class PeriodServiceImpl implements PeriodService {
     }
 
     @Override
-    public String createLogPeriodFormatById(List<Long> idList, Integer logLevelType) throws ParseException {
+    public String createLogPeriodFormatById(List<Long> idList, Integer logLevelType) {
         String period = "";
         List<LogPeriodResult> maxPeriodList = new ArrayList<>();
         List<LogPeriodResult> rsList = new ArrayList<>();
