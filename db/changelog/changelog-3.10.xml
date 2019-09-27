@@ -161,5 +161,10 @@
         </sql>
 
     </changeSet>
+    <changeSet id="3.10-skononova-4" author="skononova">
+        <sql>
+            comment on column report_period.form_type_id is 'Вид налоговой формы';
+        </sql>
+    </changeSet>
 
 </databaseChangeLog>
