@@ -2123,7 +2123,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         }
     }
 
-    private static final class NdflPersonDeductionRowMapper implements RowMapper<NdflPersonDeduction> {
+    private static class NdflPersonDeductionRowMapper implements RowMapper<NdflPersonDeduction> {
 
         @Override
         public NdflPersonDeduction mapRow(ResultSet rs, int i) throws SQLException {
@@ -2165,7 +2165,16 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         }
     }
 
-    private static final class NdflPersonPrepaymentRowMapper implements RowMapper<NdflPersonPrepayment> {
+    private static final class NdflPersonConsolidationDeductionRowMapper extends NdflPersonDeductionRowMapper {
+        @Override
+        public NdflPersonDeduction mapRow(ResultSet rs, int i) throws SQLException {
+            NdflPersonDeduction personDeduction = super.mapRow(rs, i);
+            personDeduction.setSourceId(personDeduction.getId());
+            return personDeduction;
+        }
+    }
+
+    private static class NdflPersonPrepaymentRowMapper implements RowMapper<NdflPersonPrepayment> {
 
         @Override
         public NdflPersonPrepayment mapRow(ResultSet rs, int i) throws SQLException {
@@ -2190,6 +2199,15 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             personPrepayment.setOperInfoId(rs.getBigDecimal("oper_info_id"));
             personPrepayment.setOktmo(rs.getString("oktmo"));
             personPrepayment.setKpp(rs.getString("kpp"));
+            return personPrepayment;
+        }
+    }
+
+    private static class NdflPersonConsolidationPrepaymentRowMapper extends NdflPersonPrepaymentRowMapper {
+        @Override
+        public NdflPersonPrepayment mapRow(ResultSet rs, int i) throws SQLException {
+            NdflPersonPrepayment personPrepayment = super.mapRow(rs, i);
+            personPrepayment.setSourceId(personPrepayment.getId());
             return personPrepayment;
         }
     }
@@ -2459,7 +2477,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                 "left join person_operation po on npd.operation_id = po.operation_id \n" +
                 " left join ref_book_asnu rba on npd.asnu_id = rba.id " +
                 "where npd.operation_id = po.operation_id and npd.ndfl_person_id = po.ndfl_person_id";
-        List<NdflPersonDeduction> result = selectIn(sql, incomeIds, "incomeIds", new NdflPersonDeductionRowMapper());
+        List<NdflPersonDeduction> result = selectIn(sql, incomeIds, "incomeIds", new NdflPersonConsolidationDeductionRowMapper());
 
         if (result.isEmpty()) return null;
         return result;
@@ -2474,7 +2492,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                 "left join person_operation po on npp.operation_id = po.operation_id \n" +
                 " left join ref_book_asnu rba on npp.asnu_id = rba.id " +
                 "where npp.operation_id = po.operation_id and npp.ndfl_person_id = po.ndfl_person_id";
-        List<NdflPersonPrepayment> result = selectIn(sql, incomeIds, "incomeIds", new NdflPersonPrepaymentRowMapper());
+        List<NdflPersonPrepayment> result = selectIn(sql, incomeIds, "incomeIds", new NdflPersonConsolidationPrepaymentRowMapper());
 
         if (result.isEmpty()) return null;
         return result;
