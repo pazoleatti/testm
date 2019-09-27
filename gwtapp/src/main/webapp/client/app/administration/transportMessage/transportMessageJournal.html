@@ -1,7 +1,7 @@
 <div class="flex-column">
     <div class="content-header flex-row">
         <h1 class="flex-column" style="flex-grow: 1">{{::'transportMessages.title' | translate}}</h1>
-        <div class="flex-column" style="padding-right: 5px" >
+        <div class="flex-column" style="padding-right: 20px" >
             <!--Выгрузить в Excel-->
             <span>
                         <button id="download-excel-button" type="button" class="btn btn-default"
@@ -13,15 +13,17 @@
                         <ul class="dropdown-menu dropdown-menu-block" role="menu"
                             aria-labelledby="download-excel-button">
                             <li role="menuitem">
-                                <a ng-click="downloadExcelAll()">{{::'transportMessages.excelButton.all' | translate}}</a>
+                                <a ng-click="downloadExcelAll()" style="font-size: inherit">{{::'transportMessages.excelButton.all' | translate}}</a>
                             </li>
                             <li role="menuitem">
                                 <a ng-class="searchFilter.isClear && transportMessageGrid.ctrl.getCountRecords() > 0 ? '' : 'disabled'"
-                                   ng-click="downloadExcelByFilter()">{{::'transportMessages.excelButton.byFilter' | translate}}</a>
+                                   ng-click="downloadExcelByFilter()"
+                                   style="font-size: inherit">{{::'transportMessages.excelButton.byFilter' | translate}}</a>
                             </li>
                             <li role="menuitem">
                                 <a ng-class="transportMessageGrid.value.length > 0 ? '' : 'disabled'"
-                                   ng-click="downloadExcelBySelected()">{{::'transportMessages.excelButton.selected' | translate}}</a>
+                                   ng-click="downloadExcelBySelected()"
+                                   style="font-size: inherit">{{::'transportMessages.excelButton.selected' | translate}}</a>
                             </li>
                         </ul>
               </span>

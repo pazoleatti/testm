@@ -5,10 +5,10 @@ import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.messaging.TransportMessage;
 import com.aplana.sbrf.taxaccounting.model.messaging.TransportMessageFilter;
-import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 
 import javax.annotation.Nullable;
-import java.util.List;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Сервис для работы с Транспортными сообщениями, предназначенными для обмена между подсистемами АС Учет Налогов.
@@ -86,28 +86,12 @@ public interface TransportMessageService {
     /**
      * Запускает ассинхронную задачу на выгрузку транспортных сообщений в Excel
      *
+     *
+     * @param headerDescription
      * @param filter   фильтр, по которому выбираются формы
      * @param userInfo пользователь запустивший операцию
      * @return результат запуска задачи
      */
-    ActionResult asyncExport(TransportMessageFilter filter, TAUserInfo userInfo);
+    InputStream export(String headerDescription, TransportMessageFilter filter, TAUserInfo userInfo) throws IOException;
 
-
-    /**
-     * Запускает ассинхронную задачу на выгрузку транспортных сообщений в Excel
-     *
-     * @param transportMessageIds   Список идентификаторов транспортных сообщений
-     * @param userInfo пользователь запустивший операцию
-     * @return результат запуска задачи
-     */
-    ActionResult asyncExport(List<Long> transportMessageIds, TAUserInfo userInfo);
-
-    /**
-     * Получить список сообщений согласно списку (если список пустой, то возвращает все сообщения)
-     *
-     * @param transportMessageIds Список идентификаторов сообщений (может быть пустым null или size=0)
-     * @param userInfo Пользователь который выполняеть действие
-     * @return список Транспортных сообщений, согласно указоному списку идентификаторов
-     */
-    List<TransportMessage> findByIds(List<Long> transportMessageIds, TAUserInfo userInfo);
 }

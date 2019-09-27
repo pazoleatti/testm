@@ -11,8 +11,6 @@ import org.intellij.lang.annotations.Language;
 import org.joda.time.LocalDateTime;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.core.RowMapperResultSetExtractor;
-import org.springframework.jdbc.core.SingleColumnRowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -22,6 +20,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 
@@ -264,7 +263,9 @@ public class TransportMessageDaoImpl extends AbstractDao implements TransportMes
     @Override
     public List<TransportMessage> findByIds(List<Long> ids) {
 
-        List<String> conditions = new ArrayList<>();
+        if(CollectionUtils.isEmpty(ids))
+            return Collections.emptyList();
+
         MapSqlParameterSource params = new MapSqlParameterSource();
         StringBuilder sqlBuilder = new StringBuilder(SELECT_TRANSPORT_MESSAGE);
         if (CollectionUtils.isNotEmpty(ids)) {

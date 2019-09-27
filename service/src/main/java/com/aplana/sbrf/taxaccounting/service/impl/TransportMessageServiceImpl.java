@@ -1,13 +1,11 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.async.AsyncManager;
 import com.aplana.sbrf.taxaccounting.dao.TransportMessageDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
-import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.messaging.TransportMessage;
 import com.aplana.sbrf.taxaccounting.model.messaging.TransportMessageFilter;
-import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 import com.aplana.sbrf.taxaccounting.permissions.PermissionUtils;
 import com.aplana.sbrf.taxaccounting.service.*;
 import org.apache.commons.logging.Log;
@@ -17,10 +15,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Nullable;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 
 @Service
@@ -37,9 +36,7 @@ public class TransportMessageServiceImpl implements TransportMessageService {
     @Autowired
     protected DepartmentService departmentService;
     @Autowired
-    private LogEntryService logEntryService;
-    @Autowired
-    private AsyncManager asyncManager;
+    private PrintingService printingService;
 
 
     @Override
@@ -123,35 +120,36 @@ public class TransportMessageServiceImpl implements TransportMessageService {
 
     private boolean checkExportAccess(TAUserInfo userInfo) {
         TAUser user = userInfo.getUser();
-        if(user.hasRole(TARole.N_ROLE_CONTROL_NS) ||user.hasRole(TARole.N_ROLE_CONTROL_UNP)) {
+        if (user.hasRole(TARole.N_ROLE_CONTROL_NS) || user.hasRole(TARole.N_ROLE_CONTROL_UNP)) {
             return true;
         }
         throw new AccessDeniedException("Нет прав на выгрузку транспортных сообщений");
     }
 
     @Override
-    public ActionResult asyncExport(TransportMessageFilter filter, TAUserInfo userInfo) {
+    public InputStream export(String headerDescription, TransportMessageFilter filter, TAUserInfo userInfo) throws IOException {
         checkExportAccess(userInfo);
-        List<Long> transportMessageIds = transportMessageDao.findIdsByFilter(filter);
-        return asyncExport(transportMessageIds,userInfo);
+
+        List<Long> transportMessageIds = getTransportMessageIds(filter);
+
+        List<TransportMessage> transportMessages =
+                CollectionUtils.isEmpty(transportMessageIds)
+                        ? transportMessageDao.findByFilter(filter, null)
+                        : transportMessageDao.findByIds(transportMessageIds);
+
+        InputStream inputStream = buildExcelStream(transportMessages, headerDescription);
+        if (inputStream == null)
+            throw new ServiceException("Нет данных для формирования Excel-файла транспортных сообщений");
+        return inputStream;
     }
 
-    @Override
-    public ActionResult asyncExport(List<Long> transportMessageIds, TAUserInfo userInfo) {
-        checkExportAccess(userInfo);
-        Logger logger = new Logger();
-        if (transportMessageIds.isEmpty()) {
-            logger.error("По заданым параметрам не найдено ни одного транспортного сообщения");
-        } else {
-            Map<String, Object> params = new HashMap<>();
-            params.put("transportMessageIds", transportMessageIds);
-            asyncManager.createTask(OperationType.EXPORT_TRANSPORT_MESSAGES, userInfo, params, logger);
-        }
-        return new ActionResult(logEntryService.save(logger.getEntries()));
+    private List<Long> getTransportMessageIds(TransportMessageFilter filter) {
+        return filter != null ? filter.getIds() : null;
     }
 
-    @Override
-    public List<TransportMessage> findByIds(List<Long> transportMessageIds, TAUserInfo userInfo) {
-        return transportMessageDao.findByIds(transportMessageIds);
+
+    private InputStream buildExcelStream(List<TransportMessage> transportMessages, String headerDescription) throws IOException {
+        return printingService.generateExcelTransportMessages(transportMessages, headerDescription);
     }
+
 }

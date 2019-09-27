@@ -6,8 +6,9 @@
      */
     angular.module('app.transportMessage')
 
-        .controller('transportMessageJournalCtrl', ['$scope', '$filter', '$http', '$aplanaModal', 'transportMessageResource', 'APP_CONSTANTS',
-            function ($scope, $filter, $http, $aplanaModal, transportMessageResource, APP_CONSTANTS) {
+        .controller('transportMessageJournalCtrl', ['$scope', '$filter', '$http', '$aplanaModal',
+            'transportMessageResource', '$alertService', 'APP_CONSTANTS',
+            function ($scope, $filter, $http, $aplanaModal, transportMessageResource, $alertService, APP_CONSTANTS) {
 
                 function getDefaultFilterParams() {
                     return {};
@@ -182,8 +183,51 @@
                 }
 
 
+                function saveAs(response, opts) {
+                    opts = opts || {};
+                    var data = response.data;
+                    var contentDispositionHeader = response.headers("content-disposition");
+                    var fname = /attachment\;filename=\"([^\"]*)\"/.exec(contentDispositionHeader)[1];
+
+                    var contentTypeHeader = response.headers("content-type");
+                    if (contentTypeHeader) {
+                        opts.type = contentTypeHeader;
+                    }
+
+                    var file, url, tmp = [];
+
+                    fname = fname == null || fname === '' ? 'Список транспортных сообщений.xls' : fname;
+                    fname = decodeURI(fname);
+
+                    if (!$.isArray(data)) {
+                        tmp[0] = data;
+                    } else {
+                        tmp = data;
+                    }
+                    try {
+                        file = new File(tmp, fname, opts);
+                    } catch (e) {
+                        file = new Blob(tmp, opts);
+                    }
+                    if (window.navigator && window.navigator.msSaveOrOpenBlob) {
+                        window.navigator.msSaveOrOpenBlob(file, fname);
+                    } else {
+                        url = URL.createObjectURL(file);
+                        var a = document.createElement("a");
+                        a.href = url;
+                        a.download = fname;
+                        document.body.appendChild(a);
+                        a.click();
+                        setTimeout(function () {
+                            document.body.removeChild(a);
+                            window.URL.revokeObjectURL(url);
+                        }, 0);
+                    }
+                };
+
+
                 function getFilter() {
-                    var params  = $scope.searchFilter.params;
+                    var params = $scope.searchFilter.params;
                     return {
                         id: params.id,
                         stateIds: $filter('idExtractor')(params.states),
@@ -209,6 +253,18 @@
                 }
 
 
+                function onExportDone(response) {
+                    saveAs(response);
+                }
+
+                function onExportError(response) {
+                    if (response.data && typeof response.data.text === 'function') {
+                        response.data.text().then(function (error) {
+                            $alertService.error(error);
+                        });
+                    }
+                }
+
                 /**
                  * @description Выгрузить в excel
                  */
@@ -217,12 +273,9 @@
                     $http({
                         method: "POST",
                         url: "controller/actions/transportMessages/exportExcel",
-                        data: $filter('idExtractor')(selectedRows, 'declarationDataId')
-                    }).then(function (response) {
-                        if (response.data && response.data.uuid && response.data.uuid !== null) {
-                            $logPanel.open('log-panel-container', response.data.uuid);
-                        }
-                    });
+                        data: $filter('idExtractor')(selectedRows, 'id'),
+                        responseType: 'blob'
+                    }).then(onExportDone, onExportError);
                 };
 
                 /**
@@ -234,12 +287,9 @@
                         url: "controller/actions/transportMessages/exportExcelByFilter",
                         params: {
                             filter: JSON.stringify(getFilter())
-                        }
-                    }).then(function (response) {
-                        if (response.data && response.data.uuid && response.data.uuid !== null) {
-                            $logPanel.open('log-panel-container', response.data.uuid);
-                        }
-                    });
+                        },
+                        responseType: 'blob'
+                    }).then(onExportDone, onExportError);
                 };
 
                 /**
@@ -250,12 +300,9 @@
                     $http({
                         method: "POST",
                         url: "controller/actions/transportMessages/exportExcelBySelected",
-                        data: $filter('idExtractor')(selectedRows, 'id')
-                    }).then(function (response) {
-                        if (response.data && response.data.uuid && response.data.uuid !== null) {
-                            $logPanel.open('log-panel-container', response.data.uuid);
-                        }
-                    });
+                        data: $filter('idExtractor')(selectedRows, 'id'),
+                        responseType: 'blob'
+                    }).then(onExportDone, onExportError);
                 };
             }
         ])

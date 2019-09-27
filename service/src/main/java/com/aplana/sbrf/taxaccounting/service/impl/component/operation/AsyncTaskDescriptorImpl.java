@@ -127,8 +127,6 @@ public class AsyncTaskDescriptorImpl implements AsyncTaskDescriptor {
             return String.format("Выгрузка протоколов по оповещениям за : %s", dates);
         else if (operationType.equals(OperationType.SEND_EDO))
             return declarationDataReportingMultiModeAsyncTaskDescriptor.createDescription((List<Long>) params.get("noLockDeclarationDataIds"), "Отправка ЭД в ЭДО");
-        else if (operationType.equals(OperationType.EXPORT_TRANSPORT_MESSAGES))
-            return declarationDataReportingMultiModeAsyncTaskDescriptor.createDescription((List<Long>) params.get("transportMessageIds"), "Формирование списка транспортных сообщений");
         else {
             throw new IllegalArgumentException("Unknown operationType type!");
         }

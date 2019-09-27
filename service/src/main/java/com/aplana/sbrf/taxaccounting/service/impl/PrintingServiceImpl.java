@@ -535,20 +535,9 @@ public class PrintingServiceImpl implements PrintingService {
     }
 
     @Override
-    public String generateExcelTransportMessages(List<TransportMessage> transportMessages) {
-        List<Relation> relationList = new ArrayList<>();
-
-        ExcelTransportMessagesReportBuilder reportBuilder = new ExcelTransportMessagesReportBuilder(transportMessages);
-        String reportPath = null;
-        try {
-            reportPath = reportBuilder.createReport();
-            return blobDataService.create(reportPath, "Список транспортных сообщений" + FastDateFormat.getInstance("dd-MM-yyyy_hh:mm:ss").format(new Date()) + ".xls");
-        } catch (IOException e) {
-            LOG.error(e.getMessage(), e);
-            throw new ServiceException(e.getMessage());
-        } finally {
-            AppFileUtils.deleteTmp(reportPath);
-        }
+    public InputStream generateExcelTransportMessages(List<TransportMessage> transportMessages, String headerDescription) throws IOException {
+        ExcelTransportMessagesReportBuilder reportBuilder = new ExcelTransportMessagesReportBuilder(transportMessages,headerDescription);
+        return reportBuilder.createReportAsStream();
     }
 
     private String makeDepartmentConfigsExcelFileName(int departmentId) {
