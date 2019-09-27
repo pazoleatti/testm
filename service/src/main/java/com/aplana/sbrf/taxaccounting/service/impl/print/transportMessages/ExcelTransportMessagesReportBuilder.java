@@ -296,7 +296,7 @@ public class ExcelTransportMessagesReportBuilder extends AbstractReportBuilder {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         try {
             workBook.write(outputStream);
-            new ByteArrayInputStream(outputStream.toByteArray());
+            return new ByteArrayInputStream(outputStream.toByteArray());
         } finally {
             outputStream.close();
         }
