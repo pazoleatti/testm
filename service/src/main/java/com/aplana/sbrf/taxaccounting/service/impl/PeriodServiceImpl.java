@@ -24,7 +24,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.DateFormat;
 import java.text.Format;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -503,7 +505,7 @@ public class PeriodServiceImpl implements PeriodService {
     }
 
     @Override
-    public String createLogPeriodFormatById(List<Long> idList, Integer logLevelType) {
+    public String createLogPeriodFormatById(List<Long> idList, Integer logLevelType) throws ParseException {
         String period = "";
         List<LogPeriodResult> maxPeriodList = new ArrayList<>();
         List<LogPeriodResult> rsList = new ArrayList<>();
@@ -515,7 +517,7 @@ public class PeriodServiceImpl implements PeriodService {
 
         if (maxPeriodList.size() > 0) {
             Collections.sort(maxPeriodList, new LogPeriodResult.CompDate(true));
-            period = period + maxPeriodList.get(0).getYear() + ":" + maxPeriodList.get(0).getName() + ";";
+            period = period + maxPeriodList.get(0).getYear() + ":" + maxPeriodList.get(0).getName() + "; ";
             if (maxPeriodList.get(0).getCorrectionDate() != null) {
                 Format formatter = new SimpleDateFormat("dd-MM-yy");
                 period = period + formatter.format(maxPeriodList.get(0).getCorrectionDate());

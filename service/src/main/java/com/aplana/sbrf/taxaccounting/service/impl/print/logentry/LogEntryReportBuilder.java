@@ -101,6 +101,7 @@ public class LogEntryReportBuilder extends AbstractReportBuilder {
         entries.add(item.getMessage());
         entries.add(item.getType());
         entries.add(item.getObject());
+        entries.add(item.getPeriod());
         return entries.toArray(new String[entries.size()]);
     }
 }
