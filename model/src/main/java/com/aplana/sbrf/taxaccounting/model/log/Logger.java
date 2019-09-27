@@ -53,7 +53,7 @@ public class Logger implements Serializable {
         log(LogLevel.INFO, message, type, object, false, args);
     }
 
-    public void infoExp(String message, String type, String object, String period, Object... args) {
+    public void infoExpWithPeriod(String message, String type, String object, String period, Object... args) {
         log(LogLevel.INFO, message, type, object, period, false, args);
     }
 
@@ -77,7 +77,7 @@ public class Logger implements Serializable {
         log(LogLevel.WARNING, message, type, object, false, args);
     }
 
-    public void warnExp(String message, String type, String object,String period, Object... args) {
+    public void warnExpWithPeriod(String message, String type, String object,String period, Object... args) {
         log(LogLevel.WARNING, message, type, object, period, false, args);
     }
     /**
@@ -100,7 +100,7 @@ public class Logger implements Serializable {
         log(LogLevel.ERROR, message, type, object, false, args);
     }
 
-    public void errorExp(String message, String type, String object, String period, Object... args) {
+    public void errorExpWithPeriod(String message, String type, String object, String period, Object... args) {
         log(LogLevel.ERROR, message, type, object, period, false, args);
     }
 
@@ -119,7 +119,7 @@ public class Logger implements Serializable {
         }
     }
 
-    public void logCheck(String message, boolean fatal, String type, String object, String period, Object... args) {
+    public void logCheckWithPeriod(String message, boolean fatal, String type, String object, String period, Object... args) {
         if (fatal) {
             errorExp(message, type, object, period, args);
         } else {
@@ -147,7 +147,7 @@ public class Logger implements Serializable {
         log(LogLevel.INFO, message, type, object, true, args);
     }
 
-    public void infoIfNotExistExp(String message, String type, String object, String period, Object... args) {
+    public void infoIfNotExistExpWithPeriod(String message, String type, String object, String period, Object... args) {
         log(LogLevel.INFO, message, type, object, period, true, args);
     }
     /**
@@ -170,7 +170,7 @@ public class Logger implements Serializable {
         log(LogLevel.WARNING, message, type, object, true, args);
     }
 
-    public void warnIfNotExistExp(String message, String type, String object, String period, Object... args) {
+    public void warnIfNotExistExpWithPeriod(String message, String type, String object, String period, Object... args) {
         log(LogLevel.WARNING, message, type, object, period, true, args);
     }
     /**
@@ -193,7 +193,7 @@ public class Logger implements Serializable {
         log(LogLevel.ERROR, message, type, object, true, args);
     }
 
-    public void errorIfNotExistExp(String message, String type, String object, String period, Object... args) {
+    public void errorIfNotExistExpWithPeriod(String message, String type, String object, String period, Object... args) {
         log(LogLevel.ERROR, message, type, object, period, true, args);
     }
     /**

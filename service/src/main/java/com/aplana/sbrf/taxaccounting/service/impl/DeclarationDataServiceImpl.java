@@ -2819,7 +2819,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 String period = periodService.createLogPeriodFormatById(idList, LogLevelType.INCOME.getId());
 
                 for (String message : changelogBuilder.build(declarationDataId, incomeBeforeUpdate.getRowNum(), incomeAfterUpdate.getRowNum())) {
-                    logger.infoExp(message,null,null,period,false);
+                    logger.infoExpWithPeriod(message,null,null, period,false);
                 }
                 logBusinessService.logFormEvent(declarationDataId, FormDataEvent.NDFL_EDIT, logger.getLogId(), null, userInfo);
                 sendNotification(changelogBuilder.notificationMessage, logger.getLogId(), userInfo.getUser().getId());
@@ -3054,7 +3054,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 String period = periodService.createLogPeriodFormatById(idList, LogLevelType.DEDUCTION.getId());
 
                 for (String message : changelogBuilder.build(declarationDataId, deductionBeforeUpdate.getRowNum(), deductionAfterUpdate.getRowNum())) {
-                    logger.infoExp(message,null,null,period,false);
+                    logger.infoExpWithPeriod(message,null,null, period,false);
                 }
                 logBusinessService.logFormEvent(declarationDataId, FormDataEvent.NDFL_EDIT, logger.getLogId(), null, userInfo);
             } else {
@@ -3093,7 +3093,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 String period = periodService.createLogPeriodFormatById(idList, LogLevelType.PREPAYMENT.getId());
 
                 for (String message : changelogBuilder.build(declarationDataId, prepaymentBeforeUpdate.getRowNum(), prepaymentAfterUpdate.getRowNum())) {
-                    logger.infoExp(message,null,null, period,false);
+                    logger.infoExpWithPeriod(message,null,null, period,false);
                 }
                 logBusinessService.logFormEvent(declarationDataId, FormDataEvent.NDFL_EDIT, logger.getLogId(), null, userInfo);
             } else {
