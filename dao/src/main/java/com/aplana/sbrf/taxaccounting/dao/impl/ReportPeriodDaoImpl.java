@@ -5,6 +5,8 @@ import com.aplana.sbrf.taxaccounting.dao.impl.util.FormatUtils;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevelType;
+import com.aplana.sbrf.taxaccounting.model.result.LogPeriodResult;
 import com.aplana.sbrf.taxaccounting.model.result.ReportPeriodResult;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -16,6 +18,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.text.Format;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -217,15 +221,16 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
 
         jt.update(
                 "insert into report_period (id, name, tax_period_id, " +
-                        " dict_tax_period_id, start_date, end_date, calendar_start_date)" +
-                        " values (?, ?, ?, ?, ?, ?, ?)",
+                        " dict_tax_period_id, start_date, end_date, calendar_start_date, form_type_id)" +
+                        " values (?, ?, ?, ?, ?, ?, ?, ?)",
                 id,
                 reportPeriod.getName(),
                 reportPeriod.getTaxPeriod().getId(),
                 reportPeriod.getDictTaxPeriodId(),
                 reportPeriod.getStartDate(),
                 reportPeriod.getEndDate(),
-                reportPeriod.getCalendarStartDate()
+                reportPeriod.getCalendarStartDate(),
+                reportPeriod.getReportPeriodTaxFormTypeId()
         );
         reportPeriod.setId(id);
         return id;
@@ -264,8 +269,9 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
     @Override
     public List<ReportPeriod> findAllActive(List<Integer> departmentIds) {
         return getJdbcTemplate().query("" +
-                        "select rp.id, rp.name, rp.tax_period_id, tp.tax_type, tp.year, rp.start_date, rp.end_date, rp.dict_tax_period_id, " +
-                        "  rp.calendar_start_date\n" +
+                        "select\n " +
+                        "  rp.id, rp.name, rp.tax_period_id, tp.tax_type, tp.year, rp.start_date, rp.end_date,\n " +
+                        "  rp.dict_tax_period_id, rp.calendar_start_date, rp.form_type_id\n " +
                         "from report_period rp\n" +
                         "join tax_period tp on tp.id = rp.tax_period_id\n" +
                         "where rp.id in (\n" +
@@ -383,6 +389,66 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
                     reportPeriodResult.setCalendarStartDate(reportPeriod.getCalendarStartDate());
                     reportPeriodResult.setReportPeriodTaxFormTypeId(reportPeriod.getReportPeriodTaxFormTypeId());
                     return reportPeriodResult;
+                }
+            });
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<>();
+        }
+    }
+
+    /**
+     * Маппер для представления значений из {@link ResultSet} в виде объекта LogPeriodResult
+     */
+    private class LogPeriodMapper implements RowMapper<LogPeriodResult> {
+        @Override
+        public LogPeriodResult mapRow(ResultSet rs, int index) throws SQLException {
+            LogPeriodResult logPeriodResult = new LogPeriodResult();
+            Integer id = SqlUtils.getInteger(rs, "id");
+            logPeriodResult.setId(id);
+            logPeriodResult.setCorrectionDate(rs.getDate("correction_date"));
+            logPeriodResult.setName(rs.getString("name"));
+            logPeriodResult.setYear(rs.getInt("year"));
+            logPeriodResult.setEndDate(rs.getDate("end_date"));
+            return logPeriodResult;
+        }
+    }
+
+    @Override
+    public List<LogPeriodResult> createLogPeriodFormatById(Long id, Integer logLevelType) {
+        String sql = "select npo.id, drp.correction_date, rp.name, tp.year, rp.end_date\n";
+        if (logLevelType == LogLevelType.INCOME.getId()) sql = sql + "from NDFL_PERSON_INCOME npo\n";
+        if (logLevelType == LogLevelType.DEDUCTION.getId()) sql = sql + "from NDFL_PERSON_DEDUCTION npo\n";
+        if (logLevelType == LogLevelType.PREPAYMENT.getId()) sql = sql + "from NDFL_PERSON_PREPAYMENT npo\n";
+        sql = sql + "left join ndfl_person np on np.id = npo.NDFL_PERSON_ID\n" +
+                "left join declaration_data dd on dd.id = np.DECLARATION_DATA_ID\n" +
+                "left join department_report_period drp on drp.id = dd.department_report_period_id\n" +
+                "left join report_period rp on rp.id = drp.report_period_id\n" +
+                "left join tax_period tp on tp.id = rp.tax_period_id\n" +
+                "where npo.id = (\n" +
+                "    select npo.SOURCE_ID \n";
+        if (logLevelType == LogLevelType.INCOME.getId()) sql = sql + "    from NDFL_PERSON_INCOME npo\n";
+        if (logLevelType == LogLevelType.DEDUCTION.getId()) sql = sql + "    from NDFL_PERSON_DEDUCTION npo\n";
+        if (logLevelType == LogLevelType.PREPAYMENT.getId()) sql = sql + "    from NDFL_PERSON_PREPAYMENT npo\n";
+        sql = sql + "    left join ndfl_person np on np.id = npo.NDFL_PERSON_ID\n" +
+                "    left join declaration_data dd on dd.id = np.DECLARATION_DATA_ID\n" +
+                "    left join department_report_period drp on drp.id = dd.department_report_period_id\n" +
+                "    where npo.id = :id)\n" +
+                "ORDER BY rp.end_date DESC";
+        MapSqlParameterSource params = new MapSqlParameterSource("id", id);
+        try {
+            return getNamedParameterJdbcTemplate().query(sql, params, new RowMapper<LogPeriodResult>() {
+                private LogPeriodMapper logPeriodMapper = new LogPeriodMapper();
+
+                @Override
+                public LogPeriodResult mapRow(ResultSet resultSet, int i) throws SQLException {
+                    LogPeriodResult logPeriod = logPeriodMapper.mapRow(resultSet, i);
+                    LogPeriodResult lpr = new LogPeriodResult();
+                    lpr.setId(logPeriod.getId());
+                    lpr.setCorrectionDate(logPeriod.getCorrectionDate());
+                    lpr.setName(logPeriod.getName());
+                    lpr.setYear(logPeriod.getYear());
+                    lpr.setEndDate(logPeriod.getEndDate());
+                    return lpr;
                 }
             });
         } catch (EmptyResultDataAccessException e) {

@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.action.OpenCorrectionPeriodAction;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevelType;
 import com.aplana.sbrf.taxaccounting.model.result.ClosePeriodResult;
 import com.aplana.sbrf.taxaccounting.model.result.DeletePeriodResult;
 import com.aplana.sbrf.taxaccounting.model.result.OpenPeriodResult;
@@ -161,4 +162,13 @@ public interface PeriodService {
      * @return период с датой корректировки
      */
     List<ReportPeriodResult> fetchActiveByDepartment(Integer departmentId);
+
+    /**
+     * Получить сформированное поле периода
+     *
+     * @param idList ПНФ список
+     * @param logLevelType тип операции
+     * @return период для логов
+     */
+    String createLogPeriodFormatById(List<Long> idList, Integer logLevelType);
 }

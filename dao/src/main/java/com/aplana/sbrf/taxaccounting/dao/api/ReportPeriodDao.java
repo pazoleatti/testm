@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.dao.PermissionDao;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriodType;
 import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
+import com.aplana.sbrf.taxaccounting.model.result.LogPeriodResult;
 import com.aplana.sbrf.taxaccounting.model.result.ReportPeriodResult;
 
 import java.util.List;
@@ -139,4 +140,14 @@ public interface ReportPeriodDao extends PermissionDao {
      * @return период с датой корректировкиhttps://jira.aplana.com/browse/SBRFNDFL-5117
      */
     List<ReportPeriodResult> fetchActiveByDepartment(Integer departmentId);
+
+    /**
+     * Получить сформированное поле периода
+     *
+     * @param id ПНФ
+     * @param logLevelType тип операции
+     * @return список периодов для логов
+     */
+    List<LogPeriodResult> createLogPeriodFormatById(Long id, Integer logLevelType);
+
 }

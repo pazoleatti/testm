@@ -141,6 +141,14 @@ public class ReportPeriodDaoTest {
         assertTrue(getReportPeriodIds(reportPeriods).containsAll(asList(1, 2, 3)));
     }
 
+    @Test
+    public void getAllActivePeriods() {
+        List<ReportPeriod> reportPeriods;
+        reportPeriods = reportPeriodDao.findAllActive(asList(1, 2, 3));
+        assertEquals(3, reportPeriods.size());
+        assertTrue(getReportPeriodIds(reportPeriods).containsAll(asList(1, 2, 3)));
+    }
+
     private ReportPeriod getReportPeriod() {
         ReportPeriod newReportPeriod = new ReportPeriod();
         newReportPeriod.setName("MyTestName");

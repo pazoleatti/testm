@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.builder.DepartmentReportPeriodBuilder;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookFormType;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import org.apache.commons.lang3.time.DateUtils;
 import org.junit.Assert;
@@ -232,7 +233,11 @@ public class DepartmentReportPeriodDaoTest {
     @Test
     public void existLargeCorrectionTest() throws ParseException {
         DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriodBuilder()
-                .department(1).reportPeriodId(20).correctionDate(SIMPLE_DATE_FORMAT.parse("01.01.2011")).build();
+                .department(1)
+                .reportPeriodId(20)
+                .reportPeriodTaxFormTypeId(RefBookFormType.NDFL_6.getId().intValue())
+                .correctionDate(SIMPLE_DATE_FORMAT.parse("01.01.2011"))
+                .build();
         Assert.assertTrue(departmentReportPeriodDao.isLaterCorrectionPeriodExists(departmentReportPeriod));
     }
 

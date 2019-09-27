@@ -40,6 +40,7 @@ public class LogEntryDaoImpl extends AbstractDao implements LogEntryDao {
             result.setMessage(msg != null ? msg : "");
             result.setType(rs.getString("type"));
             result.setObject(rs.getString("object"));
+            result.setPeriod(rs.getString("period"));
 
             return result;
         }
@@ -115,7 +116,7 @@ public class LogEntryDaoImpl extends AbstractDao implements LogEntryDao {
         final List<LogEntry> splitLogEntries = splitBigMessage(logEntries);
 
         getJdbcTemplate().batchUpdate(
-                "insert into log_entry (log_id, creation_date, log_level, type, message,  ord, object) values (?, ?, ?, ?, ?, ?, ?)",
+                "insert into log_entry (log_id, creation_date, log_level, type, message,  ord, object, period) values (?, ?, ?, ?, ?, ?, ?, ?)",
                 new BatchPreparedStatementSetter() {
                     @Override
                     public void setValues(PreparedStatement ps, int i) throws SQLException {
@@ -130,6 +131,7 @@ public class LogEntryDaoImpl extends AbstractDao implements LogEntryDao {
                         ps.setString(5, logEntry.getMessage());
                         ps.setInt(6, logEntry.getOrd());
                         ps.setString(7, logEntry.getObject());
+                        ps.setString(8, logEntry.getPeriod());
                     }
 
                     @Override
@@ -146,7 +148,7 @@ public class LogEntryDaoImpl extends AbstractDao implements LogEntryDao {
         }
 
         List<LogEntry> result = getJdbcTemplate().query(
-                "select log_id, ord, creation_date, log_level, message, type, object from log_entry where log_id = ? order by ord",
+                "select log_id, ord, creation_date, log_level, message, type, object, period from log_entry where log_id = ? order by ord",
                 new Object[]{logId},
                 new int[]{Types.VARCHAR},
                 new LogEntryMapper()
@@ -163,7 +165,7 @@ public class LogEntryDaoImpl extends AbstractDao implements LogEntryDao {
     public PagingResult<LogEntry> fetch(@NotNull String logId, PagingParams pagingParams) {
         String query = "select * from (  select a.*, rownum rn from (   select le.log_id, " +
                 "le.creation_date, le.log_level, le.message, le.object, " +
-                "le.ord, le.type " +
+                "le.ord, le.type, le.period " +
                 "from log_entry le where le.log_id = :logId " +
                 "order by le.ord " +
                 "asc  ) a) " +

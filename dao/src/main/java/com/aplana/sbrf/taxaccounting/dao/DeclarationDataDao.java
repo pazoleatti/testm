@@ -265,8 +265,9 @@ public interface DeclarationDataDao extends PermissionDao {
 
     /**
      * Возвращаает id НФ по критериям в зависимости от ее вида
+     * @param declarationData создаваемая налоговая форма
      */
-    Long getDeclarationData(DeclarationData declarationData);
+    List<Long> findExistingDeclarationsForCreationCheck(DeclarationData declarationData);
 
     /**
      * Находит налоговые формы операции из которых используются для создания Приложения 2 к НП

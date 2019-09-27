@@ -40,7 +40,7 @@ public class Logger implements Serializable {
      * @param args    набор объектов для подставновки в текст сообщения, может не задаваться
      */
     public void info(String message, Object... args) {
-        log(LogLevel.INFO, message, null, null, false, args);
+        log(LogLevel.INFO, message, null, null, null,false, args);
     }
 
     /**
@@ -53,6 +53,10 @@ public class Logger implements Serializable {
         log(LogLevel.INFO, message, type, object, false, args);
     }
 
+    public void infoExpWithPeriod(String message, String type, String object, String period, Object... args) {
+        log(LogLevel.INFO, message, type, object, period, false, args);
+    }
+
     /**
      * Добавить предупреждающее сообщение в журнал (работа системы на нарушена, но нужно обратить внимание пользователя на что-то)
      *
@@ -60,7 +64,7 @@ public class Logger implements Serializable {
      * @param args    набор объектов для подставновки в текст сообщения, может не задаваться
      */
     public void warn(String message, Object... args) {
-        log(LogLevel.WARNING, message, null, null, false, args);
+        log(LogLevel.WARNING, message, null, null,null, false, args);
     }
 
     /**
@@ -73,6 +77,9 @@ public class Logger implements Serializable {
         log(LogLevel.WARNING, message, type, object, false, args);
     }
 
+    public void warnExpWithPeriod(String message, String type, String object,String period, Object... args) {
+        log(LogLevel.WARNING, message, type, object, period, false, args);
+    }
     /**
      * Добавить сообщение об ошибке в журнал (ошибка, требующая вмешательства пользователя для корректной работы системы)
      *
@@ -80,7 +87,7 @@ public class Logger implements Serializable {
      * @param args    набор объектов для подставновки в текст сообщения, может не задаваться
      */
     public void error(String message, Object... args) {
-        log(LogLevel.ERROR, message, null, null, false, args);
+        log(LogLevel.ERROR, message, null, null, null,false, args);
     }
 
     /**
@@ -91,6 +98,10 @@ public class Logger implements Serializable {
      */
     public void errorExp(String message, String type, String object, Object... args) {
         log(LogLevel.ERROR, message, type, object, false, args);
+    }
+
+    public void errorExpWithPeriod(String message, String type, String object, String period, Object... args) {
+        log(LogLevel.ERROR, message, type, object, period, false, args);
     }
 
     /**
@@ -108,6 +119,14 @@ public class Logger implements Serializable {
         }
     }
 
+    public void logCheckWithPeriod(String message, boolean fatal, String type, String object, String period, Object... args) {
+        if (fatal) {
+            errorExp(message, type, object, period, args);
+        } else {
+            warnExp(message, type, object, period, args);
+        }
+    }
+
     /**
      * Добавить информационное сообщение в журнал (это сообщения, не требующие особой реакции пользователя). Сообщение не добавляется, если оно уже существует в списке сообщений
      *
@@ -115,7 +134,7 @@ public class Logger implements Serializable {
      * @param args    набор объектов для подставновки в текст сообщения, может не задаваться
      */
     public void infoIfNotExist(String message, Object... args) {
-        log(LogLevel.INFO, message, null, null, true, args);
+        log(LogLevel.INFO, message, null, null, null,true, args);
     }
 
     /**
@@ -128,6 +147,9 @@ public class Logger implements Serializable {
         log(LogLevel.INFO, message, type, object, true, args);
     }
 
+    public void infoIfNotExistExpWithPeriod(String message, String type, String object, String period, Object... args) {
+        log(LogLevel.INFO, message, type, object, period, true, args);
+    }
     /**
      * Добавить предупреждающее сообщение в журнал (работа системы на нарушена, но нужно обратить внимание пользователя на что-то). Сообщение не добавляется, если оно уже существует в списке сообщений
      *
@@ -135,7 +157,7 @@ public class Logger implements Serializable {
      * @param args    набор объектов для подставновки в текст сообщения, может не задаваться
      */
     public void warnIfNotExist(String message, Object... args) {
-        log(LogLevel.WARNING, message, null, null, true, args);
+        log(LogLevel.WARNING, message, null, null, null,true, args);
     }
 
     /**
@@ -148,6 +170,9 @@ public class Logger implements Serializable {
         log(LogLevel.WARNING, message, type, object, true, args);
     }
 
+    public void warnIfNotExistExpWithPeriod(String message, String type, String object, String period, Object... args) {
+        log(LogLevel.WARNING, message, type, object, period, true, args);
+    }
     /**
      * Добавить сообщение об ошибке в журнал (ошибка, требующая вмешательства пользователя для корректной работы системы). Сообщение не добавляется, если оно уже существует в списке сообщений
      *
@@ -155,7 +180,7 @@ public class Logger implements Serializable {
      * @param args    набор объектов для подставновки в текст сообщения, может не задаваться
      */
     public void errorIfNotExistExp(String message, Object... args) {
-        log(LogLevel.ERROR, message, null, null, true, args);
+        log(LogLevel.ERROR, message, null, null, null,true, args);
     }
 
     /**
@@ -168,6 +193,9 @@ public class Logger implements Serializable {
         log(LogLevel.ERROR, message, type, object, true, args);
     }
 
+    public void errorIfNotExistExpWithPeriod(String message, String type, String object, String period, Object... args) {
+        log(LogLevel.ERROR, message, type, object, period, true, args);
+    }
     /**
      * Записать сообщение о неожиданном исключении в журнал
      * В журнал сервера приложений будет выведен стектрейс ошибки
@@ -179,7 +207,7 @@ public class Logger implements Serializable {
         if (msg != null && msg.length() > MAX_EXCEPTION_LOG_MESSAGE_LENGTH) {
             msg = msg.substring(0, MAX_EXCEPTION_LOG_MESSAGE_LENGTH - 1) + '…';
         }
-        log(LogLevel.ERROR, "Ошибка: %s", null, null, false, msg);
+        log(LogLevel.ERROR, "Ошибка: %s", null, null, null, false, msg);
         LOG.error("Unhandled exception: " + msg, e);
     }
 
@@ -200,7 +228,7 @@ public class Logger implements Serializable {
     }
 
     public void log(LogLevel level, String message) {
-        log(level, message, null, null, false);
+        log(level, message, null, null, null, false);
     }
 
     private void log(LogLevel level, String message, String type, String object, boolean excludeIfNotExist, Object... args) {
@@ -210,6 +238,18 @@ public class Logger implements Serializable {
         }
 
         LogEntry entry = new LogEntry(level, extMessage, type, object);
+        if (!excludeIfNotExist || !entries.contains(entry)) {
+            entries.add(entry);
+        }
+    }
+
+    private void log(LogLevel level, String message, String type, String object, String period, boolean excludeIfNotExist, Object... args) {
+        String extMessage = message;
+        if (args != null && args.length > 0) {
+            extMessage = String.format(message, args);
+        }
+
+        LogEntry entry = new LogEntry(level, extMessage, type, object, period);
         if (!excludeIfNotExist || !entries.contains(entry)) {
             entries.add(entry);
         }

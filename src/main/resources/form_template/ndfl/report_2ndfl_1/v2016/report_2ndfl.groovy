@@ -161,8 +161,8 @@ class Report2Ndfl extends AbstractScriptClass {
         try {
             xmlFile = File.createTempFile("file_for_validate", ".xml")
             fileWriter = new OutputStreamWriter(new FileOutputStream(xmlFile), xmlCharset)
-            if (declarationTemplate.type.id == DeclarationType.NDFL_2_1) xml = buildXmlFor2Ndfl1(departmentConfig, operations, fileWriter)
-            else if (declarationTemplate.type.id == DeclarationType.NDFL_2_2) xml = buildXmlFor2Ndfl2(departmentConfig, operations, fileWriter)
+            if (is2Ndfl1()) xml = buildXmlFor2Ndfl1(departmentConfig, operations, fileWriter)
+            else if (is2Ndfl2()) xml = buildXmlFor2Ndfl2(departmentConfig, operations, fileWriter)
             if (xml) {
                 xml.xmlFile = xmlFile
             }
@@ -196,7 +196,7 @@ class Report2Ndfl extends AbstractScriptClass {
 
         def persons = operations*.person.toSet()
         if (!persons) {
-            if (declarationData.declarationTemplateId == DeclarationType.NDFL_2_2) {
+            if (is2Ndfl2()) {
                 logger.error("Отчетность $declarationTemplate.name для $department.name за период ${formatPeriod(departmentReportPeriod)} не сформирована. " +
                         "В РНУ НДФЛ (консолидированная) № ${sourceKnf.id} для подразделения: $department.name за период ${formatPeriod(departmentReportPeriod)} " +
                         "отсутствуют операции, содержащие сведения о не удержанном налоге.")
@@ -450,11 +450,35 @@ class Report2Ndfl extends AbstractScriptClass {
                         incomesByRate.remove(null)
                         for (def rate : incomesByRate.keySet()) {
                             def rateIncomes = incomesByRate.get(rate)
-                            def operationIds = rateIncomes.operationId.toSet()
+
+                            List<Operation> operationsByPerson = operationsByPersonId[person.id]
+                            List<OperationAttachment> cписокОперацийПриложение = new ArrayList<>()
+                            List<OperationWithoutHoldingTax> operationsWithoutHoldingTaxes = new ArrayList<>() // СписокОперацийБезУдержания
+                            for (Operation operation : operationsByPerson) {
+                                NdflPersonIncome minOperationByIncomeAccruedDate = operation.incomes.findAll() { it.incomeAccruedDate != null}
+                                                                                        .min { it.incomeAccruedDate } as NdflPersonIncome
+
+                                BigDecimal holdingTaxSum = sum(rateIncomes.calculatedTax) - sum(rateIncomes.notHoldingTax)
+                                BigDecimal totalNotHoldingTax = sum(rateIncomes.notHoldingTax) - sum(rateIncomes.overholdingTax)
+                                int holding = holdingTaxSum == 0 ? 0 : 1
+                                def incomeSum = holding == 1 ? totalNotHoldingTax / rate : sum(rateIncomes.incomeAccruedSumm)
+                                cписокОперацийПриложение.add(new OperationAttachment(operation.operationId,
+                                        minOperationByIncomeAccruedDate.incomeAccruedDate[Calendar.MONTH],
+                                        minOperationByIncomeAccruedDate.incomeCode,
+                                        totalNotHoldingTax, holding, incomeSum))
+                                if (holdingTaxSum == 0) {
+                                    operationsWithoutHoldingTaxes.add(new OperationWithoutHoldingTax(
+                                            minOperationByIncomeAccruedDate.operationId,
+                                            minOperationByIncomeAccruedDate.ndflPersonId,
+                                            minOperationByIncomeAccruedDate.taxRate
+                                    ))
+                                }
+                            }
+                            def ratePrepayments = person.prepayments.findAll { it.operationId in operationsWithoutHoldingTaxes.operationId }
+
                             def rateDeductions = сторнированиеВычетов(
-                                    person.deductions.findAll { it.operationId in operationIds }
+                                    person.deductions.findAll { it.operationId in operationsWithoutHoldingTaxes.operationId }
                             )
-                            def ratePrepayments = person.prepayments.findAll { it.operationId in operationIds }
 
                             List<NdflPersonDeduction> deductions = rateDeductions.findAll {
                                 it.typeCode && !(deductionTypesByCode[it.typeCode]?.mark?.code in [INVESTMENT_CODE, OTHERS_CODE])
@@ -468,20 +492,6 @@ class Report2Ndfl extends AbstractScriptClass {
                             }.sort { a, b ->
                                 a.notifDate <=> b.notifDate ?: a.notifType <=> b.notifType ?:
                                         a.notifNum <=> b.notifNum ?: a.notifSource <=> b.notifSource
-                            }
-
-                            List<Operation> operationsByPerson = operationsByPersonId[person.id]
-                            List<OperationAttachment> cписокОперацийПриложение = new ArrayList<>()
-                            for (Operation operation : operationsByPerson) {
-                                NdflPersonIncome minOperationByIncomeAccruedDate = operation.incomes.findAll() { it.incomeAccruedDate != null}
-                                                                                        .min { it.incomeAccruedDate } as NdflPersonIncome
-                                BigDecimal totalNotHoldingTax = sum(rateIncomes.notHoldingTax) - sum(rateIncomes.overholdingTax)
-                                int holding = sum(rateIncomes.calculatedTax) - sum(rateIncomes.notHoldingTax) == 0 ? 0 : 1
-                                def incomeSum = holding == 1 ? totalNotHoldingTax / rate : sum(rateIncomes.incomeAccruedSumm)
-                                cписокОперацийПриложение.add(new OperationAttachment(operation.operationId,
-                                        minOperationByIncomeAccruedDate.incomeAccruedDate[Calendar.MONTH],
-                                        minOperationByIncomeAccruedDate.incomeCode,
-                                        totalNotHoldingTax, holding, incomeSum))
                             }
 
                             Set<String> incomeCodeList = cписокОперацийПриложение.incomeCode.toSet()
@@ -580,6 +590,9 @@ class Report2Ndfl extends AbstractScriptClass {
         return xml
     }
 
+    /**
+     * Deprecated
+     */
     List<NdflPerson> getPersons() {
         def persons = ndflPersonService.findAllFor2Ndfl(sourceKnf.id, declarationData.kpp, declarationData.oktmo, reportPeriod.startDate, reportPeriod.endDate)
         for (def personIterator = persons.iterator(); personIterator.hasNext();) {
@@ -618,16 +631,21 @@ class Report2Ndfl extends AbstractScriptClass {
         for (def personId : incomesByPersonIdAndOperationId.keySet()) {
             def personIncomesByOperationId = incomesByPersonIdAndOperationId[personId]
             def personIncomes = (List<NdflPersonIncome>) personIncomesByOperationId.values().flatten()
-            if (hasPositiveSum(personIncomes)) {
+            // Для 2-НДФЛ(2) пропускаем подсчет суммы, т.к. он производится по сгруппированному по ставке списку (при формировании operation.incomes)
+            if (is2Ndfl2() || hasPositiveSum(personIncomes)) {
                 for (def operationId : personIncomesByOperationId.keySet()) {
                     def operation = new Operation()
                     operation.operationId = operationId
                     operation.person = personsById[personId]
-                    operation.incomes = incomesByPersonIdAndOperationId[personId][operationId]
+                    if (is2Ndfl2()) {
+                        operation.incomes = getIncomesFor2NDFL2(incomesByPersonIdAndOperationId[personId][operationId])
+                    } else {
+                        operation.incomes = incomesByPersonIdAndOperationId[personId][operationId]
+                    }
                     operation.deductions = deductionsByPersonIdAndOperationId.get(personId)?.get(operationId) ?: new ArrayList<NdflPersonDeduction>()
                     operation.prepayments = prepaymentsByPersonIdAndOperationId.get(personId)?.get(operationId) ?: new ArrayList<NdflPersonPrepayment>()
                     if (isOperationBelongToPeriod(operation)) {
-                        if (declarationData.declarationTemplateId == DeclarationType.NDFL_2_2) {
+                        if (is2Ndfl2()) {
                             BigDecimal notHoldingTaxSum = sum(operation.incomes.notHoldingTax)
                             BigDecimal overholdingTaxSum = sum(operation.incomes.overholdingTax)
                             BigDecimal calculatedTaxSum = sum(operation.incomes.calculatedTax)
@@ -658,17 +676,15 @@ class Report2Ndfl extends AbstractScriptClass {
     }
 
     /**
-     * Возвращяет признак наличия суммыФЛ (сумма дохода (для 2-НДЛФЛ(1)) или сумма неудержанного (для 2-НДЛФЛ(2)) больше 0)
+     * Возвращяет признак наличия суммыФЛ (сумма дохода (для 2-НДЛФЛ(1)))
      * @param incomes строки 2 раздела ФЛ
      */
     boolean hasPositiveSum(List<NdflPersonIncome> incomes) {
         BigDecimal sum = 0
-        for (def income : incomes) {
-            if (isBelongToPeriod(income.incomeAccruedDate)) {
-                if (is2Ndfl1()) {
+        if (is2Ndfl1()) {
+            for (def income : incomes) {
+                if (isBelongToPeriod(income.incomeAccruedDate)) {
                     sum += income.incomeAccruedSumm ?: 0
-                } else {
-                    sum += (income.notHoldingTax > 0 ? income.notHoldingTax : 0) - (income.overholdingTax > 0 ? income.overholdingTax : 0)
                 }
             }
         }
@@ -685,6 +701,26 @@ class Report2Ndfl extends AbstractScriptClass {
             }
         }
         return false
+    }
+
+    /**
+     * Определение списка ФЛ и ставок для включения в 2-НДФЛ
+     * Если по группе ставок (сумма графы 18 - сумма графы 19) > 0, то включаем строки из группы в 2-НДФЛ (2)
+     *
+     * @param personIncomes строки 2 раздела ФЛ
+     * @return список доходов по ставке, подходящие по условию сумм
+     */
+    List<NdflPersonIncome> getIncomesFor2NDFL2(List<NdflPersonIncome> personIncomes) {
+        def incomesByRate = personIncomes.groupBy { it.taxRate }.sort { it.key }
+        incomesByRate.remove(null)
+        List<NdflPersonIncome> incomesFor2NDFL2 = new ArrayList<>()
+        for (def rate : incomesByRate.keySet()) {
+            def rateIncomes = incomesByRate.get(rate)
+            if (sum(rateIncomes.notHoldingTax) - sum(rateIncomes.overholdingTax) > 0) {
+                incomesFor2NDFL2.addAll(rateIncomes)
+            }
+        }
+        return incomesFor2NDFL2
     }
 
     /**
@@ -971,9 +1007,9 @@ class Report2Ndfl extends AbstractScriptClass {
      * Определить признак
      */
     String definePriznak(DepartmentConfig departmentConfig) {
-        if (declarationTemplate.type.id == DeclarationType.NDFL_2_1) {
+        if (is2Ndfl1()) {
             return !departmentConfig.reorganization ? "1" : "3"
-        } else if (declarationTemplate.type.id == DeclarationType.NDFL_2_2) {
+        } else if (is2Ndfl2()) {
             return !departmentConfig.reorganization ? "2" : "4"
         }
         throw new IllegalArgumentException()
@@ -1015,8 +1051,7 @@ class Report2Ndfl extends AbstractScriptClass {
             Xml xml = null
             try {
                 def kppOktmoOperations = operationsByKppOktmoPair[new KppOktmoPair(departmentConfig.kpp, departmentConfig.oktmo.code)] ?: new ArrayList<Operation>()
-                if (declarationTemplate.type.id == DeclarationType.NDFL_2_1) xml = buildXml(departmentConfig, kppOktmoOperations)
-                else if (declarationTemplate.type.id == DeclarationType.NDFL_2_2) xml = buildXml(departmentConfig, kppOktmoOperations)
+                xml = buildXml(departmentConfig, kppOktmoOperations)
                 if (xml) {
                     def formsToDelete = existingDeclarations
                     if (deleteForms(formsToDelete)) {
@@ -1172,7 +1207,11 @@ class Report2Ndfl extends AbstractScriptClass {
 
     /************************************* ОБЩИЕ МЕТОДЫ** *****************************************************************/
     boolean is2Ndfl1() {
-        return declarationData.declarationTemplateId == DeclarationType.NDFL_2_1
+        return declarationTemplate.type.id == DeclarationType.NDFL_2_1
+    }
+
+    boolean is2Ndfl2() {
+        return declarationTemplate.type.id == DeclarationType.NDFL_2_2
     }
 
     /**
@@ -2130,6 +2169,20 @@ class Report2Ndfl extends AbstractScriptClass {
         CтрокаКодДоходаВычетыПриложение(String кодВычет, BigDecimal суммаВычет) {
             this.кодВычет = кодВычет
             this.суммаВычет = суммаВычет
+        }
+    }
+
+    @ToString(includePackage = false)
+    @EqualsAndHashCode
+    class OperationWithoutHoldingTax {
+        String operationId
+        Long inp
+        Integer taxRate
+
+        OperationWithoutHoldingTax(String operationId, Long inp, Integer taxRate) {
+            this.operationId = operationId
+            this.inp = inp
+            this.taxRate = taxRate
         }
     }
 }
