@@ -63,7 +63,7 @@ public class LogEntryDaoTest {
         logger.error("E1");
         logger.error("E2");
         logger.warn("W1");
-        logger.warnExp("W2", "type", "obj","period");
+        logger.warnExp("W2", "type", "obj");
         logEntryDao.save(logger.getEntries(), UID_WITHOUT_LOG_ENTRY_2);
         List<LogEntry> lel = logEntryDao.fetch(UID_WITHOUT_LOG_ENTRY_2);
 
@@ -72,7 +72,6 @@ public class LogEntryDaoTest {
         Assert.assertEquals(lel.get(3).getLevel(), LogLevel.WARNING);
         Assert.assertEquals(lel.get(3).getType(), "type");
         Assert.assertEquals(lel.get(3).getObject(), "obj");
-        Assert.assertEquals(lel.get(3).getPeriod(), "period");
     }
 
     @Test
