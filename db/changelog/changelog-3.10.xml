@@ -87,7 +87,7 @@
     </changeSet>
 
     <!-- https://jira.aplana.com/browse/SBRFNDFL-8698 Датафикс заполнения полей source_id у вычетов и авансов -->
-    <changeSet id="3.10-skononova-3" author="skononova"  runAlways="true" >
+    <changeSet id="3.10-skononova-3" author="skononova"  runAlways="false" >
         <sql>
 	UPDATE ndfl_person_deduction npd
 	SET
