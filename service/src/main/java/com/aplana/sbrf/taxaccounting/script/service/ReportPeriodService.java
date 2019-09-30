@@ -3,9 +3,11 @@ package com.aplana.sbrf.taxaccounting.script.service;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriodType;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevelType;
 import com.aplana.sbrf.taxaccounting.service.ScriptExposed;
 
 import java.util.Calendar;
+import java.util.List;
 
 @ScriptExposed
 public interface ReportPeriodService {
@@ -56,4 +58,13 @@ public interface ReportPeriodService {
      * Получение записи справочника "Коды, определяющие налоговый (отчётный) период" по идентификатору.
      */
     ReportPeriodType getReportPeriodTypeById(Long id);
+
+    /**
+     * Получить сформированное поле периода
+     *
+     * @param ids список ПНФ
+     * @param logLevelType тип операции
+     * @return строка периода
+     */
+    String createLogPeriodFormatById(List<Long> ids, LogLevelType logLevelType);
 }
