@@ -359,10 +359,10 @@
                 $scope.initSelectWithOpenPeriodDeclarationTypes = function () {
                     $scope.declarationTypeSelect = GetSelectOption.getBasicSingleSelectOptions(true);
                     $scope.declarationTypeSelect.options.data.results = [
-                        APP_CONSTANTS.TAX_FORM_TYPE.REPORT_2_NDFL_1,
-                        APP_CONSTANTS.TAX_FORM_TYPE.REPORT_2_NDFL_2,
-                        APP_CONSTANTS.TAX_FORM_TYPE.REPORT_6_NDFL,
-                        APP_CONSTANTS.TAX_FORM_TYPE.APP_2
+                        APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_1,
+                        APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_2,
+                        APP_CONSTANTS.DECLARATION_TYPE.REPORT_6_NDFL,
+                        APP_CONSTANTS.DECLARATION_TYPE.APP_2
                     ];
                 };
 
