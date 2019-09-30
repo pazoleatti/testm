@@ -199,8 +199,7 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
     @Override
     public List<ReportPeriod> fetchAllByTaxPeriod(int taxPeriodId) {
         return getJdbcTemplate().query(
-                "select rp.id, rp.name, rp.tax_period_id, tp.tax_type, tp.year, rp.start_date, rp.end_date, " +
-                        "rp.dict_tax_period_id, rp.calendar_start_date, rp.form_type_id " +
+                "select rp.id, rp.name, rp.tax_period_id, tp.tax_type, tp.year, rp.start_date, rp.end_date, rp.dict_tax_period_id, rp.calendar_start_date " +
                         "from report_period rp join tax_period tp on rp.tax_period_id = tp.id " +
                         "where rp.tax_period_id = ? order by rp.end_date, rp.calendar_start_date desc",
                 new Object[]{taxPeriodId},
@@ -257,7 +256,7 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
     public List<ReportPeriod> fetchAllByDepartments(List<Integer> departmentList) {
         return getJdbcTemplate().query(
                 "select rp.id, rp.name, rp.tax_period_id, tp.tax_type, tp.year, rp.start_date, rp.end_date, rp.dict_tax_period_id, " +
-                        "rp.calendar_start_date, rp.form_type_id from report_period rp, tax_period tp where rp.id in " +
+                        "rp.calendar_start_date from report_period rp, tax_period tp where rp.id in " +
                         "(select distinct report_period_id from department_report_period " +
                         "where correction_date is null and " + SqlUtils.transformToSqlInStatement("department_id", departmentList) + ") " +
                         "and rp.tax_period_id = tp.id " +
@@ -305,7 +304,7 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
         try {
             return getJdbcTemplate().queryForObject(
                     "select rp.id, rp.name, rp.tax_period_id, tp.tax_type, tp.year, rp.start_date, rp.end_date, rp.dict_tax_period_id, " +
-                            "rp.calendar_start_date, rp.form_type_id from report_period rp join tax_period tp on rp.tax_period_id = tp.id " +
+                            "rp.calendar_start_date from report_period rp join tax_period tp on rp.tax_period_id = tp.id " +
                             "where rp.tax_period_id = ? and rp.dict_tax_period_id = ?",
                     new Object[]{taxPeriodId, dictTaxPeriodId},
                     new int[]{Types.NUMERIC, Types.NUMERIC},
@@ -317,6 +316,22 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
     }
 
     @Override
+    public List<ReportPeriod> getReportPeriodsByDate(Date startDate, Date endDate) {
+        try {
+            return getJdbcTemplate().query(
+                    "select rp.id, rp.name, rp.tax_period_id, tp.tax_type, tp.year, rp.start_date, rp.end_date, rp.dict_tax_period_id, " +
+                            "rp.calendar_start_date from report_period rp join tax_period tp on rp.tax_period_id = tp.id " +
+                            "where rp.end_date>=? and (rp.calendar_start_date<=? or ? is null)",
+                    new Object[]{startDate, endDate, endDate},
+                    new int[]{Types.DATE, Types.DATE, Types.DATE},
+                    new ReportPeriodMapper()
+            );
+        } catch (EmptyResultDataAccessException e) {
+            throw new DaoException(String.format("Не найдены отчетные периоды за период (%s; %s)", startDate, endDate));
+        }
+    }
+
+    @Override
     public ReportPeriod getByTaxTypedCodeYear(String code, int year) {
         try {
             MapSqlParameterSource params = new MapSqlParameterSource();
@@ -324,8 +339,7 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
             params.addValue("year", year);
 
             return getNamedParameterJdbcTemplate().queryForObject(
-                    "SELECT rp.id, rp.name, rp.tax_period_id, tp.tax_type, tp.year, rp.start_date, rp.end_date, " +
-                            "rp.dict_tax_period_id, rp.calendar_start_date, rp.form_type_id " +
+                    "SELECT rp.id, rp.name, rp.tax_period_id, tp.tax_type, tp.year, rp.start_date, rp.end_date, rp.dict_tax_period_id, rp.calendar_start_date  " +
                             "FROM report_period rp  " +
                             "JOIN report_period_type rpt ON (rpt.id = rp.dict_tax_period_id AND rpt.code = :code)" +
                             "JOIN tax_period tp ON (tp.id = rp.tax_period_id AND tp.year = :year)",
