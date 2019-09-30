@@ -10,8 +10,7 @@ public interface ReportPeriodService {
      *
      * @param taxPeriod        налоговый период
      * @param reportPeriodType данные по отчетному периоду
-     * @param formTypeId       ссылка на вид отчетности
      * @return отчетный период {@link ReportPeriod}
      */
-    ReportPeriod fetchOrCreate(TaxPeriod taxPeriod, ReportPeriodType reportPeriodType, Integer formTypeId);
+    ReportPeriod fetchOrCreate(TaxPeriod taxPeriod, ReportPeriodType reportPeriodType);
 }

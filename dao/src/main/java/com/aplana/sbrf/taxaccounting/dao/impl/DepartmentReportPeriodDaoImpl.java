@@ -414,14 +414,10 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
     @Transactional(readOnly = true)
     public boolean isLaterCorrectionPeriodExists(DepartmentReportPeriod departmentReportPeriod) {
         return getJdbcTemplate().queryForObject(
-                "SELECT count(*) FROM department_report_period drp\n " +
-                        "join report_period rp on rp.id = drp.report_period_id\n " +
-                        "WHERE\n " +
-                        "drp.DEPARTMENT_ID = ?\n" +
-                        "AND drp.report_period_id = ? AND drp.CORRECTION_DATE > ? AND rp.form_type_id = ?",
-                Integer.class, departmentReportPeriod.getDepartmentId(),
-                departmentReportPeriod.getReportPeriod().getId(), departmentReportPeriod.getCorrectionDate(),
-                departmentReportPeriod.getReportPeriod().getReportPeriodTaxFormTypeId()
+                "SELECT count(*) FROM department_report_period drp WHERE " +
+                        "drp.DEPARTMENT_ID = ? AND drp.report_period_id = ? AND drp.CORRECTION_DATE > ?",
+                Integer.class, departmentReportPeriod.getDepartmentId(), departmentReportPeriod.getReportPeriod().getId(),
+                departmentReportPeriod.getCorrectionDate()
         ) > 0;
     }
 

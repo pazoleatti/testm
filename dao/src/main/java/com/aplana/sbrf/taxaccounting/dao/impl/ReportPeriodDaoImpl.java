@@ -221,16 +221,15 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
 
         jt.update(
                 "insert into report_period (id, name, tax_period_id, " +
-                        " dict_tax_period_id, start_date, end_date, calendar_start_date, form_type_id)" +
-                        " values (?, ?, ?, ?, ?, ?, ?, ?)",
+                        " dict_tax_period_id, start_date, end_date, calendar_start_date)" +
+                        " values (?, ?, ?, ?, ?, ?, ?)",
                 id,
                 reportPeriod.getName(),
                 reportPeriod.getTaxPeriod().getId(),
                 reportPeriod.getDictTaxPeriodId(),
                 reportPeriod.getStartDate(),
                 reportPeriod.getEndDate(),
-                reportPeriod.getCalendarStartDate(),
-                reportPeriod.getReportPeriodTaxFormTypeId()
+                reportPeriod.getCalendarStartDate()
         );
         reportPeriod.setId(id);
         return id;
