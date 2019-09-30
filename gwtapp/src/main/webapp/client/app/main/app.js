@@ -220,6 +220,7 @@
         "ndflReportJournal.button.selected": "Выбранные на странице",
         "ndflReportJournal.button.updateDocState": "Изменить состояние ЭД",
         "ndflReportJournal.button.sendEdo": "Отправить в ЭДО",
+        "ndflReportJournal.button.create2ndfl": "Создать 2-НДФЛ",
         "ndflReportJournal.message.emptyFilterFields": "Заполнены не все поля отчетности",
         "ndflReportJournal.filter.documentState": "Состояние ЭД",
         "ndflReportJournal.filter.note": "Примечание",

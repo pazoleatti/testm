@@ -103,7 +103,9 @@
                                             $scope.declarationTypeName = declarationType.name;
                                         }
                                     });
-                                    $scope.isCurrentForm2NDFLFL = $scope.declarationData.declarationType === APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_FL.id
+                                    $scope.isCurrentForm2NDFLFL = $scope.declarationData.declarationType === APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_FL.id;
+                                    $scope.isCurrentForm2NDFL_1_OR_2 = (($scope.declarationData.declarationType === APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_1.id) ||
+                                                                       ($scope.declarationData.declarationType === APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_2.id));
                                 }
                             }
                         }
@@ -431,6 +433,21 @@
                             $logPanel.open('log-panel-container', response.data.uuid);
                         }
                     });
+                };
+
+                /**
+                 * @description Форма выбора ФЛ
+                 */
+                $scope.create2NDFL = function () {
+                    // $http({
+                    //     method: "POST",
+                    //     url: "controller/actions/declarationData/sendEdo",
+                    //     data: [$stateParams.declarationDataId]
+                    // }).then(function (response) {
+                    //     if (response.data && response.data.uuid) {
+                    //         $logPanel.open('log-panel-container', response.data.uuid);
+                    //     }
+                    // });
                 };
 
                 /**
