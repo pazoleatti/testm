@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.model;
 
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookFormType;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -45,6 +46,13 @@ public class DepartmentReportPeriod implements Serializable, SecuredEntity {
 	@Getter
 	@Setter
     private Date correctionDate;
+
+	/**
+	 * Вид отчетности
+	 */
+	@Getter
+	@Setter
+	private RefBookFormType refBookFormType;
 
 	/**
 	 * Права доступа

@@ -189,32 +189,24 @@
          * @description Форматтер для получения наименования отчетного периода в нужном формате "год: наименование периода"
          * @param reportPeriod Отчетный период
          */
-        .filter('periodFormatter', ['APP_CONSTANTS', function (APP_CONSTANTS) {
+        .filter('periodFormatter', function () {
             return function (reportPeriod) {
-                var reportPeriodTaxFormType =
-                    getReportPeriodTaxFormTypeNameFromId(APP_CONSTANTS, reportPeriod.reportPeriodTaxFormTypeId);
-
-                return reportPeriod
-                    ? reportPeriod.taxPeriod.year + ": " + reportPeriod.name + ": " + reportPeriodTaxFormType
-                    : "";
+                return reportPeriod ? reportPeriod.taxPeriod.year + ": " + reportPeriod.name : "";
             };
-        }])
+        })
 
         /**
          * @description Форматтер для получения наименования отчетного периода в нужном формате "год: наименование периода (срок корректировки)"
          * @param reportPeriod Отчетный период
          */
-        .filter('periodFormatterWithCorrectionDate', ['$filter', 'APP_CONSTANTS', function ($filter, APP_CONSTANTS) {
+        .filter('periodFormatterWithCorrectionDate', ['$filter', function ($filter) {
             return function (reportPeriod) {
                 if (reportPeriod) {
-                    var reportPeriodTaxFormType =
-                        getReportPeriodTaxFormTypeNameFromId(APP_CONSTANTS, reportPeriod.reportPeriodTaxFormTypeId);
-
                     var correctionDateClause = "";
                     if (reportPeriod.correctionDate) {
-                        correctionDateClause = " " + $filter('translate')('createReport.correctionString', {correctionDate: $filter('date')(reportPeriod.correctionDate, 'dd.MM.yyyy')})
+                        correctionDateClause = $filter('translate')('createReport.correctionString', {correctionDate: $filter('date')(reportPeriod.correctionDate, 'dd.MM.yyyy')})
                     }
-                    return reportPeriod.taxPeriod.year + ": " + reportPeriod.name + correctionDateClause + ": " + reportPeriodTaxFormType
+                    return reportPeriod.taxPeriod.year + ": " + reportPeriod.name + " " + correctionDateClause
                 } else {
                     return "";
                 }
@@ -334,19 +326,15 @@
          * "<Год>, <Название периода><Дата корректировки через запятую (если имеется)>"
          * @param value признак активности периода
          */
-        .filter('ndflPeriodFormatter', ['$filter', 'APP_CONSTANTS', function ($filter, APP_CONSTANTS) {
+        .filter('ndflPeriodFormatter', ['$filter', function ($filter) {
             return function (declarationData) {
                 if (declarationData) {
-                    var reportPeriodTaxFormType =
-                        getReportPeriodTaxFormTypeNameFromId(APP_CONSTANTS, declarationData.reportPeriodTaxFormTypeId);
-
                     return $filter('translate')('title.period.value', {
                         year: declarationData.reportPeriodYear,
                         periodName: declarationData.reportPeriod,
                         correctionString: declarationData.correctionDate ?
                             $filter('translate')('title.period.value.correctionString', {correctionDate: $filter('date')(declarationData.correctionDate, 'dd.MM.yyyy')}) :
-                            '',
-                        formType: reportPeriodTaxFormType ? ", " + reportPeriodTaxFormType : ""
+                            ''
                     });
                 }
                 return '';
@@ -742,13 +730,4 @@
             };
         }])
     ;
-
-    function getReportPeriodTaxFormTypeNameFromId(APP_CONSTANTS, taxFormTypeId) {
-        for (var reportPeriodTaxFormType in APP_CONSTANTS.TAX_FORM_TYPE) {
-            if (taxFormTypeId === APP_CONSTANTS.TAX_FORM_TYPE[reportPeriodTaxFormType].id) {
-                return APP_CONSTANTS.TAX_FORM_TYPE[reportPeriodTaxFormType].name;
-            }
-        }
-    };
-
 }());

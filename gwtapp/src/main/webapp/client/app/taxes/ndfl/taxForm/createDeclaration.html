@@ -95,9 +95,9 @@
                     <div>
                         <div data-aplana-field>
                             <div style="width: 355px;"
-                                 data-ng-controller="SelectKnfTypeCtrlByReportPeriod"
-                                 data-ui-select2="result.options"
-                                 data-ng-init="init('declarationData.period')"
+                                 data-ng-controller="SelectFromArrayCtrl"
+                                 data-ui-select2="selectFromArray.options"
+                                 data-ng-init="initBasicSingleSelectFromArray([APP_CONSTANTS.KNF_TYPE.ALL, APP_CONSTANTS.KNF_TYPE.BY_NONHOLDING_TAX, APP_CONSTANTS.KNF_TYPE.BY_KPP, APP_CONSTANTS.KNF_TYPE.FOR_APP2])"
                                  data-ng-model="declarationData.knfType"
                                  data-required>
                             </div>
