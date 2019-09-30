@@ -158,11 +158,7 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
         }
 
         if (filter.getReportPeriod() != null) {
-            if (filter.getReportPeriod().getId() != null) {
-                causeList.add("drp.report_period_id = " + filter.getReportPeriod().getId());
-            } else if (filter.getReportPeriod().getReportPeriodTaxFormTypeId() != null) {
-                causeList.add("rp.form_type_id = " + filter.getReportPeriod().getReportPeriodTaxFormTypeId());
-            }
+            causeList.add("drp.report_period_id = " + filter.getReportPeriod().getId());
         }
 
         if (causeList.isEmpty()) {
