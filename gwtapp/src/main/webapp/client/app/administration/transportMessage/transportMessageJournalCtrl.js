@@ -7,8 +7,8 @@
     angular.module('app.transportMessage')
 
         .controller('transportMessageJournalCtrl', ['$scope', '$filter', '$http', '$aplanaModal',
-            'transportMessageResource', '$alertService', 'APP_CONSTANTS',
-            function ($scope, $filter, $http, $aplanaModal, transportMessageResource, $alertService, APP_CONSTANTS) {
+            'transportMessageResource', '$dialogs', 'APP_CONSTANTS',
+            function ($scope, $filter, $http, $aplanaModal, transportMessageResource, $dialogs, APP_CONSTANTS) {
 
                 function getDefaultFilterParams() {
                     return {};
@@ -260,7 +260,7 @@
                 function onExportError(response) {
                     if (response.data && typeof response.data.text === 'function') {
                         response.data.text().then(function (error) {
-                            $alertService.error(error);
+                            $dialogs.errorDialog({content: error});
                         });
                     }
                 }

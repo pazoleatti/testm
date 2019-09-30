@@ -137,7 +137,12 @@ public class TransportMessageServiceImpl implements TransportMessageService {
                         ? transportMessageDao.findByFilter(filter, null)
                         : transportMessageDao.findByIds(transportMessageIds);
 
-        InputStream inputStream = buildExcelStream(transportMessages, headerDescription);
+        InputStream inputStream = null;
+        try {
+            inputStream = buildExcelStream(transportMessages, headerDescription);
+        } catch (Exception e) {
+            throw new ServiceException("Ошибка формирования Excel-файла списка транспортных сообщений", e);
+        }
         if (inputStream == null)
             throw new ServiceException("Нет данных для формирования Excel-файла транспортных сообщений");
         return inputStream;

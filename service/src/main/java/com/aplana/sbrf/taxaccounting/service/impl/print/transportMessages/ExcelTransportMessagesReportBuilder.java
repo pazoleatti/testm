@@ -11,6 +11,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFColor;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.awt.*;
 import java.io.ByteArrayInputStream;
@@ -53,12 +54,13 @@ public class ExcelTransportMessagesReportBuilder extends AbstractReportBuilder {
     private final List<TransportMessage> transportMessages;
     private final String headerDescription;
     private int rowNumber = 0;
+    private int rowTableHeadersNumber = 3;
 
     public ExcelTransportMessagesReportBuilder(List<TransportMessage> transportMessages, String headerDescription) {
         this.transportMessages = transportMessages;
         this.headerDescription = headerDescription;
 
-        workBook = new SXSSFWorkbook();
+        workBook = new XSSFWorkbook();
         workBook.setMissingCellPolicy(Row.CREATE_NULL_AS_BLANK);
 
         sheet = workBook.createSheet(SHEET_NAME);
@@ -82,19 +84,13 @@ public class ExcelTransportMessagesReportBuilder extends AbstractReportBuilder {
     @Override
     protected void createTableHeaders() {
         CellStyle cs = createTableHeadersCellStyle();
-        Row row = sheet.createRow(rowNumber++);
-
+        Row row = sheet.createRow(rowNumber);
+        rowTableHeadersNumber = rowNumber;
+        rowNumber++;
         for (int i = 0; i < headers.length; i++) {
             Cell cell = row.createCell(i);
             cell.setCellStyle(cs);
             cell.setCellValue(headers[i]);
-        }
-
-        Iterator<Cell> cellIterator = row.cellIterator();
-        while (cellIterator.hasNext()) {
-            Cell cell = cellIterator.next();
-            int columnIndex = cell.getColumnIndex();
-            sheet.autoSizeColumn(columnIndex);
         }
     }
 
@@ -220,7 +216,10 @@ public class ExcelTransportMessagesReportBuilder extends AbstractReportBuilder {
         }
     }
 
-
+    /**
+     * Создание шрифта для заголовка отчета
+     * @return
+     */
     private Font createFillHeaderFont() {
         Font font = workBook.createFont();
         font.setBoldweight(Font.BOLDWEIGHT_BOLD);
@@ -229,7 +228,10 @@ public class ExcelTransportMessagesReportBuilder extends AbstractReportBuilder {
         return font;
     }
 
-
+    /**
+     * Создание ситиля для заголовка отчета
+     * @return
+     */
     private CellStyle createFillHeaderCellStyle() {
         CellStyle cs = workBook.createCellStyle();
         cs.setFont(createFillHeaderFont());
@@ -242,6 +244,10 @@ public class ExcelTransportMessagesReportBuilder extends AbstractReportBuilder {
         return cs;
     }
 
+    /**
+     * Создание шрифта для шапки таблицы
+     * @return
+     */
     private Font createTableHeadersFont() {
         Font font = workBook.createFont();
         font.setBoldweight(Font.BOLDWEIGHT_BOLD);
@@ -250,6 +256,10 @@ public class ExcelTransportMessagesReportBuilder extends AbstractReportBuilder {
         return font;
     }
 
+    /**
+     * Создание стиля для шапки таблицы
+     * @return
+     */
     private CellStyle createTableHeadersCellStyle() {
         XSSFCellStyle cs = (XSSFCellStyle) workBook.createCellStyle();
         cs.setFont(createTableHeadersFont());
@@ -259,11 +269,15 @@ public class ExcelTransportMessagesReportBuilder extends AbstractReportBuilder {
         cs.setBorderRight(CellStyle.BORDER_THIN);
         cs.setBorderLeft(CellStyle.BORDER_THIN);
         cs.setFillBackgroundColor(new XSSFColor(GRAY_COLOR));
-        cs.setFillPattern(CellStyle.BIG_SPOTS);
+        cs.setFillPattern(CellStyle.SOLID_FOREGROUND);
         cs.setWrapText(false);
         return cs;
     }
 
+    /**
+     * Создание шрифта для данныз таблицы
+     * @return
+     */
     private Font createDataForTableFont() {
         Font font = workBook.createFont();
         font.setFontName(FONT_NAME);
@@ -271,6 +285,10 @@ public class ExcelTransportMessagesReportBuilder extends AbstractReportBuilder {
         return font;
     }
 
+    /**
+     * Создание стиля для данных таблицы
+     * @return
+     */
     private CellStyle createDataForTableCellStyle() {
         XSSFCellStyle cs = (XSSFCellStyle) workBook.createCellStyle();
         cs.setFont(createDataForTableFont());
@@ -284,13 +302,32 @@ public class ExcelTransportMessagesReportBuilder extends AbstractReportBuilder {
         return cs;
     }
 
+    @Override
+    protected void cellAlignment() {
+        Iterator<Cell> cellIterator = sheet.getRow(rowTableHeadersNumber).cellIterator();
+        while (cellIterator.hasNext()) {
+            Cell cell = cellIterator.next();
+            int columnIndex = cell.getColumnIndex();
+            sheet.autoSizeColumn(columnIndex);
+        }
+    }
 
+    /***
+     * Сформировать Excel-файл с транспортными сообщениями
+     * @return InputStream, который необходимо закрыть из вызяваемого кода используя метод InputStream.close()
+     * @throws IOException
+     */
     public InputStream createReportAsStream() throws IOException {
 
+        //Заполнение заголовка
         fillHeader();
+        //Заполнение запки таблицы
         createTableHeaders();
+        //Заполнение таблицы
         createDataForTable();
+        //Задать ширину ячеек
         cellAlignment();
+        //Подвал отчета
         fillFooter();
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
