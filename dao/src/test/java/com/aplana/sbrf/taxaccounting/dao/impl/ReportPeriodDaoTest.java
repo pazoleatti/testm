@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.result.ReportPeriodResult;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +32,8 @@ import static org.junit.Assert.assertTrue;
 @ContextConfiguration({"ReportPeriodDaoTest.xml"})
 @Transactional
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+//TODO включить в версии 3.10.1
+@Ignore
 public class ReportPeriodDaoTest {
 
     @Autowired
