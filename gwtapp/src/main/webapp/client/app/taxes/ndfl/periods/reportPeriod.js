@@ -79,7 +79,6 @@
                         colNames: [
                             $filter('translate')('reportPeriod.grid.period'),
                             $filter('translate')('reportPeriod.grid.state'),
-                            $filter('translate')('reportPeriod.grid.formType'),
                             $filter('translate')('reportPeriod.grid.correctionDate')
                         ],
                         colModel: [
@@ -103,14 +102,9 @@
                                 formatter: $filter('activeStatusPeriodFormatter')
                             },
                             {
-                                name: 'formType',
-                                index: 'formType',
-                                width: 140
-                            },
-                            {
                                 name: 'correctionDate',
                                 index: 'correctionDate',
-                                width: 110,
+                                width: 250,
                                 formatter: $filter('dateFormatter')
                             }
                         ],
