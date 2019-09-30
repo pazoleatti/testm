@@ -66,7 +66,7 @@
     </changeSet>
 
     <!-- https://jira.aplana.com/browse/SBRFNDFL-8668 Создать сиквенсы для существующих налоговых периодов -->
-    <changeSet id="3.10-skononova-2" author="skononova"  runAlways="true" >
+    <changeSet id="3.10-skononova-2" author="skononova">
         <sql  splitStatements="false">
 	declare
 	    cnt number;
@@ -181,6 +181,17 @@
 	    ALTER TABLE transport_message DROP  CONSTRAINT tmess_declaration_id_fk;
 	    ALTER TABLE transport_message ADD  CONSTRAINT tmess_declaration_id_fk FOREIGN KEY (declaration_id)
         	REFERENCES declaration_data (id)  ENABLE;
+        </sql>
+    </changeSet>
+
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-8479 Реализовать определение номера справки
+    и номера корректировки для справок 2-НДФЛ сформированных в корректировочном периоде -->
+    <changeSet id="3.10-avoynov-2" author="avoynov">
+        <sql>
+            ALTER TABLE ndfl_references ADD correction_num NUMBER(3);
+            COMMENT ON column ndfl_references.correction_num IS 'Номер корректировки';
+            insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, precision, width, required, is_unique, max_length)
+            values(9650, 964, 'Номер корректировки', 'CORRECTION_NUM', 2, 10, 0, 5, 1, 0, 3);
         </sql>
     </changeSet>
 
