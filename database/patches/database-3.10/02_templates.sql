@@ -151,8 +151,8 @@ PROMPT Fill service tables...
 --3.10-avoynov-1
 HOST "&2\sqlldr" &3 control=database-3.10/templates/ldr/ndfl/template.ldr log=&4/3.10_02_03_ndfl_template.txt bad=&5/3.10_02_03_ndfl_template.bad
 
-
---HOST "&2\sqlldr" &3 control=database-3.10/templates/ldr/ndfl/template_script.ldr log=&4/3.10_02_04_ndfl_template_script.txt bad=&5/3.10_02_04_ndfl_template_script.bad
+--3.10-adudenko-03
+HOST "&2\sqlldr" &3 control=database-3.10/templates/ldr/ndfl/template_script.ldr log=&4/3.10_02_04_ndfl_template_script.txt bad=&5/3.10_02_04_ndfl_template_script.bad
 
 
 BEGIN
