@@ -390,7 +390,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                                 existDeclaration.getId(), departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + ", " + departmentReportPeriod.getReportPeriod().getName() + strCorrPeriod,
                                 department.getName(), declarationTemplate.getDeclarationFormKind().getName(), newDeclaration.getKnfType().getName());
                     } else {
-                        if (departmentReportPeriod.getReportPeriod().getId()== newDeclaration.getReportPeriodId() &&
+                        if (departmentReportPeriod.getId() == newDeclaration.getDepartmentReportPeriodId() &&
                                 departmentReportPeriod.getDepartmentId() == newDeclaration.getDepartmentId() &&
                                 existDeclaration.getKnfType().equals(newDeclaration.getKnfType())) {
                             HashSet<String> newKppList = new HashSet<>(newDeclaration.getIncludedKpps());
