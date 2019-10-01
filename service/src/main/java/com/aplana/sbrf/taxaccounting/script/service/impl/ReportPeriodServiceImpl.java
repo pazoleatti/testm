@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriodType;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevelType;
 import com.aplana.sbrf.taxaccounting.script.service.ReportPeriodService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -12,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.List;
 
 
 @Service("reportPeriodService")
@@ -58,5 +60,10 @@ public class ReportPeriodServiceImpl extends AbstractDao implements ReportPeriod
     @Override
     public ReportPeriodType getReportPeriodTypeById(Long id) {
         return reportPeriodDao.getReportPeriodTypeById(id);
+    }
+
+    @Override
+    public String createLogPeriodFormatById(List<Long> ids, LogLevelType logLevelType) {
+        return reportPeriodService.createLogPeriodFormatById(ids, logLevelType.getId());
     }
 }

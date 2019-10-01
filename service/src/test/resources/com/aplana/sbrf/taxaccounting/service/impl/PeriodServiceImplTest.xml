@@ -45,8 +45,5 @@
               <constructor-arg value="com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService"/>
        </bean>
        <bean id="periodService" class="com.aplana.sbrf.taxaccounting.service.impl.PeriodServiceImpl" />
-       <bean class="org.mockito.Mockito" factory-method="mock">
-              <constructor-arg value="com.aplana.sbrf.taxaccounting.service.refbook.RefBookFormTypeService"/>
-       </bean>
 
 </beans>

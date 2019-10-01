@@ -21,11 +21,6 @@ public class DepartmentReportPeriodBuilder {
         return this;
     }
 
-    public DepartmentReportPeriodBuilder reportPeriodTaxFormTypeId(Integer formTypeId) {
-        departmentReportPeriod.getReportPeriod().setReportPeriodTaxFormTypeId(formTypeId);
-        return this;
-    }
-
     public DepartmentReportPeriodBuilder taxPeriodId(Integer id) {
         departmentReportPeriod.getReportPeriod().getTaxPeriod().setId(id);
         return this;
@@ -64,7 +59,6 @@ public class DepartmentReportPeriodBuilder {
     public DepartmentReportPeriodBuilder but() {
         return new DepartmentReportPeriodBuilder()
                 .reportPeriodId(departmentReportPeriod.getReportPeriod().getId())
-                .reportPeriodTaxFormTypeId(departmentReportPeriod.getReportPeriod().getReportPeriodTaxFormTypeId())
                 .taxPeriodId(departmentReportPeriod.getReportPeriod().getTaxPeriod().getId())
                 .reportPeriodName(departmentReportPeriod.getReportPeriod().getName())
                 .correctionDate(departmentReportPeriod.getCorrectionDate())

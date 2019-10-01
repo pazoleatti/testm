@@ -169,14 +169,6 @@
                 ONLY_PRIMARY: {id: 1, name: "Только не корректирующие"},
                 ONLY_CORRECTIVE: {id: 2, name: "Только корректирующие"}
             },
-            TAX_FORM_TYPE: {
-                RNU_NDFL: {id: 2, name: "РНУ-НДФЛ"},
-                REPORT_2_NDFL_1: {id: 3, name: "2 НДФЛ (1)"},
-                REPORT_2_NDFL_2: {id: 4, name: "2 НДФЛ (2)"},
-                REPORT_6_NDFL: {id: 5, name: "6 НДФЛ"},
-                REPORT_2_NDFL_FL: {id: 6, name: "2 НДФЛ (ФЛ)"},
-                APP_2: {id: 7, name: "Приложение 2"}
-            },
             DECLARATION_TYPE: {
                 RNU_NDFL_PRIMARY: {id: 100, name: "РНУ НДФЛ (первичная)"},
                 RNU_NDFL_CONSOLIDATED: {id: 101, name: "РНУ НДФЛ (консолидированная)"},

@@ -79,6 +79,7 @@ class Report2Ndfl extends AbstractScriptClass {
     RefBookDeductionTypeService refBookDeductionTypeService
     String applicationVersion
     Map<String, Object> paramMap
+    NdflReferenceService ndflReferenceService
 
     @TypeChecked(TypeCheckingMode.SKIP)
     Report2Ndfl(scriptClass) {
@@ -109,6 +110,7 @@ class Report2Ndfl extends AbstractScriptClass {
         this.applicationVersion = (String) getSafeProperty("applicationVersion")
         this.paramMap = (Map<String, Object>) getSafeProperty("paramMap")
         this.reportFormsCreationParams = (ReportFormsCreationParams) getSafeProperty("reportFormsCreationParams")
+        this.ndflReferenceService = (NdflReferenceService) getSafeProperty("ndflReferenceService")
     }
 
     @Override
@@ -149,6 +151,7 @@ class Report2Ndfl extends AbstractScriptClass {
     final String NDFL_REFERENCES_LASTNAME = "LASTNAME"
     final String NDFL_REFERENCES_BIRTHDAY = "BIRTHDAY"
     final String NDFL_REFERENCES_ERRTEXT = "ERRTEXT"
+    final String NDFL_REFERENCES_CORRECTION_NUM = "CORRECTION_NUM"
 
     /**
      * Создаёт xml-файл по настройке подразделений.
@@ -219,7 +222,6 @@ class Report2Ndfl extends AbstractScriptClass {
         Map<String, RefBookDeductionType> deductionTypesByCode = refBookDeductionTypeService.findAllByVersion(reportPeriod.endDate)
                 .collectEntries { [it.code, it] }
         String priznak = definePriznak(departmentConfig)
-        int nomSprCounter = 0
 
         MarkupBuilder builder = new MarkupBuilder(new PlatformLineWriter(writer))
         builder.setDoubleQuotes(true)
@@ -259,8 +261,9 @@ class Report2Ndfl extends AbstractScriptClass {
                     person.incomes = (List<NdflPersonIncome>) operationsByPersonId[person.id]*.incomes.flatten()
                     person.deductions = (List<NdflPersonDeduction>) operationsByPersonId[person.id]*.deductions.flatten()
                     person.prepayments = (List<NdflPersonPrepayment>) operationsByPersonId[person.id]*.prepayments.flatten()
-                    "НДФЛ-2"(НомСпр: ++nomSprCounter,
-                            НомКорр: sprintf('%02d', declarationData.correctionNum ?: 0)) {
+                    def nomSprAndCorr = getNomSpr(person.id, reportPeriod.taxPeriod.year, declarationData.kpp, declarationData.oktmo, declarationTemplate.type.id)
+                    "НДФЛ-2"(НомСпр: nomSprAndCorr.sprNum,
+                            НомКорр: sprintf('%02d', nomSprAndCorr.corrNum)) {
                         ПолучДох(ИННФЛ: person.innNp,
                                 Статус: person.status,
                                 ДатаРожд: ScriptUtils.formatDate(person.birthDay),
@@ -356,7 +359,7 @@ class Report2Ndfl extends AbstractScriptClass {
                     }
                     if (!refPersonIds.contains(person.personId)) {
                         refPersonIds << person.personId
-                        xml.ndflReferences << buildNdflReference(person.id, person.personId, nomSprCounter, person.lastName, person.firstName, person.middleName, person.birthDay)
+                        xml.ndflReferences << buildNdflReference(person.id, person.personId, nomSprAndCorr.sprNum, person.lastName, person.firstName, person.middleName, person.birthDay, nomSprAndCorr.corrNum)
                     }
                 }
             }
@@ -392,7 +395,6 @@ class Report2Ndfl extends AbstractScriptClass {
 
         Map<String, RefBookDeductionType> deductionTypesByCode = refBookDeductionTypeService.findAllByVersion(reportPeriod.endDate)
                 .collectEntries { [it.code, it] }
-        int nomSprCounter = 0
         String priznak = definePriznak(departmentConfig)
 
         MarkupBuilder builder = new MarkupBuilder(new PlatformLineWriter(writer))
@@ -434,8 +436,9 @@ class Report2Ndfl extends AbstractScriptClass {
                     person.incomes = (List<NdflPersonIncome>) operationsByPersonId[person.id]*.incomes.flatten()
                     person.deductions = (List<NdflPersonDeduction>) operationsByPersonId[person.id]*.deductions.flatten()
                     person.prepayments = (List<NdflPersonPrepayment>) operationsByPersonId[person.id]*.prepayments.flatten()
-                    "НДФЛ-2"(НомСпр: ++nomSprCounter,
-                            НомКорр: sprintf('%02d', declarationData.correctionNum ?: 0)) {
+                    def nomSprAndCorr = getNomSpr(person.id, reportPeriod.taxPeriod.year, declarationData.kpp, declarationData.oktmo, declarationTemplate.type.id)
+                    "НДФЛ-2"(НомСпр: nomSprAndCorr.sprNum,
+                            НомКорр: sprintf('%02d', nomSprAndCorr.corrNum)) {
                         ПолучДох(ИННФЛ: person.innNp,
                                 Статус: person.status,
                                 ДатаРожд: ScriptUtils.formatDate(person.birthDay),
@@ -582,7 +585,7 @@ class Report2Ndfl extends AbstractScriptClass {
                     }
                     if (!refPersonIds.contains(person.personId)) {
                         refPersonIds << person.personId
-                        xml.ndflReferences << buildNdflReference(person.id, person.personId, nomSprCounter, person.lastName, person.firstName, person.middleName, person.birthDay)
+                        xml.ndflReferences << buildNdflReference(person.id, person.personId, nomSprAndCorr.sprNum, person.lastName, person.firstName, person.middleName, person.birthDay, nomSprAndCorr.corrNum)
                     }
                 }
             }
@@ -957,7 +960,7 @@ class Report2Ndfl extends AbstractScriptClass {
     /**
      * Заполнить значение реестра справок
      */
-    RefBookRecord buildNdflReference(Long ndflPersonId, Long personId, Long nomSpr, String lastName, String firstName, String middleName, Date birthDay) {
+    RefBookRecord buildNdflReference(Long ndflPersonId, Long personId, Long nomSpr, String lastName, String firstName, String middleName, Date birthDay, Integer corrNum) {
         Map<String, RefBookValue> row = new HashMap<String, RefBookValue>()
         row.put(NDFL_PERSON_ID, new RefBookValue(RefBookAttributeType.NUMBER, ndflPersonId))
         row.put(NDFL_REFERENCES_PERSON_ID, new RefBookValue(RefBookAttributeType.REFERENCE, personId))
@@ -967,11 +970,29 @@ class Report2Ndfl extends AbstractScriptClass {
         row.put(NDFL_REFERENCES_LASTNAME, new RefBookValue(RefBookAttributeType.STRING, middleName))
         row.put(NDFL_REFERENCES_BIRTHDAY, new RefBookValue(RefBookAttributeType.DATE, birthDay))
         row.put(NDFL_REFERENCES_ERRTEXT, new RefBookValue(RefBookAttributeType.STRING, null))
+        row.put(NDFL_REFERENCES_CORRECTION_NUM, new RefBookValue(RefBookAttributeType.NUMBER, corrNum))
         RefBookRecord record = new RefBookRecord()
         record.setValues(row)
         return record
     }
 
+    NumFor2Ndfl getNomSpr(Long personId, int year, String kpp, String oktmo, int declarationTypeId) {
+        def ndflNum = new NumFor2Ndfl()
+        if (departmentReportPeriod.correctionDate == null) {
+            ndflNum.sprNum = ndflReferenceService.getNextSprNum(year)
+            ndflNum.corrNum = 0
+        } else {
+            List<NumFor2Ndfl> ndflNumList = ndflReferenceService.getCorrSprNum(personId, year, kpp, oktmo, declarationTypeId)
+            if (ndflNumList != null && ndflNumList.size() > 0) {
+                ndflNum.sprNum = ndflNumList.get(0).sprNum
+                ndflNum.corrNum = ndflNumList.corrNum.max() + 1
+            } else {
+                ndflNum.sprNum = ndflReferenceService.getNextSprNum(year)
+                ndflNum.corrNum = 0;
+            }
+        }
+        return ndflNum
+    }
     /**
      * Генерация имени файла
      */

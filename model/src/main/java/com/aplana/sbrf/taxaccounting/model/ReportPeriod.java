@@ -1,9 +1,5 @@
 package com.aplana.sbrf.taxaccounting.model;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
-
 import java.io.Serializable;
 import java.util.Date;
 
@@ -11,10 +7,8 @@ import java.util.Date;
  * Отчётный период.
  * В нормальной ситуации может быть только один активный отчётный период по каждому виду налога
  * исключения возможны в случае использования корректирующих периодов.
+ * @author dsultanbekov
  */
-@Getter
-@Setter
-@ToString
 public class ReportPeriod implements Serializable, SecuredEntity {
 	private static final long serialVersionUID = 1L;
 
@@ -36,8 +30,129 @@ public class ReportPeriod implements Serializable, SecuredEntity {
 	private Date calendarStartDate;
 	/** Ссылка на федеральный справочника для классификации отчетных периодов */
 	private long dictTaxPeriodId;
-	/** Ссылка на вид налоговой формы в отчетном периоде */
-	private Integer reportPeriodTaxFormTypeId;
-
 	private long permissions;
+
+	/**
+	 * Получить идентификатор отчётного периода
+	 */
+	public Integer getId() {
+		return id;
+	}
+	/**
+	 * Задать идентфикатор отчётного периода
+	 */
+	public void setId(Integer id) {
+		this.id = id;
+	}
+	/**
+	 * Получить название периода
+	 * @return
+	 */
+	public String getName() {
+		return name;
+	}
+	/**
+	 * Задать название периода
+	 */
+	public void setName(String name) {
+		this.name = name;
+	}
+
+    /**
+     * Получить порядковый номер отчётного периода в налоговом
+     *
+     * @return порядковый номер отчётного периода в налоговом
+     */
+    public int getOrder() {
+        return order;
+    }
+
+    /**
+     * Задать порядковый номер отчётного периода в налоговом (начиная с 1)
+     * @param order порядковый номер отчётного периода в налоговом
+     */
+    public void setOrder(int order) {
+        this.order = order;
+	}
+
+	public long getDictTaxPeriodId() {
+		return dictTaxPeriodId;
+	}
+
+	public void setDictTaxPeriodId(long dictTaxPeriodId) {
+		this.dictTaxPeriodId = dictTaxPeriodId;
+	}
+
+	public TaxPeriod getTaxPeriod() {
+		return taxPeriod;
+	}
+	public void setTaxPeriod(TaxPeriod taxPeriod) {
+		this.taxPeriod = taxPeriod;
+	}
+
+	/**
+	 * Возвращает начальную дату отчетного периода. Это может быть 1 января, 1 апреля и т.д.
+	 * @return
+	 */
+	public Date getStartDate() {
+		return startDate;
+	}
+
+	public void setStartDate(Date startDate) {
+		this.startDate = startDate;
+	}
+
+	/**
+	 * Возвращает последнюю дату в отчетном периоде. Это может быть 31 марта, 31 декабря и т.д.
+	 * @return
+	 */
+	public Date getEndDate() {
+		return endDate;
+	}
+
+	public void setEndDate(Date endDate) {
+		this.endDate = endDate;
+	}
+
+	public Date getCalendarStartDate() {
+		return calendarStartDate;
+	}
+
+	public void setCalendarStartDate(Date calendarStartDate) {
+		this.calendarStartDate = calendarStartDate;
+	}
+
+    public String getAccName() {
+        return accName;
+    }
+
+    public void setAccName(String accName) {
+        this.accName = accName;
+    }
+
+	@Override
+	public long getPermissions() {
+		return permissions;
+	}
+
+	@Override
+	public void setPermissions(long permissions) {
+		this.permissions = permissions;
+	}
+
+	@Override
+	public String toString() {
+		return "ReportPeriod{" +
+				"id=" + id +
+				", name='" + name + '\'' +
+				", accName='" + accName + '\'' +
+				", order=" + order +
+				", taxPeriod=" + taxPeriod +
+				", startDate=" + startDate +
+				", endDate=" + endDate +
+				", calendarStartDate=" + calendarStartDate +
+				", dictTaxPeriodId=" + dictTaxPeriodId +
+				", permissions=" + permissions +
+				'}';
+	}
 }

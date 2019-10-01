@@ -5,10 +5,10 @@ insert into tax_period (id, tax_type, year) values (2, 'N', 2017);
 INSERT INTO report_period_type (id, code, name, start_date, end_date, calendar_start_date)
 VALUES (21, '21', 'первый квартал', DATE '1970-01-01', DATE '1970-03-31', DATE '1970-01-01');
 
-INSERT INTO REPORT_PERIOD(id, name, tax_period_id, dict_tax_period_id, start_date, end_date, calendar_start_date, form_type_id)
-VALUES (1, 'первый квартал', 1, 21, date '2016-01-01', date '2016-03-31', date '2016-01-01', 5);
-INSERT INTO REPORT_PERIOD(id, name, tax_period_id, dict_tax_period_id, start_date, end_date, calendar_start_date, form_type_id)
-VALUES (2, 'первый квартал', 2, 21, date '2017-01-01', date '2017-03-31', date '2017-01-01', 5);
+INSERT INTO REPORT_PERIOD(id, name, tax_period_id, dict_tax_period_id, start_date, end_date, calendar_start_date)
+VALUES (1, 'первый квартал', 1, 21, date '2016-01-01', date '2016-03-31', date '2016-01-01');
+INSERT INTO REPORT_PERIOD(id, name, tax_period_id, dict_tax_period_id, start_date, end_date, calendar_start_date)
+VALUES (2, 'первый квартал', 2, 21, date '2017-01-01', date '2017-03-31', date '2017-01-01');
 
 INSERT INTO state (id, name) VALUES (1, 'Создана');
 insert into department_report_period(id, department_id, report_period_id, is_active) values (2, 2, 2, 1);

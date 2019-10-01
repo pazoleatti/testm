@@ -66,25 +66,6 @@
                     </div>
                 </td>
             </tr>
-            <tr>
-                <td>
-                    <label class="control-label">{{::'reportPeriod.grid.formType' |
-                        translate}}:</label>
-                </td>
-                <td>
-                    <div data-aplana-field>
-                        <div style="width: 355px;" data-ng-controller="SelectDeclarationTypeCtrl"
-                             data-ui-select2="declarationTypeSelect.options"
-                             data-ng-init="initSelectWithOpenPeriodDeclarationTypes()"
-                             data-ng-model="form.type"
-                             data-required>
-                        </div>
-                        <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
-                            translate}}
-                        </div>
-                    </div>
-                </td>
-            </tr>
             </tbody>
         </table>
 

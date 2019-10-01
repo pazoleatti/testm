@@ -65,6 +65,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.poi.ss.formula.functions.T;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -325,8 +326,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
         Map<String, Object> additionalParameters = new HashMap<>();
 
-        try(InputStream arialStream = DeclarationDataServiceImpl.class.getResourceAsStream("/arial/arial.ttf");
-        InputStream arialBoldStream = DeclarationDataServiceImpl.class.getResourceAsStream("/arial/arialbd.ttf")) {
+        try (InputStream arialStream = DeclarationDataServiceImpl.class.getResourceAsStream("/arial/arial.ttf");
+             InputStream arialBoldStream = DeclarationDataServiceImpl.class.getResourceAsStream("/arial/arialbd.ttf")) {
             params.setArialFont(arialStream);
             params.setArialBoldFont(arialBoldStream);
             additionalParameters.put("createParams", params);
@@ -383,43 +384,41 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     DeclarationData existDeclaration = new DeclarationData();
                     List<Long> takeExistingDeclaratiosId = new ArrayList<>(declarationDataDao.findExistingDeclarationsForCreationCheck(newDeclaration));
                     existDeclaration = declarationDataDao.get(takeExistingDeclaratiosId.get(0));
-                    if ( !RefBookKnfType.BY_KPP.equals(newDeclaration.getKnfType())) {
+                    if (!RefBookKnfType.BY_KPP.equals(newDeclaration.getKnfType())) {
                         message = String.format("В Системе уже существует налоговая форма № \"%s\" с заданными параметрами Период: \"%s\", Подразделение: \"%s\", " +
                                         " Вид налоговой формы: \"%s\", Тип КНФ: \"%s\" . Создание в Системе нескольких КНФ с одинаковыми параметрами невозможно.",
                                 existDeclaration.getId(), departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + ", " + departmentReportPeriod.getReportPeriod().getName() + strCorrPeriod,
                                 department.getName(), declarationTemplate.getDeclarationFormKind().getName(), newDeclaration.getKnfType().getName());
                     } else {
-                        if ( existDeclaration.getReportPeriodId() == newDeclaration.getReportPeriodId() &&
-                                existDeclaration.getDepartmentId() == newDeclaration.getDepartmentId() &&
-                                existDeclaration.getKnfType().equals(newDeclaration.getKnfType()) ) {
+                        if (departmentReportPeriod.getReportPeriod().getId()== newDeclaration.getReportPeriodId() &&
+                                departmentReportPeriod.getDepartmentId() == newDeclaration.getDepartmentId() &&
+                                existDeclaration.getKnfType().equals(newDeclaration.getKnfType())) {
                             HashSet<String> newKppList = new HashSet<>(newDeclaration.getIncludedKpps());
-                            String messageKpp = "";
+                            StringBuilder messageKpp = new StringBuilder();
                             boolean isBelongKpp = false;
-
                             for (Long existId : takeExistingDeclaratiosId) {
                                 existDeclaration = declarationDataDao.get(existId);
                                 List<String> existKppList = new ArrayList<>(declarationService.getDeclarationDataKppList(existId));
                                 for (String existKpp : existKppList) {
                                     if (newKppList.contains(existKpp)) {
                                         if (!isBelongKpp) {
-                                            messageKpp = messageKpp + existKpp;
+                                            messageKpp.append(existKpp);
                                             isBelongKpp = true;
                                         } else {
-                                            messageKpp = messageKpp + "," + existKpp;
-                                        };
-                                    };
+                                            messageKpp.append(",").append(existKpp);
+                                        }
+                                    }
                                 }
                                 if (isBelongKpp) break;
                             }
-
                             if (isBelongKpp) {
                                 message = String.format("В Системе уже существует налоговая форма № \"%s\" с заданными параметрами Период: \"%s\", Подразделение: \"%s\", " +
                                                 " Вид налоговой формы: \"%s\", Тип КНФ: \"%s\" , содержащая операции с КПП:  \"%s\". Создание в Системе нескольких КНФ с одинаковыми параметрами невозможно.",
                                         existDeclaration.getId(), departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + ", " + departmentReportPeriod.getReportPeriod().getName() + strCorrPeriod,
                                         department.getName(), declarationTemplate.getDeclarationFormKind().getName(), newDeclaration.getKnfType().getName(), messageKpp);
-                            };
-                        };
-                    };
+                            }
+                        }
+                    }
                     logger.error(message);
                 }
                 doCreate(newDeclaration, declarationTemplate, logger, userInfo, true);
@@ -815,9 +814,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             result.setCalendarStartDate(departmentReportPeriod.getReportPeriod().getCalendarStartDate());
             result.setEndDate(departmentReportPeriod.getReportPeriod().getEndDate());
             result.setCorrectionDate(departmentReportPeriod.getCorrectionDate());
-
-            ReportPeriod reportPeriod = reportPeriodService.fetchReportPeriod(departmentReportPeriod.getReportPeriod().getId());
-            result.setReportPeriodTaxFormTypeId(reportPeriod.getReportPeriodTaxFormTypeId());
 
             if (declaration.getAsnuId() != null) {
                 RefBookDataProvider asnuProvider = refBookFactory.getDataProvider(RefBook.Id.ASNU.getId());
@@ -2819,7 +2815,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 String period = periodService.createLogPeriodFormatById(idList, LogLevelType.INCOME.getId());
 
                 for (String message : changelogBuilder.build(declarationDataId, incomeBeforeUpdate.getRowNum(), incomeAfterUpdate.getRowNum())) {
-                    logger.infoExpWithPeriod(message,null,null, period,false);
+                    logger.infoExpWithPeriod(message, null, null, period, false);
                 }
                 logBusinessService.logFormEvent(declarationDataId, FormDataEvent.NDFL_EDIT, logger.getLogId(), null, userInfo);
                 sendNotification(changelogBuilder.notificationMessage, logger.getLogId(), userInfo.getUser().getId());
@@ -3054,7 +3050,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 String period = periodService.createLogPeriodFormatById(idList, LogLevelType.DEDUCTION.getId());
 
                 for (String message : changelogBuilder.build(declarationDataId, deductionBeforeUpdate.getRowNum(), deductionAfterUpdate.getRowNum())) {
-                    logger.infoExpWithPeriod(message,null,null, period,false);
+                    logger.infoExpWithPeriod(message, null, null, period, false);
                 }
                 logBusinessService.logFormEvent(declarationDataId, FormDataEvent.NDFL_EDIT, logger.getLogId(), null, userInfo);
             } else {
@@ -3093,7 +3089,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 String period = periodService.createLogPeriodFormatById(idList, LogLevelType.PREPAYMENT.getId());
 
                 for (String message : changelogBuilder.build(declarationDataId, prepaymentBeforeUpdate.getRowNum(), prepaymentAfterUpdate.getRowNum())) {
-                    logger.infoExpWithPeriod(message,null,null, period,false);
+                    logger.infoExpWithPeriod(message, null, null, period, false);
                 }
                 logBusinessService.logFormEvent(declarationDataId, FormDataEvent.NDFL_EDIT, logger.getLogId(), null, userInfo);
             } else {

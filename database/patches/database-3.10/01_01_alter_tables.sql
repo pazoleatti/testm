@@ -20,32 +20,11 @@ EXCEPTION
 END;
 /
 commit;
---3.10-skononova-1
-DECLARE
-	v_run_condition number(1);
-	v_task_name varchar2(128):='alter_tables block #2 - alter table transport_message';  
-BEGIN
-	select count(*) into v_run_condition from user_constraints where 
-		TABLE_NAME='TRANSPORT_MESSAGE' and CONSTRAINT_NAME='TMESS_DECLARATION_ID_FK';
-	IF v_run_condition>=1 THEN
-           	execute immediate 'ALTER TABLE transport_message DROP  CONSTRAINT tmess_declaration_id_fk';
-	END IF;
-	execute immediate ' ALTER TABLE transport_message ADD  CONSTRAINT tmess_declaration_id_fk FOREIGN KEY (declaration_id)
-        	REFERENCES declaration_data (id) ON DELETE CASCADE ENABLE';
-		dbms_output.put_line(v_task_name||'[INFO (transport_message)]:'||' Success');
-
-EXCEPTION
-	when OTHERS then
-		dbms_output.put_line(v_task_name||'[FATAL]:'||sqlerrm);	
-END;
-/
-
-commit;
 --3.10-mchernyakov-03
 
 DECLARE
 	v_run_condition number(1);
-	v_task_name varchar2(128):='alter_tables block #3 - alter table log_entry';  
+	v_task_name varchar2(128):='alter_tables block #2 - alter table log_entry';  
 BEGIN
 	select decode(count(*),0,1,0) into v_run_condition from user_tab_columns where 
 			TABLE_NAME='LOG_ENTRY' and COLUMN_NAME='PERIOD';

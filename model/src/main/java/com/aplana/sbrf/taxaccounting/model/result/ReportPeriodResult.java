@@ -1,16 +1,12 @@
 package com.aplana.sbrf.taxaccounting.model.result;
 
 import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.util.Date;
 
 /**
  * Содержит и переносит данные об отчетном периоде
  */
-@Getter
-@Setter
 public class ReportPeriodResult {
 
     /** Уникальный идентификатор отчетного периода */
@@ -27,8 +23,70 @@ public class ReportPeriodResult {
     private Date calendarStartDate;
     /** Ссылка на федеральный справочника для классификации отчетных периодов */
     private long dictTaxPeriodId;
-    /** Ссылка на вид налоговой формы в отчетном периоде */
-    private Integer reportPeriodTaxFormTypeId;
 
     private Date correctionDate;
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public TaxPeriod getTaxPeriod() {
+        return taxPeriod;
+    }
+
+    public void setTaxPeriod(TaxPeriod taxPeriod) {
+        this.taxPeriod = taxPeriod;
+    }
+
+    public Date getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(Date startDate) {
+        this.startDate = startDate;
+    }
+
+    public Date getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(Date endDate) {
+        this.endDate = endDate;
+    }
+
+    public Date getCalendarStartDate() {
+        return calendarStartDate;
+    }
+
+    public void setCalendarStartDate(Date calendarStartDate) {
+        this.calendarStartDate = calendarStartDate;
+    }
+
+    public long getDictTaxPeriodId() {
+        return dictTaxPeriodId;
+    }
+
+    public void setDictTaxPeriodId(long dictTaxPeriodId) {
+        this.dictTaxPeriodId = dictTaxPeriodId;
+    }
+
+    public Date getCorrectionDate() {
+        return correctionDate;
+    }
+
+    public void setCorrectionDate(Date correctionDate) {
+        this.correctionDate = correctionDate;
+    }
 }
