@@ -43,3 +43,26 @@ END;
 /
 commit;
 /
+
+--3.10-avoynov-2
+DECLARE
+	v_run_condition number(1);
+	v_task_name varchar2(128):='alter_tables block #3 - alter table ndfl_references';  
+BEGIN
+	select decode(count(*),0,1,0) into v_run_condition from user_tab_columns where 
+			TABLE_NAME='NDFL_REFERENCES' and COLUMN_NAME='CORRECTION_NUM';
+	IF v_run_condition=1 THEN
+           	execute immediate 'ALTER TABLE ndfl_references ADD correction_num NUMBER(3)';
+                execute immediate 'COMMENT ON column ndfl_references.correction_num IS ''Номер корректировки''';
+		dbms_output.put_line(v_task_name||'[INFO (period)]:'||' Success');
+	ELSE
+		dbms_output.put_line(v_task_name||'[WARNING (period)]:'||' changes had already been implemented');
+	END IF;
+
+EXCEPTION
+	when OTHERS then
+		dbms_output.put_line(v_task_name||'[FATAL]:'||sqlerrm);	
+END;
+/
+commit;
+/
