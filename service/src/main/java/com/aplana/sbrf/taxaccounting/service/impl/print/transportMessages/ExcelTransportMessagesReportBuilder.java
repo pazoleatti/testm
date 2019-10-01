@@ -169,11 +169,11 @@ public class ExcelTransportMessagesReportBuilder extends AbstractReportBuilder {
             cellUuid.setCellStyle(cs);
             cellUuid.setCellValue(transportMessage.getMessageUuid());
 
-            Cell cellAttachment = row.createCell(cellNumber);
+            Cell cellAttachment = row.createCell(cellNumber++);
             cellAttachment.setCellStyle(cs);
             cellAttachment.setCellValue(transportMessage.getBodyFileName());
 
-            Cell cellFilename = row.createCell(cellNumber++);
+            Cell cellFilename = row.createCell(cellNumber);
             cellFilename.setCellStyle(cs);
             if (transportMessage.getBlob() != null) {
                 cellFilename.setCellValue(transportMessage.getBlob().getName());
