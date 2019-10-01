@@ -1656,7 +1656,7 @@ class Check extends AbstractScriptClass {
                                     String errMsg = String.format("Значение налога исчисленного в гр. 16 (%s р) не совпадает с расчетным (%s р)",
                                             ndflPersonIncome.calculatedTax, ВычисленноеЗначениеНалога
                                     )
-                                    String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""
+                                    String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
                                     def period = reportPeriodService.createLogPeriodFormatById(
                                             Collections.singletonList(ndflPersonIncome.id), LogLevelType.INCOME)
                                     logger.logCheckWithPeriod("%s. %s.",
