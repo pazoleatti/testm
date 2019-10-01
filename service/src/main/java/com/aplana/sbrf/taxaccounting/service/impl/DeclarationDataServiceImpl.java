@@ -391,7 +391,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                                 department.getName(), declarationTemplate.getDeclarationFormKind().getName(), newDeclaration.getKnfType().getName());
                     } else {
                         if (departmentReportPeriod.getId() == newDeclaration.getDepartmentReportPeriodId() &&
-                                departmentReportPeriod.getDepartmentId() == newDeclaration.getDepartmentId() &&
                                 existDeclaration.getKnfType().equals(newDeclaration.getKnfType())) {
                             HashSet<String> newKppList = new HashSet<>(newDeclaration.getIncludedKpps());
                             StringBuilder messageKpp = new StringBuilder();
