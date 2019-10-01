@@ -333,8 +333,8 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 "select dd.id declarationDataId, dkind.name declarationKind, dtype.name declarationType, dep_fullpath.shortname department,\n" +
                         "   asnu.name asnuName, knf_type.name knfTypeName, state.name state, dd.file_name fileName, dd.created_date creationDate, su.name creationUserName,\n" +
                         "   case when drp.correction_date is not null then" +
-                        "       tp.year || ': ' || rp.name || ', корр. (' || to_char(drp.correction_date, 'DD.MM.YYYY') || ')'" +
-                        "       else tp.year || ': ' || rp.name end as reportPeriod,\n" +
+                        "       tp.year || ': ' || rp.name || ', корр. (' || to_char(drp.correction_date, 'DD.MM.YYYY') || ')' || nvl2(rp.form_type_id, ': ' || form_type.code, '')\n" +
+                        "       else tp.year || ': ' || rp.name || nvl2(rp.form_type_id, ': ' || form_type.code, '') end as reportPeriod,\n" +
                         "   dd.kpp, dd.oktmo, dd.tax_organ_code taxOrganCode, doc_state.name docState, dd.note, dd.correction_num\n" +
                         "from DECLARATION_DATA dd\n" +
                         "left join REF_BOOK_ASNU asnu on asnu.id = dd.asnu_id\n" +
@@ -350,6 +350,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                         "inner join DEPARTMENT dep on dep.id = drp.department_id\n" +
                         "inner join DEPARTMENT_FULLPATH dep_fullpath on dep_fullpath.id = dep.id\n" +
                         "left join REF_BOOK_DOC_STATE doc_state on doc_state.id = dd.doc_state_id\n" +
+                        "left join REF_BOOK_FORM_TYPE form_type on FORM_TYPE.id = rp.form_type_id\n" +
                         "where (:declarationDataId is null or dd.id like '%' || :declarationDataId || '%')\n" +
                         "   and (:correctionNum is null or dd.correction_num like '%' || :correctionNum || '%')\n" +
                         "   and (:fileName is null or upper(dd.file_name) like '%' || upper(:fileName) || '%')\n" +

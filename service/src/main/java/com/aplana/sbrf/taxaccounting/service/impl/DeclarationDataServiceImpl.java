@@ -65,7 +65,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.poi.ss.formula.functions.T;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -814,6 +813,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             result.setCalendarStartDate(departmentReportPeriod.getReportPeriod().getCalendarStartDate());
             result.setEndDate(departmentReportPeriod.getReportPeriod().getEndDate());
             result.setCorrectionDate(departmentReportPeriod.getCorrectionDate());
+
+            ReportPeriod reportPeriod = reportPeriodService.fetchReportPeriod(departmentReportPeriod.getReportPeriod().getId());
+            result.setReportPeriodTaxFormTypeId(reportPeriod.getReportPeriodTaxFormTypeId());
 
             if (declaration.getAsnuId() != null) {
                 RefBookDataProvider asnuProvider = refBookFactory.getDataProvider(RefBook.Id.ASNU.getId());

@@ -60,6 +60,7 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
             reportPeriod.setCalendarStartDate(calendarStartDate);
             reportPeriod.setOrder(getReportOrder(calendarStartDate, id));
             reportPeriod.setAccName(FormatUtils.getAccName(reportPeriod.getName(), reportPeriod.getCalendarStartDate()));
+            reportPeriod.setReportPeriodTaxFormTypeId(SqlUtils.getInteger(rs, "form_type_id"));
             return reportPeriod;
         }
 
@@ -108,7 +109,8 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
         try {
             return 0 == id ? null :
                     getJdbcTemplate().queryForObject(
-                            "select rp.id, rp.name, rp.tax_period_id, tp.tax_type, tp.year, rp.start_date, rp.end_date, rp.dict_tax_period_id, rp.calendar_start_date " +
+                            "select rp.id, rp.name, rp.tax_period_id, tp.tax_type, tp.year, rp.start_date, " +
+                                    "rp.end_date, rp.dict_tax_period_id, rp.calendar_start_date, rp.form_type_id " +
                                     "from report_period rp join tax_period tp on rp.tax_period_id = tp.id " +
                                     "where rp.id = ?",
                             new Object[]{id},
@@ -170,7 +172,8 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
     @Override
     public List<ReportPeriod> findAll() {
         return getJdbcTemplate().query(
-                "select rp.id, rp.name, rp.tax_period_id, tp.tax_type, tp.year, rp.start_date, rp.end_date, rp.dict_tax_period_id, rp.calendar_start_date \n" +
+                "select rp.id, rp.name, rp.tax_period_id, tp.tax_type, tp.year, rp.start_date, rp.end_date, " +
+                        "rp.dict_tax_period_id, rp.calendar_start_date, rp.form_type_id \n" +
                         "from report_period rp, tax_period tp \n" +
                         "where rp.tax_period_id = tp.id \n" +
                         "order by tp.year desc, calendar_start_date",
@@ -181,7 +184,9 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
     @Override
     public List<ReportPeriod> findAllFor2NdflFL() {
         return getJdbcTemplate().query(
-                "select rp.id, rp.name, rp.tax_period_id, tp.tax_type, tp.year, rp.start_date, rp.end_date, rp.dict_tax_period_id, rp.calendar_start_date \n" +
+                "select \n" +
+                        "rp.id, rp.name, rp.tax_period_id, tp.tax_type, tp.year, rp.start_date, rp.end_date, \n" +
+                        "rp.dict_tax_period_id, rp.calendar_start_date, rp.form_type_id \n" +
                         "from report_period rp \n" +
                         "join tax_period tp on tp.id = rp.tax_period_id \n" +
                         "join report_period_type rpt on rpt.id = rp.dict_tax_period_id \n" +
@@ -371,7 +376,7 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
     @Override
     public List<ReportPeriodResult> fetchActiveByDepartment(Integer departmentId) {
         String sql = "select rp.id, rp.name, rp.tax_period_id, tp.tax_type, tp.year, rp.start_date, rp.end_date, rp.dict_tax_period_id, " +
-                "rp.calendar_start_date, drp.correction_date from report_period rp " +
+                "rp.calendar_start_date, rp.form_type_id, drp.correction_date from report_period rp " +
                 "left join department_report_period drp on rp.id = drp.report_period_id " +
                 "left join tax_period tp on tp.id = rp.tax_period_id " +
                 "left join report_period_type rpt on rpt.id = rp.dict_tax_period_id " +
@@ -395,6 +400,7 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
                     reportPeriodResult.setEndDate(reportPeriod.getEndDate());
                     reportPeriodResult.setDictTaxPeriodId(reportPeriod.getDictTaxPeriodId());
                     reportPeriodResult.setCalendarStartDate(reportPeriod.getCalendarStartDate());
+                    reportPeriodResult.setReportPeriodTaxFormTypeId(reportPeriod.getReportPeriodTaxFormTypeId());
                     return reportPeriodResult;
                 }
             });

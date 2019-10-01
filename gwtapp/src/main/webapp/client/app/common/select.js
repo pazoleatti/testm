@@ -1337,5 +1337,40 @@
 
                 };
             }
+        ])
+
+        /**
+         * Контроллер для выбора типа КНФ по виду отчетности
+         */
+        .controller('SelectKnfTypeCtrlByReportPeriod', ['$scope', 'APP_CONSTANTS', 'GetSelectOption',
+            function ($scope, APP_CONSTANTS, GetSelectOption) {
+                $scope.result = {};
+
+                /**
+                 * Определение возможных типов КНФ по виду отчетности
+                 *
+                 * @param periodModelPath путь в scope до модели периода
+                 */
+                $scope.init = function(periodModelPath) {
+                    $scope.result = GetSelectOption.getBasicSingleSelectOptions(false);
+                    $scope.result.options.data.results = getKnfTypesByPeriod(periodModelPath);
+
+                    function getKnfTypesByPeriod(periodModelPath) {
+                        var period = _.deep($scope, periodModelPath);
+                        switch(period.periodTaxFormTypeId) {
+                            case APP_CONSTANTS.TAX_FORM_TYPE.REPORT_2_NDFL_1:
+                            case APP_CONSTANTS.TAX_FORM_TYPE.REPORT_6_NDFL:
+                                return [APP_CONSTANTS.KNF_TYPE.ALL, APP_CONSTANTS.KNF_TYPE.BY_KPP];
+                            case APP_CONSTANTS.TAX_FORM_TYPE.REPORT_2_NDFL_2:
+                                return [APP_CONSTANTS.KNF_TYPE.BY_NONHOLDING_TAX];
+                            case APP_CONSTANTS.TAX_FORM_TYPE.APP_2:
+                                return [APP_CONSTANTS.KNF_TYPE.FOR_APP2];
+                            //TODO необходимо для корректной работы без отсутствия датафикса SBRFNDFL-8553
+                            default:
+                                return [APP_CONSTANTS.KNF_TYPE.ALL, APP_CONSTANTS.KNF_TYPE.BY_KPP];
+                        }
+                    }
+                }
+            }
         ]);
 }());
