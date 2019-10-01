@@ -731,6 +731,16 @@ class Report6Ndfl extends AbstractScriptClass {
         // Строки раздела, общие данные по ставкке
         List<GeneralBlockRow> rows = []
 
+        /**
+         * Принадлежит периоду январь 2019
+         */
+        boolean isBelongToJanuary2019Period(Date date) {
+            Date janStart = new LocalDate(2019, 1, 1).toDate()
+            Date janEnd = new LocalDate(2019, 31, 1).toDate()
+            return date != null && (janStart <= date && date <= janEnd)
+        }
+
+
         GeneralBlock(IncomeList incomeList, Section2Block section2Block) {
             Set<Long> personIds = []
             for (def income : incomeList) {
@@ -756,13 +766,27 @@ class Report6Ndfl extends AbstractScriptClass {
                 }
             }
             if (!section2Block.isEmpty()) {
-                incomeWithholdingTotal = incomeWithholdingTotal - (section2Block.СуммаВНкРаспределению - section2Block.negativeWithholding.abs())
+                incomeWithholdingTotal = incomeWithholdingTotal -
+                        (section2Block.СуммаВНкРаспределению - section2Block.negativeWithholding.abs())
+                        - СуммаВНянварь2019(incomeList)
             }
             if (incomeNotHoldingTaxSum > incomeOverholdingTaxSum) {
                 incomeNotHoldingTotal = incomeNotHoldingTaxSum - incomeOverholdingTaxSum
             }
 
             buildRows(incomeList)
+        }
+
+        Closure<Long> СуммаВНянварь2019 = { IncomeList incomeList ->
+            def reportPeriod = Report6Ndfl.this.reportPeriod;
+            def periodCode = Report6Ndfl.this.periodCode;
+            def year = reportPeriod.taxPeriod.year;
+
+            //ОНФ.Период.Год = 2019 И ОНФ.Период.Код = 21
+            year == 2019 && periodCode == "21"
+                    ? 0
+                    : incomeList.findAll { income -> isBelongToJanuary2019Period(income.taxDate) && income.refoundTax }
+                    .collect { income -> income.refoundTax } as Long
         }
 
         void buildRows(IncomeList incomeList) {
