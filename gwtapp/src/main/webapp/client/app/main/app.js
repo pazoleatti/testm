@@ -70,6 +70,7 @@
         "common.button.no": "Нет",
         "common.button.yes": "Да",
         "common.button.upload": "Загрузить файл",
+        "common.button.annul2ndfl": "Аннулирующая 2-НДФЛ",
         "button.create": "Создать",
         "button.check": "Проверить",
         "button.edit.row": "Редактировать одну строку",

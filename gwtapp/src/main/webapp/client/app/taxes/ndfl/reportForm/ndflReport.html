@@ -309,10 +309,10 @@
                             <span data-translate-once="ndflReportJournal.button.sendEdo"></span>
                         </button>
                     </span>
-                    <!-- Аннулирующая 2-НДФЛ -->
+                    <!--  Создать 2-НДФЛ -->
                     <span data-ng-if="isCurrentForm2NDFL_1_OR_2">
                         <button type="button" class="btn btn-default"
-                                data-ng-click="create2NDFL()"
+                                data-ng-click="createReportNdflByPersonReport()"
                                 data-ng-disabled="!user.hasRole(APP_CONSTANTS.USER_ROLE.N_ROLE_CONTROL_UNP, APP_CONSTANTS.USER_ROLE.N_ROLE_CONTROL_NS)">
                             <span data-translate-once="ndflReportJournal.button.create2ndfl"></span>
                         </button>
