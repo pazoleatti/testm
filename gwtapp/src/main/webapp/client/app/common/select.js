@@ -354,6 +354,19 @@
                 };
 
                 /**
+                 * Инициализировать список с видами налоговых форм, доступных при открытии нового периода
+                 */
+                $scope.initSelectWithOpenPeriodDeclarationTypes = function () {
+                    $scope.declarationTypeSelect = GetSelectOption.getBasicSingleSelectOptions(true);
+                    $scope.declarationTypeSelect.options.data.results = [
+                        APP_CONSTANTS.TAX_FORM_TYPE.REPORT_2_NDFL_1,
+                        APP_CONSTANTS.TAX_FORM_TYPE.REPORT_2_NDFL_2,
+                        APP_CONSTANTS.TAX_FORM_TYPE.REPORT_6_NDFL,
+                        APP_CONSTANTS.TAX_FORM_TYPE.APP_2
+                    ];
+                };
+
+                /**
                  * Инициализировать список с видами отчетных форм, которые можно создать
                  * @param knf КНФ, из которой брать пары КПП/ОКТМО
                  * @param departmentModelPath путь в scope до модели подразделения
