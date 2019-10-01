@@ -4,14 +4,14 @@ declare
 begin
 
 	merge into ref_book_form_type dst using
-	(select 7 as id, 'Приложение 2' as code, 'Приложение 2' as name from dual 
+	(select 7 as id, 'РџСЂРёР»РѕР¶РµРЅРёРµ 2' as code, 'РџСЂРёР»РѕР¶РµРЅРёРµ 2' as name from dual 
 	) src
 	on (src.id=dst.id)
 	when not matched then
 		insert (id, code, name)
 		values (src.id, src.code, src.name)
 	when matched then
-		update set dst.name=src.name;
+		update set dst.name=src.name, dst.code=src.code;
 	
 	CASE SQL%ROWCOUNT 
 	WHEN 0 THEN dbms_output.put_line(v_task_name||'[WARNING]:'||' No changes was done');
