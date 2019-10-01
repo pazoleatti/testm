@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.service.impl.print.AbstractReportBuilder;
 import com.aplana.sbrf.taxaccounting.service.impl.print.sourcesAndDestinations.StyleBuilder.CellType;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.FastDateFormat;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
@@ -34,7 +35,7 @@ public class SourcesAndDestinationsReportBuilder extends AbstractReportBuilder {
     private StyleBuilder styleBuilder;
 
     public SourcesAndDestinationsReportBuilder(List<Relation> relationList, long declarationDataId) {
-        super("tmp_источники_и_приемники_", ".xlsx");
+        super("tmp_источники_и_приемники_" + FastDateFormat.getInstance("yyyyMMddHHmmssSSS").format(new Date()), ".xlsx");
         this.relationList = relationList;
 
         workBook = new SXSSFWorkbook();
@@ -85,9 +86,9 @@ public class SourcesAndDestinationsReportBuilder extends AbstractReportBuilder {
         int colIndex = 0;
         createCellValue(colIndex++, number, "startDate", CellType.INTEGER, CellStyle.ALIGN_CENTER);
         createCellValue(colIndex++, relation.getTaxType().getName(), "taxName", CellType.STRING, CellStyle.ALIGN_CENTER);
-        if(relation.isSource()) {
+        if (relation.isSource()) {
             createCellValue(colIndex++, "источник", "sources", CellType.STRING, CellStyle.ALIGN_CENTER);
-        }else {
+        } else {
             createCellValue(colIndex++, "приемник", "destinations", CellType.STRING, CellStyle.ALIGN_CENTER);
         }
         createCellValue(colIndex++, relation.getDeclarationDataId(), "declarationDataId", CellType.STRING, CellStyle.ALIGN_CENTER);
@@ -98,22 +99,6 @@ public class SourcesAndDestinationsReportBuilder extends AbstractReportBuilder {
         createCellValue(colIndex++, relation.getYear(), "year", CellType.STRING, CellStyle.ALIGN_CENTER);
         createCellValue(colIndex++, relation.getFormTypeCode(), "typeReport", CellType.STRING, CellStyle.ALIGN_LEFT);
         createCellValue(colIndex++, relation.getDeclarationState().getTitle(), "statusForm", CellType.STRING, CellStyle.ALIGN_LEFT);
-    }
-
-    private String toString(RefBookOktmo oktmo) {
-        return oktmo != null ? oktmo.getCode() : null;
-    }
-
-    private String toString(RefBookPresentPlace presentPlace) {
-        return presentPlace != null ? presentPlace.getCode() : null;
-    }
-
-    private Number toNumber(RefBookSignatoryMark signatoryMark) {
-        return signatoryMark != null ? signatoryMark.getCode() : null;
-    }
-
-    private String toString(RefBookReorganization reorganization) {
-        return reorganization != null ? reorganization.getCode() : null;
     }
 
     private Cell createCellValue(int colIndex, Object value, String propName, CellType cellType, short align) {
