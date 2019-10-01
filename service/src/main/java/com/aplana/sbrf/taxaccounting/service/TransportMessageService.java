@@ -2,10 +2,13 @@ package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.messaging.TransportMessage;
 import com.aplana.sbrf.taxaccounting.model.messaging.TransportMessageFilter;
 
 import javax.annotation.Nullable;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Сервис для работы с Транспортными сообщениями, предназначенными для обмена между подсистемами АС Учет Налогов.
@@ -79,4 +82,16 @@ public interface TransportMessageService {
      * @param transportMessage ТС, для которого отправляется сообщение в ЖА
      */
     void sendAuditMessage(String noteFormat, TransportMessage transportMessage);
+
+    /**
+     * Запускает ассинхронную задачу на выгрузку транспортных сообщений в Excel
+     *
+     *
+     * @param headerDescription
+     * @param filter   фильтр, по которому выбираются формы
+     * @param userInfo пользователь запустивший операцию
+     * @return результат запуска задачи
+     */
+    InputStream export(String headerDescription, TransportMessageFilter filter, TAUserInfo userInfo) throws IOException;
+
 }

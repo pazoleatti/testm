@@ -1,17 +1,13 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.TransportMessageDao;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.TARole;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.messaging.TransportMessage;
 import com.aplana.sbrf.taxaccounting.model.messaging.TransportMessageFilter;
 import com.aplana.sbrf.taxaccounting.permissions.PermissionUtils;
-import com.aplana.sbrf.taxaccounting.service.AuditService;
-import com.aplana.sbrf.taxaccounting.service.DepartmentService;
-import com.aplana.sbrf.taxaccounting.service.TAUserService;
-import com.aplana.sbrf.taxaccounting.service.TransportMessageService;
+import com.aplana.sbrf.taxaccounting.service.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,9 +18,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.*;
 
 @Service
 public class TransportMessageServiceImpl implements TransportMessageService {
@@ -39,6 +35,9 @@ public class TransportMessageServiceImpl implements TransportMessageService {
     protected TAUserService userService;
     @Autowired
     protected DepartmentService departmentService;
+    @Autowired
+    private PrintingService printingService;
+
 
     @Override
     public TransportMessage findById(Long id) {
@@ -118,4 +117,44 @@ public class TransportMessageServiceImpl implements TransportMessageService {
                 transportMessage.getState().getText());
         auditService.add(null, userService.getSystemUserInfo(), note);
     }
+
+    private boolean checkExportAccess(TAUserInfo userInfo) {
+        TAUser user = userInfo.getUser();
+        if (user.hasRole(TARole.N_ROLE_CONTROL_NS) || user.hasRole(TARole.N_ROLE_CONTROL_UNP)) {
+            return true;
+        }
+        throw new AccessDeniedException("Нет прав на выгрузку транспортных сообщений");
+    }
+
+    @Override
+    public InputStream export(String headerDescription, TransportMessageFilter filter, TAUserInfo userInfo) throws IOException {
+        checkExportAccess(userInfo);
+
+        List<Long> transportMessageIds = getTransportMessageIds(filter);
+
+        List<TransportMessage> transportMessages =
+                CollectionUtils.isEmpty(transportMessageIds)
+                        ? transportMessageDao.findByFilter(filter, null)
+                        : transportMessageDao.findByIds(transportMessageIds);
+
+        InputStream inputStream = null;
+        try {
+            inputStream = buildExcelStream(transportMessages, headerDescription);
+        } catch (Exception e) {
+            throw new ServiceException("Ошибка формирования Excel-файла списка транспортных сообщений", e);
+        }
+        if (inputStream == null)
+            throw new ServiceException("Нет данных для формирования Excel-файла транспортных сообщений");
+        return inputStream;
+    }
+
+    private List<Long> getTransportMessageIds(TransportMessageFilter filter) {
+        return filter != null ? filter.getIds() : null;
+    }
+
+
+    private InputStream buildExcelStream(List<TransportMessage> transportMessages, String headerDescription) throws IOException {
+        return printingService.generateExcelTransportMessages(transportMessages, headerDescription);
+    }
+
 }

@@ -3,8 +3,11 @@ package com.aplana.sbrf.taxaccounting.service;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
+import com.aplana.sbrf.taxaccounting.model.messaging.TransportMessage;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -115,4 +118,14 @@ public interface PrintingService {
      * @return uuid на блоб файла
      */
     String generateExcelUnloadList(long declarationDataId, boolean sources, boolean destinations, TAUser user);
+
+
+    /**
+     * Формирует Excel со списком собщений "Обмена с ФП АС Учет Налогов"
+     *
+     * @return streamOutput, который необходимо после закрыть в вызывающем коде с помошью Stream.close()
+     * @param transportMessages Список транспортных сообщений для формирования отчета
+     * @param headerDescription
+     */
+    InputStream generateExcelTransportMessages(List<TransportMessage> transportMessages, String headerDescription) throws IOException;
 }
