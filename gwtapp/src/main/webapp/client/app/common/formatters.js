@@ -741,6 +741,16 @@
                 }
             };
         }])
+
+        /**
+         * @description Формат вида отчетности
+         */
+        .filter('taxFormTypeFormatter', ['$filter', 'APP_CONSTANTS', function($filter, APP_CONSTANTS) {
+            return function (taxFormTypeId) {
+                var formType = getReportPeriodTaxFormTypeNameFromId(APP_CONSTANTS, taxFormTypeId);
+                return formType ? formType : "";
+            };
+        }])
     ;
 
     function getReportPeriodTaxFormTypeNameFromId(APP_CONSTANTS, taxFormTypeId) {

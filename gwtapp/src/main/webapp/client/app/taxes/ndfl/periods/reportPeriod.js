@@ -103,9 +103,10 @@
                                 formatter: $filter('activeStatusPeriodFormatter')
                             },
                             {
-                                name: 'formType',
-                                index: 'formType',
-                                width: 140
+                                name: 'taxFormTypeId',
+                                index: 'taxFormTypeId',
+                                width: 140,
+                                formatter: $filter('taxFormTypeFormatter')
                             },
                             {
                                 name: 'correctionDate',
