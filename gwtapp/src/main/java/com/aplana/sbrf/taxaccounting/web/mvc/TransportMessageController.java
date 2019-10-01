@@ -165,7 +165,7 @@ public class TransportMessageController {
 
         String fileName = "Список транспортных сообщений " +
                 FastDateFormat.getInstance("yyyy-MM-dd_HH-mm-ss").format(generationExcelDate) +
-                ".xls";
+                ".xlsx";
         //ResponseUtils.createBlobHeaders(req, resp, fileName);
 
         String fileNameAttr = "filename=\"" + URLEncoder.encode(fileName, "UTF-8")

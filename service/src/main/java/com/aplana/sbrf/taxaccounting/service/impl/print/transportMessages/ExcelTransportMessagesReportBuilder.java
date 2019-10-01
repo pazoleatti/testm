@@ -4,16 +4,13 @@ import com.aplana.sbrf.taxaccounting.model.messaging.TransportMessage;
 import com.aplana.sbrf.taxaccounting.model.messaging.TransportMessageContentType;
 import com.aplana.sbrf.taxaccounting.service.impl.print.AbstractReportBuilder;
 import org.apache.commons.lang3.time.FastDateFormat;
+import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.xssf.streaming.SXSSFWorkbook;
-import org.apache.poi.xssf.usermodel.XSSFCellStyle;
-import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import java.awt.*;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -48,7 +45,6 @@ public class ExcelTransportMessagesReportBuilder extends AbstractReportBuilder {
     private static final String SHEET_NAME = "Транспортные сообщения";
     private static final String FONT_NAME = "Calibri";
     private static final int FONT_11_SIZE = 11;
-    private static final Color GRAY_COLOR = new Color(191, 191, 191, 255);
     private static final FastDateFormat DATE_FORMATTER = FastDateFormat.getInstance("dd.MM.yyyy HH:mm");
 
     private final List<TransportMessage> transportMessages;
@@ -57,6 +53,7 @@ public class ExcelTransportMessagesReportBuilder extends AbstractReportBuilder {
     private int rowTableHeadersNumber = 3;
 
     public ExcelTransportMessagesReportBuilder(List<TransportMessage> transportMessages, String headerDescription) {
+        super();
         this.transportMessages = transportMessages;
         this.headerDescription = headerDescription;
 
@@ -261,14 +258,14 @@ public class ExcelTransportMessagesReportBuilder extends AbstractReportBuilder {
      * @return
      */
     private CellStyle createTableHeadersCellStyle() {
-        XSSFCellStyle cs = (XSSFCellStyle) workBook.createCellStyle();
+        CellStyle cs = workBook.createCellStyle();
         cs.setFont(createTableHeadersFont());
         cs.setAlignment(CellStyle.ALIGN_CENTER);
         cs.setBorderBottom(CellStyle.BORDER_THIN);
         cs.setBorderTop(CellStyle.BORDER_THIN);
         cs.setBorderRight(CellStyle.BORDER_THIN);
         cs.setBorderLeft(CellStyle.BORDER_THIN);
-        cs.setFillBackgroundColor(new XSSFColor(GRAY_COLOR));
+        cs.setFillForegroundColor(HSSFColor.GREY_25_PERCENT.index);
         cs.setFillPattern(CellStyle.SOLID_FOREGROUND);
         cs.setWrapText(false);
         return cs;
@@ -290,7 +287,7 @@ public class ExcelTransportMessagesReportBuilder extends AbstractReportBuilder {
      * @return
      */
     private CellStyle createDataForTableCellStyle() {
-        XSSFCellStyle cs = (XSSFCellStyle) workBook.createCellStyle();
+        CellStyle cs = workBook.createCellStyle();
         cs.setFont(createDataForTableFont());
         cs.setAlignment(CellStyle.ALIGN_LEFT);
         cs.setBorderBottom(CellStyle.BORDER_THIN);
@@ -321,7 +318,7 @@ public class ExcelTransportMessagesReportBuilder extends AbstractReportBuilder {
 
         //Заполнение заголовка
         fillHeader();
-        //Заполнение запки таблицы
+        //Заполнение шапки таблицы
         createTableHeaders();
         //Заполнение таблицы
         createDataForTable();
