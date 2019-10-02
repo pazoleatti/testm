@@ -7,7 +7,10 @@
                         <button id="download-excel-button" type="button" class="btn btn-default"
                                 data-bs-dropdown
                                 data-placement="bottom-right"
-                                data-ng-disabled="!user.hasRole(APP_CONSTANTS.USER_ROLE.N_ROLE_CONTROL_UNP, APP_CONSTANTS.USER_ROLE.N_ROLE_CONTROL_NS)">
+                                data-ng-disabled="!user.hasRole(
+                                APP_CONSTANTS.USER_ROLE.N_ROLE_CONTROL_UNP,
+                                APP_CONSTANTS.USER_ROLE.N_ROLE_CONTROL_NS,
+                                APP_CONSTANTS.USER_ROLE.ROLE_ADMIN)">
                             <span>Выгрузить в Excel</span>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-block" role="menu"
