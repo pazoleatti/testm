@@ -4,8 +4,9 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
 
-    <!-- https://jira.aplana.com/browse/SBRFNDFL-8645 Реализовать при удалении ОНФ удаление связанных ТС -->
-    <changeSet id="3.10-skononova-1" author="skononova">
+    <!--https://jira.aplana.com/browse/SBRFNDFL-8553 Заполнение поля Вид отчетности у существующих периодов, 
+	https://jira.aplana.com/browse/SBRFNDFL-8702 Изменить ограничение в БД REPORT_PERIOD_UNIQ_TAX_DICT-->
+    <changeSet id="3.10.1-skononova-1" author="skononova">
         <sql>
 	ALTER TABLE report_period DROP  CONSTRAINT report_period_uniq_tax_dict DROP INDEX;
  	
