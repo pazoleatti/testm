@@ -5,10 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.messaging.TransportMessageContentType
 import com.aplana.sbrf.taxaccounting.service.impl.print.AbstractReportBuilder;
 import org.apache.commons.lang3.time.FastDateFormat;
 import org.apache.poi.hssf.util.HSSFColor;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.Font;
-import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.ByteArrayInputStream;
@@ -214,6 +211,15 @@ public class ExcelTransportMessagesReportBuilder extends AbstractReportBuilder {
     }
 
     /**
+     * Создание текстового формата ячеек книги
+     * @return
+     */
+    private short getTextFormat() {
+        DataFormat textFormat = workBook.createDataFormat();
+        return textFormat.getFormat("text");
+    }
+
+    /**
      * Создание шрифта для заголовка отчета
      * @return
      */
@@ -237,6 +243,7 @@ public class ExcelTransportMessagesReportBuilder extends AbstractReportBuilder {
         cs.setBorderTop(CellStyle.BORDER_NONE);
         cs.setBorderRight(CellStyle.BORDER_NONE);
         cs.setBorderLeft(CellStyle.BORDER_NONE);
+        cs.setDataFormat(getTextFormat());
         cs.setWrapText(false);
         return cs;
     }
@@ -267,6 +274,7 @@ public class ExcelTransportMessagesReportBuilder extends AbstractReportBuilder {
         cs.setBorderLeft(CellStyle.BORDER_THIN);
         cs.setFillForegroundColor(HSSFColor.GREY_25_PERCENT.index);
         cs.setFillPattern(CellStyle.SOLID_FOREGROUND);
+        cs.setDataFormat(getTextFormat());
         cs.setWrapText(false);
         return cs;
     }
@@ -295,9 +303,12 @@ public class ExcelTransportMessagesReportBuilder extends AbstractReportBuilder {
         cs.setBorderRight(CellStyle.BORDER_THIN);
         cs.setBorderLeft(CellStyle.BORDER_THIN);
         cs.setFillPattern(CellStyle.NO_FILL);
+        cs.setDataFormat(getTextFormat());
         cs.setWrapText(false);
         return cs;
     }
+
+
 
     @Override
     protected void cellAlignment() {
