@@ -122,8 +122,8 @@ public class ExcelTransportMessagesReportBuilder extends AbstractReportBuilder {
             Cell cellUser = row.createCell(cellNumber++);
             cellUser.setCellStyle(cs);
             if (transportMessage.getInitiatorUser() != null) {
-                cellUser.setCellValue(transportMessage.getInitiatorUser().getName() + " " +
-                        transportMessage.getInitiatorUser().getLogin());
+                cellUser.setCellValue(transportMessage.getInitiatorUser().getName() + " (" +
+                        transportMessage.getInitiatorUser().getLogin()+")");
             }
 
             Cell cellStatus = row.createCell(cellNumber++);
