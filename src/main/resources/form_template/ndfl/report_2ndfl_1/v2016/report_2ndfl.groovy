@@ -1184,13 +1184,13 @@ class Report2Ndfl extends AbstractScriptClass {
         if (ДокументOld.@КодНО != ДокументNew.@КодНО) {
             return true
         }
-        if (nodesHasDifference(ДокументOld.СвНП?.first(), ДокументNew.СвНП?.first())) {
+        if (nodesHasDifference(ДокументOld.СвНА?.first(), ДокументNew.СвНА?.first())) {
             return true
         }
         if (nodesHasDifference(ДокументOld.Подписант?.first(), ДокументNew.Подписант?.first())) {
             return true
         }
-        if (nodesHasDifference(ДокументOld.НДФЛ-2?.first(), ДокументNew.НДФЛ-2?.first())) {
+        if (nodesHasDifference(ДокументOld."НДФЛ-2"?.first(), ДокументNew."НДФЛ-2"?.first())) {
             return true
         }
         return false
