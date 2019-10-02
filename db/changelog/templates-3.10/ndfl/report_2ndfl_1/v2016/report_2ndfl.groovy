@@ -30,6 +30,7 @@ import groovy.transform.TypeChecked
 import groovy.transform.TypeCheckingMode
 import groovy.xml.MarkupBuilder
 import groovy.xml.XmlUtil
+import org.apache.commons.io.FileUtils
 import org.apache.commons.io.IOUtils
 import org.apache.commons.lang3.StringUtils
 import org.apache.pdfbox.cos.COSDictionary
@@ -1074,7 +1075,15 @@ class Report2Ndfl extends AbstractScriptClass {
                 def kppOktmoOperations = operationsByKppOktmoPair[new KppOktmoPair(departmentConfig.kpp, departmentConfig.oktmo.code)] ?: new ArrayList<Operation>()
                 xml = buildXml(departmentConfig, kppOktmoOperations)
                 if (xml) {
-                    def formsToDelete = existingDeclarations
+                    if (existingDeclarations) {
+                        if (!hasDifference(xml, existingDeclarations.first())) {
+                            // Удалять не требуется
+                            continue
+                        }
+                    }
+                    def formsToDelete = existingDeclarations.findAll {
+                        it.docStateId == RefBookDocState.NOT_SENT.id && departmentReportPeriodService.get(it.departmentReportPeriodId).isActive()
+                    }
                     if (deleteForms(formsToDelete)) {
                         declarationData.fileName = xml.fileName
                         if (!create(declarationData)) {
@@ -1156,6 +1165,39 @@ class Report2Ndfl extends AbstractScriptClass {
                     "Отсутствуют пары КПП/ОКТМО, присутствующие одновременно в справочнике \"Настройки подразделений\" (актуальные на текущий момент, либо бывшие актуальными в отчетном периоде) и в КНФ.")
         }
         return departmentConfigs
+    }
+
+    @TypeChecked(value = TypeCheckingMode.SKIP)
+    boolean hasDifference(Xml xml, DeclarationData declarationData) {
+        def xmlOld = declarationService.getXmlData(declarationData.id, userInfo)
+        if (!xmlOld || !xml) {
+            return true
+        }
+        def xmlNew = FileUtils.readFileToString(xml.xmlFile, "windows-1251")
+        def ФайлOld = new XmlParser().parseText(xmlOld)
+        def ФайлNew = new XmlParser().parseText(xmlNew)
+        if (ФайлOld.@ВерсФорм != ФайлNew.@ВерсФорм) {
+            return true
+        }
+        def ДокументOld = ФайлOld.Документ
+        def ДокументNew = ФайлNew.Документ
+        if (ДокументOld.@КодНО != ДокументNew.@КодНО) {
+            return true
+        }
+        if (nodesHasDifference(ДокументOld.СвНП?.first(), ДокументNew.СвНП?.first())) {
+            return true
+        }
+        if (nodesHasDifference(ДокументOld.Подписант?.first(), ДокументNew.Подписант?.first())) {
+            return true
+        }
+        if (nodesHasDifference(ДокументOld.НДФЛ-2?.first(), ДокументNew.НДФЛ-2?.first())) {
+            return true
+        }
+        return false
+    }
+
+    boolean nodesHasDifference(Node a, Node b) {
+        return a.toString() != b.toString()
     }
 
     boolean deleteForms(List<DeclarationData> formsToDelete) {
