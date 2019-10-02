@@ -370,7 +370,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 if (logger.containsLevel(LogLevel.ERROR)) {
                     throw new ServiceLoggerException(("Налоговая форма не создана"), logEntryService.save(logger.getEntries()));
                 }
-
+                boolean isBelongKpp = false;
                 if (declarationTemplate.getDeclarationFormKind().getId() == DeclarationFormKind.CONSOLIDATED.getId() &&
                         newDeclaration.isManuallyCreated() && declarationDataDao.existDeclarationData(newDeclaration)) {
                     String strCorrPeriod = "";
@@ -394,7 +394,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                                 existDeclaration.getKnfType().equals(newDeclaration.getKnfType())) {
                             HashSet<String> newKppList = new HashSet<>(newDeclaration.getIncludedKpps());
                             StringBuilder messageKpp = new StringBuilder();
-                            boolean isBelongKpp = false;
                             for (Long existId : takeExistingDeclaratiosId) {
                                 existDeclaration = declarationDataDao.get(existId);
                                 List<String> existKppList = new ArrayList<>(declarationService.getDeclarationDataKppList(existId));
@@ -418,7 +417,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                             }
                         }
                     }
-                    logger.error(message);
+                    if (isBelongKpp) logger.error(message);
                 }
                 doCreate(newDeclaration, declarationTemplate, logger, userInfo, true);
             } finally {
