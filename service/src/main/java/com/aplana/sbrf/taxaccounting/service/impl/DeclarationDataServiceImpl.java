@@ -369,7 +369,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 if (logger.containsLevel(LogLevel.ERROR)) {
                     throw new ServiceLoggerException(("Налоговая форма не создана"), logEntryService.save(logger.getEntries()));
                 }
-
+                boolean isBelongKpp = false;
                 if (declarationTemplate.getDeclarationFormKind().getId() == DeclarationFormKind.CONSOLIDATED.getId() &&
                         newDeclaration.isManuallyCreated() && declarationDataDao.existDeclarationData(newDeclaration)) {
                     String strCorrPeriod = "";
@@ -389,12 +389,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                                 existDeclaration.getId(), departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + ", " + departmentReportPeriod.getReportPeriod().getName() + strCorrPeriod,
                                 department.getName(), declarationTemplate.getDeclarationFormKind().getName(), newDeclaration.getKnfType().getName());
                     } else {
-                        if (departmentReportPeriod.getReportPeriod().getId()== newDeclaration.getReportPeriodId() &&
-                                departmentReportPeriod.getDepartmentId() == newDeclaration.getDepartmentId() &&
+                        if (departmentReportPeriod.getId() == newDeclaration.getDepartmentReportPeriodId() &&
                                 existDeclaration.getKnfType().equals(newDeclaration.getKnfType())) {
                             HashSet<String> newKppList = new HashSet<>(newDeclaration.getIncludedKpps());
                             StringBuilder messageKpp = new StringBuilder();
-                            boolean isBelongKpp = false;
                             for (Long existId : takeExistingDeclaratiosId) {
                                 existDeclaration = declarationDataDao.get(existId);
                                 List<String> existKppList = new ArrayList<>(declarationService.getDeclarationDataKppList(existId));
@@ -418,7 +416,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                             }
                         }
                     }
-                    logger.error(message);
+                    if (isBelongKpp) logger.error(message);
                 }
                 doCreate(newDeclaration, declarationTemplate, logger, userInfo, true);
             } finally {

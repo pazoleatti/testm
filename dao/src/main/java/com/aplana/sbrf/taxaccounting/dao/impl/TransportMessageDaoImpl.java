@@ -20,6 +20,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 
@@ -82,12 +83,9 @@ public class TransportMessageDaoImpl extends AbstractDao implements TransportMes
         return getNamedParameterJdbcTemplate().queryForObject(sql, params, Integer.class);
     }
 
-    @Override
-    public PagingResult<TransportMessage> findByFilter(TransportMessageFilter filter, PagingParams pagingParams) {
 
+    private String prepareQueryByFilter(final TransportMessageFilter filter, final MapSqlParameterSource params) {
         List<String> conditions = new ArrayList<>();
-        MapSqlParameterSource params = new MapSqlParameterSource();
-
         if (filter != null) {
             if (StringUtils.isNotEmpty(filter.getId())) {
                 conditions.add(" (tm.id like :id) ");
@@ -150,20 +148,29 @@ public class TransportMessageDaoImpl extends AbstractDao implements TransportMes
             }
         }
 
-        String sql;
+        StringBuilder queryBuilder = new StringBuilder(SELECT_TRANSPORT_MESSAGE);
         if (conditions.size() > 0) {
-            sql = SELECT_TRANSPORT_MESSAGE + " where \n" + StringUtils.join(conditions, " \n and ");
-        } else {
-            sql = SELECT_TRANSPORT_MESSAGE;
+            queryBuilder
+                    .append(" where \n")
+                    .append(StringUtils.join(conditions, " \n and "));
         }
+        return queryBuilder.toString();
+    }
 
+    @Override
+    public PagingResult<TransportMessage> findByFilter(TransportMessageFilter filter, PagingParams pagingParams) {
+
+        MapSqlParameterSource params = new MapSqlParameterSource();
+
+        String sql = prepareQueryByFilter(filter, params);
         String countSql = "select count(*) from (" + sql + ")";
 
         if (pagingParams != null) {
             sql = pagingParams.wrapQuery(sql, params);
         }
 
-        List<TransportMessage> messages = getNamedParameterJdbcTemplate().query(sql, params, new TransportMessageMapper());
+        List<TransportMessage> messages = getNamedParameterJdbcTemplate()
+                .query(sql, params, new TransportMessageMapper());
         int totalCount = getNamedParameterJdbcTemplate().queryForObject(countSql, params, Integer.class);
 
         return new PagingResult<>(messages, totalCount);
@@ -232,7 +239,48 @@ public class TransportMessageDaoImpl extends AbstractDao implements TransportMes
     }
 
 
-    private static final class TransportMessageMapper implements RowMapper<TransportMessage> {
+    @Override
+    public List<Long> findIdsByFilter(TransportMessageFilter filter) {
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        String sql = prepareQueryByFilter(filter, params);
+        String idsSql = "select id from (" + sql + ")";
+
+        List<Long> ids = getNamedParameterJdbcTemplate().query(idsSql, params, new RowMapper<Long>() {
+            @Override
+            public Long mapRow(ResultSet resultSet, int i) throws SQLException {
+                return resultSet.getLong(0);
+            }
+        });
+        return ids;
+    }
+
+    /**
+     * Получить список всех транспортных сообщений
+     *
+     * @param ids
+     * @return
+     */
+    @Override
+    public List<TransportMessage> findByIds(List<Long> ids) {
+
+        if(CollectionUtils.isEmpty(ids))
+            return Collections.emptyList();
+
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        StringBuilder sqlBuilder = new StringBuilder(SELECT_TRANSPORT_MESSAGE);
+        if (CollectionUtils.isNotEmpty(ids)) {
+            params.addValue("ids", ids);
+            sqlBuilder.append(" where \n")
+                    .append(" (tm.id in (:ids)) ");
+        }
+
+        List<TransportMessage> messages = this.getNamedParameterJdbcTemplate()
+                .query(sqlBuilder.toString(), params, new TransportMessageMapper());
+        return messages;
+    }
+
+
+    private final static class TransportMessageMapper implements RowMapper<TransportMessage> {
         @Override
         public TransportMessage mapRow(ResultSet rs, int i) throws SQLException {
 

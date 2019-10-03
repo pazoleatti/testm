@@ -955,7 +955,7 @@ public class DeclarationDataController {
      * @return Результат запуска задачи
      */
     @PostMapping(value = "/actions/declarationData/{declarationDataId}/unloadListInXlsx")
-    public String createUnloadListInExcel(@PathVariable("declarationDataId") long declarationDataId, @RequestParam boolean sources, @RequestParam boolean destinations ) {
+    public String createExportSourcesAndDestinations(@PathVariable("declarationDataId") long declarationDataId, @RequestParam boolean sources, @RequestParam boolean destinations ) {
         TAUserInfo userInfo = securityService.currentUserInfo();
         return declarationService.createTaskToCreateUnloadListInXlsx(userInfo, declarationDataId, sources, destinations);
     }

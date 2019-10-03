@@ -24,4 +24,6 @@ public class TransportMessageFilter {
     private String fileName;
     private Date dateFrom;
     private Date dateTo;
+    private List<Long> ids;
+
 }

@@ -77,12 +77,12 @@
 			to_char(tax_year.year);
 		    if (cnt =0) then
 		        execute immediate 'CREATE SEQUENCE SEQ_NDFL_REFERENCES_'||to_char(tax_year.year)||
-					    ' MINVALUE 1 MAXVALUE 9999999999999999999999999999 
-		                            INCREMENT BY 1 START WITH 1 CACHE 20 NOORDER  NOCYCLE';    
+					    ' MINVALUE 1 MAXVALUE 9999999999999999999999999999
+		                            INCREMENT BY 1 START WITH 1 CACHE 20 NOORDER  NOCYCLE';
 		    end if;
 		end loop;
 	end;
-	
+
         </sql>
     </changeSet>
 
@@ -105,7 +105,7 @@
 	                                               AND npdc.asnu_id = npdp.asnu_id
 	                                               AND npdc.type_code = npdp.type_code
 	                                               AND npdc.period_curr_summ = npdp.period_curr_summ
-						       AND npdc.period_curr_date = npdp.period_curr_date     
+						       AND npdc.period_curr_date = npdp.period_curr_date
 	        WHERE
 	            npd.id = npdc.id
 	    )
@@ -138,7 +138,7 @@
 		            JOIN ndfl_person_prepayment   nppp ON nppp.ndfl_person_id = npip.ndfl_person_id
 	        	                                       AND nppc.operation_id = nppp.operation_id
 	                	                               AND nppc.asnu_id = nppp.asnu_id
-	                        	                       
+
                                         	           AND nppc.NOTIF_NUM = nppp.NOTIF_NUM
 	                                        	       AND nppc.summ = nppp.summ
 	                                                   AND nppc.NOTIF_SOURCE = nppp.NOTIF_SOURCE
@@ -194,5 +194,13 @@
             values(9650, 964, 'Номер корректировки', 'CORRECTION_NUM', 2, 10, 0, 5, 1, 0, 3);
         </sql>
     </changeSet>
+
+	<!-- https://jira.aplana.com/browse/SBRFNDFL-8670 Реализовать корректировку алгоритма учета ВН в разделе 2 6-НДФЛ -->
+	<changeSet id="3.10-smolokovskikh-1" author="smolokovskikh" runAlways="true">
+		<update tableName="DECLARATION_TEMPLATE">
+			<column name="CREATE_SCRIPT" valueClobFile="templates-3.10/ndfl/report_6ndfl/v2016/report_6ndfl.groovy"/>
+			<where>declaration_type_id = 103</where>
+		</update>
+	</changeSet>
 
 </databaseChangeLog>

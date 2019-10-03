@@ -59,7 +59,6 @@
                 N_ROLE_CONTROL_NS: "N_ROLE_CONTROL_NS",
                 N_ROLE_EDITOR_FL: "N_ROLE_EDITOR_FL",
                 N_ROLE_CONF: "N_ROLE_CONF",
-                N_ROLE_ADMIN: "N_ROLE_ADMIN",
                 ROLE_ADMIN: "ROLE_ADMIN"
             },
             REFBOOK: {

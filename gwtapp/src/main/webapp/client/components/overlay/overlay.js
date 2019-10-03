@@ -143,6 +143,30 @@
                         },
 
                         showAlertByStatus: function (status, addMessage) {
+                            /**
+                             * Извлекает String сообщения из Blob-объекта
+                             * Если тип объекта Blob, иначе просто возвращается переданный объект
+                             * @param data Данные, которые поверяются на Blob
+                             * @return {string|*} возвращает текст из Blob-объекта
+                             */
+                            function unwrapBlobData(data) {
+                                function blobToString(b) {
+                                    var u, x;
+                                    u = URL.createObjectURL(b);
+                                    x = new XMLHttpRequest();
+                                    x.open('GET', u, false);
+                                    x.send();
+                                    URL.revokeObjectURL(u);
+                                    return x.responseText;
+                                }
+
+                                if (data instanceof Blob) {
+                                    return blobToString(data);
+                                }
+                                return data;
+                            }
+
+                            addMessage = unwrapBlobData(addMessage);
                             if (!status) {
                                 status = "unknown";
                             }

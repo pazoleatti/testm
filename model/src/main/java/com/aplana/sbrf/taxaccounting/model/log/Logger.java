@@ -121,9 +121,9 @@ public class Logger implements Serializable {
 
     public void logCheckWithPeriod(String message, boolean fatal, String type, String object, String period, Object... args) {
         if (fatal) {
-            errorExp(message, type, object, period, args);
+            errorExpWithPeriod(message, type, object, period, args);
         } else {
-            warnExp(message, type, object, period, args);
+            warnExpWithPeriod(message, type, object, period, args);
         }
     }
 

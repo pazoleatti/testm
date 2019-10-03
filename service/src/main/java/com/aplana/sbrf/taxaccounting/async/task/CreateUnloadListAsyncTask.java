@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.async.task;
 import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.PersonService;
 import com.aplana.sbrf.taxaccounting.service.PrintingService;
@@ -34,7 +33,7 @@ public class CreateUnloadListAsyncTask extends AbstractAsyncTask {
 
     @Override
     protected AsyncTaskType getAsyncTaskType() {
-        return AsyncTaskType.UNLOAD_LIST;
+        return AsyncTaskType.EXCEL_UNLOAD_LIST;
     }
 
     @Override

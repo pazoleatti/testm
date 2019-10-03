@@ -120,8 +120,7 @@ public class DeclarationLockerImpl implements DeclarationLocker {
             OperationType.EXCEL_DEC, OperationType.DECLARATION_2NDFL1, OperationType.DECLARATION_2NDFL2,
             OperationType.DECLARATION_6NDFL, OperationType.DECLARATION_2NDFL_FL, OperationType.EXCEL_TEMPLATE_DEC, OperationType.EXPORT_REPORTS,
             OperationType.IMPORT_DECLARATION_EXCEL, OperationType.UPDATE_DOC_STATE, OperationType.SEND_EDO,
-            OperationType.TRANSFER
-    );
+            OperationType.TRANSFER, OperationType.EXCEL_UNLOAD_LIST);
 
     private static final Set<OperationType> SET_XLSX = ImmutableSet.of(
             OperationType.IDENTIFY_PERSON, OperationType.LOAD_TRANSPORT_FILE, OperationType.IMPORT_DECLARATION_EXCEL);
@@ -148,7 +147,7 @@ public class DeclarationLockerImpl implements DeclarationLocker {
             OperationType.DELETE_DEC, OperationType.IDENTIFY_PERSON, OperationType.RETURN_DECLARATION,
             OperationType.UPDATE_PERSONS_DATA, OperationType.CONSOLIDATE);
 
-    private static final Set<OperationType> REPORT_LINK_DECLARATION = ImmutableSet.of(
+    private static final Set<OperationType> SET_REPORT_LINK_DECLARATION = ImmutableSet.of(
             OperationType.DELETE_DEC);
 
     // Зависимости
@@ -261,7 +260,7 @@ public class DeclarationLockerImpl implements DeclarationLocker {
         } else if (operationType.equals(OperationType.TRANSFER)){
             return doCheckAndLock(declarationDataIdList, operationType, SET_TRANSFER, additionalParams, userInfo, logger);
         } else if (operationType.equals(OperationType.EXCEL_UNLOAD_LIST)){
-            return doCheckAndLock(declarationDataIdList, operationType, REPORT_LINK_DECLARATION, additionalParams, userInfo, logger);
+            return doCheckAndLock(declarationDataIdList, operationType, SET_REPORT_LINK_DECLARATION, additionalParams, userInfo, logger);
         } else {
             throw new IllegalArgumentException("Unknown operationType type!");
         }

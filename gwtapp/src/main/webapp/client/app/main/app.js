@@ -895,6 +895,9 @@
         "transportMessages.title.date": "Дата сообщения",
         "transportMessages.title.dateFrom": "Дата с",
         "transportMessages.title.dateTo": "Дата по",
+        "transportMessages.excelButton.all": "По всем данным",
+        "transportMessages.excelButton.byFilter": "По отобранным по фильтру",
+        "transportMessages.excelButton.selected": "По выбранным на странице",
 
         "users.title": "Список пользователей",
         "users.link.download.label": "Выгрузить в Excel",

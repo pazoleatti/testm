@@ -6,8 +6,9 @@
      */
     angular.module('app.transportMessage')
 
-        .controller('transportMessageJournalCtrl', ['$scope', '$filter', '$http', '$aplanaModal', 'transportMessageResource', 'APP_CONSTANTS',
-            function ($scope, $filter, $http, $aplanaModal, transportMessageResource, APP_CONSTANTS) {
+        .controller('transportMessageJournalCtrl', ['$scope', '$filter', '$http', '$aplanaModal',
+            'transportMessageResource', '$dialogs', 'APP_CONSTANTS',
+            function ($scope, $filter, $http, $aplanaModal, transportMessageResource, $dialogs, APP_CONSTANTS) {
 
                 function getDefaultFilterParams() {
                     return {};
@@ -69,7 +70,7 @@
                                     // SBRFNDFL-8318
                                     declarationType: params.declarationType
                                 }
-                            }
+                            };
                         },
                         colNames: [
                             $filter('translate')('transportMessages.title.id'),
@@ -180,6 +181,125 @@
                         }
                     });
                 }
+
+
+                function saveAs(response, opts) {
+                    opts = opts || {};
+                    var data = response.data;
+                    var contentDispositionHeader = response.headers("content-disposition");
+                    var fname = /attachment\;filename=\"([^\"]*)\"/.exec(contentDispositionHeader)[1];
+
+                    var contentTypeHeader = response.headers("content-type");
+                    if (contentTypeHeader) {
+                        opts.type = contentTypeHeader;
+                    }
+
+                    var file, url, tmp = [];
+
+                    fname = fname == null || fname === '' ? 'Список транспортных сообщений.xls' : fname;
+                    fname = decodeURI(fname);
+
+                    if (!$.isArray(data)) {
+                        tmp[0] = data;
+                    } else {
+                        tmp = data;
+                    }
+                    try {
+                        file = new File(tmp, fname, opts);
+                    } catch (e) {
+                        file = new Blob(tmp, opts);
+                    }
+                    if (window.navigator && window.navigator.msSaveOrOpenBlob) {
+                        window.navigator.msSaveOrOpenBlob(file, fname);
+                    } else {
+                        url = URL.createObjectURL(file);
+                        var a = document.createElement("a");
+                        a.href = url;
+                        a.download = fname;
+                        document.body.appendChild(a);
+                        a.click();
+                        setTimeout(function () {
+                            document.body.removeChild(a);
+                            window.URL.revokeObjectURL(url);
+                        }, 0);
+                    }
+                }
+
+
+                function getFilter() {
+                    var params = $scope.searchFilter.params;
+                    return {
+                        id: params.id,
+                        stateIds: $filter('idExtractor')(params.states),
+                        typeId: params.type ? params.type.id : null,
+                        messageUuid: params.messageUuid,
+                        user: params.user,
+                        senderSubsystemId: params.senderSubsystem ? params.senderSubsystem.id : null,
+                        receiverSubsystemId: params.receiverSubsystem ? params.receiverSubsystem.id : null,
+                        contentTypeIds: $filter('idExtractor')(params.contentTypes),
+
+                        // Вид формы (SBRFNDFL-8318)
+                        declarationTypes: $filter('idExtractor')(params.declarationTypes),
+
+                        departmentIds: $filter('idExtractor')(params.departmentIds),
+                        declarationId: params.declarationId,
+                        fileName: params.fileName,
+                        dateFrom: params.dateFrom,
+                        dateTo: params.dateTo,
+
+                        // SBRFNDFL-8318
+                        declarationType: params.declarationType
+                    };
+                }
+
+
+                function onExportDone(response) {
+                    saveAs(response);
+                }
+
+                function onExportError(response) {
+
+                }
+
+                /**
+                 * @description Выгрузить в excel
+                 */
+                $scope.downloadExcelAll = function () {
+                    var selectedRows = $scope.transportMessageGrid.value;
+                    $http({
+                        method: "POST",
+                        url: "controller/actions/transportMessages/exportExcel",
+                        data: $filter('idExtractor')(selectedRows, 'id'),
+                        responseType: 'blob'
+                    }).then(onExportDone, onExportError);
+                };
+
+                /**
+                 * @description Выгрузить в Excel по фильтру
+                 */
+                $scope.downloadExcelByFilter = function () {
+                    $http({
+                        method: "POST",
+                        url: "controller/actions/transportMessages/exportExcelByFilter",
+                        params: {
+                            filter: JSON.stringify(getFilter())
+                        },
+                        responseType: 'blob'
+                    }).then(onExportDone, onExportError);
+                };
+
+                /**
+                 * @description Выгрузить в Excel по фильтру по выбранным
+                 */
+                $scope.downloadExcelBySelected = function () {
+                    var selectedRows = $scope.transportMessageGrid.value;
+                    $http({
+                        method: "POST",
+                        url: "controller/actions/transportMessages/exportExcelBySelected",
+                        data: $filter('idExtractor')(selectedRows, 'id'),
+                        responseType: 'blob'
+                    }).then(onExportDone, onExportError);
+                };
             }
         ])
 }());
