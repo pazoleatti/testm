@@ -258,7 +258,27 @@
                  * @description Сформировать аннулирующей 2-НДФЛ в ручном режиме
                  */
                 $scope.annul2Ndfl = function () {
-                    $modalInstance.dismiss();
+                    var params = {
+                        declarationTypeId: $shareData.declarationData.declarationType,
+                        departmentId: $shareData.declarationData.departmentId,
+                        periodId: $shareData.declarationData.reportPeriodId
+                    };
+                    if ($shareData.declarationData.kpp && $shareData.declarationData.oktmo) {
+                        var kppOktmoPair = new Array();
+                        kppOktmoPair.push({kpp: $shareData.declarationData.kpp, oktmo: $shareData.declarationData.oktmo});
+                        params.kppOktmoPairs = kppOktmoPair;
+                    }
+                    params.reportTypeMode = APP_CONSTANTS.REPORT_TYPE_MODE.ANNULMENT.enumName;
+
+                    $http({
+                        method: "POST",
+                        url: "controller/actions/declarationData/createReportForm",
+                        data: params
+                    }).then(function (response) {
+                        $modalInstance.close(response);
+                    }).catch(function () {
+                        $modalInstance.close();
+                    });
                 };
 
                 $scope.close = function () {

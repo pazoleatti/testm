@@ -286,7 +286,8 @@
                             $shareData: function () {
                                 return {
                                     declarationDataId: $scope.declarationDataId,
-                                    reportType: APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.REPORT_2NDFL
+                                    reportType: APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.REPORT_2NDFL,
+                                    declarationData: $scope.declarationData
                                 };
                             }
                         }

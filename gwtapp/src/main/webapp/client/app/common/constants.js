@@ -361,6 +361,10 @@
                 FROM_CURRENT_FORM: {id: 0, name: "Из текущей формы", enumName: "FROM_CURRENT_FORM"},
                 FROM_PREV_FORM: {id: 1, name: "Из предыдущей формы", enumName: "FROM_PREV_FORM"}
             },
+            REPORT_TYPE_MODE: {
+                USUAL: {id: 0, name: "Обычная", enumName: "USUAL"},
+                ANNULMENT: {id: 1, name: "Аннулирующая", enumName: "ANNULMENT"}
+            },
             TRANSPORT_MESSAGE_TYPE: {
                 0: "Исходящее",
                 1: "Входящее"
