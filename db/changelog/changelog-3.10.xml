@@ -203,12 +203,4 @@
 		</update>
 	</changeSet>
 
-	<!-- https://jira.aplana.com/browse/SBRFNDFL-8670 Реализовать корректировку алгоритма учета ВН в разделе 2 6-НДФЛ -->
-	<changeSet id="3.10-smolokovskikh-2" author="smolokovskikh" runAlways="true">
-		<update tableName="DECLARATION_TEMPLATE">
-			<column name="CREATE_SCRIPT" valueClobFile="templates-3.10/ndfl/report_6ndfl/v2016/report_6ndfl.groovy"/>
-			<where>declaration_type_id = 103</where>
-		</update>
-	</changeSet>
-
 </databaseChangeLog>
