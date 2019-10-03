@@ -18,8 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.text.Format;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -302,14 +300,14 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
     }
 
     @Override
-    public ReportPeriod fetchOneByTaxPeriodAndDict(int taxPeriodId, long dictTaxPeriodId) {
+    public ReportPeriod fetchOneByTaxPeriodAndDictAndFormType(int taxPeriodId, long dictTaxPeriodId, Integer formTypeId) {
         try {
             return getJdbcTemplate().queryForObject(
                     "select rp.id, rp.name, rp.tax_period_id, tp.tax_type, tp.year, rp.start_date, rp.end_date, rp.dict_tax_period_id, " +
                             "rp.calendar_start_date, rp.form_type_id from report_period rp join tax_period tp on rp.tax_period_id = tp.id " +
-                            "where rp.tax_period_id = ? and rp.dict_tax_period_id = ?",
-                    new Object[]{taxPeriodId, dictTaxPeriodId},
-                    new int[]{Types.NUMERIC, Types.NUMERIC},
+                            "where rp.tax_period_id = ? and rp.dict_tax_period_id = ? and rp.form_type_id = ?",
+                    new Object[]{taxPeriodId, dictTaxPeriodId, formTypeId},
+                    new int[]{Types.NUMERIC, Types.NUMERIC, Types.NUMERIC},
                     new ReportPeriodMapper()
             );
         } catch (EmptyResultDataAccessException e) {

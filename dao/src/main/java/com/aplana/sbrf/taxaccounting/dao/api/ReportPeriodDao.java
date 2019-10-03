@@ -36,11 +36,12 @@ public interface ReportPeriodDao extends PermissionDao {
     /**
      * Получение отчетного периода по налоговому периоду и периоду в справочнике "Коды, определяющие налоговый (отчётный) период"
      *
-     * @param taxPeriodId     идентификатор налогового периода
-     * @param dictTaxPeriodId идентификатор записи справочника "Коды, определяющие налоговый (отчётный) период"
+     * @param taxPeriodId       идентификатор налогового периода
+     * @param dictTaxPeriodId   идентификатор записи справочника "Коды, определяющие налоговый (отчётный) период"
+     * @param formTypeId        вид отчетности
      * @return объект {@link ReportPeriod} или null
      */
-    ReportPeriod fetchOneByTaxPeriodAndDict(int taxPeriodId, long dictTaxPeriodId);
+    ReportPeriod fetchOneByTaxPeriodAndDictAndFormType(int taxPeriodId, long dictTaxPeriodId, Integer formTypeId);
 
     /**
      * Получение списка всех отчётных периодов.

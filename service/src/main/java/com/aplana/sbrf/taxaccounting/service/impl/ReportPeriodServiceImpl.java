@@ -21,7 +21,8 @@ public class ReportPeriodServiceImpl implements ReportPeriodService {
 
     @Override
     public ReportPeriod fetchOrCreate(TaxPeriod taxPeriod, ReportPeriodType reportPeriodType, Integer formTypeId) {
-        ReportPeriod reportPeriod = reportPeriodDao.fetchOneByTaxPeriodAndDict(taxPeriod.getId(), reportPeriodType.getId());
+        ReportPeriod reportPeriod = reportPeriodDao.fetchOneByTaxPeriodAndDictAndFormType(
+                taxPeriod.getId(), reportPeriodType.getId(), formTypeId);
         if (reportPeriod == null) {
             reportPeriod = new ReportPeriod();
             reportPeriod.setName(reportPeriodType.getName());

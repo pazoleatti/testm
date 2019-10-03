@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookFormType;
 import com.aplana.sbrf.taxaccounting.model.result.ReportPeriodResult;
 import org.junit.Before;
 import org.junit.Test;
@@ -114,15 +115,15 @@ public class ReportPeriodDaoTest {
 
     @Test
     public void getReportPeriodByTaxPeriodAndDictTest1() {
-        ReportPeriod reportPeriod1 = reportPeriodDao.fetchOneByTaxPeriodAndDict(1, 21);
-        ReportPeriod reportPeriod2 = reportPeriodDao.fetchOneByTaxPeriodAndDict(1, 22);
+        ReportPeriod reportPeriod1 = reportPeriodDao.fetchOneByTaxPeriodAndDictAndFormType(1, 21, RefBookFormType.NDFL_6.getId().intValue());
+        ReportPeriod reportPeriod2 = reportPeriodDao.fetchOneByTaxPeriodAndDictAndFormType(1, 22, RefBookFormType.NDFL_2_1.getId().intValue());
         assertEquals(reportPeriod1.getId(), Integer.valueOf(1));
         assertEquals(reportPeriod2.getId(), Integer.valueOf(2));
     }
 
     @Test
     public void getReportPeriodByTaxPeriodAndDictTest2() {
-        assertNull(reportPeriodDao.fetchOneByTaxPeriodAndDict(-1, -1));
+        assertNull(reportPeriodDao.fetchOneByTaxPeriodAndDictAndFormType(-1, -1, RefBookFormType.NDFL_6.getId().intValue()));
     }
 
     private List<Integer> getReportPeriodIds(List<ReportPeriod> reportPeriodList) {
