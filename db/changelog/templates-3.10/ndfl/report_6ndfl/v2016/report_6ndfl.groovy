@@ -787,7 +787,8 @@ class Report6Ndfl extends AbstractScriptClass {
             year == 2019 && periodCode == "21"
                     ? 0
                     : incomeList.findAll { income -> isBelongToJanuary2019Period(income.taxDate) && income.refoundTax }
-                    .collect { income -> income.refoundTax } as Long
+                    .collect { income -> income.refoundTax}
+                    .sum()
         }
 
         void buildRows(IncomeList incomeList) {
