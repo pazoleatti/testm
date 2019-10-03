@@ -2,6 +2,8 @@ package com.aplana.sbrf.taxaccounting.utils;
 
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import jcifs.smb.SmbFile;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -15,6 +17,8 @@ import java.util.regex.Pattern;
  * @author dloshkarev
  */
 public final class ResourceUtils {
+
+    private static final Log LOG = LogFactory.getLog(ResourceUtils.class);
 
     private ResourceUtils() {}
 
@@ -46,6 +50,7 @@ public final class ResourceUtils {
                 }
 
                 File file = new File(uri);
+                LOG.info(String.format("%s by URI %s", file.exists(), uri.toString()));
                 if (!checkExist || file.exists()) {
                     return new FileWrapper(file);
                 } else {
