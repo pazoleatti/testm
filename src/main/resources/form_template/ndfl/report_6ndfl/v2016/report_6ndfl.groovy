@@ -788,7 +788,7 @@ class Report6Ndfl extends AbstractScriptClass {
                     ? 0
                     : incomeList.findAll { income -> isBelongToJanuary2019Period(income.taxDate) && income.refoundTax }
                     .collect { income -> income.refoundTax}
-                    .sum()
+                    .sum() as Long
         }
 
         void buildRows(IncomeList incomeList) {
