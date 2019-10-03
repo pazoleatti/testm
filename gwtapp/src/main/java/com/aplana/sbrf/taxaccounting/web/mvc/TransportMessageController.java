@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.BlobData;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
@@ -181,13 +182,15 @@ public class TransportMessageController {
             IOUtils.copy(in, out);
         } catch (ServiceException | IOException e) {
             Logger logger = logEntryService.createLogger();
-            String messageError = "Не выполнена операция \"Выгрузка списка транспортных сообщений.\n" +
-                    "Причина: " + e.getMessage();
+            String messageError = "Не выполнена операция \"Выгрузка списка транспортных сообщений\".\n<br>" +
+                    "Причина: " + e.getMessage()+".";
+
             logger.log(LogLevel.ERROR, messageError);
 
-            resp.setContentType(MediaType.TEXT_PLAIN_VALUE+";charset=UTF-8");
-            out.print(messageError);
-            resp.setStatus(500);
+            resp.setContentType(MediaType.TEXT_PLAIN_VALUE + ";charset=UTF-8");
+
+            out.write(messageError.getBytes("UTF8"));
+            resp.setStatus(e instanceof AccessDeniedException ? 403 : 500);
         } finally {
             // Закрываем потоки ввода/вывода
             if (in != null)

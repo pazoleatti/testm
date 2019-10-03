@@ -223,7 +223,7 @@
                             window.URL.revokeObjectURL(url);
                         }, 0);
                     }
-                };
+                }
 
 
                 function getFilter() {
@@ -258,11 +258,7 @@
                 }
 
                 function onExportError(response) {
-                    if (response.data && typeof response.data.text === 'function') {
-                        response.data.text().then(function (error) {
-                            $dialogs.errorDialog({content: error});
-                        });
-                    }
+
                 }
 
                 /**
