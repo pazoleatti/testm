@@ -165,3 +165,31 @@ end;
 COMMIT;
 
 
+--3.10-avoynov-2
+declare 
+  v_task_name varchar2(128):='insert_update_delete block #3 - merge into ref_book_attribute';  
+begin
+	merge into ref_book_attribute dst using
+	(select 9650 as id, 964 as ref_book_id, 'Номер корректировки' as name,
+	'CORRECTION_NUM' as alias, 2 as type, 10 as ord, 0 as precision, 5 as width, 1 as required,
+	0 as is_unique, 3 as max_length  from dual ) src
+	on (src.id=dst.id)
+	when not matched then
+		insert (id, ref_book_id, name, alias, type, ord, precision, width, required, 
+	is_unique, max_length)
+		values (src.id, src.ref_book_id, src.name, src.alias, src.type, src.ord, src.precision, 
+			src.width, src.required,  src.is_unique, src.max_length);
+	
+	CASE SQL%ROWCOUNT 
+	WHEN 0 THEN dbms_output.put_line(v_task_name||'[WARNING]:'||' No changes was done');
+	ELSE dbms_output.put_line(v_task_name||'[INFO]:'||' Success');
+	END CASE; 
+
+EXCEPTION
+  when OTHERS then 
+    dbms_output.put_line(v_task_name||'[FATAL]:'||sqlerrm);		
+end;
+/
+COMMIT;
+
+

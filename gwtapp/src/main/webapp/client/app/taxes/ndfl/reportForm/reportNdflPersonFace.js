@@ -254,6 +254,13 @@
                     );
                 };
 
+                /**
+                 * @description Сформировать аннулирующей 2-НДФЛ в ручном режиме
+                 */
+                $scope.annul2Ndfl = function () {
+                    $modalInstance.dismiss();
+                };
+
                 $scope.close = function () {
                     $modalInstance.dismiss();
                 };
