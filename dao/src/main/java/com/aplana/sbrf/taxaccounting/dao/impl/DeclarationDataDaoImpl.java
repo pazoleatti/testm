@@ -212,6 +212,31 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
     }
 
     @Override
+    public List<DeclarationData> findPreviousONFFor2Ndfl(int declarationTypeId, String reportPeriodTypeCode, int year, String kpp, String oktmo) {
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("declarationTypeId", declarationTypeId);
+        params.addValue("reportPeriodTypeCode", reportPeriodTypeCode);
+        params.addValue("year", year);
+        params.addValue("kpp", kpp);
+        params.addValue("oktmo", oktmo);
+        return getNamedParameterJdbcTemplate().query("" +
+                        "select " + DeclarationDataRowMapper.FIELDS +
+                        "from declaration_data dd " +
+                        "left join ref_book_knf_type knf_type on knf_type.id = dd.knf_type_id " +
+                        "join department_report_period drp on dd.department_report_period_id = drp.id " +
+                        "join report_period rp on drp.report_period_id = rp.id " +
+                        "join report_period_type rpt on rp.dict_tax_period_id = rpt.id " +
+                        "join tax_period tp on rp.tax_period_id = tp.id " +
+                        "join declaration_template dt on dt.id = dd.declaration_template_id " +
+                        "where dt.declaration_type_id = :declarationTypeId " +
+                        "and rpt.code = :reportPeriodTypeCode " +
+                        "and tp.year = :year " +
+                        "and dd.kpp = :kpp " +
+                        "and dd.oktmo = :oktmo",
+                params, new DeclarationDataRowMapper());
+    }
+
+    @Override
     public DeclarationData findPrev(DeclarationData declarationData, RefBookDocState... docStates) {
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("declarationTemplateId", declarationData.getDeclarationTemplateId());

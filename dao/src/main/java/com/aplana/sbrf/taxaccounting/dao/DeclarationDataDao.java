@@ -173,6 +173,19 @@ public interface DeclarationDataDao extends PermissionDao {
     List<DeclarationData> findAllByTypeIdAndReportPeriodIdAndKppAndOktmo(int declarationTypeId, int reportPeriodId, String kpp, String oktmo);
 
     /**
+     * Возвращяет список форм по указанным параметрам.
+     * Для определения предыдущего ОНФ при формировании аннулирующей 2НДФЛ
+     *
+     * @param declarationTypeId     ТекущаяОНФ."Макет формы"."Вид формы"
+     * @param reportPeriodTypeCode  ТекущаяОНФ."Период"."Код Периода"
+     * @param year                  ТекущаяОНФ."Период"."Год"
+     * @param kpp                   ТекущаяОНФ.КПП
+     * @param oktmo                 ТекущаяОНФ.ОКТМО
+     * @return список форм
+     */
+    List<DeclarationData> findPreviousONFFor2Ndfl(int declarationTypeId, String reportPeriodTypeCode, int year, String kpp, String oktmo);
+
+    /**
      * Возвращяет предыдущую форму того же типа и КПП/ОКТМО в состоянии ЭД из заданного множества
      *
      * @return форма
