@@ -120,7 +120,9 @@ public class TransportMessageServiceImpl implements TransportMessageService {
 
     private boolean checkExportAccess(TAUserInfo userInfo) {
         TAUser user = userInfo.getUser();
-        if (user.hasRole(TARole.N_ROLE_CONTROL_NS) || user.hasRole(TARole.N_ROLE_CONTROL_UNP)) {
+        if (user.hasRole(TARole.N_ROLE_CONTROL_NS)
+                || user.hasRole(TARole.N_ROLE_CONTROL_UNP)
+                || user.hasRole(TARole.ROLE_ADMIN)) {
             return true;
         }
         throw new AccessDeniedException("Нет прав на выгрузку транспортных сообщений");
