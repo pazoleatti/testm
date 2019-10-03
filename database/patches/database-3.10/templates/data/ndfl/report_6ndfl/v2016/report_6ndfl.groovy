@@ -735,8 +735,9 @@ class Report6Ndfl extends AbstractScriptClass {
          * Принадлежит периоду январь 2019
          */
         boolean isBelongToJanuary2019Period(Date date) {
+            date = new LocalDate(date).toDate();
             Date janStart = new LocalDate(2019, 1, 1).toDate()
-            Date janEnd = new LocalDate(2019, 31, 1).toDate()
+            Date janEnd = new LocalDate(2019, 1, 31).toDate()
             return date != null && (janStart <= date && date <= janEnd)
         }
 
