@@ -370,7 +370,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 if (logger.containsLevel(LogLevel.ERROR)) {
                     throw new ServiceLoggerException(("Налоговая форма не создана"), logEntryService.save(logger.getEntries()));
                 }
-                boolean isBelongKpp = false;
+                boolean isExistForm = false;
                 if (declarationTemplate.getDeclarationFormKind().getId() == DeclarationFormKind.CONSOLIDATED.getId() &&
                         newDeclaration.isManuallyCreated() && declarationDataDao.existDeclarationData(newDeclaration)) {
                     String strCorrPeriod = "";
@@ -389,8 +389,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                                         " Вид налоговой формы: \"%s\", Тип КНФ: \"%s\" . Создание в Системе нескольких КНФ с одинаковыми параметрами невозможно.",
                                 existDeclaration.getId(), departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + ", " + departmentReportPeriod.getReportPeriod().getName() + strCorrPeriod,
                                 department.getName(), declarationTemplate.getDeclarationFormKind().getName(), newDeclaration.getKnfType().getName());
+                        isExistForm = true;
                     } else {
-                        if (departmentReportPeriod.getId() == newDeclaration.getDepartmentReportPeriodId() &&
+                        if (departmentReportPeriod.getId().equals(newDeclaration.getDepartmentReportPeriodId()) &&
                                 existDeclaration.getKnfType().equals(newDeclaration.getKnfType())) {
                             HashSet<String> newKppList = new HashSet<>(newDeclaration.getIncludedKpps());
                             StringBuilder messageKpp = new StringBuilder();
@@ -399,17 +400,17 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                                 List<String> existKppList = new ArrayList<>(declarationService.getDeclarationDataKppList(existId));
                                 for (String existKpp : existKppList) {
                                     if (newKppList.contains(existKpp)) {
-                                        if (!isBelongKpp) {
+                                        if (!isExistForm) {
                                             messageKpp.append(existKpp);
-                                            isBelongKpp = true;
+                                            isExistForm = true;
                                         } else {
                                             messageKpp.append(",").append(existKpp);
                                         }
                                     }
                                 }
-                                if (isBelongKpp) break;
+                                if (isExistForm) break;
                             }
-                            if (isBelongKpp) {
+                            if (isExistForm) {
                                 message = String.format("В Системе уже существует налоговая форма № \"%s\" с заданными параметрами Период: \"%s\", Подразделение: \"%s\", " +
                                                 " Вид налоговой формы: \"%s\", Тип КНФ: \"%s\" , содержащая операции с КПП:  \"%s\". Создание в Системе нескольких КНФ с одинаковыми параметрами невозможно.",
                                         existDeclaration.getId(), departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + ", " + departmentReportPeriod.getReportPeriod().getName() + strCorrPeriod,
@@ -417,7 +418,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                             }
                         }
                     }
-                    if (isBelongKpp) logger.error(message);
+                    if (isExistForm) logger.error(message);
                 }
                 doCreate(newDeclaration, declarationTemplate, logger, userInfo, true);
             } finally {
