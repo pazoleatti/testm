@@ -29,7 +29,7 @@ public class SourcesAndDestinationsReportBuilder extends AbstractReportBuilder {
     private List<Relation> relationList;
     // Отображаемые столбцы
     private List<String> header = asList("Номер", "Налог", "Источник/ приемник", "Номер формы", "Подразделение", "Дата сдачи корректировки",
-            "Тип формы", "Вид формы", "Год", "Вид отчетности", "Состояние формы");
+            "Тип формы", "Вид формы", "Год", "Период", "Вид отчетности", "Состояние формы");
 
     private int curRowIndex;
     private StyleBuilder styleBuilder;
@@ -48,7 +48,7 @@ public class SourcesAndDestinationsReportBuilder extends AbstractReportBuilder {
 
     @Override
     protected void cellAlignment() {
-        List<Integer> widthList = Arrays.asList(10, 12, 14, 14, 42, 16, 21, 16, 12, 20, 20);
+        List<Integer> widthList = Arrays.asList(10, 12, 14, 14, 42, 16, 21, 16, 12, 20, 20,20);
         for (int i = 0; i < header.size(); i++) {
             sheet.autoSizeColumn(i);
             sheet.setColumnWidth(i, widthList.get(i) * 269);
@@ -97,6 +97,7 @@ public class SourcesAndDestinationsReportBuilder extends AbstractReportBuilder {
         createCellValue(colIndex++, relation.getDeclarationTemplate().getDeclarationFormKind().getName(), "typeForm", CellType.STRING, CellStyle.ALIGN_LEFT);
         createCellValue(colIndex++, relation.getDeclarationTypeName(), "typeForm", CellType.STRING, CellStyle.ALIGN_LEFT);
         createCellValue(colIndex++, relation.getYear(), "year", CellType.STRING, CellStyle.ALIGN_CENTER);
+        createCellValue(colIndex++, relation.getPeriodName(), "periodName", CellType.STRING, CellStyle.ALIGN_LEFT);
         createCellValue(colIndex++, relation.getFormTypeCode(), "typeReport", CellType.STRING, CellStyle.ALIGN_LEFT);
         createCellValue(colIndex++, relation.getDeclarationState().getTitle(), "statusForm", CellType.STRING, CellStyle.ALIGN_LEFT);
     }
