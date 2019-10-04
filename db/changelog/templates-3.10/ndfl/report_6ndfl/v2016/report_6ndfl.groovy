@@ -768,8 +768,8 @@ class Report6Ndfl extends AbstractScriptClass {
             }
             if (!section2Block.isEmpty()) {
                 incomeWithholdingTotal = incomeWithholdingTotal -
-                        (section2Block.СуммаВНкРаспределению - section2Block.negativeWithholding.abs())
-                        - СуммаВНянварь2019(incomeList)
+                        (section2Block.СуммаВНкРаспределению - section2Block.negativeWithholding.abs()) -
+                        СуммаВНянварь2019(incomeList)
             }
             if (incomeNotHoldingTaxSum > incomeOverholdingTaxSum) {
                 incomeNotHoldingTotal = incomeNotHoldingTaxSum - incomeOverholdingTaxSum
