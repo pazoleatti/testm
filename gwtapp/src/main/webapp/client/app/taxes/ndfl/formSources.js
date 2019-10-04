@@ -10,8 +10,8 @@
     /**
      * @description Контроллер модального окна, в котором выводятся источники и приемники формы
      */
-        .controller('sourcesFormCtrl', ["$scope", "$http", '$state', '$stateParams', "$modalInstance", "$filter", 'DeclarationDataResource', 'APP_CONSTANTS',
-            function ($scope, $http, $state, $stateParams, $modalInstance, $filter, DeclarationDataResource, APP_CONSTANTS) {
+        .controller('sourcesFormCtrl', ["$scope", "$http", '$logPanel', '$state', '$stateParams', "$modalInstance", "$filter", 'DeclarationDataResource', 'APP_CONSTANTS',
+            function ($scope, $http, $logPanel, $state, $stateParams, $modalInstance, $filter, DeclarationDataResource, APP_CONSTANTS) {
                 $scope.sourcesGridData = [];
 
                 //Чекбоксы
@@ -183,31 +183,7 @@
 
         .filter('declarationFormKindFormatter', function () {
             return function (value) {
-                var result = "";
-                switch (value) {
-                    case 'ADDITIONAL':
-                        result = 'Выходная';
-                        break;
-                    case 'CONSOLIDATED':
-                        result = 'Консолидированная';
-                        break;
-                    case 'PRIMARY':
-                        result = 'Первичная';
-                        break;
-                    case 'SUMMARY':
-                        result = 'Сводная';
-                        break;
-                    case 'UNP':
-                        result = 'Форма УНП';
-                        break;
-                    case 'CALCULATED':
-                        result = 'Расчетная';
-                        break;
-                    case 'REPORTS':
-                        result = 'Отчетная';
-                        break;
-                }
-                return result;
+                return value.name;
             };
         })
 
