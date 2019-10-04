@@ -512,7 +512,7 @@ public class PeriodServiceImpl implements PeriodService {
 
         if (maxPeriodList.size() > 0) {
             Collections.sort(maxPeriodList, new LogPeriodResult.CompDate(true));
-            period = period + maxPeriodList.get(0).getYear() + ":" + maxPeriodList.get(0).getName() + "; ";
+            period = period + maxPeriodList.get(0).getYear() + " :" + maxPeriodList.get(0).getName() + "; ";
             if (maxPeriodList.get(0).getCorrectionDate() != null) {
                 Format formatter = new SimpleDateFormat("dd-MM-yy");
                 period = period + formatter.format(maxPeriodList.get(0).getCorrectionDate());
