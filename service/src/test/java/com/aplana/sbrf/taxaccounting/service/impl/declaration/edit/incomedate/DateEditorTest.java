@@ -79,7 +79,7 @@ public class DateEditorTest {
         datesDTO.setAccruedDate(null);
 
         Date oldValue = income.getIncomeAccruedDate();
-        boolean edited = editor.editIncomeDateField(income, datesDTO, person, logger);
+        boolean edited = editor.editIncomeDateField(income, datesDTO, person, logger, null);
 
         assertThat(edited).isFalse();
         assertThat(income.getIncomeAccruedDate()).isEqualTo(oldValue);
@@ -91,7 +91,7 @@ public class DateEditorTest {
         DateEditor editor = DateEditorFactory.getEditor(EditableDateField.ACCRUED);
         income.setIncomeAccruedDate(null);
 
-        boolean edited = editor.editIncomeDateField(income, datesDTO, person, logger);
+        boolean edited = editor.editIncomeDateField(income, datesDTO, person, logger, null);
         LogEntry lastEntry = logger.getLastEntry();
 
         assertThat(edited).isFalse();
@@ -104,7 +104,7 @@ public class DateEditorTest {
         DateEditor editor = DateEditorFactory.getEditor(EditableDateField.PAYOUT);
         income.setIncomePayoutDate(null);
 
-        boolean edited = editor.editIncomeDateField(income, datesDTO, person, logger);
+        boolean edited = editor.editIncomeDateField(income, datesDTO, person, logger, null);
         LogEntry lastEntry = logger.getLastEntry();
 
         assertThat(edited).isFalse();
@@ -117,7 +117,7 @@ public class DateEditorTest {
         DateEditor editor = DateEditorFactory.getEditor(EditableDateField.TAX);
         income.setTaxDate(null);
 
-        boolean edited = editor.editIncomeDateField(income, datesDTO, person, logger);
+        boolean edited = editor.editIncomeDateField(income, datesDTO, person, logger, null);
         LogEntry lastEntry = logger.getLastEntry();
 
         assertThat(edited).isFalse();
@@ -130,7 +130,7 @@ public class DateEditorTest {
         DateEditor editor = DateEditorFactory.getEditor(EditableDateField.TRANSFER);
         income.setTaxTransferDate(null);
 
-        boolean edited = editor.editIncomeDateField(income, datesDTO, person, logger);
+        boolean edited = editor.editIncomeDateField(income, datesDTO, person, logger, null);
         LogEntry lastEntry = logger.getLastEntry();
 
         assertThat(edited).isFalse();
@@ -142,7 +142,7 @@ public class DateEditorTest {
     public void test_editIncomeDateField_onAccruedDate() {
         DateEditor editor = DateEditorFactory.getEditor(EditableDateField.ACCRUED);
 
-        boolean edited = editor.editIncomeDateField(income, datesDTO, person, logger);
+        boolean edited = editor.editIncomeDateField(income, datesDTO, person, logger, null);
 
         LogEntry lastEntry = logger.getLastEntry();
 
@@ -155,7 +155,7 @@ public class DateEditorTest {
     public void test_editIncomeDateField_onPayoutDate() {
         DateEditor editor = DateEditorFactory.getEditor(EditableDateField.PAYOUT);
 
-        boolean edited = editor.editIncomeDateField(income, datesDTO, person, logger);
+        boolean edited = editor.editIncomeDateField(income, datesDTO, person, logger, null);
 
         LogEntry lastEntry = logger.getLastEntry();
 
@@ -168,7 +168,7 @@ public class DateEditorTest {
     public void test_editIncomeDateField_onTaxDate() {
         DateEditor editor = DateEditorFactory.getEditor(EditableDateField.TAX);
 
-        boolean edited = editor.editIncomeDateField(income, datesDTO, person, logger);
+        boolean edited = editor.editIncomeDateField(income, datesDTO, person, logger, null);
 
         LogEntry lastEntry = logger.getLastEntry();
 
@@ -181,7 +181,7 @@ public class DateEditorTest {
     public void test_editIncomeDateField_onTransferDate() {
         DateEditor editor = DateEditorFactory.getEditor(EditableDateField.TRANSFER);
 
-        boolean edited = editor.editIncomeDateField(income, datesDTO, person, logger);
+        boolean edited = editor.editIncomeDateField(income, datesDTO, person, logger, null);
 
         LogEntry lastEntry = logger.getLastEntry();
 
@@ -195,7 +195,7 @@ public class DateEditorTest {
         DateEditor editor = DateEditorFactory.getEditor(EditableDateField.TRANSFER);
         income.setTaxTransferDate(DateUtils.DATE_ZERO);
 
-        editor.editIncomeDateField(income, datesDTO, person, logger);
+        editor.editIncomeDateField(income, datesDTO, person, logger, null);
 
         LogEntry lastEntry = logger.getLastEntry();
         assertThat(lastEntry.getMessage()).isEqualTo("Раздел 2. Строка 1. Выполнена замена Срока перечисления: \"00.00.0000\" -> \"01.01.2000\".");
@@ -206,7 +206,7 @@ public class DateEditorTest {
         DateEditor editor = DateEditorFactory.getEditor(EditableDateField.TRANSFER);
         datesDTO.setTransferDate(DateUtils.DATE_ZERO);
 
-        editor.editIncomeDateField(income, datesDTO, person, logger);
+        editor.editIncomeDateField(income, datesDTO, person, logger, null);
 
         LogEntry lastEntry = logger.getLastEntry();
         assertThat(lastEntry.getMessage()).isEqualTo("Раздел 2. Строка 1. Выполнена замена Срока перечисления: \"01.01.1970\" -> \"00.00.0000\".");
@@ -216,7 +216,7 @@ public class DateEditorTest {
     public void test_editIncomeDateField_onSuccess_logEntry() {
         DateEditor editor = DateEditorFactory.getEditor(EditableDateField.ACCRUED);
 
-        editor.editIncomeDateField(income, datesDTO, person, logger);
+        editor.editIncomeDateField(income, datesDTO, person, logger, null);
 
         LogEntry lastEntry = logger.getLastEntry();
         assertThat(lastEntry)
@@ -234,7 +234,7 @@ public class DateEditorTest {
         DateEditor editor = DateEditorFactory.getEditor(EditableDateField.ACCRUED);
         datesDTO.setAccruedDate(new Date(0));
 
-        boolean edited = editor.editIncomeDateField(income, datesDTO, person, logger);
+        boolean edited = editor.editIncomeDateField(income, datesDTO, person, logger, null);
 
         LogEntry lastEntry = logger.getLastEntry();
 
@@ -254,7 +254,7 @@ public class DateEditorTest {
         DateEditor editor = DateEditorFactory.getEditor(EditableDateField.ACCRUED);
         income.setIncomeAccruedDate(null);
 
-        editor.editIncomeDateField(income, datesDTO, person, logger);
+        editor.editIncomeDateField(income, datesDTO, person, logger, null);
 
         LogEntry lastEntry = logger.getLastEntry();
         assertThat(lastEntry)
@@ -273,7 +273,7 @@ public class DateEditorTest {
         income.setTaxTransferDate(DateUtils.DATE_ZERO);
         datesDTO.setTransferDate(DateUtils.DATE_ZERO);
 
-        editor.editIncomeDateField(income, datesDTO, person, logger);
+        editor.editIncomeDateField(income, datesDTO, person, logger, null);
 
         LogEntry lastEntry = logger.getLastEntry();
         assertThat(lastEntry.getMessage()).isEqualTo("Раздел 2. Строка 1. Значение Срока перечисления не было изменено. Графа уже содержит требуемое значение: \"00.00.0000\".");

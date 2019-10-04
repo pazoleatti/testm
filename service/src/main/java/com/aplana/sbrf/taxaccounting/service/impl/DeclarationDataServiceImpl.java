@@ -369,7 +369,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 if (logger.containsLevel(LogLevel.ERROR)) {
                     throw new ServiceLoggerException(("Налоговая форма не создана"), logEntryService.save(logger.getEntries()));
                 }
-                boolean isBelongKpp = false;
+                boolean isExistForm = false;
                 if (declarationTemplate.getDeclarationFormKind().getId() == DeclarationFormKind.CONSOLIDATED.getId() &&
                         newDeclaration.isManuallyCreated() && declarationDataDao.existDeclarationData(newDeclaration)) {
                     String strCorrPeriod = "";
@@ -388,8 +388,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                                         " Вид налоговой формы: \"%s\", Тип КНФ: \"%s\" . Создание в Системе нескольких КНФ с одинаковыми параметрами невозможно.",
                                 existDeclaration.getId(), departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + ", " + departmentReportPeriod.getReportPeriod().getName() + strCorrPeriod,
                                 department.getName(), declarationTemplate.getDeclarationFormKind().getName(), newDeclaration.getKnfType().getName());
+                        isExistForm = true;
                     } else {
-                        if (departmentReportPeriod.getId() == newDeclaration.getDepartmentReportPeriodId() &&
+                        if (departmentReportPeriod.getId().equals(newDeclaration.getDepartmentReportPeriodId()) &&
                                 existDeclaration.getKnfType().equals(newDeclaration.getKnfType())) {
                             HashSet<String> newKppList = new HashSet<>(newDeclaration.getIncludedKpps());
                             StringBuilder messageKpp = new StringBuilder();
@@ -398,17 +399,17 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                                 List<String> existKppList = new ArrayList<>(declarationService.getDeclarationDataKppList(existId));
                                 for (String existKpp : existKppList) {
                                     if (newKppList.contains(existKpp)) {
-                                        if (!isBelongKpp) {
+                                        if (!isExistForm) {
                                             messageKpp.append(existKpp);
-                                            isBelongKpp = true;
+                                            isExistForm = true;
                                         } else {
                                             messageKpp.append(",").append(existKpp);
                                         }
                                     }
                                 }
-                                if (isBelongKpp) break;
+                                if (isExistForm) break;
                             }
-                            if (isBelongKpp) {
+                            if (isExistForm) {
                                 message = String.format("В Системе уже существует налоговая форма № \"%s\" с заданными параметрами Период: \"%s\", Подразделение: \"%s\", " +
                                                 " Вид налоговой формы: \"%s\", Тип КНФ: \"%s\" , содержащая операции с КПП:  \"%s\". Создание в Системе нескольких КНФ с одинаковыми параметрами невозможно.",
                                         existDeclaration.getId(), departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + ", " + departmentReportPeriod.getReportPeriod().getName() + strCorrPeriod,
@@ -416,7 +417,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                             }
                         }
                     }
-                    if (isBelongKpp) logger.error(message);
+                    if (isExistForm) logger.error(message);
                 }
                 doCreate(newDeclaration, declarationTemplate, logger, userInfo, true);
             } finally {
@@ -2842,6 +2843,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         Notification notification = new Notification();
 
         try {
+            DeclarationData declarationData = declarationDataDao.get(declarationDataId);
+            DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declarationData.getDeclarationTemplateId());
             // Достаем из базы строки для редактирования
             List<Long> incomeIds = incomeDates.getIncomeIds();
             List<NdflPersonIncome> incomes = ndflPersonDao.findAllIncomesByIdIn(incomeIds);
@@ -2853,6 +2856,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
             // Заменяем значения в строках
             for (NdflPersonIncome income : incomes) {
+                String period = null;
+                if (declarationTemplate.getType().getId() == (DeclarationType.NDFL_CONSOLIDATE)) {
+                    period = periodService.createLogPeriodFormatById(Collections.singletonList(income.getId()), LogLevelType.INCOME.getId());
+                }
                 // ФЛ, к которому относится строка дохода
                 NdflPerson person = ndflPersonDao.findById(income.getNdflPersonId());
 
@@ -2861,7 +2868,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     try {
                         // Для каждого вида даты своя реализация DateEditor
                         DateEditor dateEditor = DateEditorFactory.getEditor(dateField);
-                        boolean dateChanged = dateEditor.editIncomeDateField(income, incomeDates, person, logger);
+                        boolean dateChanged = dateEditor.editIncomeDateField(income, incomeDates, person, logger, period);
 
                         isAnyDateChanged = isAnyDateChanged || dateChanged;
 
@@ -2872,10 +2879,11 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                             income.setModifiedBy(user.getName() + "(" + user.getLogin() + ")");
                         }
                     } catch (Exception e) {
-                        logger.errorExp(
+                        logger.errorExpWithPeriod(
                                 "Раздел 2. Строка %s. %s не была заменена. %s",
                                 "Ошибка замены",
                                 String.format("%s, ИНП: %s, ID операции: %s", person.getFullName(), person.getInp(), income.getOperationId()),
+                                period,
                                 income.getRowNum(), dateField.getTitle(), e.getMessage()
                         );
                     }

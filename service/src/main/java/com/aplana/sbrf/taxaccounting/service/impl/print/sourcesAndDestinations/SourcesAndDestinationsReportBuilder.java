@@ -85,15 +85,15 @@ public class SourcesAndDestinationsReportBuilder extends AbstractReportBuilder {
         sheet.createRow(curRowIndex);
         int colIndex = 0;
         createCellValue(colIndex++, number, "startDate", CellType.INTEGER, CellStyle.ALIGN_CENTER);
-        createCellValue(colIndex++, relation.getTaxType().getName(), "taxName", CellType.STRING, CellStyle.ALIGN_CENTER);
+        createCellValue(colIndex++, relation.getTaxType().getName(), "taxName", CellType.STRING, CellStyle.ALIGN_LEFT);
         if (relation.isSource()) {
-            createCellValue(colIndex++, "источник", "sources", CellType.STRING, CellStyle.ALIGN_CENTER);
+            createCellValue(colIndex++, "источник", "sources", CellType.STRING, CellStyle.ALIGN_LEFT);
         } else {
-            createCellValue(colIndex++, "приемник", "destinations", CellType.STRING, CellStyle.ALIGN_CENTER);
+            createCellValue(colIndex++, "приемник", "destinations", CellType.STRING, CellStyle.ALIGN_LEFT);
         }
         createCellValue(colIndex++, relation.getDeclarationDataId(), "declarationDataId", CellType.STRING, CellStyle.ALIGN_CENTER);
         createCellValue(colIndex++, relation.getFullDepartmentName(), "fullDepartmentName", CellType.STRING, CellStyle.ALIGN_LEFT);
-        createCellValue(colIndex++, relation.getCorrectionDate(), "correctionDate", CellType.DATE, CellStyle.ALIGN_CENTER);
+        createCellValue(colIndex++, relation.getCorrectionDate(), "correctionDate", CellType.DATE, CellStyle.ALIGN_LEFT);
         createCellValue(colIndex++, relation.getDeclarationTemplate().getDeclarationFormKind().getName(), "typeForm", CellType.STRING, CellStyle.ALIGN_LEFT);
         createCellValue(colIndex++, relation.getDeclarationTypeName(), "typeForm", CellType.STRING, CellStyle.ALIGN_LEFT);
         createCellValue(colIndex++, relation.getYear(), "year", CellType.STRING, CellStyle.ALIGN_CENTER);
