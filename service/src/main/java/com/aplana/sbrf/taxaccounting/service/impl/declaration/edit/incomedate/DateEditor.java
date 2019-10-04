@@ -29,6 +29,10 @@ public abstract class DateEditor {
      * ФЛ, к которому относится редактируемая строка. Нужно для вывода сообщений.
      */
     private NdflPerson person;
+    /**
+     * Информация о периоде для добавления в протокол
+     */
+    private String period;
 
 
     /**
@@ -63,12 +67,14 @@ public abstract class DateEditor {
      * @param income         редактируемый объект
      * @param incomeDatesDTO dto с новыми данными
      * @param logger         логгер для сообщений о результате
+     * @param period         информация о периоде
      * @return true, если поле успешно заменено
      */
-    public boolean editIncomeDateField(NdflPersonIncome income, NdflPersonIncomeDatesDTO incomeDatesDTO, NdflPerson person, Logger logger) {
+    public boolean editIncomeDateField(NdflPersonIncome income, NdflPersonIncomeDatesDTO incomeDatesDTO, NdflPerson person, Logger logger, String period) {
         this.income = income;
         this.incomeDatesDTO = incomeDatesDTO;
         this.person = person;
+        this.period = period;
 
         if (thereIsNoDateToSet()) {
             return false;
@@ -104,18 +110,20 @@ public abstract class DateEditor {
     }
 
     private void printWarning(Logger logger) {
-        logger.warnExp(
+        logger.warnExpWithPeriod(
                 warningText(),
                 "Установка даты не предусмотрена для этой строки",
-                editingObject()
+                editingObject(),
+                period
         );
     }
 
     private void printTheSameDatesMessage(Logger logger) {
-        logger.infoExp(
+        logger.infoExpWithPeriod(
                 "Раздел 2. Строка %s. Значение %s не было изменено. Графа уже содержит требуемое значение: \"%s\".",
                 "Графа уже содержит значение",
                 editingObject(),
+                period,
                 income.getRowNum(),
                 fieldNameInGenitiveCase(),
                 DateUtils.formatPossibleZeroDate(getDateToSet())
@@ -123,10 +131,11 @@ public abstract class DateEditor {
     }
 
     private void printSuccess(Logger logger) {
-        logger.infoExp(
+        logger.infoExpWithPeriod(
                 "Раздел 2. Строка %s. Выполнена замена %s: \"%s\" -> \"%s\".",
                 "Дата изменена",
                 editingObject(),
+                period,
                 income.getRowNum(),
                 fieldNameInGenitiveCase(),
                 DateUtils.formatPossibleZeroDate(getDateToEdit()),

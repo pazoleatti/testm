@@ -2841,6 +2841,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         Notification notification = new Notification();
 
         try {
+            DeclarationData declarationData = declarationDataDao.get(declarationDataId);
+            DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declarationData.getDeclarationTemplateId());
             // Достаем из базы строки для редактирования
             List<Long> incomeIds = incomeDates.getIncomeIds();
             List<NdflPersonIncome> incomes = ndflPersonDao.findAllIncomesByIdIn(incomeIds);
@@ -2852,6 +2854,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
             // Заменяем значения в строках
             for (NdflPersonIncome income : incomes) {
+                String period = null;
+                if (declarationTemplate.getType().getId() == (DeclarationType.NDFL_CONSOLIDATE)) {
+                    period = periodService.createLogPeriodFormatById(Collections.singletonList(income.getId()), LogLevelType.INCOME.getId());
+                }
                 // ФЛ, к которому относится строка дохода
                 NdflPerson person = ndflPersonDao.findById(income.getNdflPersonId());
 
@@ -2860,7 +2866,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     try {
                         // Для каждого вида даты своя реализация DateEditor
                         DateEditor dateEditor = DateEditorFactory.getEditor(dateField);
-                        boolean dateChanged = dateEditor.editIncomeDateField(income, incomeDates, person, logger);
+                        boolean dateChanged = dateEditor.editIncomeDateField(income, incomeDates, person, logger, period);
 
                         isAnyDateChanged = isAnyDateChanged || dateChanged;
 
@@ -2871,10 +2877,11 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                             income.setModifiedBy(user.getName() + "(" + user.getLogin() + ")");
                         }
                     } catch (Exception e) {
-                        logger.errorExp(
+                        logger.errorExpWithPeriod(
                                 "Раздел 2. Строка %s. %s не была заменена. %s",
                                 "Ошибка замены",
                                 String.format("%s, ИНП: %s, ID операции: %s", person.getFullName(), person.getInp(), income.getOperationId()),
+                                period,
                                 income.getRowNum(), dateField.getTitle(), e.getMessage()
                         );
                     }
