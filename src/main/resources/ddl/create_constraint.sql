@@ -57,7 +57,7 @@ alter table form_style add constraint form_style_uniq_alias unique (form_templat
 alter table ref_book_attribute add constraint ref_book_attribute_uniq_ord unique (ref_book_id, ord);
 alter table ref_book_attribute add constraint ref_book_attribute_uniq_alias unique (ref_book_id, alias);
 alter table form_column add constraint form_column_uniq_alias unique(form_template_id, alias);
-alter table report_period add constraint report_period_uniq_tax_dict unique (tax_period_id, dict_tax_period_id);
+alter table report_period add constraint report_period_uniq_tax_dict unique (tax_period_id, dict_tax_period_id, form_type_id);
 alter table department_declaration_type add constraint dept_decl_type_uniq_decl unique (department_id, declaration_type_id);
 alter table sec_user add constraint sec_user_uniq_login_active unique (login);
 alter table sec_role add constraint sec_role_uniq_alias unique (alias);
