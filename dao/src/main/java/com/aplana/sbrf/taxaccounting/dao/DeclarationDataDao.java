@@ -1,17 +1,11 @@
 package com.aplana.sbrf.taxaccounting.dao;
 
-import com.aplana.sbrf.taxaccounting.model.DeclarationData;
-import com.aplana.sbrf.taxaccounting.model.DeclarationDataFilter;
-import com.aplana.sbrf.taxaccounting.model.DeclarationDataJournalItem;
-import com.aplana.sbrf.taxaccounting.model.DeclarationDataSearchOrdering;
-import com.aplana.sbrf.taxaccounting.model.KppOktmoPair;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.State;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.dto.Declaration2NdflFLDTO;
 import com.aplana.sbrf.taxaccounting.model.filter.Declaration2NdflFLFilter;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDocState;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookKnfType;
+import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 
 import java.util.Date;
@@ -155,11 +149,20 @@ public interface DeclarationDataDao extends PermissionDao {
     /**
      * Возвращяет консолидированную форму в отчетном периоде подразделения и по типу КНФ
      *
-     * @param knfType                  типу КНФ
+     * @param knfType                  тип КНФ
      * @param departmentReportPeriodId отчетный период подразделения
-     * @return консолидированная форм
+     * @return консолидированная форма
      */
     DeclarationData findKnfByKnfTypeAndPeriodId(RefBookKnfType knfType, int departmentReportPeriodId);
+
+    /**
+     * Возвращяет консолидированную форму по параметрам отчетного периода и по типу КНФ
+     *
+     * @param knfType   тип КНФ
+     * @param drpFilter параметры отчетного периода
+     * @return консолидированная форма
+     */
+    DeclarationData findKnfByKnfTypeAndPeriodFilter(RefBookKnfType knfType, DepartmentReportPeriodFilter drpFilter);
 
     /**
      * Возвращяет список форм по типу и отчетному периоду и паре кпп/октмо
@@ -281,6 +284,17 @@ public interface DeclarationDataDao extends PermissionDao {
      * @param declarationData создаваемая налоговая форма
      */
     List<Long> findExistingDeclarationsForCreationCheck(DeclarationData declarationData);
+
+    /**
+     * Возвращаает IDs НФ по критериям декларации, а также по критериям года отчетного периода без учета вида отчетности
+     *
+     * @param declarationData   создаваемая налоговая форма
+     * @param taxPeriodId       ID года периода
+     * @param periodCode        код периода
+     * @return IDs найденных НФ, соответствующих критериям поиска
+     */
+    List<Long> findExistingDeclarationsForCreationCheck(DeclarationData declarationData, Integer taxPeriodId,
+                                                        String periodCode);
 
     /**
      * Находит налоговые формы операции из которых используются для создания Приложения 2 к НП

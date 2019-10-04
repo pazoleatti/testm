@@ -24,9 +24,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.text.DateFormat;
 import java.text.Format;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -40,6 +38,9 @@ import static java.util.Collections.singletonList;
 @Transactional
 public class PeriodServiceImpl implements PeriodService {
     private static final Log LOG = LogFactory.getLog(PeriodServiceImpl.class);
+
+    private static final String YEAR_PERIOD_CODE = "34";
+    private static final String YEAR_REORG_PERIOD_CODE = "90";
 
     @Autowired
     private ReportPeriodDao reportPeriodDao;
@@ -541,13 +542,34 @@ public class PeriodServiceImpl implements PeriodService {
                         " с периодом сдачи корректировки " + FastDateFormat.getInstance("dd.MM.yyyy").format(departmentReportPeriod.getCorrectionDate()));
     }
 
-    private String getPeriodString(ReportPeriod reportPeriod) {
+    @Override
+    public String getPeriodString(ReportPeriod reportPeriod) {
         Integer reportPeriodTaxFormTypeId = reportPeriod.getReportPeriodTaxFormTypeId();
         RefBookFormType refBookFormType = refBookFormTypeService.findOne(reportPeriodTaxFormTypeId);
 
         return String.format("%s:%s:%s",
                 reportPeriod.getTaxPeriod().getYear(), reportPeriod.getName(), refBookFormType.getCode());
     }
+
+    @Override
+    public boolean isYearPeriodType(ReportPeriod reportPeriod) {
+        long dictTaxPeriodId = reportPeriod.getDictTaxPeriodId();
+        ReportPeriodType periodType = getPeriodTypeById(dictTaxPeriodId);
+        return isYearPeriodType(periodType);
+    }
+
+    @Override
+    public boolean isYearPeriodType(ReportPeriodType periodType) {
+        return YEAR_PERIOD_CODE.equals(periodType.getCode()) || YEAR_REORG_PERIOD_CODE.equals(periodType.getCode());
+    }
+
+    @Override
+    public boolean is6NdflOr2Ndfl1TaxFormType(ReportPeriod reportPeriod) {
+        Integer reportPeriodTaxFormTypeId = reportPeriod.getReportPeriodTaxFormTypeId();
+        return RefBookFormType.NDFL_2_1.getId().intValue() == reportPeriodTaxFormTypeId
+                || RefBookFormType.NDFL_6.getId().intValue() == reportPeriodTaxFormTypeId;
+    }
+
 
     private DepartmentReportPeriodFilter filterFor(DepartmentReportPeriod departmentReportPeriod) {
         DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter();
