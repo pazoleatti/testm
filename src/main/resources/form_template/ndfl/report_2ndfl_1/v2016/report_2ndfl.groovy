@@ -719,7 +719,7 @@ class Report2Ndfl extends AbstractScriptClass {
             for (def ndflReference : ndflReferenceList) {
                 String corrNum = searchCorrNum(ndflReference.NUM.stringValue, previousONF.id)
                 if (corrNum != "99") {
-                    long referencePersonId = ndflReference.PERSON_ID.referenceValue
+                    long referencePersonId = ndflReference.NDFL_PERSON_ID.referenceValue
                     if (!personSet.any {it.personId == referencePersonId } ) {
                         NdflPerson person = ndflPersonService.get(referencePersonId)
                         nullifyPersonList.add(person)
