@@ -173,4 +173,97 @@
     </changeSet>
 
 
+    <changeSet id="3.10.1-skononova-2" author="skononova">
+	<sql splitStatements="false">
+		CREATE TABLE REF_BOOK_OKTMO_TMP3
+                      (
+                      version   DATE NOT NULL,
+                      code      VARCHAR2(11 CHAR) NOT NULL,
+                      name      VARCHAR2(500 CHAR) NOT NULL,
+                      razd      NUMBER(1)
+                      )
+	</sql>
+	<loadData encoding="UTF-8" file="csv/oktmo.csv" tableName="REF_BOOK_OKTMO_TMP3" separator="|">
+	            <column name="VERSION" type="date"/>
+	            <column name="CODE" type="string"/>
+	            <column name="NAME" type="string"/>
+	            <column name="RAZD" type="string"/>
+        </loadData>
+
+	<sql>
+            INSERT INTO ref_book_oktmo (id, record_id, version, status, code, name, razd)
+	    SELECT seq_ref_book_record.nextval, seq_ref_book_record_row_id.nextval, tmp.version, 0, tmp.code, tmp.name, tmp.razd 
+	    FROM ref_book_oktmo_TMP3 tmp
+	    WHERE tmp.code NOT IN (SELECT code FROM ref_book_oktmo);
+	</sql>
+        <sql>
+	   INSERT INTO ref_book_oktmo (id, record_id, version, status, code, name, razd)
+		    SELECT seq_ref_book_record.nextval, (select max(record_id) from ref_book_oktmo c where c.code=src.code),
+			   src.version, 0, src.code, src.name, src.razd 
+		    FROM ref_book_oktmo_TMP3 src left join ref_book_oktmo dst 
+				on dst.code = src.code and dst.name=src.name and dst.version  &lt;= src.version     		   
+			where dst.id is null;
+	</sql>
+	<sql>
+	merge into ref_book_oktmo dst using 
+	    (select '96612101' as code, 'Курчалойское' as name, '1' as razd, to_date ('01.05.2019','dd.mm.yyyy') as version, 0 as status from dual union
+	     select '96612101001','г Курчалой','2', to_date ('01.05.2019','dd.mm.yyyy'), 0 from dual union
+	     select '76636402','Балягинское','1', to_date ('01.05.2019','dd.mm.yyyy'), 0 from dual union
+	     select '76636402101','с Баляга','2', to_date ('01.05.2019','dd.mm.yyyy'), 0 from dual union
+	     select '76636402106','с Кули','2', to_date ('01.05.2019','dd.mm.yyyy'), 0 from dual union
+	     select '76636452','Тарбагатайское','1', to_date ('01.05.2019','dd.mm.yyyy'), 0 from dual union
+	     select '76636452101','c Тарбагатай','2', to_date ('01.05.2019','dd.mm.yyyy'), 0 from dual union
+	     select '76636452106','c Нижний Тарбагатай','2', to_date ('01.05.2019','dd.mm.yyyy'), 0 from dual 	    )  src
+	    on (dst.code=src.code and dst.version=src.version and dst.status=src.status)
+	    when not matched then insert (id, code, name, version, status, record_id, razd)
+	    values (seq_ref_book_record.nextval, src.code, src.name, src.version, src.status, seq_ref_book_record_row_id.nextval, src.razd);
+
+	merge into ref_book_oktmo dst using 
+	    (select  '96612419' as code, 'Курчалойское' as name, '1' as razd, to_date ('01.05.2019','dd.mm.yyyy') as version, 2 as status from dual union
+	     select '96612419101','c Курчалой','2', to_date ('01.05.2019','dd.mm.yyyy'), 2 from dual union
+	     select '76636152','Балягинское','1', to_date ('01.05.2019','dd.mm.yyyy'), 2 from dual union
+	     select '76636152051','пгт Баляга','2', to_date ('01.05.2019','dd.mm.yyyy'), 2 from dual union
+	     select '76636152106','с Кули','2', to_date ('01.05.2019','dd.mm.yyyy'), 2 from dual union
+	     select '76636158','Тарбагатайское','1', to_date ('01.05.2019','dd.mm.yyyy'), 2 from dual union
+	     select '76636158051','пгт Тарбагатай','2', to_date ('01.05.2019','dd.mm.yyyy'), 2 from dual 
+	    )  src
+	    on (dst.code=src.code and dst.version=src.version)
+	    when not matched then insert (id, code, name, version, status, record_id, razd)
+	    values (seq_ref_book_record.nextval, src.code, src.name, src.version, src.status, 
+	   (select max(record_id) from ref_book_oktmo c where c.code=src.code and c.status=0),  src.razd);
+
+	merge into ref_book_oktmo dst using 
+	    (
+	     select '04614452' as code, 'сельсовет Памяти 13 Борцов' as name, '1' as razd, to_date ('01.06.2019','dd.mm.yyyy') as version, 0 as status from dual union
+	     select '04614452101','п Памяти 13 Борцов','2', to_date ('01.06.2019','dd.mm.yyyy'), 0 from dual union
+	     select '04614452106','д Малый Кемчуг','2', to_date ('01.06.2019','dd.mm.yyyy'), 0 from dual union
+	     select '04639450','поселок Тинской','1', to_date ('01.06.2019','dd.mm.yyyy'), 0 from dual union
+	     select '04639450101','п Тинской','2', to_date ('01.06.2019','dd.mm.yyyy'), 0 from dual 
+	    ) src
+	    on (dst.code=src.code and dst.version=src.version and dst.status=src.status)
+	    when not matched then insert (id, code, name, version, status, record_id, razd)
+	    values (seq_ref_book_record.nextval, src.code, src.name, src.version, src.status, seq_ref_book_record_row_id.nextval, src.razd);
+
+
+	merge into ref_book_oktmo dst using 
+	    (select  '04614156' as code, 'поселок Памяти 13 Борцов' as name, '1' as razd, to_date ('01.06.2019','dd.mm.yyyy') as version, 2 as status from dual union
+	     select '04614156051','рп Памяти 13 Борцов','2', to_date ('01.06.2019','dd.mm.yyyy'), 2 from dual union
+	     select '04614156106','д Малый Кемчуг','2', to_date ('01.06.2019','dd.mm.yyyy'), 2 from dual union
+	     select '04639160','поселок Тинской','1', to_date ('01.06.2019','dd.mm.yyyy'), 2 from dual union
+	     select '04639160051','рп Тинской','2', to_date ('01.06.2019','dd.mm.yyyy'), 2 from dual  union
+	     select '76636158106','с Нижний Тарбагатай','2', to_date ('01.05.2019','dd.mm.yyyy'), 2 from dual
+	    )  src
+	    on (dst.code=src.code and dst.version=src.version)
+	    when not matched then insert (id, code, name, version, status, record_id, razd)
+	    values (seq_ref_book_record.nextval, src.code, src.name, src.version, src.status, 
+	   (select max(record_id) from ref_book_oktmo c where c.code=src.code and c.status=0),  src.razd)
+	   where (select max(record_id) from ref_book_oktmo c where c.code=src.code and c.status=0) is not null;
+
+	</sql>
+	<sql>
+		drop table REF_BOOK_OKTMO_TMP3
+	</sql>
+    </changeSet>
+
+
 </databaseChangeLog>
