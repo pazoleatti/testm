@@ -262,7 +262,7 @@ class Report2Ndfl extends AbstractScriptClass {
                     person.incomes = (List<NdflPersonIncome>) operationsByPersonId[person.id]*.incomes.flatten()
                     person.deductions = (List<NdflPersonDeduction>) operationsByPersonId[person.id]*.deductions.flatten()
                     person.prepayments = (List<NdflPersonPrepayment>) operationsByPersonId[person.id]*.prepayments.flatten()
-                    def nomSprAndCorr = getNomSpr(person.id, reportPeriod.taxPeriod.year, declarationData.kpp, declarationData.oktmo, declarationTemplate.type.id)
+                    def nomSprAndCorr = getNomSpr(person.recordId, reportPeriod.taxPeriod.year, declarationData.kpp, declarationData.oktmo, declarationTemplate.type.id)
                     "НДФЛ-2"(НомСпр: nomSprAndCorr.sprNum,
                             НомКорр: sprintf('%02d', nomSprAndCorr.corrNum)) {
                         ПолучДох(ИННФЛ: person.innNp,
@@ -365,7 +365,7 @@ class Report2Ndfl extends AbstractScriptClass {
                 }
                 def nullifyPersonList = getNullifyPersonList(declarationData.kpp, declarationData.oktmo, reportPeriod.taxPeriod.year, reportPeriod.dictTaxPeriodId, declarationTemplate.type.id, persons)
                 for (NdflPerson person : nullifyPersonList) {
-                    def nomSprAndCorr = getNomSpr(person.id, reportPeriod.taxPeriod.year, declarationData.kpp, declarationData.oktmo, declarationTemplate.type.id)
+                    def nomSprAndCorr = getNomSpr(person.recordId, reportPeriod.taxPeriod.year, declarationData.kpp, declarationData.oktmo, declarationTemplate.type.id)
                     "НДФЛ-2"(НомСпр: nomSprAndCorr.sprNum,
                             НомКорр: "99") {
                         ПолучДох(ИННФЛ: person.innNp,
@@ -611,7 +611,7 @@ class Report2Ndfl extends AbstractScriptClass {
                 }
                 def nullifyPersonList = getNullifyPersonList(declarationData.kpp, declarationData.oktmo, reportPeriod.taxPeriod.year, reportPeriod.dictTaxPeriodId, declarationTemplate.type.id, persons)
                 for (NdflPerson person : nullifyPersonList) {
-                    def nomSprAndCorr = getNomSpr(person.id, reportPeriod.taxPeriod.year, declarationData.kpp, declarationData.oktmo, declarationTemplate.type.id)
+                    def nomSprAndCorr = getNomSpr(person.recordId, reportPeriod.taxPeriod.year, declarationData.kpp, declarationData.oktmo, declarationTemplate.type.id)
                     "НДФЛ-2"(НомСпр: nomSprAndCorr.sprNum,
                             НомКорр: "99") {
                         ПолучДох(ИННФЛ: person.innNp,
