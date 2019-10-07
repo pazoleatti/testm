@@ -54,7 +54,7 @@ public class DeclarationTemplateDaoTest {
 
     @Test
     public void testListAll() {
-        assertEquals(6, declarationTemplateDao.listAll().size());
+        assertEquals(7, declarationTemplateDao.listAll().size());
     }
 
     @Test
@@ -268,15 +268,15 @@ public class DeclarationTemplateDaoTest {
     }
 
     @Test
-    public void testGeAll() {
-        Assert.assertEquals(6, declarationTemplateDao.getByFilter(null).size());
+    public void testGetAll() {
+        Assert.assertEquals(7, declarationTemplateDao.getByFilter(null).size());
     }
 
     @Test
-    public void testGeByFilter() {
+    public void testGetByFilter() {
         TemplateFilter filter = new TemplateFilter();
         filter.setTaxType(TaxType.TRANSPORT);
-        Assert.assertEquals(6, declarationTemplateDao.getByFilter(filter).size());
+        Assert.assertEquals(7, declarationTemplateDao.getByFilter(filter).size());
     }
 
     @Test

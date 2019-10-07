@@ -40,3 +40,6 @@ insert into department_report_period(id, department_id, report_period_id, is_act
 insert into department_report_period(id, department_id, report_period_id, is_active) values (604, 6, 2, 1);
 insert into department_report_period(id, department_id, report_period_id, is_active) values (605, 6, 3, 1);
 insert into department_report_period(id, department_id, report_period_id, is_active) values (606, 6, 4, 1);
+
+insert into department_report_period(id, department_id, report_period_id, is_active) values (701, 1, 130, 1);
+insert into department_report_period(id, department_id, report_period_id, is_active) values (702, 1, 410, 1);

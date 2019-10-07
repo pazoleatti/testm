@@ -1,7 +1,8 @@
 INSERT INTO report_period_type (id,code,name,start_date,end_date,calendar_start_date) VALUES (21, '21', 'первый квартал', DATE '1970-01-01', DATE '1970-03-31', DATE '1970-01-01');
 INSERT INTO report_period_type (id,code,name,start_date,end_date,calendar_start_date) VALUES (22, '22', 'второй квартал', DATE '1970-01-01', DATE '1970-06-30', DATE '1970-04-01');
 INSERT INTO report_period_type (id,code,name,start_date,end_date,calendar_start_date) VALUES (23, '23', 'третий квартал', DATE '1970-01-01', DATE '1970-09-30', DATE '1970-07-01');
-INSERT INTO report_period_type (id,code,name,start_date,end_date,calendar_start_date) VALUES (24, '24', 'год', DATE '1970-01-01', DATE '1970-12-31', DATE '1970-10-01');
+INSERT INTO report_period_type (id,code,name,start_date,end_date,calendar_start_date) VALUES (24, '33', 'год', DATE '1970-01-01', DATE '1970-12-31', DATE '1970-10-01');
+INSERT INTO report_period_type (id,code,name,start_date,end_date,calendar_start_date) VALUES (25, '90', 'год при реорганизации (ликвидации) организации', DATE '1970-01-01', DATE '1970-12-31', DATE '1970-10-01');
 
 INSERT INTO REPORT_PERIOD (id, name, tax_period_id, dict_tax_period_id, start_date, end_date, calendar_start_date, form_type_id) VALUES (1, 'первый квартал',  1, 21, date '2013-01-01', date '2013-03-31', date '2013-01-01', 5);
 INSERT INTO REPORT_PERIOD (id, name, tax_period_id, dict_tax_period_id, start_date, end_date, calendar_start_date, form_type_id) VALUES (2, 'полугодие',  1, 22, date '2013-04-01', date '2013-06-30', date '2013-04-01', 5);
@@ -30,4 +31,4 @@ INSERT INTO REPORT_PERIOD (id, name, tax_period_id, dict_tax_period_id, start_da
 INSERT INTO REPORT_PERIOD (id, name, tax_period_id, dict_tax_period_id, start_date, end_date, calendar_start_date, form_type_id) VALUES (310, 'полугодие', 1020, 22, date '2018-01-01', date '2018-06-30', date '2018-04-01', 5);
 INSERT INTO REPORT_PERIOD (id, name, tax_period_id, dict_tax_period_id, start_date, end_date, calendar_start_date, form_type_id) VALUES (320, '9 месяцев', 1020, 23, date '2018-01-01', date '2018-09-30', date '2018-07-01', 5);
 INSERT INTO REPORT_PERIOD (id, name, tax_period_id, dict_tax_period_id, start_date, end_date, calendar_start_date, form_type_id) VALUES (330, 'год', 1020, 24, date '2018-01-01', date '2018-12-31', date '2018-10-01', 5);
-
+INSERT INTO REPORT_PERIOD (id, name, tax_period_id, dict_tax_period_id, start_date, end_date, calendar_start_date, form_type_id) VALUES (410, 'год при реорганизации (ликвидации) организации', 1000, 25, date '2016-01-01', date '2016-12-31', date '2016-10-01', 3);

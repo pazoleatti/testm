@@ -11,8 +11,6 @@ create global temporary table tmp_cons_data(
 
 insert into declaration_template(id, name, version, jrxml, declaration_type_id, status, form_kind, form_type)
 values (100, 'РНУ НДФЛ (первичная)', date '2016-01-01', null, 100, 0, '1', 2);
-insert into declaration_template(id, name, version, jrxml, declaration_type_id, status, form_kind, form_type)
-values (101, 'РНУ НДФЛ (консолидированная)', date '2016-01-01', null, 101, 0, '2', 2);
 
 insert into department_report_period(id, department_id, report_period_id, is_active) values (1000, 7, 100, 1),
 (1010, 7, 110, 1),

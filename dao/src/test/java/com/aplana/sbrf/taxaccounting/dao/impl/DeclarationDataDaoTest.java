@@ -4,6 +4,8 @@ import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookKnfType;
+import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.google.common.collect.Sets;
 import org.junit.Assert;
 import org.junit.Before;
@@ -79,33 +81,33 @@ public class DeclarationDataDaoTest {
 
     @Test(expected = DaoException.class)
     public void testGetNotExisted() {
-        declarationDataDao.get(1000l);
+        declarationDataDao.get(1000L);
     }
 
     @Test(expected = DaoException.class)
     public void testGetDataNotExisted() {
-        declarationDataDao.get(1000l);
+        declarationDataDao.get(1000L);
     }
 
     @Test
     public void testGetDataNotExisted2() {
-        assertFalse(declarationDataDao.existDeclarationData(1000l));
+        assertFalse(declarationDataDao.existDeclarationData(1000L));
     }
 
     @Test
     public void testSetAccepted() {
-        declarationDataDao.setStatus(3l, State.CREATED);
-        DeclarationData d3 = declarationDataDao.get(3l);
+        declarationDataDao.setStatus(3L, State.CREATED);
+        DeclarationData d3 = declarationDataDao.get(3L);
         assertEquals(State.CREATED, d3.getState());
 
-        declarationDataDao.setStatus(4l, State.ACCEPTED);
-        DeclarationData d4 = declarationDataDao.get(4l);
+        declarationDataDao.setStatus(4L, State.ACCEPTED);
+        DeclarationData d4 = declarationDataDao.get(4L);
         assertEquals(State.ACCEPTED, d4.getState());
     }
 
     @Test(expected = DaoException.class)
     public void testSetAcceptedNotExistsed() {
-        declarationDataDao.setStatus(1000l, State.ACCEPTED);
+        declarationDataDao.setStatus(1000L, State.ACCEPTED);
     }
 
     @Test
@@ -121,7 +123,7 @@ public class DeclarationDataDaoTest {
 
     @Test(expected = DaoException.class)
     public void testDeleteNotExisted() {
-        declarationDataDao.delete(1000l);
+        declarationDataDao.delete(1000L);
     }
 
     @Test
@@ -151,7 +153,7 @@ public class DeclarationDataDaoTest {
     @Test(expected = IllegalArgumentException.class)
     public void testSaveNewWithId() {
         DeclarationData d = new DeclarationData();
-        d.setId(1000l);
+        d.setId(1000L);
         d.setState(State.ACCEPTED);
         d.setDeclarationTemplateId(1);
         d.setDepartmentReportPeriodId(111);
@@ -161,8 +163,8 @@ public class DeclarationDataDaoTest {
     @Test
     public void findPageByFilterTest() {
         DeclarationDataFilter filter = new DeclarationDataFilter();
-        assertArrayEquals(new Long[]{123l, 5l, 4l, 3l, 2l, 1l}, declarationDataDao.findIdsByFilter(filter, DeclarationDataSearchOrdering.ID, false).toArray());
-        assertArrayEquals(new Long[]{1l, 2l, 3l, 4l, 5l, 123l}, declarationDataDao.findIdsByFilter(filter, DeclarationDataSearchOrdering.ID, true).toArray());
+        assertArrayEquals(new Long[]{123L, 7L, 6L, 5L, 4L, 3L, 2L, 1L}, declarationDataDao.findIdsByFilter(filter, DeclarationDataSearchOrdering.ID, false).toArray());
+        assertArrayEquals(new Long[]{1L, 2L, 3L, 4L, 5L, 6L, 7L, 123L}, declarationDataDao.findIdsByFilter(filter, DeclarationDataSearchOrdering.ID, true).toArray());
     }
 
     private PagingParams getPagingParams(int page, int count) {
@@ -176,8 +178,8 @@ public class DeclarationDataDaoTest {
     public void findPage_all() {
         DeclarationDataFilter filter = new DeclarationDataFilter();
         PagingResult<DeclarationDataJournalItem> page = declarationDataDao.findPage(filter, getPagingParams(1, Integer.MAX_VALUE));
-        assertEquals(6, page.size());
-        assertEquals(6, page.getTotalCount());
+        assertEquals(8, page.size());
+        assertEquals(8, page.getTotalCount());
     }
 
     @Test
@@ -185,7 +187,7 @@ public class DeclarationDataDaoTest {
         DeclarationDataFilter filter = new DeclarationDataFilter();
         PagingResult<DeclarationDataJournalItem> page = declarationDataDao.findPage(filter, getPagingParams(2, 2));
         assertEquals(2, page.size());
-        assertEquals(6, page.getTotalCount());
+        assertEquals(8, page.getTotalCount());
         assertEquals(new Long(3), page.get(0).getDeclarationDataId());
         assertEquals(new Long(4), page.get(1).getDeclarationDataId());
     }
@@ -282,6 +284,46 @@ public class DeclarationDataDaoTest {
     public void findEmptyResultTest() {
         DeclarationData declaration = declarationDataDao.find(222, 222, null, null, null, null, null);
         assertNull(declaration);
+    }
+
+    @Test
+    public void findKnfByKnfTypeAndPeriodIdTest() {
+        DepartmentReportPeriodFilter drpFilter = new DepartmentReportPeriodFilter();
+        drpFilter.setDepartmentId(1);
+        drpFilter.setYearStart(2016);
+        drpFilter.setYearEnd(2016);
+        drpFilter.setDictTaxPeriodId(24L); // report_period_type
+
+        DeclarationData knf = declarationDataDao.findKnfByKnfTypeAndPeriodFilter(RefBookKnfType.ALL, drpFilter);
+        assertNotNull(knf);
+        assertEquals(6, (long) knf.getId());
+    }
+
+    @Test
+    public void checkExistingConsolidateDeclarationInYearPeriodAndPeriodCodeTest() {
+        DeclarationData declarationData = new DeclarationData();
+        declarationData.setDeclarationTemplateId(DeclarationType.NDFL_CONSOLIDATE);
+        declarationData.setKnfType(RefBookKnfType.ALL);
+
+        List<Long> existingDeclarationsIds =
+                declarationDataDao.findExistingDeclarationsForCreationCheck(declarationData, 1000, "33");
+
+        assertEquals(1, existingDeclarationsIds.size());
+        assertEquals(new Long(6), existingDeclarationsIds.get(0));
+
+    }
+
+    @Test
+    public void checkExistingConsolidateDeclarationInYearReorgPeriodAndPeriodCodeTest() {
+        DeclarationData declarationData = new DeclarationData();
+        declarationData.setDeclarationTemplateId(DeclarationType.NDFL_CONSOLIDATE);
+        declarationData.setKnfType(RefBookKnfType.ALL);
+
+        List<Long> existingDeclarationsIds =
+                declarationDataDao.findExistingDeclarationsForCreationCheck(declarationData, 1000, "90");
+
+        assertEquals(1, existingDeclarationsIds.size());
+        assertEquals(new Long(7), existingDeclarationsIds.get(0));
     }
 
     @Test

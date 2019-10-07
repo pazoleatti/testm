@@ -1,0 +1,1 @@
+insert into ref_book_knf_type(id, name, status) values (1, 'КНФ по всем данным', 0)
