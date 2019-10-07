@@ -2,12 +2,7 @@ package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.action.OpenCorrectionPeriodAction;
-import com.aplana.sbrf.taxaccounting.model.log.LogLevelType;
-import com.aplana.sbrf.taxaccounting.model.result.ClosePeriodResult;
-import com.aplana.sbrf.taxaccounting.model.result.DeletePeriodResult;
-import com.aplana.sbrf.taxaccounting.model.result.OpenPeriodResult;
-import com.aplana.sbrf.taxaccounting.model.result.ReopenPeriodResult;
-import com.aplana.sbrf.taxaccounting.model.result.ReportPeriodResult;
+import com.aplana.sbrf.taxaccounting.model.result.*;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import net.sf.jasperreports.web.actions.ActionException;
 
@@ -171,4 +166,40 @@ public interface PeriodService {
      * @return период для логов
      */
     String createLogPeriodFormatById(List<Long> idList, Integer logLevelType);
+
+    /**
+     * Формирование строки описания периода
+     *
+     * @param reportPeriod период, по которому необходимо получить полное описание
+     * @return строка описания периода
+     */
+    String getPeriodString(ReportPeriod reportPeriod);
+
+    /**
+     * Проверка на то, что тип отчетного периода соответствует значению "год" или
+     * "год при реорганизации (ликвидации) организации"
+     *
+     * @param reportPeriod отчетный период
+     * @return true, если тип отчетного период соответствует значению "год" или
+     * "год при реорганизации (ликвидации) организации"
+     */
+    boolean isYearPeriodType(ReportPeriod reportPeriod);
+
+    /**
+     * Проверка на то, что тип отчетного периода соответствует значению "год" или
+     * "год при реорганизации (ликвидации) организации"
+     *
+     * @param periodType тип отчетного периода
+     * @return true, если тип отчетного период соответствует значению "год" или
+     * "год при реорганизации (ликвидации) организации"
+     */
+    boolean isYearPeriodType(ReportPeriodType periodType);
+
+    /**
+     * Проверка на то, что тип НФ является 6-НДФЛ или 2-НДФЛ(1)
+     *
+     * @param reportPeriod отчтетный период
+     * @return true, если тип НФ является 6-НДФЛ или 2-НДФЛ(1)
+     */
+    boolean is6NdflOr2Ndfl1TaxFormType(ReportPeriod reportPeriod);
 }

@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.SourceDao;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,8 +17,6 @@ import static org.junit.Assert.*;
 @ContextConfiguration({"SourceDaoTest.xml"})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @Transactional
-//TODO включить в версии 3.10.1
-@Ignore
 public class SourceDaoTest {
 
     @Autowired

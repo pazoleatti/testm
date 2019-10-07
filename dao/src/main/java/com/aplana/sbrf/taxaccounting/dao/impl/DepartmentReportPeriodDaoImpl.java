@@ -3,9 +3,9 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
+import com.aplana.sbrf.taxaccounting.dao.util.DepartmentPeriodSqlFilterUtil;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,8 +24,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Objects;
 
 
 @Repository
@@ -36,13 +38,6 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
     @Autowired
     private ReportPeriodDao reportPeriodDao;
 
-    private static final ThreadLocal<SimpleDateFormat> SIMPLE_DATE_FORMAT = new ThreadLocal<SimpleDateFormat>() {
-        @Override
-        protected SimpleDateFormat initialValue() {
-            return new SimpleDateFormat("dd.MM.yyyy");
-        }
-    };
-
     /**
      * Запрос обычной выборки отчетных периодов подразделения
      */
@@ -51,7 +46,8 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
     /**
      * Запрос выборки отчетных периодов подразделения с сортировкой по году и периоду сдаче корректировки(сначала некорректирующие)
      */
-    private static final String QUERY_TEMPLATE_COMPOSITE_SORT = "select drp.id, rpt.code, drp.department_id, drp.report_period_id, drp.is_active, drp.correction_date \n" +
+    private static final String QUERY_TEMPLATE_COMPOSITE_SORT = "select \n" +
+            " drp.id, rpt.code, drp.department_id, drp.report_period_id, drp.is_active, drp.correction_date, rp.form_type_id \n" +
             " from \n" +
             " department_report_period drp \n" +
             " join report_period rp on drp.report_period_id = rp.id \n" +
@@ -102,69 +98,10 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
             departmentReportPeriodJournalItem.setIsActive(!Objects.equals(SqlUtils.getInteger(rs, "is_active"), 0));
             departmentReportPeriodJournalItem.setCorrectionDate(rs.getDate("correction_date"));
             departmentReportPeriodJournalItem.setCode(rs.getString("code"));
+            departmentReportPeriodJournalItem.setTaxFormTypeId(SqlUtils.getInteger(rs, "form_type_id"));
             return departmentReportPeriodJournalItem;
         }
     };
-
-    /**
-     * Формирует sql выражение where с параметрами из фильтра
-     *
-     * @param filter фильтр
-     * @return строка с условиями выборки where
-     */
-    private String makeSqlWhereClause(DepartmentReportPeriodFilter filter) {
-        if (filter == null) {
-            return "";
-        }
-
-        List<String> causeList = new LinkedList<>();
-
-        if (filter.isCorrection() != null) {
-            causeList.add("drp.correction_date is " + (filter.isCorrection() ? " not " : "") + " null");
-        }
-
-        if (filter.isActive() != null) {
-            causeList.add("drp.is_active " + (filter.isActive() ? "<>" : "=") + " 0");
-        }
-
-        if (filter.getCorrectionDate() != null) {
-            causeList.add("drp.correction_date = to_date('" +
-                    SIMPLE_DATE_FORMAT.get().format(filter.getCorrectionDate()) +
-                    "', 'DD.MM.YYYY')");
-        }
-
-        if (filter.getDepartmentIdList() != null) {
-            causeList.add(SqlUtils.transformToSqlInStatement("drp.department_id",
-                    filter.getDepartmentIdList()));
-        }
-
-        if (filter.getReportPeriodIdList() != null) {
-            causeList.add(SqlUtils.transformToSqlInStatement("drp.report_period_id",
-                    filter.getReportPeriodIdList()));
-        }
-
-        if (filter.getTaxTypeList() != null) {
-            causeList.add("tp.tax_type in " +
-                    SqlUtils.transformTaxTypeToSqlInStatement(filter.getTaxTypeList()));
-        }
-        if (filter.getYearStart() != null || filter.getYearEnd() != null) {
-            causeList.add("(:yearStart is null or tp.year >= :yearStart) and (:yearEnd is null or tp.year <= :yearEnd)");
-        }
-
-        if (filter.getDepartmentId() != null) {
-            causeList.add("drp.department_id = " + filter.getDepartmentId());
-        }
-
-        if (filter.getReportPeriod() != null) {
-            causeList.add("drp.report_period_id = " + filter.getReportPeriod().getId());
-        }
-
-        if (causeList.isEmpty()) {
-            return "";
-        }
-
-        return " where " + StringUtils.join(causeList, " and ");
-    }
 
     /**
      * Выполняет запрос в БД  с фильтрацией и формирует список объектов по указанному мапперу
@@ -175,7 +112,8 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
      * @return список объектов типа <T> или пустой список
      */
     private <T> List<T> executeFetchByFilter(final DepartmentReportPeriodFilter filter, RowMapper<T> mapper) {
-        return getNamedParameterJdbcTemplate().query(String.format(QUERY_TEMPLATE_COMPOSITE_SORT, makeSqlWhereClause(filter)),
+        return getNamedParameterJdbcTemplate().query(
+                String.format(QUERY_TEMPLATE_COMPOSITE_SORT, DepartmentPeriodSqlFilterUtil.makeSqlWhereClause(filter)),
                 new HashMap<String, Object>(2) {{
                     put("yearStart", filter.getYearStart());
                     put("yearEnd", filter.getYearEnd());
@@ -190,7 +128,7 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
     @Override
     public List<Integer> fetchAllIdsByFilter(final DepartmentReportPeriodFilter filter) {
         return getNamedParameterJdbcTemplate().queryForList(
-                String.format(QUERY_TEMPLATE_COMPOSITE_SORT_ID, makeSqlWhereClause(filter)),
+                String.format(QUERY_TEMPLATE_COMPOSITE_SORT_ID, DepartmentPeriodSqlFilterUtil.makeSqlWhereClause(filter)),
                 new HashMap<String, Object>(2) {{
                     put("yearStart", filter.getYearStart());
                     put("yearEnd", filter.getYearEnd());
@@ -408,10 +346,14 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
     @Transactional(readOnly = true)
     public boolean isLaterCorrectionPeriodExists(DepartmentReportPeriod departmentReportPeriod) {
         return getJdbcTemplate().queryForObject(
-                "SELECT count(*) FROM department_report_period drp WHERE " +
-                        "drp.DEPARTMENT_ID = ? AND drp.report_period_id = ? AND drp.CORRECTION_DATE > ?",
-                Integer.class, departmentReportPeriod.getDepartmentId(), departmentReportPeriod.getReportPeriod().getId(),
-                departmentReportPeriod.getCorrectionDate()
+                "SELECT count(*) FROM department_report_period drp\n " +
+                        "join report_period rp on rp.id = drp.report_period_id\n " +
+                        "WHERE\n " +
+                        "drp.DEPARTMENT_ID = ?\n" +
+                        "AND drp.report_period_id = ? AND drp.CORRECTION_DATE > ? AND rp.form_type_id = ?",
+                Integer.class, departmentReportPeriod.getDepartmentId(),
+                departmentReportPeriod.getReportPeriod().getId(), departmentReportPeriod.getCorrectionDate(),
+                departmentReportPeriod.getReportPeriod().getReportPeriodTaxFormTypeId()
         ) > 0;
     }
 

@@ -27,6 +27,7 @@ import com.aplana.sbrf.taxaccounting.model.ndfl.*;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.result.*;
 import com.aplana.sbrf.taxaccounting.model.util.DateUtils;
+import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 import com.aplana.sbrf.taxaccounting.permissions.BasePermissionEvaluator;
 import com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission;
@@ -65,7 +66,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.poi.ss.formula.functions.T;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -99,7 +100,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     private static final Log LOG = LogFactory.getLog(DeclarationDataService.class);
 
-    private static final String XML_HEADER = "<?xml version=\"1.0\" encoding=\"windows-1251\"?>";
     private static final String ENCODING = "UTF-8";
     private static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
         @Override
@@ -119,10 +119,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     private static final String CALCULATION_NOT_TOPICAL_SUFFIX = " Для коррекции консолидированных данных необходимо нажать на кнопку \"Рассчитать\"";
     private static final String ACCESS_ERR_MSG_FMT = "Нет прав на доступ к налоговой форме. Проверьте назначение формы РНУ НДФЛ (первичная) для подразделения «%s» в «Назначении налоговых форм»%s.";
     private static final String DD_NOT_IN_RANGE = "Найдена форма: \"%s\", \"%d\", \"%s\", \"%s\", состояние - \"%s\"";
-    private static final String TAG_FILE = "Файл";
-    private static final String TAG_DOCUMENT = "Документ";
-    private static final String ATTR_FILE_ID = "ИдФайл";
-    private static final String ATTR_DOC_DATE = "ДатаДок";
     private static final String VALIDATION_ERR_MSG = "Обнаружены фатальные ошибки!";
     private static final String MSG_IS_EXIST_DECLARATION =
             "Существует экземпляр \"%s\" в подразделении \"%s\" в периоде \"%s\"%s%s для макета!";
@@ -235,6 +231,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 create(newDeclarationData, departmentReportPeriod, logger, userInfo);
                 result.setEntityId(newDeclarationData.getId());
             } catch (DaoException e) {
+                LOG.warn("Произошла ошибка при создании декларации", e);
                 throw new ServiceException(e.getMessage());
             }
             if (!logger.getEntries().isEmpty()) {
@@ -349,8 +346,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         LOG.info(String.format("DeclarationDataServiceImpl.create by %s. declarationTemplateId: %s; departmentReportPeriod: %s; taxOrganCode: %s; taxOrganKpp: %s; oktmo: %s; asunId: %s; fileName: %s; note: %s; manuallyCreated: %s",
                 userInfo, newDeclaration.getDeclarationTemplateId(), departmentReportPeriod, newDeclaration.getTaxOrganCode(), newDeclaration.getKpp(), newDeclaration.getOktmo(), newDeclaration.getAsnuId(), newDeclaration.getFileName(), newDeclaration.getNote(), newDeclaration.isManuallyCreated()));
 
+        ReportPeriod reportPeriod = departmentReportPeriod.getReportPeriod();
+
         newDeclaration.setDepartmentReportPeriodId(departmentReportPeriod.getId());
-        newDeclaration.setReportPeriodId(departmentReportPeriod.getReportPeriod().getId());
+        newDeclaration.setReportPeriodId(reportPeriod.getId());
         newDeclaration.setDepartmentId(departmentReportPeriod.getDepartmentId());
         newDeclaration.setState(State.CREATED);
 
@@ -371,8 +370,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     throw new ServiceLoggerException(("Налоговая форма не создана"), logEntryService.save(logger.getEntries()));
                 }
                 boolean isExistForm = false;
+                List<Long> existingDeclarationsIds = getExistingDeclarationsIds(newDeclaration, reportPeriod);
                 if (declarationTemplate.getDeclarationFormKind().getId() == DeclarationFormKind.CONSOLIDATED.getId() &&
-                        newDeclaration.isManuallyCreated() && declarationDataDao.existDeclarationData(newDeclaration)) {
+                        newDeclaration.isManuallyCreated() && !existingDeclarationsIds.isEmpty()) {
                     String strCorrPeriod = "";
                     if (departmentReportPeriod.getCorrectionDate() != null) {
                         SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
@@ -381,13 +381,11 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
                     // Доп проверка если Вид налоговой формы = «РНУ НДФЛ (консолидированная)»
                     String message = "";
-                    DeclarationData existDeclaration = new DeclarationData();
-                    List<Long> takeExistingDeclaratiosId = new ArrayList<>(declarationDataDao.findExistingDeclarationsForCreationCheck(newDeclaration));
-                    existDeclaration = declarationDataDao.get(takeExistingDeclaratiosId.get(0));
+                    DeclarationData existDeclaration = declarationDataDao.get(existingDeclarationsIds.get(0));
                     if (!RefBookKnfType.BY_KPP.equals(newDeclaration.getKnfType())) {
                         message = String.format("В Системе уже существует налоговая форма № \"%s\" с заданными параметрами Период: \"%s\", Подразделение: \"%s\", " +
                                         " Вид налоговой формы: \"%s\", Тип КНФ: \"%s\" . Создание в Системе нескольких КНФ с одинаковыми параметрами невозможно.",
-                                existDeclaration.getId(), departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + ", " + departmentReportPeriod.getReportPeriod().getName() + strCorrPeriod,
+                                existDeclaration.getId(), reportPeriod.getTaxPeriod().getYear() + ", " + reportPeriod.getName() + strCorrPeriod,
                                 department.getName(), declarationTemplate.getDeclarationFormKind().getName(), newDeclaration.getKnfType().getName());
                         isExistForm = true;
                     } else {
@@ -395,7 +393,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                                 existDeclaration.getKnfType().equals(newDeclaration.getKnfType())) {
                             HashSet<String> newKppList = new HashSet<>(newDeclaration.getIncludedKpps());
                             StringBuilder messageKpp = new StringBuilder();
-                            for (Long existId : takeExistingDeclaratiosId) {
+                            for (Long existId : existingDeclarationsIds) {
                                 existDeclaration = declarationDataDao.get(existId);
                                 List<String> existKppList = new ArrayList<>(declarationService.getDeclarationDataKppList(existId));
                                 for (String existKpp : existKppList) {
@@ -413,7 +411,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                             if (isExistForm) {
                                 message = String.format("В Системе уже существует налоговая форма № \"%s\" с заданными параметрами Период: \"%s\", Подразделение: \"%s\", " +
                                                 " Вид налоговой формы: \"%s\", Тип КНФ: \"%s\" , содержащая операции с КПП:  \"%s\". Создание в Системе нескольких КНФ с одинаковыми параметрами невозможно.",
-                                        existDeclaration.getId(), departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + ", " + departmentReportPeriod.getReportPeriod().getName() + strCorrPeriod,
+                                        existDeclaration.getId(), reportPeriod.getTaxPeriod().getYear() + ", " + reportPeriod.getName() + strCorrPeriod,
                                         department.getName(), declarationTemplate.getDeclarationFormKind().getName(), newDeclaration.getKnfType().getName(), messageKpp);
                             }
                         }
@@ -434,6 +432,23 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 errorMessage = String.format("Данная форма заблокирована. Пользователем %s (%s) уже запущена операция \"%s\"", user.getName(), user.getLogin(), lockDescription);
             }
             logger.error(errorMessage);
+        }
+    }
+
+    @NotNull
+    private List<Long> getExistingDeclarationsIds(DeclarationData newDeclaration, ReportPeriod reportPeriod) {
+        if (DeclarationType.NDFL_CONSOLIDATE != newDeclaration.getDeclarationTemplateId()) {
+            return Collections.emptyList();
+        }
+
+        long dictTaxPeriodId = reportPeriod.getDictTaxPeriodId();
+        ReportPeriodType periodType = periodService.getPeriodTypeById(dictTaxPeriodId);
+
+        if (newDeclaration.getKnfType() != RefBookKnfType.BY_KPP && reportPeriodService.isYearPeriodType(periodType)) {
+            return declarationDataDao.findExistingDeclarationsForCreationCheck(
+                    newDeclaration, reportPeriod.getTaxPeriod().getId(), periodType.getCode());
+        } else {
+            return declarationDataDao.findExistingDeclarationsForCreationCheck(newDeclaration);
         }
     }
 
@@ -813,6 +828,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             result.setCalendarStartDate(departmentReportPeriod.getReportPeriod().getCalendarStartDate());
             result.setEndDate(departmentReportPeriod.getReportPeriod().getEndDate());
             result.setCorrectionDate(departmentReportPeriod.getCorrectionDate());
+
+            ReportPeriod reportPeriod = reportPeriodService.fetchReportPeriod(departmentReportPeriod.getReportPeriod().getId());
+            result.setReportPeriodTaxFormTypeId(reportPeriod.getReportPeriodTaxFormTypeId());
 
             if (declaration.getAsnuId() != null) {
                 RefBookDataProvider asnuProvider = refBookFactory.getDataProvider(RefBook.Id.ASNU.getId());
@@ -2276,7 +2294,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         } else {
             departmentReportPeriod = departmentReportPeriodService.fetchLast(action.getDepartmentId(), action.getPeriodId());
             RefBookKnfType knfType = action.getDeclarationTypeId() == DeclarationType.NDFL_2_2 ? RefBookKnfType.BY_NONHOLDING_TAX : RefBookKnfType.ALL;
-            knf = declarationDataDao.findKnfByKnfTypeAndPeriodId(knfType, departmentReportPeriod.getId());
+            knf = findKnf(departmentReportPeriod, knfType);
         }
 
         // Период должен быть открыт.
@@ -2297,17 +2315,35 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         return knf;
     }
 
+    private DeclarationData findKnf(DepartmentReportPeriod departmentReportPeriod, RefBookKnfType knfType) {
+        DeclarationData knf = null;
+
+        ReportPeriod reportPeriod = departmentReportPeriod.getReportPeriod();
+        if (reportPeriodService.isYearPeriodType(reportPeriod) && reportPeriodService.is6NdflOr2Ndfl1TaxFormType(reportPeriod)) {
+            DepartmentReportPeriodFilter periodFilter = new DepartmentReportPeriodFilter();
+            periodFilter.setDepartmentId(departmentReportPeriod.getDepartmentId());
+            periodFilter.setYearStart(reportPeriod.getTaxPeriod().getYear());
+            periodFilter.setYearEnd(reportPeriod.getTaxPeriod().getYear());
+            periodFilter.setCorrectionDate(departmentReportPeriod.getCorrectionDate());
+            periodFilter.setDictTaxPeriodId(reportPeriod.getDictTaxPeriodId());
+
+            knf = declarationDataDao.findKnfByKnfTypeAndPeriodFilter(knfType, periodFilter);
+        } else if (!reportPeriodService.isYearPeriodType(reportPeriod)) {
+            knf = declarationDataDao.findKnfByKnfTypeAndPeriodId(knfType, departmentReportPeriod.getId());
+        }
+
+        return knf;
+    }
     /**
      * Генерация текста ошибки при формировании ОНФ по закрытому периоду.
      */
     private String generatePeriodIsClosedErrorText(Integer reportDeclarationTypeId, DepartmentReportPeriod departmentReportPeriod) {
         DeclarationType declarationType = declarationTypeDao.get(reportDeclarationTypeId);
         Department department = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
-        return String.format("Не выполнена операция \"Создание отчетных форм: \"%s\", Период: \"%s, %s%s\", Подразделение: \"%s\". " +
+        return String.format("Не выполнена операция \"Создание отчетных форм: \"%s\", Период: \"%s%s\", Подразделение: \"%s\". " +
                         "Причина: Выбранный период закрыт.",
                 declarationType.getName(),
-                departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(),
-                departmentReportPeriod.getReportPeriod().getName(),
+                reportPeriodService.getPeriodString(departmentReportPeriod.getReportPeriod()),
                 formatCorrectionDate(departmentReportPeriod.getCorrectionDate()),
                 department.getName()
         );
@@ -2319,12 +2355,11 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     private String generateKnfIsNotFoundErrorText(Integer reportDeclarationTypeId, DepartmentReportPeriod departmentReportPeriod) {
         DeclarationType declarationType = declarationTypeDao.get(reportDeclarationTypeId);
         Department department = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
-        return String.format("Отчетность %s для %s за период %s, %s%s не сформирована. " +
+        return String.format("Отчетность %s для %s за период %s%s не сформирована. " +
                         "Для указанного подразделения и периода не найдена форма РНУ НДФЛ (консолидированная).",
                 declarationType.getName(),
                 department.getName(),
-                departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(),
-                departmentReportPeriod.getReportPeriod().getName(),
+                reportPeriodService.getPeriodString(departmentReportPeriod.getReportPeriod()),
                 formatCorrectionDate(departmentReportPeriod.getCorrectionDate())
         );
     }
@@ -2335,12 +2370,11 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     private String generateKnfIsNotAcceptedErrorText(Integer reportDeclarationTypeId, DeclarationData knf, DepartmentReportPeriod departmentReportPeriod) {
         DeclarationType declarationType = declarationTypeDao.get(reportDeclarationTypeId);
         Department department = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
-        return String.format("Отчетность %s для %s за период %s, %s%s не сформирована. " +
+        return String.format("Отчетность %s для %s за период %s%s не сформирована. " +
                         "Для указанного подразделения и периода форма РНУ НДФЛ (консолидированная) № %s должна быть в состоянии \"Принята\". Примите форму и повторите операцию",
                 declarationType.getName(),
                 department.getName(),
-                departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(),
-                departmentReportPeriod.getReportPeriod().getName(),
+                reportPeriodService.getPeriodString(departmentReportPeriod.getReportPeriod()),
                 formatCorrectionDate(departmentReportPeriod.getCorrectionDate()),
                 knf.getId()
         );

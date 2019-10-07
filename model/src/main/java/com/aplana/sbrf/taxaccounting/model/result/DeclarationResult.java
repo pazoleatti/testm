@@ -61,6 +61,10 @@ public class DeclarationResult {
      */
     private Integer reportPeriodYear;
     /**
+     * Ссылка на вид отчетности (период)
+     */
+    private Integer reportPeriodTaxFormTypeId;
+    /**
      * Календарная дата начала отчетного периода (квартала)
      */
     private Date calendarStartDate;

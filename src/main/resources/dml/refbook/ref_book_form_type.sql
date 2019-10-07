@@ -3,3 +3,4 @@ insert into ref_book_form_type(id,code,name) values(2,'РНУ-НДФЛ','Рег�
 insert into ref_book_form_type(id,code,name) values(3,'2 НДФЛ (1)','2 НДФЛ с признаком 1');
 insert into ref_book_form_type(id,code,name) values(4,'2 НДФЛ (2)','2 НДФЛ с признаком 2');
 insert into ref_book_form_type(id,code,name) values(5,'6 НДФЛ','6 НДФЛ');
+insert into ref_book_form_type(id,code,name) values(7,'Приложение 2','Приложение 2');

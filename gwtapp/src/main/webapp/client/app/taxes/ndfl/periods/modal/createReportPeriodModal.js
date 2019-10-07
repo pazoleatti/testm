@@ -35,7 +35,8 @@
                                     dictTaxPeriodId: $scope.form.dictPeriod.id,
                                     taxPeriod: {
                                         year: $scope.form.year
-                                    }
+                                    },
+                                    reportPeriodTaxFormTypeId: $scope.form.type.id
                                 }
                             })
                         }

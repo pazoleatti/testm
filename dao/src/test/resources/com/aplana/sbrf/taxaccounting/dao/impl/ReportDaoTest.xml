@@ -18,6 +18,7 @@
         <jdbc:script location="classpath:data/TAUser.sql" encoding="UTF-8"/>
         <jdbc:script location="classpath:data/Event.sql" encoding="UTF-8"/>
         <jdbc:script location="classpath:data/DeclarationTemplate.sql" encoding="UTF-8"/>
+        <jdbc:script location="classpath:data/RefBookKnfType.sql" encoding="UTF-8"/>
         <jdbc:script location="classpath:data/DeclarationData.sql" encoding="UTF-8"/>
         <jdbc:script location="classpath:data/DeclarationSubreport.sql" encoding="UTF-8"/>
         <jdbc:script location="classpath:data/DeclarationReport.sql" encoding="UTF-8"/>

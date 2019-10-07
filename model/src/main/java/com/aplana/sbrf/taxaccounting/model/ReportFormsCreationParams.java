@@ -42,11 +42,17 @@ public class ReportFormsCreationParams implements Serializable {
     @ToString.Exclude
     private List<KppOktmoPair> kppOktmoPairs;
 
+    /**
+     * см {@link ReportTypeModeEnum}
+     */
+    private ReportTypeModeEnum reportTypeMode;
+
     public ReportFormsCreationParams(CreateReportFormsAction action) {
         declarationTypeId = action.getDeclarationTypeId();
         adjustNegativeValues= action.isAdjustNegativeValues();
         taxRefundReflectionMode = action.getTaxRefundReflectionMode();
         reportFormCreationMode = action.getReportFormCreationMode();
         kppOktmoPairs = action.getKppOktmoPairs();
+        reportTypeMode = action.getReportTypeMode();
     }
 }

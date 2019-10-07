@@ -88,6 +88,20 @@
 
                         <td class="col-separator"></td>
 
+                        <!-- Вид отчетности -->
+                        <td>
+                            <label class="control-label">{{::'reportPeriod.filter.formType' | translate}}:</label>
+                        </td>
+                        <td>
+                            <div data-ng-controller="SelectDeclarationTypeCtrl"
+                                 data-ui-select2="declarationTypeSelect.options"
+                                 data-ng-init="initSelectWithOpenPeriodDeclarationTypes()"
+                                 data-ng-model="searchFilter.params.formType">
+                            </div>
+                        </td>
+
+                        <td class="col-separator"></td>
+
                         <!--Кнопка Найти-->
                         <td>
                             <button type="submit"

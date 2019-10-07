@@ -150,6 +150,13 @@
             data-ng-click="createSubreport()">
         <span data-translate-once="common.button.formation"></span>
     </button>
+    <!--Кнопка Аннулирующая 2-НДФЛ-->
+    <button type="button"
+            class="btn btn-default"
+            data-ng-show="reportNdflGrid.value.length"
+            data-ng-click="annul2Ndfl()">
+        <span data-translate-once="common.button.annul2ndfl"></span>
+    </button>
     <!--Кнопка Выход-->
     <button type="button"
             class="btn  btn-default-nonBg iconed-btn"

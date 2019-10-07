@@ -20,8 +20,9 @@ public class ReportPeriodServiceImpl implements ReportPeriodService {
     private ReportPeriodDao reportPeriodDao;
 
     @Override
-    public ReportPeriod fetchOrCreate(TaxPeriod taxPeriod, ReportPeriodType reportPeriodType) {
-        ReportPeriod reportPeriod = reportPeriodDao.fetchOneByTaxPeriodAndDict(taxPeriod.getId(), reportPeriodType.getId());
+    public ReportPeriod fetchOrCreate(TaxPeriod taxPeriod, ReportPeriodType reportPeriodType, Integer formTypeId) {
+        ReportPeriod reportPeriod = reportPeriodDao.fetchOneByTaxPeriodAndDictAndFormType(
+                taxPeriod.getId(), reportPeriodType.getId(), formTypeId);
         if (reportPeriod == null) {
             reportPeriod = new ReportPeriod();
             reportPeriod.setName(reportPeriodType.getName());
@@ -57,6 +58,7 @@ public class ReportPeriodServiceImpl implements ReportPeriodService {
             reportPeriod.setCalendarStartDate(calendarDate.getTime());
             reportPeriod.setTaxPeriod(taxPeriod);
             reportPeriod.setDictTaxPeriodId(reportPeriodType.getId());
+            reportPeriod.setReportPeriodTaxFormTypeId(formTypeId);
             reportPeriod = reportPeriodDao.fetchOne(reportPeriodDao.create(reportPeriod));
         }
         return reportPeriod;

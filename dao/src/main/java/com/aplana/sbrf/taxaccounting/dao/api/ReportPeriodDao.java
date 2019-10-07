@@ -7,7 +7,6 @@ import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
 import com.aplana.sbrf.taxaccounting.model.result.LogPeriodResult;
 import com.aplana.sbrf.taxaccounting.model.result.ReportPeriodResult;
 
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -37,11 +36,12 @@ public interface ReportPeriodDao extends PermissionDao {
     /**
      * Получение отчетного периода по налоговому периоду и периоду в справочнике "Коды, определяющие налоговый (отчётный) период"
      *
-     * @param taxPeriodId     идентификатор налогового периода
-     * @param dictTaxPeriodId идентификатор записи справочника "Коды, определяющие налоговый (отчётный) период"
+     * @param taxPeriodId       идентификатор налогового периода
+     * @param dictTaxPeriodId   идентификатор записи справочника "Коды, определяющие налоговый (отчётный) период"
+     * @param formTypeId        вид отчетности
      * @return объект {@link ReportPeriod} или null
      */
-    ReportPeriod fetchOneByTaxPeriodAndDict(int taxPeriodId, long dictTaxPeriodId);
+    ReportPeriod fetchOneByTaxPeriodAndDictAndFormType(int taxPeriodId, long dictTaxPeriodId, Integer formTypeId);
 
     /**
      * Получение списка всех отчётных периодов.
@@ -91,17 +91,6 @@ public interface ReportPeriodDao extends PermissionDao {
      * @return Список {@link ReportPeriod} или пустой список
      */
     List<ReportPeriod> fetchAllByDepartments(List<Integer> departmentList);
-
-    /**
-     * Возвращает все периоды которые либо пересекаются с указанным диапазоном дат, либо полностью находятся внутри него
-     *
-     * @param startDate начало диапазона
-     * @param endDate   конец диапазона
-     * @return список {@link ReportPeriod}
-     * @throws com.aplana.sbrf.taxaccounting.model.exception.DaoException если не найдены отчетные периоды
-     */
-    @Deprecated
-    List<ReportPeriod> getReportPeriodsByDate(Date startDate, Date endDate);
 
     /**
      * Получение списка открытых периодов по списку подразделений и признаку корректировки

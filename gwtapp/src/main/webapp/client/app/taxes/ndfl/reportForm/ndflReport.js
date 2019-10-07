@@ -103,7 +103,9 @@
                                             $scope.declarationTypeName = declarationType.name;
                                         }
                                     });
-                                    $scope.isCurrentForm2NDFLFL = $scope.declarationData.declarationType === APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_FL.id
+                                    $scope.isCurrentForm2NDFLFL = $scope.declarationData.declarationType === APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_FL.id;
+                                    $scope.isCurrentForm2NDFL_1_OR_2 = (($scope.declarationData.declarationType === APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_1.id) ||
+                                                                       ($scope.declarationData.declarationType === APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_2.id));
                                 }
                             }
                         }
@@ -284,7 +286,8 @@
                             $shareData: function () {
                                 return {
                                     declarationDataId: $scope.declarationDataId,
-                                    reportType: APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.REPORT_2NDFL
+                                    reportType: APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.REPORT_2NDFL,
+                                    declarationData: $scope.declarationData
                                 };
                             }
                         }

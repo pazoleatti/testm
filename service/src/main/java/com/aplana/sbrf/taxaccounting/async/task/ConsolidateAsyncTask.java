@@ -16,6 +16,7 @@ import com.aplana.sbrf.taxaccounting.permissions.logging.TargetIdAndLogger;
 import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.LockStateLogger;
+import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import org.apache.commons.lang3.time.FastDateFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -38,6 +39,8 @@ public class ConsolidateAsyncTask extends XmlGeneratorAsyncTask {
     private DepartmentService departmentService;
     @Autowired
     private DepartmentReportPeriodService departmentReportPeriodService;
+    @Autowired
+    private PeriodService periodService;
 
     @Override
     protected AsyncTaskType getAsyncTaskType() {
@@ -76,10 +79,9 @@ public class ConsolidateAsyncTask extends XmlGeneratorAsyncTask {
         DepartmentReportPeriod reportPeriod = departmentReportPeriodService.fetchOne(declarationData.getDepartmentReportPeriodId());
         Department department = departmentService.getDepartment(declarationData.getDepartmentId());
         Throwable throwable = (Throwable) taskData.getParams().get("exceptionThrown");
-        return String.format("Операция \"Консолидация\" не выполнена для формы №: %d, Период: \"%s, %s%s\", Подразделение: \"%s\".%s",
+        return String.format("Операция \"Консолидация\" не выполнена для формы №: %d, Период: \"%s%s\", Подразделение: \"%s\".%s",
                 declarationDataId,
-                reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
-                reportPeriod.getReportPeriod().getName(),
+                periodService.getPeriodString(reportPeriod.getReportPeriod()),
                 reportPeriod.getCorrectionDate() != null ? " (корр. " + FastDateFormat.getInstance("dd.MM.yyyy").format(reportPeriod.getCorrectionDate()) + ")" : "",
                 department.getShortName(),
                 throwable != null && !isEmpty(throwable.getMessage())? " Причина: " + throwable.getMessage() : "");
@@ -93,10 +95,9 @@ public class ConsolidateAsyncTask extends XmlGeneratorAsyncTask {
         DeclarationData declarationData = declarationDataService.get(declarationDataId, userInfo);
         DepartmentReportPeriod reportPeriod = departmentReportPeriodService.fetchOne(declarationData.getDepartmentReportPeriodId());
         Department department = departmentService.getDepartment(declarationData.getDepartmentId());
-        return String.format("Операция \"Консолидация\" завершена для формы №: %d, Период: \"%s, %s%s\", Подразделение: \"%s\"",
+        return String.format("Операция \"Консолидация\" завершена для формы №: %d, Период: \"%s%s\", Подразделение: \"%s\"",
                 declarationDataId,
-                reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
-                reportPeriod.getReportPeriod().getName(),
+                periodService.getPeriodString(reportPeriod.getReportPeriod()),
                 reportPeriod.getCorrectionDate() != null ? " (корр. " + FastDateFormat.getInstance("dd.MM.yyyy").format(reportPeriod.getCorrectionDate()) + ")" : "",
                 department.getShortName());
     }

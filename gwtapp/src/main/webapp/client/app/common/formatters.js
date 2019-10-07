@@ -189,24 +189,32 @@
          * @description Форматтер для получения наименования отчетного периода в нужном формате "год: наименование периода"
          * @param reportPeriod Отчетный период
          */
-        .filter('periodFormatter', function () {
+        .filter('periodFormatter', ['APP_CONSTANTS', function (APP_CONSTANTS) {
             return function (reportPeriod) {
-                return reportPeriod ? reportPeriod.taxPeriod.year + ": " + reportPeriod.name : "";
+                var reportPeriodTaxFormType =
+                    getReportPeriodTaxFormTypeNameFromId(APP_CONSTANTS, reportPeriod.reportPeriodTaxFormTypeId);
+
+                return reportPeriod
+                    ? reportPeriod.taxPeriod.year + ": " + reportPeriod.name + ": " + reportPeriodTaxFormType
+                    : "";
             };
-        })
+        }])
 
         /**
          * @description Форматтер для получения наименования отчетного периода в нужном формате "год: наименование периода (срок корректировки)"
          * @param reportPeriod Отчетный период
          */
-        .filter('periodFormatterWithCorrectionDate', ['$filter', function ($filter) {
+        .filter('periodFormatterWithCorrectionDate', ['$filter', 'APP_CONSTANTS', function ($filter, APP_CONSTANTS) {
             return function (reportPeriod) {
                 if (reportPeriod) {
+                    var reportPeriodTaxFormType =
+                        getReportPeriodTaxFormTypeNameFromId(APP_CONSTANTS, reportPeriod.reportPeriodTaxFormTypeId);
+
                     var correctionDateClause = "";
                     if (reportPeriod.correctionDate) {
-                        correctionDateClause = $filter('translate')('createReport.correctionString', {correctionDate: $filter('date')(reportPeriod.correctionDate, 'dd.MM.yyyy')})
+                        correctionDateClause = " " + $filter('translate')('createReport.correctionString', {correctionDate: $filter('date')(reportPeriod.correctionDate, 'dd.MM.yyyy')})
                     }
-                    return reportPeriod.taxPeriod.year + ": " + reportPeriod.name + " " + correctionDateClause
+                    return reportPeriod.taxPeriod.year + ": " + reportPeriod.name + correctionDateClause + ": " + reportPeriodTaxFormType
                 } else {
                     return "";
                 }
@@ -326,15 +334,19 @@
          * "<Год>, <Название периода><Дата корректировки через запятую (если имеется)>"
          * @param value признак активности периода
          */
-        .filter('ndflPeriodFormatter', ['$filter', function ($filter) {
+        .filter('ndflPeriodFormatter', ['$filter', 'APP_CONSTANTS', function ($filter, APP_CONSTANTS) {
             return function (declarationData) {
                 if (declarationData) {
+                    var reportPeriodTaxFormType =
+                        getReportPeriodTaxFormTypeNameFromId(APP_CONSTANTS, declarationData.reportPeriodTaxFormTypeId);
+
                     return $filter('translate')('title.period.value', {
                         year: declarationData.reportPeriodYear,
                         periodName: declarationData.reportPeriod,
                         correctionString: declarationData.correctionDate ?
                             $filter('translate')('title.period.value.correctionString', {correctionDate: $filter('date')(declarationData.correctionDate, 'dd.MM.yyyy')}) :
-                            ''
+                            '',
+                        formType: reportPeriodTaxFormType ? ", " + reportPeriodTaxFormType : ""
                     });
                 }
                 return '';
@@ -729,5 +741,24 @@
                 }
             };
         }])
+
+        /**
+         * @description Формат вида отчетности
+         */
+        .filter('taxFormTypeFormatter', ['$filter', 'APP_CONSTANTS', function($filter, APP_CONSTANTS) {
+            return function (taxFormTypeId) {
+                var formType = getReportPeriodTaxFormTypeNameFromId(APP_CONSTANTS, taxFormTypeId);
+                return formType ? formType : "";
+            };
+        }])
     ;
+
+    function getReportPeriodTaxFormTypeNameFromId(APP_CONSTANTS, taxFormTypeId) {
+        for (var reportPeriodTaxFormType in APP_CONSTANTS.TAX_FORM_TYPE) {
+            if (taxFormTypeId === APP_CONSTANTS.TAX_FORM_TYPE[reportPeriodTaxFormType].id) {
+                return APP_CONSTANTS.TAX_FORM_TYPE[reportPeriodTaxFormType].name;
+            }
+        }
+    };
+
 }());

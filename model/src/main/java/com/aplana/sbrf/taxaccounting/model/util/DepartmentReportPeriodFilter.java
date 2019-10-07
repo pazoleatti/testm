@@ -2,6 +2,8 @@ package com.aplana.sbrf.taxaccounting.model.util;
 
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -10,6 +12,8 @@ import java.util.List;
 /**
  * Фильтр очетных периодов подразделений, null-значения соответствуют отсутствию фильтрации
  */
+@Getter
+@Setter
 public class DepartmentReportPeriodFilter implements Serializable {
     private Integer id;
     private Boolean isActive;
@@ -23,38 +27,11 @@ public class DepartmentReportPeriodFilter implements Serializable {
     private Integer departmentId;
     private ReportPeriod reportPeriod;
     private Date deadline;
+    private Long dictTaxPeriodId;
     private boolean withChild;
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public Integer getYearStart() {
-        return yearStart;
-    }
-
-    public void setYearStart(Integer yearStart) {
-        this.yearStart = yearStart;
-    }
-
-    public Integer getYearEnd() {
-        return yearEnd;
-    }
-
-    public void setYearEnd(Integer yearEnd) {
-        this.yearEnd = yearEnd;
-    }
 
     public Boolean isActive() {
         return isActive;
-    }
-
-    public void setIsActive(Boolean isActive) {
-        this.isActive = isActive;
     }
 
     public Boolean isCorrection() {
@@ -69,66 +46,8 @@ public class DepartmentReportPeriodFilter implements Serializable {
         this.isCorrection = isCorrection;
     }
 
-    public Date getCorrectionDate() {
-        return correctionDate;
-    }
-
-    public void setCorrectionDate(Date correctionDate) {
-        this.correctionDate = correctionDate;
-    }
-
-    public List<Integer> getDepartmentIdList() {
-        return departmentIdList;
-    }
-
-    public void setDepartmentIdList(List<Integer> departmentIdList) {
-        this.departmentIdList = departmentIdList;
-    }
-
-    public List<Integer> getReportPeriodIdList() {
-        return reportPeriodIdList;
-    }
-
-    public void setReportPeriodIdList(List<Integer> reportPeriodIdList) {
-        this.reportPeriodIdList = reportPeriodIdList;
-    }
-
-    public List<TaxType> getTaxTypeList() {
-        return taxTypeList;
-    }
-
-    public void setTaxTypeList(List<TaxType> taxTypeList) {
-        this.taxTypeList = taxTypeList;
-    }
-
-    public Integer getDepartmentId() {
-        return departmentId;
-    }
-
-    public void setDepartmentId(Integer departmentId) {
-        this.departmentId = departmentId;
-    }
-
-    public ReportPeriod getReportPeriod() {
-        return reportPeriod;
-    }
-
-    public void setReportPeriod(ReportPeriod reportPeriod) {
-        this.reportPeriod = reportPeriod;
-    }
-
-    public Date getDeadline() {
-        return deadline;
-    }
-
-    public void setDeadline(Date deadline) {
-        this.deadline = deadline;
-    }
     public boolean isWithChild() {
         return withChild;
     }
 
-    public void setWithChild(boolean withChild) {
-        this.withChild = withChild;
-    }
 }

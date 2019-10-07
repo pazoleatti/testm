@@ -6,9 +6,9 @@ import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookFormType;
 import com.aplana.sbrf.taxaccounting.model.result.ReportPeriodResult;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,8 +32,6 @@ import static org.junit.Assert.assertTrue;
 @ContextConfiguration({"ReportPeriodDaoTest.xml"})
 @Transactional
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-//TODO включить в версии 3.10.1
-@Ignore
 public class ReportPeriodDaoTest {
 
     @Autowired
@@ -117,15 +115,15 @@ public class ReportPeriodDaoTest {
 
     @Test
     public void getReportPeriodByTaxPeriodAndDictTest1() {
-        ReportPeriod reportPeriod1 = reportPeriodDao.fetchOneByTaxPeriodAndDict(1, 21);
-        ReportPeriod reportPeriod2 = reportPeriodDao.fetchOneByTaxPeriodAndDict(1, 22);
+        ReportPeriod reportPeriod1 = reportPeriodDao.fetchOneByTaxPeriodAndDictAndFormType(1, 21, RefBookFormType.NDFL_6.getId().intValue());
+        ReportPeriod reportPeriod2 = reportPeriodDao.fetchOneByTaxPeriodAndDictAndFormType(1, 22, RefBookFormType.NDFL_2_1.getId().intValue());
         assertEquals(reportPeriod1.getId(), Integer.valueOf(1));
         assertEquals(reportPeriod2.getId(), Integer.valueOf(2));
     }
 
     @Test
     public void getReportPeriodByTaxPeriodAndDictTest2() {
-        assertNull(reportPeriodDao.fetchOneByTaxPeriodAndDict(-1, -1));
+        assertNull(reportPeriodDao.fetchOneByTaxPeriodAndDictAndFormType(-1, -1, RefBookFormType.NDFL_6.getId().intValue()));
     }
 
     private List<Integer> getReportPeriodIds(List<ReportPeriod> reportPeriodList) {
@@ -204,18 +202,6 @@ public class ReportPeriodDaoTest {
         assertNull(reportPeriod1);
         assertNotNull(reportPeriod2);
         assertEquals(3, reportPeriod2.getId().intValue());
-    }
-
-    @Test
-    public void getReportPeriodsByDateTest() {
-        List<ReportPeriod> periodList = new ArrayList<>();
-        periodList.add(reportPeriodDao.fetchOne(1));
-        periodList.add(reportPeriodDao.fetchOne(2));
-        Date startDate = new GregorianCalendar(2011, Calendar.JANUARY, 1).getTime();
-        Date endDate = new GregorianCalendar(2014, Calendar.JANUARY, 10).getTime();
-        List<ReportPeriod> actualPeriods = reportPeriodDao.getReportPeriodsByDate(startDate, endDate);
-        assertEquals(periodList.get(0).getId(), actualPeriods.get(0).getId());
-        assertEquals(periodList.get(1).getId(), actualPeriods.get(1).getId());
     }
 
     @Test

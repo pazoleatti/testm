@@ -79,6 +79,7 @@
                         colNames: [
                             $filter('translate')('reportPeriod.grid.period'),
                             $filter('translate')('reportPeriod.grid.state'),
+                            $filter('translate')('reportPeriod.grid.formType'),
                             $filter('translate')('reportPeriod.grid.correctionDate')
                         ],
                         colModel: [
@@ -102,9 +103,15 @@
                                 formatter: $filter('activeStatusPeriodFormatter')
                             },
                             {
+                                name: 'taxFormTypeId',
+                                index: 'taxFormTypeId',
+                                width: 140,
+                                formatter: $filter('taxFormTypeFormatter')
+                            },
+                            {
                                 name: 'correctionDate',
                                 index: 'correctionDate',
-                                width: 250,
+                                width: 110,
                                 formatter: $filter('dateFormatter')
                             }
                         ],
@@ -138,10 +145,12 @@
                  */
                 $scope.initGrid = function () {
                     $scope.periodGridData = [];
+                    var taxFormTypeId = $scope.searchFilter.params.formType ? $scope.searchFilter.params.formType.id : null;
                     DepartmentReportPeriodResource.query({
                         filter: JSON.stringify({
                             yearStart: $scope.searchFilter.params.yearStart,
                             yearEnd: $scope.searchFilter.params.yearEnd,
+                            reportPeriod: taxFormTypeId ? { reportPeriodTaxFormTypeId: taxFormTypeId } : null,
                             departmentId: $scope.searchFilter.params.department.id
                         })
                     }, function (response) {

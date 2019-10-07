@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.model.action;
 
 import com.aplana.sbrf.taxaccounting.model.KppOktmoPair;
 import com.aplana.sbrf.taxaccounting.model.ReportFormCreationModeEnum;
+import com.aplana.sbrf.taxaccounting.model.ReportTypeModeEnum;
 import com.aplana.sbrf.taxaccounting.model.TaxRefundReflectionMode;
 import lombok.Getter;
 import lombok.Setter;
@@ -50,4 +51,8 @@ public class CreateReportFormsAction implements Serializable {
      */
     @ToString.Exclude
     private List<KppOktmoPair> kppOktmoPairs;
+    /**
+     * см {@link ReportTypeModeEnum}
+     */
+    private ReportTypeModeEnum reportTypeMode;
 }
