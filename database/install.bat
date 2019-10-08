@@ -30,6 +30,8 @@ cd PATCHES
 
 "%ORA_BIN%\sqlplus" %DBA_AUTH% @"database-3.10/patch_03_010_00.sql" %NDFL_USR% ../_log/patch_03_010_00.log %NSI_USR% %ORA_BIN% %DBA_AUTH% %TAXREC_USR%
 
+"%ORA_BIN%\sqlplus" %DBA_AUTH% @"database-3.10.1/patch_03_010_01.sql" %NDFL_USR% ../_log/patch_03_010_01.log %NSI_USR% %ORA_BIN% %DBA_AUTH% %TAXREC_USR%
+
 
 cd ..
 @echo "Gather statistics"
