@@ -327,7 +327,8 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
                             "rp.dict_tax_period_id, rp.calendar_start_date, rp.form_type_id " +
                             "FROM report_period rp  " +
                             "JOIN report_period_type rpt ON (rpt.id = rp.dict_tax_period_id AND rpt.code = :code)" +
-                            "JOIN tax_period tp ON (tp.id = rp.tax_period_id AND tp.year = :year)",
+                            "JOIN tax_period tp ON (tp.id = rp.tax_period_id AND tp.year = :year) " +
+                            "where rp.form_type_id = 4",
                     params,
                     new ReportPeriodMapper()
             );
