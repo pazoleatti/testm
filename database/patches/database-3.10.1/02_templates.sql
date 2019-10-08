@@ -170,7 +170,7 @@ PROMPT Fill service tables...
 --
 --HOST "&2\sqlldr" &3 control=database-3.10.1/templates/ldr/ndfl/blob_data.ldr log=&4/3_10_1_02_02_ndfl_blob_data.txt bad=&5/3_10_1_02_02_ndfl_blob_data.bad
 
---HOST "&2\sqlldr" &3 control=database-3.10.1/templates/ldr/ndfl/template.ldr log=&4/3_10_1_02_03_ndfl_template.txt bad=&5/3_10_1_02_03_ndfl_template.bad
+HOST "&2\sqlldr" &3 control=database-3.10.1/templates/ldr/ndfl/template.ldr log=&4/3_10_1_02_03_ndfl_template.txt bad=&5/3_10_1_02_03_ndfl_template.bad
 
 --HOST "&2\sqlldr" &3 control=database-3.10.1/templates/ldr/ndfl/template_script.ldr log=&4/3_10_1_02_04_ndfl_template_script.txt bad=&5/3_10_1_02_04_ndfl_template_script.bad
 

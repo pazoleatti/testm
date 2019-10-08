@@ -11,6 +11,14 @@ begin
 		EXECUTE IMMEDIATE 'ALTER TABLE report_period DROP  CONSTRAINT report_period_uniq_tax_dict DROP INDEX';
 	END IF;
 
+	select count ( * ) into v_run_condition from user_indexes where
+		INDEX_NAME='REPORT_PERIOD_UNIQ_TAX_DICT';
+	
+	IF v_run_condition>=1 THEN
+		EXECUTE IMMEDIATE 'DROP INDEX report_period_uniq_tax_dict ';
+	END IF;
+
+
 	dbms_output.put_line(v_task_name||'[INFO (REPORT_PERIOD_UNIQ_TAX_DICT)]:'||' Success');
 
 EXCEPTION
@@ -256,7 +264,7 @@ begin
 	select count ( * ) into v_run_condition from user_constraints where
 		TABLE_NAME='REPORT_PERIOD' and CONSTRAINT_NAME='REP_PER_UNIQ_TAX_DICT_FRM_TYPE';
 	
-	IF v_run_condition>=1 THEN
+	IF v_run_condition=0 THEN
 		EXECUTE IMMEDIATE 'ALTER TABLE report_period ADD CONSTRAINT rep_per_uniq_tax_dict_frm_type UNIQUE (tax_period_id, dict_tax_period_id, form_type_id)';
 		dbms_output.put_line(v_task_name||'[INFO (REP_PER_UNIQ_TAX_DICT_FRM_TYPE)]:'||' Success');
 	else
