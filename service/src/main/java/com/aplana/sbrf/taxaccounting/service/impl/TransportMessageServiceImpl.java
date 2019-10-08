@@ -156,7 +156,7 @@ public class TransportMessageServiceImpl implements TransportMessageService {
         Collections.sort(transportMessages, new Comparator<TransportMessage>() {
             @Override
             public int compare(TransportMessage o1, TransportMessage o2) {
-                return o1.getId().compareTo(o2.getId());
+                return o2.getId().compareTo(o1.getId());
             }
         });
     }
