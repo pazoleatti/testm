@@ -139,6 +139,8 @@ public class TransportMessageServiceImpl implements TransportMessageService {
                         ? transportMessageDao.findByFilter(filter, null)
                         : transportMessageDao.findByIds(transportMessageIds);
 
+        sortById(transportMessages);
+
         InputStream inputStream = null;
         try {
             inputStream = buildExcelStream(transportMessages, headerDescription);
@@ -148,6 +150,15 @@ public class TransportMessageServiceImpl implements TransportMessageService {
         if (inputStream == null)
             throw new ServiceException("Нет данных для формирования Excel-файла транспортных сообщений");
         return inputStream;
+    }
+
+    private void sortById(List<TransportMessage> transportMessages) {
+        Collections.sort(transportMessages, new Comparator<TransportMessage>() {
+            @Override
+            public int compare(TransportMessage o1, TransportMessage o2) {
+                return o1.getId().compareTo(o2.getId());
+            }
+        });
     }
 
     private List<Long> getTransportMessageIds(TransportMessageFilter filter) {
