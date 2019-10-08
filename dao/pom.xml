@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.aplana.sbrf</groupId>
         <artifactId>ndfl</artifactId>
-        <version>3.10.1</version>
+        <version>3.11</version>
     </parent>
 
     <artifactId>dao</artifactId>
