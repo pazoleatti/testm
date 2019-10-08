@@ -262,7 +262,7 @@ class Report2Ndfl extends AbstractScriptClass {
                     person.incomes = (List<NdflPersonIncome>) operationsByPersonId[person.id]*.incomes.flatten()
                     person.deductions = (List<NdflPersonDeduction>) operationsByPersonId[person.id]*.deductions.flatten()
                     person.prepayments = (List<NdflPersonPrepayment>) operationsByPersonId[person.id]*.prepayments.flatten()
-                    def nomSprAndCorr = getNomSpr(person.id, reportPeriod.taxPeriod.year, declarationData.kpp, declarationData.oktmo, declarationTemplate.type.id)
+                    def nomSprAndCorr = getNomSpr(person.recordId, reportPeriod.taxPeriod.year, declarationData.kpp, declarationData.oktmo, declarationTemplate.type.id)
                     "НДФЛ-2"(НомСпр: nomSprAndCorr.sprNum,
                             НомКорр: sprintf('%02d', nomSprAndCorr.corrNum)) {
                         ПолучДох(ИННФЛ: person.innNp,
@@ -365,7 +365,7 @@ class Report2Ndfl extends AbstractScriptClass {
                 }
                 def nullifyPersonList = getNullifyPersonList(declarationData.kpp, declarationData.oktmo, reportPeriod.taxPeriod.year, reportPeriod.dictTaxPeriodId, declarationTemplate.type.id, persons)
                 for (NdflPerson person : nullifyPersonList) {
-                    def nomSprAndCorr = getNomSpr(person.id, reportPeriod.taxPeriod.year, declarationData.kpp, declarationData.oktmo, declarationTemplate.type.id)
+                    def nomSprAndCorr = getNomSpr(person.recordId, reportPeriod.taxPeriod.year, declarationData.kpp, declarationData.oktmo, declarationTemplate.type.id)
                     "НДФЛ-2"(НомСпр: nomSprAndCorr.sprNum,
                             НомКорр: "99") {
                         ПолучДох(ИННФЛ: person.innNp,
@@ -480,10 +480,12 @@ class Report2Ndfl extends AbstractScriptClass {
                                 NdflPersonIncome minOperationByIncomeAccruedDate = operation.incomes.findAll() { it.incomeAccruedDate != null}
                                                                                         .min { it.incomeAccruedDate } as NdflPersonIncome
 
-                                BigDecimal holdingTaxSum = sum(rateIncomes.calculatedTax) - sum(rateIncomes.notHoldingTax)
-                                BigDecimal totalNotHoldingTax = sum(rateIncomes.notHoldingTax) - sum(rateIncomes.overholdingTax)
+                                List<NdflPersonIncome> ndflPersonIncomeList = operation.incomes
+
+                                BigDecimal holdingTaxSum = sum(ndflPersonIncomeList.calculatedTax) - sum(ndflPersonIncomeList.notHoldingTax)
+                                BigDecimal totalNotHoldingTax = sum(ndflPersonIncomeList.notHoldingTax) - sum(ndflPersonIncomeList.overholdingTax)
                                 int holding = holdingTaxSum == 0 ? 0 : 1
-                                def incomeSum = holding == 1 ? totalNotHoldingTax / rate : sum(rateIncomes.incomeAccruedSumm)
+                                def incomeSum = holding == 1 ? totalNotHoldingTax / (rate / 100) : sum(ndflPersonIncomeList.incomeAccruedSumm)
                                 cписокОперацийПриложение.add(new OperationAttachment(operation.operationId,
                                         minOperationByIncomeAccruedDate.incomeAccruedDate[Calendar.MONTH],
                                         minOperationByIncomeAccruedDate.incomeCode,
@@ -564,12 +566,12 @@ class Report2Ndfl extends AbstractScriptClass {
                                 BigDecimal totalNotHoldingTaxSum = sum(списокДохВычПриложение.notHoldingTaxSum)
                                 СумИтНалПер(СумДохОбщ: ScriptUtils.round(totalIncomeSum, 2),
                                         НалБаза: ScriptUtils.round(nalBase, 2),
-                                        НалИсчисл: ScriptUtils.round(totalNotHoldingTaxSum, 2),
+                                        НалИсчисл: ScriptUtils.round(totalNotHoldingTaxSum, 0),
                                         АвансПлатФикс: АвансПлатФикс(ratePrepayments),
                                         НалУдерж: 0,
                                         НалПеречисл: 0,
                                         НалУдержЛиш: 0,
-                                        НалНеУдерж: ScriptUtils.round(totalNotHoldingTaxSum, 2))
+                                        НалНеУдерж: ScriptUtils.round(totalNotHoldingTaxSum, 0))
                                 if (deductionsByCode || СписокУведомленийОВычетах) {
                                     НалВычССИ() {
                                         deductionsByCode.each { deductionCode, deductionsOfCode ->
@@ -609,7 +611,7 @@ class Report2Ndfl extends AbstractScriptClass {
                 }
                 def nullifyPersonList = getNullifyPersonList(declarationData.kpp, declarationData.oktmo, reportPeriod.taxPeriod.year, reportPeriod.dictTaxPeriodId, declarationTemplate.type.id, persons)
                 for (NdflPerson person : nullifyPersonList) {
-                    def nomSprAndCorr = getNomSpr(person.id, reportPeriod.taxPeriod.year, declarationData.kpp, declarationData.oktmo, declarationTemplate.type.id)
+                    def nomSprAndCorr = getNomSpr(person.recordId, reportPeriod.taxPeriod.year, declarationData.kpp, declarationData.oktmo, declarationTemplate.type.id)
                     "НДФЛ-2"(НомСпр: nomSprAndCorr.sprNum,
                             НомКорр: "99") {
                         ПолучДох(ИННФЛ: person.innNp,
@@ -678,7 +680,7 @@ class Report2Ndfl extends AbstractScriptClass {
                     operation.operationId = operationId
                     operation.person = personsById[personId]
                     if (is2Ndfl2()) {
-                        operation.incomes = getIncomesFor2NDFL2(incomesByPersonIdAndOperationId[personId][operationId])
+                        operation.incomes = getIncomesFor2NDFL2(incomesByPersonIdAndOperationId[personId], operationId)
                     } else {
                         operation.incomes = incomesByPersonIdAndOperationId[personId][operationId]
                     }
@@ -717,7 +719,7 @@ class Report2Ndfl extends AbstractScriptClass {
             for (def ndflReference : ndflReferenceList) {
                 String corrNum = searchCorrNum(ndflReference.NUM.stringValue, previousONF.id)
                 if (corrNum != "99") {
-                    long referencePersonId = ndflReference.PERSON_ID.referenceValue
+                    long referencePersonId = ndflReference.NDFL_PERSON_ID.referenceValue
                     if (!personSet.any {it.personId == referencePersonId } ) {
                         NdflPerson person = ndflPersonService.get(referencePersonId)
                         nullifyPersonList.add(person)
@@ -780,13 +782,18 @@ class Report2Ndfl extends AbstractScriptClass {
 
     /**
      * Определение списка ФЛ и ставок для включения в 2-НДФЛ
-     * Если по группе ставок (сумма графы 18 - сумма графы 19) > 0, то включаем строки из группы в 2-НДФЛ (2)
+     * Если по группе ставок по всем операциям (сумма графы 18 - сумма графы 19) > 0, то включаем строки из группы в 2-НДФЛ (2)
      *
-     * @param personIncomes строки 2 раздела ФЛ
-     * @return список доходов по ставке, подходящие по условию сумм
+     * @param personIncomes строки 2 раздела ФЛ по всем операциям ФЛ
+     * @param operationId номер операции, по которой нужно вернуть подходящие строки раздела 2
+     * @return список доходов по ставке по номеру операции, подходящие по условию сумм
      */
-    List<NdflPersonIncome> getIncomesFor2NDFL2(List<NdflPersonIncome> personIncomes) {
-        def incomesByRate = personIncomes.groupBy { it.taxRate }.sort { it.key }
+    List<NdflPersonIncome> getIncomesFor2NDFL2(Map<String, List<NdflPersonIncome>> personIncomes, String operationId) {
+        List<NdflPersonIncome> allNdflPersonIncomes = new ArrayList<>()
+        personIncomes.each { id, ndflPersonIncomeList ->
+            allNdflPersonIncomes.addAll(ndflPersonIncomeList)
+        }
+        def incomesByRate = allNdflPersonIncomes.groupBy { it.taxRate }.sort { it.key }
         incomesByRate.remove(null)
         List<NdflPersonIncome> incomesFor2NDFL2 = new ArrayList<>()
         for (def rate : incomesByRate.keySet()) {
@@ -795,7 +802,7 @@ class Report2Ndfl extends AbstractScriptClass {
                 incomesFor2NDFL2.addAll(rateIncomes)
             }
         }
-        return incomesFor2NDFL2
+        return incomesFor2NDFL2.findAll { it.operationId == operationId }
     }
 
     /**
