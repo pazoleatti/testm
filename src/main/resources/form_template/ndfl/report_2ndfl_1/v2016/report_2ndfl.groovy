@@ -1134,6 +1134,8 @@ class Report2Ndfl extends AbstractScriptClass {
             ScriptUtils.checkInterrupted()
             List<DeclarationData> existingDeclarations = declarationService.findAllByTypeIdAndReportPeriodIdAndKppAndOktmo(
                     declarationTemplate.type.id, departmentReportPeriod.reportPeriod.id, departmentConfig.kpp, departmentConfig.oktmo.code)
+            def lastSentForms = existingDeclarations.findAll() { it.docStateId != RefBookDocState.NOT_SENT.id }
+            def lastSentForm = lastSentForms.max({ it.correctionNum })
             declarationData = new DeclarationData()
             declarationData.declarationTemplateId = declarationTemplate.id
             declarationData.kpp = departmentConfig.kpp
@@ -1142,6 +1144,11 @@ class Report2Ndfl extends AbstractScriptClass {
             declarationData.adjustNegativeValues = reportFormsCreationParams.adjustNegativeValues
             declarationData.taxRefundReflectionMode = reportFormsCreationParams.taxRefundReflectionMode
             declarationData.docStateId = RefBookDocState.NOT_SENT.id
+            declarationData.correctionNum = lastSentForm
+                    ? (lastSentForm.docStateId in [RefBookDocState.REJECTED.id, RefBookDocState.ERROR.id]
+                            ? lastSentForm.correctionNum
+                            : lastSentForm.correctionNum + 1)
+                    : 0
             declarationData.departmentReportPeriodId = departmentReportPeriod.id
             declarationData.reportPeriodId = departmentReportPeriod.reportPeriod.id
             declarationData.departmentId = departmentReportPeriod.departmentId
