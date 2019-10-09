@@ -534,7 +534,7 @@ class Report2Ndfl extends AbstractScriptClass {
                                                         it.operationId == строкаСписокОперацийПриложение.operationId &&
                                                         it.periodCurrDate && it.periodCurrDate[Calendar.MONTH] == строкаСписокОперацийПриложение.month &&
                                                         deductionTypesByCode[it.typeCode]?.mark?.code in [INVESTMENT_CODE, OTHERS_CODE]
-                                            }.groupBy { it.incomeCode }
+                                            }.groupBy { it.typeCode }
 
                                             for (def cтрокаКодДоходаВычетыПриложениеKey : cписокСведВычетовПриложение.keySet()) {
                                                 List<NdflPersonDeduction> cтрокаКодДоходаВычетыПриложение = cписокСведВычетовПриложение.get(cтрокаКодДоходаВычетыПриложениеKey)
