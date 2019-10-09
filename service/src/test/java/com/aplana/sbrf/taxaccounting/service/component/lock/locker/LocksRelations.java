@@ -22,7 +22,7 @@ class LocksRelations {
     /**
      * Кол-во всех блокировок (см. нумерацию в постановке).
      */
-    static final int LOCKS_COUNT = 33;
+    static final int LOCKS_COUNT = 34;
 
     // Все возможные виды блокировок, в значениях ID заменен на значение DECLARATION_ID (даже для TEMPLATE, т.к. при вызове один алгоритм)
     private static final String DECLARATION_DATA_ID_IMPORT_TF_DECLARATION = "DECLARATION_DATA_1_IMPORT_TF_DECLARATION";
@@ -58,6 +58,7 @@ class LocksRelations {
     private static final String DECLARATION_DATA_ID_SEND_EDO = "DECLARATION_DATA_1_SEND_EDO";
     private static final String DECLARATION_DATA_ID_TRANSFER = "DECLARATION_DATA_1_TRANSFER_null";
     private static final String DECLARATION_DATA_ID_REPORT_LINK_DECLARATION = "DECLARATION_DATA_1_REPORT_LINK_DECLARATION";
+    private static final String DECLARATION_TEMPLATE_ID_2NDFL_NEW = "DECLARATION_TEMPLATE_1_2NDFL_NEW";
 
     /**
      * Массив из всех блокировок
@@ -95,7 +96,8 @@ class LocksRelations {
             DECLARATION_DATA_ID_CHANGE_STATUS,
             DECLARATION_DATA_ID_SEND_EDO,
             DECLARATION_DATA_ID_TRANSFER,
-            DECLARATION_DATA_ID_REPORT_LINK_DECLARATION
+            DECLARATION_DATA_ID_REPORT_LINK_DECLARATION,
+            DECLARATION_TEMPLATE_ID_2NDFL_NEW
     };
 
     /**
@@ -139,6 +141,7 @@ class LocksRelations {
         OPERATION_BY_LOCK.put(DECLARATION_DATA_ID_SEND_EDO, OperationType.SEND_EDO);
         OPERATION_BY_LOCK.put(DECLARATION_DATA_ID_TRANSFER, OperationType.TRANSFER);
         OPERATION_BY_LOCK.put(DECLARATION_DATA_ID_REPORT_LINK_DECLARATION, OperationType.EXCEL_UNLOAD_LIST);
+        OPERATION_BY_LOCK.put(DECLARATION_TEMPLATE_ID_2NDFL_NEW, OperationType.CREATE_ANNULMENT_2NDFL);
     }
 
     /**
@@ -380,7 +383,8 @@ class LocksRelations {
                         IMPORT_DECLARATION_EXCEL_ID,
                         DECLARATION_DATA_ID_CHANGE_STATUS,
                         DECLARATION_DATA_ID_SEND_EDO,
-                        DECLARATION_DATA_ID_REPORT_LINK_DECLARATION
+                        DECLARATION_DATA_ID_REPORT_LINK_DECLARATION,
+                        DECLARATION_TEMPLATE_ID_2NDFL_NEW
                 )
         );
 
@@ -607,6 +611,13 @@ class LocksRelations {
 
         CONFLICTING_LOCKS.put(
                 DECLARATION_DATA_ID_REPORT_LINK_DECLARATION,
+                Arrays.asList(
+                        DECLARATION_DATA_ID_DELETE_DECLARATION
+                )
+        );
+
+        CONFLICTING_LOCKS.put(
+                DECLARATION_TEMPLATE_ID_2NDFL_NEW,
                 Arrays.asList(
                         DECLARATION_DATA_ID_DELETE_DECLARATION
                 )
