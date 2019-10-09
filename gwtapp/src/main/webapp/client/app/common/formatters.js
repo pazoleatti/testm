@@ -186,7 +186,8 @@
         }])
 
         /**
-         * @description Форматтер для получения наименования отчетного периода в нужном формате "год: наименование периода"
+         * @description Форматтер для получения наименования отчетного периода из модели НФ
+         * в нужном формате "год: наименование периода"
          * @param reportPeriod Отчетный период
          */
         .filter('periodFormatter', ['APP_CONSTANTS', function (APP_CONSTANTS) {
@@ -197,6 +198,18 @@
                 return reportPeriod
                     ? reportPeriod.taxPeriod.year + ": " + reportPeriod.name + ": " + reportPeriodTaxFormType
                     : "";
+            };
+        }])
+
+        /**
+         * @description Форматтер для получения наименования отчетного периода из модели отчетного периода подразделения
+         * в нужном формате "год: наименование периода"
+         * @param reportPeriod Отчетный период
+         */
+        .filter('departmentReportPeriodFormatter', ['APP_CONSTANTS', function (APP_CONSTANTS) {
+            return function (departmentReportPeriod) {
+                var formType = getReportPeriodTaxFormTypeNameFromId(APP_CONSTANTS, departmentReportPeriod.taxFormTypeId);
+                return departmentReportPeriod.year + ":" + departmentReportPeriod.name + ":" + formType;
             };
         }])
 
