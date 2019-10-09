@@ -346,6 +346,17 @@ public class DeclarationDataController {
     }
 
     /**
+     * Создание Аннулирующей отчетной формы в ручном режиме
+     *
+     * @param action параметры создания отчетности
+     * @return модель {@link CreateDeclarationReportResult}, в которой содержаться данные результате операции создания
+     */
+    @PostMapping(value = "/actions/declarationData/createReportFormAnnul")
+    public ActionResult createReportFormAnnul(@RequestBody CreateReportFormsAction action) {
+        return declarationService.asyncCreateReportForms(action, securityService.currentUserInfo());
+    }
+
+    /**
      * Создание налоговой формы
      *
      * @param action параметры создания формы

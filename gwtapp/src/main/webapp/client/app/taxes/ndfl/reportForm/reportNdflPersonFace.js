@@ -269,10 +269,11 @@
                         params.kppOktmoPairs = kppOktmoPair;
                     }
                     params.reportTypeMode = APP_CONSTANTS.REPORT_TYPE_MODE.ANNULMENT.enumName;
+                    params.selectedSprNum =  $scope.reportNdflGrid.value[0].pNumSpravka;
 
                     $http({
                         method: "POST",
-                        url: "controller/actions/declarationData/createReportForm",
+                        url: "controller/actions/declarationData/createReportFormAnnul",
                         data: params
                     }).then(function (response) {
                         $modalInstance.close(response);

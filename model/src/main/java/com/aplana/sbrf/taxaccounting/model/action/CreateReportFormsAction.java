@@ -55,4 +55,8 @@ public class CreateReportFormsAction implements Serializable {
      * см {@link ReportTypeModeEnum}
      */
     private ReportTypeModeEnum reportTypeMode;
+    /**
+     * Выбранный номер справки в xml-файле на основании которой нужно сформировать аннулирующую 2-НДФЛ в ручном режиме
+     */
+    private Integer selectedSprNum;
 }

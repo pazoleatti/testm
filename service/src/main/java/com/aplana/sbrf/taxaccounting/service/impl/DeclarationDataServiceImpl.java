@@ -282,6 +282,21 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
+    @Transactional
+    public void createReportFormAnnul(ReportFormsCreationParams params, LockStateLogger stateLogger, Logger logger, TAUserInfo userInfo) {
+        LOG.info(String.format("createReportFormAnnul by %s. params: %s", userInfo, params));
+        DeclarationData sourceKnf = get(params.getSourceKnfId());
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.fetchOne(sourceKnf.getDepartmentReportPeriodId());
+        DeclarationData declarationDataTemp = new DeclarationData();
+        declarationDataTemp.setDeclarationTemplateId(declarationTemplateService.getActiveDeclarationTemplateId(params.getDeclarationTypeId(), departmentReportPeriod.getReportPeriod().getId()));
+        declarationDataTemp.setDepartmentReportPeriodId(departmentReportPeriod.getId());
+
+        Map<String, Object> additionalParameters = new HashMap<>();
+        additionalParameters.put("reportFormsCreationParams", params);
+        declarationDataScriptingService.executeScript(userInfo, declarationDataTemp, FormDataEvent.CREATE_FORMS, logger, additionalParameters);
+    }
+
+    @Override
     public ActionResult asyncCreate2NdflFL(Create2NdflFLParams params, TAUserInfo userInfo) {
         LOG.info(String.format("asyncCreate2NdflFL by %s. action: %s", userInfo, params));
         Logger logger = new Logger();

@@ -45,7 +45,7 @@ public enum OperationType {
     RETURN_DECLARATION(null, "Возврат формы из подготовлена/принята в создана"),
     EDIT(null, "Редактирование строки налоговой формы"),
     EDIT_FILE(null, "Добавление/удаление файлов/комментариев"),
-    CREATE_ANNULMENT_2NDFL(AsyncTaskType.CREATE_FORMS_DEC, "Формирование аннулирующей 2-НДФЛ"),
+    CREATE_ANNULMENT_2NDFL(AsyncTaskType.CREATE_FORMS_DEC, "Формирование аннулирующей 2-НДФЛ в ручном режиме"),
     TRANSFER(null, "Консолидация данных из формы");
 
     /**

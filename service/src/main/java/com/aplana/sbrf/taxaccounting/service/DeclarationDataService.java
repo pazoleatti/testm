@@ -541,6 +541,16 @@ public interface DeclarationDataService {
     void createReportForms(ReportFormsCreationParams params, LockStateLogger stateLogger, Logger logger, TAUserInfo userInfo);
 
     /**
+     * Создание аннулирующей ОНФ 2-НДФЛ в ручном режиме
+     *
+     * @param params      параметры создания отчетности
+     * @param stateLogger логгер состояния асинхронной задачи
+     * @param logger      логгер с результатами выполнения
+     * @param userInfo    пользователь, запустивший задачу
+     */
+    void createReportFormAnnul(ReportFormsCreationParams params, LockStateLogger stateLogger, Logger logger, TAUserInfo userInfo);
+
+    /**
      * Создание отчетности для выгрузки
      *
      * @param departmentReportPeriod отчетный период
