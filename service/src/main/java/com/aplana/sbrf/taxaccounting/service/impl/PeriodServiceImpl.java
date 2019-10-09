@@ -22,8 +22,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 
-import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -40,6 +40,9 @@ public class PeriodServiceImpl implements PeriodService {
 
     private static final String YEAR_PERIOD_CODE = "34";
     private static final String YEAR_REORG_PERIOD_CODE = "90";
+
+    public static final FastDateFormat DD_MM_YYYY_DATE_FORMAT = FastDateFormat.getInstance("dd.MM.yyyy");
+    public static final String EMPTY_STRING = "";
 
     @Autowired
     private ReportPeriodDao reportPeriodDao;
@@ -129,7 +132,7 @@ public class PeriodServiceImpl implements PeriodService {
         } catch (Exception e) {
             throw new ServiceException(String.format("Ошибка при открытии корректирующего периода \"%s\" с периодом сдачи корректировки %s для подразделения \"%s\" и всех дочерних подразделений. Обратитесь к администратору.",
                     getPeriodString(correctionPeriod.getReportPeriod()),
-                    FastDateFormat.getInstance("dd.MM.yyyy").format(correctionPeriod.getCorrectionDate()),
+                    DD_MM_YYYY_DATE_FORMAT.format(correctionPeriod.getCorrectionDate()),
                     departmentDao.getDepartment(correctionPeriod.getDepartmentId()).getName()), e);
         }
     }
@@ -498,39 +501,73 @@ public class PeriodServiceImpl implements PeriodService {
 
     @Override
     public String createLogPeriodFormatById(List<Long> idList, Integer logLevelType) {
-        String period = "";
+
+        if (ObjectUtils.isEmpty(idList)) {
+            return EMPTY_STRING;
+        }
+
         List<LogPeriodResult> maxPeriodList = new ArrayList<>();
-        List<LogPeriodResult> rsList = new ArrayList<>();
 
         for (Long id : idList) {
-            rsList = reportPeriodDao.createLogPeriodFormatById(id, logLevelType);
-            if (rsList.size() > 0) maxPeriodList.add(rsList.get(0));
+            LogPeriodResult logPeriodResult = getFirstInList(reportPeriodDao.createLogPeriodFormatById(id, logLevelType));
+            if (!ObjectUtils.isEmpty(logPeriodResult))
+                maxPeriodList.add(logPeriodResult);
         }
 
-        if (maxPeriodList.size() > 0) {
-            Collections.sort(maxPeriodList, new LogPeriodResult.CompDate(true));
-            period = period + maxPeriodList.get(0).getYear() + ": " + maxPeriodList.get(0).getName() + "; ";
-            if (maxPeriodList.get(0).getCorrectionDate() != null) {
-                Format formatter = new SimpleDateFormat("dd-MM-yy");
-                period = period + formatter.format(maxPeriodList.get(0).getCorrectionDate());
-            }
+        if (maxPeriodList.isEmpty()) {
+            return EMPTY_STRING;
         }
 
-        return period;
+        StringBuilder periodBuilder = new StringBuilder();
+        Collections.sort(maxPeriodList, new LogPeriodResult.CompDate(true));
+        LogPeriodResult logPeriodResult = getFirstInList(maxPeriodList);
+        periodBuilder.append(periodBuilder)
+                .append(logPeriodResult.getYear())
+                .append(": ")
+                .append(logPeriodResult.getName())
+                .append("; ")
+                .append(getLogPeriodResultCorrectingString(logPeriodResult));
+
+        return periodBuilder.toString();
+    }
+
+
+    /**
+     * Строка корректировки
+     *
+     * @param logPeriodResult
+     * @return
+     */
+    private String getLogPeriodResultCorrectingString(LogPeriodResult logPeriodResult) {
+        if (ObjectUtils.isEmpty(logPeriodResult.getCorrectionDate())) {
+            return EMPTY_STRING;
+        }
+        return "(корр. " + DD_MM_YYYY_DATE_FORMAT.format(logPeriodResult.getCorrectionDate()) + ")";
+    }
+
+    /**
+     * Получить первый элемент в списке
+     *
+     * @param list
+     * @param <T>
+     * @return
+     */
+    private <T> T getFirstInList(List<T> list) {
+        return list.size() > 0 ? list.get(0) : null;
     }
 
     private String periodDescription(DepartmentReportPeriod departmentReportPeriod) {
         return String.format("\"%s%s\"",
                 getPeriodString(departmentReportPeriod.getReportPeriod()),
-                departmentReportPeriod.getCorrectionDate() != null ? " (корр. " + FastDateFormat.getInstance("dd.MM.yyyy").format(departmentReportPeriod.getCorrectionDate()) + ")" : "");
+                departmentReportPeriod.getCorrectionDate() != null ? " (корр. " + DD_MM_YYYY_DATE_FORMAT.format(departmentReportPeriod.getCorrectionDate()) + ")" : EMPTY_STRING);
     }
 
     private String periodWithDescription(DepartmentReportPeriod departmentReportPeriod) {
         return String.format("%s \"%s\"%s",
                 departmentReportPeriod.getCorrectionDate() == null ? "Период" : "Корректирующий период",
                 getPeriodString(departmentReportPeriod.getReportPeriod()),
-                departmentReportPeriod.getCorrectionDate() == null ? "" :
-                        " с периодом сдачи корректировки " + FastDateFormat.getInstance("dd.MM.yyyy").format(departmentReportPeriod.getCorrectionDate()));
+                departmentReportPeriod.getCorrectionDate() == null ? EMPTY_STRING :
+                        " с периодом сдачи корректировки " + DD_MM_YYYY_DATE_FORMAT.format(departmentReportPeriod.getCorrectionDate()));
     }
 
     @Override

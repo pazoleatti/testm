@@ -10,10 +10,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookFormType;
-import com.aplana.sbrf.taxaccounting.model.result.ClosePeriodResult;
-import com.aplana.sbrf.taxaccounting.model.result.DeletePeriodResult;
-import com.aplana.sbrf.taxaccounting.model.result.OpenPeriodResult;
-import com.aplana.sbrf.taxaccounting.model.result.ReopenPeriodResult;
+import com.aplana.sbrf.taxaccounting.model.result.*;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
@@ -455,7 +452,7 @@ public class PeriodServiceImplTest {
         DeletePeriodResult result = periodService.delete(123);
         verify(departmentReportPeriodService, never()).updateActive(anyListOf(Integer.class), anyInt(), anyBoolean());
         assertEquals("Удаление периода \"2018:reportPeriodName:6НДФЛ\" для подразделения \"dep1Name\" " +
-                "и всех дочерних подразделений невозможно, т.к. для него существует корректирующий период.",
+                        "и всех дочерних подразделений невозможно, т.к. для него существует корректирующий период.",
                 result.getError());
     }
 
@@ -498,5 +495,48 @@ public class PeriodServiceImplTest {
                 .year(2018)
                 .taxPeriodId(1)
                 .dictTaxPeriodId(1L);
+    }
+
+
+    @Test
+    public void createLogPeriodFormatById() {
+
+        LogPeriodResult logPeriodResultFirst = new LogPeriodResult();
+        LogPeriodResult logPeriodResultSecond = new LogPeriodResult();
+
+        logPeriodResultFirst.setYear(2019);
+        logPeriodResultSecond.setYear(2019);
+
+        logPeriodResultFirst.setId(1);
+        logPeriodResultSecond.setId(2);
+
+        logPeriodResultFirst.setName("полугодие");
+        logPeriodResultSecond.setName("полугодие");
+
+        Calendar endDate1 = Calendar.getInstance();
+        Calendar endDate2 = Calendar.getInstance();
+        endDate1.set(2019, 06, 31);
+        endDate2.set(2019, 11, 31);
+        logPeriodResultFirst.setEndDate(endDate1.getTime());
+        logPeriodResultSecond.setEndDate(endDate2.getTime());
+
+        Calendar corrDate1 = Calendar.getInstance();
+        Calendar corrDate2 = Calendar.getInstance();
+        corrDate1.set(2020, 01, 21);
+        corrDate2.set(2021, 04, 13);
+        logPeriodResultFirst.setCorrectionDate(corrDate1.getTime());
+        logPeriodResultSecond.setCorrectionDate(corrDate2.getTime());
+
+        List<Long> idList = asList(1L, 2L);
+        int logLevelType = 0;
+
+        final List<LogPeriodResult> logPeriodResults1 = asList(logPeriodResultSecond, logPeriodResultFirst);
+        final List<LogPeriodResult> logPeriodResults2 = asList(logPeriodResultFirst, logPeriodResultSecond);
+        when(reportPeriodDao.createLogPeriodFormatById(1L, logLevelType)).thenReturn(logPeriodResults1);
+        when(reportPeriodDao.createLogPeriodFormatById(2L, logLevelType)).thenReturn(logPeriodResults2);
+
+        String logPeriodFormat = periodService.createLogPeriodFormatById(idList, logLevelType);
+        assertEquals("2019: полугодие; (корр. 13.05.2021)", logPeriodFormat);
+        verify(reportPeriodDao, times(2)).createLogPeriodFormatById(anyLong(), anyInt());
     }
 }
