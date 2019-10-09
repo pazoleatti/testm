@@ -219,7 +219,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
     }
 
     @Override
-    public List<DeclarationData> findPreviousONFFor2Ndfl(int declarationTypeId, String reportPeriodTypeCode, int year, String kpp, String oktmo) {
+    public List<DeclarationData> findONFFor2Ndfl(int declarationTypeId, String reportPeriodTypeCode, int year, String kpp, String oktmo) {
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("declarationTypeId", declarationTypeId);
         params.addValue("reportPeriodTypeCode", reportPeriodTypeCode);

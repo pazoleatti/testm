@@ -77,7 +77,7 @@ public interface DeclarationService {
      * @param oktmo                 ТекущаяОНФ.ОКТМО
      * @return список форм
      */
-    List<DeclarationData> findPreviousONFFor2Ndfl(int declarationTypeId, String reportPeriodTypeCode, int year, String kpp, String oktmo);
+    List<DeclarationData> findONFFor2Ndfl(int declarationTypeId, String reportPeriodTypeCode, int year, String kpp, String oktmo);
 
     /**
      * Возвращяет предыдущую форму того же типа и КПП/ОКТМО в состоянии ЭД из заданного множества

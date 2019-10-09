@@ -43,3 +43,5 @@ insert into department_report_period(id, department_id, report_period_id, is_act
 
 insert into department_report_period(id, department_id, report_period_id, is_active) values (701, 1, 130, 1);
 insert into department_report_period(id, department_id, report_period_id, is_active) values (702, 1, 410, 1);
+
+insert into department_report_period(id, department_id, report_period_id, is_active) values (801, 1, 330, 1);

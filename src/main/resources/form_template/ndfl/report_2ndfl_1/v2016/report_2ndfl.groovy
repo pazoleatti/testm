@@ -712,7 +712,7 @@ class Report2Ndfl extends AbstractScriptClass {
     List<NdflPerson> getNullifyPersonList(String kpp, String oktmo, int year, long reportPeriodTypeId, int declarationTypeId, Set<NdflPerson> personSet) {
         List<NdflPerson> nullifyPersonList = new ArrayList<>()
         ReportPeriodType reportPeriodType = reportPeriodService.getReportPeriodTypeById(reportPeriodTypeId)
-        List<DeclarationData> previousONFList = declarationService.findPreviousONFFor2Ndfl(declarationTypeId, reportPeriodType.code, year, kpp, oktmo)
+        List<DeclarationData> previousONFList = declarationService.findONFFor2Ndfl(declarationTypeId, reportPeriodType.code, year, kpp, oktmo)
         if (previousONFList.size() > 0) {
             DeclarationData previousONF = previousONFList.max({ it.correctionNum })
             List<Map<String, RefBookValue>> ndflReferenceList = getProvider(RefBook.Id.NDFL_REFERENCES.id).getRecords(null, null, "DECLARATION_DATA_ID = ${previousONF.id}".toString(), null)
