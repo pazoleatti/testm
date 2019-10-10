@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://java.sun.com/jsf/facelets"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
@@ -422,6 +423,7 @@
                                                 <include>/main/app.js</include>
                                                 <!-- объявление модуля должно предварять создаваемые в нём функции -->
                                                 <include>/administration/transportMessage/transportMessageModule.js</include>
+                                                <include>/refbooks/refBookInterceptors.js</include>
                                                 <include>**/*.js</include>
                                             </includes>
                                         </aggregation>
