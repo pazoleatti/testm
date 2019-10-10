@@ -1,7 +1,7 @@
 (function () {
     'use strict';
 
-    angular.module('app.refBookInterceptors')
+    angular.module('app.refBookInterceptors', [])
         .factory('refBookInterceptorsIncomeKindConditionUtils', function () {
             /**
              * Сравнивает две даты
