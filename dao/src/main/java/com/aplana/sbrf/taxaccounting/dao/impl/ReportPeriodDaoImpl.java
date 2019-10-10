@@ -9,9 +9,10 @@ import com.aplana.sbrf.taxaccounting.model.log.LogLevelType;
 import com.aplana.sbrf.taxaccounting.model.result.LogPeriodResult;
 import com.aplana.sbrf.taxaccounting.model.result.ReportPeriodResult;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -208,28 +209,24 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
     }
 
     @Override
-    @Transactional
     public Integer create(ReportPeriod reportPeriod) {
-        JdbcTemplate jt = getJdbcTemplate();
+        final KeyHolder keyHolder = new GeneratedKeyHolder();
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("name", reportPeriod.getName());
+        params.addValue("taxPeriodId", reportPeriod.getTaxPeriod().getId());
+        params.addValue("dictTaPeriodId", reportPeriod.getDictTaxPeriodId());
+        params.addValue("startDate", reportPeriod.getStartDate());
+        params.addValue("endDate", reportPeriod.getEndDate());
+        params.addValue("calendarStartDate", reportPeriod.getCalendarStartDate());
+        params.addValue("formTypeId", reportPeriod.getReportPeriodTaxFormTypeId());
 
-        Integer id = reportPeriod.getId();
-        if (id == null) {
-            id = generateId("seq_report_period", Integer.class);
-        }
+        getNamedParameterJdbcTemplate().update("insert into report_period (id, name, tax_period_id, " +
+                        "dict_tax_period_id, start_date, end_date, calendar_start_date, form_type_id) " +
+                        "values (seq_report_period.nextval, :name, :taxPeriodId, " +
+                        ":dictTaPeriodId, :startDate, :endDate, :calendarStartDate, :formTypeId)",
+        params, keyHolder, new String[]{"ID"});
 
-        jt.update(
-                "insert into report_period (id, name, tax_period_id, " +
-                        " dict_tax_period_id, start_date, end_date, calendar_start_date, form_type_id)" +
-                        " values (?, ?, ?, ?, ?, ?, ?, ?)",
-                id,
-                reportPeriod.getName(),
-                reportPeriod.getTaxPeriod().getId(),
-                reportPeriod.getDictTaxPeriodId(),
-                reportPeriod.getStartDate(),
-                reportPeriod.getEndDate(),
-                reportPeriod.getCalendarStartDate(),
-                reportPeriod.getReportPeriodTaxFormTypeId()
-        );
+        int id = keyHolder.getKey().intValue();
         reportPeriod.setId(id);
         return id;
     }
