@@ -164,8 +164,8 @@ PROMPT Fill tables
 PROMPT ======================
 
 PROMPT Fill service tables...
---
---HOST "&2\sqlldr" &3 control=database-3.10.1/templates/ldr/refbook/blob_data.ldr log=&4/3_10_1_02_01_refbook_blob_data.txt bad=&5/3_10_1_02_01_refbook_blob_data.bad
+--3.10.1-adudenko-1--
+HOST "&2\sqlldr" &3 control=database-3.10.1/templates/ldr/refbook/blob_data.ldr log=&4/3_10_1_02_01_refbook_blob_data.txt bad=&5/3_10_1_02_01_refbook_blob_data.bad
 
 --
 --HOST "&2\sqlldr" &3 control=database-3.10.1/templates/ldr/ndfl/blob_data.ldr log=&4/3_10_1_02_02_ndfl_blob_data.txt bad=&5/3_10_1_02_02_ndfl_blob_data.bad
