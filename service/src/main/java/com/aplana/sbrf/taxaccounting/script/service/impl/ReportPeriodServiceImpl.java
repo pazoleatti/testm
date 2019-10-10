@@ -4,7 +4,6 @@ import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriodType;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevelType;
 import com.aplana.sbrf.taxaccounting.script.service.ReportPeriodService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,11 +49,6 @@ public class ReportPeriodServiceImpl extends AbstractDao implements ReportPeriod
         Calendar cal = new GregorianCalendar();
         cal.setTime(reportPeriodService.fetchReportPeriod(reportPeriodId).getEndDate());
         return cal;
-    }
-
-    @Override
-    public ReportPeriod getByTaxTypedCodeYear(TaxType taxType, String code, int year) {
-        return reportPeriodService.getByDictCodeAndYear(code, year);
     }
 
     @Override

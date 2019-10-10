@@ -109,16 +109,6 @@ public interface ReportPeriodDao extends PermissionDao {
     List<ReportPeriod> getCorrectPeriods(int departmentId);
 
     /**
-     * Получение отчетного периода по коду записи справочника "Коды, определяющие налоговый (отчётный) период" и году
-     *
-     * @param code код записи справочника "Коды, определяющие налоговый (отчётный) период"
-     * @param year год отчетного периода
-     * @return объект {@link ReportPeriod} или null
-     */
-    ReportPeriod getByTaxTypedCodeYear(String code, int year);
-
-
-    /**
      * Получение списка всех записей справочника "Коды, определяющие налоговый (отчётный) период"
      *
      * @return список {@link ReportPeriodType} или пустой список

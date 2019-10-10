@@ -180,7 +180,7 @@ public class PeriodServiceImplTest {
     @Test
     public void openCorrection() {
         DepartmentReportPeriodBuilder mainPeriodBuilder = getDepartmentReportPeriodBuilder(false);
-        when(departmentReportPeriodDao.fetchOne(123)).thenReturn(mainPeriodBuilder.build());
+        when(departmentReportPeriodService.fetchOne(123)).thenReturn(mainPeriodBuilder.build());
         DepartmentReportPeriod lastPeriod = mainPeriodBuilder.but().build();
         when(departmentReportPeriodService.fetchLast(anyInt(), anyInt())).thenReturn(lastPeriod);
 
@@ -195,7 +195,7 @@ public class PeriodServiceImplTest {
     @Test
     public void openCorrectionExists() {
         DepartmentReportPeriodBuilder mainPeriodBuilder = getDepartmentReportPeriodBuilder(false);
-        when(departmentReportPeriodDao.fetchOne(123)).thenReturn(mainPeriodBuilder.build());
+        when(departmentReportPeriodService.fetchOne(123)).thenReturn(mainPeriodBuilder.build());
         DepartmentReportPeriod lastPeriod = mainPeriodBuilder.but().correctionDate(new Date(2018 - 1900, 0, 1)).build();
         when(departmentReportPeriodService.fetchLast(anyInt(), anyInt())).thenReturn(lastPeriod);
         when(departmentReportPeriodService.fetchOneByFilter(any(DepartmentReportPeriodFilter.class))).thenReturn(lastPeriod);
@@ -208,7 +208,7 @@ public class PeriodServiceImplTest {
     @Test
     public void openCorrectionWhenOpenedCorrectionPeriodExists() {
         DepartmentReportPeriodBuilder mainPeriodBuilder = getDepartmentReportPeriodBuilder(false);
-        when(departmentReportPeriodDao.fetchOne(123)).thenReturn(mainPeriodBuilder.build());
+        when(departmentReportPeriodService.fetchOne(123)).thenReturn(mainPeriodBuilder.build());
         DepartmentReportPeriod lastPeriod = mainPeriodBuilder.but().correctionDate(new Date(2018 - 1900, 11, 1)).active(true).build();
         when(departmentReportPeriodService.fetchLast(anyInt(), anyInt())).thenReturn(lastPeriod);
 
@@ -220,7 +220,7 @@ public class PeriodServiceImplTest {
     @Test
     public void openCorrectionWhenLaterCorrectionPeriodExists() {
         DepartmentReportPeriodBuilder mainPeriodBuilder = getDepartmentReportPeriodBuilder(false);
-        when(departmentReportPeriodDao.fetchOne(123)).thenReturn(mainPeriodBuilder.build());
+        when(departmentReportPeriodService.fetchOne(123)).thenReturn(mainPeriodBuilder.build());
         DepartmentReportPeriod lastPeriod = mainPeriodBuilder.but().build();
         when(departmentReportPeriodService.fetchLast(anyInt(), anyInt())).thenReturn(lastPeriod);
         when(departmentReportPeriodService.isLaterCorrectionPeriodExists(any(DepartmentReportPeriod.class))).thenReturn(true);
@@ -233,7 +233,7 @@ public class PeriodServiceImplTest {
     @Test(expected = ServiceException.class)
     public void openCorrectionDaoException() {
         DepartmentReportPeriodBuilder mainPeriodBuilder = getDepartmentReportPeriodBuilder(false);
-        when(departmentReportPeriodDao.fetchOne(123)).thenReturn(mainPeriodBuilder.build());
+        when(departmentReportPeriodService.fetchOne(123)).thenReturn(mainPeriodBuilder.build());
         DepartmentReportPeriod lastPeriod = mainPeriodBuilder.but().build();
         when(departmentReportPeriodService.fetchLast(anyInt(), anyInt())).thenReturn(lastPeriod);
         doThrow(new DaoException("123")).when(departmentReportPeriodService).create(any(DepartmentReportPeriod.class), anyListOf(Integer.class));
@@ -249,7 +249,7 @@ public class PeriodServiceImplTest {
     @Test
     public void close() {
         DepartmentReportPeriod departmentReportPeriod = getTestDataForDepartmentReportPeriod(true);
-        when(departmentReportPeriodDao.fetchOne(123)).thenReturn(departmentReportPeriod);
+        when(departmentReportPeriodService.fetchOne(123)).thenReturn(departmentReportPeriod);
         when(departmentReportPeriodService.fetchAllIdsByFilter(any(DepartmentReportPeriodFilter.class))).thenReturn(asList(1, 2, 3));
 
         periodService.close(123, false);
@@ -264,7 +264,7 @@ public class PeriodServiceImplTest {
     @Test
     public void closeClosed() {
         DepartmentReportPeriod departmentReportPeriod = getTestDataForDepartmentReportPeriod(false);
-        when(departmentReportPeriodDao.fetchOne(123)).thenReturn(departmentReportPeriod);
+        when(departmentReportPeriodService.fetchOne(123)).thenReturn(departmentReportPeriod);
 
         ClosePeriodResult result = periodService.close(123, false);
         verify(departmentReportPeriodService, never()).updateActive(anyListOf(Integer.class), anyInt(), anyBoolean());
@@ -274,7 +274,7 @@ public class PeriodServiceImplTest {
     @Test
     public void closeHasBlockedForms() {
         DepartmentReportPeriod departmentReportPeriod = getTestDataForDepartmentReportPeriod(true);
-        when(departmentReportPeriodDao.fetchOne(123)).thenReturn(departmentReportPeriod);
+        when(departmentReportPeriodService.fetchOne(123)).thenReturn(departmentReportPeriod);
         DeclarationData declarationData = new DeclarationData();
         declarationData.setId(1L);
         declarationData.setDeclarationTemplateId(1);
@@ -290,7 +290,7 @@ public class PeriodServiceImplTest {
     @Test
     public void closeHasNotAcceptedForms() {
         DepartmentReportPeriod departmentReportPeriod = getTestDataForDepartmentReportPeriod(true);
-        when(departmentReportPeriodDao.fetchOne(123)).thenReturn(departmentReportPeriod);
+        when(departmentReportPeriodService.fetchOne(123)).thenReturn(departmentReportPeriod);
         DeclarationData declarationData = new DeclarationData();
         declarationData.setId(1L);
         declarationData.setDeclarationTemplateId(1);
@@ -310,7 +310,7 @@ public class PeriodServiceImplTest {
     @Test(expected = ServiceException.class)
     public void closeDaoException() {
         DepartmentReportPeriod departmentReportPeriod = getTestDataForDepartmentReportPeriod(true);
-        when(departmentReportPeriodDao.fetchOne(123)).thenReturn(departmentReportPeriod);
+        when(departmentReportPeriodService.fetchOne(123)).thenReturn(departmentReportPeriod);
         when(departmentReportPeriodService.fetchAllIdsByFilter(any(DepartmentReportPeriodFilter.class))).thenAnswer(new Answer<List<Integer>>() {
             @Override
             public List<Integer> answer(InvocationOnMock invocation) throws Throwable {
@@ -331,7 +331,7 @@ public class PeriodServiceImplTest {
     @Test
     public void reopen() {
         DepartmentReportPeriod departmentReportPeriod = getTestDataForDepartmentReportPeriod(false);
-        when(departmentReportPeriodDao.fetchOne(123)).thenReturn(departmentReportPeriod);
+        when(departmentReportPeriodService.fetchOne(123)).thenReturn(departmentReportPeriod);
         when(departmentReportPeriodService.fetchAllIdsByFilter(any(DepartmentReportPeriodFilter.class))).thenAnswer(new Answer<List<Integer>>() {
             @Override
             public List<Integer> answer(InvocationOnMock invocation) throws Throwable {
@@ -352,7 +352,7 @@ public class PeriodServiceImplTest {
     @Test(expected = ServiceException.class)
     public void reopenDaoException() {
         DepartmentReportPeriod departmentReportPeriod = getTestDataForDepartmentReportPeriod(false);
-        when(departmentReportPeriodDao.fetchOne(123)).thenReturn(departmentReportPeriod);
+        when(departmentReportPeriodService.fetchOne(123)).thenReturn(departmentReportPeriod);
         when(departmentReportPeriodService.fetchAllIdsByFilter(any(DepartmentReportPeriodFilter.class))).thenAnswer(new Answer<List<Integer>>() {
             @Override
             public List<Integer> answer(InvocationOnMock invocation) throws Throwable {
@@ -374,7 +374,7 @@ public class PeriodServiceImplTest {
     @Test
     public void reopenOpened() {
         DepartmentReportPeriod departmentReportPeriod = getTestDataForDepartmentReportPeriod(true);
-        when(departmentReportPeriodDao.fetchOne(123)).thenReturn(departmentReportPeriod);
+        when(departmentReportPeriodService.fetchOne(123)).thenReturn(departmentReportPeriod);
 
         ReopenPeriodResult result = periodService.reopen(123);
         verify(departmentReportPeriodService, never()).updateActive(anyListOf(Integer.class), anyInt(), anyBoolean());
@@ -384,7 +384,7 @@ public class PeriodServiceImplTest {
     @Test
     public void reopenWhenCorrectionPeriodExists() {
         DepartmentReportPeriod departmentReportPeriod = getTestDataForDepartmentReportPeriod(false);
-        when(departmentReportPeriodDao.fetchOne(123)).thenReturn(departmentReportPeriod);
+        when(departmentReportPeriodService.fetchOne(123)).thenReturn(departmentReportPeriod);
         when(departmentReportPeriodService.fetchAllIdsByFilter(any(DepartmentReportPeriodFilter.class))).thenReturn(asList(1, 2, 3));
 
         ReopenPeriodResult result = periodService.reopen(123);
@@ -395,7 +395,7 @@ public class PeriodServiceImplTest {
     @Test
     public void reopenWhenLaterCorrectionPeriodExists() {
         DepartmentReportPeriod departmentReportPeriod = getTestDataForDepartmentReportPeriodWithCorrectionDate();
-        when(departmentReportPeriodDao.fetchOne(123)).thenReturn(departmentReportPeriod);
+        when(departmentReportPeriodService.fetchOne(123)).thenReturn(departmentReportPeriod);
         when(departmentReportPeriodService.isLaterCorrectionPeriodExists(any(DepartmentReportPeriod.class))).thenReturn(true);
 
         ReopenPeriodResult result = periodService.reopen(123);
@@ -406,7 +406,7 @@ public class PeriodServiceImplTest {
     @Test
     public void delete() {
         DepartmentReportPeriod departmentReportPeriod = getTestDataForDepartmentReportPeriod(false);
-        when(departmentReportPeriodDao.fetchOne(123)).thenReturn(departmentReportPeriod);
+        when(departmentReportPeriodService.fetchOne(123)).thenReturn(departmentReportPeriod);
         when(departmentReportPeriodService.fetchAllIdsByFilter(any(DepartmentReportPeriodFilter.class))).thenAnswer(new Answer<List<Integer>>() {
             @Override
             public List<Integer> answer(InvocationOnMock invocation) throws Throwable {
@@ -427,7 +427,7 @@ public class PeriodServiceImplTest {
     @Test(expected = ServiceException.class)
     public void deleteDaoException() {
         DepartmentReportPeriod departmentReportPeriod = getTestDataForDepartmentReportPeriod(false);
-        when(departmentReportPeriodDao.fetchOne(123)).thenReturn(departmentReportPeriod);
+        when(departmentReportPeriodService.fetchOne(123)).thenReturn(departmentReportPeriod);
         when(departmentReportPeriodService.fetchAllIdsByFilter(any(DepartmentReportPeriodFilter.class))).thenAnswer(new Answer<List<Integer>>() {
             @Override
             public List<Integer> answer(InvocationOnMock invocation) throws Throwable {
@@ -449,7 +449,7 @@ public class PeriodServiceImplTest {
     @Test
     public void deleteWhenCorrectionPeriodExists() {
         DepartmentReportPeriod departmentReportPeriod = getTestDataForDepartmentReportPeriod(false);
-        when(departmentReportPeriodDao.fetchOne(123)).thenReturn(departmentReportPeriod);
+        when(departmentReportPeriodService.fetchOne(123)).thenReturn(departmentReportPeriod);
         when(departmentReportPeriodService.fetchAllIdsByFilter(any(DepartmentReportPeriodFilter.class))).thenReturn(asList(1, 2, 3));
 
         DeletePeriodResult result = periodService.delete(123);
@@ -462,7 +462,7 @@ public class PeriodServiceImplTest {
     @Test
     public void deleteWhenLaterCorrectionPeriodExists() {
         DepartmentReportPeriod departmentReportPeriod = getTestDataForDepartmentReportPeriodWithCorrectionDate();
-        when(departmentReportPeriodDao.fetchOne(123)).thenReturn(departmentReportPeriod);
+        when(departmentReportPeriodService.fetchOne(123)).thenReturn(departmentReportPeriod);
         when(departmentReportPeriodService.isLaterCorrectionPeriodExists(any(DepartmentReportPeriod.class))).thenReturn(true);
 
         DeletePeriodResult result = periodService.delete(123);

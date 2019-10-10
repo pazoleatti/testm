@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Required;
 import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.User;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.Serializable;
 import java.util.List;
@@ -84,6 +85,7 @@ public class BasePermissionEvaluator implements PermissionEvaluator {
 
     @SuppressWarnings("unchecked")
     @Override
+    @Transactional(readOnly = true)
     public boolean hasPermission(Authentication authentication, Serializable target,
                                  String targetType, Object permission) {
         Logger logger = null;
@@ -133,7 +135,7 @@ public class BasePermissionEvaluator implements PermissionEvaluator {
         if (targetClass.equals(TargetIdAndLogger.class)) {
             logger = ((TargetIdAndLogger) target).getLogger();
             PermissionDao permissionDao = permissionDaoFactory.getPermissionDao(DeclarationData.class);
-            SecuredEntity targetDomainObject = permissionDao.findSecuredEntityById(((TargetIdAndLogger) target).getId());
+            SecuredEntity targetDomainObject = findSecuredEntityById(((TargetIdAndLogger) target).getId(), permissionDao);
             return hasPermissionSingle(authentication, targetDomainObject, permission, logger);
         } else {
             return hasPermissionSingleId(authentication, target, targetType, permission, logger);
@@ -155,13 +157,18 @@ public class BasePermissionEvaluator implements PermissionEvaluator {
         }
 
         PermissionDao permissionDao = permissionDaoFactory.getPermissionDao(targetClass);
-        SecuredEntity targetDomainObject = permissionDao.findSecuredEntityById(((Number) targetId).longValue());
+        SecuredEntity targetDomainObject = findSecuredEntityById(((Number) targetId).longValue(), permissionDao);
 
         if (targetDomainObject == null) {
             throw new RuntimeException("Object of type '" + targetType +
                     "' with identity '" + targetId + "' not found");
         }
         return checkPermission(authentication, targetDomainObject, permission, logger);
+    }
+
+    @Transactional(readOnly = true)
+    public SecuredEntity findSecuredEntityById(Long targetId, PermissionDao permissionDao) {
+        return permissionDao.findSecuredEntityById(targetId);
     }
 
     @SuppressWarnings("unchecked")

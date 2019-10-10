@@ -66,12 +66,14 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
     }
 
     @Override
+    @Transactional
     public void create(DepartmentReportPeriod departmentReportPeriod) {
         LOG.info(String.format("DepartmentReportPeriodServiceImpl.create. departmentReportPeriod: %s", departmentReportPeriod));
         departmentReportPeriodDao.create(departmentReportPeriod);
     }
 
     @Override
+    @Transactional
     public void create(DepartmentReportPeriod departmentReportPeriod, List<Integer> departmentIds) {
         Assert.notEmpty(departmentIds);
         LOG.info(String.format("DepartmentReportPeriodServiceImpl.create. departmentReportPeriod: %s; departmentIds: %s", departmentReportPeriod, departmentIds));
@@ -79,6 +81,7 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
     }
 
     @Override
+    @Transactional
     public void merge(final List<DepartmentReportPeriod> departmentReportPeriods, final Integer departmentId) {
         if (departmentReportPeriods != null && !departmentReportPeriods.isEmpty()) {
             LOG.info(String.format("DepartmentReportPeriodServiceImpl.merge. departmentReportPeriods.size: %s; departmentId: %s", departmentReportPeriods.size(), departmentId));
@@ -87,12 +90,14 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
     }
 
     @Override
+    @Transactional
     public void updateActive(int id, boolean active) {
         LOG.info(String.format("DepartmentReportPeriodServiceImpl.updateActive. id: %s; active: %s", id, active));
         departmentReportPeriodDao.updateActive(id, active);
     }
 
     @Override
+    @Transactional
     public void updateActive(List<Integer> ids, Integer reportPeriodId, boolean active) {
         LOG.info(String.format("DepartmentReportPeriodServiceImpl.updateActive. ids: %s; reportPeriodId: %s; active: %s", ids, reportPeriodId, active));
         if (ids == null || ids.isEmpty()) {
@@ -102,37 +107,44 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
     }
 
     @Override
+    @Transactional
     public void delete(List<Integer> ids) {
         LOG.info(String.format("DepartmentReportPeriodServiceImpl.delete. ids: %s", ids));
         departmentReportPeriodDao.delete(ids);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public boolean isExistsByReportPeriodIdAndDepartmentId(int departmentId, int reportPeriodId) {
         return departmentReportPeriodDao.isExistsByReportPeriodIdAndDepartmentId(departmentId, reportPeriodId);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public boolean isExistsByReportPeriodId(int reportPeriodId) {
         return departmentReportPeriodDao.isExistsByReportPeriodId(reportPeriodId);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public DepartmentReportPeriod fetchLast(int departmentId, int reportPeriodId) {
         return departmentReportPeriodDao.fetchLast(departmentId, reportPeriodId);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public boolean isLaterCorrectionPeriodExists(DepartmentReportPeriod departmentReportPeriod) {
         return departmentReportPeriodDao.isLaterCorrectionPeriodExists(departmentReportPeriod);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<DepartmentReportPeriodJournalItem> fetchJournalItemByFilter(DepartmentReportPeriodFilter filter) {
         return departmentReportPeriodDao.fetchJournalItemByFilter(filter);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public DepartmentReportPeriod fetchOne(int id) {
         return departmentReportPeriodDao.fetchOne(id);
     }

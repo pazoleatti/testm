@@ -5,7 +5,6 @@ import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.builder.DepartmentReportPeriodBuilder;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookFormType;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import org.apache.commons.lang3.time.DateUtils;
 import org.junit.Assert;
@@ -19,8 +18,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 
+import static com.aplana.sbrf.taxaccounting.model.refbook.RefBookFormType.*;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.*;
@@ -66,7 +69,7 @@ public class DepartmentReportPeriodDaoTest {
         // Пустой фильтр
         List<DepartmentReportPeriod> departmentReportPeriodList =
                 departmentReportPeriodDao.fetchAllByFilter(departmentReportPeriodFilter);
-        assertEquals(40, departmentReportPeriodList.size());
+        assertEquals(48, departmentReportPeriodList.size());
         // Фильтр по подразделениям
         departmentReportPeriodFilter = new DepartmentReportPeriodFilter();
         departmentReportPeriodFilter.setDepartmentIdList(asList(4));
@@ -116,7 +119,7 @@ public class DepartmentReportPeriodDaoTest {
         departmentReportPeriodFilter.setIsActive(true);
         departmentReportPeriodFilter.setIsCorrection(true);
         departmentReportPeriodList = departmentReportPeriodDao.fetchAllByFilter(departmentReportPeriodFilter);
-        assertEquals(2, departmentReportPeriodList.size());
+        assertEquals(6, departmentReportPeriodList.size());
         assertEquals(303, departmentReportPeriodList.get(0).getId().intValue());
         assertEquals(307, departmentReportPeriodList.get(1).getId().intValue());
     }
@@ -127,7 +130,7 @@ public class DepartmentReportPeriodDaoTest {
         // Пустой фильтр
         List<Integer> departmentReportPeriodList =
                 departmentReportPeriodDao.fetchAllIdsByFilter(departmentReportPeriodFilter);
-        assertEquals(40, departmentReportPeriodList.size());
+        assertEquals(48, departmentReportPeriodList.size());
     }
 
     @Test
@@ -231,11 +234,57 @@ public class DepartmentReportPeriodDaoTest {
     }
 
     @Test
+    public void getCorrectivePeriodsSortedByFormTypePriorityTest() {
+        List<DepartmentReportPeriod> departmentReportPeriods =
+                departmentReportPeriodDao.getPeriodsSortedByFormTypePriority(1, "33", 2019, true);
+        assertEquals(4, departmentReportPeriods.size());
+
+        DepartmentReportPeriod departmentReportPeriod1 = departmentReportPeriods.get(0);
+        assertEquals(912, (int) departmentReportPeriod1.getId());
+        assertEquals(NDFL_2_2.getId(), new Long(departmentReportPeriod1.getReportPeriod().getReportPeriodTaxFormTypeId()));
+
+        DepartmentReportPeriod departmentReportPeriod2 = departmentReportPeriods.get(1);
+        assertEquals(911, (int) departmentReportPeriod2.getId());
+        assertEquals(NDFL_2_1.getId(), new Long(departmentReportPeriod2.getReportPeriod().getReportPeriodTaxFormTypeId()));
+
+        DepartmentReportPeriod departmentReportPeriod3 = departmentReportPeriods.get(2);
+        assertEquals(913, (int) departmentReportPeriod3.getId());
+        assertEquals(NDFL_6.getId(), new Long(departmentReportPeriod3.getReportPeriod().getReportPeriodTaxFormTypeId()));
+
+        DepartmentReportPeriod departmentReportPeriod4 = departmentReportPeriods.get(3);
+        assertEquals(914, (int) departmentReportPeriod4.getId());
+        assertEquals(APPLICATION_2.getId(), new Long(departmentReportPeriod4.getReportPeriod().getReportPeriodTaxFormTypeId()));
+    }
+
+    @Test
+    public void getNonCorrectivePeriodsSortedByFormTypePriorityTest() {
+        List<DepartmentReportPeriod> departmentReportPeriods =
+                departmentReportPeriodDao.getPeriodsSortedByFormTypePriority(1, "21", 2019, false);
+        assertEquals(4, departmentReportPeriods.size());
+
+        DepartmentReportPeriod departmentReportPeriod1 = departmentReportPeriods.get(0);
+        assertEquals(902, (int) departmentReportPeriod1.getId());
+        assertEquals(NDFL_2_2.getId(), new Long(departmentReportPeriod1.getReportPeriod().getReportPeriodTaxFormTypeId()));
+
+        DepartmentReportPeriod departmentReportPeriod2 = departmentReportPeriods.get(1);
+        assertEquals(901, (int) departmentReportPeriod2.getId());
+        assertEquals(NDFL_2_1.getId(), new Long(departmentReportPeriod2.getReportPeriod().getReportPeriodTaxFormTypeId()));
+
+        DepartmentReportPeriod departmentReportPeriod3 = departmentReportPeriods.get(2);
+        assertEquals(903, (int) departmentReportPeriod3.getId());
+        assertEquals(NDFL_6.getId(), new Long(departmentReportPeriod3.getReportPeriod().getReportPeriodTaxFormTypeId()));
+
+        DepartmentReportPeriod departmentReportPeriod4 = departmentReportPeriods.get(3);
+        assertEquals(904, (int) departmentReportPeriod4.getId());
+        assertEquals(APPLICATION_2.getId(), new Long(departmentReportPeriod4.getReportPeriod().getReportPeriodTaxFormTypeId()));
+    }
+
+    @Test
     public void existLargeCorrectionTest() throws ParseException {
         DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriodBuilder()
                 .department(1)
                 .reportPeriodId(20)
-                .reportPeriodTaxFormTypeId(RefBookFormType.NDFL_6.getId().intValue())
+                .reportPeriodTaxFormTypeId(NDFL_6.getId().intValue())
                 .correctionDate(SIMPLE_DATE_FORMAT.parse("01.01.2011"))
                 .build();
         Assert.assertTrue(departmentReportPeriodDao.isLaterCorrectionPeriodExists(departmentReportPeriod));

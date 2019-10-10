@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
-import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.action.OpenCorrectionPeriodAction;
@@ -70,9 +69,6 @@ public class PeriodServiceImpl implements PeriodService {
     private LogEntryService logEntryService;
 
     @Autowired
-    private DepartmentReportPeriodDao departmentReportPeriodDao;
-
-    @Autowired
     private DeclarationDataDao declarationDataDao;
 
     @Autowired
@@ -116,7 +112,7 @@ public class PeriodServiceImpl implements PeriodService {
     @PreAuthorize("hasPermission(#action.departmentReportPeriodId, 'com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod', T(com.aplana.sbrf.taxaccounting.permissions.DepartmentReportPeriodPermission).OPEN_CORRECT)")
     public OpenPeriodResult openCorrectionPeriod(OpenCorrectionPeriodAction action) {
         LOG.info(String.format("openCorrectionPeriod for departmentReportPeriodId: %s", action.getDepartmentReportPeriodId()));
-        DepartmentReportPeriod mainDrp = departmentReportPeriodDao.fetchOne(action.getDepartmentReportPeriodId());
+        DepartmentReportPeriod mainDrp = departmentReportPeriodService.fetchOne(action.getDepartmentReportPeriodId());
         DepartmentReportPeriod correctionPeriod = new DepartmentReportPeriod();
         correctionPeriod.setReportPeriod(mainDrp.getReportPeriod());
         correctionPeriod.setDepartmentId(mainDrp.getDepartmentId());
@@ -191,7 +187,7 @@ public class PeriodServiceImpl implements PeriodService {
     public ReopenPeriodResult reopen(Integer departmentReportPeriodId) {
         LOG.info(String.format("reopen departmentReportPeriodId: %s", departmentReportPeriodId));
         Logger logger = new Logger();
-        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.fetchOne(departmentReportPeriodId);
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.fetchOne(departmentReportPeriodId);
         try {
             reopen(departmentReportPeriod, logger);
             return new ReopenPeriodResult(logEntryService.save(logger.getEntries()));
@@ -237,7 +233,7 @@ public class PeriodServiceImpl implements PeriodService {
     @PreAuthorize("hasPermission(#departmentReportPeriodId, 'com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod', T(com.aplana.sbrf.taxaccounting.permissions.DepartmentReportPeriodPermission).CLOSE)")
     public ClosePeriodResult close(Integer departmentReportPeriodId, boolean skipHasNotAcceptedCheck) {
         LOG.info(String.format("close departmentReportPeriodId: %s", departmentReportPeriodId));
-        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.fetchOne(departmentReportPeriodId);
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.fetchOne(departmentReportPeriodId);
         Logger logger = new Logger();
         try {
             close(departmentReportPeriod, skipHasNotAcceptedCheck, logger);
@@ -289,7 +285,7 @@ public class PeriodServiceImpl implements PeriodService {
     public DeletePeriodResult delete(Integer departmentReportPeriodId) {
         LOG.info(String.format("delete id: %s", departmentReportPeriodId));
         Logger logger = new Logger();
-        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.fetchOne(departmentReportPeriodId);
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.fetchOne(departmentReportPeriodId);
         try {
             delete(departmentReportPeriod, logger);
             return new DeletePeriodResult(logEntryService.save(logger.getEntries()));
@@ -452,7 +448,7 @@ public class PeriodServiceImpl implements PeriodService {
     public void updateDeadline(DepartmentReportPeriodFilter filter) throws ActionException {
         SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy");
         TAUser userInfo = userService.getCurrentUser();
-        DepartmentReportPeriod period = departmentReportPeriodDao.fetchOne(filter.getId());
+        DepartmentReportPeriod period = departmentReportPeriodService.fetchOne(filter.getId());
         String text = "%s назначил подразделению %s новый срок сдачи отчетности для %s в периоде %s %s года: %s";
         List<Notification> notifications = new ArrayList<>();
         if (filter.getDeadline() == null) {
@@ -488,11 +484,6 @@ public class PeriodServiceImpl implements PeriodService {
     @Override
     public List<ReportPeriod> getCorrectPeriods(int departmentId) {
         return reportPeriodDao.getCorrectPeriods(departmentId);
-    }
-
-    @Override
-    public ReportPeriod getByDictCodeAndYear(String code, int year) {
-        return reportPeriodDao.getByTaxTypedCodeYear(code, year);
     }
 
     @Override

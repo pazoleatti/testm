@@ -265,5 +265,12 @@
 	</sql>
     </changeSet>
 
+	<changeSet id="3.10.1-adudenko-1" author="adudenko">
+		<update tableName="BLOB_DATA">
+			<column name="data"
+					valueBlobFile="templates-3.10.1/refbook/declaration_type.groovy"/>
+			<where>id in (select script_id from ref_book r where r.id = 207)</where>
+		</update>
+	</changeSet>
 
 </databaseChangeLog>

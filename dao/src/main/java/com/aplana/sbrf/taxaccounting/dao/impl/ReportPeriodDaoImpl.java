@@ -316,28 +316,6 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
     }
 
     @Override
-    public ReportPeriod getByTaxTypedCodeYear(String code, int year) {
-        try {
-            MapSqlParameterSource params = new MapSqlParameterSource();
-            params.addValue("code", code);
-            params.addValue("year", year);
-
-            return getNamedParameterJdbcTemplate().queryForObject(
-                    "SELECT rp.id, rp.name, rp.tax_period_id, tp.tax_type, tp.year, rp.start_date, rp.end_date, " +
-                            "rp.dict_tax_period_id, rp.calendar_start_date, rp.form_type_id " +
-                            "FROM report_period rp  " +
-                            "JOIN report_period_type rpt ON (rpt.id = rp.dict_tax_period_id AND rpt.code = :code)" +
-                            "JOIN tax_period tp ON (tp.id = rp.tax_period_id AND tp.year = :year) " +
-                            "where rp.form_type_id = 4",
-                    params,
-                    new ReportPeriodMapper()
-            );
-        } catch (EmptyResultDataAccessException e) {
-            return null;
-        }
-    }
-
-    @Override
     public List<ReportPeriodType> getPeriodType() {
 
         try {

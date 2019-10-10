@@ -18,7 +18,6 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -136,13 +135,42 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<DepartmentReportPeriodJournalItem> fetchJournalItemByFilter(final DepartmentReportPeriodFilter filter) {
         return executeFetchByFilter(filter, mapperJournalItem);
     }
 
     @Override
-    @Transactional
+    public List<DepartmentReportPeriod> getPeriodsSortedByFormTypePriority(long departmentId, String periodCode,
+                                                                           int year, boolean correctivePeriods) {
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("departmentId", departmentId);
+        params.addValue("periodCode", periodCode);
+        params.addValue("periodYear", year);
+
+        String sql = "select \n" +
+                "  drp.id, rpt.code, drp.department_id, drp.report_period_id, drp.is_active, drp.correction_date\n" +
+                "from\n" +
+                "  department_report_period drp\n" +
+                "join report_period rp on rp.id = drp.report_period_id\n" +
+                "join report_period_type rpt on rpt.id = rp.dict_tax_period_id\n" +
+                "join tax_period tp on tp.id = rp.tax_period_id\n" +
+                "where\n" +
+                "  drp.department_id = :departmentId\n" +
+                "  and drp.correction_date is " + (correctivePeriods ? "not null" : "null ") + "\n" +
+                "  and drp.is_active = 1\n" +
+                "  and rpt.code = :periodCode\n" +
+                "  and tp.year = :periodYear\n" +
+                "order by case \n" +
+                "  when form_type_id = 4 then 1 -- 2-НДФЛ(2)\n" +
+                "  when form_type_id = 3 then 2 -- 2-НДФЛ(1)\n" +
+                "  when form_type_id = 5 then 3 -- 6-НДФЛ\n" +
+                "  when form_type_id = 7 then 4 -- Приложение 2\n" +
+                "end";
+
+        return getNamedParameterJdbcTemplate().query(sql, params, mapper);
+    }
+
+    @Override
     @CacheEvict(value = CacheConstants.DEPARTMENT_REPORT_PERIOD, key = "#departmentReportPeriod.id")
     public void create(DepartmentReportPeriod departmentReportPeriod) {
         final KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -160,7 +188,6 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
     }
 
     @Override
-    @Transactional
     @CacheEvict(cacheNames = CacheConstants.DEPARTMENT_REPORT_PERIOD, allEntries = true)
     public void create(final DepartmentReportPeriod departmentReportPeriod, final List<Integer> departmentIds) {
         final List<Integer> ids = generateIds("seq_department_report_period", departmentIds.size(), Integer.class);
@@ -184,7 +211,6 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
     }
 
     @Override
-    @Transactional
     @CacheEvict(cacheNames = CacheConstants.DEPARTMENT_REPORT_PERIOD, allEntries = true)
     public void merge(final List<DepartmentReportPeriod> departmentReportPeriods, final Integer departmentId) {
         final List<Integer> ids = generateIds("seq_department_report_period", departmentReportPeriods.size(), Integer.class);
@@ -216,7 +242,6 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
     }
 
     @Override
-    @Transactional
     @CacheEvict(value = CacheConstants.DEPARTMENT_REPORT_PERIOD, key = "#id")
     public void updateActive(int id, boolean active) {
         getJdbcTemplate().update(
@@ -227,7 +252,6 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
     }
 
     @Override
-    @Transactional
     @CacheEvict(value = CacheConstants.DEPARTMENT_REPORT_PERIOD, allEntries = true)
     public void updateActive(final List<Integer> ids, final Integer reportPeriodId, final boolean active) {
         getJdbcTemplate().batchUpdate("UPDATE department_report_period SET is_active = ? WHERE report_period_id = ? AND id = ?", new BatchPreparedStatementSetter() {
@@ -246,7 +270,6 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
     }
 
     @Override
-    @Transactional
     @CacheEvict(value = CacheConstants.DEPARTMENT_REPORT_PERIOD, allEntries = true)
     public void delete(final List<Integer> ids) {
         getJdbcTemplate().batchUpdate("DELETE FROM department_report_period WHERE id = ?",
@@ -265,7 +288,6 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
     }
 
     @Override
-    @Transactional(readOnly = true)
     public boolean isExistsByReportPeriodIdAndDepartmentId(int departmentId, int reportPeriodId) {
         Integer count = getJdbcTemplate().queryForObject(
                 "SELECT CASE WHEN exists(SELECT * FROM department_report_period WHERE department_id = ? AND report_period_id = ?) THEN 1 ELSE 0 END FROM dual",
@@ -275,7 +297,6 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
     }
 
     @Override
-    @Transactional(readOnly = true)
     public boolean isExistsByReportPeriodId(int reportPeriodId) {
         Integer count = getJdbcTemplate().queryForObject(
                 "SELECT CASE WHEN exists(SELECT * FROM department_report_period WHERE report_period_id = ?) THEN 1 ELSE 0 END FROM dual",
@@ -284,7 +305,6 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
     }
 
     @Override
-    @Transactional(readOnly = true)
     public DepartmentReportPeriod fetchLast(int departmentId, int reportPeriodId) {
         try {
             return getJdbcTemplate().queryForObject("SELECT drp.id, drp.department_id, drp.report_period_id, " +
@@ -306,7 +326,6 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
     }
 
     @Override
-    @Transactional(readOnly = true)
     public DepartmentReportPeriod fetchPrevLast(int departmentId, int reportPeriodId) {
         try {
             MapSqlParameterSource params = new MapSqlParameterSource();
@@ -326,7 +345,6 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
     }
 
     @Override
-    @Transactional(readOnly = true)
     public DepartmentReportPeriod fetchFirst(int departmentId, int reportPeriodId) {
         try {
             return getJdbcTemplate().queryForObject("SELECT drp.id, drp.department_id, drp.report_period_id, " +
@@ -343,7 +361,6 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
     }
 
     @Override
-    @Transactional(readOnly = true)
     public boolean isLaterCorrectionPeriodExists(DepartmentReportPeriod departmentReportPeriod) {
         return getJdbcTemplate().queryForObject(
                 "SELECT count(*) FROM department_report_period drp\n " +
@@ -358,7 +375,6 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<Integer> fetchIdsByDepartmentTypeAndReportPeriod(int departmentTypeCode, int departmentReportPeriodId) {
         String query = "SELECT drp.id FROM department_report_period drp \n" +
                 "JOIN department_report_period drp2 ON drp2.id = :departmentReportPeriodId\n" +
@@ -376,7 +392,6 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
     }
 
     @Override
-    @Transactional(readOnly = true)
     @Cacheable(value = CacheConstants.DEPARTMENT_REPORT_PERIOD, key = "#id")
     public DepartmentReportPeriod fetchOne(int id) {
         try {

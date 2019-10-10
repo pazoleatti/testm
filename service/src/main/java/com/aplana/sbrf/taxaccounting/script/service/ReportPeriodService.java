@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.script.service;
 
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriodType;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevelType;
 import com.aplana.sbrf.taxaccounting.service.ScriptExposed;
 
@@ -44,15 +43,6 @@ public interface ReportPeriodService {
      * @return объект {@link Calendar} или null
      */
     Calendar getEndDate(int reportPeriodId);
-
-    /**
-     * Получение отчетного периода по коду записи справочника "Коды, определяющие налоговый (отчётный) период" и году
-     *
-     * @param code код записи справочника "Коды, определяющие налоговый (отчётный) период"
-     * @param year год отчетного периода
-     * @return объект {@link ReportPeriod} или null
-     */
-    ReportPeriod getByTaxTypedCodeYear(TaxType taxType, String code, int year);
 
     /**
      * Получение записи справочника "Коды, определяющие налоговый (отчётный) период" по идентификатору.

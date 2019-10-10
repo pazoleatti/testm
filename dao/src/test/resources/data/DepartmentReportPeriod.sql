@@ -45,3 +45,12 @@ insert into department_report_period(id, department_id, report_period_id, is_act
 insert into department_report_period(id, department_id, report_period_id, is_active) values (702, 1, 410, 1);
 
 insert into department_report_period(id, department_id, report_period_id, is_active) values (801, 1, 330, 1);
+
+insert into department_report_period(id, department_id, report_period_id, is_active) values (901, 1, 500, 1);
+insert into department_report_period(id, department_id, report_period_id, is_active) values (902, 1, 501, 1);
+insert into department_report_period(id, department_id, report_period_id, is_active) values (903, 1, 502, 1);
+insert into department_report_period(id, department_id, report_period_id, is_active) values (904, 1, 503, 1);
+insert into department_report_period(id, department_id, report_period_id, is_active, correction_date) values (911, 1, 510, 1, to_date('01.01.2020', 'DD.MM.YYYY'));
+insert into department_report_period(id, department_id, report_period_id, is_active, correction_date) values (912, 1, 520, 1, to_date('01.01.2020', 'DD.MM.YYYY'));
+insert into department_report_period(id, department_id, report_period_id, is_active, correction_date) values (913, 1, 530, 1, to_date('01.01.2020', 'DD.MM.YYYY'));
+insert into department_report_period(id, department_id, report_period_id, is_active, correction_date) values (914, 1, 540, 1, to_date('01.01.2020', 'DD.MM.YYYY'));
