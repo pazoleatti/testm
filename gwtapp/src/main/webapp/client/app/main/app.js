@@ -1253,6 +1253,7 @@
         'app.declarationTypeJournal',
         'app.declarationTemplateJournal',
         'app.declarationTemplate',
+        'app.refBookInterceptors',
         'app.registryFL',
         'app.refBookList',
         'app.personCard',
