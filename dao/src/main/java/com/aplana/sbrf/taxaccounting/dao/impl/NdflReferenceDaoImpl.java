@@ -34,16 +34,18 @@ public class NdflReferenceDaoImpl extends AbstractDao implements NdflReferenceDa
         return uniqueRecordIds.size();
     }
 
-    public Integer getNextSprNum(Integer year) {
-        Integer sequenceCount = getJdbcTemplate().queryForObject("select count(*) from user_sequences where sequence_name='SEQ_NDFL_REFERENCES_" + year + "'", Integer.class);
-        if (sequenceCount == 0) {
-            createSequence(year);
-        }
-        return getJdbcTemplate().queryForObject("select SEQ_NDFL_REFERENCES_" + year + ".nextval from dual", Integer.class);
-
+    @Override
+    public Integer countSequenceByYear(Integer year) {
+        return getJdbcTemplate().queryForObject("select count(*) from user_sequences where sequence_name='SEQ_NDFL_REFERENCES_" + year + "'", Integer.class);
     }
 
-    private void createSequence(Integer year) {
+    @Override
+    public Integer getNextSprNum(Integer year) {
+        return getJdbcTemplate().queryForObject("select SEQ_NDFL_REFERENCES_" + year + ".nextval from dual", Integer.class);
+    }
+
+    @Override
+    public void createSequence(Integer year) {
         getJdbcTemplate().execute("CREATE SEQUENCE SEQ_NDFL_REFERENCES_" + year
                 + " MINVALUE 1 MAXVALUE 9999999999999999999999999999 INCREMENT BY 1 START WITH 1 CACHE 20 NOORDER NOCYCLE");
     }
