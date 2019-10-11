@@ -273,4 +273,16 @@
 		</update>
 	</changeSet>
 
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-8786 Реализовать запись в ЖА для спецотчетов -->
+    <changeSet id="3.10.1-avoynov-2" author="avoynov" runAlways="true">
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="CREATE_SCRIPT" valueClobFile="templates-3.10.1/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl.groovy"/>
+            <where>declaration_type_id = 101</where>
+        </update>
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="CREATE_SCRIPT" valueClobFile="templates-3.10.1/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl.groovy"/>
+            <where>declaration_type_id = 100</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>

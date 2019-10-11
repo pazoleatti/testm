@@ -17,6 +17,7 @@ import com.aplana.sbrf.taxaccounting.script.SharedConstants
 import com.aplana.sbrf.taxaccounting.script.dao.BlobDataService
 import com.aplana.sbrf.taxaccounting.script.service.*
 import com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils
+import com.aplana.sbrf.taxaccounting.service.AuditService
 import com.aplana.sbrf.taxaccounting.service.LockDataService
 import com.aplana.sbrf.taxaccounting.service.ReportService
 import com.aplana.sbrf.taxaccounting.service.component.lock.locker.DeclarationLocker
@@ -81,6 +82,7 @@ class Report2Ndfl extends AbstractScriptClass {
     String applicationVersion
     Map<String, Object> paramMap
     NdflReferenceService ndflReferenceService
+    AuditService auditService
 
     @TypeChecked(TypeCheckingMode.SKIP)
     Report2Ndfl(scriptClass) {
@@ -112,6 +114,7 @@ class Report2Ndfl extends AbstractScriptClass {
         this.paramMap = (Map<String, Object>) getSafeProperty("paramMap")
         this.reportFormsCreationParams = (ReportFormsCreationParams) getSafeProperty("reportFormsCreationParams")
         this.ndflReferenceService = (NdflReferenceService) getSafeProperty("ndflReferenceService")
+        this.auditService = (AuditService) getSafeProperty("auditServiceImpl")
     }
 
     @Override
@@ -1748,6 +1751,13 @@ class Report2Ndfl extends AbstractScriptClass {
         destination.close()
 
         scriptSpecificReportHolder.setFileName(fileName)
+        if (is2Ndfl1()) {
+            auditService.add(null, userInfo, declarationData,
+                    "Создание спецотчета: \"Спецотчет \"2-НДФЛ (1) по физическому лицу\"\"", null)
+        } else if (is2Ndfl2()) {
+            auditService.add(null, userInfo, declarationData,
+                    "Создание спецотчета: \"Спецотчет \"2-НДФЛ (2) по физическому лицу\"\"", null)
+        }
     }
 
     /**
