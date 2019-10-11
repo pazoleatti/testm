@@ -462,7 +462,7 @@ class Report2Ndfl extends AbstractScriptClass {
                     person.deductions = (List<NdflPersonDeduction>) operationsByPersonId[person.id]*.deductions.flatten()
                     person.prepayments = (List<NdflPersonPrepayment>) operationsByPersonId[person.id]*.prepayments.flatten()
                     def nomSprAndCorr = getNomSpr(person.recordId, reportPeriod.taxPeriod.year, declarationData.kpp, declarationData.oktmo, declarationTemplate.type.id)
-//                    if (!reportFormsCreationParams.getReportTypeMode().equals(ReportTypeModeEnum.ANNULMENT)) {}
+                    if (!reportFormsCreationParams.getReportTypeMode().equals(ReportTypeModeEnum.ANNULMENT)) {
                     "НДФЛ-2"(НомСпр: nomSprAndCorr.sprNum,
                             НомКорр: sprintf('%02d', nomSprAndCorr.corrNum)) {
                         ПолучДох(ИННФЛ: person.innNp,
@@ -620,6 +620,7 @@ class Report2Ndfl extends AbstractScriptClass {
                             }
                         }
                     }
+		}
                     if (!refPersonIds.contains(person.personId)) {
                         refPersonIds << person.personId
                         xml.ndflReferences << buildNdflReference(person.id, person.personId, nomSprAndCorr.sprNum, person.lastName, person.firstName, person.middleName, person.birthDay, nomSprAndCorr.corrNum)
@@ -738,7 +739,16 @@ class Report2Ndfl extends AbstractScriptClass {
                     long referencePersonId = ndflReference.NDFL_PERSON_ID.numberValue as Long
                     if (!personSet.any { it.personId == referencePersonId }) {
                         NdflPerson person = ndflPersonService.get(referencePersonId)
-                        nullifyPersonList.add(person)
+                       if (!reportFormsCreationParams.getReportTypeMode().equals(ReportTypeModeEnum.ANNULMENT)) {
+                            nullifyPersonList.add(person)
+                        } else {
+                            if (person.getLastName().equals(reportFormsCreationParams.getLastName()) &&
+                                    person.getFirstName().equals(reportFormsCreationParams.getFirstName()) &&
+                                    person.getMiddleName().equals(reportFormsCreationParams.getMiddleName()) &&
+                                    person.getInnNp().equals(reportFormsCreationParams.getInnNp()) &&
+                                    person.getIdDocNumber().equals(reportFormsCreationParams.getIdDocNumber())
+                            ) nullifyPersonList.add(person)
+                        }
                     }
                 }
             }
@@ -819,6 +829,28 @@ class Report2Ndfl extends AbstractScriptClass {
             }
         }
         return incomesFor2NDFL2.findAll { it.operationId == operationId }
+    }
+
+    /**
+     * Выбирает операции выбранного ФЛ только для ручного формирования аннулирующей 2-НДФЛ
+     * @param ndflPersonList список операций
+     * @throws ServiceException
+     */
+    List<Operation> findOperationsForAnnul(List<Operation> operations) {
+        if (reportFormsCreationParams.getReportTypeMode().equals(ReportTypeModeEnum.ANNULMENT)) {
+            List<Operation> selectedOperations = new LinkedList<>();
+            for (Operation operation : operations) {
+                if (operation.person.getLastName().equals(reportFormsCreationParams.getLastName()) &&
+                        operation.person.getFirstName().equals(reportFormsCreationParams.getFirstName()) &&
+                        operation.person.getMiddleName().equals(reportFormsCreationParams.getMiddleName()) &&
+                        operation.person.getInnNp().equals(reportFormsCreationParams.getInnNp()) &&
+                        operation.person.getIdDocNumber().equals(reportFormsCreationParams.getIdDocNumber())
+                ) selectedOperations.add(operation)
+            }
+            return selectedOperations
+        } else {
+            return operations
+        }
     }
 
     /**
@@ -1188,13 +1220,16 @@ class Report2Ndfl extends AbstractScriptClass {
             Xml xml = null
             try {
                 def kppOktmoOperations = operationsByKppOktmoPair[new KppOktmoPair(departmentConfig.kpp, departmentConfig.oktmo.code)] ?: new ArrayList<Operation>()
+		kppOktmoOperations = findOperationsForAnnul(kppOktmoOperations)
                 xml = buildXml(departmentConfig, kppOktmoOperations)
                 if (xml) {
                     if (existingDeclarations) {
-                        if (!hasDifference(xml, existingDeclarations.first())) {
-                            // Удалять не требуется
-                            continue
-                        }
+			if (!reportFormsCreationParams.getReportTypeMode().equals(ReportTypeModeEnum.ANNULMENT)) {
+                	        if (!hasDifference(xml, existingDeclarations.first())) {
+                        	    // Удалять не требуется
+                            	    continue
+                        	}
+			}
                     }
                     def formsToDelete = existingDeclarations.findAll {
                         it.docStateId == RefBookDocState.NOT_SENT.id && departmentReportPeriodService.get(it.departmentReportPeriodId).isActive()
