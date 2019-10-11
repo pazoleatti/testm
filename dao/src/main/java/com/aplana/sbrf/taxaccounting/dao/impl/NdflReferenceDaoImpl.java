@@ -85,4 +85,15 @@ public class NdflReferenceDaoImpl extends AbstractDao implements NdflReferenceDa
             return numFor2Ndfl;
         }
     }
+
+    public Boolean checkExistingAnnulReport(Long declarationDataId, Integer num, String lastName, String firstName, String middleName, String innNp, String idDocNumber) {
+        Boolean result = false;
+        Integer resultCount = getJdbcTemplate().queryForObject("select count(*) from ndfl_references nr " +
+                        "left join ndfl_person np on np.id = nr.ndfl_person_id " +
+                        "where nr.correction_num = 99 and nr.declaration_data_id = ? and nr.num = ? and np.last_name = ? and np.first_name = ? and np.middle_name = ? and np.inn_np = ? and np.id_doc_number = ?  ",
+                new Object[] {declarationDataId, num, lastName, firstName, middleName, innNp, idDocNumber}, Integer.class);
+        if (resultCount > 0) result = true;
+        return result;
+    }
+
 }

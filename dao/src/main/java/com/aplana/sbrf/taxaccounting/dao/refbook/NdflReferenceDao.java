@@ -45,4 +45,18 @@ public interface NdflReferenceDao {
      *
      */
     List<NumFor2Ndfl> getCorrSprNum(Long personId, int year, String kpp, String oktmo, int declarationTypeId);
+
+    /**
+     * Проверка наличие ранее созданной аннулирующей формы справки
+     * @param declarationDataId Идентификатор налоговой формы к которой относятся данные
+     * @param num Номер справки
+     * @param lastName Фамилия
+     * @param firstName Имя
+     * @param middleName Отчество
+     * @param innNp ИНН РФ
+     * @param idDocNumber Номер ДУЛ
+     * @return true если есть
+     */
+    Boolean checkExistingAnnulReport(Long declarationDataId, Integer num, String lastName, String firstName, String middleName, String innNp, String idDocNumber);
+
 }

@@ -270,6 +270,12 @@
                     }
                     params.reportTypeMode = APP_CONSTANTS.REPORT_TYPE_MODE.ANNULMENT.enumName;
                     params.selectedSprNum =  $scope.reportNdflGrid.value[0].pNumSpravka;
+                    params.declarationDataId = $shareData.declarationDataId;
+                    params.lastName = $scope.reportNdflGrid.value[0].lastName;
+                    params.firstName = $scope.reportNdflGrid.value[0].firstName;
+                    params.middleName = $scope.reportNdflGrid.value[0].middleName;
+                    params.innNp = $scope.reportNdflGrid.value[0].innNp;
+                    params.idDocNumber = $scope.reportNdflGrid.value[0].idDocNumber;
 
                     $http({
                         method: "POST",

@@ -38,4 +38,8 @@ public class NdflReferenceServiceImpl implements NdflReferenceService {
         return ndflReferenceDao.getNextSprNum(year);
     }
 
+    public Boolean checkExistingAnnulReport(Long declarationDataId, Integer num, String lastName, String firstName, String middleName, String innNp, String idDocNumber) {
+        return ndflReferenceDao.checkExistingAnnulReport(declarationDataId, num, lastName, firstName, middleName, innNp, idDocNumber);
+    }
+
 }
