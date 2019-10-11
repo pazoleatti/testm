@@ -17,6 +17,7 @@ import com.aplana.sbrf.taxaccounting.script.SharedConstants
 import com.aplana.sbrf.taxaccounting.script.dao.BlobDataService
 import com.aplana.sbrf.taxaccounting.script.service.*
 import com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils
+import com.aplana.sbrf.taxaccounting.service.AuditService
 import com.aplana.sbrf.taxaccounting.service.LockDataService
 import com.aplana.sbrf.taxaccounting.service.ReportService
 import com.aplana.sbrf.taxaccounting.service.component.lock.locker.DeclarationLocker
@@ -79,6 +80,7 @@ class Report2Ndfl extends AbstractScriptClass {
     RefBookDeductionTypeService refBookDeductionTypeService
     String applicationVersion
     Map<String, Object> paramMap
+    AuditService auditService
 
     @TypeChecked(TypeCheckingMode.SKIP)
     Report2Ndfl(scriptClass) {
@@ -109,6 +111,7 @@ class Report2Ndfl extends AbstractScriptClass {
         this.applicationVersion = (String) getSafeProperty("applicationVersion")
         this.paramMap = (Map<String, Object>) getSafeProperty("paramMap")
         this.reportFormsCreationParams = (ReportFormsCreationParams) getSafeProperty("reportFormsCreationParams")
+        this.auditService = (AuditService) getSafeProperty("auditServiceImpl")
     }
 
     @Override
@@ -935,7 +938,11 @@ class Report2Ndfl extends AbstractScriptClass {
 
     /************************************* ОБЩИЕ МЕТОДЫ** *****************************************************************/
     boolean is2Ndfl1() {
-        return declarationData.declarationTemplateId == DeclarationType.NDFL_2_1
+        return declarationTemplate.type.id == DeclarationType.NDFL_2_1
+    }
+
+    boolean is2Ndfl2() {
+        return declarationTemplate.type.id == DeclarationType.NDFL_2_2
     }
 
     /**
@@ -1277,6 +1284,13 @@ class Report2Ndfl extends AbstractScriptClass {
         destination.close()
 
         scriptSpecificReportHolder.setFileName(fileName)
+        if (is2Ndfl1()) {
+            auditService.add(null, userInfo, declarationData,
+                    "Создание спецотчета: \"Спецотчет \"2-НДФЛ (1) по физическому лицу\"\"", null)
+        } else if (is2Ndfl2()) {
+            auditService.add(null, userInfo, declarationData,
+                    "Создание спецотчета: \"Спецотчет \"2-НДФЛ (2) по физическому лицу\"\"", null)
+        }
     }
 
     /**
