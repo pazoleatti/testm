@@ -44,6 +44,7 @@ import com.aplana.sbrf.taxaccounting.script.SharedConstants
 import com.aplana.sbrf.taxaccounting.script.dao.BlobDataService
 import com.aplana.sbrf.taxaccounting.script.service.*
 import com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils
+import com.aplana.sbrf.taxaccounting.service.AuditService
 import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService
 import groovy.transform.*
 import groovy.transform.builder.Builder
@@ -100,6 +101,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
     Date dateFrom, dateTo
     Date formCreationDate = null
     Date date = new Date()
+    AuditService auditService
     /**
      * Дополнительные спецотчеты (SBRFNDFL-8445)
      */
@@ -168,6 +170,9 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         }
         if (scriptClass.getBinding().hasVariable("selectedRows")) {
             this.ndflAllPersonsReportSelectedRows = (RnuNdflAllPersonsReportSelectedRows) scriptClass.getProperty("selectedRows");
+        }
+        if (scriptClass.getBinding().hasVariable("auditServiceImpl")) {
+            this.auditService = (AuditService) scriptClass.getProperty("auditServiceImpl")
         }
     }
 
@@ -474,6 +479,8 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         } finally {
             writer.close()
         }
+        auditService.add(null, userInfo, declarationData,
+                "Создание спецотчета: \"Реестр загруженных данных\" ", null)
     }
 
     def createSpecificReport() {
@@ -492,37 +499,51 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
                     department.name)
             return
         }
+        String specReportDescription
         switch (scriptSpecificReportHolder?.declarationSubreport?.alias) {
             case SubreportAliasConstants.RNU_NDFL_PERSON_DB:
                 exportPersonDataToExcel()
+                specReportDescription = "РНУ НДФЛ по физическому лицу"
                 break
             case SubreportAliasConstants.RNU_NDFL_PERSON_ALL_DB:
                 exportAllDeclarationDataToExcel()
                 scriptSpecificReportHolder.setFileName("РНУ_НДФЛ_${declarationData.id}_${checkSubreportKind().getKind()}_${new Date().format('yyyy-MM-dd_HH-mm-ss')}.xlsx")
+                specReportDescription = "\"РНУ НДФЛ по всем ФЛ\" в режиме: \"${checkSubreportKind().getKind()}\""
                 break
             case SubreportAliasConstants.RNU_RATE_REPORT:
                 createRateReport()
                 scriptSpecificReportHolder.setFileName("Отчет_в_разрезе_ставок_${declarationData.id}_${date.format('yyyy-MM-dd_HH-mm-ss')}.xlsx")
+                specReportDescription = "Отчет в разрезе ставок"
                 break
             case SubreportAliasConstants.RNU_PAYMENT_REPORT:
                 createPaymentReport()
                 scriptSpecificReportHolder.setFileName("Отчет_в_разрезе_ПП_${declarationData.id}_${date.format('yyyy-MM-dd_HH-mm-ss')}.xlsx")
+                specReportDescription = "Отчет в разрезе платежных поручений"
                 break
             case SubreportAliasConstants.RNU_NDFL_DETAIL_REPORT:
                 createNdflDetailReport()
                 scriptSpecificReportHolder.setFileName("Детализация_${declarationData.id}_${date.format('yyyy-MM-dd_HH-mm-ss')}.xlsx")
+                specReportDescription = "Детализация – доходы, вычеты, налоги"
                 break
             case SubreportAliasConstants.RNU_NDFL_2_6_DATA_XLSX_REPORT:
                 create2_6NdflDataReport('xlsx')
                 scriptSpecificReportHolder.setFileName("Данные_для_2_и_6-НДФЛ_${declarationData.id}_${date.format('yyyy-MM-dd_HH-mm-ss')}.xlsx")
+                specReportDescription = "\"Данные для включения в 2-НДФЛ и 6-НДФЛ\" с параметрами: " +
+                        "Включать данные с ${dateFrom.format('yyyy-MM-dd')} по ${dateTo.format('yyyy-MM-dd')} " +
+                        "Отрицательные значения : ${adjustNegativeValues ? "Корректировать" : "Не корректировать"} КПП: ${kppList.size() > 0 ? "Выбранные КПП" : "Все КПП формы"}"
                 break
             case SubreportAliasConstants.RNU_NDFL_2_6_DATA_TXT_REPORT:
                 create2_6NdflDataReport('txt')
                 scriptSpecificReportHolder.setFileName("Данные_для_2_и_6-НДФЛ_${declarationData.id}_${date.format('yyyy-MM-dd_HH-mm-ss')}.txt")
+                specReportDescription = "Файл выгрузки: \"Данные для включения в 2-НДФЛ и 6-НДФЛ\" с параметрами: " +
+                        "Включать данные с ${dateFrom.format('yyyy-MM-dd')} по ${dateTo.format('yyyy-MM-dd')} " +
+                        "Отрицательные значения : ${adjustNegativeValues ? "Корректировать" : "Не корректировать"} КПП: ${kppList.size() > 0 ? "Выбранные КПП" : "Все КПП формы"}"
                 break
             default:
                 throw new ServiceException("Обработка данного спец. отчета не предусмотрена!")
         }
+        auditService.add(null, userInfo, declarationData,
+                "Создание спецотчета: \"${specReportDescription}\"", null)
     }
 
     void exportPersonDataToExcel() {
