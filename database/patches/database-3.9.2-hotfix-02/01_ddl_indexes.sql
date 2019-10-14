@@ -7,7 +7,7 @@ BEGIN
 	select decode(count(*),0,1,0) into v_run_condition from user_indexes where INDEX_NAME=v_index_name ;
 	IF v_run_condition=1 THEN
 		execute immediate 'create index '|| v_index_name ||' on REF_BOOK_PERSON (REPORT_DOC ASC)
-					PCTFREE 20 INITRANS 5 COMPUTE STATISTICS';
+					PCTFREE 20 INITRANS 5 COMPUTE STATISTICS ONLINE';
 		dbms_output.put_line(v_task_name||'[INFO ('||v_index_name||')]:'||' Success');
 	ELSE
 		dbms_output.put_line(v_task_name||'[WARNING ('||v_index_name||')]:'||' changes had already been implemented');
@@ -31,7 +31,7 @@ BEGIN
 	select decode(count(*),0,1,0) into v_run_condition from user_indexes where INDEX_NAME=v_index_name ;
 	IF v_run_condition=1 THEN
 		execute immediate 'create index '|| v_index_name ||' on DECLARATION_DATA (PERSON_ID ASC)
-				   COMPUTE STATISTICS';
+				   COMPUTE STATISTICS ONLINE';
 		dbms_output.put_line(v_task_name||'[INFO ('||v_index_name||')]:'||' Success');
 	ELSE
 		dbms_output.put_line(v_task_name||'[WARNING ('||v_index_name||')]:'||' changes had already been implemented');
@@ -54,7 +54,7 @@ BEGIN
 	select decode(count(*),0,1,0) into v_run_condition from user_indexes where INDEX_NAME=v_index_name ;
 	IF v_run_condition=1 THEN
 		execute immediate 'create index '|| v_index_name ||' on NDFL_PERSON (PERSON_ID ASC)
-				   PCTFREE 50 INITRANS 5 COMPUTE STATISTICS';
+				   PCTFREE 50 INITRANS 5 COMPUTE STATISTICS ONLINE';
 		dbms_output.put_line(v_task_name||'[INFO ('||v_index_name||')]:'||' Success');
 	ELSE
 		dbms_output.put_line(v_task_name||'[WARNING ('||v_index_name||')]:'||' changes had already been implemented');
@@ -77,7 +77,7 @@ BEGIN
 	select decode(count(*),0,1,0) into v_run_condition from user_indexes where INDEX_NAME=v_index_name ;
 	IF v_run_condition=1 THEN
 		execute immediate 'create index '|| v_index_name ||' on NDFL_REFERENCES (PERSON_ID ASC)
-				   PCTFREE 50 INITRANS 5 COMPUTE STATISTICS';
+				   PCTFREE 50 INITRANS 5 COMPUTE STATISTICS  ONLINE';
 		dbms_output.put_line(v_task_name||'[INFO ('||v_index_name||')]:'||' Success');
 	ELSE
 		dbms_output.put_line(v_task_name||'[WARNING ('||v_index_name||')]:'||' changes had already been implemented');
@@ -100,7 +100,7 @@ BEGIN
 	select decode(count(*),0,1,0) into v_run_condition from user_indexes where INDEX_NAME=v_index_name ;
 	IF v_run_condition=1 THEN
 		execute immediate 'create index '|| v_index_name ||' on LOG_BUSINESS (PERSON_ID ASC)
-				   INITRANS 5 COMPUTE STATISTICS';
+				   INITRANS 5 COMPUTE STATISTICS ONLINE';
 		dbms_output.put_line(v_task_name||'[INFO ('||v_index_name||')]:'||' Success');
 	ELSE
 		dbms_output.put_line(v_task_name||'[WARNING ('||v_index_name||')]:'||' changes had already been implemented');
