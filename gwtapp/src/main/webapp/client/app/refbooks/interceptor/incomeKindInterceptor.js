@@ -12,8 +12,12 @@
              * @param date2
              */
             function compareDate(date1, date2) {
-                if (_.isNull(date1) || _.isUndefined(date1) || _.isNull(date2) || _.isUndefined(date2)) {
-                    return -1;
+                var maxDate = new Date(8640000000000000);
+                if (_.isNull(date1) || _.isUndefined(date1)) {
+                    date1 = maxDate;
+                }
+                if (_.isNull(date2) || _.isUndefined(date2)) {
+                    date2 = maxDate;
                 }
                 var dateFmt = "YYYY-MM-DD";
                 var moment1 = moment(date1, dateFmt);
@@ -35,11 +39,11 @@
                 },
                 isError2: function (incomeKindStartDate, incomeTypeEndDate) {
                     //incomeKindStartDate >= incomeTypeEndDate
-                    return incomeTypeEndDate && compareDate(incomeKindStartDate, incomeTypeEndDate) >= 0;
+                    return !!incomeTypeEndDate && compareDate(incomeKindStartDate, incomeTypeEndDate) >= 0;
                 },
                 isError3: function (incomeKindEndDate, incomeTypeEndDate) {
                     //incomeKindEndDate > incomeTypeEndDate
-                    return incomeTypeEndDate && compareDate(incomeKindEndDate, incomeTypeEndDate) > 0;
+                    return !!incomeTypeEndDate && !!incomeKindEndDate && compareDate(incomeKindEndDate, incomeTypeEndDate) > 0;
                 }
             };
         })
@@ -47,7 +51,8 @@
 
             $provide.decorator('$refBookInterceptors',
                 function refBookInterceptorsDecorator($delegate, $q, $dialogs, APP_CONSTANTS,
-                                                      IncomeTypeRecordResource,
+                                                      IncomeTypeResource,
+                                                      $logPanel,
                                                       refBookInterceptorsIncomeKindConditionUtils) {
 
                     var ERROR_1 = _.template('Дата начала актуальности Вида Дохода: <%= incomeKindStartDate %> должна быть больше или равна ' +
@@ -59,7 +64,7 @@
                     var ERROR_3 = _.template('Дата окончания актуальности Вида Дохода: <%= incomeKindEndDate %> должна быть меньше  ' +
                         'Даты окончания актуальности Кода Вида Дохода: <%= incomeTypeEndDate %>');
 
-                    var ERROR_SEPARATOR = '<br>';
+                    var ERROR_SEPARATOR = '';
 
 
                     function condition(eventData) {
@@ -69,13 +74,20 @@
                         }
 
                         var incomeKind = eventData.record;
-                        return IncomeTypeRecordResource.query({
-                            id: incomeKind.INCOME_TYPE_ID.referenceObject.record_id.value
-                        }).$promise.then(function (value) {
+                        var id = incomeKind.INCOME_TYPE_ID && incomeKind.INCOME_TYPE_ID.value;
+                        var record_id = incomeKind.INCOME_TYPE_ID.referenceObject &&
+                            incomeKind.INCOME_TYPE_ID.referenceObject.record_id &&
+                            incomeKind.INCOME_TYPE_ID.referenceObject.record_id.value;
+                        //TODO оставил, до правки компонента select с учетом периодических справочников
+                        var version = incomeKind.record_version_from.value;
 
-                            var incomeType = value.records > 0 ? value.rows[0] : null;
+                        return IncomeTypeResource.query({
+                            //version: version,
+                            id: id,
+                            recordId: record_id,
+                        }).$promise.then(function (incomeType) {
 
-                            if (incomeType) {
+                            if (incomeType && incomeType.record_version_from) {
                                 var incomeKindStartDate = incomeKind.record_version_from && incomeKind.record_version_from.value;
                                 var incomeKindEndDate = incomeKind.record_version_to && incomeKind.record_version_to.value;
 
@@ -91,7 +103,7 @@
                                     });
                                 }
 
-                                if (refBookInterceptorsIncomeKindConditionUtils.isError2(incomeKindEndDate, incomeTypeEndDate)) {
+                                if (refBookInterceptorsIncomeKindConditionUtils.isError2(incomeKindStartDate, incomeTypeEndDate)) {
                                     error = error + error ? ERROR_SEPARATOR : '';
                                     error = error + ERROR_2({
                                         incomeKindStartDate: formatDate(incomeKindStartDate),
@@ -117,6 +129,7 @@
                         });
                     }
 
+                    //До сохранения на сервере
                     $delegate.subscribe('beforeSaveRecord', function (eventData) {
                         if (eventData.$shareData.refBook.tableName !== "REF_BOOK_INCOME_KIND") {
                             return $q.resolve();
@@ -136,6 +149,31 @@
                             });
 
                     });
+
+                    //После успешного сохранения на сервере
+                    $delegate.subscribe('onSaveRecord', function (eventData) {
+                        if (eventData.$shareData.refBook.tableName !== "REF_BOOK_INCOME_KIND") {
+                            return $q.resolve();
+                        }
+                        var result = eventData.result;
+                        var logUuid = result && result.data && result.data.uuid;
+                        if (logUuid) {
+                            $logPanel.open('log-panel-container', logUuid);
+                        }
+                    });
+
+                    //При ошибке сохранения на сервере
+                    $delegate.subscribe('onErrorSaveRecord', function (eventData) {
+                        if (eventData.$shareData.refBook.tableName !== "REF_BOOK_INCOME_KIND") {
+                            return $q.resolve();
+                        }
+                        var result = eventData.result;
+                        var logUuid = result.data && result.data.additionInfo && result.data.additionInfo.uuid;
+                        if (logUuid) {
+                            $logPanel.open('log-panel-container', logUuid);
+                        }
+                    });
+
                     return $delegate;
                 }
             );

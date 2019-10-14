@@ -471,10 +471,14 @@
         /**
          * @description Версия записи справочника "Коды вида дохода"
          */
-        .factory('IncomeTypeRecordResource', ['$resource', function ($resource) {
-            return $resource('controller/rest/refBookRecords/922?recordId=:id&pagingParams={}', {}, {
-                query: {method: 'GET', isArray: false, cache: false}
-            });
-        }])
+        .factory('IncomeTypeResource', function ($resource) {
+            return $resource('controller/rest/refBook/922/record'+
+                '?version=:version' +
+                '&recordId=:recordId'+
+                '&id=:id',
+                {}, {
+                    query: {method: 'GET', isArray: false, cache: false}
+                });
+        })
     ;
 }());

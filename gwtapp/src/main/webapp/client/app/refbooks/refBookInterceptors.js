@@ -16,6 +16,7 @@
             var _eventTypes = {
                 beforeSaveRecord: true,
                 onSaveRecord: true,
+                onErrorSaveRecord: true,
                 onCloseWindowRecord: true
             };
 
@@ -97,6 +98,10 @@
 
             RefBookInterceptors.prototype.onSaveRecord = function (eventData) {
                 return fireEvent(this.$q, eventData, 'onSaveRecord');
+            };
+
+            RefBookInterceptors.prototype.onErrorSaveRecord = function (eventData) {
+                return fireEvent(this.$q, eventData, 'onErrorSaveRecord');
             };
 
             RefBookInterceptors.prototype.onCloseWindowRecord = function (eventData) {

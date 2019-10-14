@@ -202,14 +202,21 @@
                             method: "POST",
                             url: url,
                             data: tempRecord
-                        }).then(function () {
-                                $refBookInterceptors.onSaveRecord({
-                                    record: tempRecord,
-                                    $shareData: $shareData
-                                }).then(function () {
-                                    $modalInstance.close(true);
-                                });
+                        }).then(function (result) {
+                            $refBookInterceptors.onSaveRecord({
+                                record: tempRecord,
+                                $shareData: $shareData,
+                                result: result
+                            }).then(function () {
+                                $modalInstance.close(true);
                             });
+                        }, function (result) {
+                            $refBookInterceptors.onErrorSaveRecord({
+                                record: tempRecord,
+                                $shareData: $shareData,
+                                result: result
+                            });
+                        });
                     });
 
                 };
