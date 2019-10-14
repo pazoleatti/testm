@@ -32,11 +32,4 @@ public class RefBookFormTypeDaoImplTest {
         Assert.assertEquals(5, refBookFormTypes.size());
     }
 
-    @Test
-    public void findOneTest() {
-        RefBookFormType refBookFormType = refBookFormTypeDao.findOne(3);
-        Assert.assertEquals(new Long(3), refBookFormType.getId());
-        Assert.assertEquals("2 НДФЛ (1)", refBookFormType.getCode());
-        Assert.assertEquals("2 НДФЛ с признаком 1", refBookFormType.getName());
-    }
 }

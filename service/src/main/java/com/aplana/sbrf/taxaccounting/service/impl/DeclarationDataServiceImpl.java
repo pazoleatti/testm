@@ -513,28 +513,24 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                                                         DeclarationTemplate declarationTemplate,
                                                         DepartmentReportPeriod departmentReportPeriod,
                                                         Department department) {
-        String periodName = departmentReportPeriod.getReportPeriod().getName();
-        int periodYear = departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear();
-        String correctionDate = departmentReportPeriod.getCorrectionDate() != null
-                ? " с датой сдачи корректировки " + sdf.get().format(departmentReportPeriod.getCorrectionDate())
-                : "";
-        String period = "Период: \"" + periodName + " " + periodYear + correctionDate + "\"";
+        String period = departmentReportPeriodFormatter.getPeriodDescription(departmentReportPeriod);
+        String periodStr = String.format("Период: \"%s\"", period);
 
-        String departmentStr = "Подразделение: \"" + department.getName() + "\"";
-        String declarationKind = "Вид: " + declarationTemplate.getDeclarationFormKind().getName();
-        String declarationType = "Тип: " + declarationTemplate.getType().getName();
+        String departmentStr = String.format("Подразделение: \"%s\"", department.getName());
+        String declarationKind = String.format("Вид: \"%s\"", declarationTemplate.getDeclarationFormKind().getName());
+        String declarationType = String.format("Тип: \"%s\"", declarationTemplate.getType().getName());
 
         String asnu;
         Long asnuId = declarationData.getAsnuId();
         if (asnuId != null) {
             RefBookDataProvider asnuProvider = refBookFactory.getDataProvider(RefBook.Id.ASNU.getId());
             String asnuName = asnuProvider.getRecordData(asnuId).get("NAME").getStringValue();
-            asnu = "Наименование АСНУ: " + asnuName;
+            asnu = String.format("Наименование АСНУ: \"%s\"", asnuName);
         } else {
             asnu = "";
         }
 
-        String[] parts = {period, departmentStr, declarationKind, declarationType, asnu};
+        String[] parts = {periodStr, departmentStr, declarationKind, declarationType, asnu};
 
         return "Создание налоговой формы: " + StringUtils.joinNotEmpty(parts, ", ");
     }
@@ -2355,11 +2351,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     private String generatePeriodIsClosedErrorText(Integer reportDeclarationTypeId, DepartmentReportPeriod departmentReportPeriod) {
         DeclarationType declarationType = declarationTypeDao.get(reportDeclarationTypeId);
         Department department = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
-        return String.format("Не выполнена операция \"Создание отчетных форм: \"%s\", Период: \"%s%s\", Подразделение: \"%s\". " +
+        return String.format("Не выполнена операция \"Создание отчетных форм: \"%s\", Период: \"%s\", Подразделение: \"%s\". " +
                         "Причина: Выбранный период закрыт.",
                 declarationType.getName(),
-                reportPeriodService.getPeriodString(departmentReportPeriod.getReportPeriod()),
-                formatCorrectionDate(departmentReportPeriod.getCorrectionDate()),
+                departmentReportPeriodFormatter.getPeriodDescription(departmentReportPeriod),
                 department.getName()
         );
     }
@@ -2370,12 +2365,11 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     private String generateKnfIsNotFoundErrorText(Integer reportDeclarationTypeId, DepartmentReportPeriod departmentReportPeriod) {
         DeclarationType declarationType = declarationTypeDao.get(reportDeclarationTypeId);
         Department department = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
-        return String.format("Отчетность %s для %s за период %s%s не сформирована. " +
+        return String.format("Отчетность %s для %s за период %s не сформирована. " +
                         "Для указанного подразделения и периода не найдена форма РНУ НДФЛ (консолидированная).",
                 declarationType.getName(),
                 department.getName(),
-                reportPeriodService.getPeriodString(departmentReportPeriod.getReportPeriod()),
-                formatCorrectionDate(departmentReportPeriod.getCorrectionDate())
+                departmentReportPeriodFormatter.getPeriodDescription(departmentReportPeriod)
         );
     }
 
@@ -2385,12 +2379,12 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     private String generateKnfIsNotAcceptedErrorText(Integer reportDeclarationTypeId, DeclarationData knf, DepartmentReportPeriod departmentReportPeriod) {
         DeclarationType declarationType = declarationTypeDao.get(reportDeclarationTypeId);
         Department department = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
-        return String.format("Отчетность %s для %s за период %s%s не сформирована. " +
-                        "Для указанного подразделения и периода форма РНУ НДФЛ (консолидированная) № %s должна быть в состоянии \"Принята\". Примите форму и повторите операцию",
+        return String.format("Отчетность %s для %s за период %s не сформирована. " +
+                        "Для указанного подразделения и периода форма РНУ НДФЛ (консолидированная) № %s должна быть " +
+                        "в состоянии \"Принята\". Примите форму и повторите операцию",
                 declarationType.getName(),
                 department.getName(),
-                reportPeriodService.getPeriodString(departmentReportPeriod.getReportPeriod()),
-                formatCorrectionDate(departmentReportPeriod.getCorrectionDate()),
+                departmentReportPeriodFormatter.getPeriodDescription(departmentReportPeriod),
                 knf.getId()
         );
     }
@@ -3235,11 +3229,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         DepartmentReportPeriod reportPeriod = departmentReportPeriodService.fetchOne(declaration.getDepartmentReportPeriodId());
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declaration.getDeclarationTemplateId());
 
-        return String.format("№: %d, Период: \"%s, %s%s\", Подразделение: \"%s\", Вид: \"%s\"",
+        return String.format("№: %d, Период: \"%s\", Подразделение: \"%s\", Вид: \"%s\"",
                 declaration.getId(),
-                reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
-                reportPeriod.getReportPeriod().getName(),
-                getCorrectionDateString(reportPeriod),
+                departmentReportPeriodFormatter.getPeriodDescription(reportPeriod),
                 department.getName(),
                 declarationTemplate.getType().getName());
     }

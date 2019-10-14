@@ -1,13 +1,8 @@
 package com.aplana.sbrf.taxaccounting.service.impl.component.operation;
 
 import com.aplana.sbrf.taxaccounting.model.OperationType;
-import com.aplana.sbrf.taxaccounting.service.component.operation.AsyncTaskDescriptor;
-import com.aplana.sbrf.taxaccounting.service.component.operation.CreateReportsAsyncTaskDescriptor;
-import com.aplana.sbrf.taxaccounting.service.component.operation.DeclarationDataAsyncTaskDescriptor;
-import com.aplana.sbrf.taxaccounting.service.component.operation.DeclarationDataReportingMultiModeAsyncTaskDescriptor;
-import com.aplana.sbrf.taxaccounting.service.component.operation.ExportReportDescriptor;
-import com.aplana.sbrf.taxaccounting.service.component.operation.SpecReportByPersonDescriptor;
-import com.aplana.sbrf.taxaccounting.service.component.operation.TransportFileAsyncTaskDescriptor;
+import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
+import com.aplana.sbrf.taxaccounting.service.component.operation.*;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -19,20 +14,19 @@ import java.util.Map;
 @Component
 public class AsyncTaskDescriptorImpl implements AsyncTaskDescriptor {
 
-    private DeclarationDataAsyncTaskDescriptor declarationDataAsyncTaskDescriptor;
     private CreateReportsAsyncTaskDescriptor createReportsAsyncTaskDescriptor;
-    private ExportReportDescriptor exportReportDescriptor;
-    private SpecReportByPersonDescriptor specReportByPersonDescriptor;
     private TransportFileAsyncTaskDescriptor transportFileAsyncTaskDescriptor;
     private DeclarationDataReportingMultiModeAsyncTaskDescriptor declarationDataReportingMultiModeAsyncTaskDescriptor;
+    private DeclarationDataService declarationDataService;
 
-    public AsyncTaskDescriptorImpl(DeclarationDataAsyncTaskDescriptor declarationDataAsyncTaskDescriptor, CreateReportsAsyncTaskDescriptor createReportsAsyncTaskDescriptor, ExportReportDescriptor exportReportDescriptor, SpecReportByPersonDescriptor specReportByPersonDescriptor, TransportFileAsyncTaskDescriptor transportFileAsyncTaskDescriptor, DeclarationDataReportingMultiModeAsyncTaskDescriptor declarationDataReportingMultiModeAsyncTaskDescriptor) {
-        this.declarationDataAsyncTaskDescriptor = declarationDataAsyncTaskDescriptor;
+    public AsyncTaskDescriptorImpl(CreateReportsAsyncTaskDescriptor createReportsAsyncTaskDescriptor,
+                                   TransportFileAsyncTaskDescriptor transportFileAsyncTaskDescriptor,
+                                   DeclarationDataReportingMultiModeAsyncTaskDescriptor declarationDataReportingMultiModeAsyncTaskDescriptor,
+                                   DeclarationDataService declarationDataService) {
         this.createReportsAsyncTaskDescriptor = createReportsAsyncTaskDescriptor;
-        this.exportReportDescriptor = exportReportDescriptor;
-        this.specReportByPersonDescriptor = specReportByPersonDescriptor;
         this.transportFileAsyncTaskDescriptor = transportFileAsyncTaskDescriptor;
         this.declarationDataReportingMultiModeAsyncTaskDescriptor = declarationDataReportingMultiModeAsyncTaskDescriptor;
+        this.declarationDataService = declarationDataService;
     }
 
     /**
@@ -72,47 +66,47 @@ public class AsyncTaskDescriptorImpl implements AsyncTaskDescriptor {
             dates = (String) params.get("dates");
         }
         if (operationType.equals(OperationType.IMPORT_DECLARATION_EXCEL))
-            return declarationDataAsyncTaskDescriptor.createDescription(declarationDataId, "Загрузка данных в ПНФ РНУ НДФЛ");
+            return createDescription(declarationDataId, "Загрузка данных в ПНФ РНУ НДФЛ");
         else if (operationType.equals(OperationType.IDENTIFY_PERSON))
-            return declarationDataAsyncTaskDescriptor.createDescription(declarationDataId, "Идентификация ФЛ");
+            return createDescription(declarationDataId, "Идентификация ФЛ");
         else if (operationType.equals(OperationType.UPDATE_PERSONS_DATA))
-            return declarationDataAsyncTaskDescriptor.createDescription(declarationDataId, "Обновление данных ФЛ");
+            return createDescription(declarationDataId, "Обновление данных ФЛ");
         else if (operationType.equals(OperationType.CHECK_DEC))
-            return declarationDataAsyncTaskDescriptor.createDescription(declarationDataId, "Проверка налоговой формы");
+            return createDescription(declarationDataId, "Проверка налоговой формы");
         else if (operationType.equals(OperationType.ACCEPT_DEC))
-            return declarationDataAsyncTaskDescriptor.createDescription(declarationDataId, "Принятие налоговой формы");
+            return createDescription(declarationDataId, "Принятие налоговой формы");
         else if (operationType.equals(OperationType.DELETE_DEC))
-            return declarationDataAsyncTaskDescriptor.createDescription(declarationDataId, "Удаление налоговой формы");
+            return createDescription(declarationDataId, "Удаление налоговой формы");
         else if (operationType.equals(OperationType.CONSOLIDATE))
-            return declarationDataAsyncTaskDescriptor.createDescription(declarationDataId, "\"Консолидация\" для формы");
+            return createDescription(declarationDataId, "\"Консолидация\" для формы");
         else if (operationType.equals(OperationType.EXCEL_DEC))
-            return declarationDataAsyncTaskDescriptor.createDescription(declarationDataId, "Формирование XLSX-отчета для НФ");
+            return createDescription(declarationDataId, "Формирование XLSX-отчета для НФ");
         else if (operationType.equals(OperationType.EXCEL_TEMPLATE_DEC))
-            return declarationDataAsyncTaskDescriptor.createDescription(declarationDataId, "Выгрузка данных налоговой формы в виде шаблона ТФ (Excel)");
+            return createDescription(declarationDataId, "Выгрузка данных налоговой формы в виде шаблона ТФ (Excel)");
         else if (operationType.equals(OperationType.EXCEL_UNLOAD_LIST))
-            return declarationDataAsyncTaskDescriptor.createDescription(declarationDataId, "Выгрузка списка источники-приемники в xlsx (Excel)");
+            return createDescription(declarationDataId, "Выгрузка списка источники-приемники в xlsx (Excel)");
         else if (operationType.equals(OperationType.PDF_DEC))
-            return declarationDataAsyncTaskDescriptor.createDescription(declarationDataId, "Создание формы предварительного просмотра");
+            return createDescription(declarationDataId, "Создание формы предварительного просмотра");
         else if (operationType.equals(OperationType.RNU_NDFL_PERSON_DB))
-            return declarationDataAsyncTaskDescriptor.createDescription(declarationDataId, "Формирование отчета \"РНУ НДФЛ по физическому лицу\"");
+            return createDescription(declarationDataId, "Формирование отчета \"РНУ НДФЛ по физическому лицу\"");
         else if (operationType.equals(OperationType.RNU_NDFL_PERSON_ALL_DB))
-            return declarationDataAsyncTaskDescriptor.createDescription(declarationDataId, "Формирование отчета \"РНУ НДФЛ по всем ФЛ\"");
+            return createDescription(declarationDataId, "Формирование отчета \"РНУ НДФЛ по всем ФЛ\"");
         else if (operationType.equals(OperationType.REPORT_KPP_OKTMO))
-            return declarationDataAsyncTaskDescriptor.createDescription(declarationDataId, "Формирование отчета \"Реестр сформированной отчетности\"");
+            return createDescription(declarationDataId, "Формирование отчета \"Реестр сформированной отчетности\"");
         else if (operationType.equals(OperationType.RNU_RATE_REPORT))
-            return declarationDataAsyncTaskDescriptor.createDescription(declarationDataId, "Формирование отчета \"Отчет в разрезе ставок\"");
+            return createDescription(declarationDataId, "Формирование отчета \"Отчет в разрезе ставок\"");
         else if (operationType.equals(OperationType.RNU_PAYMENT_REPORT))
-            return declarationDataAsyncTaskDescriptor.createDescription(declarationDataId, "Формирование отчета \"Отчет в разрезе платёжных поручений\"");
+            return createDescription(declarationDataId, "Формирование отчета \"Отчет в разрезе платёжных поручений\"");
         else if (operationType.equals(OperationType.RNU_NDFL_DETAIL_REPORT))
-            return declarationDataAsyncTaskDescriptor.createDescription(declarationDataId, "Формирование отчета \"Детализация – доходы, вычеты, налоги\"");
+            return createDescription(declarationDataId, "Формирование отчета \"Детализация – доходы, вычеты, налоги\"");
         else if (operationType.equals(OperationType.RNU_NDFL_2_6_DATA_XLSX_REPORT))
-            return declarationDataAsyncTaskDescriptor.createDescription(declarationDataId, "Формирование отчета \"Данные для включения в разделы 2-НДФЛ и 6-НДФЛ\"");
+            return createDescription(declarationDataId, "Формирование отчета \"Данные для включения в разделы 2-НДФЛ и 6-НДФЛ\"");
         else if (operationType.equals(OperationType.RNU_NDFL_2_6_DATA_TXT_REPORT))
-            return declarationDataAsyncTaskDescriptor.createDescription(declarationDataId, "Формирование файла выгрузки \"Данные для включения в разделы 2-НДФЛ и 6-НДФЛ\"");
+            return createDescription(declarationDataId, "Формирование файла выгрузки \"Данные для включения в разделы 2-НДФЛ и 6-НДФЛ\"");
         else if (operationType.equals(OperationType.REPORT_2NDFL1))
-            return declarationDataAsyncTaskDescriptor.createDescription(declarationDataId, "Формирование отчета \"2-НДФЛ (1) по физическому лицу\" ");
+            return createDescription(declarationDataId, "Формирование отчета \"2-НДФЛ (1) по физическому лицу\"");
         else if (operationType.equals(OperationType.REPORT_2NDFL2))
-            return declarationDataAsyncTaskDescriptor.createDescription(declarationDataId, "Формирование отчета \"2-НДФЛ (2) по физическому лицу\" ");
+            return createDescription(declarationDataId, "Формирование отчета \"2-НДФЛ (2) по физическому лицу\"");
         else if (operationType.equals(OperationType.DECLARATION_2NDFL1) || operationType.equals(OperationType.DECLARATION_2NDFL2) || operationType.equals(OperationType.DECLARATION_6NDFL))
             return createReportsAsyncTaskDescriptor.createDescription(departmentReportPeriodId, declarationTypeId);
         else if (operationType.equals(OperationType.DECLARATION_2NDFL_FL))
@@ -130,5 +124,11 @@ public class AsyncTaskDescriptorImpl implements AsyncTaskDescriptor {
         else {
             throw new IllegalArgumentException("Unknown operationType type!");
         }
+    }
+
+    private String createDescription(Long declarationDataId, String name) {
+        return String.format("%s. Налоговая форма: %s",
+                name,
+                declarationDataService.getFullDeclarationDescription(declarationDataId));
     }
 }

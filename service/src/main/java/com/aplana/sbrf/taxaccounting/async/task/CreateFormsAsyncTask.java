@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
+import com.aplana.sbrf.taxaccounting.utils.DepartmentReportPeriodFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -39,6 +40,9 @@ public class CreateFormsAsyncTask extends AbstractAsyncTask {
 
     @Autowired
     private AsyncManager asyncManager;
+
+    @Autowired
+    private DepartmentReportPeriodFormatter departmentReportPeriodFormatter;
 
     @Override
     protected AsyncTaskType getAsyncTaskType() {
@@ -95,15 +99,9 @@ public class CreateFormsAsyncTask extends AbstractAsyncTask {
         int activeDeclarationTemplateId = declarationTemplateService.getActiveDeclarationTemplateId(declarationTypeId, departmentReportPeriod.getReportPeriod().getId());
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(activeDeclarationTemplateId);
 
-        String strCorrPeriod = "";
-        if (departmentReportPeriod.getCorrectionDate() != null) {
-            strCorrPeriod = " (корр. " + SDF_DD_MM_YYYY.format(departmentReportPeriod.getCorrectionDate()) + ")";
-        }
-
-        return String.format("Создание отчетных форм: \"%s\", Период: \"%s%s\", Подразделение: \"%s\"",
+        return String.format("Создание отчетных форм: \"%s\", Период: \"%s\", Подразделение: \"%s\"",
                 declarationTemplate.getName(),
-                periodService.getPeriodString(departmentReportPeriod.getReportPeriod()),
-                strCorrPeriod,
+                departmentReportPeriodFormatter.getPeriodDescription(departmentReportPeriod),
                 department.getName()
         );
     }

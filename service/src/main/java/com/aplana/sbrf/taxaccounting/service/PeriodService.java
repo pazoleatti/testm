@@ -159,14 +159,6 @@ public interface PeriodService {
     String createLogPeriodFormatById(List<Long> idList, Integer logLevelType);
 
     /**
-     * Формирование строки описания периода
-     *
-     * @param reportPeriod период, по которому необходимо получить полное описание
-     * @return строка описания периода
-     */
-    String getPeriodString(ReportPeriod reportPeriod);
-
-    /**
      * Проверка на то, что тип отчетного периода соответствует значению "год" или
      * "год при реорганизации (ликвидации) организации"
      *
