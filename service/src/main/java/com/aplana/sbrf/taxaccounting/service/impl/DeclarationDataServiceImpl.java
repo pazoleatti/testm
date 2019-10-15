@@ -2365,7 +2365,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     private String generateKnfIsNotFoundErrorText(Integer reportDeclarationTypeId, DepartmentReportPeriod departmentReportPeriod) {
         DeclarationType declarationType = declarationTypeDao.get(reportDeclarationTypeId);
         Department department = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
-        return String.format("Отчетность %s для %s за период %s не сформирована. " +
+        return String.format("Отчетность \"%s\" для подразделения \"%s\" за период \"%s\" не сформирована. " +
                         "Для указанного подразделения и периода не найдена форма РНУ НДФЛ (консолидированная).",
                 declarationType.getName(),
                 department.getName(),
