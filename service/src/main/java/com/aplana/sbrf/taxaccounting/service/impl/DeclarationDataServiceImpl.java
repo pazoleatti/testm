@@ -2379,9 +2379,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     private String generateKnfIsNotAcceptedErrorText(Integer reportDeclarationTypeId, DeclarationData knf, DepartmentReportPeriod departmentReportPeriod) {
         DeclarationType declarationType = declarationTypeDao.get(reportDeclarationTypeId);
         Department department = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
-        return String.format("Отчетность %s для %s за период %s не сформирована. " +
+        return String.format("Отчетность \"%s\" для подразделения \"%s\" за период \"%s\" не сформирована. " +
                         "Для указанного подразделения и периода форма РНУ НДФЛ (консолидированная) № %s должна быть " +
-                        "в состоянии \"Принята\". Примите форму и повторите операцию",
+                        "в состоянии \"Принята\". Примите форму и повторите операцию.",
                 declarationType.getName(),
                 department.getName(),
                 departmentReportPeriodFormatter.getPeriodDescription(departmentReportPeriod),
