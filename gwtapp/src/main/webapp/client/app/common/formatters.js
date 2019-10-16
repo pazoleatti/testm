@@ -344,7 +344,7 @@
 
         /**
          * @description Форматтер периода формы в виде
-         * "<Год>, <Название периода><Дата корректировки через запятую (если имеется)>"
+         * "<Год>: <Название периода> (<Дата корректировки через запятую (если имеется)): <Вид отчетности>"
          * @param value признак активности периода
          */
         .filter('ndflPeriodFormatter', ['$filter', 'APP_CONSTANTS', function ($filter, APP_CONSTANTS) {
@@ -359,7 +359,7 @@
                         correctionString: declarationData.correctionDate ?
                             $filter('translate')('title.period.value.correctionString', {correctionDate: $filter('date')(declarationData.correctionDate, 'dd.MM.yyyy')}) :
                             '',
-                        formType: reportPeriodTaxFormType ? ", " + reportPeriodTaxFormType : ""
+                        formType: reportPeriodTaxFormType
                     });
                 }
                 return '';
