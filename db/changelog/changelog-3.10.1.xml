@@ -358,5 +358,12 @@
 	</sql>
     </changeSet>
 
+	<!-- https://jira.aplana.com/browse/SBRFNDFL-8860 Ошибка при создании 6-НДФЛ -->
+	<changeSet id="3.10.1-smolokovskikh-1" author="smolokovskikh" runAlways="true">
+		<update tableName="DECLARATION_TEMPLATE">
+			<column name="CREATE_SCRIPT" valueClobFile="templates-3.10.1/ndfl/report_6ndfl/v2016/report_6ndfl.groovy"/>
+			<where>declaration_type_id = 103</where>
+		</update>
+	</changeSet>
 </databaseChangeLog>
         
