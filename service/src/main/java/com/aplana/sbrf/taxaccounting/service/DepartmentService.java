@@ -227,6 +227,14 @@ public interface DepartmentService {
     List<Department> findAllByIdIn(List<Integer> ids);
 
     /**
+     * Получение подразделения по его коду
+     *
+     * @param code код подразделения
+     * @return подразделение
+     */
+    Department findByCode(Long code);
+
+    /**
      * Получение DTO всех подразделений.
      *
      * @param name поисковая строка

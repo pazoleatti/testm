@@ -12,6 +12,7 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.ConfigurationService;
+import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.utils.FileWrapper;
 import com.aplana.sbrf.taxaccounting.utils.ResourceUtils;
@@ -75,6 +76,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     private static final String REPORT_PERIOD_YEAR_MIN_HIGHER_MAX_ERROR = "Минимальное значение отчетного года\" должно быть не больше \"Максимального значения отчетного года";
     private static final String REPORT_PERIOD_YEAR_MAX_LOWER_MIN_ERROR = "Максимальное значение отчетного года\" должно быть не меньше \"Минимального значения отчетного года";
     private static final String SUBSYSTEM_PARAM_ERROR = "Значение параметра \"%s\" должно содержаться в справочнике \"Подсистемы АС УН\"";
+    private static final String DEPARTMENT_FOR_APP_2_ERROR = "В справочнике \"Подразделения\" не найдено подразделение с кодом : %s";
 
 
     @Autowired
@@ -90,6 +92,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     private AsyncTaskTypeDao asyncTaskTypeDao;
     @Autowired
     private SubsystemDao subsystemDao;
+    @Autowired
+    private DepartmentService departmentService;
 
     //Значение конфигурационных параметров по умолчанию
     private List<Configuration> defaultCommonParams() {
@@ -120,6 +124,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         defaultCommonConfig.add(new Configuration(ConfigurationParam.WEIGHT_DUL.getCaption(), COMMON_PARAM_DEPARTMENT_ID, "10"));
         defaultCommonConfig.add(new Configuration(ConfigurationParam.WEIGHT_ADDRESS.getCaption(), COMMON_PARAM_DEPARTMENT_ID, "1"));
         defaultCommonConfig.add(new Configuration(ConfigurationParam.WEIGHT_ADDRESS_INO.getCaption(), COMMON_PARAM_DEPARTMENT_ID, "1"));
+        defaultCommonConfig.add(new Configuration(ConfigurationParam.DEPARTMENT_FOR_APP_2.getCaption(), COMMON_PARAM_DEPARTMENT_ID, "77"));
 
         return defaultCommonConfig;
     }
@@ -413,6 +418,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
             checkDiscreteValue(config.getValue(), logger);
         } else if (config.getCode().equals(ConfigurationParam.CALCULATED_TAX_DIFF.name())) {
             checkCalcTaxDiffInput(config, logger);
+        } else if (config.getCode().equals(ConfigurationParam.DEPARTMENT_FOR_APP_2.name())) {
+            checkDepartmentForApp2(config, logger);
         }
     }
 
@@ -469,6 +476,14 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         String value = configuration.getValue();
         if (!isPositiveInt(value)) {
             logger.error("Для параметра \"%s\" должно быть указано целое число > 0", configuration.getDescription());
+        }
+    }
+
+    private void checkDepartmentForApp2(Configuration configuration, Logger logger) {
+        String value = configuration.getValue();
+        Department dep = departmentService.findByCode(Long.parseLong(value));
+        if (dep == null) {
+            logger.error(DEPARTMENT_FOR_APP_2_ERROR, value);
         }
     }
 

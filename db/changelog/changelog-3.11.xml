@@ -4,5 +4,12 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
 
+    <changeSet id="3.11-avoynov-1" author="avoynov">
+        <insert tableName="configuration">
+            <column name="code" value="DEPARTMENT_FOR_APP_2"/>
+            <column name="department_id" value="0"/>
+            <column name="value" value="77"/>
+        </insert>
+    </changeSet>
 
 </databaseChangeLog>

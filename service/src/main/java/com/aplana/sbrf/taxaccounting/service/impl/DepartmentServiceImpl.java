@@ -264,6 +264,11 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
+    public Department findByCode(Long code) {
+        return departmentDao.findByCode(code);
+    }
+
+    @Override
     public PagingResult<DepartmentName> searchDepartmentNames(String name, PagingParams pagingParams) {
         return departmentDao.searchDepartmentNames(name, pagingParams);
     }
