@@ -459,7 +459,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         long dictTaxPeriodId = reportPeriod.getDictTaxPeriodId();
         ReportPeriodType periodType = periodService.getPeriodTypeById(dictTaxPeriodId);
 
-        if (!RefBookKnfType.BY_KPP.getId().equals(newDeclaration.getKnfType().getId()) && reportPeriodService.isYearPeriodType(periodType)) {
+        if (RefBookKnfType.ALL.getId().equals(newDeclaration.getKnfType().getId()) && reportPeriodService.isYearPeriodType(periodType)) {
             return declarationDataDao.findExistingDeclarationsForCreationCheck(
                     newDeclaration, reportPeriod.getTaxPeriod().getId(), periodType.getCode());
         } else {

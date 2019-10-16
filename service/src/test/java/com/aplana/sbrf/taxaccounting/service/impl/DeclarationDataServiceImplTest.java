@@ -21,6 +21,7 @@ import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.component.lock.locker.DeclarationLocker;
 import com.aplana.sbrf.taxaccounting.utils.ApplicationInfo;
 import com.aplana.sbrf.taxaccounting.utils.DepartmentReportPeriodFormatter;
+import lombok.Getter;
 import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -726,73 +727,46 @@ public class DeclarationDataServiceImplTest {
     }
 
     @Test
+    public void test_checkCorrectWorkOfSearchExistingDeclarationDuringCreationOfKnfByNonHoldingTax() {
+        CreateKnfTestData createKnfTestData = new CreateKnfTestData().init();
+        TAUserInfo userInfo = createKnfTestData.getUserInfo();
+        int consolidateDeclarationTemplateId = createKnfTestData.getConsolidateDeclarationTemplateId();
+
+        CreateDeclarationDataAction createDeclarationDataAction = new CreateDeclarationDataAction();
+        createDeclarationDataAction.setKnfType(RefBookKnfType.BY_NONHOLDING_TAX);
+        createDeclarationDataAction.setDepartmentId(1);
+        createDeclarationDataAction.setPeriodId(1);
+        createDeclarationDataAction.setDeclarationTypeId((long) consolidateDeclarationTemplateId);
+
+        declarationDataService.create(userInfo, createDeclarationDataAction);
+        Mockito.verify(declarationDataDao, Mockito.times(1))
+                .findExistingDeclarationsForCreationCheck((DeclarationData) anyObject());
+        reset(declarationDataDao);
+    }
+
+    @Test
+    public void test_checkCorrectWorkOfSearchExistingDeclarationDuringCreationOfKnfByApp2() {
+        CreateKnfTestData createKnfTestData = new CreateKnfTestData().init();
+        TAUserInfo userInfo = createKnfTestData.getUserInfo();
+        int consolidateDeclarationTemplateId = createKnfTestData.getConsolidateDeclarationTemplateId();
+
+        CreateDeclarationDataAction createDeclarationDataAction = new CreateDeclarationDataAction();
+        createDeclarationDataAction.setKnfType(RefBookKnfType.FOR_APP2);
+        createDeclarationDataAction.setDepartmentId(1);
+        createDeclarationDataAction.setPeriodId(1);
+        createDeclarationDataAction.setDeclarationTypeId((long) consolidateDeclarationTemplateId);
+
+        declarationDataService.create(userInfo, createDeclarationDataAction);
+        Mockito.verify(declarationDataDao, Mockito.times(1))
+                .findExistingDeclarationsForCreationCheck((DeclarationData) anyObject());
+        reset(declarationDataDao);
+    }
+
+    @Test
     public void test_checkCorrectWorkOfSearchExistingDeclarationDuringCreationOfKnfByAllDataYearlyPeriod() {
-        int declarationTypeId = 1;
-
-        DepartmentDeclarationType departmentDeclarationType = new DepartmentDeclarationType();
-        departmentDeclarationType.setDeclarationTypeId(declarationTypeId);
-
-        ReportPeriodType reportPeriodType = new ReportPeriodType();
-        reportPeriodType.setCode("34");
-
-        DeclarationType declarationType = new DeclarationType();
-        declarationType.setId(declarationTypeId);
-        declarationType.setName("Тестовый тип налоговой формы");
-
-        DeclarationTemplate declarationTemplate = new DeclarationTemplate();
-        declarationTemplate.setType(declarationType);
-        declarationTemplate.setDeclarationFormKind(DeclarationFormKind.CONSOLIDATED);
-        declarationTemplate.setId(1);
-
-        Department department = new Department();
-        department.setName("Тестовое подразделение");
-
-        TaxPeriod taxPeriod = new TaxPeriod();
-        taxPeriod.setTaxType(TaxType.NDFL);
-
-        ReportPeriod reportPeriod = new ReportPeriod();
-        reportPeriod.setTaxPeriod(taxPeriod);
-        reportPeriod.setId(1);
-
-        DepartmentReportPeriod drp1 = new DepartmentReportPeriod();
-        drp1.setId(1);
-        drp1.setCorrectionDate(new Date(0));
-        drp1.setReportPeriod(reportPeriod);
-        drp1.setDepartmentId(1);
-        drp1.setIsActive(true);
-
-        TARole taRole = new TARole();
-        taRole.setAlias(TARole.N_ROLE_CONTROL_UNP);
-
-        TAUser user = new TAUser();
-        user.setId(1);
-        user.setRoles(Collections.singletonList(taRole));
-        TAUserInfo userInfo = new TAUserInfo();
-        userInfo.setUser(user);
-
-        int consolidateDeclarationTemplateId = DeclarationType.NDFL_CONSOLIDATE;
-
-        DeclarationDataScriptingService declarationDataScriptingService = mock(DeclarationDataScriptingService.class);
-
-        PeriodServiceImpl periodServiceImpl = new PeriodServiceImpl();
-
-        when(departmentReportPeriodService.fetchLast(1, 1)).thenReturn(drp1);
-        when(departmentReportPeriodFormatter.getPeriodDescription(drp1)).thenReturn("period");
-        when(departmentService.getDepartment(1)).thenReturn(department);
-        when(declarationTemplateService.getActiveDeclarationTemplateId(consolidateDeclarationTemplateId, 1)).thenReturn(consolidateDeclarationTemplateId);
-        when(declarationTemplateService.get(anyInt())).thenReturn(declarationTemplate);
-        when(periodService.getPeriodTypeById(anyLong())).thenReturn(reportPeriodType);
-        when(periodService.isYearPeriodType(eq(reportPeriodType))).thenReturn(periodServiceImpl.isYearPeriodType(reportPeriodType));
-        when(lockDataService.lock(anyString(), anyInt(), anyString())).thenReturn(null);
-        when(sourceService.getDDTByDepartment(eq(1), any(TaxType.class), any(Date.class), any(Date.class)))
-                .thenReturn(Collections.singletonList(departmentDeclarationType));
-
-        when(declarationDataScriptingService.executeScript(
-                eq(userInfo), any(DeclarationData.class), eq(FormDataEvent.CREATE), any(Logger.class), any(Map.class))
-        ).thenReturn(true);
-        when(declarationDataScriptingService.executeScript(
-                eq(userInfo), any(DeclarationData.class), eq(FormDataEvent.AFTER_CREATE), any(Logger.class), any(Map.class))
-        ).thenReturn(true);
+        CreateKnfTestData createKnfTestData = new CreateKnfTestData().init();
+        TAUserInfo userInfo = createKnfTestData.getUserInfo();
+        int consolidateDeclarationTemplateId = createKnfTestData.getConsolidateDeclarationTemplateId();
 
         CreateDeclarationDataAction createDeclarationDataAction = new CreateDeclarationDataAction();
         createDeclarationDataAction.setKnfType(RefBookKnfType.ALL);
@@ -803,6 +777,7 @@ public class DeclarationDataServiceImplTest {
         declarationDataService.create(userInfo, createDeclarationDataAction);
         Mockito.verify(declarationDataDao, Mockito.times(1))
                 .findExistingDeclarationsForCreationCheck((DeclarationData) anyObject(), anyInt(), anyString());
+        reset(declarationDataDao);
     }
 
     @Test
@@ -884,5 +859,81 @@ public class DeclarationDataServiceImplTest {
         Mockito.verify(declarationDataDao, Mockito.times(1))
                 .findExistingDeclarationsForCreationCheck((DeclarationData) anyObject());
         reset(declarationDataDao);
+    }
+
+    @Getter
+    private class CreateKnfTestData {
+        private TAUserInfo userInfo;
+        private int consolidateDeclarationTemplateId;
+
+        CreateKnfTestData init() {
+            int declarationTypeId = 1;
+
+            DepartmentDeclarationType departmentDeclarationType = new DepartmentDeclarationType();
+            departmentDeclarationType.setDeclarationTypeId(declarationTypeId);
+
+            ReportPeriodType reportPeriodType = new ReportPeriodType();
+            reportPeriodType.setCode("34");
+
+            DeclarationType declarationType = new DeclarationType();
+            declarationType.setId(declarationTypeId);
+            declarationType.setName("Тестовый тип налоговой формы");
+
+            DeclarationTemplate declarationTemplate = new DeclarationTemplate();
+            declarationTemplate.setType(declarationType);
+            declarationTemplate.setDeclarationFormKind(DeclarationFormKind.CONSOLIDATED);
+            declarationTemplate.setId(1);
+
+            Department department = new Department();
+            department.setName("Тестовое подразделение");
+
+            TaxPeriod taxPeriod = new TaxPeriod();
+            taxPeriod.setTaxType(TaxType.NDFL);
+
+            ReportPeriod reportPeriod = new ReportPeriod();
+            reportPeriod.setTaxPeriod(taxPeriod);
+            reportPeriod.setId(1);
+
+            DepartmentReportPeriod drp1 = new DepartmentReportPeriod();
+            drp1.setId(1);
+            drp1.setCorrectionDate(new Date(0));
+            drp1.setReportPeriod(reportPeriod);
+            drp1.setDepartmentId(1);
+            drp1.setIsActive(true);
+
+            TARole taRole = new TARole();
+            taRole.setAlias(TARole.N_ROLE_CONTROL_UNP);
+
+            TAUser user = new TAUser();
+            user.setId(1);
+            user.setRoles(Collections.singletonList(taRole));
+            userInfo = new TAUserInfo();
+            userInfo.setUser(user);
+
+            consolidateDeclarationTemplateId = DeclarationType.NDFL_CONSOLIDATE;
+
+            DeclarationDataScriptingService declarationDataScriptingService = mock(DeclarationDataScriptingService.class);
+
+            PeriodServiceImpl periodServiceImpl = new PeriodServiceImpl();
+
+            when(departmentReportPeriodService.fetchLast(1, 1)).thenReturn(drp1);
+            when(departmentReportPeriodFormatter.getPeriodDescription(drp1)).thenReturn("period");
+            when(departmentService.getDepartment(1)).thenReturn(department);
+            when(declarationTemplateService.getActiveDeclarationTemplateId(consolidateDeclarationTemplateId, 1)).thenReturn(consolidateDeclarationTemplateId);
+            when(declarationTemplateService.get(anyInt())).thenReturn(declarationTemplate);
+            when(periodService.getPeriodTypeById(anyLong())).thenReturn(reportPeriodType);
+            when(periodService.isYearPeriodType(eq(reportPeriodType))).thenReturn(periodServiceImpl.isYearPeriodType(reportPeriodType));
+            when(lockDataService.lock(anyString(), anyInt(), anyString())).thenReturn(null);
+            when(sourceService.getDDTByDepartment(eq(1), any(TaxType.class), any(Date.class), any(Date.class)))
+                    .thenReturn(Collections.singletonList(departmentDeclarationType));
+
+            when(declarationDataScriptingService.executeScript(
+                    eq(userInfo), any(DeclarationData.class), eq(FormDataEvent.CREATE), any(Logger.class), any(Map.class))
+            ).thenReturn(true);
+            when(declarationDataScriptingService.executeScript(
+                    eq(userInfo), any(DeclarationData.class), eq(FormDataEvent.AFTER_CREATE), any(Logger.class), any(Map.class))
+            ).thenReturn(true);
+            return this;
+        }
     }
 }
