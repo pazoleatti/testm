@@ -21,7 +21,6 @@ import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.component.lock.locker.DeclarationLocker;
 import com.aplana.sbrf.taxaccounting.utils.ApplicationInfo;
 import com.aplana.sbrf.taxaccounting.utils.DepartmentReportPeriodFormatter;
-import lombok.Getter;
 import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -861,10 +860,12 @@ public class DeclarationDataServiceImplTest {
         reset(declarationDataDao);
     }
 
-    @Getter
     private class CreateKnfTestData {
         private TAUserInfo userInfo;
         private int consolidateDeclarationTemplateId;
+
+        TAUserInfo getUserInfo() { return userInfo; }
+        int getConsolidateDeclarationTemplateId() { return consolidateDeclarationTemplateId; }
 
         CreateKnfTestData init() {
             int declarationTypeId = 1;
