@@ -57,6 +57,9 @@ PROMPT ## 03_ddl_indexes
 PROMPT ## 04_ddl_views
 @database-3.10.1/04_ddl_views.sql  &3 &6
 
+PROMPT ## 05_dml_update
+@database-3.10.1/05_dml_update.sql 
+
 PROMPT ## 06_check_index_constraints
 @database-3.10.1/06_check_index_constraints.sql
 

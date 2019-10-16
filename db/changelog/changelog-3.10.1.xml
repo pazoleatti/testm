@@ -313,7 +313,7 @@
 	alter index IDX_NDFL_PERSON_DECL_DATA_ID REBUILD PCTFREE 50 INITRANS 50	 COMPUTE STATISTICS;
 	</sql>
     </changeSet>
-	<changeSet id="3.10.1-adudenko-2" author="adudenko">
+    <changeSet id="3.10.1-adudenko-2" author="adudenko">
 		<sql>
 			update ref_book_form_type set code = '2-НДФЛ (1)' where id = 3;
 			update ref_book_form_type set name = '2-НДФЛ с признаком 1' where id = 3;
@@ -326,7 +326,7 @@
 
 			update ref_book_form_type set code = '2-НДФЛ (ФЛ)' where id = 6;
 		</sql>
-	</changeSet>
+    </changeSet>
     <changeSet id="3.10.1-skononova-4" author="skononova">
 	<sql>
 			create or replace view vw_declaration_data as
@@ -357,3 +357,4 @@
     </changeSet>
 
 </databaseChangeLog>
+        
