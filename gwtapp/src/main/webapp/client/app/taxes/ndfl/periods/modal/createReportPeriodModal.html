@@ -32,17 +32,19 @@
                                data-ng-max="yearMax"
                                data-ng-min="yearMin"
                         />
-                        <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
-                            translate}}
+                        <div data-aplana-validator data-key='required'>{{::'reportPeriod.modal.validation.year' |
+                            translate:'{ minValue: ' + yearMin + ', maxValue: ' + yearMax + '}'}}
                         </div>
                         <div data-aplana-validator data-key="pattern">{{::'common.validation.year' |
                             translate}}
                         </div>
                         <div data-aplana-validator data-key='min'>
-                            {{'common.validation.min.value' | translate:'{ minValue: ' + yearMin + ' }'}}
+                            {{'reportPeriod.modal.validation.year' |
+                            translate:'{ minValue: ' + yearMin + ', maxValue: ' + yearMax + '}'}}
                         </div>
                         <div data-aplana-validator data-key='max'>
-                            {{'common.validation.max.value' | translate:'{ maxValue: ' + yearMax + ' }'}}
+                            {{'reportPeriod.modal.validation.year' |
+                            translate:'{ minValue: ' + yearMin + ', maxValue: ' + yearMax + '}'}}
                         </div>
                     </div>
                 </td>

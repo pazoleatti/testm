@@ -580,6 +580,7 @@
         "reportPeriod.modal.grid.startDate": "Дата начала периода",
         "reportPeriod.modal.grid.endDate": "Дата окончания периода",
         "reportPeriod.modal.grid.calendarDate": "Календарная дата начала периода",
+        "reportPeriod.modal.validation.year": "Необходимо ввести значение от {{minValue}} до {{maxValue}} включительно",
         "reportPeriod.confirm.text": "Назначить нижестоящим подразделениям?",
         "reportPeriod.confirm.closePeriod": "Подтверждение закрытия периода",
         "reportPeriod.confirm.deletePeriod.title": "Удаление периода",
