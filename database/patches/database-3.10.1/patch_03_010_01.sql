@@ -51,8 +51,11 @@ PROMPT ## 01_ddl_dml_periods
 PROMPT ## 02_templates
 @database-3.10.1/02_templates.sql "_log/3.10_1_03_templates.txt" "&4" "&5" "../_log" "../_bad"
 
-PROMPT ## 01_ddl_indexes
+PROMPT ## 03_ddl_indexes
 @database-3.10.1/03_ddl_indexes.sql 
+
+PROMPT ## 04_ddl_views
+@database-3.10.1/04_ddl_views.sql  &3 &6
 
 PROMPT ## 06_check_index_constraints
 @database-3.10.1/06_check_index_constraints.sql
