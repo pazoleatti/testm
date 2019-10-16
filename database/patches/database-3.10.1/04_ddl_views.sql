@@ -29,9 +29,9 @@ end;
 	create or replace view VW_REF_BOOK_DOC_STATE (id, knd, name) as select id, knd,name from ref_book_doc_state;
 	grant select on VW_REF_BOOK_DOC_STATE to &2;
 	grant references on VW_REF_BOOK_DOC_STATE to &2;
-	comment on column REF_BOOK_DOC_STATE.ID IS 'Уникальный идентификатор';
-	comment on column REF_BOOK_DOC_STATE.KND IS 'Код формы по КНД';
-	comment on column REF_BOOK_DOC_STATE.NAME IS 'Наименование состояния';
-	comment on  table REF_BOOK_DOC_STATE  IS 'Состояние ЭД';
+	comment on column VW_REF_BOOK_DOC_STATE.ID IS 'Уникальный идентификатор';
+	comment on column VW_REF_BOOK_DOC_STATE.KND IS 'Код формы по КНД';
+	comment on column VW_REF_BOOK_DOC_STATE.NAME IS 'Наименование состояния';
+	comment on  table VW_REF_BOOK_DOC_STATE  IS 'Состояние ЭД';
 
 /

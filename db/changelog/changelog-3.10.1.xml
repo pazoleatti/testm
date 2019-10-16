@@ -355,6 +355,14 @@
 			comment on  table REF_BOOK_DOC_STATE  IS 'Состояние ЭД';
 	</sql>
     </changeSet>
+    <changeSet id="3.10.1-skononova-5" author="skononova">
+	<sql>
+			comment on column VW_REF_BOOK_DOC_STATE.ID IS 'Уникальный идентификатор';
+			comment on column VW_REF_BOOK_DOC_STATE.KND IS 'Код формы по КНД';
+			comment on column VW_REF_BOOK_DOC_STATE.NAME IS 'Наименование состояния';
+			comment on  table VW_REF_BOOK_DOC_STATE  IS 'Состояние ЭД';
+	</sql>
+    </changeSet>
 
 </databaseChangeLog>
         
