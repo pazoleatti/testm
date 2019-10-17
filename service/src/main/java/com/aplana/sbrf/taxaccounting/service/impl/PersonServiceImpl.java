@@ -409,35 +409,36 @@ public class PersonServiceImpl implements PersonService {
         personToPersist.setOldId(personDTO.getOldId());
         personToPersist.setStartDate(SimpleDateUtils.toStartOfDay(personDTO.getStartDate()));
         personToPersist.setEndDate(SimpleDateUtils.toStartOfDay(personDTO.getEndDate()));
-        personToPersist.setLastName(personDTO.getLastName());
-        personToPersist.setFirstName(personDTO.getFirstName());
-        personToPersist.setMiddleName(personDTO.getMiddleName());
+        personToPersist.setLastName(personDTO.getLastName() != null ? personDTO.getLastName().toUpperCase() : null);
+        personToPersist.setFirstName(personDTO.getFirstName() != null ? personDTO.getFirstName().toUpperCase() : null);
+        personToPersist.setMiddleName(personDTO.getMiddleName() != null ? personDTO.getMiddleName().toUpperCase() : null);
         personToPersist.setBirthDate(SimpleDateUtils.toStartOfDay(personDTO.getBirthDate()));
         // Тут и ниже устанавливаем пустые объекты вместо null, т.к. сохранение работает через BeanPropertySqlParameterSource, и оно иначе не будет работать
         personToPersist.setCitizenship(personDTO.getCitizenship().value() != null ? personDTO.getCitizenship().value() : new RefBookCountry());
         personToPersist.setSource(personDTO.getSource() != null ? personDTO.getSource() : new RefBookAsnu());
         if (personDTO.getReportDoc().value() != null) {
             IdDoc idDoc = personDTO.getReportDoc().value();
+            idDoc.setDocumentNumber(idDoc.getDocumentNumber() != null ? idDoc.getDocumentNumber().toUpperCase() : null);
             personToPersist.setReportDoc(idDoc);
         } else {
             personToPersist.setReportDoc(new IdDoc());
         }
-        personToPersist.setInn(personDTO.getInn().value());
-        personToPersist.setInnForeign(personDTO.getInnForeign().value());
-        personToPersist.setSnils(personDTO.getSnils().value());
+        personToPersist.setInn(personDTO.getInn().value() != null ? personDTO.getInn().value().toUpperCase() : null);
+        personToPersist.setInnForeign(personDTO.getInnForeign().value() != null ? personDTO.getInnForeign().value().toUpperCase() : null);
+        personToPersist.setSnils(personDTO.getSnils().value() != null ? personDTO.getSnils().value().toUpperCase() : null);
         personToPersist.setTaxPayerState(personDTO.getTaxPayerState().value() != null ? personDTO.getTaxPayerState().value() : new RefBookTaxpayerState());
         personToPersist.setVip(personDTO.isVip());
-        personToPersist.getAddress().setRegionCode(personDTO.getAddress().value().getRegionCode());
-        personToPersist.getAddress().setPostalCode(personDTO.getAddress().value().getPostalCode());
-        personToPersist.getAddress().setDistrict(personDTO.getAddress().value().getDistrict());
-        personToPersist.getAddress().setCity(personDTO.getAddress().value().getCity());
-        personToPersist.getAddress().setLocality(personDTO.getAddress().value().getLocality());
-        personToPersist.getAddress().setStreet(personDTO.getAddress().value().getStreet());
-        personToPersist.getAddress().setHouse(personDTO.getAddress().value().getHouse());
-        personToPersist.getAddress().setBuild(personDTO.getAddress().value().getBuild());
-        personToPersist.getAddress().setAppartment(personDTO.getAddress().value().getAppartment());
+        personToPersist.getAddress().setRegionCode(personDTO.getAddress().value().getRegionCode() != null ? personDTO.getAddress().value().getRegionCode().toUpperCase() : null);
+        personToPersist.getAddress().setPostalCode(personDTO.getAddress().value().getPostalCode() != null ? personDTO.getAddress().value().getPostalCode().toUpperCase() : null);
+        personToPersist.getAddress().setDistrict(personDTO.getAddress().value().getDistrict() != null ? personDTO.getAddress().value().getDistrict().toUpperCase() : null);
+        personToPersist.getAddress().setCity(personDTO.getAddress().value().getCity() != null ? personDTO.getAddress().value().getCity().toUpperCase() : null);
+        personToPersist.getAddress().setLocality(personDTO.getAddress().value().getLocality() != null ? personDTO.getAddress().value().getLocality().toUpperCase() : null);
+        personToPersist.getAddress().setStreet(personDTO.getAddress().value().getStreet() != null ? personDTO.getAddress().value().getStreet().toUpperCase() : null);
+        personToPersist.getAddress().setHouse(personDTO.getAddress().value().getHouse() != null ? personDTO.getAddress().value().getHouse().toUpperCase() : null);
+        personToPersist.getAddress().setBuild(personDTO.getAddress().value().getBuild() != null ? personDTO.getAddress().value().getBuild().toUpperCase() : null);
+        personToPersist.getAddress().setAppartment(personDTO.getAddress().value().getAppartment() != null ? personDTO.getAddress().value().getAppartment().toUpperCase() : null);
         personToPersist.getAddress().setCountry(personDTO.getAddress().value().getCountry() != null ? personDTO.getAddress().value().getCountry() : new RefBookCountry());
-        personToPersist.getAddress().setAddressIno(personDTO.getAddress().value().getAddressIno());
+        personToPersist.getAddress().setAddressIno(personDTO.getAddress().value().getAddressIno() != null ? personDTO.getAddress().value().getAddressIno().toUpperCase() : null);
         changeLogBuilder.personInfoUpdated(persistedPerson, personToPersist);
 
         refBookPersonDao.updateRegistryPerson(personToPersist);
@@ -546,6 +547,7 @@ public class PersonServiceImpl implements PersonService {
     @Override
     public CheckDulResult checkDul(String docCode, String docNumber) {
         CheckDulResult result = new CheckDulResult();
+        docNumber = docNumber.toUpperCase();
         String erasedNumber = docNumber.replaceAll("[^\\wА-Яа-яЁё]", "");
         if (docCode.equals("91")) {
             if (ScriptUtils.isUSSRIdDoc(docNumber)) {
