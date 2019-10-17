@@ -27,3 +27,7 @@ insert into department_config(id, kpp, oktmo_id, start_date, end_date, departmen
 (17,  '000000011', 2, to_date('01.01.2016', 'DD.MM.YYYY'), null,                                3, '0012', 1, 1),
 
 (18,  '000000012', 2, to_date('01.01.2016', 'DD.MM.YYYY'), null,                                7, '0013', 1, 1);
+
+insert into department_config(id, kpp, oktmo_id, start_date, end_date, department_id, tax_organ_code, present_place_id, signatory_id, related_kpp, related_oktmo) values
+(19, '000000013', 2, to_date('01.01.2019', 'DD.MM.YYYY'), null, 7, '0014', 1, 1, '000000012', '222'),
+(20, '000000013', 2, to_date('01.03.2019', 'DD.MM.YYYY'), to_date('30.03.2019', 'DD.MM.YYYY'), 7, '0015', 1, 1, '000000012', '222');

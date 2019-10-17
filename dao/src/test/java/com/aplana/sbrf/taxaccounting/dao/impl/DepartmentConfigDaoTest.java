@@ -1,19 +1,10 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DepartmentConfigDao;
-import com.aplana.sbrf.taxaccounting.model.DeclarationData;
-import com.aplana.sbrf.taxaccounting.model.KppOktmoPair;
-import com.aplana.sbrf.taxaccounting.model.KppOktmoPairFilter;
-import com.aplana.sbrf.taxaccounting.model.KppSelect;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.ReportFormCreationKppOktmoPair;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.action.DepartmentConfigsFilter;
-import com.aplana.sbrf.taxaccounting.model.refbook.DepartmentConfig;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDepartment;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookOktmo;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookPresentPlace;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookSignatoryMark;
+import com.aplana.sbrf.taxaccounting.model.consolidation.ConsolidationSourceDataSearchFilter;
+import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import org.hamcrest.Matchers;
 import org.joda.time.LocalDate;
@@ -92,7 +83,7 @@ public class DepartmentConfigDaoTest {
     public void findAllByFilterTest4() {
         List<DepartmentConfig> departmentConfigs = departmentConfigDao.findPageByFilter(DepartmentConfigsFilter.builder().build(),
                 PagingParams.getInstance(1, 100));
-        assertThat(departmentConfigs, hasSize(13));
+        assertThat(departmentConfigs, hasSize(15));
     }
 
     @Test
@@ -306,6 +297,37 @@ public class DepartmentConfigDaoTest {
         assertThat(departmentConfigDao.findById(10).getEndDate(), equalTo(newDate(31, 12, 2016)));
         departmentConfigDao.updateEndDate(10, newDate(3, 3, 2016));
         assertThat(departmentConfigDao.findById(10).getEndDate(), equalTo(newDate(3, 3, 2016)));
+    }
+
+    @Test
+    public void findDepartmentConfigsForAutoCorrectKppAndOktmoWithOnlyOneActualConfig() {
+        Date periodEndDate = newDate(31, 3, 2019);
+        ConsolidationSourceDataSearchFilter filter = ConsolidationSourceDataSearchFilter.builder()
+                .periodStartDate(newDate(1,3, 2019))
+                .periodEndDate(periodEndDate)
+                .build();
+
+        List<DepartmentConfig> allByKppAndOktmoAndFilter =
+                departmentConfigDao.findAllByKppAndOktmoAndFilter("000000013", "222", filter);
+
+        assertThat(allByKppAndOktmoAndFilter.size(), equalTo(1));
+        assertThat(allByKppAndOktmoAndFilter, contains(
+                DepartmentConfig.builder().id(20L).build()
+        ));
+        assertThat(allByKppAndOktmoAndFilter.get(0).getEndDate(), anyOf(lessThan(periodEndDate), nullValue()));
+    }
+
+    @Test
+    public void findDepartmentConfigsForAutoCorrectWithNonOverlappingPeriodAndDepartmentConfig() {
+        ConsolidationSourceDataSearchFilter filter = ConsolidationSourceDataSearchFilter.builder()
+                .periodStartDate(newDate(1,12, 2018))
+                .periodEndDate(newDate(31, 12, 2018))
+                .build();
+
+        List<DepartmentConfig> allByKppAndOktmoAndFilter =
+                departmentConfigDao.findAllByKppAndOktmoAndFilter("000000013", "222", filter);
+
+        assertThat(allByKppAndOktmoAndFilter.size(), equalTo(0));
     }
 
     private Date newDate(int day, int month, int year) {

@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.service.refbook;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.action.DepartmentConfigsFilter;
 import com.aplana.sbrf.taxaccounting.model.action.ImportDepartmentConfigsAction;
-import com.aplana.sbrf.taxaccounting.model.consolidation.ConsolidationIncome;
 import com.aplana.sbrf.taxaccounting.model.consolidation.ConsolidationSourceDataSearchFilter;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -78,7 +77,9 @@ public interface DepartmentConfigService {
     List<DepartmentConfig> findAllByKppAndOktmo(String kpp, String oktmo);
 
     /**
-     * Возвращяет список настроек подразделений по КПП/ОКТМО с учетом периода действия настройки подразделения у которого заполнено Учитывать в КПП/ОКТМО
+     * Возвращяет список настроек подразделений по КПП/ОКТМО с учетом периода действия настройки подразделения у
+     * которого заполнено Учитывать в КПП/ОКТМО и "Дата окончания действия" настройки подразделения меньше,
+     * чем дата окончания переиода у КНФ (тем самым, возвращаются те настройки, которые входят в границы периода)
      *
      * @param kpp   КПП
      * @param oktmo код ОКТМО

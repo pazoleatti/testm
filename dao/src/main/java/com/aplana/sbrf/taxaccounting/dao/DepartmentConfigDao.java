@@ -1,15 +1,8 @@
 package com.aplana.sbrf.taxaccounting.dao;
 
 
-import com.aplana.sbrf.taxaccounting.model.DeclarationData;
-import com.aplana.sbrf.taxaccounting.model.KppOktmoPair;
-import com.aplana.sbrf.taxaccounting.model.KppOktmoPairFilter;
-import com.aplana.sbrf.taxaccounting.model.KppSelect;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.ReportFormCreationKppOktmoPair;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.action.DepartmentConfigsFilter;
-import com.aplana.sbrf.taxaccounting.model.consolidation.ConsolidationIncome;
 import com.aplana.sbrf.taxaccounting.model.consolidation.ConsolidationSourceDataSearchFilter;
 import com.aplana.sbrf.taxaccounting.model.refbook.DepartmentConfig;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
@@ -102,7 +95,9 @@ public interface DepartmentConfigDao extends PermissionDao {
     List<DepartmentConfig> findAllByKppAndOktmo(String kpp, String oktmo);
 
     /**
-     * Возвращяет список настроек подразделений по КПП/ОКТМО с учетом периода действия настройки подразделения у которого заполнено Учитывать в КПП/ОКТМО
+     * Возвращяет список настроек подразделений по КПП/ОКТМО с учетом периода действия настройки подразделения у
+     * которого заполнено Учитывать в КПП/ОКТМО и "Дата окончания действия" настройки подразделения меньше,
+     * чем дата окончания переиода у КНФ (тем самым, возвращаются те настройки, которые входят в границы периода)
      *
      * @param kpp   КПП
      * @param oktmo код ОКТМО

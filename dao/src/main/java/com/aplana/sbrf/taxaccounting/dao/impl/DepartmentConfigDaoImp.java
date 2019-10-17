@@ -157,12 +157,24 @@ public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentCon
 
     @Override
     public List<DepartmentConfig> findAllByKppAndOktmoAndFilter(String kpp, String oktmo, ConsolidationSourceDataSearchFilter filter) {
-        String whereParam = "where dc.kpp = ? and oktmo.code = ? and (dc.related_kpp is not null and dc.related_oktmo is not null) and (\n" +
-                "    dc.start_date <= ? and (dc.end_date is null or ? <= dc.end_date) or (\n" +
-                "      dc.start_date <= ? and (dc.end_date is null or ? <= dc.end_date))) \n";
+        String whereParam = "where dc.kpp = :kpp and oktmo.code = :oktmo \n" +
+                "and (dc.related_kpp is not null and dc.related_oktmo is not null) \n" +
+                "and ( \n" +
+                "    dc.start_date <= sysdate and " +
+                "       (dc.end_date is null or sysdate <= dc.end_date) " +
+                "       or (dc.start_date <= :periodEndDate and (dc.end_date is null or :periodStartDate <= dc.end_date)) \n" +
+                ") and dc.end_date < :periodEndDate \n";
         String departmentConfigsKppOktmoFilterSelect = "" +
                 "select " + ALL_FIELDS + " from department_config dc\n" + ALL_FIELDS_JOINS + whereParam;
-        return getJdbcTemplate().query(departmentConfigsKppOktmoFilterSelect, new DepartmentConfigRowMapper(), kpp, oktmo, filter.getCurrentDate(), filter.getCurrentDate(), filter.getPeriodEndDate(), filter.getPeriodStartDate());
+
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("kpp", kpp);
+        params.addValue("oktmo", oktmo);
+        params.addValue("periodStartDate", filter.getPeriodStartDate());
+        params.addValue("periodEndDate", filter.getPeriodEndDate());
+
+        return getNamedParameterJdbcTemplate().query(
+                departmentConfigsKppOktmoFilterSelect, params, new DepartmentConfigRowMapper());
     }
 
     @Override
