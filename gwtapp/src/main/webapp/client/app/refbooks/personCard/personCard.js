@@ -769,6 +769,7 @@
                  * @description Обработка события создания ИНП
                  */
                 $scope.$on("createInp", function (event, inp) {
+                    inp.inp = inp.inp.toUpperCase();
                     $scope.personParam.personIdentityList.push(inp);
                     $scope.inpListGrid.ctrl.refreshGridData($scope.personParam.personIdentityList);
                 });
