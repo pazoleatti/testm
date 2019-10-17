@@ -29,6 +29,7 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Objects;
 import com.google.common.base.Strings;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
 import org.springframework.beans.BeanUtils;
@@ -409,36 +410,36 @@ public class PersonServiceImpl implements PersonService {
         personToPersist.setOldId(personDTO.getOldId());
         personToPersist.setStartDate(SimpleDateUtils.toStartOfDay(personDTO.getStartDate()));
         personToPersist.setEndDate(SimpleDateUtils.toStartOfDay(personDTO.getEndDate()));
-        personToPersist.setLastName(personDTO.getLastName() != null ? personDTO.getLastName().toUpperCase() : null);
-        personToPersist.setFirstName(personDTO.getFirstName() != null ? personDTO.getFirstName().toUpperCase() : null);
-        personToPersist.setMiddleName(personDTO.getMiddleName() != null ? personDTO.getMiddleName().toUpperCase() : null);
+        personToPersist.setLastName(StringUtils.upperCase(personDTO.getLastName()));
+        personToPersist.setFirstName(StringUtils.upperCase(personDTO.getFirstName()));
+        personToPersist.setMiddleName(StringUtils.upperCase(personDTO.getMiddleName()));
         personToPersist.setBirthDate(SimpleDateUtils.toStartOfDay(personDTO.getBirthDate()));
         // Тут и ниже устанавливаем пустые объекты вместо null, т.к. сохранение работает через BeanPropertySqlParameterSource, и оно иначе не будет работать
         personToPersist.setCitizenship(personDTO.getCitizenship().value() != null ? personDTO.getCitizenship().value() : new RefBookCountry());
         personToPersist.setSource(personDTO.getSource() != null ? personDTO.getSource() : new RefBookAsnu());
         if (personDTO.getReportDoc().value() != null) {
             IdDoc idDoc = personDTO.getReportDoc().value();
-            idDoc.setDocumentNumber(idDoc.getDocumentNumber() != null ? idDoc.getDocumentNumber().toUpperCase() : null);
+            idDoc.setDocumentNumber(StringUtils.upperCase(idDoc.getDocumentNumber()));
             personToPersist.setReportDoc(idDoc);
         } else {
             personToPersist.setReportDoc(new IdDoc());
         }
-        personToPersist.setInn(personDTO.getInn().value() != null ? personDTO.getInn().value().toUpperCase() : null);
-        personToPersist.setInnForeign(personDTO.getInnForeign().value() != null ? personDTO.getInnForeign().value().toUpperCase() : null);
-        personToPersist.setSnils(personDTO.getSnils().value() != null ? personDTO.getSnils().value().toUpperCase() : null);
+        personToPersist.setInn(StringUtils.upperCase(personDTO.getInn().value()));
+        personToPersist.setInnForeign(StringUtils.upperCase(personDTO.getInnForeign().value()));
+        personToPersist.setSnils(StringUtils.upperCase(personDTO.getSnils().value()));
         personToPersist.setTaxPayerState(personDTO.getTaxPayerState().value() != null ? personDTO.getTaxPayerState().value() : new RefBookTaxpayerState());
         personToPersist.setVip(personDTO.isVip());
-        personToPersist.getAddress().setRegionCode(personDTO.getAddress().value().getRegionCode() != null ? personDTO.getAddress().value().getRegionCode().toUpperCase() : null);
-        personToPersist.getAddress().setPostalCode(personDTO.getAddress().value().getPostalCode() != null ? personDTO.getAddress().value().getPostalCode().toUpperCase() : null);
-        personToPersist.getAddress().setDistrict(personDTO.getAddress().value().getDistrict() != null ? personDTO.getAddress().value().getDistrict().toUpperCase() : null);
-        personToPersist.getAddress().setCity(personDTO.getAddress().value().getCity() != null ? personDTO.getAddress().value().getCity().toUpperCase() : null);
-        personToPersist.getAddress().setLocality(personDTO.getAddress().value().getLocality() != null ? personDTO.getAddress().value().getLocality().toUpperCase() : null);
-        personToPersist.getAddress().setStreet(personDTO.getAddress().value().getStreet() != null ? personDTO.getAddress().value().getStreet().toUpperCase() : null);
-        personToPersist.getAddress().setHouse(personDTO.getAddress().value().getHouse() != null ? personDTO.getAddress().value().getHouse().toUpperCase() : null);
-        personToPersist.getAddress().setBuild(personDTO.getAddress().value().getBuild() != null ? personDTO.getAddress().value().getBuild().toUpperCase() : null);
-        personToPersist.getAddress().setAppartment(personDTO.getAddress().value().getAppartment() != null ? personDTO.getAddress().value().getAppartment().toUpperCase() : null);
+        personToPersist.getAddress().setRegionCode(StringUtils.upperCase(personDTO.getAddress().value().getRegionCode()));
+        personToPersist.getAddress().setPostalCode(StringUtils.upperCase(personDTO.getAddress().value().getPostalCode()));
+        personToPersist.getAddress().setDistrict(StringUtils.upperCase(personDTO.getAddress().value().getDistrict()));
+        personToPersist.getAddress().setCity(StringUtils.upperCase(personDTO.getAddress().value().getCity()));
+        personToPersist.getAddress().setLocality(StringUtils.upperCase(personDTO.getAddress().value().getLocality()));
+        personToPersist.getAddress().setStreet(StringUtils.upperCase(personDTO.getAddress().value().getStreet()));
+        personToPersist.getAddress().setHouse(StringUtils.upperCase(personDTO.getAddress().value().getHouse()));
+        personToPersist.getAddress().setBuild(StringUtils.upperCase(personDTO.getAddress().value().getBuild()));
+        personToPersist.getAddress().setAppartment(StringUtils.upperCase(personDTO.getAddress().value().getAppartment()));
         personToPersist.getAddress().setCountry(personDTO.getAddress().value().getCountry() != null ? personDTO.getAddress().value().getCountry() : new RefBookCountry());
-        personToPersist.getAddress().setAddressIno(personDTO.getAddress().value().getAddressIno() != null ? personDTO.getAddress().value().getAddressIno().toUpperCase() : null);
+        personToPersist.getAddress().setAddressIno(StringUtils.upperCase(personDTO.getAddress().value().getAddressIno()));
         changeLogBuilder.personInfoUpdated(persistedPerson, personToPersist);
 
         refBookPersonDao.updateRegistryPerson(personToPersist);
