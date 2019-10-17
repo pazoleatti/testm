@@ -18,4 +18,12 @@
         </update>
     </changeSet>
 
+    <changeSet id="3.9.2.3-adudenko-2" author="adudenko">
+        <update tableName="BLOB_DATA">
+            <column name="data"
+                    valueBlobFile="templates-3.9.2.3/refbook/person.groovy"/>
+            <where>id in (select script_id from ref_book r where r.id = 904)</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>
