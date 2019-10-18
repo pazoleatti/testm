@@ -11,4 +11,14 @@
         </update>
     </changeSet>
 
+    <!-- Оптимизация второго запроса идентификации -->
+    <changeSet id="3.9.2.3-skononova-1" author="skononova">
+        <sqlFile dbms="oracle"
+                 encoding="utf8"
+                 endDelimiter=""
+                 path="/scripts/person_pkg_body18.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
+
 </databaseChangeLog>
