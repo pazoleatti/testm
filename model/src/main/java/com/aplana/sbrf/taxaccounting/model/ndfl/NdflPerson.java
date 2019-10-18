@@ -30,19 +30,19 @@ public class NdflPerson extends NdflData<Long> {
     private Long declarationDataId;
 
     // Уникальный код клиента (Графа 2)
-    //private String inp;
+    private String inp;
 
     // СНИЛС
-    //private String snils;
+    private String snils;
 
     // Налогоплательщик.Фамилия (Графа 3)
-    //private String lastName;
+    private String lastName;
 
     // Налогоплательщик.Имя (Графа 4)
-    //private String firstName;
+    private String firstName;
 
     // Налогоплательщик.Отчество (Графа 5)
-    //private String middleName;
+    private String middleName;
 
     // Налогоплательщик.Дата рождения (Графа 6)
     private Date birthDay;
@@ -51,16 +51,16 @@ public class NdflPerson extends NdflData<Long> {
     private String citizenship;
 
     // ИНН.В Российской федерации (Графа 8)
-    //private String innNp;
+    private String innNp;
 
     // ИНН.В стране гражданства (Графа 9)
-   // private String innForeign;
+    private String innForeign;
 
     // Документ удостоверяющий личность.Код (Графа 10)
     private String idDocType;
 
     // Документ удостоверяющий личность.Номер (Графа 11)
-   // private String idDocNumber;
+    private String idDocNumber;
 
     // Cтатус (Код) (Графа 12)
     private String status;
@@ -72,25 +72,25 @@ public class NdflPerson extends NdflData<Long> {
     private String postIndex;
 
     // Адрес регистрации в Российской Федерации.Район (Графа 15)
-    //private String area;
+    private String area;
 
     // Адрес регистрации в Российской Федерации.Город (Графа 16)
-    //private String city;
+    private String city;
 
     // Адрес регистрации в Российской Федерации.Населенный пункт (Графа 17)
-   // private String locality;
+    private String locality;
 
     // Адрес регистрации в Российской Федерации.Улица (Графа 18)
-   // private String street;
+    private String street;
 
     // Адрес регистрации в Российской Федерации.Дом (Графа 19)
-    //private String house;
+    private String house;
 
     // Адрес регистрации в Российской Федерации.Корпус (Графа 20)
-    //private String building;
+    private String building;
 
     // Адрес регистрации в Российской Федерации.Квартира (Графа 21)
-   // private String flat;
+    private String flat;
 
     // Код страны проживания вне РФ
     private String countryCode;
