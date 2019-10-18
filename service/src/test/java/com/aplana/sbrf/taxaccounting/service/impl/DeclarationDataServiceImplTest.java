@@ -775,7 +775,7 @@ public class DeclarationDataServiceImplTest {
 
         declarationDataService.create(userInfo, createDeclarationDataAction);
         Mockito.verify(declarationDataDao, Mockito.times(1))
-                .findExistingDeclarationsForCreationCheck((DeclarationData) anyObject(), anyInt(), anyString());
+                .findExistingDeclarationsForCreationCheck((DeclarationData) anyObject(), anyInt(), anyString(), any(Date.class));
         reset(declarationDataDao);
     }
 

@@ -385,7 +385,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     throw new ServiceLoggerException(("Налоговая форма не создана"), logEntryService.save(logger.getEntries()));
                 }
                 boolean isExistForm = false;
-                List<Long> existingDeclarationsIds = getExistingDeclarationsIds(newDeclaration, reportPeriod);
+                List<Long> existingDeclarationsIds = getExistingDeclarationsIds(newDeclaration, departmentReportPeriod);
                 if (declarationTemplate.getDeclarationFormKind().getId() == DeclarationFormKind.CONSOLIDATED.getId() &&
                         newDeclaration.isManuallyCreated() && !existingDeclarationsIds.isEmpty()) {
                     String strCorrPeriod = "";
@@ -451,17 +451,18 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @NotNull
-    private List<Long> getExistingDeclarationsIds(DeclarationData newDeclaration, ReportPeriod reportPeriod) {
+    private List<Long> getExistingDeclarationsIds(DeclarationData newDeclaration, DepartmentReportPeriod departmentReportPeriod) {
         if (DeclarationType.NDFL_CONSOLIDATE != newDeclaration.getDeclarationTemplateId()) {
             return Collections.emptyList();
         }
 
-        long dictTaxPeriodId = reportPeriod.getDictTaxPeriodId();
+        long dictTaxPeriodId = departmentReportPeriod.getReportPeriod().getDictTaxPeriodId();
         ReportPeriodType periodType = periodService.getPeriodTypeById(dictTaxPeriodId);
 
         if (RefBookKnfType.ALL.getId().equals(newDeclaration.getKnfType().getId()) && reportPeriodService.isYearPeriodType(periodType)) {
             return declarationDataDao.findExistingDeclarationsForCreationCheck(
-                    newDeclaration, reportPeriod.getTaxPeriod().getId(), periodType.getCode());
+                    newDeclaration, departmentReportPeriod.getReportPeriod().getTaxPeriod().getId(),
+                    periodType.getCode(), departmentReportPeriod.getCorrectionDate());
         } else {
             return declarationDataDao.findExistingDeclarationsForCreationCheck(newDeclaration);
         }

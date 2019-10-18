@@ -43,6 +43,8 @@ insert into department_report_period(id, department_id, report_period_id, is_act
 
 insert into department_report_period(id, department_id, report_period_id, is_active) values (701, 1, 130, 1);
 insert into department_report_period(id, department_id, report_period_id, is_active) values (702, 1, 410, 1);
+insert into department_report_period(id, department_id, report_period_id, is_active) values (703, 1, 420, 0);
+insert into department_report_period(id, department_id, report_period_id, is_active, correction_date) values (704, 1, 420, 1, to_date('01.01.2017', 'DD.MM.YYYY'));
 
 insert into department_report_period(id, department_id, report_period_id, is_active) values (801, 1, 330, 1);
 

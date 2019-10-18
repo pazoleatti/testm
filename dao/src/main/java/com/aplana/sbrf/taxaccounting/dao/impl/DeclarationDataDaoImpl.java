@@ -1023,7 +1023,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 
     @Override
     public List<Long> findExistingDeclarationsForCreationCheck(DeclarationData declarationData, Integer taxPeriodId,
-                                                               String periodCode) {
+                                                               String periodCode, Date periodCorrectionDate) {
         String sql = "select dd.id from declaration_data dd\n" +
                 "join department_report_period drp on drp.id = dd.department_report_period_id\n" +
                 "join report_period rp on rp.id = drp.report_period_id\n" +
@@ -1032,6 +1032,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 "where \n" +
                 "  dd.declaration_template_id = :declarationTemplateId\n" +
                 "  and dd.knf_type_id = :knfTypeId\n" +
+                "  and drp.correction_date is " + (periodCorrectionDate == null ? "null\n" : "not null\n") +
                 "  and rpt.code = :reportPeriodCode\n" +
                 "  and tp.id = :taxPeriodId";
         MapSqlParameterSource params = new MapSqlParameterSource();

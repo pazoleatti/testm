@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookKnfType;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 
+import javax.annotation.Nullable;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -288,13 +289,14 @@ public interface DeclarationDataDao extends PermissionDao {
     /**
      * Возвращаает IDs НФ по критериям декларации, а также по критериям года отчетного периода без учета вида отчетности
      *
-     * @param declarationData   создаваемая налоговая форма
-     * @param taxPeriodId       ID года периода
-     * @param periodCode        код периода
+     * @param declarationData       создаваемая налоговая форма
+     * @param taxPeriodId           ID года периода
+     * @param periodCode            код периода
+     * @param periodCorrectionDate  дата корректировки периода
      * @return IDs найденных НФ, соответствующих критериям поиска
      */
     List<Long> findExistingDeclarationsForCreationCheck(DeclarationData declarationData, Integer taxPeriodId,
-                                                        String periodCode);
+                                                        String periodCode, @Nullable Date periodCorrectionDate);
 
     /**
      * Находит налоговые формы операции из которых используются для создания Приложения 2 к НП
