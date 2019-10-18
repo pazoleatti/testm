@@ -11,7 +11,6 @@
         </update>
     </changeSet>
 
-    <!-- Оптимизация второго запроса идентификации -->
     <changeSet id="3.9.2.3-skononova-1" author="skononova">
         <sqlFile dbms="oracle"
                  encoding="utf8"
@@ -19,6 +18,26 @@
                  path="/scripts/person_pkg_body18.sql"
                  relativeToChangelogFile="true"
                  splitStatements="false"/>
+    <changeSet id="3.9.2.3-adudenko-1" author="adudenko">
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script" valueClobFile="templates-3.9.2.3/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_import.groovy"/>
+            <where>DECLARATION_TEMPLATE_ID = 100 and EVENT_ID = 7</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="3.9.2.3-adudenko-2" author="adudenko">
+        <update tableName="BLOB_DATA">
+            <column name="data"
+                    valueBlobFile="templates-3.9.2.3/refbook/person.groovy"/>
+            <where>id in (select script_id from ref_book r where r.id = 904)</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="3.3.9.2.3-ytrofimov-1" author="ytrofimov" runAlways="true">
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script" valueClobFile="templates-3.9.2.3/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_calculate.groovy"/>
+            <where>DECLARATION_TEMPLATE_ID = 100 and EVENT_ID = 3</where>
+        </update>
     </changeSet>
 
 </databaseChangeLog>
