@@ -96,9 +96,9 @@ create or replace PACKAGE BODY                  "PERSON_PKG" as
                tb.import_date
           from (
              select /*+ use_hash(n fv)*/ distinct n.id as person_id,first_value(fv.id) over(partition by n.id order by fv.id) ref_person_id
-               from  ndfl_person n join ref_book_person fv on (replace(lower(nvl(fv.last_name,'empty')),' ','') = replace(lower(nvl(n.last_name,'empty')),' ','')
-                                                               and replace(lower(nvl(fv.first_name,'empty')),' ','') = replace(lower(nvl(n.first_name,'empty')),' ','')
-                                                               and replace(lower(nvl(fv.middle_name,'empty')),' ','') = replace(lower(nvl(n.middle_name,'empty')),' ','')
+               from  ndfl_person n join ref_book_person fv on (replace((nvl(fv.last_name,'empty')),' ','') = replace((nvl(n.last_name,'empty')),' ','')
+                                                               and replace((nvl(fv.first_name,'empty')),' ','') = replace((nvl(n.first_name,'empty')),' ','')
+                                                               and replace((nvl(fv.middle_name,'empty')),' ','') = replace((nvl(n.middle_name,'empty')),' ','')
                                                                and fv.birth_date=n.birth_day
                                                                and replace(replace(nvl(fv.snils,'empty'),' ',''),'-','') = replace(replace(nvl(n.snils,'empty'), ' ', ''), '-', '')
                                                                and replace(nvl(fv.inn,'empty'),' ','') = replace(nvl(n.inn_np,'empty'),' ','')
@@ -108,14 +108,14 @@ create or replace PACKAGE BODY                  "PERSON_PKG" as
               where n.declaration_data_id=p_declaration
                 and exists (-- Существуют записи ИНП, привязанные ко всем версиям ФЛ с одинаковым "Идентификатором ФЛ", включая версии дубликатов
                              select 1 from ref_book_person c join ref_book_person c1 on (c.record_id=c1.record_id) left join ref_book_id_tax_payer t on (t.person_id=c1.id)
-                             where replace(lower(nvl(c.last_name,'empty')),' ','') = replace(lower(nvl(n.last_name,'empty')),' ','')
-                               and replace(lower(nvl(c.first_name,'empty')),' ','') = replace(lower(nvl(n.first_name,'empty')),' ','')
-                               and replace(lower(nvl(c.middle_name,'empty')),' ','') = replace(lower(nvl(n.middle_name,'empty')),' ','')
+                             where replace((nvl(c.last_name,'empty')),' ','') = replace((nvl(n.last_name,'empty')),' ','')
+                               and replace((nvl(c.first_name,'empty')),' ','') = replace((nvl(n.first_name,'empty')),' ','')
+                               and replace((nvl(c.middle_name,'empty')),' ','') = replace((nvl(n.middle_name,'empty')),' ','')
                                and c.birth_date=n.birth_day
                                and replace(replace(nvl(c.snils,'empty'),' ',''),'-','') = replace(replace(nvl(n.snils,'empty'), ' ', ''), '-', '')
                                and replace(nvl(c.inn,'empty'),' ','') = replace(nvl(n.inn_np,'empty'),' ','')
                                and replace(nvl(c.inn_foreign,'empty'),' ','') = replace(nvl(n.inn_foreign,'empty'),' ','')
-                               and t.as_nu=v_asnu and lower(t.inp)=lower(n.inp)
+                               and t.as_nu=v_asnu and (t.inp)=(n.inp)
                                )
                 and fv.record_id=fv.old_id -- не относится к дубликатам
                 ) fv join ref_book_person person on (person.id=fv.ref_person_id)
@@ -183,9 +183,9 @@ create or replace PACKAGE BODY                  "PERSON_PKG" as
                    person.id as ref_book_person_id,
                    doc.id as ref_book_id_doc_id,
                    tax.id as book_id_tax_payer_id
-              from t join ref_book_person person on (replace(lower(nvl(person.last_name,'empty')),' ','') = replace(lower(t.last_name),' ','') and
-                                                                 replace(lower(nvl(person.first_name,'empty')),' ','') = replace(lower(t.first_name),' ','') and
-                                                                 replace(lower(nvl(person.middle_name,'empty')),' ','') = replace(lower(t.middle_name),' ','') and
+              from t join ref_book_person person on (replace((nvl(person.last_name,'empty')),' ','') = replace((t.last_name),' ','') and
+                                                                 replace((nvl(person.first_name,'empty')),' ','') = replace((t.first_name),' ','') and
+                                                                 replace((nvl(person.middle_name,'empty')),' ','') = replace((t.middle_name),' ','') and
                                                                  person.birth_date=t.birth_day and 
                                                                  person.start_date <= sysdate and ( (person.end_date is null) or (person.end_date >= sysdate) ) and person.record_id = person.old_id
                                                                      )
@@ -235,7 +235,7 @@ create or replace PACKAGE BODY                  "PERSON_PKG" as
                    doc.id as ref_book_id_doc_id,
                    tax.id as book_id_tax_payer_id
               from t join ref_book_doc_type dt on (dt.code=t.id_doc_type)
-                                 join ref_book_id_doc doc on (doc.doc_id=dt.id and regexp_replace(lower(doc.doc_number),'[^0-9A-Za-zА-Яа-я]','') = regexp_replace(lower(t.id_doc_number),'[^0-9A-Za-zА-Яа-я]',''))
+                                 join ref_book_id_doc doc on (doc.doc_id=dt.id and regexp_replace((doc.doc_number),'[^0-9A-Za-zА-Яа-я]','') = regexp_replace((t.id_doc_number),'[^0-9A-Za-zА-Яа-я]',''))
                                  join (select distinct r1.id,r2.id id1 from ref_book_person r1 join ref_book_person r2 on r1.record_id=r2.record_id) a on (a.id1 = doc.person_id)
                                  join ref_book_person person on (person.id = a.id and
                                                                  person.start_date <= sysdate and ( (person.end_date is null) or (person.end_date >= sysdate) ) and person.record_id = person.old_id
@@ -248,7 +248,7 @@ create or replace PACKAGE BODY                  "PERSON_PKG" as
                    person.id as ref_book_person_id,
                    doc.id as ref_book_id_doc_id,
                    tax.id as book_id_tax_payer_id
-              from t join ref_book_id_tax_payer tax on (tax.as_nu = v_asnu and lower(tax.inp)=lower(t.inp))
+              from t join ref_book_id_tax_payer tax on (tax.as_nu = v_asnu and (tax.inp)=(t.inp))
                                  join (select distinct r1.id,r2.id id1 from ref_book_person r1 join ref_book_person r2 on r1.record_id=r2.record_id) a on (a.id1 = tax.person_id)
                                  join ref_book_person person on (person.id=a.id and
                                                                  person.start_date <= sysdate and ( (person.end_date is null) or (person.end_date >= sysdate) ) and person.record_id = person.old_id
@@ -265,4 +265,3 @@ create or replace PACKAGE BODY                  "PERSON_PKG" as
   end;
 
 end PERSON_PKG ;
-/
