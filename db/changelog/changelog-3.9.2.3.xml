@@ -114,7 +114,7 @@
         <sqlFile dbms="oracle"
                  encoding="utf8"
                  endDelimiter=""
-                 path="/scripts/id_add_columns.sql"
+                 path="/scripts/REF_BOOK_ID_DOC_BEFORE_INS_UPD.sql"
                  relativeToChangelogFile="true"
                  splitStatements="false"/>
     </changeSet>
@@ -127,6 +127,31 @@
                  relativeToChangelogFile="true"
                  splitStatements="false"/>
     </changeSet>
+    <changeSet id="3.9.2.3-skononova-7" author="skononova" >
+        <sqlFile dbms="oracle"
+                 encoding="utf8"
+                 endDelimiter=""
+                 path="/scripts/REF_BOOK_PERSON_BEFORE_INS_UPD.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
 
+    <changeSet id="3.9.2.3-skononova-8" author="skononova" >
+        <sql>
+		drop index SRCH_REF_BOOK_PERSON_INN;
+		drop index SRCH_FULL_REF_PERS_DUBLE;
+		drop index SRCH_REF_BOOK_ID_DOC_TP_NUM;
+		drop index SRCH_REFB_TAX_PAYER_INP_ASNU;
+		drop index SRCH_REF_PERSON_NAME_BRTHD;
+		drop index SRCH_REF_BOOK_PERSON_SNILS;
+		drop index SRCH_REF_BOOK_PERSON_INN_F;
+		create index idx_ref_book_id_doc_srch_doc on ref_book_id_doc (search_doc_number asc);
+		create index idx_ref_book_person_srch_fio on ref_book_person (search_last_name asc, search_first_name asc, search_middle_name asc, birth_date asc);
+		create index idx_ref_book_person_srch_inn on ref_book_person (search_inn asc);
+		create index idx_ref_book_person_srch_innf on ref_book_person (search_inn_foreign asc);
+		create index idx_ref_book_person_srch_snils on ref_book_person (search_snils asc);
+
+	</sql>
+    </changeSet>
 
 </databaseChangeLog>
