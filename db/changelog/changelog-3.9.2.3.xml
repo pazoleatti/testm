@@ -11,7 +11,7 @@
         </update>
     </changeSet>
 
-    <changeSet id="3.9.2.3-skononova-1" author="skononova" runAlways="true">
+    <changeSet id="3.9.2.3-skononova-1" author="skononova" >
         <sqlFile dbms="oracle"
                  encoding="utf8"
                  endDelimiter=""
@@ -90,6 +90,42 @@
 
 	  CREATE INDEX "SRCH_REFB_TAX_PAYER_INP_ASNU" ON "REF_BOOK_ID_TAX_PAYER" ("AS_NU", ("INP")); 		
 	</sql>
+    </changeSet>
+    <changeSet id="3.9.2.3-skononova-4" author="skononova" >
+	<sql>
+		alter table ref_book_id_doc add  SEARCH_DOC_NUMBER VARCHAR2(25 CHAR);
+		alter table ref_book_person add SEARCH_LAST_NAME VARCHAR2(60 CHAR);
+		alter table ref_book_person add SEARCH_FIRST_NAME VARCHAR2(60 CHAR);
+		alter table ref_book_person add SEARCH_MIDDLE_NAME VARCHAR2(60 CHAR);
+		alter table ref_book_person add SEARCH_INN VARCHAR2(12 CHAR);
+		alter table ref_book_person add SEARCH_INN_FOREIGN VARCHAR2(50 CHAR);
+		alter table ref_book_person add SEARCH_SNILS VARCHAR2(14 CHAR);
+
+		update ref_book_id_doc set search_doc_number=regexp_replace(doc_number,'[^0-9A-Za-zА-Яа-я]','');
+		update ref_book_person set search_LAST_NAME = replace(nvl(last_name,'empty'),' ',''),
+		search_FIRST_NAME = replace(nvl(FIRST_name,'empty'),' ',''),
+		search_MIDDLE_NAME = replace(nvl(MIDDLE_name,'empty'),' ',''),
+                search_INN = replace(nvl(inn,'empty'),' ',''),
+		search_INN_FOREIGN = replace(nvl(inn_foreign,'empty'),' ',''),
+		search_SNILS = replace(replace(nvl(snils,'empty'),' ',''),'-',''); 
+	</sql>
+    </changeSet>
+    <changeSet id="3.9.2.3-skononova-5" author="skononova" >
+        <sqlFile dbms="oracle"
+                 encoding="utf8"
+                 endDelimiter=""
+                 path="/scripts/id_add_columns.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
+
+    <changeSet id="3.9.2.3-skononova-6" author="skononova" >
+        <sqlFile dbms="oracle"
+                 encoding="utf8"
+                 endDelimiter=""
+                 path="/scripts/person_pkg_body19.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
     </changeSet>
 
 
