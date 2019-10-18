@@ -142,15 +142,12 @@ PROMPT Fill tables
 PROMPT ======================
 
 PROMPT Fill service tables...
---3.9.2-adudenko-2, 3.9.2-ytrofimov-2
-HOST "&2\sqlldr" &3 control=database-3.9.2/templates/ldr/refbook/blob_data.ldr log=&4/3_9_2_02_01_refbook_blob_data.txt bad=&5/3_9_2_02_01_refbook_blob_data.bad
 
+HOST "&2\sqlldr" &3 control=database-3.9.2.3/templates/ldr/refbook/blob_data.ldr log=&4/3_9_2_02_01_refbook_blob_data.txt bad=&5/3_9_2_02_01_refbook_blob_data.bad
 
---3.9.2-mchernyakov-1, 3.9.2-mchernyakov-2, 3.9.2-mchernyakov-3, 3.9.2-avtornikov-1
-HOST "&2\sqlldr" &3 control=database-3.9.2/templates/ldr/ndfl/template.ldr log=&4/3_9_2_02_03_ndfl_template.txt bad=&5/3_9_2_02_03_ndfl_template.bad
+HOST "&2\sqlldr" &3 control=database-3.9.2.3/templates/ldr/ndfl/template.ldr log=&4/3_9_2_02_03_ndfl_template.txt bad=&5/3_9_2_02_03_ndfl_template.bad
 
---3.9.2-mchernyakov-4, 3.9.2-avtornikov-2, 3.9.2-avtornikov-3
-HOST "&2\sqlldr" &3 control=database-3.9.2/templates/ldr/ndfl/template_script.ldr log=&4/3_9_2_02_04_ndfl_template_script.txt bad=&5/3_9_2_02_04_ndfl_template_script.bad
+HOST "&2\sqlldr" &3 control=database-3.9.2.3/templates/ldr/ndfl/template_script.ldr log=&4/3_9_2_02_04_ndfl_template_script.txt bad=&5/3_9_2_02_04_ndfl_template_script.bad
 
 
 BEGIN

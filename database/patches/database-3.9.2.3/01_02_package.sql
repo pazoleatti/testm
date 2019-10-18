@@ -1,10 +1,10 @@
 create or replace PACKAGE BODY                  "PERSON_PKG" as
 
-  v_max_end_date date := to_date(5373484, 'J'); -- Максимально возможная дата окончания действия =31.12.9999
+  v_max_end_date date := to_date(5373484, 'J'); -- РњР°РєСЃРёРјР°Р»СЊРЅРѕ РІРѕР·РјРѕР¶РЅР°СЏ РґР°С‚Р° РѕРєРѕРЅС‡Р°РЅРёСЏ РґРµР№СЃС‚РІРёСЏ =31.12.9999
 
   /*
-  Процедура подготовки актуальных версий ФЛ на заданную дату.
-  Актуальные версии помещаются во временную таблицу, которая затем используется остальными функциями.
+  РџСЂРѕС†РµРґСѓСЂР° РїРѕРґРіРѕС‚РѕРІРєРё Р°РєС‚СѓР°Р»СЊРЅС‹С… РІРµСЂСЃРёР№ Р¤Р› РЅР° Р·Р°РґР°РЅРЅСѓСЋ РґР°С‚Сѓ.
+  РђРєС‚СѓР°Р»СЊРЅС‹Рµ РІРµСЂСЃРёРё РїРѕРјРµС‰Р°СЋС‚СЃСЏ РІРѕ РІСЂРµРјРµРЅРЅСѓСЋ С‚Р°Р±Р»РёС†Сѓ, РєРѕС‚РѕСЂР°СЏ Р·Р°С‚РµРј РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ РѕСЃС‚Р°Р»СЊРЅС‹РјРё С„СѓРЅРєС†РёСЏРјРё.
   */
   procedure FillRecordVersions(p_date date default trunc(sysdate))
   is
@@ -16,7 +16,7 @@ create or replace PACKAGE BODY                  "PERSON_PKG" as
   end;
 
   /*
-  Функция возвращает ссылку на АСНУ хранящуюся в декларации
+  Р¤СѓРЅРєС†РёСЏ РІРѕР·РІСЂР°С‰Р°РµС‚ СЃСЃС‹Р»РєСѓ РЅР° РђРЎРќРЈ С…СЂР°РЅСЏС‰СѓСЋСЃСЏ РІ РґРµРєР»Р°СЂР°С†РёРё
   */
   function Get_ASNU_Id(p_declaration number) return number
   is
@@ -30,7 +30,7 @@ create or replace PACKAGE BODY                  "PERSON_PKG" as
       when no_data_found then
         v_asnu := null;
     end;
-    if v_asnu is null then -- если ссылка на АСНУ не определена, то взять значение по умолчанию
+    if v_asnu is null then -- РµСЃР»Рё СЃСЃС‹Р»РєР° РЅР° РђРЎРќРЈ РЅРµ РѕРїСЂРµРґРµР»РµРЅР°, С‚Рѕ РІР·СЏС‚СЊ Р·РЅР°С‡РµРЅРёРµ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ
         begin
           select min(id) into v_asnu from REF_BOOK_ASNU where id > 0;
         exception
@@ -44,14 +44,14 @@ create or replace PACKAGE BODY                  "PERSON_PKG" as
   end;
 
   /*
-  Выборка ФЛ, которые есть в справочнике ФЛ, для их дальнейшего обновления
+  Р’С‹Р±РѕСЂРєР° Р¤Р›, РєРѕС‚РѕСЂС‹Рµ РµСЃС‚СЊ РІ СЃРїСЂР°РІРѕС‡РЅРёРєРµ Р¤Р›, РґР»СЏ РёС… РґР°Р»СЊРЅРµР№С€РµРіРѕ РѕР±РЅРѕРІР»РµРЅРёСЏ
   */
   function GetPersonForUpd(p_declaration number) return ref_cursor
   is
     v_ref ref_cursor;
     v_asnu number;
   begin
-    v_asnu := Get_ASNU_Id(p_declaration); -- ссылка на АСНУ
+    v_asnu := Get_ASNU_Id(p_declaration); -- СЃСЃС‹Р»РєР° РЅР° РђРЎРќРЈ
     
     open v_ref for
         select fv.person_id,
@@ -106,7 +106,7 @@ create or replace PACKAGE BODY                  "PERSON_PKG" as
 															   and fv.start_date <= sysdate and ( (fv.end_date is null) or (fv.end_date >= sysdate) ) and fv.record_id = fv.old_id
                                                                )
               where n.declaration_data_id=p_declaration
-                and exists (-- Существуют записи ИНП, привязанные ко всем версиям ФЛ с одинаковым "Идентификатором ФЛ", включая версии дубликатов
+                and exists (-- РЎСѓС‰РµСЃС‚РІСѓСЋС‚ Р·Р°РїРёСЃРё РРќРџ, РїСЂРёРІСЏР·Р°РЅРЅС‹Рµ РєРѕ РІСЃРµРј РІРµСЂСЃРёСЏРј Р¤Р› СЃ РѕРґРёРЅР°РєРѕРІС‹Рј "РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂРѕРј Р¤Р›", РІРєР»СЋС‡Р°СЏ РІРµСЂСЃРёРё РґСѓР±Р»РёРєР°С‚РѕРІ
                              select 1 from ref_book_person c join ref_book_person c1 on (c.record_id=c1.record_id) left join ref_book_id_tax_payer t on (t.person_id=c1.id)
                              where replace((nvl(c.last_name,'empty')),' ','') = replace((nvl(n.last_name,'empty')),' ','')
                                and replace((nvl(c.first_name,'empty')),' ','') = replace((nvl(n.first_name,'empty')),' ','')
@@ -117,7 +117,7 @@ create or replace PACKAGE BODY                  "PERSON_PKG" as
                                and replace(nvl(c.inn_foreign,'empty'),' ','') = replace(nvl(n.inn_foreign,'empty'),' ','')
                                and t.as_nu=v_asnu and (t.inp)=(n.inp)
                                )
-                and fv.record_id=fv.old_id -- не относится к дубликатам
+                and fv.record_id=fv.old_id -- РЅРµ РѕС‚РЅРѕСЃРёС‚СЃСЏ Рє РґСѓР±Р»РёРєР°С‚Р°Рј
                 ) fv join ref_book_person person on (person.id=fv.ref_person_id)
                      left join ref_book_id_tax_payer tax on (tax.person_id in (select id from ref_book_person where record_id=person.record_id))
                      left join ref_book_id_doc doc on (doc.person_id in (select id from ref_book_person where record_id=person.record_id))
@@ -127,14 +127,14 @@ create or replace PACKAGE BODY                  "PERSON_PKG" as
   end;
 
   /*
-  Выборка ФЛ для их дальнейшей проверки с вычислением весов
+  Р’С‹Р±РѕСЂРєР° Р¤Р› РґР»СЏ РёС… РґР°Р»СЊРЅРµР№С€РµР№ РїСЂРѕРІРµСЂРєРё СЃ РІС‹С‡РёСЃР»РµРЅРёРµРј РІРµСЃРѕРІ
   */
   function GetPersonForCheck(p_declaration number) return ref_cursor
   is
     v_ref ref_cursor;
     v_asnu number;
   begin
-    v_asnu := Get_ASNU_Id(p_declaration); -- ссылка на АСНУ
+    v_asnu := Get_ASNU_Id(p_declaration); -- СЃСЃС‹Р»РєР° РЅР° РђРЎРќРЈ
     open v_ref for
       with t as (select * from ndfl_person where declaration_data_id=p_declaration and person_id is null)  
       select person2.person_id,
@@ -178,7 +178,7 @@ create or replace PACKAGE BODY                  "PERSON_PKG" as
              tb.tb_department_id,
              tb.import_date
       from (
-             /*По ФИО*/
+             /*РџРѕ Р¤РРћ*/
             select /*+ use_hash(t person) parallel(t 4) parallel(person 4)*/ t.id as person_id,
                    person.id as ref_book_person_id,
                    doc.id as ref_book_id_doc_id,
@@ -193,7 +193,7 @@ create or replace PACKAGE BODY                  "PERSON_PKG" as
                                  left join ref_book_id_tax_payer tax on (tax.person_id in (select id from ref_book_person where record_id=person.record_id))
              where person.record_id=person.old_id
             union
-             /*по СНИЛСУ*/
+             /*РїРѕ РЎРќРР›РЎРЈ*/
             select /*+ use_hash(t person) parallel(t 4) parallel(person 4)*/ t.id as person_id,
                    person.id as ref_book_person_id,
                    doc.id as ref_book_id_doc_id,
@@ -205,7 +205,7 @@ create or replace PACKAGE BODY                  "PERSON_PKG" as
                                  left join ref_book_id_tax_payer tax on (tax.person_id in (select id from ref_book_person where record_id=person.record_id))
              where  person.record_id=person.old_id
             union
-            /*По ИННу*/
+            /*РџРѕ РРќРќСѓ*/
             select /*+ use_hash(t person) parallel(t 4) parallel(person 4)*/ t.id as person_id,
                    person.id as ref_book_person_id,
                    doc.id as ref_book_id_doc_id,
@@ -217,7 +217,7 @@ create or replace PACKAGE BODY                  "PERSON_PKG" as
                                  left join ref_book_id_tax_payer tax on (tax.person_id in (select id from ref_book_person where record_id=person.record_id))
              where person.record_id=person.old_id
             union
-            /*По ИННу иностранного государства*/
+            /*РџРѕ РРќРќСѓ РёРЅРѕСЃС‚СЂР°РЅРЅРѕРіРѕ РіРѕСЃСѓРґР°СЂСЃС‚РІР°*/
             select /*+ use_hash(t person) parallel(t 4) parallel(person 4)*/ t.id as person_id,
                    person.id as ref_book_person_id,
                    doc.id as ref_book_id_doc_id,
@@ -229,13 +229,13 @@ create or replace PACKAGE BODY                  "PERSON_PKG" as
                                  left join ref_book_id_tax_payer tax on (tax.person_id in (select id from ref_book_person where record_id=person.record_id))
              where person.record_id=person.old_id
             union
-            /*По ДУЛ*/
+            /*РџРѕ Р”РЈР›*/
             select /*+ use_hash(t doc) parallel(t 4) parallel(doc 4)*/ t.id as person_id,
                    person.id as ref_book_person_id,
                    doc.id as ref_book_id_doc_id,
                    tax.id as book_id_tax_payer_id
               from t join ref_book_doc_type dt on (dt.code=t.id_doc_type)
-                                 join ref_book_id_doc doc on (doc.doc_id=dt.id and regexp_replace((doc.doc_number),'[^0-9A-Za-zА-Яа-я]','') = regexp_replace((t.id_doc_number),'[^0-9A-Za-zА-Яа-я]',''))
+                                 join ref_book_id_doc doc on (doc.doc_id=dt.id and regexp_replace((doc.doc_number),'[^0-9A-Za-zРђ-РЇР°-СЏ]','') = regexp_replace((t.id_doc_number),'[^0-9A-Za-zРђ-РЇР°-СЏ]',''))
                                  join (select distinct r1.id,r2.id id1 from ref_book_person r1 join ref_book_person r2 on r1.record_id=r2.record_id) a on (a.id1 = doc.person_id)
                                  join ref_book_person person on (person.id = a.id and
                                                                  person.start_date <= sysdate and ( (person.end_date is null) or (person.end_date >= sysdate) ) and person.record_id = person.old_id
@@ -243,7 +243,7 @@ create or replace PACKAGE BODY                  "PERSON_PKG" as
                                  left join ref_book_id_tax_payer tax on (tax.person_id in (select id from ref_book_person where record_id=person.record_id))
              where person.record_id=person.old_id
             union
-            /*По ИНП*/
+            /*РџРѕ РРќРџ*/
             select /*+ use_hash(t tax) parallel(t 4) parallel(tax 4)*/ t.id as person_id,
                    person.id as ref_book_person_id,
                    doc.id as ref_book_id_doc_id,
