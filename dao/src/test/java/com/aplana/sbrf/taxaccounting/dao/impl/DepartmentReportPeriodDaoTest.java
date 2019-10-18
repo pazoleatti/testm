@@ -119,7 +119,7 @@ public class DepartmentReportPeriodDaoTest {
         departmentReportPeriodFilter.setIsActive(true);
         departmentReportPeriodFilter.setIsCorrection(true);
         departmentReportPeriodList = departmentReportPeriodDao.fetchAllByFilter(departmentReportPeriodFilter);
-        assertEquals(6, departmentReportPeriodList.size());
+        assertEquals(7, departmentReportPeriodList.size());
         assertEquals(303, departmentReportPeriodList.get(0).getId().intValue());
         assertEquals(307, departmentReportPeriodList.get(1).getId().intValue());
     }
