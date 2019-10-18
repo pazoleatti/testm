@@ -18,6 +18,7 @@
                  path="/scripts/person_pkg_body18.sql"
                  relativeToChangelogFile="true"
                  splitStatements="false"/>
+    </changeSet>
     <changeSet id="3.9.2.3-adudenko-1" author="adudenko">
         <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
             <column name="script" valueClobFile="templates-3.9.2.3/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_import.groovy"/>
