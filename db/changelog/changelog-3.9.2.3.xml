@@ -224,5 +224,13 @@
  
 	</sql>
     </changeSet>
+    <changeSet id="3.9.2.3-skononova-13" author="skononova" >
+        <sqlFile dbms="oracle"
+                 encoding="utf8"
+                 endDelimiter=""
+                 path="/scripts/person_pkg_body20.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
 
 </databaseChangeLog>
