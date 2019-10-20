@@ -129,3 +129,14 @@ END;
 /
 commit;
 
+begin
+    dbms_output.put_line ('Drop functional indexes...');
+    for ind in (select index_name from user_indexes where index_name in ('IDX_REF_BOOK_ID_DOC_SRCH_DOC',
+		'IDX_REF_BOOK_PERSON_SRCH_FIO','IDX_REF_BOOK_PERSON_SRCH_INN',
+                'IDX_REF_BOOK_PERSON_SRCH_INNF','IDX_REF_BOOK_PERSON_SRCH_SNILS'))
+    loop
+        execute immediate 'DROP INDEX '|| ind.index_name;
+    end loop;
+end;
+/
+commit;

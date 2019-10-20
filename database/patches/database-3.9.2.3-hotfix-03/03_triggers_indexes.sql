@@ -116,4 +116,100 @@ END;
 /
 commit;
 
+DECLARE
+	v_run_condition number(1);
+	v_task_name varchar2(128):='indexes block #6 - idx_ref_book_id_doc_srch_doc';  
+BEGIN
+	select decode(count(*),0,1,0) into v_run_condition from user_indexes where INDEX_NAME='IDX_REF_BOOK_ID_DOC_SRCH_DOC';
+	IF v_run_condition=1 THEN
+	        execute immediate 'create index idx_ref_book_id_doc_srch_doc on ref_book_id_doc (search_doc_number asc)';
+		dbms_output.put_line(v_task_name||'[INFO ]:'||' Success');
+	ELSE
+		dbms_output.put_line(v_task_name||'[WARNING]:'||' changes had already been implemented');
+	END IF;
+
+EXCEPTION
+	when OTHERS then
+		dbms_output.put_line(v_task_name||'[FATAL]:'||sqlerrm);	
+END;
+/
+commit;
+
+DECLARE
+	v_run_condition number(1);
+	v_task_name varchar2(128):='indexes block #7 - idx_ref_book_person_srch_fio';  
+BEGIN
+	select decode(count(*),0,1,0) into v_run_condition from user_indexes where INDEX_NAME='IDX_REF_BOOK_PERSON_SRCH_FIO';
+	IF v_run_condition=1 THEN
+	        execute immediate 'create index idx_ref_book_person_srch_fio  on ref_book_person (search_last_name asc, search_first_name asc, search_middle_name asc, birth_date asc)';
+		dbms_output.put_line(v_task_name||'[INFO ]:'||' Success');
+	ELSE
+		dbms_output.put_line(v_task_name||'[WARNING]:'||' changes had already been implemented');
+	END IF;
+
+EXCEPTION
+	when OTHERS then
+		dbms_output.put_line(v_task_name||'[FATAL]:'||sqlerrm);	
+END;
+/
+commit;
+
+DECLARE
+	v_run_condition number(1);
+	v_task_name varchar2(128):='indexes block #8 - idx_ref_book_person_srch_inn';  
+BEGIN
+	select decode(count(*),0,1,0) into v_run_condition from user_indexes where INDEX_NAME='IDX_REF_BOOK_PERSON_SRCH_INN';
+	IF v_run_condition=1 THEN
+	        execute immediate 'create index idx_ref_book_person_srch_inn on ref_book_person (search_inn asc)';
+		dbms_output.put_line(v_task_name||'[INFO ]:'||' Success');
+	ELSE
+		dbms_output.put_line(v_task_name||'[WARNING]:'||' changes had already been implemented');
+	END IF;
+
+EXCEPTION
+	when OTHERS then
+		dbms_output.put_line(v_task_name||'[FATAL]:'||sqlerrm);	
+END;
+/
+commit;
+
+
+DECLARE
+	v_run_condition number(1);
+	v_task_name varchar2(128):='indexes block #9 - idx_ref_book_person_srch_innf';  
+BEGIN
+	select decode(count(*),0,1,0) into v_run_condition from user_indexes where INDEX_NAME='IDX_REF_BOOK_PERSON_SRCH_INNF';
+	IF v_run_condition=1 THEN
+	        execute immediate 'create index idx_ref_book_person_srch_innf on ref_book_person (search_inn_foreign asc)';
+		dbms_output.put_line(v_task_name||'[INFO ]:'||' Success');
+	ELSE
+		dbms_output.put_line(v_task_name||'[WARNING]:'||' changes had already been implemented');
+	END IF;
+
+EXCEPTION
+	when OTHERS then
+		dbms_output.put_line(v_task_name||'[FATAL]:'||sqlerrm);	
+END;
+/
+commit;
+
+DECLARE
+	v_run_condition number(1);
+	v_task_name varchar2(128):='indexes block #10 - idx_ref_book_person_srch_snils';  
+BEGIN
+	select decode(count(*),0,1,0) into v_run_condition from user_indexes where INDEX_NAME='IDX_REF_BOOK_PERSON_SRCH_SNILS';
+	IF v_run_condition=1 THEN
+	        execute immediate 'create index idx_ref_book_person_srch_snils on ref_book_person (search_snils asc)';
+		dbms_output.put_line(v_task_name||'[INFO ]:'||' Success');
+	ELSE
+		dbms_output.put_line(v_task_name||'[WARNING]:'||' changes had already been implemented');
+	END IF;
+
+EXCEPTION
+	when OTHERS then
+		dbms_output.put_line(v_task_name||'[FATAL]:'||sqlerrm);	
+END;
+/
+commit;
+
 commit;
