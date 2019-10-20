@@ -18,7 +18,7 @@ WHENEVER SQLERROR EXIT SQL.SQLCODE
 begin  
    :USER_NDFL := upper('&1');
    select to_char(systimestamp,'yyyy.mm.dd hh24:mi:ss:FF3') into :start_time from dual;	
-   :version := '03.009.02.03.fx3';
+   :version := '03.009.02.03.fx5';
    :STATUS := 'OK';   
 end;
 /
@@ -36,25 +36,14 @@ end;
 
 PROMPT ## Beginning Installing Hotfix
 
-PROMPT ## alter tables
-@01_alter_tables.sql
-
-PROMPT ## dml_update
-@02_dml_update.sql
-
 PROMPT ##templates
-@02_templates.sql "_log/3.9.2.3_hotfix_02_templates.txt" "&3" "&4" "_log" "_bad"
+@02_templates.sql "_log/3.9.2.3_hotfix_05_templates.txt" "&3" "&4" "_log" "_bad"
 
-PROMPT ## triggers_indexes
-@03_triggers_indexes.sql
 
 PROMPT ##package
 @04_package.sql
 
-PROMPT ##Statistics
---@tech/gather_statistics.sql &1
-
-insert into version_history (version, scrname, status, start_time, end_time) values (:version, 'patch_03_009_02_03_hotfix_03.sql', :status, to_timestamp(:start_time,'yyyy.mm.dd hh24:mi:ss:FF3'), systimestamp);
+insert into version_history (version, scrname, status, start_time, end_time) values (:version, 'patch_03_009_02_hotfix_05.sql', :status, to_timestamp(:start_time,'yyyy.mm.dd hh24:mi:ss:FF3'), systimestamp);
 commit;
 
 PROMPT Installation complete
