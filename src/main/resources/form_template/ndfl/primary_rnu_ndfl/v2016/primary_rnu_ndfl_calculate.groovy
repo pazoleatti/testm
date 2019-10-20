@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonPrimaryRnuR
 import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonRefbookHandler
 import com.aplana.sbrf.taxaccounting.dao.identification.RefDataHolder
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.person.NaturalPersonMapper
+import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils
 import com.aplana.sbrf.taxaccounting.model.*
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.identification.IdentificationData
@@ -27,6 +28,13 @@ import groovy.transform.TypeCheckingMode
 import org.apache.commons.collections4.CollectionUtils
 import org.apache.commons.lang3.exception.ExceptionUtils
 import org.springframework.dao.DeadlockLoserDataAccessException
+import org.springframework.jdbc.core.RowCallbackHandler
+import org.springframework.jdbc.core.RowMapper
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
+
+import java.sql.ResultSet
+import java.sql.SQLException
 
 new Calculate(this).run()
 
@@ -62,6 +70,7 @@ class Calculate extends AbstractScriptClass {
     LogBusinessService logBusinessService
     TAUserService taUserService
     Long taskDataId
+    NamedParameterJdbcTemplate namedParameterJdbcTemplate
 
     // Дата окончания отчетного периода
     Date periodEndDate = null
@@ -159,6 +168,82 @@ class Calculate extends AbstractScriptClass {
 
     boolean runParallel
 
+    String snilsQuery = "with t as (select np.id, np.snils from ndfl_person np where declaration_data_id=:p_declaration and person_id is null)\n" +
+            "      select person2.person_id,\n" +
+            "             person3.id as ref_book_person_id\n" +
+            "      from (\n" +
+            "            select t.id as person_id,\n" +
+            "                   person.id as ref_book_person_id\n" +
+            "              from  t join ref_book_person person on (search_snils = replace(replace(t.snils, ' ', ''), '-', '') and\n" +
+            "                                                                 person.start_date <= sysdate and ( (person.end_date is null) or (person.end_date >= sysdate) ) and person.record_id = person.old_id\n" +
+            ")\n" +
+            "             where  person.record_id=person.old_id\n" +
+            "      ) person2\n" +
+            "               join ref_book_person person3 on (person3.id=person2.ref_book_person_id)"
+    String inpQuery = "with t as (select * from ndfl_person where declaration_data_id=:p_declaration and person_id is null)\n" +
+            "select person2.person_id,\n" +
+            "    person2.ref_book_person_id as ref_book_person_id\n" +
+            "from (\n" +
+            "    select t.id as person_id, person.id as ref_book_person_id\n" +
+            "    from t \n" +
+            "    join ref_book_person person on (person.start_date <= sysdate and ( (person.end_date is null) or (person.end_date >= sysdate) ))\n" +
+            "    where person.record_id=person.old_id\n" +
+            "    and t.inp in (select inp from ref_book_id_tax_payer where person_id = person.id and as_nu = :asnu)\n" +
+            ") person2"
+    String fioQuery = "with t as (select np.id, np.last_name, np.first_name, np.middle_name, np.birth_day from ndfl_person np where declaration_data_id=:p_declaration and person_id is null)\n" +
+            "select person2.person_id,\n" +
+            "person3.id as ref_book_person_id\n" +
+            "from (\n" +
+            "    select t.id as person_id,\n" +
+            "    person.id as ref_book_person_id\n" +
+            "    from t join ref_book_person person on (search_last_name = replace((t.last_name),' ','') and\n" +
+            "                                                                 search_first_name= replace((t.first_name),' ','') and\n" +
+            "                                                                 search_middle_name= replace((t.middle_name),' ','') and\n" +
+            "                                                                 person.birth_date=t.birth_day and\n" +
+            "                                                                 person.start_date <= sysdate and ( (person.end_date is null) or (person.end_date >= sysdate) ) and person.record_id = person.old_id\n" +
+            "                                                                     )\n" +
+            "    where person.record_id=person.old_id\n" +
+            ") person2\n" +
+            "join ref_book_person person3 on (person3.id=person2.ref_book_person_id)"
+    String innQuery = "with t as (select np.id, np.inn_np from ndfl_person np where declaration_data_id=:p_declaration and person_id is null)\n" +
+            "select person2.person_id,\n" +
+            "       person3.id as ref_book_person_id\n" +
+            "from (\n" +
+            "    select t.id as person_id,\n" +
+            "    person.id as ref_book_person_id\n" +
+            "    from  t join ref_book_person person on (search_inn = replace(t.inn_np,' ','') and\n" +
+            "                                                                 person.start_date <= sysdate and ( (person.end_date is null) or (person.end_date >= sysdate) ) and person.record_id = person.old_id\n" +
+            ")\n" +
+            "where person.record_id=person.old_id\n" +
+            ") person2\n" +
+            "join ref_book_person person3 on (person3.id=person2.ref_book_person_id)"
+    String innForeignQuery = "with t as (select np.id, np.inn_foreign from ndfl_person np where declaration_data_id=:p_declaration and person_id is null)\n" +
+            "select person2.person_id,\n" +
+            "       person3.id as ref_book_person_id\n" +
+            "from (\n" +
+            "      select t.id as person_id,\n" +
+            "      person.id as ref_book_person_id\n" +
+            "      from t join ref_book_person person on (person.start_date <= sysdate and ( (person.end_date is null) or (person.end_date >= sysdate) ) and person.record_id = person.old_id\n" +
+            "      and (person.inn_foreign = t.inn_foreign))                                                              \n" +
+            "      where person.record_id=person.old_id\n" +
+            "      ) person2\n" +
+            "join ref_book_person person3 on (person3.id=person2.ref_book_person_id)"
+    String dulQuery = "with t as (select np.id, np.id_doc_type, np.id_doc_number from ndfl_person np where declaration_data_id=:p_declaration and person_id is null)\n" +
+            "select person2.person_id,\n" +
+            "     person3.id as ref_book_person_id\n" +
+            "from (\n" +
+            "     select  t.id as person_id,\n" +
+            "     person.id as ref_book_person_id\n" +
+            "     from t join ref_book_doc_type dt on (dt.code=t.id_doc_type)\n" +
+            "                                 join ref_book_id_doc doc on (doc.doc_id=dt.id and search_doc_number = regexp_replace((t.id_doc_number),'[^0-9A-Za-zА-Яа-я]',''))\n" +
+            "                                 join (select distinct r1.id,r2.id id1 from ref_book_person r1 join ref_book_person r2 on r1.record_id=r2.record_id) a on (a.id1 = doc.person_id)\n" +
+            "                                 join ref_book_person person on (person.id = a.id and\n" +
+            "                                                                 person.start_date <= sysdate and ( (person.end_date is null) or (person.end_date >= sysdate) ) and person.record_id = person.old_id\n" +
+            ")\n" +
+            "             where person.record_id=person.old_id\n" +
+            "      ) person2\n" +
+            "               join ref_book_person person3 on (person3.id=person2.ref_book_person_id)"
+
     @TypeChecked(TypeCheckingMode.SKIP)
     Calculate(scriptClass) {
         //noinspection GroovyAssignabilityCheck
@@ -202,6 +287,7 @@ class Calculate extends AbstractScriptClass {
         if (scriptClass.getBinding().hasVariable("taskDataId")) {
             this.taskDataId = (Long) scriptClass.getProperty("taskDataId")
         }
+        this.namedParameterJdbcTemplate = (NamedParameterJdbcTemplate) scriptClass.getProperty("namedParameterJdbcTemplate")
     }
 
     @Override
@@ -266,16 +352,122 @@ class Calculate extends AbstractScriptClass {
 
                     if (!insertPersonList.isEmpty()) {
                         time = System.currentTimeMillis()
-                        Map<Long, Map<Long, NaturalPerson>> checkSimilarityPersonMap = refBookPersonService.findPersonForCheckFromPrimaryRnuNdfl(declarationData.id, createRefbookHandler())
-                        //noinspection GroovyAssignabilityCheck
-                        logForDebug("Основная выборка по всем параметрам (" + checkSimilarityPersonMap.size() + " записей, " + ScriptUtils.calcTimeMillis(time))
-                        println "Identification #=${declarationData.id} Основная выборка по всем параметрам (\" ${checkSimilarityPersonMap.size()}\" записей,  ${ScriptUtils.calcTimeMillis(time)}"
+                        MapSqlParameterSource params = new MapSqlParameterSource("p_declaration", declarationData.id)
+                        SearchMapper searchMapper = new SearchMapper()
+                        namedParameterJdbcTemplate.query(snilsQuery, params, searchMapper)
+                        Map<Long, Long> snilsSearchResult = searchMapper.getResult()
 
-                        time = System.currentTimeMillis()
-                        updateNaturalPersonRefBookRecords(primaryPersonMap, checkSimilarityPersonMap)
-                        //noinspection GroovyAssignabilityCheck
-                        logForDebug("Обновление записей (" + ScriptUtils.calcTimeMillis(time))
-                        println "Identification #=${declarationData.id} Обновление записей 2-я процедура (  ${ScriptUtils.calcTimeMillis(time)}"
+                        logForDebug("Выборка по СНИЛС (" + snilsSearchResult.size() + " записей, " + ScriptUtils.calcTimeMillis(time))
+                        println "Identification #=${declarationData.id} Выборка по СНИЛС (\" ${snilsSearchResult.size()}\" записей,  ${ScriptUtils.calcTimeMillis(time)}"
+
+                        if (snilsSearchResult) {
+                            List<NaturalPerson> snilsNaturalPersonList = namedParameterJdbcTemplate.query(getPersonSqlQuery(snilsSearchResult.values() as List), new MapSqlParameterSource(), new NaturalPersonScriptRowMapper())
+                            time = System.currentTimeMillis()
+                            logForDebug("Получение ФЛ по СНИЛС (" + snilsNaturalPersonList.size() + " записей, " + ScriptUtils.calcTimeMillis(time))
+                            println "Identification #=${declarationData.id} Получение ФЛ по СНИЛС (\" ${snilsNaturalPersonList.size()}\" записей,  ${ScriptUtils.calcTimeMillis(time)}"
+
+                            Map<Long, Map<Long, NaturalPerson>> snilsSimilarityPersonMap = createSimilarityPersonMap(snilsSearchResult, snilsNaturalPersonList)
+
+                            updateNaturalPersonRefBookRecords(primaryPersonMap, snilsSimilarityPersonMap)
+                        }
+
+                        if (!insertPersonList.isEmpty()) {
+                            searchMapper = new SearchMapper()
+                            params.addValue("asnu", declarationData.asnuId)
+                            time = System.currentTimeMillis()
+                            namedParameterJdbcTemplate.query(inpQuery, params, searchMapper)
+                            Map<Long, Long> inpSearchResult = searchMapper.getResult()
+                            //noinspection GroovyAssignabilityCheck
+                            logForDebug("Выборка по ИНП (" + inpSearchResult.size() + " записей, " + ScriptUtils.calcTimeMillis(time))
+                            println "Identification #=${declarationData.id} Выборка по ИНП (\" ${inpSearchResult.size()}\" записей,  ${ScriptUtils.calcTimeMillis(time)}"
+                            if (inpSearchResult) {
+                                time = System.currentTimeMillis()
+                                List<NaturalPerson> inpNaturalPersonList = namedParameterJdbcTemplate.query(getPersonSqlQuery(inpSearchResult.values() as List), new MapSqlParameterSource(), new NaturalPersonScriptRowMapper())
+                                //noinspection GroovyAssignabilityCheck
+                                logForDebug("Получение ФЛ по ИНП (" + inpNaturalPersonList.size() + " записей, " + ScriptUtils.calcTimeMillis(time))
+                                println "Identification #=${declarationData.id} Получение ФЛ по ИНП (\" ${inpNaturalPersonList.size()}\" записей,  ${ScriptUtils.calcTimeMillis(time)}"
+                                Map<Long, Map<Long, NaturalPerson>> inpSimilarityPersonMap = createSimilarityPersonMap(inpSearchResult, inpNaturalPersonList)
+
+                                updateNaturalPersonRefBookRecords(primaryPersonMap, inpSimilarityPersonMap)
+                            }
+
+                            if (!insertPersonList.isEmpty()) {
+                                searchMapper = new SearchMapper()
+                                time = System.currentTimeMillis()
+                                namedParameterJdbcTemplate.query(fioQuery, params, searchMapper)
+                                Map<Long, Long> fioSearchResult = searchMapper.getResult()
+                                //noinspection GroovyAssignabilityCheck
+                                logForDebug("Выборка по ФИО (" + fioSearchResult.size() + " записей, " + ScriptUtils.calcTimeMillis(time))
+                                println "Identification #=${declarationData.id} Выборка по ФИО (\" ${fioSearchResult.size()}\" записей,  ${ScriptUtils.calcTimeMillis(time)}"
+
+                                if (fioSearchResult) {
+                                    List<NaturalPerson> fioNaturalPersonList = namedParameterJdbcTemplate.query(getPersonSqlQuery(fioSearchResult.values() as List), new MapSqlParameterSource(), new NaturalPersonScriptRowMapper())
+
+                                    time = System.currentTimeMillis()
+                                    Map<Long, Map<Long, NaturalPerson>> fioSimilarityPersonMap = createSimilarityPersonMap(fioSearchResult, fioNaturalPersonList)
+                                    logForDebug("Получение ФЛ по ФИО (" + fioSearchResult.size() + " записей, " + ScriptUtils.calcTimeMillis(time))
+                                    println "Identification #=${declarationData.id} Получение ФЛ по ФИО (\" ${fioSearchResult.size()}\" записей,  ${ScriptUtils.calcTimeMillis(time)}"
+
+                                    updateNaturalPersonRefBookRecords(primaryPersonMap, fioSimilarityPersonMap)
+                                }
+
+                                if (!insertPersonList.isEmpty()) {
+                                    searchMapper = new SearchMapper()
+                                    time = System.currentTimeMillis()
+                                    namedParameterJdbcTemplate.query(innQuery, params, searchMapper)
+                                    Map<Long, Long> innSearchResult = searchMapper.getResult()
+                                    logForDebug("Выборка по по ИНН (" + innSearchResult.size() + " записей, " + ScriptUtils.calcTimeMillis(time))
+                                    println "Identification #=${declarationData.id} Выборка по ФИО (\" ${innSearchResult.size()}\" записей,  ${ScriptUtils.calcTimeMillis(time)}"
+
+                                    if (innSearchResult) {
+                                        time = System.currentTimeMillis()
+                                        List<NaturalPerson> innNaturalPersonList = namedParameterJdbcTemplate.query(getPersonSqlQuery(innSearchResult.values() as List), new MapSqlParameterSource(), new NaturalPersonScriptRowMapper())
+                                        Map<Long, Map<Long, NaturalPerson>> innSimilarityPersonMap = createSimilarityPersonMap(innSearchResult, innNaturalPersonList)
+                                        logForDebug("Получение ФЛ по ИНН (" + innNaturalPersonList.size() + " записей, " + ScriptUtils.calcTimeMillis(time))
+                                        println "Identification #=${declarationData.id} Получение ФЛ по ИНН (\" ${innNaturalPersonList.size()}\" записей,  ${ScriptUtils.calcTimeMillis(time)}"
+
+                                        updateNaturalPersonRefBookRecords(primaryPersonMap, innSimilarityPersonMap)
+                                    }
+
+                                    if (!insertPersonList.isEmpty()) {
+                                        searchMapper = new SearchMapper()
+                                        time = System.currentTimeMillis()
+                                        namedParameterJdbcTemplate.query(innForeignQuery, params, searchMapper)
+                                        Map<Long, Long> innForeignSearchResult = searchMapper.getResult()
+                                        logForDebug("Выборка по ИНН иностр (" + innForeignSearchResult.size() + " записей, " + ScriptUtils.calcTimeMillis(time))
+                                        println "Identification #=${declarationData.id} Выборка по ИНН иностр(\" ${innForeignSearchResult.size()}\" записей,  ${ScriptUtils.calcTimeMillis(time)}"
+
+                                        if (innForeignSearchResult) {
+                                            time = System.currentTimeMillis()
+                                            List<NaturalPerson> innForeignNaturalPersonList = namedParameterJdbcTemplate.query(getPersonSqlQuery(innForeignSearchResult.values() as List), new MapSqlParameterSource(), new NaturalPersonScriptRowMapper())
+                                            Map<Long, Map<Long, NaturalPerson>> innForeignSimilarityPersonMap = createSimilarityPersonMap(innForeignSearchResult, innForeignNaturalPersonList)
+                                            logForDebug("Получение ФЛ по ИНН иностр (" + innForeignNaturalPersonList.size() + " записей, " + ScriptUtils.calcTimeMillis(time))
+                                            println "Identification #=${declarationData.id} Получение ФЛ по ИНН иностр(\" ${innForeignNaturalPersonList.size()}\" записей,  ${ScriptUtils.calcTimeMillis(time)}"
+
+                                            updateNaturalPersonRefBookRecords(primaryPersonMap, innForeignSimilarityPersonMap)
+                                        }
+
+                                        if (!insertPersonList.isEmpty()) {
+                                            searchMapper = new SearchMapper()
+                                            time = System.currentTimeMillis()
+                                            namedParameterJdbcTemplate.query(dulQuery, params, searchMapper)
+                                            Map<Long, Long> dulSearchResult = searchMapper.getResult()
+                                            logForDebug("Выборка по ДУЛ (" + dulSearchResult.size() + " записей, " + ScriptUtils.calcTimeMillis(time))
+                                            println "Identification #=${declarationData.id} Выборка по ДУЛ(\" ${dulSearchResult.size()}\" записей,  ${ScriptUtils.calcTimeMillis(time)}"
+
+                                            if (dulSearchResult) {
+                                                time = System.currentTimeMillis()
+                                                List<NaturalPerson> dulNaturalPersonList = namedParameterJdbcTemplate.query(getPersonSqlQuery(dulSearchResult.values() as List), new MapSqlParameterSource(), new NaturalPersonScriptRowMapper())
+                                                Map<Long, Map<Long, NaturalPerson>> dulSimilarityPersonMap = createSimilarityPersonMap(dulSearchResult, dulNaturalPersonList)
+                                                logForDebug("Получение ФЛ по ДУЛ (" + dulNaturalPersonList.size() + " записей, " + ScriptUtils.calcTimeMillis(time))
+                                                println "Identification #=${declarationData.id} Получение ФЛ по ДУЛ(\" ${dulNaturalPersonList.size()}\" записей,  ${ScriptUtils.calcTimeMillis(time)}"
+                                                updateNaturalPersonRefBookRecords(primaryPersonMap, dulSimilarityPersonMap)
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
 
                     if (!insertPersonList.isEmpty()) {
@@ -293,6 +485,86 @@ class Calculate extends AbstractScriptClass {
                 logForDebug("Завершение расчета ПНФ (" + ScriptUtils.calcTimeMillis(timeFull))
                 println "Identification #=${declarationData.id} Завершение расчета ПНФ (${ScriptUtils.calcTimeMillis(time)}"
         }
+    }
+
+    @TypeChecked(TypeCheckingMode.SKIP)
+    static Map<Long, Map<Long, NaturalPerson>> createSimilarityPersonMap(Map<Long, Long> searchResult, List<NaturalPerson> naturalPersonList) {
+        Map<Long, Map<Long, NaturalPerson>> result = [:]
+        searchResult.each {Long k, Long v ->
+            if (naturalPersonList.id.contains(v)) {
+                Map<Long, NaturalPerson> matchedMap = result.get(k)
+                if (matchedMap == null) {
+                    matchedMap = [:]
+                }
+                naturalPersonList.each {
+                    if (it.id == v) {
+                        if (matchedMap.containsKey(v)) {
+                            NaturalPerson addedPerson = matchedMap.get(v)
+                            if (it.documents && !addedPerson.getDocuments()?.id?.contains(it.getDocuments().get(0)?.id)) {
+                                addedPerson.getDocuments().add(it.getDocuments()?.get(0))
+                            }
+                            if (it.personIdentityList && !addedPerson.getPersonIdentityList()?.id?.contains(it.getPersonIdentityList().get(0)?.id)) {
+                                addedPerson.getPersonIdentityList().add(it.getPersonIdentityList()?.get(0))
+                            }
+                            if (it.personTbList && !addedPerson.getPersonTbList()?.id?.contains(it.getPersonTbList().get(0)?.id)) {
+                                addedPerson.getPersonTbList().add(it.getPersonTbList()?.get(0))
+                            }
+                        } else {
+                            it.primaryPersonId = k
+                            matchedMap.put(v, it)
+                        }
+                    }
+                }
+                result.put(k, matchedMap)
+            }
+        }
+        return result
+    }
+
+    static String getPersonSqlQuery(List<Long> values) {
+        return "select distinct person3.id as ref_book_person_id,\n" +
+                "             person3.record_id as person_record_id,\n" +
+                "             person3.last_name,\n" +
+                "             person3.first_name,\n" +
+                "             person3.middle_name,\n" +
+                "             person3.inn,\n" +
+                "             person3.inn_foreign,\n" +
+                "             person3.snils,\n" +
+                "             person3.taxpayer_state,\n" +
+                "             person3.birth_date,\n" +
+                "             person3.birth_place,\n" +
+                "             person3.citizenship,\n" +
+                "             person3.record_id,\n" +
+                "             person3.source_id,\n" +
+                "             person3.old_id,\n" +
+                "             person3.report_doc,\n" +
+                "             person3.vip,\n" +
+                "             person3.country_id,\n" +
+                "             person3.region_code,\n" +
+                "             person3.postal_code,\n" +
+                "             person3.district,\n" +
+                "             person3.city,\n" +
+                "             person3.locality,\n" +
+                "             person3.street,\n" +
+                "             person3.house,\n" +
+                "             person3.build,\n" +
+                "             person3.appartment,\n" +
+                "             person3.address_foreign,\n" +
+                "             person3.start_date,\n" +
+                "             person3.end_date,\n" +
+                "             tax.id as book_id_tax_payer_id,\n" +
+                "             tax.inp,\n" +
+                "             tax.as_nu,\n" +
+                "             doc.id as ref_book_id_doc_id,\n" +
+                "             doc.doc_id,\n" +
+                "             doc.doc_number,\n" +
+                "             tb.id as ref_book_person_tb_id,\n" +
+                "             tb.tb_department_id,\n" +
+                "             tb.import_date from ref_book_person person3 \n" +
+                "             left join ref_book_id_doc doc on (doc.person_id in (select id from ref_book_person where record_id=person3.record_id))\n" +
+                "             left join ref_book_id_tax_payer tax on (tax.person_id in (select id from ref_book_person where record_id=person3.record_id))\n" +
+                "             left join ref_book_person_tb tb on (tb.person_id in (select id from ref_book_person where record_id=person3.record_id))\n" +
+                "where ${SqlUtils.transformToSqlInStatementViaTmpTable("person3.id", values)}"
     }
 
     // Вывод информации о количестве обработанных физлиц всего и уникальных
@@ -1349,5 +1621,169 @@ class Calculate extends AbstractScriptClass {
             departmentCache.put(id, result)
         }
         return result
+    }
+
+    class SearchMapper implements RowCallbackHandler {
+        Map<Long, Long> result = new HashMap<>()
+        @Override
+        void processRow(ResultSet rs) throws SQLException {
+            result.put(SqlUtils.getLong(rs, "person_id"), SqlUtils.getLong(rs, "ref_book_person_id"))
+        }
+    }
+
+    class NaturalPersonScriptRowMapper implements RowMapper<NaturalPerson> {
+        private Map<Long, Map<Long, PersonIdentifier>> identitiesMap = [:]
+        private Map<Long, Map<Long, IdDoc>> documentsMap = [:]
+        private Map<Long, Map<Long, PersonTb>> personTbMap = [:]
+
+        @Override
+        NaturalPerson mapRow(ResultSet rs, int rowNum) throws SQLException {
+            NaturalPerson naturalPerson = buildNaturalPerson(rs)
+
+            addPersonDocument(rs, naturalPerson);
+
+            // инициализируем ДУЛ включаемый в отчетность
+            initReportDoc(rs, naturalPerson);
+
+            //Добавляем идентификаторы
+            addPersonIdentifier(rs, naturalPerson);
+
+            // добавляем Тербанки
+            addPersonTb(rs, naturalPerson);
+
+            //Адрес
+            Address address = buildAddress(rs);
+            naturalPerson.setAddress(address);
+
+            return naturalPerson
+        }
+
+        void addPersonIdentifier(ResultSet rs, NaturalPerson naturalPerson) throws SQLException {
+
+            Long refBookPersonId = naturalPerson.getId();
+            Long personIdentifierId = SqlUtils.getLong(rs, "book_id_tax_payer_id");
+            Map<Long, PersonIdentifier> personIdentityMap = identitiesMap.get(refBookPersonId);
+
+            if (personIdentityMap == null) {
+                personIdentityMap = new HashMap<Long, PersonIdentifier>();
+                identitiesMap.put(refBookPersonId, personIdentityMap);
+            }
+
+            if (personIdentifierId != null && !personIdentityMap.containsKey(personIdentifierId)) {
+                PersonIdentifier personIdentifier = new PersonIdentifier();
+                personIdentifier.setId(personIdentifierId);
+
+                personIdentifier.setInp(rs.getString("inp"));
+                RefBookAsnu asnu = new RefBookAsnu();
+                asnu.setId(SqlUtils.getLong(rs, "as_nu"));
+                personIdentifier.setAsnu(asnu);
+                personIdentifier.setPerson(naturalPerson);
+                personIdentityMap.put(personIdentifierId, personIdentifier);
+                naturalPerson.getPersonIdentityList().add(personIdentifier);
+            }
+        }
+
+        private NaturalPerson buildNaturalPerson(ResultSet rs) throws SQLException {
+                NaturalPerson person = new NaturalPerson();
+
+                //person
+                person.setId(SqlUtils.getLong(rs, "ref_book_person_id"));
+
+                person.setRecordId(SqlUtils.getLong(rs, "person_record_id"));
+                person.setStartDate(rs.getDate("start_date"));
+                person.setEndDate(rs.getDate("end_date"));
+
+                person.setLastName(rs.getString("last_name"));
+                person.setFirstName(rs.getString("first_name"));
+                person.setMiddleName(rs.getString("middle_name"));
+                person.setInn(rs.getString("inn"));
+                person.setInnForeign(rs.getString("inn_foreign"));
+                person.setSnils(rs.getString("snils"));
+                person.setBirthDate(rs.getDate("birth_date"));
+
+                //ссылки на справочники
+                person.setTaxPayerState(refDataHolder.getTaxpayerStatusById(SqlUtils.getLong(rs, "taxpayer_state")));
+                person.setCitizenship(refDataHolder.getCountryById(SqlUtils.getLong(rs, "citizenship")));
+
+                //additional
+                person.setSource(refDataHolder.getAsnuMap().get(SqlUtils.getLong(rs, "source_id")));
+                person.setRecordId(SqlUtils.getLong(rs, "record_id"));
+                person.setOldId(SqlUtils.getLong(rs, "old_id"));
+                person.setVip(rs.getBoolean("vip"));
+
+                return person;
+        }
+
+        private Address buildAddress(ResultSet rs) throws SQLException {
+            Address address = new Address();
+            RefBookCountry country = refDataHolder.getCountryById(SqlUtils.getLong(rs, "country_id"));
+            address.setCountry(country != null ? country : new RefBookCountry());
+            address.setRegionCode(rs.getString("region_code"));
+            address.setPostalCode(rs.getString("postal_code"));
+            address.setDistrict(rs.getString("district"));
+            address.setCity(rs.getString("city"));
+            address.setLocality(rs.getString("locality"));
+            address.setStreet(rs.getString("street"));
+            address.setHouse(rs.getString("house"));
+            address.setBuild(rs.getString("build"));
+            address.setAppartment(rs.getString("appartment"));
+            address.setAddressIno(rs.getString("address_foreign"));
+            return address;
+        }
+
+        private void addPersonDocument(ResultSet rs, NaturalPerson naturalPerson) throws SQLException {
+            Long refBookPersonId = naturalPerson.getId();
+            Long docId = SqlUtils.getLong(rs, "ref_book_id_doc_id");
+            Map<Long, IdDoc> pesonDocumentMap = documentsMap.get(refBookPersonId);
+
+            if (pesonDocumentMap == null) {
+                pesonDocumentMap = new HashMap<Long, IdDoc>();
+                documentsMap.put(refBookPersonId, pesonDocumentMap);
+            }
+
+            if (docId != null && !pesonDocumentMap.containsKey(docId)) {
+                Long docTypeId = SqlUtils.getLong(rs, "doc_id");
+                RefBookDocType docType = refDataHolder.getDocTypeById(docTypeId);
+                IdDoc personDocument = new IdDoc();
+                personDocument.setId(docId);
+
+                personDocument.setDocType(docType);
+                personDocument.setDocumentNumber(rs.getString("doc_number"));
+                personDocument.setPerson(naturalPerson);
+                pesonDocumentMap.put(docId, personDocument);
+                naturalPerson.getDocuments().add(personDocument);
+            }
+        }
+
+        private void initReportDoc(ResultSet rs, NaturalPerson naturalPerson) throws SQLException {
+            Long reportDocId = rs.getLong("report_doc");
+            IdDoc personDocument = documentsMap.get(naturalPerson.getId()).get(reportDocId);
+            naturalPerson.setReportDoc(personDocument != null ? personDocument: new IdDoc());
+        }
+
+        private void addPersonTb(ResultSet rs, NaturalPerson naturalPerson) throws SQLException {
+            Long refBookPersonId = naturalPerson.getId();
+            Long personTbId = SqlUtils.getLong(rs, "ref_book_person_tb_id");
+            Map<Long, PersonTb> tbMap = personTbMap.get(refBookPersonId);
+
+            if (tbMap == null) {
+                tbMap = new HashMap<>();
+                personTbMap.put(refBookPersonId, tbMap);
+            }
+
+            if (personTbId != null && !tbMap.containsKey(personTbId)) {
+                PersonTb personTb = new PersonTb();
+                personTb.setId(personTbId);
+                Department department = new Department();
+                department.setId(rs.getInt("tb_department_id"));
+                personTb.setTbDepartment(department);
+                personTb.setImportDate(rs.getDate("import_date"));
+                personTb.setPerson(naturalPerson);
+                tbMap.put(personTbId, personTb);
+                naturalPerson.getPersonTbList().add(personTb);
+            }
+        }
+
+
     }
 }
