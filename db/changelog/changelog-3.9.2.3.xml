@@ -171,4 +171,66 @@
 	</sql>
     </changeSet>
 
+    <changeSet id="3.9.2.3-skononova-10" author="skononova" >
+	<sql>
+		alter table ndfl_person add  SEARCH_DOC_NUMBER VARCHAR2(25 CHAR);
+		alter table ndfl_person add SEARCH_LAST_NAME VARCHAR2(60 CHAR);
+		alter table ndfl_person add SEARCH_FIRST_NAME VARCHAR2(60 CHAR);
+		alter table ndfl_person add SEARCH_MIDDLE_NAME VARCHAR2(60 CHAR);
+		alter table ndfl_person add SEARCH_INN VARCHAR2(12 CHAR);
+		alter table ndfl_person add SEARCH_INN_FOREIGN VARCHAR2(50 CHAR);
+		alter table ndfl_person add SEARCH_SNILS VARCHAR2(14 CHAR);
+
+		update ndfl_person set search_doc_number=regexp_replace(id_doc_number,'[^0-9A-Za-zА-Яа-я]','');
+		update ndfl_person set search_LAST_NAME = replace(nvl(last_name,'empty'),' ',''),
+		search_FIRST_NAME = replace(nvl(FIRST_name,'empty'),' ',''),
+		search_MIDDLE_NAME = replace(nvl(MIDDLE_name,'empty'),' ',''),
+                search_INN = replace(nvl(inn_np,'empty'),' ',''),
+		search_INN_FOREIGN = replace(nvl(inn_foreign,'empty'),' ',''),
+		search_SNILS = replace(replace(nvl(snils,'empty'),' ',''),'-',''); 
+	</sql>
+    </changeSet>
+
+    <changeSet id="3.9.2.3-skononova-11" author="skononova" >
+        <sqlFile dbms="oracle"
+                 encoding="utf8"
+                 endDelimiter=""
+                 path="/scripts/NDFL_PERSON_BEFORE_INS_UPD.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
+    <changeSet id="3.9.2.3-skononova-12" author="skononova" >
+	<sql>
+		create index idx_ndfl_person_search_snils on ndfl_person 
+			(declaration_data_id, person_id, id, search_snils) 
+		PCTFREE 50 INITRANS 50 COMPUTE STATISTICS; 
+
+		create index idx_ndfl_person_search_fio on ndfl_person 
+			(declaration_data_id asc, person_id asc, id, search_last_name asc, 
+			search_first_name asc, search_middle_name asc, birth_day asc) 
+		PCTFREE 50 INITRANS 50 COMPUTE STATISTICS;
+
+		create index idx_ndfl_person_search_doc on ndfl_person 
+			(declaration_data_id asc, person_id asc, id, search_doc_number asc) 
+		PCTFREE 50 INITRANS 50 COMPUTE STATISTICS;
+
+		create index idx_ndfl_person_search_inn on ndfl_person 
+			(declaration_data_id asc, person_id asc, id, search_inn asc) 
+		PCTFREE 50 INITRANS 50 COMPUTE STATISTICS;
+
+		create index idx_ndfl_person_search_innf on ndfl_person 
+			(declaration_data_id asc, person_id asc, id, search_inn_foreign asc) 
+		PCTFREE 50 INITRANS 50 COMPUTE STATISTICS;
+ 
+	</sql>
+    </changeSet>
+    <changeSet id="3.9.2.3-skononova-13" author="skononova" >
+        <sqlFile dbms="oracle"
+                 encoding="utf8"
+                 endDelimiter=""
+                 path="/scripts/person_pkg_body20.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
+
 </databaseChangeLog>
