@@ -48,6 +48,9 @@ PROMPT ##templates
 PROMPT ## triggers_indexes
 @03_triggers_indexes.sql
 
+PROMPT ##package
+@04_package.sql
+
 PROMPT ##Statistics
 --@tech/gather_statistics.sql &1
 
