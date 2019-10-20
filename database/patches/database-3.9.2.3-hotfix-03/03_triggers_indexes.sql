@@ -206,11 +206,11 @@ commit;
 
 DECLARE
 	v_run_condition number(1);
-	v_task_name varchar2(128):='indexes block #10 - idx_ref_book_person_srch_snils';  
+	v_task_name varchar2(128):='indexes block #10 - idx_ref_book_person_srch_snils1';  
 BEGIN
-	select decode(count(*),0,1,0) into v_run_condition from user_indexes where INDEX_NAME='IDX_REF_BOOK_PERSON_SRCH_SNILS';
+	select decode(count(*),0,1,0) into v_run_condition from user_indexes where INDEX_NAME='IDX_REF_BOOK_PERSON_SRCH_SNILS1';
 	IF v_run_condition=1 THEN
-	        execute immediate 'create index IDX_REF_BOOK_PERSON_SRCH_SNILS on ref_book_person (search_snils asc, start_date asc, end_date asc, id asc, record_id asc)';
+	        execute immediate 'create index IDX_REF_BOOK_PERSON_SRCH_SNILS1 on ref_book_person (search_snils asc, start_date asc, end_date asc, id asc, record_id asc)';
 		dbms_output.put_line(v_task_name||'[INFO ]:'||' Success');
 	ELSE
 		dbms_output.put_line(v_task_name||'[WARNING]:'||' changes had already been implemented');
