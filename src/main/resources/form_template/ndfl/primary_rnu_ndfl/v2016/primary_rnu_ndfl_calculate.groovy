@@ -168,81 +168,12 @@ class Calculate extends AbstractScriptClass {
 
     boolean runParallel
 
-    String snilsQuery = "with t as (select np.id, np.snils from ndfl_person np where declaration_data_id=:p_declaration and person_id is null)\n" +
-            "      select person2.person_id,\n" +
-            "             person3.id as ref_book_person_id\n" +
-            "      from (\n" +
-            "            select t.id as person_id,\n" +
-            "                   person.id as ref_book_person_id\n" +
-            "              from  t join ref_book_person person on (search_snils = replace(replace(t.snils, ' ', ''), '-', '') and\n" +
-            "                                                                 person.start_date <= sysdate and ( (person.end_date is null) or (person.end_date >= sysdate) ) and person.record_id = person.old_id\n" +
-            ")\n" +
-            "             where  person.record_id=person.old_id\n" +
-            "      ) person2\n" +
-            "               join ref_book_person person3 on (person3.id=person2.ref_book_person_id)"
-    String inpQuery = "with t as (select * from ndfl_person where declaration_data_id=:p_declaration and person_id is null)\n" +
-            "select person2.person_id,\n" +
-            "    person2.ref_book_person_id as ref_book_person_id\n" +
-            "from (\n" +
-            "    select t.id as person_id, person.id as ref_book_person_id\n" +
-            "    from t \n" +
-            "    join ref_book_person person on (person.start_date <= sysdate and ( (person.end_date is null) or (person.end_date >= sysdate) ))\n" +
-            "    where person.record_id=person.old_id\n" +
-            "    and t.inp in (select inp from ref_book_id_tax_payer where person_id = person.id and as_nu = :asnu)\n" +
-            ") person2"
-    String fioQuery = "with t as (select np.id, np.last_name, np.first_name, np.middle_name, np.birth_day from ndfl_person np where declaration_data_id=:p_declaration and person_id is null)\n" +
-            "select person2.person_id,\n" +
-            "person3.id as ref_book_person_id\n" +
-            "from (\n" +
-            "    select t.id as person_id,\n" +
-            "    person.id as ref_book_person_id\n" +
-            "    from t join ref_book_person person on (search_last_name = replace((t.last_name),' ','') and\n" +
-            "                                                                 search_first_name= replace((t.first_name),' ','') and\n" +
-            "                                                                 search_middle_name= replace((t.middle_name),' ','') and\n" +
-            "                                                                 person.birth_date=t.birth_day and\n" +
-            "                                                                 person.start_date <= sysdate and ( (person.end_date is null) or (person.end_date >= sysdate) ) and person.record_id = person.old_id\n" +
-            "                                                                     )\n" +
-            "    where person.record_id=person.old_id\n" +
-            ") person2\n" +
-            "join ref_book_person person3 on (person3.id=person2.ref_book_person_id)"
-    String innQuery = "with t as (select np.id, np.inn_np from ndfl_person np where declaration_data_id=:p_declaration and person_id is null)\n" +
-            "select person2.person_id,\n" +
-            "       person3.id as ref_book_person_id\n" +
-            "from (\n" +
-            "    select t.id as person_id,\n" +
-            "    person.id as ref_book_person_id\n" +
-            "    from  t join ref_book_person person on (search_inn = replace(t.inn_np,' ','') and\n" +
-            "                                                                 person.start_date <= sysdate and ( (person.end_date is null) or (person.end_date >= sysdate) ) and person.record_id = person.old_id\n" +
-            ")\n" +
-            "where person.record_id=person.old_id\n" +
-            ") person2\n" +
-            "join ref_book_person person3 on (person3.id=person2.ref_book_person_id)"
-    String innForeignQuery = "with t as (select np.id, np.inn_foreign from ndfl_person np where declaration_data_id=:p_declaration and person_id is null)\n" +
-            "select person2.person_id,\n" +
-            "       person3.id as ref_book_person_id\n" +
-            "from (\n" +
-            "      select t.id as person_id,\n" +
-            "      person.id as ref_book_person_id\n" +
-            "      from t join ref_book_person person on (person.start_date <= sysdate and ( (person.end_date is null) or (person.end_date >= sysdate) ) and person.record_id = person.old_id\n" +
-            "      and (person.inn_foreign = t.inn_foreign))                                                              \n" +
-            "      where person.record_id=person.old_id\n" +
-            "      ) person2\n" +
-            "join ref_book_person person3 on (person3.id=person2.ref_book_person_id)"
-    String dulQuery = "with t as (select np.id, np.id_doc_type, np.id_doc_number from ndfl_person np where declaration_data_id=:p_declaration and person_id is null)\n" +
-            "select person2.person_id,\n" +
-            "     person3.id as ref_book_person_id\n" +
-            "from (\n" +
-            "     select  t.id as person_id,\n" +
-            "     person.id as ref_book_person_id\n" +
-            "     from t join ref_book_doc_type dt on (dt.code=t.id_doc_type)\n" +
-            "                                 join ref_book_id_doc doc on (doc.doc_id=dt.id and search_doc_number = regexp_replace((t.id_doc_number),'[^0-9A-Za-zА-Яа-я]',''))\n" +
-            "                                 join (select distinct r1.id,r2.id id1 from ref_book_person r1 join ref_book_person r2 on r1.record_id=r2.record_id) a on (a.id1 = doc.person_id)\n" +
-            "                                 join ref_book_person person on (person.id = a.id and\n" +
-            "                                                                 person.start_date <= sysdate and ( (person.end_date is null) or (person.end_date >= sysdate) ) and person.record_id = person.old_id\n" +
-            ")\n" +
-            "             where person.record_id=person.old_id\n" +
-            "      ) person2\n" +
-            "               join ref_book_person person3 on (person3.id=person2.ref_book_person_id)"
+    String snilsQuery = "with t as (select np.id, np.search_snils from ndfl_person np where declaration_data_id=:p_declaration and person_id is null) select person2.person_id, person3.id as ref_book_person_id from (select t.id as person_id, person.id as ref_book_person_id from  t join ref_book_person person on (person.search_snils = t.search_snils and person.start_date <= sysdate and ( (person.end_date is null) or (person.end_date >= sysdate) ) and person.record_id = person.old_id) where  person.record_id=person.old_id) person2 join ref_book_person person3 on (person3.id=person2.ref_book_person_id)"
+    String inpQuery = "with t as (select * from ndfl_person where declaration_data_id=:p_declaration and person_id is null) select person2.person_id, person2.ref_book_person_id as ref_book_person_id from (select t.id as person_id, person.id as ref_book_person_id from t join ref_book_person person on (person.start_date <= sysdate and ( (person.end_date is null) or (person.end_date >= sysdate) )) where person.record_id=person.old_id and t.inp in (select inp from ref_book_id_tax_payer where person_id = person.id and as_nu = :asnu)) person2"
+    String fioQuery = "with t as (select np.id, np.search_last_name, np.search_first_name, np.search_middle_name, np.birth_day from ndfl_person np where declaration_data_id=:p_declaration and person_id is null) select person2.person_id, person3.id as ref_book_person_id from (select t.id as person_id, person.id as ref_book_person_id from t join ref_book_person person on (person.search_last_name = t.search_last_name and person.search_first_name= t.search_first_name and person.search_middle_name= t.search_middle_name and person.birth_date=t.birth_day and person.start_date <= sysdate and ((person.end_date is null) or (person.end_date >= sysdate) ) and person.record_id = person.old_id) where person.record_id=person.old_id) person2 join ref_book_person person3 on (person3.id=person2.ref_book_person_id)"
+    String innQuery = "with t as (select np.id, np.search_inn from ndfl_person np where declaration_data_id=:p_declaration and person_id is null) select person2.person_id, person3.id as ref_book_person_id from (select t.id as person_id, person.id as ref_book_person_id from  t join ref_book_person person on (person.search_inn = t.search_inn and person.start_date <= sysdate and ( (person.end_date is null) or (person.end_date >= sysdate) ) and person.record_id = person.old_id) where person.record_id=person.old_id) person2 join ref_book_person person3 on (person3.id=person2.ref_book_person_id)"
+    String innForeignQuery = "with t as (select np.id, np.search_inn_foreign from ndfl_person np where declaration_data_id=:p_declaration and person_id is null) select person2.person_id, person3.id as ref_book_person_id from (select t.id as person_id, person.id as ref_book_person_id from t join ref_book_person person on (person.start_date <= sysdate and ( (person.end_date is null) or (person.end_date >= sysdate) ) and person.record_id = person.old_id and (person.search_inn_foreign = t.search_inn_foreign)) where person.record_id=person.old_id) person2 join ref_book_person person3 on (person3.id=person2.ref_book_person_id)"
+    String dulQuery = "with t as (select np.id, np.id_doc_type, np.search_doc_number from ndfl_person np where declaration_data_id=:p_declaration and person_id is null) select person2.person_id, person3.id as ref_book_person_id from (select t.id as person_id, person.id as ref_book_person_id from t join ref_book_doc_type dt on (dt.code=t.id_doc_type) join ref_book_id_doc doc on (doc.doc_id=dt.id and doc.search_doc_number = t.search_doc_number) join (select distinct r1.id,r2.id id1 from ref_book_person r1 join ref_book_person r2 on r1.record_id=r2.record_id) a on (a.id1 = doc.person_id) join ref_book_person person on (person.id = a.id and person.start_date <= sysdate and ( (person.end_date is null) or (person.end_date >= sysdate) ) and person.record_id = person.old_id ) where person.record_id=person.old_id) person2 join ref_book_person person3 on (person3.id=person2.ref_book_person_id)"
 
     @TypeChecked(TypeCheckingMode.SKIP)
     Calculate(scriptClass) {
