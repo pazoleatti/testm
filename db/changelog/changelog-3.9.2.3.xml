@@ -232,19 +232,30 @@
                  relativeToChangelogFile="true"
                  splitStatements="false"/>
     </changeSet>
+
     <changeSet id="3.9.2.3-skononova-14" author="skononova" >
     <sql>	
 	drop index IDX_REF_BOOK_PERSON_SRCH_SNILS;
 	create index IDX_REF_BOOK_PERSON_SRCH_SNILS on ref_book_person (search_snils asc, start_date asc, end_date asc, id asc, record_id asc);
     </sql>
     </changeSet>
+
     <changeSet id="3.9.2.3-skononova-15" author="skononova" >
     <sql>	
 	drop index IDX_REF_BOOK_PERSON_SRCH_SNILS;
 	create index IDX_REF_BOOK_PERSON_SRCH_SNIL1 on ref_book_person (search_snils asc, start_date asc, end_date asc, id asc, record_id asc);
 	create index IDX_REF_BOOK_PERSON_SRCH_SNILS on ref_book_person (search_snils asc);
     </sql>
-
     </changeSet>
+
+    <changeSet id="3.9.2.3-skononova-16" author="skononova" >
+        <sqlFile dbms="oracle"
+                 encoding="utf8"
+                 endDelimiter=""
+                 path="/scripts/person_pkg_body21.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
+
 
 </databaseChangeLog>
