@@ -332,13 +332,13 @@ class Calculate extends AbstractScriptClass {
         for (def income : pickedRows ) {
             List<DepartmentConfig> departmentConfigList = departmentConfigService.findAllByKppAndOktmoAndFilter(income.kpp,income.oktmo, filter)
             if (departmentConfigList.size() > 0) {
-               for (def dp : departmentConfigList) {
-                   logger.info("У физического лица: " + income.inp + " в операции : " + income.operationId + " значение в поле:  \"Сведения о доходах и НДФЛ.КПП\": " +
-                           income.kpp + " было заменено на значение : " + dp.relatedKppOktmo.kpp + " , значение в поле: Сведения о доходах и НДФЛ.ОКТМО: " +
-                           income.oktmo + " было заменено на: " + dp.relatedKppOktmo.oktmo)
-                   income.setKpp(dp.relatedKppOktmo.kpp)
-                   income.setOktmo(dp.relatedKppOktmo.oktmo)
-               }
+                for (def dp : departmentConfigList) {
+                    logger.info("У физического лица: " + income.inp + " в операции : " + income.operationId + " значение в поле:  \"Сведения о доходах и НДФЛ.КПП\": " +
+                            income.kpp + " было заменено на значение : " + dp.relatedKppOktmo.kpp + " , значение в поле: Сведения о доходах и НДФЛ.ОКТМО: " +
+                            income.oktmo + " было заменено на: " + dp.relatedKppOktmo.oktmo)
+                    income.setKpp(dp.relatedKppOktmo.kpp)
+                    income.setOktmo(dp.relatedKppOktmo.oktmo)
+                }
             }
         }
 

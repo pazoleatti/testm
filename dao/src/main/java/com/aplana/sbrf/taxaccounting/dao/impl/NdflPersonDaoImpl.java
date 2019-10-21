@@ -2373,14 +2373,18 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
     @Override
     public List<ConsolidationIncome> fetchIncomeSourcesConsolidation(ConsolidationSourceDataSearchFilter searchData) {
+        // TODO дубликат запроса из com.aplana.sbrf.taxaccounting.dao.impl.DepartmentConfigDaoImp.ACTUAL_KPP_OKTMO_SELECT_WITH_PERIOD
         String departmentConfigsKppOktmoSelect = "" +
                 "  select dc.kpp, oktmo.code oktmo, max(dc.start_date) start_date \n" +
                 "  from department_config dc\n" +
                 "  join ref_book_oktmo oktmo on oktmo.id = dc.oktmo_id\n" +
+                "  join report_period rp on rp.id = :reportPeriodId\n" +
                 "  where department_id = :departmentId and (\n" +
                 "    dc.start_date <= :currentDate and (dc.end_date is null or :currentDate <= dc.end_date) or (\n" +
                 "      dc.start_date <= :periodEndDate and (dc.end_date is null or :periodStartDate <= dc.end_date) \n" +
-                "      and not exists (select * from department_config where kpp = dc.kpp and oktmo_id = dc.oktmo_id and start_date > dc.start_date and department_id != :departmentId)\n" +
+                "      and not exists (\n" +
+                "       select * from department_config where kpp = dc.kpp and oktmo_id = dc.oktmo_id and \n" +
+                "       start_date > dc.start_date and start_date <= rp.end_date and department_id != :departmentId)\n" +
                 "    )\n" +
                 "  )\n" +
                 "  group by dc.kpp, oktmo.code\n";
@@ -2423,6 +2427,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         params.addValue("currentDate", searchData.getCurrentDate())
                 .addValue("periodStartDate", searchData.getPeriodStartDate())
                 .addValue("periodEndDate", searchData.getPeriodEndDate())
+                .addValue("reportPeriodId", searchData.getPeriodId())
                 .addValue("declarationType", searchData.getDeclarationType())
                 .addValue("dataSelectionDepth", searchData.getDataSelectionDepth())
                 .addValue("consolidateDeclarationDataYear", searchData.getConsolidateDeclarationDataYear())

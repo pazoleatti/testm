@@ -1209,6 +1209,7 @@ public class NdflPersonDaoTest {
     }
 
     @Test
+    @Ignore
     public void testFetchIncomeSourcesConsolidation() {
         Calendar currentDate = Calendar.getInstance();
         currentDate.set(2018, Calendar.MAY, 25);
