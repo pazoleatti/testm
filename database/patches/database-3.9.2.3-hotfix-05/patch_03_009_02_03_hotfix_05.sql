@@ -36,6 +36,9 @@ end;
 
 PROMPT ## Beginning Installing Hotfix
 
+PROMPT ##indexes
+@01_indexes.sql
+
 PROMPT ##templates
 @02_templates.sql "_log/3.9.2.3_hotfix_05_templates.txt" "&3" "&4" "_log" "_bad"
 
