@@ -262,25 +262,7 @@ class Calculate extends AbstractScriptClass {
 
                 if (!getPrimaryPersonDataList().isEmpty()) {
                     //Заполнени временной таблицы версий
-                    time = System.currentTimeMillis()
-                    refBookPersonService.fillRecordVersions()
-                    //noinspection GroovyAssignabilityCheck
-                    logForDebug("Заполнение таблицы версий (" + ScriptUtils.calcTimeMillis(time))
-                    println "Identification #=${declarationData.id} Заполнение таблицы версий ( ${ScriptUtils.calcTimeMillis(time)}"
-
-                    // Идентификатор записи в первичной форме - список подходящих записей для идентификации по весам и обновления справочников
-                    time = System.currentTimeMillis()
-                    Map<Long, Map<Long, NaturalPerson>> similarityPersonMap = refBookPersonService.findPersonForUpdateFromPrimaryRnuNdfl(declarationData.id, createRefbookHandler())
-                    //noinspection GroovyAssignabilityCheck
-                    logForDebug("Предварительная выборка по значимым параметрам (" + similarityPersonMap.size() + " записей, " + ScriptUtils.calcTimeMillis(time))
-                    println "Identification #=${declarationData.id} Предварительная выборка по значимым параметрам (\" ${similarityPersonMap.size()}\" записей,  ${ScriptUtils.calcTimeMillis(time)}"
-
-                    time = System.currentTimeMillis()
-                    updateNaturalPersonRefBookRecords(primaryPersonMap, similarityPersonMap)
-                    //noinspection GroovyAssignabilityCheck
-                    logForDebug("Обновление записей 1-я процедура (" + ScriptUtils.calcTimeMillis(time))
-                    println "Identification #=${declarationData.id} Обновление записей ( ${ScriptUtils.calcTimeMillis(time)}"
-
+                    getRefData()
                     if (!insertPersonList.isEmpty()) {
                         time = System.currentTimeMillis()
                         MapSqlParameterSource params = new MapSqlParameterSource("p_declaration", declarationData.id)
