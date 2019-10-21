@@ -484,7 +484,7 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
         switch (scriptSpecificReportHolder?.declarationSubreport?.alias) {
             case SubreportAliasConstants.RNU_NDFL_PERSON_DB:
                 exportPersonDataToExcel()
-                specReportDescription = "РНУ НДФЛ по физическому лицу"
+                specReportDescription = "\"РНУ НДФЛ по физическому лицу\""
                 break
             case SubreportAliasConstants.REPORT_KPP_OKTMO:
                 createSpecificReportDb()
@@ -492,7 +492,7 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
                 def reportPeriodName = reportPeriod.getTaxPeriod().year + '_' + reportPeriod.name
                 Department department = departmentService.get(declarationData.departmentId)
                 scriptSpecificReportHolder.setFileName("Реестр_сформированной_отчетности_${declarationData.id}_${reportPeriodName}_${department.shortName}_${new Date().format('yyyy-MM-dd_HH-mm-ss')}.xlsx")
-                specReportDescription = "Спецотчет \"Реестр сформированной отчетности\""
+                specReportDescription = "\"Спецотчет \"Реестр сформированной отчетности\"\""
                 break
             case SubreportAliasConstants.RNU_NDFL_PERSON_ALL_DB:
                 exportAllDeclarationDataToExcel()
@@ -502,17 +502,17 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
             case SubreportAliasConstants.RNU_RATE_REPORT:
                 createRateReport()
                 scriptSpecificReportHolder.setFileName("Отчет_в_разрезе_ставок_${declarationData.id}_${date.format('yyyy-MM-dd_HH-mm-ss')}.xlsx")
-                specReportDescription = "Отчет в разрезе ставок"
+                specReportDescription = "\"Отчет в разрезе ставок\""
                 break
             case SubreportAliasConstants.RNU_PAYMENT_REPORT:
                 createPaymentReport()
                 scriptSpecificReportHolder.setFileName("Отчет_в_разрезе_ПП_${declarationData.id}_${date.format('yyyy-MM-dd_HH-mm-ss')}.xlsx")
-                specReportDescription = "Отчет в разрезе платежных поручений"
+                specReportDescription = "\"Отчет в разрезе платежных поручений\""
                 break
             case SubreportAliasConstants.RNU_NDFL_DETAIL_REPORT:
                 createNdflDetailReport()
                 scriptSpecificReportHolder.setFileName("Детализация_${declarationData.id}_${date.format('yyyy-MM-dd_HH-mm-ss')}.xlsx")
-                specReportDescription = "Детализация – доходы, вычеты, налоги"
+                specReportDescription = "\"Детализация – доходы, вычеты, налоги\""
                 break
             case SubreportAliasConstants.RNU_NDFL_2_6_DATA_XLSX_REPORT:
                 create2_6NdflDataReport('xlsx')
@@ -532,7 +532,7 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
                 throw new ServiceException("Обработка данного спец. отчета не предусмотрена!");
         }
         auditService.add(null, userInfo, declarationData,
-                "Создание спецотчета: \"$specReportDescription\"", null)
+                "Создание спецотчета: $specReportDescription", null)
     }
 /**
  * Спец. отчет "РНУ НДФЛ по физическому лицу". Данные макет извлекает непосредственно из бд
