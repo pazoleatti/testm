@@ -2471,14 +2471,15 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     @Override
     public List<NdflPersonDeduction> fetchDeductionsForConsolidation(List<Long> incomeIds) {
         String sql = "with person_operation as \n" +
-                "(select distinct npi.operation_id, npi.ndfl_person_id from ndfl_person_income npi where npi.id in (:incomeIds))\n" +
+                "(select distinct npi.operation_id, npi.ndfl_person_id from ndfl_person_income npi where \n" +
+                SqlUtils.transformToSqlInStatementViaTmpTable("npi.id", incomeIds) + ")\n" +
                 "select rba.NAME as asnu_name, " + createColumns(NdflPersonDeduction.COLUMNS, "npd") + " \n" +
                 "from ndfl_person_deduction npd \n" +
                 "left join person_operation po on npd.operation_id = po.operation_id \n" +
                 " left join ref_book_asnu rba on npd.asnu_id = rba.id " +
                 "where npd.operation_id = po.operation_id and npd.ndfl_person_id = po.ndfl_person_id";
-        List<NdflPersonDeduction> result = selectIn(sql, incomeIds, "incomeIds", new NdflPersonConsolidationDeductionRowMapper());
 
+        List<NdflPersonDeduction> result = getNamedParameterJdbcTemplate().query(sql, new NdflPersonConsolidationDeductionRowMapper());
         if (result.isEmpty()) return null;
         return result;
     }
@@ -2486,13 +2487,14 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     @Override
     public List<NdflPersonPrepayment> fetchPrepaymentsForConsolidation(List<Long> incomeIds) {
         String sql = "with person_operation as \n" +
-                "(select distinct npi.operation_id, npi.ndfl_person_id from ndfl_person_income npi where npi.id in (:incomeIds))\n" +
+                "(select distinct npi.operation_id, npi.ndfl_person_id from ndfl_person_income npi where \n" +
+                SqlUtils.transformToSqlInStatementViaTmpTable("npi.id", incomeIds) + ") \n" +
                 "select rba.NAME as asnu_name, " + createColumns(NdflPersonPrepayment.COLUMNS, "npp") + " \n" +
                 "from ndfl_person_prepayment npp \n" +
                 "left join person_operation po on npp.operation_id = po.operation_id \n" +
                 " left join ref_book_asnu rba on npp.asnu_id = rba.id " +
                 "where npp.operation_id = po.operation_id and npp.ndfl_person_id = po.ndfl_person_id";
-        List<NdflPersonPrepayment> result = selectIn(sql, incomeIds, "incomeIds", new NdflPersonConsolidationPrepaymentRowMapper());
+        List<NdflPersonPrepayment> result = getNamedParameterJdbcTemplate().query(sql, new NdflPersonConsolidationPrepaymentRowMapper());
 
         if (result.isEmpty()) return null;
         return result;
