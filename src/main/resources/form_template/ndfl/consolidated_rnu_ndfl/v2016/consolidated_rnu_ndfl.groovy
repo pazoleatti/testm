@@ -519,14 +519,14 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
                 scriptSpecificReportHolder.setFileName("Данные_для_2_и_6-НДФЛ_${declarationData.id}_${date.format('yyyy-MM-dd_HH-mm-ss')}.xlsx")
                 specReportDescription = "\"Данные для включения в 2-НДФЛ и 6-НДФЛ\" с параметрами: " +
                         "Включать данные с ${dateFrom.format('yyyy-MM-dd')} по ${dateTo.format('yyyy-MM-dd')} " +
-                        "Отрицательные значения : ${adjustNegativeValues ? "Корректировать" : "Не корректировать"} КПП: ${kppList.size() > 0 ? "Выбранные КПП" : "Все КПП формы"}"
+                        "Отрицательные значения : ${adjustNegativeValues ? "Корректировать" : "Не корректировать"} КПП: ${(kppList && kppList.size() > 0) ? "Выбранные КПП" : "Все КПП формы"}"
                 break
             case SubreportAliasConstants.RNU_NDFL_2_6_DATA_TXT_REPORT:
                 create2_6NdflDataReport('txt')
                 scriptSpecificReportHolder.setFileName("Данные_для_2_и_6-НДФЛ_${declarationData.id}_${date.format('yyyy-MM-dd_HH-mm-ss')}.txt")
                 specReportDescription = "Файл выгрузки: \"Данные для включения в 2-НДФЛ и 6-НДФЛ\" с параметрами: " +
                         "Включать данные с ${dateFrom.format('yyyy-MM-dd')} по ${dateTo.format('yyyy-MM-dd')} " +
-                        "Отрицательные значения : ${adjustNegativeValues ? "Корректировать" : "Не корректировать"} КПП: ${kppList.size() > 0 ? "Выбранные КПП" : "Все КПП формы"}"
+                        "Отрицательные значения : ${adjustNegativeValues ? "Корректировать" : "Не корректировать"} КПП: ${(kppList && kppList.size() > 0) ? "Выбранные КПП" : "Все КПП формы"}"
                 break
             default:
                 throw new ServiceException("Обработка данного спец. отчета не предусмотрена!");
