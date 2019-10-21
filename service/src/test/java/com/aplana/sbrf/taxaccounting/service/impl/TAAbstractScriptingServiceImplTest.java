@@ -154,6 +154,9 @@ public class TAAbstractScriptingServiceImplTest extends TAAbstractScriptingServi
 	@Test
 	public void getScriptFilePath() {
 		assertTrue(getScriptFilePath("refbook.test.script1", TEST_SCRIPT_PATH_PREFIX, new Logger(), FormDataEvent.CREATE)
-				.contains("\\service\\src\\test\\resources\\com\\aplana\\sbrf\\taxaccounting\\service\\impl\\groovy\\script1\\script.groovy"));
+				.contains(File.separator+"service"+File.separator+"src"+File.separator+"test"+File.separator+"resources"+
+								File.separator+"com"+File.separator+"aplana"+File.separator+"sbrf"+File.separator+
+								"taxaccounting"+File.separator+"service"+File.separator+"impl"+File.separator+"groovy"+
+								File.separator+"script1"+File.separator+"script.groovy"));
 	}
 }
