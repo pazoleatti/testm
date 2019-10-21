@@ -258,6 +258,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             taskParams.put("declarationTypeId", action.getDeclarationTypeId());
             taskParams.put("departmentReportPeriodId", knf.getDepartmentReportPeriodId());
             taskParams.put("params", params);
+            taskParams.put("userIP", userInfo.getIp());
             asyncManager.createTask(OperationType.getOperationByDeclarationTypeId(action.getDeclarationTypeId()),
                     userInfo, taskParams, logger);
 
@@ -1050,6 +1051,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         params.put("declarationDataId", declarationDataId);
         params.put("alias", alias);
         params.put("viewParamValues", new LinkedHashMap<String, String>());
+        params.put("userIP", userInfo.getIp());
         if (reportParams != null) {
             params.put("subreportParamValues", reportParams);
         }
@@ -1080,6 +1082,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             params.put("selectedRows", selectedRows);
         }
         params.put("subreportParamValues", Collections.emptyMap());
+        params.put("userIP", userInfo.getIp());
 
         asyncManager.createTask(OperationType.getOperationTypeBySubreport(reportAlias), userInfo, params, logger);
 
@@ -1096,6 +1099,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         reportService.deleteByDeclarationAndType(declarationDataId, DeclarationReportType.EXCEL_DEC);
         Map<String, Object> params = new HashMap<>();
         params.put("declarationDataId", declarationDataId);
+        params.put("userIP", userInfo.getIp());
 
         asyncManager.createTask(OperationType.EXCEL_DEC, userInfo, params, logger);
 

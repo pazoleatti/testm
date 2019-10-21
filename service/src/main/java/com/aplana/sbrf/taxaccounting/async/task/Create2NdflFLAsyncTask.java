@@ -55,6 +55,7 @@ public class Create2NdflFLAsyncTask extends AbstractAsyncTask {
         Create2NdflFLParams params = (Create2NdflFLParams) taskData.getParams().get("params");
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(taskData.getUserId()));
+        userInfo.setIp((String) taskData.getParams().get("userIP"));
         declarationDataService.create2NdflFL(params, userInfo, logger);
         return new BusinessLogicResult(true, null);
     }
