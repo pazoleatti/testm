@@ -39,6 +39,10 @@ PROMPT ## Beginning Installing Hotfix
 PROMPT ##templates
 @02_templates.sql "_log/3.9.2.3_hotfix_07_templates.txt" "&3" "&4" "_log" "_bad"
 
+PROMPT ##indexes
+@03_indexes.sql 
+
+
 insert into version_history (version, scrname, status, start_time, end_time) values (:version, 'patch_03_009_02_hotfix_07.sql', :status, to_timestamp(:start_time,'yyyy.mm.dd hh24:mi:ss:FF3'), systimestamp);
 commit;
 
