@@ -314,12 +314,15 @@ class Calculate extends AbstractScriptClass {
                                 println "Identification #=${declarationData.id} Выборка по ФИО (\" ${fioSearchResult.size()}\" записей,  ${ScriptUtils.calcTimeMillis(time)}"
 
                                 if (fioSearchResult) {
+                                    time = System.currentTimeMillis()
                                     List<NaturalPerson> fioNaturalPersonList = namedParameterJdbcTemplate.query(getPersonSqlQuery(fioSearchResult.values() as List), new MapSqlParameterSource(), new NaturalPersonScriptRowMapper())
+                                    logForDebug("Получение ФЛ по ФИО (" + fioSearchResult.size() + " записей, " + ScriptUtils.calcTimeMillis(time))
+                                    println "Identification #=${declarationData.id} Получение ФЛ по ФИО (\" ${fioSearchResult.size()}\" записей,  ${ScriptUtils.calcTimeMillis(time)}"
 
                                     time = System.currentTimeMillis()
                                     Map<Long, Map<Long, NaturalPerson>> fioSimilarityPersonMap = createSimilarityPersonMap(fioSearchResult, fioNaturalPersonList)
-                                    logForDebug("Получение ФЛ по ФИО (" + fioSearchResult.size() + " записей, " + ScriptUtils.calcTimeMillis(time))
-                                    println "Identification #=${declarationData.id} Получение ФЛ по ФИО (\" ${fioSearchResult.size()}\" записей,  ${ScriptUtils.calcTimeMillis(time)}"
+                                    logForDebug("Инициализация ФЛ по ФИО (" + fioSearchResult.size() + " записей, " + ScriptUtils.calcTimeMillis(time))
+                                    println "Identification #=${declarationData.id} Инициализация ФЛ по ФИО (\" ${fioSearchResult.size()}\" записей,  ${ScriptUtils.calcTimeMillis(time)}"
 
                                     updateNaturalPersonRefBookRecords(primaryPersonMap, fioSimilarityPersonMap)
                                 }
@@ -403,33 +406,32 @@ class Calculate extends AbstractScriptClass {
     @TypeChecked(TypeCheckingMode.SKIP)
     static Map<Long, Map<Long, NaturalPerson>> createSimilarityPersonMap(Map<Long, Long> searchResult, List<NaturalPerson> naturalPersonList) {
         Map<Long, Map<Long, NaturalPerson>> result = [:]
+        Map<Long, NaturalPerson> naturalPersonGroupedById = [:]
+        naturalPersonList.each {
+            NaturalPerson addedPerson = naturalPersonGroupedById.get(it.id)
+            if (!addedPerson) {
+                naturalPersonGroupedById.put(it.id, it)
+            } else {
+                if (it.documents && !addedPerson.getDocuments()?.id?.contains(it.getDocuments().get(0)?.id)) {
+                    addedPerson.getDocuments().add(it.getDocuments()?.get(0))
+                }
+                if (it.personIdentityList && !addedPerson.getPersonIdentityList()?.id?.contains(it.getPersonIdentityList().get(0)?.id)) {
+                    addedPerson.getPersonIdentityList().add(it.getPersonIdentityList()?.get(0))
+                }
+                if (it.personTbList && !addedPerson.getPersonTbList()?.id?.contains(it.getPersonTbList().get(0)?.id)) {
+                    addedPerson.getPersonTbList().add(it.getPersonTbList()?.get(0))
+                }
+            }
+        }
         searchResult.each {Long k, Long v ->
-            if (naturalPersonList.id.contains(v)) {
-                Map<Long, NaturalPerson> matchedMap = result.get(k)
-                if (matchedMap == null) {
-                    matchedMap = [:]
-                }
-                naturalPersonList.each {
-                    if (it.id == v) {
-                        if (matchedMap.containsKey(v)) {
-                            NaturalPerson addedPerson = matchedMap.get(v)
-                            if (it.documents && !addedPerson.getDocuments()?.id?.contains(it.getDocuments().get(0)?.id)) {
-                                addedPerson.getDocuments().add(it.getDocuments()?.get(0))
-                            }
-                            if (it.personIdentityList && !addedPerson.getPersonIdentityList()?.id?.contains(it.getPersonIdentityList().get(0)?.id)) {
-                                addedPerson.getPersonIdentityList().add(it.getPersonIdentityList()?.get(0))
-                            }
-                            if (it.personTbList && !addedPerson.getPersonTbList()?.id?.contains(it.getPersonTbList().get(0)?.id)) {
-                                addedPerson.getPersonTbList().add(it.getPersonTbList()?.get(0))
-                            }
-                        } else {
-                            it.primaryPersonId = k
-                            matchedMap.put(v, it)
-                        }
-                    }
-                }
+
+            Map<Long, NaturalPerson> matchedMap = result.get(k)
+            if (matchedMap == null) {
+                matchedMap = [:]
                 result.put(k, matchedMap)
             }
+            matchedMap.put(v, naturalPersonGroupedById.get(v))
+
         }
         return result
     }
