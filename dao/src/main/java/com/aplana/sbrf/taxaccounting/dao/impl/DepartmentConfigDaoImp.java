@@ -50,8 +50,10 @@ public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentCon
             "  where (:departmentId is null or department_id = :departmentId) and (\n" +
             "    dc.start_date <= :relevanceDate and (dc.end_date is null or :relevanceDate <= dc.end_date)\n" +
             "    or dc.start_date <= rp.end_date and (dc.end_date is null or rp.start_date <= dc.end_date)\n" +
-            "       and (:departmentId is null or not exists (select * from department_config where kpp = dc.kpp and oktmo_id = dc.oktmo_id and start_date > dc.start_date and department_id != :departmentId))\n" +
-            "  )\n" +
+            "       and (:departmentId is null or not exists (\n" +
+            "           select * from department_config where kpp = dc.kpp and oktmo_id = dc.oktmo_id " +
+            "           and start_date > dc.start_date and end_date <= rp.end_date and department_id != :departmentId)\n" +
+            "       ))\n" +
             "  group by dc.kpp, dc.oktmo_id\n";
 
     /**
