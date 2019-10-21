@@ -257,5 +257,12 @@
                  splitStatements="false"/>
     </changeSet>
 
+    <changeSet id="3.9.2.3-skononova-17" author="skononova" >
+    <sql>	
+		DROP INDEX SRCH_REFB_TAX_PAYER_INP_ASNU;
+		CREATE INDEX SRCH_REFB_TAX_PAYER_INP_ASNU ON REF_BOOK_ID_TAX_PAYER (INP, AS_NU );
+    </sql>
+    </changeSet>
+
 
 </databaseChangeLog>
