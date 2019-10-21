@@ -1209,7 +1209,6 @@ public class NdflPersonDaoTest {
     }
 
     @Test
-    @Ignore
     public void testFetchIncomeSourcesConsolidation() {
         Calendar currentDate = Calendar.getInstance();
         currentDate.set(2018, Calendar.MAY, 25);
@@ -1219,6 +1218,7 @@ public class NdflPersonDaoTest {
         endDate.set(2018, Calendar.MARCH, 31);
         ConsolidationSourceDataSearchFilter filter = ConsolidationSourceDataSearchFilter.builder()
                 .currentDate(currentDate.getTime())
+                .periodId(310)
                 .periodStartDate(startDate.getTime())
                 .periodEndDate(endDate.getTime())
                 .consolidateDeclarationDataYear(2018)
