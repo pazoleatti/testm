@@ -142,7 +142,7 @@ PROMPT Fill tables
 PROMPT ======================
 
 PROMPT Fill service tables...
-HOST "&2\sqlldr" &3 control=templates/ldr/ndfl/template_script.ldr log=&4/ndfl_template_script.txt bad=&5/ndfl_template_script.bad
+HOST "&2\sqlldr" &3 control=database-3.9.2.4/templates/ldr/ndfl/template_script.ldr log=&4/3_9_2_02_04_ndfl_template_script.txt bad=&5/3_9_2_02_04_ndfl_template_script.bad
 
 
 BEGIN
