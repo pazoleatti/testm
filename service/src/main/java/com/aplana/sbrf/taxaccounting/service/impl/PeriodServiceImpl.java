@@ -186,7 +186,7 @@ public class PeriodServiceImpl implements PeriodService {
             List<Integer> departmentIds = departmentDao.findAllChildrenIdsById(departmentReportPeriod.getDepartmentId());
             departmentReportPeriodService.create(departmentReportPeriod, departmentIds);
 
-            logger.info("%s открыт для \"%s\" и всех дочерних подразделений",
+            logger.info("%s открыт для подразделения \"%s\" и всех дочерних подразделений",
                     periodWithCustomCorrectionDateDescription(departmentReportPeriod), departmentDao.getDepartment(departmentReportPeriod.getDepartmentId()).getName());
         }
     }
