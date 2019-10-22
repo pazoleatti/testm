@@ -22,5 +22,5 @@
 	<include file="changelog-3.9.xml"/>
 	<include file="changelog-3.9.1.xml"/>
 	<include file="changelog-3.9.2.xml"/>
-	<include file="changelog-3.10.xml"/>
+	<include file="changelog-3.10.0.1.xml"/>
 </databaseChangeLog>

@@ -1218,6 +1218,7 @@ public class NdflPersonDaoTest {
         endDate.set(2018, Calendar.MARCH, 31);
         ConsolidationSourceDataSearchFilter filter = ConsolidationSourceDataSearchFilter.builder()
                 .currentDate(currentDate.getTime())
+                .periodId(310)
                 .periodStartDate(startDate.getTime())
                 .periodEndDate(endDate.getTime())
                 .consolidateDeclarationDataYear(2018)

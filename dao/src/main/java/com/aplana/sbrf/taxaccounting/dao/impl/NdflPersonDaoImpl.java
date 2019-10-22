@@ -2391,20 +2391,9 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
     @Override
     public List<ConsolidationIncome> fetchIncomeSourcesConsolidation(ConsolidationSourceDataSearchFilter searchData) {
-        String departmentConfigsKppOktmoSelect = "" +
-                "  select dc.kpp, oktmo.code oktmo, max(dc.start_date) start_date \n" +
-                "  from department_config dc\n" +
-                "  join ref_book_oktmo oktmo on oktmo.id = dc.oktmo_id\n" +
-                "  where department_id = :departmentId and (\n" +
-                "    dc.start_date <= :currentDate and (dc.end_date is null or :currentDate <= dc.end_date) or (\n" +
-                "      dc.start_date <= :periodEndDate and (dc.end_date is null or :periodStartDate <= dc.end_date) \n" +
-                "      and not exists (select * from department_config where kpp = dc.kpp and oktmo_id = dc.oktmo_id and start_date > dc.start_date and department_id != :departmentId)\n" +
-                "    )\n" +
-                "  )\n" +
-                "  group by dc.kpp, oktmo.code\n";
         String insertSql = "insert into tmp_cons_data(operation_id, asnu_id)\n" +
                 "with kpp_oktmo as (\n" +
-                departmentConfigsKppOktmoSelect +
+                DepartmentConfigDaoImp.ACTUAL_KPP_OKTMO_SELECT_WITH_PERIOD +
                 ")\n" +
                 "select /*+ NO_INDEX(npi NDFL_PERS_INC_KPP_OKTMO) */ distinct npi.operation_id, dd.asnu_id\n" +
                 "from ndfl_person_income npi \n" +
@@ -2423,7 +2412,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                 "and dt.declaration_type_id = :declarationType and tp.year between :dataSelectionDepth and :consolidateDeclarationDataYear";
         String selectSql = "" +
                 "with kpp_oktmo as (\n" +
-                departmentConfigsKppOktmoSelect +
+                DepartmentConfigDaoImp.ACTUAL_KPP_OKTMO_SELECT_WITH_PERIOD +
                 ")\n" +
                 "select /*+ use_hash(cd npi)*/ distinct " + createColumns(NdflPersonIncome.COLUMNS, "npi") + ", dd.id as dd_id, dd.asnu_id, dd.state, np.inp, tp.year, rpt.code as period_code, drp.correction_date, rba.NAME as asnu_name " +
                 "from tmp_cons_data cd \n" +
@@ -2438,9 +2427,10 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                 "left join ref_book_asnu rba on npi.asnu_id = rba.id\n" +
                 "where dd.asnu_id = cd.asnu_id";
         MapSqlParameterSource params = new MapSqlParameterSource();
-        params.addValue("currentDate", searchData.getCurrentDate())
+        params.addValue("relevanceDate", searchData.getCurrentDate())
                 .addValue("periodStartDate", searchData.getPeriodStartDate())
                 .addValue("periodEndDate", searchData.getPeriodEndDate())
+                .addValue("reportPeriodId", searchData.getPeriodId())
                 .addValue("declarationType", searchData.getDeclarationType())
                 .addValue("dataSelectionDepth", searchData.getDataSelectionDepth())
                 .addValue("consolidateDeclarationDataYear", searchData.getConsolidateDeclarationDataYear())

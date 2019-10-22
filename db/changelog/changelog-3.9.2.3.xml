@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+    <changeSet id="3.9.2.3-avoynov-1" author="avoynov">
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="CREATE_SCRIPT" valueClobFile="templates-3.9.2.3/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl.groovy"/>
+            <where>declaration_type_id = 100</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="3.9.2.3-skononova-1" author="skononova" >
+        <sqlFile dbms="oracle"
+                 encoding="utf8"
+                 endDelimiter=""
+                 path="/scripts/person_pkg_body18.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
+    <changeSet id="3.9.2.3-adudenko-1" author="adudenko">
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script" valueClobFile="templates-3.9.2.3/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_import.groovy"/>
+            <where>DECLARATION_TEMPLATE_ID = 100 and EVENT_ID = 7</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="3.9.2.3-adudenko-2" author="adudenko">
+        <update tableName="BLOB_DATA">
+            <column name="data"
+                    valueBlobFile="templates-3.9.2.3/refbook/person.groovy"/>
+            <where>id in (select script_id from ref_book r where r.id = 904)</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="3.3.9.2.3-ytrofimov-1" author="ytrofimov" runAlways="true">
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script" valueClobFile="templates-3.9.2.3/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_calculate.groovy"/>
+            <where>DECLARATION_TEMPLATE_ID = 100 and EVENT_ID = 3</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="3.9.2.3-skononova-2" author="skononova">
+	<sql>
+	update ndfl_person 
+	    set inp= upper(inp), snils=upper(snils), last_name=upper(last_name), 
+		first_name = upper(first_name), middle_name = upper(middle_name), 
+		inn_np = upper (inn_np), inn_foreign = upper (inn_foreign), 
+		id_doc_number = upper (id_doc_number),
+		area = upper (area), city = upper (city), locality = upper (locality), street = upper (street), 
+		house = upper (house), building = upper (building), flat = upper (flat), ADDRESS = upper(ADDRESS);
+        update ref_book_person
+	    set last_name=upper (last_name), first_name = upper (first_name),
+		middle_name = upper (middle_name), inn = upper (inn), inn_foreign = upper (inn_foreign),
+		snils = upper (snils), district = upper (district), city = upper (city), 
+		locality = upper (locality), street = upper (street), house = upper (house), 
+		build = upper (build),appartment = upper (appartment), address_foreign = upper (address_foreign);
+
+	update ref_book_id_doc set doc_number = upper (doc_number);
+
+	update  ref_book_id_tax_payer set inp=upper (inp);
+
+	</sql>	
+    </changeSet>
+
+    <changeSet id="3.9.2.3-skononova-3" author="skononova">
+	<sql>
+	    drop index SRCH_FULL_REF_PERS_DUBLE;
+	    drop index SRCH_REF_BOOK_PERSON_INN;
+	    drop index SRCH_REF_BOOK_PERSON_INN_F;
+	    drop index SRCH_REF_BOOK_PERSON_SNILS;
+	    drop index SRCH_REF_PERSON_NAME_BRTHD;
+	    drop index SRCH_REF_BOOK_ID_DOC_TP_NUM;	
+	    drop index SRCH_REFB_TAX_PAYER_INP_ASNU;
+
+	</sql>	
+	<sql>
+	  CREATE INDEX "SRCH_FULL_REF_PERS_DUBLE" ON "REF_BOOK_PERSON" (REPLACE((NVL("LAST_NAME",'empty')),' ',''), REPLACE((NVL("FIRST_NAME",'empty')),' ',''), REPLACE((NVL("MIDDLE_NAME",'empty')),' ',''), "BIRTH_DATE", REPLACE(REPLACE(NVL("SNILS",'empty'),' ',''),'-',''), REPLACE(NVL("INN",'empty'),' ',''), REPLACE(NVL("INN_FOREIGN",'empty'),' ','')) ;
+
+	  CREATE INDEX "SRCH_REF_BOOK_PERSON_INN" ON "REF_BOOK_PERSON" (REPLACE("INN",' ','')) ;
+
+	  CREATE INDEX "SRCH_REF_BOOK_PERSON_INN_F" ON "REF_BOOK_PERSON" (REPLACE("INN_FOREIGN",' ','')) ;
+
+	  CREATE INDEX "SRCH_REF_BOOK_PERSON_SNILS" ON "REF_BOOK_PERSON" (REPLACE(REPLACE("SNILS",' ',''),'-','')) ;
+
+	  CREATE INDEX "SRCH_REF_PERSON_NAME_BRTHD" ON "REF_BOOK_PERSON" (REPLACE(("LAST_NAME"),' ',''), REPLACE(("FIRST_NAME"),' ',''), REPLACE(("MIDDLE_NAME"),' ',''), "BIRTH_DATE") ;
+
+	  CREATE INDEX "SRCH_REF_BOOK_ID_DOC_TP_NUM" ON "REF_BOOK_ID_DOC" ("DOC_ID", REPLACE(("DOC_NUMBER"),' ','')) ;
+
+	  CREATE INDEX "SRCH_REFB_TAX_PAYER_INP_ASNU" ON "REF_BOOK_ID_TAX_PAYER" ("AS_NU", ("INP")); 		
+	</sql>
+    </changeSet>
+    <changeSet id="3.9.2.3-skononova-4" author="skononova" >
+	<sql>
+		alter table ref_book_id_doc add  SEARCH_DOC_NUMBER VARCHAR2(25 CHAR);
+		alter table ref_book_person add SEARCH_LAST_NAME VARCHAR2(60 CHAR);
+		alter table ref_book_person add SEARCH_FIRST_NAME VARCHAR2(60 CHAR);
+		alter table ref_book_person add SEARCH_MIDDLE_NAME VARCHAR2(60 CHAR);
+		alter table ref_book_person add SEARCH_INN VARCHAR2(12 CHAR);
+		alter table ref_book_person add SEARCH_INN_FOREIGN VARCHAR2(50 CHAR);
+		alter table ref_book_person add SEARCH_SNILS VARCHAR2(14 CHAR);
+
+		update ref_book_id_doc set search_doc_number=regexp_replace(doc_number,'[^0-9A-Za-zА-Яа-я]','');
+		update ref_book_person set search_LAST_NAME = replace(nvl(last_name,'empty'),' ',''),
+		search_FIRST_NAME = replace(nvl(FIRST_name,'empty'),' ',''),
+		search_MIDDLE_NAME = replace(nvl(MIDDLE_name,'empty'),' ',''),
+                search_INN = replace(nvl(inn,'empty'),' ',''),
+		search_INN_FOREIGN = replace(nvl(inn_foreign,'empty'),' ',''),
+		search_SNILS = replace(replace(nvl(snils,'empty'),' ',''),'-',''); 
+	</sql>
+    </changeSet>
+    <changeSet id="3.9.2.3-skononova-5" author="skononova" >
+        <sqlFile dbms="oracle"
+                 encoding="utf8"
+                 endDelimiter=""
+                 path="/scripts/REF_BOOK_ID_DOC_BEFORE_INS_UPD.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
+
+    <changeSet id="3.9.2.3-skononova-6" author="skononova" >
+        <sqlFile dbms="oracle"
+                 encoding="utf8"
+                 endDelimiter=""
+                 path="/scripts/person_pkg_body19.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
+    <changeSet id="3.9.2.3-skononova-7" author="skononova" >
+        <sqlFile dbms="oracle"
+                 encoding="utf8"
+                 endDelimiter=""
+                 path="/scripts/REF_BOOK_PERSON_BEFORE_INS_UPD.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
+
+    <changeSet id="3.9.2.3-skononova-8" author="skononova" >
+        <sql>
+		drop index SRCH_REF_BOOK_PERSON_INN;
+		drop index SRCH_FULL_REF_PERS_DUBLE;
+		drop index SRCH_REF_BOOK_ID_DOC_TP_NUM;
+		drop index SRCH_REFB_TAX_PAYER_INP_ASNU;
+		drop index SRCH_REF_PERSON_NAME_BRTHD;
+		drop index SRCH_REF_BOOK_PERSON_SNILS;
+		drop index SRCH_REF_BOOK_PERSON_INN_F;
+		create index idx_ref_book_id_doc_srch_doc on ref_book_id_doc (search_doc_number asc);
+		create index idx_ref_book_person_srch_fio on ref_book_person (search_last_name asc, search_first_name asc, search_middle_name asc, birth_date asc);
+		create index idx_ref_book_person_srch_inn on ref_book_person (search_inn asc);
+		create index idx_ref_book_person_srch_innf on ref_book_person (search_inn_foreign asc);
+		create index idx_ref_book_person_srch_snils on ref_book_person (search_snils asc);
+
+	</sql>
+    </changeSet>
+    <changeSet id="3.9.2.3-skononova-9" author="skononova" >
+        <sql>
+	  CREATE INDEX SRCH_FULL_REF_PERS_DUBLE ON REF_BOOK_PERSON (REPLACE(LOWER(NVL(LAST_NAME,'empty')),' ',''), REPLACE(LOWER(NVL(FIRST_NAME,'empty')),' ',''), REPLACE(LOWER(NVL(MIDDLE_NAME,'empty')),' ',''), BIRTH_DATE, REPLACE(REPLACE(NVL(SNILS,'empty'),' ',''),'-',''), REPLACE(NVL(INN,'empty'),' ',''), REPLACE(NVL(INN_FOREIGN,'empty'),' ','')); 
+
+	  CREATE INDEX SRCH_REF_BOOK_PERSON_INN ON REF_BOOK_PERSON (REPLACE(INN,' ',''))  ;
+
+	  CREATE INDEX SRCH_REF_BOOK_PERSON_INN_F ON REF_BOOK_PERSON (REPLACE(INN_FOREIGN,' ','')) ;
+
+	  CREATE INDEX SRCH_REF_BOOK_PERSON_SNILS ON REF_BOOK_PERSON (REPLACE(REPLACE(SNILS,' ',''),'-','')) ;
+
+	  CREATE INDEX SRCH_REF_PERSON_NAME_BRTHD ON REF_BOOK_PERSON (REPLACE(LOWER(LAST_NAME),' ',''), REPLACE(LOWER(FIRST_NAME),' ',''), REPLACE(LOWER(MIDDLE_NAME),' ',''), BIRTH_DATE) ;
+
+	  CREATE INDEX SRCH_REF_BOOK_ID_DOC_TP_NUM ON REF_BOOK_ID_DOC (DOC_ID, REPLACE(LOWER(DOC_NUMBER),' ','')) ;
+
+	  CREATE INDEX SRCH_REFB_TAX_PAYER_INP_ASNU ON REF_BOOK_ID_TAX_PAYER (AS_NU, LOWER(INP)); 
+	</sql>
+    </changeSet>
+
+    <changeSet id="3.9.2.3-skononova-10" author="skononova" >
+	<sql>
+		alter table ndfl_person add  SEARCH_DOC_NUMBER VARCHAR2(25 CHAR);
+		alter table ndfl_person add SEARCH_LAST_NAME VARCHAR2(60 CHAR);
+		alter table ndfl_person add SEARCH_FIRST_NAME VARCHAR2(60 CHAR);
+		alter table ndfl_person add SEARCH_MIDDLE_NAME VARCHAR2(60 CHAR);
+		alter table ndfl_person add SEARCH_INN VARCHAR2(12 CHAR);
+		alter table ndfl_person add SEARCH_INN_FOREIGN VARCHAR2(50 CHAR);
+		alter table ndfl_person add SEARCH_SNILS VARCHAR2(14 CHAR);
+
+		update ndfl_person set search_doc_number=regexp_replace(id_doc_number,'[^0-9A-Za-zА-Яа-я]','');
+		update ndfl_person set search_LAST_NAME = replace(nvl(last_name,'empty'),' ',''),
+		search_FIRST_NAME = replace(nvl(FIRST_name,'empty'),' ',''),
+		search_MIDDLE_NAME = replace(nvl(MIDDLE_name,'empty'),' ',''),
+                search_INN = replace(nvl(inn_np,'empty'),' ',''),
+		search_INN_FOREIGN = replace(nvl(inn_foreign,'empty'),' ',''),
+		search_SNILS = replace(replace(nvl(snils,'empty'),' ',''),'-',''); 
+	</sql>
+    </changeSet>
+
+    <changeSet id="3.9.2.3-skononova-11" author="skononova" >
+        <sqlFile dbms="oracle"
+                 encoding="utf8"
+                 endDelimiter=""
+                 path="/scripts/NDFL_PERSON_BEFORE_INS_UPD.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
+    <changeSet id="3.9.2.3-skononova-12" author="skononova" >
+	<sql>
+		create index idx_ndfl_person_search_snils on ndfl_person 
+			(declaration_data_id, person_id, id, search_snils) 
+		PCTFREE 50 INITRANS 50 COMPUTE STATISTICS; 
+
+		create index idx_ndfl_person_search_fio on ndfl_person 
+			(declaration_data_id asc, person_id asc, id, search_last_name asc, 
+			search_first_name asc, search_middle_name asc, birth_day asc) 
+		PCTFREE 50 INITRANS 50 COMPUTE STATISTICS;
+
+		create index idx_ndfl_person_search_doc on ndfl_person 
+			(declaration_data_id asc, person_id asc, id, search_doc_number asc) 
+		PCTFREE 50 INITRANS 50 COMPUTE STATISTICS;
+
+		create index idx_ndfl_person_search_inn on ndfl_person 
+			(declaration_data_id asc, person_id asc, id, search_inn asc) 
+		PCTFREE 50 INITRANS 50 COMPUTE STATISTICS;
+
+		create index idx_ndfl_person_search_innf on ndfl_person 
+			(declaration_data_id asc, person_id asc, id, search_inn_foreign asc) 
+		PCTFREE 50 INITRANS 50 COMPUTE STATISTICS;
+ 
+	</sql>
+    </changeSet>
+    <changeSet id="3.9.2.3-skononova-13" author="skononova" >
+        <sqlFile dbms="oracle"
+                 encoding="utf8"
+                 endDelimiter=""
+                 path="/scripts/person_pkg_body20.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
+
+    <changeSet id="3.9.2.3-skononova-14" author="skononova" >
+    <sql>	
+	drop index IDX_REF_BOOK_PERSON_SRCH_SNILS;
+	create index IDX_REF_BOOK_PERSON_SRCH_SNILS on ref_book_person (search_snils asc, start_date asc, end_date asc, id asc, record_id asc);
+    </sql>
+    </changeSet>
+
+    <changeSet id="3.9.2.3-skononova-15" author="skononova" >
+    <sql>	
+	drop index IDX_REF_BOOK_PERSON_SRCH_SNILS;
+	create index IDX_REF_BOOK_PERSON_SRCH_SNIL1 on ref_book_person (search_snils asc, start_date asc, end_date asc, id asc, record_id asc);
+	create index IDX_REF_BOOK_PERSON_SRCH_SNILS on ref_book_person (search_snils asc);
+    </sql>
+    </changeSet>
+
+    <changeSet id="3.9.2.3-skononova-16" author="skononova" >
+        <sqlFile dbms="oracle"
+                 encoding="utf8"
+                 endDelimiter=""
+                 path="/scripts/person_pkg_body21.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
+
+    <changeSet id="3.9.2.3-skononova-17" author="skononova" >
+    <sql>	
+		DROP INDEX SRCH_REFB_TAX_PAYER_INP_ASNU;
+		CREATE INDEX SRCH_REFB_TAX_PAYER_INP_ASNU ON REF_BOOK_ID_TAX_PAYER (INP, AS_NU );
+    </sql>
+    </changeSet>
+
+	<changeSet id="3.9.2.3-adudenko-3" author="adudenko" runAlways="true">
+		<update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+			<column name="script" valueClobFile="templates-3.9.2.3/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl_calculate.groovy"/>
+			<where>DECLARATION_TEMPLATE_ID = 101 and EVENT_ID = 3</where>
+		</update>
+	</changeSet>
+
+</databaseChangeLog>

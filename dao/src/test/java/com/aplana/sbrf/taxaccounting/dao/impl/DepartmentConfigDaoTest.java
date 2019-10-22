@@ -1,19 +1,9 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DepartmentConfigDao;
-import com.aplana.sbrf.taxaccounting.model.DeclarationData;
-import com.aplana.sbrf.taxaccounting.model.KppOktmoPair;
-import com.aplana.sbrf.taxaccounting.model.KppOktmoPairFilter;
-import com.aplana.sbrf.taxaccounting.model.KppSelect;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.ReportFormCreationKppOktmoPair;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.action.DepartmentConfigsFilter;
-import com.aplana.sbrf.taxaccounting.model.refbook.DepartmentConfig;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDepartment;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookOktmo;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookPresentPlace;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookSignatoryMark;
+import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import org.hamcrest.Matchers;
 import org.joda.time.LocalDate;
@@ -24,13 +14,9 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import java.util.Date;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.Matchers.*;
@@ -60,13 +46,13 @@ public class DepartmentConfigDaoTest {
         List<DepartmentConfig> departmentConfigs = departmentConfigDao.findPageByFilter(DepartmentConfigsFilter.builder()
                         .departmentId(2).build(),
                 PagingParams.getInstance(1, 10, "kpp", "desc"));
-        assertThat(departmentConfigs, hasSize(9));
+        assertThat(departmentConfigs, hasSize(10));
 
         Set<String> kpps = new LinkedHashSet<>();
         for (DepartmentConfig departmentConfig : departmentConfigs) {
             kpps.add(departmentConfig.getKpp());
         }
-        assertThat(kpps, contains("000000006", "000000005", "000000004", "000000003", "000000002", "000000001"));
+        assertThat(kpps, contains("000000007", "000000006", "000000005", "000000004", "000000003", "000000002", "000000001"));
     }
 
     @Test
@@ -85,21 +71,21 @@ public class DepartmentConfigDaoTest {
                         .departmentId(2).build(),
                 PagingParams.getInstance(2, 4));
         assertThat(departmentConfigPage, hasSize(4));
-        assertThat(departmentConfigPage.getTotalCount(), equalTo(9));
+        assertThat(departmentConfigPage.getTotalCount(), equalTo(10));
     }
 
     @Test
     public void findAllByFilterTest4() {
         List<DepartmentConfig> departmentConfigs = departmentConfigDao.findPageByFilter(DepartmentConfigsFilter.builder().build(),
                 PagingParams.getInstance(1, 100));
-        assertThat(departmentConfigs, hasSize(13));
+        assertThat(departmentConfigs, hasSize(14));
     }
 
     @Test
     public void countByFilterTest() {
         int count = departmentConfigDao.countByFilter(DepartmentConfigsFilter.builder()
                 .departmentId(2).build());
-        assertThat(count, equalTo(9));
+        assertThat(count, equalTo(10));
     }
 
     @Test
@@ -127,7 +113,7 @@ public class DepartmentConfigDaoTest {
     @Test
     public void findAllKppByFilterTest() {
         PagingResult<KppSelect> kppSelectList = departmentConfigDao.findAllKppByDepartmentIdAndKppContaining(2, null, PagingParams.getInstance(1, 10));
-        assertThat(kppSelectList.size(), is(6));
+        assertThat(kppSelectList.size(), is(7));
 
         kppSelectList = departmentConfigDao.findAllKppByDepartmentIdAndKppContaining(2, null, PagingParams.getInstance(2, 2));
         assertThat(kppSelectList.size(), is(2));
@@ -143,10 +129,10 @@ public class DepartmentConfigDaoTest {
         assertThat(results.size(), is(6));
         for (Pair<KppOktmoPair, DepartmentConfig> result : results) {
             String kpp = result.getFirst() != null ? result.getFirst().getKpp() : result.getSecond().getKpp();
-            if (asList("000000001", "000000006").contains(kpp)) {
+            if (Objects.equals("000000001", kpp)) {
                 assertThat(result.getFirst(), is(notNullValue()));
                 assertThat(result.getSecond(), is(nullValue()));
-            } else if (singletonList("000000005").contains(kpp)) {
+            } else if (Objects.equals("000000005", kpp)) {
                 assertThat(result.getFirst(), is(nullValue()));
                 assertThat(result.getSecond(), is(notNullValue()));
             } else {
@@ -179,7 +165,7 @@ public class DepartmentConfigDaoTest {
     @Test
     public void findAllKppOktmoPairsByPnf() {
         assertThat(departmentConfigDao.findAllKppOktmoPairsByFilter(new KppOktmoPairFilter()
-                .reportPeriodId(2).departmentId(2).relevanceDate(newDate(1, 1, 2018)), null), hasSize(4));
+                .reportPeriodId(2).departmentId(2).relevanceDate(newDate(1, 1, 2018)), null), hasSize(5));
     }
 
     @Test
@@ -190,27 +176,34 @@ public class DepartmentConfigDaoTest {
 
     @Test
     public void findAllKppOktmoPairsByFilterTest() {
-        List<ReportFormCreationKppOktmoPair> kppOktmoPairs = departmentConfigDao.findAllKppOktmoPairsByFilter(new KppOktmoPairFilter()
-                        .reportPeriodId(2).departmentId(2).relevanceDate(newDate(1, 1, 2018)),
-                PagingParams.getInstance(1, 10));
+        KppOktmoPairFilter filter = new KppOktmoPairFilter()
+                .reportPeriodId(2).departmentId(2).relevanceDate(newDate(1, 1, 2018));
+        List<ReportFormCreationKppOktmoPair> kppOktmoPairs = departmentConfigDao.findAllKppOktmoPairsByFilter(
+                filter,
+                PagingParams.getInstance(1, 10)
+        );
         assertThat(kppOktmoPairs, containsInAnyOrder(
                 new ReportFormCreationKppOktmoPair("000000002", "111", "действует до 31.12.2017"),
                 new ReportFormCreationKppOktmoPair("000000003", "111", null),
                 new ReportFormCreationKppOktmoPair("000000004", "111", null),
-                new ReportFormCreationKppOktmoPair("000000005", "111", null)));
+                new ReportFormCreationKppOktmoPair("000000005", "111", null),
+                new ReportFormCreationKppOktmoPair("000000006", "111", "действует до 31.12.2017")));
     }
 
     @Test
     public void findAllKppOktmoPairsByFilterTest2() {
-        List<ReportFormCreationKppOktmoPair> kppOktmoPairs = departmentConfigDao.findAllKppOktmoPairsByFilter(new KppOktmoPairFilter()
-                        .declarationId(1L).reportPeriodId(2).departmentId(2).relevanceDate(newDate(1, 1, 2018)),
-                PagingParams.getInstance(1, 10));
+        KppOktmoPairFilter filter = new KppOktmoPairFilter()
+                .declarationId(1L).reportPeriodId(2).departmentId(2).relevanceDate(newDate(1, 1, 2018));
+        List<ReportFormCreationKppOktmoPair> kppOktmoPairs = departmentConfigDao.findAllKppOktmoPairsByFilter(
+                filter,
+                PagingParams.getInstance(1, 10)
+        );
         assertThat(kppOktmoPairs, containsInAnyOrder(
                 new ReportFormCreationKppOktmoPair("000000001", "111", "не относится к ТБ в периоде"),
                 new ReportFormCreationKppOktmoPair("000000002", "111", "действует до 31.12.2017"),
                 new ReportFormCreationKppOktmoPair("000000003", "111", null),
                 new ReportFormCreationKppOktmoPair("000000004", "111", null),
-                new ReportFormCreationKppOktmoPair("000000006", "111", "не относится к ТБ в периоде")));
+                new ReportFormCreationKppOktmoPair("000000006", "111", "действует до 31.12.2017")));
     }
 
     @Test
@@ -228,15 +221,29 @@ public class DepartmentConfigDaoTest {
 
     @Test
     public void findAllKppOktmoPairsByFilterTestPaging() {
-        PagingParams paging = PagingParams.getInstance(2, 2);
-        paging.setProperty("kpp desc, oktmo");
-        paging.setDirection("desc");
-        List<ReportFormCreationKppOktmoPair> kppOktmoPairs = departmentConfigDao.findAllKppOktmoPairsByFilter(new KppOktmoPairFilter()
+        PagingParams paging3 = PagingParams.getInstance(3, 2);
+        paging3.setProperty("kpp desc, oktmo");
+        paging3.setDirection("desc");
+
+        PagingParams paging2 = PagingParams.getInstance(2, 2);
+        paging2.setProperty("kpp desc, oktmo");
+        paging2.setDirection("desc");
+
+        List<ReportFormCreationKppOktmoPair> kppOktmoPairsPage3 = departmentConfigDao.findAllKppOktmoPairsByFilter(new KppOktmoPairFilter()
                         .name("000").reportPeriodId(2).departmentId(2).relevanceDate(newDate(1, 1, 2018)),
-                paging);
-        assertThat(kppOktmoPairs, contains(
-                new ReportFormCreationKppOktmoPair("000000003", "111", null),
+                paging3);
+
+        List<ReportFormCreationKppOktmoPair> kppOktmoPairsPage2 = departmentConfigDao.findAllKppOktmoPairsByFilter(new KppOktmoPairFilter()
+                        .name("000").reportPeriodId(2).departmentId(2).relevanceDate(newDate(1, 1, 2018)),
+                paging2);
+
+        assertThat(kppOktmoPairsPage3, contains(
                 new ReportFormCreationKppOktmoPair("000000002", "111", "действует до 31.12.2017")));
+
+        assertThat(kppOktmoPairsPage2, contains(
+                new ReportFormCreationKppOktmoPair("000000004", "111", null),
+                new ReportFormCreationKppOktmoPair("000000003", "111", null)));
+
     }
 
     @Test
