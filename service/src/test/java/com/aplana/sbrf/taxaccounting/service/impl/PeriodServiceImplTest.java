@@ -266,6 +266,7 @@ public class PeriodServiceImplTest {
 
     @Test
     public void closeHasBlockedForms() {
+        LockDataServiceImpl lockDataServiceImpl = new LockDataServiceImpl();
         DepartmentReportPeriod departmentReportPeriod = getTestDataForDepartmentReportPeriod(true);
         when(departmentReportPeriodService.fetchOne(123)).thenReturn(departmentReportPeriod);
         DeclarationData declarationData = new DeclarationData();
@@ -274,6 +275,11 @@ public class PeriodServiceImplTest {
         declarationData.setDepartmentId(1);
         when(declarationDataSearchService.getDeclarationData(any(DeclarationDataFilter.class), any(DeclarationDataSearchOrdering.class), anyBoolean()))
                 .thenReturn(singletonList(declarationData));
+        LockDataDTO lockDataItem = new LockDataDTO();
+        String lockKey = "DECLARATION_DATA_1";
+        lockDataItem.setKey(lockKey);
+        when(lockDataService.fetchAllByKeyPrefixSet(anySetOf(String.class))).thenReturn(singletonList(lockDataItem));
+        when(lockDataService.getDeclarationIdByLockKey(lockKey)).thenReturn(lockDataServiceImpl.getDeclarationIdByLockKey(lockKey));
 
         ClosePeriodResult result = periodService.close(123, false);
         verify(departmentReportPeriodService, never()).updateActive(anyListOf(Integer.class), anyInt(), anyBoolean());
