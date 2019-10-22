@@ -124,7 +124,7 @@ public class PeriodServiceImplTest {
         verify(departmentReportPeriodService, times(1)).create(any(DepartmentReportPeriod.class), eq(asList(1, 2, 3)));
         verify(logEntryService, times(1)).save(logEntriesArgumentCaptor.capture());
         assertEquals(1, logEntriesArgumentCaptor.getValue().size());
-        assertEquals("Период \"2018: reportPeriodName: 6-НДФЛ\" открыт для \"dep1Name\" и всех дочерних подразделений", logEntriesArgumentCaptor.getValue().get(0).getMessage());
+        assertEquals("Период \"2018: reportPeriodName: 6-НДФЛ\" открыт для подразделения \"dep1Name\" и всех дочерних подразделений", logEntriesArgumentCaptor.getValue().get(0).getMessage());
     }
 
     @Test
@@ -177,7 +177,7 @@ public class PeriodServiceImplTest {
         verify(logEntryService, times(1)).save(logEntriesArgumentCaptor.capture());
         assertEquals(1, logEntriesArgumentCaptor.getValue().size());
         assertEquals("Корректирующий период \"2018: reportPeriodName: 6-НДФЛ\" с периодом сдачи корректировки " +
-                "01.01.2018 открыт для \"dep1Name\" и всех дочерних подразделений", logEntriesArgumentCaptor.getValue().get(0).getMessage());
+                "01.01.2018 открыт для подразделения \"dep1Name\" и всех дочерних подразделений", logEntriesArgumentCaptor.getValue().get(0).getMessage());
     }
 
     @Test
