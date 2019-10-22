@@ -31,13 +31,13 @@ begin
 	select count(1) into :v_cnt from version_history where status='OK' and version='03.009.02.03';
 	if :v_cnt = 0 then
 		dbms_output.put_line('Error: 03.009.02.03 not installed. Check log-files.');
---		raise_application_error(-20999,'Error: 03.009.02.03 not installed. Check log-files.');
+		raise_application_error(-20999,'Error: 03.009.02.03 not installed. Check log-files.');
 	end if;
 
   	select count(1) into :v_cnt from version_history where status='OK' and version='03.009.02.04';
 	if :v_cnt > 0 then
 		dbms_output.put_line('Version 03.009.02.04 already installed.');
---		raise_application_error(-20999,'Version 03.009.02 already installed.');
+		raise_application_error(-20999,'Version 03.009.04 already installed.');
 	end if; 
 end;
 /  
