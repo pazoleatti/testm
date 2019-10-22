@@ -419,10 +419,10 @@
                                             <output>${webappDirectory}/client/app.js</output>
                                             <inputDir>${basedir}/src/main/webapp/client/app</inputDir>
                                             <includes>
-                                                <include>/main/app.js</include>
+                                                <include>main/app.js</include>
                                                 <!-- объявление модуля должно предварять создаваемые в нём функции -->
-                                                <include>/administration/transportMessage/transportMessageModule.js</include>
-                                                <include>/refbooks/refBookInterceptors.js</include>
+                                                <include>administration/transportMessage/transportMessageModule.js</include>
+                                                <include>refbooks/refBookInterceptors.js</include>
                                                 <include>**/*.js</include>
                                             </includes>
                                         </aggregation>
@@ -441,36 +441,36 @@
                                             <output>${webappDirectory}/client/vendor.js</output>
                                             <inputDir>${basedir}/src/main/webapp/client/lib</inputDir>
                                             <includes>
-                                                <include>/jquery.min.js</include>
-                                                <include>/jquery-ui-1.12.1.min.js</include>
-                                                <include>/angular-1.4.7.min.js</include>
-                                                <include>/angular-locale_ru-ru.js</include>
-                                                <include>/angular-translate-2.15.1.min.js</include>
-                                                <include>/angular-translate-loader-url-2.15.1.min.js</include>
-                                                <include>/angular-sanitize-1.5.9.min.js</include>
-                                                <include>/angular-ui-router-1.0.3.min.js</include>
-                                                <include>/angular-strap.min.js</include>
-                                                <include>/angular-strap.tpl.min.js</include>
-                                                <include>/bootstrap.min.js</include>
-                                                <include>/bootstrap-tooltip-extension.min.js</include>
-                                                <include>/angular-messages-1.5.9.min.js</include>
-                                                <include>/angular-animate-1.5.9.min.js</include>
-                                                <include>/angular-file-upload-2.5.0.min.js</include>
-                                                <include>/moment-2.18.1.min.js</include>
-                                                <include>/moment-locale-ru.js</include>
-                                                <include>/underscore-1.8.3.min.js</include>
-                                                <include>/grid.locale-ru.js</include>
-                                                <include>/jquery.jqGrid-5.2.1.min.js</include>
-                                                <include>/select2-3.4.5.min.js</include>
-                                                <include>/he.js</include>
-                                                <include>/re-tree.js</include>
-                                                <include>/ng-device-detector.min.js</include>
-                                                <include>/angular-translate-once.min.js</include>
-                                                <include>/angular-resource-1.4.7.min.js</include>
-                                                <include>/date.format.min.js</include>
-                                                <include>/date-parser.min.js</include>
-                                                <include>/codemirror-5.39.0.min.js</include>
-                                                <include>/groovy.min.js</include>
+                                                <include>jquery.min.js</include>
+                                                <include>jquery-ui-1.12.1.min.js</include>
+                                                <include>angular-1.4.7.min.js</include>
+                                                <include>angular-locale_ru-ru.js</include>
+                                                <include>angular-translate-2.15.1.min.js</include>
+                                                <include>angular-translate-loader-url-2.15.1.min.js</include>
+                                                <include>angular-sanitize-1.5.9.min.js</include>
+                                                <include>angular-ui-router-1.0.3.min.js</include>
+                                                <include>angular-strap.min.js</include>
+                                                <include>angular-strap.tpl.min.js</include>
+                                                <include>bootstrap.min.js</include>
+                                                <include>bootstrap-tooltip-extension.min.js</include>
+                                                <include>angular-messages-1.5.9.min.js</include>
+                                                <include>angular-animate-1.5.9.min.js</include>
+                                                <include>angular-file-upload-2.5.0.min.js</include>
+                                                <include>moment-2.18.1.min.js</include>
+                                                <include>moment-locale-ru.js</include>
+                                                <include>underscore-1.8.3.min.js</include>
+                                                <include>grid.locale-ru.js</include>
+                                                <include>jquery.jqGrid-5.2.1.min.js</include>
+                                                <include>select2-3.4.5.min.js</include>
+                                                <include>he.js</include>
+                                                <include>re-tree.js</include>
+                                                <include>ng-device-detector.min.js</include>
+                                                <include>angular-translate-once.min.js</include>
+                                                <include>angular-resource-1.4.7.min.js</include>
+                                                <include>date.format.min.js</include>
+                                                <include>date-parser.min.js</include>
+                                                <include>codemirror-5.39.0.min.js</include>
+                                                <include>groovy.min.js</include>
                                             </includes>
                                         </aggregation>
                                         <!--CSS-APP-->
@@ -479,10 +479,10 @@
                                             <output>${webappDirectory}/client/app-styles.css</output>
                                             <inputDir>${webappDirectory}/client</inputDir>
                                             <includes>
-                                                <include>/css/style.css</include>
-                                                <include>/components/grid/ui.jqgrid.css</include>
-                                                <include>/components/grid/app-ui.jqgrid.css</include>
-                                                <include>/components/treeview/treeview.css</include>
+                                                <include>css/style.css</include>
+                                                <include>components/grid/ui.jqgrid.css</include>
+                                                <include>components/grid/app-ui.jqgrid.css</include>
+                                                <include>components/treeview/treeview.css</include>
                                             </includes>
                                         </aggregation>
                                         <!--CSS-VENDOR-->
@@ -501,18 +501,18 @@
                                             <output>${webappDirectory}/client/components-styles.css</output>
                                             <inputDir>${webappDirectory}/client/components</inputDir>
                                             <includes>
-                                                <include>/collapse/accordion.css</include>
-                                                <include>/splitter/splitter.css</include>
-                                                <include>/uiSelect2/select2.css</include>
-                                                <include>/uiSelect2/app-select2.css</include>
-                                                <include>/tooltip/ndflTooltip.css</include>
-                                                <include>/datePicker/datepicker.css</include>
-                                                <include>/link/link.css</include>
-                                                <include>/alert/alert.css</include>
-                                                <include>/outerWidth/outerwidth.css</include>
-                                                <include>/datetimepicker/datetimepicker.css</include>
-                                                <include>/popover/popover.css</include>
-                                                <include>/tabs/tabs.css</include>
+                                                <include>collapse/accordion.css</include>
+                                                <include>splitter/splitter.css</include>
+                                                <include>uiSelect2/select2.css</include>
+                                                <include>uiSelect2/app-select2.css</include>
+                                                <include>tooltip/ndflTooltip.css</include>
+                                                <include>datePicker/datepicker.css</include>
+                                                <include>link/link.css</include>
+                                                <include>alert/alert.css</include>
+                                                <include>outerWidth/outerwidth.css</include>
+                                                <include>datetimepicker/datetimepicker.css</include>
+                                                <include>popover/popover.css</include>
+                                                <include>tabs/tabs.css</include>
                                             </includes>
                                         </aggregation>
                                     </aggregations>
