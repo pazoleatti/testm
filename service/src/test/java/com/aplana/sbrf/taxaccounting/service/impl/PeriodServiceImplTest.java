@@ -292,7 +292,7 @@ public class PeriodServiceImplTest {
                 .thenReturn(new ArrayList<DeclarationData>(), singletonList(declarationData), new ArrayList<DeclarationData>());
         LockDataDTO lockDataItem = new LockDataDTO();
         lockDataItem.setKey("DECLARATION_DATA_1");
-        when(lockDataService.fetchAllByKeySet(anySetOf(String.class))).thenReturn(singletonList(lockDataItem));
+        when(lockDataService.fetchAllByKeyPrefixSet(anySetOf(String.class))).thenReturn(singletonList(lockDataItem));
 
         ClosePeriodResult result = periodService.close(123, false);
         verify(departmentReportPeriodService, never()).updateActive(anyListOf(Integer.class), anyInt(), anyBoolean());

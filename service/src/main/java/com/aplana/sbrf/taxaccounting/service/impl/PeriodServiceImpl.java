@@ -384,11 +384,19 @@ public class PeriodServiceImpl implements PeriodService {
         List<LockDataDTO> lockDataItems = new ArrayList<>();
 
         if (keysBlocker.size() > 0) {
-            lockDataItems = lockDataService.fetchAllByKeySet(keysBlocker.keySet());
+            lockDataItems = lockDataService.fetchAllByKeyPrefixSet(keysBlocker.keySet());
         }
 
         for (LockDataDTO lockDataItem : lockDataItems) {
-            DeclarationData dd = keysBlocker.get(lockDataItem.getKey());
+            long declarationId = lockDataService.getDeclarationIdByLockKey(lockDataItem.getKey());
+            DeclarationData dd = null;
+            for (DeclarationData declarationData : declarations) {
+                if (declarationData.getId() == declarationId) {
+                    dd = declarationData;
+                    break;
+                }
+            }
+
             DeclarationTemplate template = declarationTemplateService.get(dd.getDeclarationTemplateId());
             logger.error("Форма \"%s\" № %s, Подразделении: \"%s\", Период: \"%s\" заблокирована.",
                     template.getType().getName(), dd.getId(), departmentService.getDepartment(dd.getDepartmentId()).getName(),
