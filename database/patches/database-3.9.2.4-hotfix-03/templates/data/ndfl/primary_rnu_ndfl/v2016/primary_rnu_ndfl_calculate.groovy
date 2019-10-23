@@ -28,11 +28,13 @@ import groovy.transform.TypeCheckingMode
 import org.apache.commons.collections4.CollectionUtils
 import org.apache.commons.lang3.exception.ExceptionUtils
 import org.springframework.dao.DeadlockLoserDataAccessException
+import org.springframework.jdbc.core.BatchPreparedStatementSetter
 import org.springframework.jdbc.core.RowCallbackHandler
 import org.springframework.jdbc.core.RowMapper
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 
+import java.sql.PreparedStatement
 import java.sql.ResultSet
 import java.sql.SQLException
 
@@ -281,12 +283,14 @@ class Calculate extends AbstractScriptClass {
                         if (snilsSearchResult) {
 
                             time = System.currentTimeMillis()
-                            List<NaturalPerson> snilsNaturalPersonList = namedParameterJdbcTemplate.query(getPersonSqlQuery(snilsSearchResult.values().flatten() as List), new MapSqlParameterSource(), new NaturalPersonScriptRowMapper())
+                            insertIntoTmpNumbers(snilsSearchResult.values().flatten() as Set)
+                            List<NaturalPerson> snilsNaturalPersonList = namedParameterJdbcTemplate.query(getPersonSqlQuery(), new MapSqlParameterSource(), new NaturalPersonScriptRowMapper())
                             addDocumentsInpTbToPerson(snilsNaturalPersonList)
                             logForDebug("Получение ФЛ по СНИЛС (" + snilsNaturalPersonList.size() + " записей, " + ScriptUtils.calcTimeMillis(time))
                             println "Identification #=${declarationData.id} Получение ФЛ по СНИЛС (\" ${snilsNaturalPersonList.size()}\" записей,  ${ScriptUtils.calcTimeMillis(time)}"
-
+                            time = System.currentTimeMillis()
                             Map<Long, Map<Long, NaturalPerson>> snilsSimilarityPersonMap = createSimilarityPersonMap(snilsSearchResult, snilsNaturalPersonList)
+                            println "Identification #=${declarationData.id} snilsSimilarityPersonMap,  ${ScriptUtils.calcTimeMillis(time)}"
 
                             updateNaturalPersonRefBookRecords(primaryPersonMap, snilsSimilarityPersonMap)
                         }
@@ -302,7 +306,8 @@ class Calculate extends AbstractScriptClass {
                             println "Identification #=${declarationData.id} Выборка по ИНП (\" ${inpSearchResult.size()}\" записей,  ${ScriptUtils.calcTimeMillis(time)}"
                             if (inpSearchResult) {
                                 time = System.currentTimeMillis()
-                                List<NaturalPerson> inpNaturalPersonList = namedParameterJdbcTemplate.query(getPersonSqlQuery(inpSearchResult.values().flatten() as List), new MapSqlParameterSource(), new NaturalPersonScriptRowMapper())
+                                insertIntoTmpNumbers(inpSearchResult.values().flatten() as Set)
+                                List<NaturalPerson> inpNaturalPersonList = namedParameterJdbcTemplate.query(getPersonSqlQuery(), new MapSqlParameterSource(), new NaturalPersonScriptRowMapper())
                                 addDocumentsInpTbToPerson(inpNaturalPersonList)
                                 //noinspection GroovyAssignabilityCheck
                                 logForDebug("Получение ФЛ по ИНП (" + inpNaturalPersonList.size() + " записей, " + ScriptUtils.calcTimeMillis(time))
@@ -323,7 +328,8 @@ class Calculate extends AbstractScriptClass {
 
                                 if (fioSearchResult) {
                                     time = System.currentTimeMillis()
-                                    List<NaturalPerson> fioNaturalPersonList = namedParameterJdbcTemplate.query(getPersonSqlQuery(fioSearchResult.values().flatten() as List), new MapSqlParameterSource(), new NaturalPersonScriptRowMapper())
+                                    insertIntoTmpNumbers(fioSearchResult.values().flatten() as Set)
+                                    List<NaturalPerson> fioNaturalPersonList = namedParameterJdbcTemplate.query(getPersonSqlQuery(), new MapSqlParameterSource(), new NaturalPersonScriptRowMapper())
                                     addDocumentsInpTbToPerson(fioNaturalPersonList)
                                     logForDebug("Получение ФЛ по ФИО (" + fioSearchResult.size() + " записей, " + ScriptUtils.calcTimeMillis(time))
                                     println "Identification #=${declarationData.id} Получение ФЛ по ФИО (\" ${fioSearchResult.size()}\" записей,  ${ScriptUtils.calcTimeMillis(time)}"
@@ -346,7 +352,8 @@ class Calculate extends AbstractScriptClass {
 
                                     if (innSearchResult) {
                                         time = System.currentTimeMillis()
-                                        List<NaturalPerson> innNaturalPersonList = namedParameterJdbcTemplate.query(getPersonSqlQuery(innSearchResult.values().flatten() as List), new MapSqlParameterSource(), new NaturalPersonScriptRowMapper())
+                                        insertIntoTmpNumbers(innSearchResult.values().flatten() as Set)
+                                        List<NaturalPerson> innNaturalPersonList = namedParameterJdbcTemplate.query(getPersonSqlQuery(), new MapSqlParameterSource(), new NaturalPersonScriptRowMapper())
                                         addDocumentsInpTbToPerson(innNaturalPersonList)
                                         Map<Long, Map<Long, NaturalPerson>> innSimilarityPersonMap = createSimilarityPersonMap(innSearchResult, innNaturalPersonList)
                                         logForDebug("Получение ФЛ по ИНН (" + innNaturalPersonList.size() + " записей, " + ScriptUtils.calcTimeMillis(time))
@@ -383,7 +390,8 @@ class Calculate extends AbstractScriptClass {
 
                                             if (dulSearchResult) {
                                                 time = System.currentTimeMillis()
-                                                List<NaturalPerson> dulNaturalPersonList = namedParameterJdbcTemplate.query(getPersonSqlQuery(dulSearchResult.values().flatten() as List), new MapSqlParameterSource(), new NaturalPersonScriptRowMapper())
+                                                insertIntoTmpNumbers(dulSearchResult.values().flatten() as Set)
+                                                List<NaturalPerson> dulNaturalPersonList = namedParameterJdbcTemplate.query(getPersonSqlQuery(), new MapSqlParameterSource(), new NaturalPersonScriptRowMapper())
                                                 addDocumentsInpTbToPerson(dulNaturalPersonList)
                                                 Map<Long, Map<Long, NaturalPerson>> dulSimilarityPersonMap = createSimilarityPersonMap(dulSearchResult, dulNaturalPersonList)
                                                 logForDebug("Получение ФЛ по ДУЛ (" + dulNaturalPersonList.size() + " записей, " + ScriptUtils.calcTimeMillis(time))
@@ -577,7 +585,7 @@ class Calculate extends AbstractScriptClass {
         }
     }
 
-    static String getPersonSqlQuery(List<Long> values) {
+    static String getPersonSqlQuery() {
         return "select person3.id as ref_book_person_id,\n" +
                 "             person3.record_id as person_record_id,\n" +
                 "             person3.last_name,\n" +
@@ -608,8 +616,25 @@ class Calculate extends AbstractScriptClass {
                 "             person3.address_foreign,\n" +
                 "             person3.start_date,\n" +
                 "             person3.end_date\n" +
-                "from ref_book_person person3 " +
-                "where ${SqlUtils.transformToSqlInStatementViaTmpTable("person3.id", values)}"
+                "from tmp_numbers0 t join ref_book_person rbp on  t.num = rbp.id join ref_book_person person3 on\n" +
+                "    person3.record_id = rbp.record_id \n" +
+                "    where  person3.start_date <= sysdate and ( (person3.end_date is null) or (person3.end_date >= sysdate) ) and person3.record_id = person3.old_id"
+    }
+
+    void insertIntoTmpNumbers(Collection<Long> collection) {
+        getNamedParameterJdbcTemplate().getJdbcOperations().update("delete from tmp_numbers0");
+        final Iterator<? extends Number> iterator = collection.iterator();
+        getNamedParameterJdbcTemplate().getJdbcOperations().batchUpdate("insert into tmp_numbers0 (num) VALUES(?)", new BatchPreparedStatementSetter() {
+            @Override
+            public void setValues(PreparedStatement ps, int i) throws SQLException {
+                ps.setLong(1, iterator.next().longValue());
+            }
+
+            @Override
+            public int getBatchSize() {
+                return collection.size();
+            }
+        });
     }
 
     static String getIdDocsQuery(List<Long> personRecordIdList) {
