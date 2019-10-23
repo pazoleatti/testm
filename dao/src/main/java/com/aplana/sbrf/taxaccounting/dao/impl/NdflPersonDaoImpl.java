@@ -2414,7 +2414,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                 "with kpp_oktmo as (\n" +
                 DepartmentConfigDaoImp.ACTUAL_KPP_OKTMO_SELECT_WITH_PERIOD +
                 ")\n" +
-                "select /*+ use_hash(cd npi)*/ distinct " + createColumns(NdflPersonIncome.COLUMNS, "npi") + ", dd.id as dd_id, dd.asnu_id, dd.state, np.inp, tp.year, rpt.code as period_code, drp.correction_date, rba.NAME as asnu_name " +
+                "select distinct " + createColumns(NdflPersonIncome.COLUMNS, "npi") + ", dd.id as dd_id, dd.asnu_id, dd.state, np.inp, tp.year, rpt.code as period_code, drp.correction_date, rba.NAME as asnu_name " +
                 "from tmp_cons_data cd \n" +
                 "join ndfl_person_income npi on npi.operation_id = cd.operation_id\n" +
                 "join kpp_oktmo on kpp_oktmo.kpp = npi.kpp and kpp_oktmo.oktmo = npi.oktmo\n" +
