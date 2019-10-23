@@ -1332,7 +1332,7 @@ class Import extends AbstractScriptClass {
             ndflPersonService.deleteNdflPersonPrepayment(prepaymentsIdsForRemove)
         }
     }
-    
+
     /**
      * Создает сообщение о добавлении даннных
      * @param ndflPerson объект физлица
