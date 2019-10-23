@@ -552,7 +552,7 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
                 logError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, ACTIVE_ERROR, logger);
                 return false;
             }
-            if (!(targetDomainObject.getState().equals(State.CREATED) || targetDomainObject.getState().equals(State.PREPARED))) {
+            if (!(targetDomainObject.getState().equals(State.CREATED))) {
                 logError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, String.format(STATE_ERROR, OPERATION_NAME, targetDomainObject.getState().getTitle()), logger);
                 return false;
             }
