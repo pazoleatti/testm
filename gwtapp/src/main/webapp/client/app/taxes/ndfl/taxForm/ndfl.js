@@ -23,7 +23,8 @@
             'app.rnuNdflPersonFace',
             'app.rnuNdflPersonFaceMenu',
             'app.returnToCreatedDialog',
-            'app.createNdfl2_6DataReport'])
+            'app.createNdfl2_6DataReport',
+            'app.createExcelTemplateModal'])
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('ndfl', {
                 url: '/taxes/ndfl/{declarationDataId}?uuid',
@@ -873,12 +874,17 @@
                  * Формирует запрос на создание шаблона Excel-файла для загрузки
                  */
                 $scope.createExcelTemplate = function () {
-                    $http({
-                        method: "POST",
-                        url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/excelTemplate"
-                    }).then(function (response) {
-                        if (response) {
-                            $logPanel.open('log-panel-container', response.data);
+                    $aplanaModal.open({
+                        title: $filter('translate')('ndfl.report.excelTemplate.modal.title'),
+                        templateUrl: 'client/app/taxes/ndfl/taxForm/createExcelTemplateModal.html',
+                        controller: 'createExcelTemplateModalCtrl',
+                        windowClass: 'modal450',
+                        resolve: {
+                            $shareData: function () {
+                                return {
+                                    selectedRow: $scope.ndflTabsCtrl
+                                };
+                            }
                         }
                     });
                 };

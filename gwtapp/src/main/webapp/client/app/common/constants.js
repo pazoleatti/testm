@@ -187,6 +187,10 @@
                 DEDUCTIONS: {id: 3, name: "Сведения о вычетах"},
                 PREPAYMENTS: {id: 4, name: "Сведения о доходах в виде авансовых платежей"}
             },
+            EXCEL_TEMPLATE_GENERATION_TYPE: {
+                ALL_DATA: {id: 1, name: "по всем данным"},
+                SELECTED_ON_PAGE: {id: 2, name: "по выбранным на странице"}
+            },
             SUBREPORT_ALIAS_CONSTANTS: {
                 RNU_NDFL_PERSON_DB: "rnu_ndfl_person_db", // РНУ НДФЛ по физическому лицу
                 RNU_NDFL_PERSON_ALL_DB: "rnu_ndfl_person_all_db", // РНУ НДФЛ по всем ФЛ

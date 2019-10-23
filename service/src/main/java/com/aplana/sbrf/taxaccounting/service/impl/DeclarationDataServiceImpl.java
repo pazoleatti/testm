@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataFileDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.TransportMessageDao;
+import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.ndfl.NdflPersonDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookPersonDao;
@@ -62,6 +63,7 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.time.FastDateFormat;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -132,6 +134,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     private static final String FAIL = "Не выполнена операция \"%s\" для %s.";
 
     private static final Date MAX_DATE;
+
+    private static final FastDateFormat sdf_time = FastDateFormat.getInstance("HH:mm:ss.SSS", TimeZone.getTimeZone("GMT+3"));
+
 
     static {
         Calendar calendar = Calendar.getInstance();
@@ -215,6 +220,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     private DeclarationService declarationService;
     @Autowired
     private PeriodService periodService;
+    @Autowired
+    private ConfigurationDao configurationDao;
 
     @Override
     public CreateResult<Long> create(TAUserInfo userInfo, CreateDeclarationDataAction action) {
@@ -2680,6 +2687,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
         Map<String, Object> params = new HashMap<>();
         params.put("declarationDataId", declarationDataId);
+        params.put("userIp", userInfo.getIp());
 
         asyncManager.createTask(OperationType.EXCEL_TEMPLATE_DEC, userInfo, params, logger);
 
@@ -2687,7 +2695,30 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    public String createExcelTemplate(DeclarationData declaration, TAUserInfo userInfo, Logger logger, LockStateLogger stateLogger) throws IOException {
+    public String createExcelTemplateBySelectedPersonList(long declarationDataId, TAUserInfo userInfo,
+                                                         ExcelTemplateSelectedRows selectedRows) throws IOException {
+        Logger logger = logEntryService.createLogger();
+        Configuration shotTimingConfiguration = configurationDao.fetchByEnum(ConfigurationParam.SHOW_TIMING);
+        boolean isShowTiming = "1".equals(shotTimingConfiguration.getValue());
+        Date startDate = Calendar.getInstance().getTime();
+        if (isShowTiming) {
+            logger.info("Начало выполнения операции %s", sdf_time.format(startDate));
+        }
+        DeclarationData declarationData = get(declarationDataId, userInfo);
+
+        String uuid = createExcelTemplate(declarationData, userInfo, logger, null, selectedRows);
+        if (isShowTiming) {
+            Date endDate = Calendar.getInstance().getTime();
+            logger.info("Длительность выполнения операции: %d мс (%s - %s)", (endDate.getTime() - startDate.getTime()), sdf_time.format(startDate), sdf_time.format(endDate));
+        }
+        logEntryService.save(logger);
+        sendNotifications("Сформирован шаблон ТФ (Excel)", logger.getLogId(), NotificationType.REF_BOOK_REPORT, uuid, userInfo.getUser().getId());
+        return logger.getLogId();
+    }
+
+    @Override
+    public String createExcelTemplate(DeclarationData declaration, TAUserInfo userInfo, Logger logger,
+                                      LockStateLogger stateLogger, ExcelTemplateSelectedRows selectedRows) throws IOException {
         LOG.info(String.format("DeclarationDataServiceImpl.createExcelTemplate by %s. declaration: %s",
                 userInfo, declaration));
         Map<String, Object> params = new HashMap<>();
@@ -2702,12 +2733,14 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             scriptSpecificReportHolder.setFileInputStream(inputStream);
             scriptSpecificReportHolder.setFileName("report.xlsx");
             params.put("scriptSpecificReportHolder", scriptSpecificReportHolder);
-            stateLogger.updateState(AsyncTaskState.FILLING_XLSX_REPORT);
+            params.put("excelTemplateSelectedRows", selectedRows);
+            if (stateLogger != null) stateLogger.updateState(AsyncTaskState.FILLING_XLSX_REPORT);
             declarationDataScriptingService.executeScript(userInfo, declaration, FormDataEvent.EXPORT_DECLARATION_DATA_TO_EXCEL, logger, params);
             if (logger.containsLevel(LogLevel.ERROR)) {
                 throw new ServiceLoggerException("Возникли ошибки при формировании отчета", logEntryService.save(logger.getEntries()));
             }
-            stateLogger.updateState(AsyncTaskState.SAVING_XLSX);
+            if (stateLogger != null) stateLogger.updateState(AsyncTaskState.SAVING_XLSX);
+            auditService.add(null, userInfo, declaration, "Выгрузка РНУ НДФЛ в файл xls для формы: №" + declaration.getId(), null);
             return blobDataService.create(reportFile.getPath(), scriptSpecificReportHolder.getFileName());
         } catch (IOException e) {
             throw new ServiceException(e.getLocalizedMessage(), e);
@@ -3331,5 +3364,20 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 department.getName(),
                 cause
         );
+    }
+
+    private void sendNotifications(String msg, String uuid, NotificationType notificationType, String reportId, Integer userId) {
+        if (msg != null && !msg.isEmpty()) {
+            List<Notification> notifications = new ArrayList<>();
+            Notification notification = new Notification();
+            notification.setUserId(userId);
+            notification.setCreateDate(new Date());
+            notification.setText(msg);
+            notification.setLogId(uuid);
+            notification.setReportId(reportId);
+            notification.setNotificationType(notificationType);
+            notifications.add(notification);
+            notificationService.create(notifications);
+        }
     }
 }

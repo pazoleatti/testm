@@ -212,6 +212,10 @@
         "ndfl.report.ndfl2_6XlsxReport.modal.kpp": "КПП",
         "ndfl.report.ndfl2_6XlsxReport.modal.kpp.all": "Все КПП формы",
 
+        "ndfl.report.excelTemplate.modal.title" : "Выбор режима выгрузки данных РНУ НДФЛ в шаблон ТФ",
+        "ndfl.report.excelTemplate.modal.byAllData" : "по всем данным",
+        "ndfl.report.excelTemplate.modal.bySelectedRows" : "по выбранным на странице",
+
         "ndfl.button.importExcel": "Загрузить из ТФ (Excel)",
 
         "ndflReportJournal.button.createReport": "Создать отчетность",
