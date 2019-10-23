@@ -6,7 +6,7 @@ spool &2
 var v_exists_user number;
 var v_cnt number;
 var start_time varchar2(30);
-var version varchar2(10);
+var version varchar2(50);
 var STATUS VARCHAR2(3000);
 var USER_NDFL VARCHAR2(50);
 var NSI_USER VARCHAR2(50);
@@ -28,7 +28,8 @@ end;
 /
  
 begin 
-	select count(1) into :v_cnt from version_history where status='OK' and version='03.10.00';
+
+	select count(1) into :v_cnt from version_history where status='OK' and version='03.010.00';
 	if :v_cnt = 0 then
 		dbms_output.put_line('Error: 03.010.00 not installed. Check log-files.');
 		raise_application_error(-20999,'Error: 03.010.00 not installed. Check log-files.');
@@ -56,13 +57,13 @@ PROMPT ## 03_dml_update
 @database-3.10.0.1/03_update_dml.sql 
 
 PROMPT ## 04_package
-@04_package.sql
+@database-3.10.0.1/04_package.sql
 
 PROMPT ## 04_ddl_views
-@04_ddl_views.sql &1 &6
+@database-3.10.0.1/04_ddl_views.sql &1 &6
 
 PROMPT ## 05_indexes_triggers
-@05_indexes_triggers.sql
+@database-3.10.0.1/05_indexes_triggers.sql
  
 PROMPT ## 06_check_index_constraints
 @database-3.10.0.1/06_check_index_constraints.sql
