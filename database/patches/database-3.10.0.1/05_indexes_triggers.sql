@@ -676,18 +676,13 @@ commit
 /
 
 DECLARE
-	v_index_name varchar(30) :='IDX_NDFL_PERSON_INC_OP_ID' ;
-	v_run_condition number(1);
-	v_task_name varchar2(128):='alter_tables block #31 - create index '||v_index_name;  
-
+	v_task_name varchar2(128):='indexes change block #1 - PK_REF_BOOK_PERSON'; 
+	v_run_condition number(1); 
 BEGIN
-	select decode(count(*),0,1,0) into v_run_condition from user_indexes where INDEX_NAME=v_index_name ;
-	IF v_run_condition=1 THEN
-		execute immediate 'create index '|| v_index_name ||' on NDFL_PERSON_INCOME (OPERATION_ID ASC)
-				   PCTFREE 50 INITRANS 20 COMPUTE STATISTICS';
-		dbms_output.put_line(v_task_name||'[INFO ('||v_index_name||')]:'||' Success');
-	ELSE
-		dbms_output.put_line(v_task_name||'[WARNING ('||v_index_name||')]:'||' changes had already been implemented');
+	select count(*) into v_run_condition from user_indexes where INDEX_NAME='PK_REF_BOOK_PERSON';
+	IF v_run_condition>0 THEN
+	        execute immediate 'alter index PK_REF_BOOK_PERSON REBUILD REVERSE COMPUTE STATISTICS';
+		dbms_output.put_line(v_task_name||'[INFO ]:'||' Success');
 	END IF;
 
 EXCEPTION
@@ -695,22 +690,30 @@ EXCEPTION
 		dbms_output.put_line(v_task_name||'[FATAL]:'||sqlerrm);	
 END;
 /
-commit
+DECLARE
+	v_task_name varchar2(128):='indexes change block #2 - PK_REF_BOOK_ID_TAX_PAYER';  
+	v_run_condition number(1);
+BEGIN
+	select count(*) into v_run_condition from user_indexes where INDEX_NAME='PK_REF_BOOK_ID_TAX_PAYER';
+	IF v_run_condition>0 THEN
+	        execute immediate 'alter index PK_REF_BOOK_ID_TAX_PAYER REBUILD REVERSE COMPUTE STATISTICS';
+		dbms_output.put_line(v_task_name||'[INFO ]:'||' Success');
+	END IF;
+
+EXCEPTION
+	when OTHERS then
+		dbms_output.put_line(v_task_name||'[FATAL]:'||sqlerrm);	
+END;
 /
 
 DECLARE
-	v_index_name varchar(30) :='IDX_NDFL_PERSON_DED_OP_ID' ;
+	v_task_name varchar2(128):='indexes change block #3 - PK_REF_BOOK_ID_DOC';  
 	v_run_condition number(1);
-	v_task_name varchar2(128):='alter_tables block #31 - create index '||v_index_name;  
-
 BEGIN
-	select decode(count(*),0,1,0) into v_run_condition from user_indexes where INDEX_NAME=v_index_name ;
-	IF v_run_condition=1 THEN
-		execute immediate 'create index '|| v_index_name ||' on NDFL_PERSON_DEDUCTION (OPERATION_ID ASC)
-				   PCTFREE 50 INITRANS 20 COMPUTE STATISTICS';
-		dbms_output.put_line(v_task_name||'[INFO ('||v_index_name||')]:'||' Success');
-	ELSE
-		dbms_output.put_line(v_task_name||'[WARNING ('||v_index_name||')]:'||' changes had already been implemented');
+	select count(*) into v_run_condition from user_indexes where INDEX_NAME='PK_REF_BOOK_ID_DOC';
+	IF v_run_condition>0 THEN
+	        execute immediate 'alter index PK_REF_BOOK_ID_DOC REBUILD REVERSE COMPUTE STATISTICS';
+		dbms_output.put_line(v_task_name||'[INFO ]:'||' Success');
 	END IF;
 
 EXCEPTION
@@ -718,22 +721,30 @@ EXCEPTION
 		dbms_output.put_line(v_task_name||'[FATAL]:'||sqlerrm);	
 END;
 /
-commit
+DECLARE
+	v_task_name varchar2(128):='indexes change block #4 - DECLARATION_DATA_PK';  
+	v_run_condition number(1);
+BEGIN
+	select count(*) into v_run_condition from user_indexes where INDEX_NAME='DECLARATION_DATA_PK';
+	IF v_run_condition>0 THEN
+	        execute immediate 'alter index DECLARATION_DATA_PK REBUILD REVERSE COMPUTE STATISTICS';
+		dbms_output.put_line(v_task_name||'[INFO ]:'||' Success');
+	END IF;
+
+EXCEPTION
+	when OTHERS then
+		dbms_output.put_line(v_task_name||'[FATAL]:'||sqlerrm);	
+END;
 /
 
 DECLARE
-	v_index_name varchar(30) :='IDX_NDFL_PERSON_PP_OP_ID' ;
+	v_task_name varchar2(128):='indexes change block #5 - NDFL_PP_PK';  
 	v_run_condition number(1);
-	v_task_name varchar2(128):='alter_tables block #31 - create index '||v_index_name;  
-
 BEGIN
-	select decode(count(*),0,1,0) into v_run_condition from user_indexes where INDEX_NAME=v_index_name ;
-	IF v_run_condition=1 THEN
-		execute immediate 'create index '|| v_index_name ||' on NDFL_PERSON_DEDUCTION (OPERATION_ID ASC)
-				   PCTFREE 50 INITRANS 20 COMPUTE STATISTICS';
-		dbms_output.put_line(v_task_name||'[INFO ('||v_index_name||')]:'||' Success');
-	ELSE
-		dbms_output.put_line(v_task_name||'[WARNING ('||v_index_name||')]:'||' changes had already been implemented');
+	select count(*) into v_run_condition from user_indexes where INDEX_NAME='NDFL_PP_PK';
+	IF v_run_condition>0 THEN
+	        execute immediate 'alter index NDFL_PP_PK REBUILD REVERSE COMPUTE STATISTICS';
+		dbms_output.put_line(v_task_name||'[INFO ]:'||' Success');
 	END IF;
 
 EXCEPTION
@@ -741,35 +752,213 @@ EXCEPTION
 		dbms_output.put_line(v_task_name||'[FATAL]:'||sqlerrm);	
 END;
 /
-commit
+DECLARE
+	v_task_name varchar2(128):='indexes change block #6 - NDFL_PERSON_PK';  
+	v_run_condition number(1);
+BEGIN
+	select count(*) into v_run_condition from user_indexes where INDEX_NAME='NDFL_PERSON_PK';
+	IF v_run_condition>0 THEN
+	        execute immediate 'alter index NDFL_PERSON_PK REBUILD REVERSE COMPUTE STATISTICS';
+		dbms_output.put_line(v_task_name||'[INFO ]:'||' Success');
+	END IF;
+
+EXCEPTION
+	when OTHERS then
+		dbms_output.put_line(v_task_name||'[FATAL]:'||sqlerrm);	
+END;
 /
 
+DECLARE
+	v_task_name varchar2(128):='indexes change block #7 - NDFL_PERSON_I_PK';  
+	v_run_condition number(1);
+BEGIN
+	select count(*) into v_run_condition from user_indexes where INDEX_NAME='NDFL_PERSON_I_PK';
+	IF v_run_condition>0 THEN
+	        execute immediate 'alter index NDFL_PERSON_I_PK REBUILD REVERSE COMPUTE STATISTICS';
+		dbms_output.put_line(v_task_name||'[INFO ]:'||' Success');
+	END IF;
 
-/*
+EXCEPTION
+	when OTHERS then
+		dbms_output.put_line(v_task_name||'[FATAL]:'||sqlerrm);	
+END;
+/
 
-	create index IDX_NDFL_PERSON_PP_OP_ID on NDFL_PERSON_PREPAYMENT (OPERATION_ID) PCTFREE 30 INITRANS 10 COMPUTE STATISTICS;
+DECLARE
+	v_task_name varchar2(128):='indexes change block #8 - NDFL_PD_PK';  
+	v_run_condition number(1);
+BEGIN
+	select count(*) into v_run_condition from user_indexes where INDEX_NAME='NDFL_PD_PK';
+	IF v_run_condition>0 THEN
+	        execute immediate 'alter index NDFL_PD_PK REBUILD REVERSE COMPUTE STATISTICS';
+		dbms_output.put_line(v_task_name||'[INFO ]:'||' Success');
+	END IF;
 
+EXCEPTION
+	when OTHERS then
+		dbms_output.put_line(v_task_name||'[FATAL]:'||sqlerrm);	
+END;
+/
 
-	alter index PK_REF_BOOK_PERSON REBUILD REVERSE COMPUTE STATISTICS;
-	alter index PK_REF_BOOK_ID_TAX_PAYER REBUILD REVERSE COMPUTE STATISTICS;
-	alter index PK_REF_BOOK_ID_DOC REBUILD REVERSE COMPUTE STATISTICS;
-	alter index DECLARATION_DATA_PK REBUILD REVERSE COMPUTE STATISTICS;
-	alter index NDFL_PP_PK REBUILD REVERSE COMPUTE STATISTICS;
-	alter index NDFL_PERSON_PK REBUILD REVERSE COMPUTE STATISTICS;
-	alter index NDFL_PERSON_I_PK REBUILD REVERSE COMPUTE STATISTICS;
-	alter index NDFL_PD_PK REBUILD REVERSE COMPUTE STATISTICS;
-	alter index LOG_BUSINESS_PK REBUILD REVERSE COMPUTE STATISTICS;
-	alter index TRANSPORT_MESSAGE_PK REBUILD REVERSE COMPUTE STATISTICS;
-	alter index PK_NDFL_REFERENCES REBUILD REVERSE COMPUTE STATISTICS;
-	alter index NDFL_PERS_INC_KPP_OKTMO REBUILD PCTFREE 50 INITRANS 50 COMPUTE STATISTICS;
-	alter index FK_LOG_ENTRY_LOG REBUILD PCTFREE 50 INITRANS 10 COMPUTE STATISTICS;
-	alter index IDX_LOG_ENTRY_DATE REBUILD PCTFREE 50 INITRANS 10 COMPUTE STATISTICS;
-	alter index PK_LOG_ENTRY REBUILD PCTFREE 50 INITRANS 10	 COMPUTE STATISTICS;
-	alter index IDX_NDFL_PERSON_INC_PAYMDT REBUILD INITRANS 50 COMPUTE STATISTICS;
-	alter index IDX_NDFL_PERSON_INC_TAXDT REBUILD PCTFREE 50 INITRANS 50 COMPUTE STATISTICS;
-	alter index IDX_NDFL_PERSON_DECL_DATA_ID REBUILD PCTFREE 50 INITRANS 50	 COMPUTE STATISTICS;
+DECLARE
+	v_task_name varchar2(128):='indexes change block #9 - LOG_BUSINESS_PK';  
+	v_run_condition number(1);
+BEGIN
+	select count(*) into v_run_condition from user_indexes where INDEX_NAME='LOG_BUSINESS_PK';
+	IF v_run_condition>0 THEN
+	        execute immediate 'alter index LOG_BUSINESS_PK REBUILD REVERSE COMPUTE STATISTICS';
+		dbms_output.put_line(v_task_name||'[INFO ]:'||' Success');
+	END IF;
 
-*/
+EXCEPTION
+	when OTHERS then
+		dbms_output.put_line(v_task_name||'[FATAL]:'||sqlerrm);	
+END;
+/
+
+DECLARE
+	v_task_name varchar2(128):='indexes change block #10 - TRANSPORT_MESSAGE_PK';  
+	v_run_condition number(1);
+BEGIN
+	select count(*) into v_run_condition from user_indexes where INDEX_NAME='TRANSPORT_MESSAGE_PK';
+	IF v_run_condition>0 THEN
+	        execute immediate 'alter index TRANSPORT_MESSAGE_PK REBUILD REVERSE COMPUTE STATISTICS';
+		dbms_output.put_line(v_task_name||'[INFO ]:'||' Success');
+	END IF;
+
+EXCEPTION
+	when OTHERS then
+		dbms_output.put_line(v_task_name||'[FATAL]:'||sqlerrm);	
+END;
+/
+
+DECLARE
+	v_task_name varchar2(128):='indexes change block #11 - PK_NDFL_REFERENCES';  
+	v_run_condition number(1);
+BEGIN
+	select count(*) into v_run_condition from user_indexes where INDEX_NAME='PK_NDFL_REFERENCES';
+	IF v_run_condition>0 THEN
+	        execute immediate 'alter index PK_NDFL_REFERENCES REBUILD REVERSE COMPUTE STATISTICS';
+		dbms_output.put_line(v_task_name||'[INFO ]:'||' Success');
+	END IF;
+
+EXCEPTION
+	when OTHERS then
+		dbms_output.put_line(v_task_name||'[FATAL]:'||sqlerrm);	
+END;
+/
+
+DECLARE
+	v_task_name varchar2(128):='indexes change block #12 - NDFL_PERS_INC_KPP_OKTMO';  
+	v_run_condition number(1);
+BEGIN
+	select count(*) into v_run_condition from user_indexes where INDEX_NAME='NDFL_PERS_INC_KPP_OKTMO';
+	IF v_run_condition>0 THEN
+	        execute immediate 'alter index NDFL_PERS_INC_KPP_OKTMO REBUILD PCTFREE 50 INITRANS 50 COMPUTE STATISTICS';
+		dbms_output.put_line(v_task_name||'[INFO ]:'||' Success');
+	END IF;
+
+EXCEPTION
+	when OTHERS then
+		dbms_output.put_line(v_task_name||'[FATAL]:'||sqlerrm);	
+END;
+/
+
+DECLARE
+	v_task_name varchar2(128):='indexes change block #13 - FK_LOG_ENTRY_LOG';  
+	v_run_condition number(1);
+BEGIN
+	select count(*) into v_run_condition from user_indexes where INDEX_NAME='FK_LOG_ENTRY_LOG';
+	IF v_run_condition>0 THEN
+	        execute immediate 'alter index FK_LOG_ENTRY_LOG REBUILD PCTFREE 50 INITRANS 10 COMPUTE STATISTICS';
+		dbms_output.put_line(v_task_name||'[INFO ]:'||' Success');
+	END IF;
+
+EXCEPTION
+	when OTHERS then
+		dbms_output.put_line(v_task_name||'[FATAL]:'||sqlerrm);	
+END;
+/
+
+DECLARE
+	v_task_name varchar2(128):='indexes change block #14 - IDX_LOG_ENTRY_DATE';  
+	v_run_condition number(1);
+BEGIN
+	select count(*) into v_run_condition from user_indexes where INDEX_NAME='IDX_LOG_ENTRY_DATE';
+	IF v_run_condition>0 THEN
+	        execute immediate 'alter index IDX_LOG_ENTRY_DATE REBUILD PCTFREE 50 INITRANS 10 COMPUTE STATISTICS';
+		dbms_output.put_line(v_task_name||'[INFO ]:'||' Success');
+	END IF;
+
+EXCEPTION
+	when OTHERS then
+		dbms_output.put_line(v_task_name||'[FATAL]:'||sqlerrm);	
+END;
+/
+
+DECLARE
+	v_task_name varchar2(128):='indexes change block #15 - PK_LOG_ENTRY';  
+	v_run_condition number(1);
+BEGIN
+	select count(*) into v_run_condition from user_indexes where INDEX_NAME='PK_LOG_ENTRY';
+	IF v_run_condition>0 THEN
+	        execute immediate 'alter index PK_LOG_ENTRY REBUILD PCTFREE 50 INITRANS 10	 COMPUTE STATISTICS';
+		dbms_output.put_line(v_task_name||'[INFO ]:'||' Success');
+	END IF;
+
+EXCEPTION
+	when OTHERS then
+		dbms_output.put_line(v_task_name||'[FATAL]:'||sqlerrm);	
+END;
+/
+
+DECLARE
+	v_task_name varchar2(128):='indexes change block #16 - IDX_NDFL_PERSON_INC_PAYMDT';  
+	v_run_condition number(1);
+BEGIN
+	select count(*) into v_run_condition from user_indexes where INDEX_NAME='IDX_NDFL_PERSON_INC_PAYMDT';
+	IF v_run_condition>0 THEN
+	        execute immediate 'alter index IDX_NDFL_PERSON_INC_PAYMDT REBUILD INITRANS 50 COMPUTE STATISTICS';
+		dbms_output.put_line(v_task_name||'[INFO ]:'||' Success');
+	END IF;
+
+EXCEPTION
+	when OTHERS then
+		dbms_output.put_line(v_task_name||'[FATAL]:'||sqlerrm);	
+END;
+/
+
+DECLARE
+	v_task_name varchar2(128):='indexes change block #17 - IDX_NDFL_PERSON_INC_TAXDT';  
+	v_run_condition number(1);
+BEGIN
+	select count(*) into v_run_condition from user_indexes where INDEX_NAME='IDX_NDFL_PERSON_INC_TAXDT';
+	IF v_run_condition>0 THEN
+	        execute immediate 'alter index IDX_NDFL_PERSON_INC_TAXDT REBUILD PCTFREE 50 INITRANS 50 COMPUTE STATISTICS';
+		dbms_output.put_line(v_task_name||'[INFO ]:'||' Success');
+	END IF;
+
+EXCEPTION
+	when OTHERS then
+		dbms_output.put_line(v_task_name||'[FATAL]:'||sqlerrm);	
+END;
+/
+
+DECLARE
+	v_task_name varchar2(128):='indexes change block #18 - IDX_NDFL_PERSON_DECL_DATA_ID';  
+	v_run_condition number(1);
+BEGIN
+	select count(*) into v_run_condition from user_indexes where INDEX_NAME='IDX_NDFL_PERSON_DECL_DATA_ID';
+	IF v_run_condition>0 THEN
+	        execute immediate 'alter index IDX_NDFL_PERSON_DECL_DATA_ID REBUILD PCTFREE 50 INITRANS 50	 COMPUTE STATISTICS';
+		dbms_output.put_line(v_task_name||'[INFO ]:'||' Success');
+	END IF;
+
+EXCEPTION
+	when OTHERS then
+		dbms_output.put_line(v_task_name||'[FATAL]:'||sqlerrm);	
+END;
+/
 
 BEGIN
 	FOR c1 IN (
