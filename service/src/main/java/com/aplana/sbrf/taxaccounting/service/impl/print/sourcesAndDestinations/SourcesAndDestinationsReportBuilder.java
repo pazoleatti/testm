@@ -98,7 +98,7 @@ public class SourcesAndDestinationsReportBuilder extends AbstractReportBuilder {
         createCellValue(colIndex++, relation.getDeclarationTypeName(), "typeForm", CellType.STRING, CellStyle.ALIGN_LEFT);
         createCellValue(colIndex++, relation.getYear(), "year", CellType.STRING, CellStyle.ALIGN_CENTER);
         createCellValue(colIndex++, relation.getPeriodName(), "periodName", CellType.STRING, CellStyle.ALIGN_LEFT);
-        createCellValue(colIndex++, relation.getFormTypeCode(), "typeReport", CellType.STRING, CellStyle.ALIGN_LEFT);
+        createCellValue(colIndex++, relation.getFormTypeCode(), "formTypeCode", CellType.STRING, CellStyle.ALIGN_LEFT);
         createCellValue(colIndex++, relation.getDeclarationState().getTitle(), "statusForm", CellType.STRING, CellStyle.ALIGN_LEFT);
     }
 
