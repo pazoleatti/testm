@@ -285,34 +285,6 @@
         </update>
     </changeSet>
 
-    <changeSet id="3.10.1-skononova-3" author="skononova">
-	<sql>
-	create index IDX_REF_BOOK_PERSON_REPORT_DOC on REF_BOOK_PERSON (REPORT_DOC ASC) PCTFREE 20 INITRANS 5 COMPUTE STATISTICS;
-	create index IDX_DECLARATION_DATA_PERSON_ID on DECLARATION_DATA (PERSON_ID ASC) COMPUTE STATISTICS;
-	create index IDX_NDFL_PERSON_PERSON_ID on NDFL_PERSON (PERSON_ID ASC) PCTFREE 50 INITRANS 5 COMPUTE STATISTICS;
-	create index IDX_NDFL_REFERENCES_PERSON_ID on NDFL_REFERENCES (PERSON_ID ASC) PCTFREE 50 INITRANS 5 COMPUTE STATISTICS;
-	create index IDX_LOG_BUSINESS_PERSON_ID on LOG_BUSINESS (PERSON_ID ASC) INITRANS 5 COMPUTE STATISTICS;
-	create index IDX_LOG_BUSINESS_LOG_ID on LOG_BUSINESS (LOG_ID ASC) PCTFREE 50 INITRANS 5 COMPUTE STATISTICS;
-	alter index PK_REF_BOOK_PERSON REBUILD REVERSE COMPUTE STATISTICS;
-	alter index PK_REF_BOOK_ID_TAX_PAYER REBUILD REVERSE COMPUTE STATISTICS;
-	alter index PK_REF_BOOK_ID_DOC REBUILD REVERSE COMPUTE STATISTICS;
-	alter index DECLARATION_DATA_PK REBUILD REVERSE COMPUTE STATISTICS;
-	alter index NDFL_PP_PK REBUILD REVERSE COMPUTE STATISTICS;
-	alter index NDFL_PERSON_PK REBUILD REVERSE COMPUTE STATISTICS;
-	alter index NDFL_PERSON_I_PK REBUILD REVERSE COMPUTE STATISTICS;
-	alter index NDFL_PD_PK REBUILD REVERSE COMPUTE STATISTICS;
-	alter index LOG_BUSINESS_PK REBUILD REVERSE COMPUTE STATISTICS;
-	alter index TRANSPORT_MESSAGE_PK REBUILD REVERSE COMPUTE STATISTICS;
-	alter index PK_NDFL_REFERENCES REBUILD REVERSE COMPUTE STATISTICS;
-	alter index NDFL_PERS_INC_KPP_OKTMO REBUILD PCTFREE 50 INITRANS 50 COMPUTE STATISTICS;
-	alter index FK_LOG_ENTRY_LOG REBUILD PCTFREE 50 INITRANS 10 COMPUTE STATISTICS;
-	alter index IDX_LOG_ENTRY_DATE REBUILD PCTFREE 50 INITRANS 10 COMPUTE STATISTICS;
-	alter index PK_LOG_ENTRY REBUILD PCTFREE 50 INITRANS 10	 COMPUTE STATISTICS;
-	alter index IDX_NDFL_PERSON_INC_PAYMDT REBUILD INITRANS 50 COMPUTE STATISTICS;
-	alter index IDX_NDFL_PERSON_INC_TAXDT REBUILD PCTFREE 50 INITRANS 50 COMPUTE STATISTICS;
-	alter index IDX_NDFL_PERSON_DECL_DATA_ID REBUILD PCTFREE 50 INITRANS 50	 COMPUTE STATISTICS;
-	</sql>
-    </changeSet>
     <changeSet id="3.10.1-adudenko-2" author="adudenko">
 		<sql>
 			update ref_book_form_type set code = '2-НДФЛ (1)' where id = 3;
@@ -327,37 +299,6 @@
 			update ref_book_form_type set code = '2-НДФЛ (ФЛ)' where id = 6;
 		</sql>
     </changeSet>
-    <changeSet id="3.10.1-skononova-4" author="skononova">
-	<sql>
-
-		create or replace view vw_declaration_data as
-		select id, declaration_template_id, tax_organ_code, kpp, oktmo,department_report_period_id, state, last_data_modified, correction_num, created_date,file_name,doc_state_id  from declaration_data;
-		grant select on vw_declaration_data to TAXREC_UNSTABLE;
-		grant references on declaration_data to TAXREC_UNSTABLE;
-		comment on column vw_declaration_data.id is 'Идентификатор';
-		comment on column vw_declaration_data.declaration_template_id is 'Ссылка на шаблон налоговой формы';
-		comment on column vw_declaration_data.tax_organ_code is 'Налоговый орган';
-		comment on column vw_declaration_data.kpp is 'КПП';
-		comment on column vw_declaration_data.oktmo is 'ОКТМО';
-		comment on column vw_declaration_data.department_report_period_id is 'Идентификатор отчетного периода подразделения';
-		comment on column vw_declaration_data.state is 'Статус (состояние формы)';
-		comment on column vw_declaration_data.file_name is 'Имя файла';
-		comment on column vw_declaration_data.last_data_modified is 'Дата последних изменений данных формы';
-		comment on column vw_declaration_data.created_date is 'Дата создания формы';
-		comment on column vw_declaration_data.correction_num is 'Номер коррекции';
-		comment on column vw_declaration_data.doc_state_id is 'Статус (состояние формы)';
-		comment on table vw_declaration_data is 'Налоговые формы';
-
-		create or replace view VW_REF_BOOK_DOC_STATE (id, knd, name) as select id, knd,name from ref_book_doc_state;
-		grant select on VW_REF_BOOK_DOC_STATE to TAXREC_UNSTABLE;
-		grant references on VW_REF_BOOK_DOC_STATE to TAXREC_UNSTABLE;
-		comment on column REF_BOOK_DOC_STATE.ID IS 'Уникальный идентификатор';
-		comment on column REF_BOOK_DOC_STATE.KND IS 'Код формы по КНД';
-		comment on column REF_BOOK_DOC_STATE.NAME IS 'Наименование состояния';
-		comment on  table REF_BOOK_DOC_STATE  IS 'Состояние ЭД';
-	</sql>
-    </changeSet>
-
 	<!-- https://jira.aplana.com/browse/SBRFNDFL-8860 Ошибка при создании 6-НДФЛ -->
 	<changeSet id="3.10.1-smolokovskikh-1" author="smolokovskikh" runAlways="true">
 		<update tableName="DECLARATION_TEMPLATE">
