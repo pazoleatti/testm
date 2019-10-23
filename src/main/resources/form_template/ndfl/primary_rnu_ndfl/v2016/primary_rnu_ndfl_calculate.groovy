@@ -552,10 +552,15 @@ class Calculate extends AbstractScriptClass {
             naturalPerson.documents = []
             naturalPerson.personIdentityList = []
             naturalPerson.personTbList = []
-
-            naturalPerson.documents.addAll(documentsGroupedByPersonId.get(naturalPerson.id))
-            naturalPerson.personIdentityList.addAll(inpsGroupedByPersonId.get(naturalPerson.id))
-            naturalPerson.personTbList.addAll(tbsGroupedByPersonId.get(naturalPerson.id))
+            if (documentsGroupedByPersonId.get(naturalPerson.id)) {
+                naturalPerson.documents.addAll(documentsGroupedByPersonId.get(naturalPerson.id))
+            }
+            if (inpsGroupedByPersonId.get(naturalPerson.id)) {
+                naturalPerson.personIdentityList.addAll(inpsGroupedByPersonId.get(naturalPerson.id))
+            }
+            if (tbsGroupedByPersonId.get(naturalPerson.id)) {
+                naturalPerson.personTbList.addAll(tbsGroupedByPersonId.get(naturalPerson.id))
+            }
 
             naturalPerson.documents.each {
                 it.person = naturalPerson
