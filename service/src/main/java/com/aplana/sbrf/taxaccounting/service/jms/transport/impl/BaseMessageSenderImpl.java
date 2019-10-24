@@ -34,6 +34,7 @@ public class BaseMessageSenderImpl implements MessageSender {
 
         LOG.debug(String.format("Попытка отправить сообщение '%s' в очередь%s", message, configuration.getValue()));
         try {
+            System.out.println("SessionTransacted " + jmsTemplate.isSessionTransacted());
             jmsTemplate.convertAndSend(configuration.getValue(), message);
         } catch (JmsException e) {
             throw new RuntimeException(e);
