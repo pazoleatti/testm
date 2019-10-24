@@ -28,6 +28,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -66,6 +67,7 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
     @Autowired
     private ApplicationInfo applicationInfo;
     @Autowired
+    @Qualifier("transactionHelper")
     private TransactionHelper tx;
     @Autowired
     private AuditService auditService;

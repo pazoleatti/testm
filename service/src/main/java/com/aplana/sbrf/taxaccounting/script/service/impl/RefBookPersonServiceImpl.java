@@ -77,7 +77,7 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
     @Autowired
     private PersonTbDao personTbDao;
     @Autowired
-    private TransactionHelper tx;
+    private TransactionHelper transactionHelper;
 
     @Override
     public RegistryPerson findById(long id) {
@@ -457,7 +457,7 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
         Boolean result = false;
         final String lockKey = baseLockKeyGenerator.generatePersonsRegistryLockKey();
         try {
-            LockData lockData = tx.executeInNewTransaction(new TransactionLogic<LockData>() {
+            LockData lockData = transactionHelper.executeInNewTransaction(new TransactionLogic<LockData>() {
                 @Override
                 public LockData execute() {
                     return lockDataService.lock(lockKey, userInfo.getUser().getId(), "Реестр физических лиц");

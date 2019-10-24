@@ -9,6 +9,7 @@
     <beans>
         <bean id="transactionManager" class="org.springframework.transaction.jta.WebSphereUowTransactionManager">
             <property name="allowCustomIsolationLevels" value="true"/>
+            <qualifier value="transactionManager"/>
         </bean>
 
         <jee:jndi-lookup id="dataSource" jndi-name="java:comp/env/jdbc/TaxAccDS" />
@@ -18,6 +19,12 @@
     </beans>
 
     <beans profile="production">
+        <bean id="secondaryTransactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+            <property name="allowCustomIsolationLevels" value="true"/>
+            <property name="dataSource" value="dataSourceSecondary"/>
+            <qualifier value="secondaryTransactionManager"/>
+        </bean>
+
         <jee:jndi-lookup id="dataSourceSecondary" jndi-name="java:comp/env/jdbc/TaxAccDSSecondary" />
         <bean id="namedParameterJdbcTemplateSecondary" class="org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate">
             <constructor-arg index="0" ref="dataSourceSecondary"/>
