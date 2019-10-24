@@ -314,6 +314,17 @@ class Import extends AbstractScriptClass {
         // Если в НФ нет данных, то создаем новые из ТФ
         if (declarationEmpty) {
             logForDebug("В НФ нет данных, создаем новые из ТФ")
+
+            logForDebug("Запущена сортировка загруженных данных декларации")
+            Collections.sort(ndflPersons, NdflPerson.getComparator())
+            ndflPersonService.fillNdflPersonIncomeSortFields((List<? extends NdflPerson>) ndflPersons)
+            for (NdflPerson ndflPerson : ndflPersons) {
+                Collections.sort(ndflPerson.incomes, NdflPersonIncome.getComparator())
+                Collections.sort(ndflPerson.deductions, NdflPersonDeduction.getComparator(ndflPerson))
+                Collections.sort(ndflPerson.prepayments, NdflPersonPrepayment.getComparator(ndflPerson))
+            }
+            logForDebug("Закончена сортировка загруженных данных декларации")
+
             logForDebug("Поиск идентификаторов операций которые отсутствуют в НФ и изменение их")
             transformOperationId()
             logForDebug("Обновление номеров строк данных декларации")
@@ -343,195 +354,207 @@ class Import extends AbstractScriptClass {
             List<NdflPersonDeduction> deductionsForCreate = []
             List<NdflPersonPrepayment> prepaymentsForCreate = []
 
+            boolean operationsTransformed = false
+
             logForDebug("Запущена процедура обновления данных физ лиц.")
             for (NdflPersonExt ndflPerson : ndflPersons) {
-                logForDebug("Запущена процедура обновления данных ФЛ $ndflPerson.id")
-                NdflPerson persistedPerson = null
-                // Проверяем обновлялись ли уже у этого физлица реквизиты
-                if (!ndflPersonImportIdCache.contains(ndflPerson.importId)) {
-                    persistedPerson = persistedPersonsById.get(ndflPerson.importId)
-                    ndflPersonImportIdCache << ndflPerson.importId
-                }
+                if (needPersonUpdate(ndflPerson)) {
+                    logForDebug("Запущена процедура обновления данных ФЛ $ndflPerson.id")
+                    NdflPerson persistedPerson = null
+                    // Проверяем обновлялись ли уже у этого физлица реквизиты
+                    if (!ndflPersonImportIdCache.contains(ndflPerson.importId)) {
+                        persistedPerson = persistedPersonsById.get(ndflPerson.importId)
+                        ndflPersonImportIdCache << ndflPerson.importId
+                    }
 
-                if (persistedPerson != null) {
-                    logForDebug("Начата процедура обновления данных ФЛ $ndflPerson.id")
-                    persistedPerson.personId = null
-                    if (ndflPerson.middleName?.isEmpty()) ndflPerson.middleName = null
-                    if (ndflPerson.innNp?.isEmpty()) ndflPerson.innNp = null
-                    if (ndflPerson.innForeign?.isEmpty()) ndflPerson.innForeign = null
-                    if (ndflPerson.regionCode?.isEmpty()) ndflPerson.regionCode = null
-                    if (ndflPerson.postIndex?.isEmpty()) ndflPerson.postIndex = null
-                    if (ndflPerson.area?.isEmpty()) ndflPerson.area = null
-                    if (ndflPerson.city?.isEmpty()) ndflPerson.city = null
-                    if (ndflPerson.locality?.isEmpty()) ndflPerson.locality = null
-                    if (ndflPerson.street?.isEmpty()) ndflPerson.street = null
-                    if (ndflPerson.house?.isEmpty()) ndflPerson.house = null
-                    if (ndflPerson.building?.isEmpty()) ndflPerson.building = null
-                    if (ndflPerson.flat?.isEmpty()) ndflPerson.flat = null
-                    if (ndflPerson.snils?.isEmpty()) ndflPerson.snils = null
-                    boolean updated = false
-                    if (ndflPerson.inp != persistedPerson.inp) {
-                        messages << createUpdateOperationMessage(ndflPerson, REQUISITES_TITLE, ndflPerson.importId, INP, persistedPerson.inp, ndflPerson.inp)
-                        persistedPerson.inp = ndflPerson.inp
-                        updated = true
+                    if (persistedPerson != null) {
+                        logForDebug("Начата процедура обновления данных ФЛ $ndflPerson.id")
+                        persistedPerson.personId = null
+                        if (ndflPerson.middleName?.isEmpty()) ndflPerson.middleName = null
+                        if (ndflPerson.innNp?.isEmpty()) ndflPerson.innNp = null
+                        if (ndflPerson.innForeign?.isEmpty()) ndflPerson.innForeign = null
+                        if (ndflPerson.regionCode?.isEmpty()) ndflPerson.regionCode = null
+                        if (ndflPerson.postIndex?.isEmpty()) ndflPerson.postIndex = null
+                        if (ndflPerson.area?.isEmpty()) ndflPerson.area = null
+                        if (ndflPerson.city?.isEmpty()) ndflPerson.city = null
+                        if (ndflPerson.locality?.isEmpty()) ndflPerson.locality = null
+                        if (ndflPerson.street?.isEmpty()) ndflPerson.street = null
+                        if (ndflPerson.house?.isEmpty()) ndflPerson.house = null
+                        if (ndflPerson.building?.isEmpty()) ndflPerson.building = null
+                        if (ndflPerson.flat?.isEmpty()) ndflPerson.flat = null
+                        if (ndflPerson.snils?.isEmpty()) ndflPerson.snils = null
+                        boolean updated = false
+                        if (ndflPerson.inp != persistedPerson.inp) {
+                            messages << createUpdateOperationMessage(ndflPerson, REQUISITES_TITLE, ndflPerson.importId, INP, persistedPerson.inp, ndflPerson.inp)
+                            persistedPerson.inp = ndflPerson.inp
+                            updated = true
+                        }
+                        if (ndflPerson.lastName != persistedPerson.lastName) {
+                            messages << createUpdateOperationMessage(ndflPerson, REQUISITES_TITLE, ndflPerson.importId, LAST_NAME, persistedPerson.lastName, ndflPerson.lastName)
+                            persistedPerson.lastName = ndflPerson.lastName
+                            updated = true
+                        }
+                        if (ndflPerson.firstName != persistedPerson.firstName) {
+                            messages << createUpdateOperationMessage(ndflPerson, REQUISITES_TITLE, ndflPerson.importId, FIRST_NAME, persistedPerson.firstName, ndflPerson.firstName)
+                            persistedPerson.firstName = ndflPerson.firstName
+                            updated = true
+                        }
+                        if (ndflPerson.middleName != persistedPerson.middleName) {
+                            messages << createUpdateOperationMessage(ndflPerson, REQUISITES_TITLE, ndflPerson.importId, MIDDLE_NAME, persistedPerson.middleName, ndflPerson.middleName)
+                            persistedPerson.middleName = ndflPerson.middleName
+                            updated = true
+                        }
+                        if (ndflPerson.birthDay != persistedPerson.birthDay) {
+                            messages << createUpdateOperationMessage(ndflPerson, REQUISITES_TITLE, ndflPerson.importId, BIRTH_DAY, persistedPerson.birthDay?.format(SharedConstants.DATE_FORMAT), ndflPerson.birthDay?.format(SharedConstants.DATE_FORMAT))
+                            persistedPerson.birthDay = ndflPerson.birthDay
+                            updated = true
+                        }
+                        if (ndflPerson.citizenship != persistedPerson.citizenship) {
+                            messages << createUpdateOperationMessage(ndflPerson, REQUISITES_TITLE, ndflPerson.importId, CITIZENSHIP, persistedPerson.citizenship, ndflPerson.citizenship)
+                            persistedPerson.citizenship = ndflPerson.citizenship
+                            updated = true
+                        }
+                        if (ndflPerson.innNp != persistedPerson.innNp) {
+                            messages << createUpdateOperationMessage(ndflPerson, REQUISITES_TITLE, ndflPerson.importId, INN, persistedPerson.innNp, ndflPerson.innNp)
+                            persistedPerson.innNp = ndflPerson.innNp
+                            updated = true
+                        }
+                        if (ndflPerson.innForeign != persistedPerson.innForeign) {
+                            messages << createUpdateOperationMessage(ndflPerson, REQUISITES_TITLE, ndflPerson.importId, INN_FOREIGN, persistedPerson.innForeign, ndflPerson.innForeign)
+                            persistedPerson.innForeign = ndflPerson.innForeign
+                            updated = true
+                        }
+                        if (ndflPerson.idDocType != persistedPerson.idDocType) {
+                            messages << createUpdateOperationMessage(ndflPerson, REQUISITES_TITLE, ndflPerson.importId, ID_DOC_TYPE, persistedPerson.idDocType, ndflPerson.idDocType)
+                            persistedPerson.idDocType = ndflPerson.idDocType
+                            updated = true
+                        }
+                        if (ndflPerson.idDocNumber != persistedPerson.idDocNumber) {
+                            messages << createUpdateOperationMessage(ndflPerson, REQUISITES_TITLE, ndflPerson.importId, ID_DOC_NUMBER, persistedPerson.idDocNumber, ndflPerson.idDocNumber)
+                            persistedPerson.idDocNumber = ndflPerson.idDocNumber
+                            updated = true
+                        }
+                        if (ndflPerson.status != persistedPerson.status) {
+                            messages << createUpdateOperationMessage(ndflPerson, REQUISITES_TITLE, ndflPerson.importId, STATUS, persistedPerson.status, ndflPerson.status)
+                            persistedPerson.status = ndflPerson.status
+                            updated = true
+                        }
+                        if (ndflPerson.regionCode != persistedPerson.regionCode) {
+                            messages << createUpdateOperationMessage(ndflPerson, REQUISITES_TITLE, ndflPerson.importId, REGION_CODE, persistedPerson.regionCode, ndflPerson.regionCode)
+                            persistedPerson.regionCode = ndflPerson.regionCode
+                            updated = true
+                        }
+                        if (ndflPerson.postIndex != persistedPerson.postIndex) {
+                            messages << createUpdateOperationMessage(ndflPerson, REQUISITES_TITLE, ndflPerson.importId, POST_INDEX, persistedPerson.postIndex, ndflPerson.postIndex)
+                            persistedPerson.postIndex = ndflPerson.postIndex
+                            updated = true
+                        }
+                        if (ndflPerson.area != persistedPerson.area) {
+                            messages << createUpdateOperationMessage(ndflPerson, REQUISITES_TITLE, ndflPerson.importId, AREA, persistedPerson.area, ndflPerson.area)
+                            persistedPerson.area = ndflPerson.area
+                            updated = true
+                        }
+                        if (ndflPerson.city != persistedPerson.city) {
+                            messages << createUpdateOperationMessage(ndflPerson, REQUISITES_TITLE, ndflPerson.importId, CITY, persistedPerson.city, ndflPerson.city)
+                            persistedPerson.city = ndflPerson.city
+                            updated = true
+                        }
+                        if (ndflPerson.locality != persistedPerson.locality) {
+                            messages << createUpdateOperationMessage(ndflPerson, REQUISITES_TITLE, ndflPerson.importId, LOCALITY, persistedPerson.locality, ndflPerson.locality)
+                            persistedPerson.locality = ndflPerson.locality
+                            updated = true
+                        }
+                        if (ndflPerson.street != persistedPerson.street) {
+                            messages << createUpdateOperationMessage(ndflPerson, REQUISITES_TITLE, ndflPerson.importId, STREET, persistedPerson.street, ndflPerson.street)
+                            persistedPerson.street = ndflPerson.street
+                            updated = true
+                        }
+                        if (ndflPerson.house != persistedPerson.house) {
+                            messages << createUpdateOperationMessage(ndflPerson, REQUISITES_TITLE, ndflPerson.importId, HOUSE, persistedPerson.house, ndflPerson.house)
+                            persistedPerson.house = ndflPerson.house
+                            updated = true
+                        }
+                        if (ndflPerson.building != persistedPerson.building) {
+                            messages << createUpdateOperationMessage(ndflPerson, REQUISITES_TITLE, ndflPerson.importId, BUILDING, persistedPerson.building, ndflPerson.building)
+                            persistedPerson.building = ndflPerson.building
+                            updated = true
+                        }
+                        if (ndflPerson.flat != persistedPerson.flat) {
+                            messages << createUpdateOperationMessage(ndflPerson, REQUISITES_TITLE, ndflPerson.importId, FLAT, persistedPerson.flat, ndflPerson.flat)
+                            persistedPerson.flat = ndflPerson.flat
+                            updated = true
+                        }
+                        if (ndflPerson.snils != persistedPerson.snils) {
+                            messages << createUpdateOperationMessage(ndflPerson, REQUISITES_TITLE, ndflPerson.importId, SNILS, persistedPerson.snils, ndflPerson.snils)
+                            persistedPerson.snils = ndflPerson.snils
+                            updated = true
+                        }
+                        if (updated) {
+                            persistedPerson.modifiedDate = new Date()
+                            persistedPerson.modifiedBy = "${userInfo.getUser().getName()} (${userInfo.getUser().getLogin()})"
+                            ndflPersonsForUpdate << persistedPerson
+                        }
+                        logForDebug("Закончена процедура обновления данных ФЛ $ndflPerson.id")
                     }
-                    if (ndflPerson.lastName != persistedPerson.lastName) {
-                        messages << createUpdateOperationMessage(ndflPerson, REQUISITES_TITLE, ndflPerson.importId, LAST_NAME, persistedPerson.lastName, ndflPerson.lastName)
-                        persistedPerson.lastName = ndflPerson.lastName
-                        updated = true
-                    }
-                    if (ndflPerson.firstName != persistedPerson.firstName) {
-                        messages << createUpdateOperationMessage(ndflPerson, REQUISITES_TITLE, ndflPerson.importId, FIRST_NAME, persistedPerson.firstName, ndflPerson.firstName)
-                        persistedPerson.firstName = ndflPerson.firstName
-                        updated = true
-                    }
-                    if (ndflPerson.middleName != persistedPerson.middleName) {
-                        messages << createUpdateOperationMessage(ndflPerson, REQUISITES_TITLE, ndflPerson.importId, MIDDLE_NAME, persistedPerson.middleName, ndflPerson.middleName)
-                        persistedPerson.middleName = ndflPerson.middleName
-                        updated = true
-                    }
-                    if (ndflPerson.birthDay != persistedPerson.birthDay) {
-                        messages << createUpdateOperationMessage(ndflPerson, REQUISITES_TITLE, ndflPerson.importId, BIRTH_DAY, persistedPerson.birthDay?.format(SharedConstants.DATE_FORMAT), ndflPerson.birthDay?.format(SharedConstants.DATE_FORMAT))
-                        persistedPerson.birthDay = ndflPerson.birthDay
-                        updated = true
-                    }
-                    if (ndflPerson.citizenship != persistedPerson.citizenship) {
-                        messages << createUpdateOperationMessage(ndflPerson, REQUISITES_TITLE, ndflPerson.importId, CITIZENSHIP, persistedPerson.citizenship, ndflPerson.citizenship)
-                        persistedPerson.citizenship = ndflPerson.citizenship
-                        updated = true
-                    }
-                    if (ndflPerson.innNp != persistedPerson.innNp) {
-                        messages << createUpdateOperationMessage(ndflPerson, REQUISITES_TITLE, ndflPerson.importId, INN, persistedPerson.innNp, ndflPerson.innNp)
-                        persistedPerson.innNp = ndflPerson.innNp
-                        updated = true
-                    }
-                    if (ndflPerson.innForeign != persistedPerson.innForeign) {
-                        messages << createUpdateOperationMessage(ndflPerson, REQUISITES_TITLE, ndflPerson.importId, INN_FOREIGN, persistedPerson.innForeign, ndflPerson.innForeign)
-                        persistedPerson.innForeign = ndflPerson.innForeign
-                        updated = true
-                    }
-                    if (ndflPerson.idDocType != persistedPerson.idDocType) {
-                        messages << createUpdateOperationMessage(ndflPerson, REQUISITES_TITLE, ndflPerson.importId, ID_DOC_TYPE, persistedPerson.idDocType, ndflPerson.idDocType)
-                        persistedPerson.idDocType = ndflPerson.idDocType
-                        updated = true
-                    }
-                    if (ndflPerson.idDocNumber != persistedPerson.idDocNumber) {
-                        messages << createUpdateOperationMessage(ndflPerson, REQUISITES_TITLE, ndflPerson.importId, ID_DOC_NUMBER, persistedPerson.idDocNumber, ndflPerson.idDocNumber)
-                        persistedPerson.idDocNumber = ndflPerson.idDocNumber
-                        updated = true
-                    }
-                    if (ndflPerson.status != persistedPerson.status) {
-                        messages << createUpdateOperationMessage(ndflPerson, REQUISITES_TITLE, ndflPerson.importId, STATUS, persistedPerson.status, ndflPerson.status)
-                        persistedPerson.status = ndflPerson.status
-                        updated = true
-                    }
-                    if (ndflPerson.regionCode != persistedPerson.regionCode) {
-                        messages << createUpdateOperationMessage(ndflPerson, REQUISITES_TITLE, ndflPerson.importId, REGION_CODE, persistedPerson.regionCode, ndflPerson.regionCode)
-                        persistedPerson.regionCode = ndflPerson.regionCode
-                        updated = true
-                    }
-                    if (ndflPerson.postIndex != persistedPerson.postIndex) {
-                        messages << createUpdateOperationMessage(ndflPerson, REQUISITES_TITLE, ndflPerson.importId, POST_INDEX, persistedPerson.postIndex, ndflPerson.postIndex)
-                        persistedPerson.postIndex = ndflPerson.postIndex
-                        updated = true
-                    }
-                    if (ndflPerson.area != persistedPerson.area) {
-                        messages << createUpdateOperationMessage(ndflPerson, REQUISITES_TITLE, ndflPerson.importId, AREA, persistedPerson.area, ndflPerson.area)
-                        persistedPerson.area = ndflPerson.area
-                        updated = true
-                    }
-                    if (ndflPerson.city != persistedPerson.city) {
-                        messages << createUpdateOperationMessage(ndflPerson, REQUISITES_TITLE, ndflPerson.importId, CITY, persistedPerson.city, ndflPerson.city)
-                        persistedPerson.city = ndflPerson.city
-                        updated = true
-                    }
-                    if (ndflPerson.locality != persistedPerson.locality) {
-                        messages << createUpdateOperationMessage(ndflPerson, REQUISITES_TITLE, ndflPerson.importId, LOCALITY, persistedPerson.locality, ndflPerson.locality)
-                        persistedPerson.locality = ndflPerson.locality
-                        updated = true
-                    }
-                    if (ndflPerson.street != persistedPerson.street) {
-                        messages << createUpdateOperationMessage(ndflPerson, REQUISITES_TITLE, ndflPerson.importId, STREET, persistedPerson.street, ndflPerson.street)
-                        persistedPerson.street = ndflPerson.street
-                        updated = true
-                    }
-                    if (ndflPerson.house != persistedPerson.house) {
-                        messages << createUpdateOperationMessage(ndflPerson, REQUISITES_TITLE, ndflPerson.importId, HOUSE, persistedPerson.house, ndflPerson.house)
-                        persistedPerson.house = ndflPerson.house
-                        updated = true
-                    }
-                    if (ndflPerson.building != persistedPerson.building) {
-                        messages << createUpdateOperationMessage(ndflPerson, REQUISITES_TITLE, ndflPerson.importId, BUILDING, persistedPerson.building, ndflPerson.building)
-                        persistedPerson.building = ndflPerson.building
-                        updated = true
-                    }
-                    if (ndflPerson.flat != persistedPerson.flat) {
-                        messages << createUpdateOperationMessage(ndflPerson, REQUISITES_TITLE, ndflPerson.importId, FLAT, persistedPerson.flat, ndflPerson.flat)
-                        persistedPerson.flat = ndflPerson.flat
-                        updated = true
-                    }
-                    if (ndflPerson.snils != persistedPerson.snils) {
-                        messages << createUpdateOperationMessage(ndflPerson, REQUISITES_TITLE, ndflPerson.importId, SNILS, persistedPerson.snils, ndflPerson.snils)
-                        persistedPerson.snils = ndflPerson.snils
-                        updated = true
-                    }
-                    if (updated) {
-                        persistedPerson.modifiedDate = new Date()
-                        persistedPerson.modifiedBy = "${userInfo.getUser().getName()} (${userInfo.getUser().getLogin()})"
-                        ndflPersonsForUpdate << persistedPerson
-                    }
-                    logForDebug("Закончена процедура обновления данных ФЛ $ndflPerson.id")
-                }
 
-                int incomesCreateCount = 0
-                logForDebug("Запущена процедура обновления сведений о доходах физ.лиц")
-                for (def income : ndflPerson.incomes) {
-                    logForDebug("Процедура обновления сведений о доходах №$income.id")
-                    income.ndflPersonId = ndflPerson.importId
-                    income.modifiedDate = new Date()
-                    income.modifiedBy = "${userInfo.getUser().getName()} (${userInfo.getUser().getLogin()})"
-                    incomesForCreate << income
-                    incomesCreateCount++
-                    logForDebug("Завершена процедура обновления сведений о доходах №$income.id")
-                }
-                logForDebug("Заверешена процедура обновления сведений о доходах физ.лиц")
+                    int incomesCreateCount = 0
+                    logForDebug("Запущена процедура обновления сведений о доходах физ.лиц")
+                    for (def income : ndflPerson.incomes) {
+                        logForDebug("Процедура обновления сведений о доходах №$income.id")
+                        income.ndflPersonId = ndflPerson.importId
+                        income.modifiedDate = new Date()
+                        income.modifiedBy = "${userInfo.getUser().getName()} (${userInfo.getUser().getLogin()})"
+                        incomesForCreate << income
+                        incomesCreateCount++
+                        logForDebug("Завершена процедура обновления сведений о доходах №$income.id")
+                    }
+                    logForDebug("Заверешена процедура обновления сведений о доходах физ.лиц")
 
-                if (incomesCreateCount > 0) {
-                    messages << createNewOperationMessage(ndflPerson, "Сведения о доходах и НДФЛ", incomesCreateCount)
-                }
-                int deductionsCreateCount = 0
-                logForDebug("Запущена процедура обновления сведений о вычетах физ.лиц")
-                for (NdflPersonDeduction deduction : ndflPerson.deductions) {
-                    logForDebug("Запущена процедура обновления сведений о вычетах №$deduction.id")
-                    deduction.ndflPersonId = ndflPerson.importId
-                    deduction.modifiedDate = new Date()
-                    deduction.modifiedBy = "${userInfo.getUser().getName()} (${userInfo.getUser().getLogin()})"
-                    deductionsForCreate << deduction
-                    deductionsCreateCount++
-                    logForDebug("Завершена процедура обновления сведений о вычетах №$deduction.id")
-                }
-                logForDebug("Заврешена процедура обновления сведений о вычетах физ.лиц")
+                    if (incomesCreateCount > 0) {
+                        messages << createNewOperationMessage(ndflPerson, "Сведения о доходах и НДФЛ", incomesCreateCount)
+                    }
+                    int deductionsCreateCount = 0
+                    logForDebug("Запущена процедура обновления сведений о вычетах физ.лиц")
+                    for (NdflPersonDeduction deduction : ndflPerson.deductions) {
+                        logForDebug("Запущена процедура обновления сведений о вычетах №$deduction.id")
+                        deduction.ndflPersonId = ndflPerson.importId
+                        deduction.modifiedDate = new Date()
+                        deduction.modifiedBy = "${userInfo.getUser().getName()} (${userInfo.getUser().getLogin()})"
+                        deductionsForCreate << deduction
+                        deductionsCreateCount++
+                        logForDebug("Завершена процедура обновления сведений о вычетах №$deduction.id")
+                    }
+                    logForDebug("Заврешена процедура обновления сведений о вычетах физ.лиц")
 
-                if (deductionsCreateCount > 0) {
-                    messages << createNewOperationMessage(ndflPerson, "Сведения о вычетах", deductionsCreateCount)
-                }
-                int prepaymentsCreateCount = 0
-                logForDebug("Запущена процедура обновления сведений о доходах в виде авансовых платежей физ.лиц")
-                for (NdflPersonPrepayment prepayment : ndflPerson.prepayments) {
-                    logForDebug("Обновление сведений о доходах в виде авансового платежа №$prepayment.id")
-                    prepayment.ndflPersonId = ndflPerson.importId
-                    prepaymentsForCreate << prepayment
-                    prepayment.modifiedDate = new Date()
-                    prepayment.modifiedBy = "${userInfo.getUser().getName()} (${userInfo.getUser().getLogin()})"
-                    prepaymentsCreateCount++
-                    logForDebug("Закочено обновление сведений о доходах в виде авансового платежа №$prepayment.id")
-                }
-                logForDebug("Заврешена процедура обновления сведений о доходах в виде авансовых платежей физ.лиц")
+                    if (deductionsCreateCount > 0) {
+                        messages << createNewOperationMessage(ndflPerson, "Сведения о вычетах", deductionsCreateCount)
+                    }
+                    int prepaymentsCreateCount = 0
+                    logForDebug("Запущена процедура обновления сведений о доходах в виде авансовых платежей физ.лиц")
+                    for (NdflPersonPrepayment prepayment : ndflPerson.prepayments) {
+                        logForDebug("Обновление сведений о доходах в виде авансового платежа №$prepayment.id")
+                        prepayment.ndflPersonId = ndflPerson.importId
+                        prepaymentsForCreate << prepayment
+                        prepayment.modifiedDate = new Date()
+                        prepayment.modifiedBy = "${userInfo.getUser().getName()} (${userInfo.getUser().getLogin()})"
+                        prepaymentsCreateCount++
+                        logForDebug("Закочено обновление сведений о доходах в виде авансового платежа №$prepayment.id")
+                    }
+                    logForDebug("Заврешена процедура обновления сведений о доходах в виде авансовых платежей физ.лиц")
 
-                if (prepaymentsCreateCount > 0) {
-                    messages << createNewOperationMessage(ndflPerson, "Сведения о доходах в виде авансовых платежей", prepaymentsCreateCount)
+                    if (prepaymentsCreateCount > 0) {
+                        messages << createNewOperationMessage(ndflPerson, "Сведения о доходах в виде авансовых платежей", prepaymentsCreateCount)
+                    }
+
+                    logForDebug("Завершена процедура обновления данных ФЛ $ndflPerson.id")
+                } else {
+                    if (!operationsTransformed) {
+                        transformOperationId()
+                    }
+                    operationsTransformed = true
+
+                    ndflPersonsForCreate << ndflPerson
                 }
-                logForDebug("Завершена процедура обновления данных ФЛ $ndflPerson.id")
             }
             logForDebug("Завершена процедура обновления данных физ лиц.")
             logForDebug("Сохранение созданных ФЛ в базу")
@@ -554,7 +577,7 @@ class Import extends AbstractScriptClass {
             logForDebug("Сохранение всех сообщений в область уведомлений")
             logger.getEntries().addAll(messages)
 
-            sortAndUpdateRowNumsInUpdatedDeclaration()
+            sortAndUpdateRowNumInUpdatedDeclaration()
         }
 
         if (logger.containsLevel(LogLevel.ERROR)) {
@@ -562,19 +585,20 @@ class Import extends AbstractScriptClass {
         }
     }
 
-    private void sortAndUpdateRowNumsInUpdatedDeclaration() {
+    private void sortAndUpdateRowNumInUpdatedDeclaration() {
         logForDebug("Запущена продедура сортировки данных")
 
         List<NdflPerson> updatedPersons = ndflPersonService.findNdflPersonWithOperations(declarationData.id)
 
-        List<NdflPersonIncome> updateRowNumIncomeList = []
-        List<NdflPersonDeduction> updateRowNumDeductionList = []
-        List<NdflPersonPrepayment> updateRowNumPrepaymentList = []
-
         BigDecimal incomeRowNum = BigDecimal.ZERO
         BigDecimal deductionRowNum = BigDecimal.ZERO
         BigDecimal prepaymentRowNum = BigDecimal.ZERO
+        Long personRowNum = 0L
         ndflPersonService.fillNdflPersonIncomeSortFields((List<? extends NdflPerson>) updatedPersons)
+        logForDebug("Начата сортировка ФЛ")
+        Collections.sort(updatedPersons, NdflPerson.getComparator())
+        logForDebug("Закончена сортировка ФЛ")
+        logForDebug("Начата сортировка всех операций декларации")
         for (NdflPerson ndflPerson : updatedPersons) {
             Collections.sort(ndflPerson.incomes, NdflPersonIncome.getComparator())
             Collections.sort(ndflPerson.deductions, NdflPersonDeduction.getComparator(ndflPerson))
@@ -584,28 +608,40 @@ class Import extends AbstractScriptClass {
                 incomeRowNum = incomeRowNum.add(BigDecimal.ONE)
                 income.rowNum = incomeRowNum
             }
-            updateRowNumIncomeList.addAll(ndflPerson.incomes)
 
             for (NdflPersonDeduction deduction : ndflPerson.deductions) {
                 deductionRowNum = deductionRowNum.add(BigDecimal.ONE)
                 deduction.rowNum = deductionRowNum
             }
-            updateRowNumDeductionList.addAll(ndflPerson.deductions)
 
             for (NdflPersonPrepayment prepayment : ndflPerson.prepayments) {
                 prepaymentRowNum = prepaymentRowNum.add(BigDecimal.ONE)
                 prepayment.rowNum = prepaymentRowNum
             }
-            updateRowNumPrepaymentList.addAll(ndflPerson.prepayments)
-        }
-        logForDebug("Обновление номеров строк сведений о доходах ФЛ в базе")
-        ndflPersonService.updateIncomesRowNum(updateRowNumIncomeList)
-        logForDebug("Обновление номеров строк сведений о вычетах ФЛ в базе")
-        ndflPersonService.updateDeductionsRowNum(updateRowNumDeductionList)
-        logForDebug("Обновление номеров строк сведений о авансовых платежах ФЛ в базе")
-        ndflPersonService.updatePrepaymentsRowNum(updateRowNumPrepaymentList)
 
+            ndflPerson.rowNum = ++personRowNum
+        }
+        logForDebug("Закончена сортировка операций декларации")
         logForDebug("Закончена продедура сортировки данных")
+
+        logForDebug("Обновление номеров строк всех разделов")
+        ndflPersonService.updateRowNum(updatedPersons)
+    }
+
+    /**
+     * Проверяет, существует ли ФЛ с пришедшим идентифкатором в НФ.
+     * Результат используется для определния нужно ли обновлять Физлицо или создавать.
+     *
+     * @param ndflPerson Объект физлица
+     * @return true если физлицо нужно обновлять
+     */
+    boolean needPersonUpdate(NdflPersonExt ndflPerson) {
+        boolean result = false
+        if (ndflPerson.importId) {
+            def existingPerson = ndflPersonService.get(ndflPerson.importId)
+            result = existingPerson.getDeclarationDataId() == declarationData.id
+        }
+        return result
     }
 
     List<String> header = ["Идентификаторы строк разделов РНУ НДФЛ (технический столбец - не заполнять при добавлении новой строки)",
