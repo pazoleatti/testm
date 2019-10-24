@@ -697,5 +697,24 @@ public interface NdflPersonService {
      * @return список сгенерированных идентификаторов
      */
     List<BigDecimal> generateOperInfoIds(int count);
+
+    /**
+     * Получить информацию о вычетах ФЛ (раздел 3), которые связаны со сведениями о доходах и НДФЛ (раздел 2)
+     *
+     * @param personId идентификатор ФЛ
+     * @param incomesIds список идентификаторов строк для сведений о доходах и НДФЛ
+     * @return список идентификаторов вычетов ФЛ
+     */
+    List<Long> getDeductionsIdsByPersonAndIncomes(long personId, Collection<Long> incomesIds);
+
+    /**
+     * Получить информацию о доходах в виде авансовых платежей у ФЛ (раздел 4),
+     * которые связаны со сведениями о доходах и НДФЛ (раздел 2)
+     *
+     * @param personId идентификатор ФЛ
+     * @param incomesIds список идентификаторов строк для сведений о доходах и НДФЛ
+     * @return список идентификаторов сведений о доходах в виде аваносовых платежей у ФЛ
+     */
+    List<Long> getPrepaymentsIdsByPersonAndIncomes(long personId, Collection<Long> incomesIds);
 }
 

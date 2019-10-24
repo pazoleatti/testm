@@ -7,11 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.consolidation.ConsolidationIncome;
 import com.aplana.sbrf.taxaccounting.model.consolidation.ConsolidationSourceDataSearchFilter;
 import com.aplana.sbrf.taxaccounting.model.filter.NdflFilter;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
-import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
-import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction;
-import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome;
-import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonOperation;
-import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment;
+import com.aplana.sbrf.taxaccounting.model.ndfl.*;
 import com.aplana.sbrf.taxaccounting.model.result.NdflPersonDeductionDTO;
 import com.aplana.sbrf.taxaccounting.model.result.NdflPersonIncomeDTO;
 import com.aplana.sbrf.taxaccounting.model.result.NdflPersonPrepaymentDTO;
@@ -20,13 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.nio.LongBuffer;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Andrey Drunk
@@ -592,5 +582,15 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     @Override
     public List<BigDecimal> generateOperInfoIds(int count) {
         return ndflPersonDao.generateOperInfoIds(count);
+    }
+
+    @Override
+    public List<Long> getDeductionsIdsByPersonAndIncomes(long personId, Collection<Long> incomesIds) {
+        return ndflPersonService.getDeductionsIdsByPersonAndIncomes(personId, incomesIds);
+    }
+
+    @Override
+    public List<Long> getPrepaymentsIdsByPersonAndIncomes(long personId, Collection<Long> incomesIds) {
+        return ndflPersonService.getPrepaymentsIdsByPersonAndIncomes(personId, incomesIds);
     }
 }
