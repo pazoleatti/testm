@@ -14,3 +14,4 @@ SCRIPT LOBFILE( L_0) TERMINATED BY EOF NULLIF L_0 = 'null'
 )
 begindata
  1|100|3|database-3.10.0.1/templates/data/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_calculate.groovy|
+ 14|100|7|database-3.10.0.1/templates/data/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_import.groovy|
