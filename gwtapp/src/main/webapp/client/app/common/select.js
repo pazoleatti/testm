@@ -377,7 +377,7 @@
                     var department = _.deep($scope, departmentModelPath);
                     var period = _.deep($scope, periodModelPath);
 
-                    loadReportFormTypes(knf, department, period);
+                    loadReportFormTypesPeriod(knf, department, period);
 
                     $scope.$watchCollection("[" + departmentModelPath + ", " + periodModelPath + "]", function (newValues, oldValues) {
                         var department = newValues && newValues[0], oldDepartment = oldValues && oldValues[0];
@@ -385,7 +385,7 @@
                         if (department && (!oldDepartment || department.id !== oldDepartment.id) ||
                             period && (!oldPeriod || period.id !== oldPeriod.id)
                         ) {
-                            loadReportFormTypes(knf, department, period);
+                            loadReportFormTypesPeriod(knf, department, period);
                         }
                     });
                 };
@@ -405,6 +405,24 @@
                             });
                             $scope.declarationTypeSelect.options.data.results = data;
                         });
+                    }
+                }
+
+                /**
+                 * Загружает тип отчетной формы из указанного в периоде
+                 */
+                function loadReportFormTypesPeriod(knf, department, period) {
+                    if (department && period) {
+                        $scope.declarationTypeSelect.options.data.results = [];
+                        if (period.text.indexOf(APP_CONSTANTS.DECLARATION_TYPE.REPORT_6_NDFL.name) > -1 ){
+                            $scope.declarationTypeSelect.options.data.results.push(APP_CONSTANTS.DECLARATION_TYPE.REPORT_6_NDFL);
+                        }
+                        if (period.text.indexOf(APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_1.name) > -1 ){
+                            $scope.declarationTypeSelect.options.data.results.push(APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_1);
+                        }
+                        if (period.text.indexOf(APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_2.name) > -1 ){
+                            $scope.declarationTypeSelect.options.data.results.push(APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_2);
+                        }
                     }
                 }
 
