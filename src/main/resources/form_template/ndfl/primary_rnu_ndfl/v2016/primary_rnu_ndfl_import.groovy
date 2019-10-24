@@ -311,13 +311,14 @@ class Import extends AbstractScriptClass {
             return
         }
 
+        ndflPersonService.fillNdflPersonIncomeSortFields((List<? extends NdflPerson>) ndflPersons)
+
         // Если в НФ нет данных, то создаем новые из ТФ
         if (declarationEmpty) {
             logForDebug("В НФ нет данных, создаем новые из ТФ")
 
             logForDebug("Запущена сортировка загруженных данных декларации")
             Collections.sort(ndflPersons, NdflPerson.getComparator())
-            ndflPersonService.fillNdflPersonIncomeSortFields((List<? extends NdflPerson>) ndflPersons)
             for (NdflPerson ndflPerson : ndflPersons) {
                 Collections.sort(ndflPerson.incomes, NdflPersonIncome.getComparator())
                 Collections.sort(ndflPerson.deductions, NdflPersonDeduction.getComparator(ndflPerson))
@@ -494,7 +495,7 @@ class Import extends AbstractScriptClass {
                             persistedPerson.modifiedBy = "${userInfo.getUser().getName()} (${userInfo.getUser().getLogin()})"
                             ndflPersonsForUpdate << persistedPerson
                         }
-                        logForDebug("Закончена процедура обновления данных ФЛ $ndflPerson.id")
+                        logForDebug("Закончена процедура обновления данных ФЛ $ndflPerson.importId")
                     }
 
                     int incomesCreateCount = 0
@@ -586,7 +587,7 @@ class Import extends AbstractScriptClass {
     }
 
     private void sortAndUpdateRowNumInUpdatedDeclaration() {
-        logForDebug("Запущена продедура сортировки данных")
+        logForDebug("Запущена процедура сортировки данных")
 
         List<NdflPerson> updatedPersons = ndflPersonService.findNdflPersonWithOperations(declarationData.id)
 
@@ -622,7 +623,7 @@ class Import extends AbstractScriptClass {
             ndflPerson.rowNum = ++personRowNum
         }
         logForDebug("Закончена сортировка операций декларации")
-        logForDebug("Закончена продедура сортировки данных")
+        logForDebug("Закончена процедура сортировки данных")
 
         logForDebug("Обновление номеров строк всех разделов")
         ndflPersonService.updateRowNum(updatedPersons)
