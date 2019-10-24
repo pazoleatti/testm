@@ -2647,4 +2647,50 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     public List<BigDecimal> generateOperInfoIds(int count) {
         return generateIds("seq_oper_info", count, BigDecimal.class);
     }
+
+    @Override
+    public List<Long> getDeductionsIdsByPersonAndIncomes(long personId, Collection<Long> incomesIds) {
+        String query = "select distinct\n" +
+                "  npd.id\n" +
+                "from\n" +
+                "  ndfl_person_deduction npd\n" +
+                "inner join ndfl_person np on np.id = npd.ndfl_person_id \n" +
+                "inner join ndfl_person_income npi on npi.operation_id = npd.operation_id\n" +
+                "where \n" +
+                "  np.id = :personId\n" +
+                "  and npi.id in (:incomeIds)\n";
+
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("personId", personId);
+        params.addValue("incomeIds", incomesIds);
+
+        try {
+            return getNamedParameterJdbcTemplate().queryForList(query, params, Long.class);
+        } catch (EmptyResultDataAccessException ex) {
+            return Collections.emptyList();
+        }
+    }
+
+    @Override
+    public List<Long> getPrepaymentsIdsByPersonAndIncomes(long personId, Collection<Long> incomesIds) {
+        String query = "select distinct\n" +
+                "  npp.id\n" +
+                "from\n" +
+                "  ndfl_person_prepayment npp\n" +
+                "inner join ndfl_person np on np.id = npp.ndfl_person_id \n" +
+                "inner join ndfl_person_income npi on npi.operation_id = npp.operation_id\n" +
+                "where \n" +
+                "  np.id = :personId\n" +
+                "  and npi.id in (:incomeIds)\n";
+
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("personId", personId);
+        params.addValue("incomeIds", incomesIds);
+
+        try {
+            return getNamedParameterJdbcTemplate().queryForList(query, params, Long.class);
+        } catch (EmptyResultDataAccessException ex) {
+            return Collections.emptyList();
+        }
+    }
 }
