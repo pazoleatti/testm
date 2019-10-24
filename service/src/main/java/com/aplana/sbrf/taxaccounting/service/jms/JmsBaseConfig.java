@@ -79,7 +79,6 @@ public class JmsBaseConfig {
                 container.setConnectionFactory(connectionFactory);
                 container.setMessageListener(baseMessageReceiver);
                 container.setDestination((Destination) new InitialContext().lookup("java:comp/env/jms/" + TO_NDFL_QUEUE_JNDI_NAME));
-                container.setSessionTransacted(true);
                 return container;
         }
 
