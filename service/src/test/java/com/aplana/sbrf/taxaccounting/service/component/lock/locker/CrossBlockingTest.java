@@ -14,6 +14,7 @@ import com.aplana.sbrf.taxaccounting.service.impl.component.lock.CheckupLockKeyG
 import com.aplana.sbrf.taxaccounting.service.impl.component.lock.MainLockKeyGeneratorImpl;
 import com.aplana.sbrf.taxaccounting.service.impl.component.lock.locker.DeclarationLockerImpl;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -33,6 +34,7 @@ import static com.aplana.sbrf.taxaccounting.service.component.lock.locker.LocksR
  * Тестирование взаимосвязи блокировок в методе {@link DeclarationLocker#establishLock(Long, OperationType, TAUserInfo, Logger)}
  */
 @RunWith(Parameterized.class)
+@Ignore
 public class CrossBlockingTest {
 
     // Тестируемый класс
