@@ -350,4 +350,14 @@ public class DeclarationServiceImpl implements DeclarationService {
     public Date getMaxLogDateByDeclarationIdAndEvent(Long declarationId, FormDataEvent event) {
         return logBusinessService.getMaxLogDateByDeclarationIdAndEvent(declarationId, event);
     }
+
+    @Override
+    public void deleteRowsBySection1(List<Long> ndflPersonIds) {
+        declarationDataDao.deleteRowsBySection1(ndflPersonIds);
+    }
+
+    @Override
+    public void deleteRowsBySection2(List<Long> ndflPersonIncomeIds) {
+        declarationDataDao.deleteRowsBySection2(ndflPersonIncomeIds);
+    }
 }

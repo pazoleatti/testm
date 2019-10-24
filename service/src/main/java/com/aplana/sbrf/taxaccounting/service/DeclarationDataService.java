@@ -842,4 +842,14 @@ public interface DeclarationDataService {
      * @param declarationDataId идентификатор НФ у которой нужно сменить статус на Выдана
      */
     void changeStateToIssued(Long declarationDataId);
+
+    /**
+     * Создать задачу на удаление строк разделов налоговой формы
+     * @param userInfo
+     * @param deleteSelectedDeclarationRowsActionCollection Информация о форме строках и разделе, к которому они относятся
+     * @return
+     */
+    ActionResult createDeleteSelectedDeclarationRowsTask(TAUserInfo userInfo,
+                                                         Collection<DeleteSelectedDeclarationRowsAction> deleteSelectedDeclarationRowsActionCollection);
+
 }

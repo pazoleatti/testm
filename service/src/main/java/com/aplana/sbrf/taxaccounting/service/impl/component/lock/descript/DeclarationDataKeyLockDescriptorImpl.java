@@ -97,6 +97,8 @@ public class DeclarationDataKeyLockDescriptorImpl implements DeclarationDataKeyL
             return createBaseDescription(declarationDataId);
         else if (operationType.equals(OperationType.EXCEL_UNLOAD_LIST))
             return createBaseDescription(declarationDataId);
+        else if (operationType.equals(OperationType.DELETE_DEC_ROWS))
+            return createBaseDescription(declarationDataId);
         else
             throw new IllegalArgumentException("Unknown operationType type!");
     }

@@ -648,7 +648,7 @@
             </activation>
             <properties>
                 <sonar.projectKey>SBRFNDFL</sonar.projectKey>
-                <sonar.moduleKey>${artifactId}</sonar.moduleKey>
+                <sonar.moduleKey>${project.artifactId}</sonar.moduleKey>
                 <sonar.login>d86d4e1f1897004be236534d03136d54ae12121d</sonar.login>
                 <sonar.host.url>https://sonarcube.aplana.com</sonar.host.url>
                 <sonar.exclusions>**/*.groovy</sonar.exclusions>

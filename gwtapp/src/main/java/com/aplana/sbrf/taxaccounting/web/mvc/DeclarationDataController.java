@@ -310,6 +310,20 @@ public class DeclarationDataController {
     }
 
     /**
+     * Удаление налоговых форм
+     *
+     * @param deleteSelectedDeclarationRows Строки для удаления из налоговой формы
+     * @return Модель {@link ActionResult}, в которой содержаться данные о результате операции
+     */
+    @PostMapping(value = "/actions/declarationData/delete/selected")
+    public ActionResult deleteSelectedDeclarationRows(
+            @RequestBody DeleteSelectedDeclarationRowsAction deleteSelectedDeclarationRows) {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        return declarationService.createDeleteSelectedDeclarationRowsTask(userInfo,
+                Collections.singletonList(deleteSelectedDeclarationRows));
+    }
+
+    /**
      * Создание налоговой формы
      *
      * @param action параметры создания формы
@@ -884,7 +898,7 @@ public class DeclarationDataController {
      * Формирование спецотчета РНУ НДФЛ по всем ФЛ, по отобранным по фильтру
      *
      * @param declarationDataId идентификатор декларации
-     * @param filter параметры фильтрации на форме
+     * @param filter            параметры фильтрации на форме
      * @return результат с даннымми для представления об операции формирования отчета
      */
     @PostMapping(value = "/actions/declarationData/{declarationDataId}/report/rnuNdflAllPersons/byFilter")
@@ -900,14 +914,14 @@ public class DeclarationDataController {
      * Формирование спецотчета РНУ НДФЛ по всем ФЛ, по выбранным на странице
      *
      * @param declarationDataId идентификатор декларации
-     * @param selectedRows информация о выбранных строках в форме
+     * @param selectedRows      информация о выбранных строках в форме
      * @return результат с даннымми для представления об операции формирования отчета
      */
     @PostMapping(value = "/actions/declarationData/{declarationDataId}/report/rnuNdflAllPersons/bySelected")
     public String createRnuNdflAllPersonsReportBySelected(@PathVariable("declarationDataId") long declarationDataId,
                                                           @RequestBody RnuNdflAllPersonsReportSelectedRows selectedRows) {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        return declarationService.createTaskToCreateRnuNdflByAllPersonsReport(declarationDataId,  userInfo, null, selectedRows);
+        return declarationService.createTaskToCreateRnuNdflByAllPersonsReport(declarationDataId, userInfo, null, selectedRows);
     }
 
     /**
@@ -952,12 +966,12 @@ public class DeclarationDataController {
      * Формирование выгрузки списка источники-приемники в xlsx
      *
      * @param declarationDataId идентификатор декларации
-     * @param sources        источники
-     * @param destinations   приемники
+     * @param sources           источники
+     * @param destinations      приемники
      * @return Результат запуска задачи
      */
     @PostMapping(value = "/actions/declarationData/{declarationDataId}/unloadListInXlsx")
-    public String createExportSourcesAndDestinations(@PathVariable("declarationDataId") long declarationDataId, @RequestParam boolean sources, @RequestParam boolean destinations ) {
+    public String createExportSourcesAndDestinations(@PathVariable("declarationDataId") long declarationDataId, @RequestParam boolean sources, @RequestParam boolean destinations) {
         TAUserInfo userInfo = securityService.currentUserInfo();
         return declarationService.createTaskToCreateUnloadListInXlsx(userInfo, declarationDataId, sources, destinations);
     }

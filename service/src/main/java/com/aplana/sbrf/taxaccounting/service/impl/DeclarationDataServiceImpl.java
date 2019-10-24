@@ -67,7 +67,6 @@ import org.apache.commons.lang3.time.FastDateFormat;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.poi.ss.formula.functions.T;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -3270,6 +3269,53 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         if (declarationTemplate.getType().getId() == DeclarationType.NDFL_2_FL) {
             declarationDataDao.setStatus(declarationDataId, State.ISSUED);
         }
+    }
+
+    @Override
+    @Transactional
+    public ActionResult createDeleteSelectedDeclarationRowsTask(TAUserInfo userInfo,
+                                                                Collection<DeleteSelectedDeclarationRowsAction> deleteSelectedDeclarationRowsActionCollection) {
+        final ActionResult result = new ActionResult();
+        Logger logger = new Logger();
+        Collection<DeleteSelectedDeclarationRowsAction> deleteRowsCollection = deleteSelectedDeclarationRowsActionCollection;
+
+        if (!CollectionUtils.isEmpty(deleteRowsCollection)) {
+
+
+            try {
+                final List<Long> declarationDataIds = new LinkedList<>();
+                for (DeleteSelectedDeclarationRowsAction deleteRows : deleteRowsCollection) {
+                    Long declarationDataId = deleteRows.getDeclarationDataId();
+                    if (permissionEvaluator.hasPermission(SecurityContextHolder.getContext().getAuthentication(),
+                            new TargetIdAndLogger(declarationDataId, logger),
+                            "com.aplana.sbrf.taxaccounting.permissions.logging.TargetIdAndLogger",
+                            DeclarationDataPermission.DELETE_ROWS)) {
+                        declarationDataIds.add(declarationDataId);
+                    } else {
+                        makeNotificationForAccessDenied(logger);
+                    }
+                }
+
+                Map<String, Object> params = new HashMap<>();
+                if (declarationDataIds.size() > 1) {
+                    params.put("declarationDataIds", declarationDataIds);
+                } else
+                    params.put("declarationDataId", declarationDataIds.get(0));
+
+                params.put("toDeleteRows", deleteRowsCollection);
+                asyncManager.createTask(OperationType.DELETE_DEC_ROWS, userInfo, params, logger);
+
+            } catch (Exception e) {
+                logger.error("Удаление строк формы: \n%s", e.getMessage());
+                LOG.error(e.getMessage(), e);
+            }
+        } else {
+            logger.error("Удаление строк формы: \nСтроки не выбраны");
+        }
+
+
+        result.setUuid(logEntryService.save(logger.getEntries()));
+        return result;
     }
 
     /**

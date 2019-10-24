@@ -128,6 +128,12 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
      */
     public static final PersonViewPermission PERSON_VIEW = new PersonViewPermission(1 << 16);
 
+    /**
+     * Право на удаление строк из формы
+     */
+    public static final DeleteRowsPermission DELETE_ROWS = new DeleteRowsPermission(1 << 17);
+
+
     private static final String DATE_FORMAT = "dd.MM.yyyy";
 
     public DeclarationDataPermission(long mask) {
@@ -808,6 +814,49 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
         @Override
         protected boolean isGrantedInternal(User currentUser, DeclarationData targetDomainObject, Logger logger) {
             return PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER);
+        }
+    }
+
+    /**
+     * Право на удаление строк из формы
+     */
+    private static final class DeleteRowsPermission extends DeclarationDataPermission {
+        public DeleteRowsPermission(long mask) {
+            super(mask);
+        }
+
+        @Override
+        protected boolean isGrantedInternal(User user, DeclarationData targetDomainObject, Logger logger) {
+
+            // Одновременно выполняется условия:
+            // Пользователю назначены хотя бы одна из ролей: "Оператор (НДФЛ)", "Контролёр НС (НДФЛ)", "Контролёр УНП (НДФЛ)"
+            if (!PermissionUtils.hasRole(user,
+                    TARole.N_ROLE_OPER,
+                    TARole.N_ROLE_CONTROL_UNP,
+                    TARole.N_ROLE_CONTROL_NS)) {
+                return false;
+            }
+
+            //Форма находится в состоянии "Создана"
+            if (!State.CREATED.equals(targetDomainObject.getState())) {
+                return false;
+            }
+
+            //Форма.Макет.Тип Формы = "Первичная"
+            DeclarationFormKind declarationKind =
+                    declarationTemplateDao.get(targetDomainObject.getDeclarationTemplateId()).getDeclarationFormKind();
+            if (!declarationKind.equals(DeclarationFormKind.PRIMARY)) {
+                return false;
+            }
+
+            //Период формы открыт
+            DepartmentReportPeriod departmentReportPeriod =
+                    departmentReportPeriodDao.fetchOne(targetDomainObject.getDepartmentReportPeriodId());
+            if (!departmentReportPeriod.isActive()) {
+                return false;
+            }
+
+            return true;
         }
     }
 }

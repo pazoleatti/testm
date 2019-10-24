@@ -178,7 +178,8 @@
                             <div class="form-horizontal info-wrapper row-fluid">
                                 <div class="span4">
                                     <div class="row-fluid">
-                                        <div class="span4">
+                                        <div class="spa
+n4">
                                             <label class="control-label">{{::'title.department' | translate}}:</label>
                                         </div>
                                         <div class="span8">
@@ -400,6 +401,14 @@
                                         data-ng-click="delete()"
                                         data-ng-disabled="!permissionChecker.check(declarationData, APP_CONSTANTS.DECLARATION_PERMISSION.DELETE)">
                                     <span data-translate-once="button.delete"></span>
+                                </button>
+                            </span>
+                            <!--Удалить выделенные строки Раздела 1 или раздела 2-->
+                            <span>
+                                <button type="button" class="btn btn-default"
+                                        data-ng-click="deleteSelectedRows()"
+                                        data-ng-disabled="!isEnableButtonDeleteSelectedRow()|| !permissionChecker.check(declarationData, APP_CONSTANTS.DECLARATION_PERMISSION.DELETE)">
+                                    <span data-translate-once="ndfl.button.deleteSelected"></span>
                                 </button>
                             </span>
                             <!--Загрузить Excel-->

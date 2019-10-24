@@ -149,6 +149,7 @@ public class DeclarationLockerImpl implements DeclarationLocker {
 
     private static final Set<OperationType> SET_REPORT_LINK_DECLARATION = ImmutableSet.of(
             OperationType.DELETE_DEC);
+    private static final Set<OperationType> SET_DELETE_DECLARATION_ROWS = ImmutableSet.of(OperationType.DELETE_DEC_ROWS);
 
     // Зависимости
     private final LockKeyGenerator mainLockKeyGenerator;
@@ -261,7 +262,10 @@ public class DeclarationLockerImpl implements DeclarationLocker {
             return doCheckAndLock(declarationDataIdList, operationType, SET_TRANSFER, additionalParams, userInfo, logger);
         } else if (operationType.equals(OperationType.EXCEL_UNLOAD_LIST)){
             return doCheckAndLock(declarationDataIdList, operationType, SET_REPORT_LINK_DECLARATION, additionalParams, userInfo, logger);
-        } else {
+        } else if (operationType.equals(OperationType.DELETE_DEC_ROWS)){
+            return doCheckAndLock(declarationDataIdList, operationType, SET_DELETE_DECLARATION_ROWS, additionalParams, userInfo, logger);
+        }
+        else {
             throw new IllegalArgumentException("Unknown operationType type!");
         }
     }

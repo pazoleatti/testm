@@ -284,12 +284,14 @@
                         $scope.searchFilter.params.income.taxRefundCondition.argument2 = undefined;
                     }
                 });
+
                 // Возвращяет признак того, что объект незаполнен
                 function isEmpty(object) {
                     return Object.keys(object).every(function (key) {
                         return !object[key] || object[key].condition && isFilterConditionEmpty(object[key]) || angular.isObject(object[key]) && isEmpty(object[key]);
                     });
                 }
+
                 // Возвращяет признак того, что объект, задающий условие для фильтрации, незаполнен
                 function isFilterConditionEmpty(filterCondition) {
                     return !filterCondition.operator || !filterCondition.operator.unary && !filterCondition.argument2;
@@ -675,6 +677,66 @@
                                 method: "POST",
                                 url: "controller/actions/declarationData/delete",
                                 data: [$stateParams.declarationDataId]
+                            }).then(function (response) {
+                                if (response.data && response.data.uuid && response.data.uuid !== null) {
+                                    if (response.data.success) {
+                                        //Обновить страницу и, если есть сообщения, показать их
+                                        var params = (response.data && response.data.uuid && response.data.uuid !== null) ? {uuid: response.data.uuid} : {};
+                                        $state.go("ndflJournal", params, {reload: true});
+                                    } else {
+                                        $logPanel.open('log-panel-container', response.data.uuid);
+                                    }
+                                }
+                            });
+                        }
+                    });
+                };
+
+                $scope.isEnableButtonDeleteSelectedRow = function () {
+                    if (!$scope.ndflTabsCtrl.getActiveTab) {
+                        return;
+                    }
+                    var tab = $scope.ndflTabsCtrl.getActiveTab();
+                    if (!tab) {
+                        return;
+                    }
+                    var section = tab.getSection && tab.getSection();
+                    var count = section === 1 ? tab.getGrid && tab.getGrid() && tab.getGrid().ctrl &&
+                        tab.getGrid().ctrl.getCountRecords && tab.getGrid().ctrl.getCountRecords()
+                        : tab.getRowsCount && tab.getRowsCount();
+                    return section < 3 && count > 0;
+                };
+
+                /**
+                 * @description Событие, которое возникает по нажатию на кнопку "Удалить выбранные строки"
+                 */
+                $scope.deleteSelectedRows = function () {
+                    var tab = $scope.ndflTabsCtrl.getActiveTab();
+                    var sectionId = tab.getSection();
+                    var rows = tab.getSelectedRows();
+                    console.log(sectionId);
+                    console.log(rows);
+                    var data = {
+                        declarationDataId: $stateParams.declarationDataId,
+                        section: 'SECTION'+sectionId,
+                        sectionIds: _.map(rows, function (r) {
+                            return r.id;
+                        })
+                    };
+                    console.log(data);
+                    $dialogs.confirmDialog({
+                        title: $filter('translate')('ndfl.dialog.deleteSelectedConfirmation.title'),
+                        content: $filter('translate')('ndfl.dialog.deleteSelectedConfirmation.content', {
+                            n: sectionId,
+                            info: sectionId === 2 ? "выбранным операциям" : "выбранным ФЛ"
+                        }),
+                        okBtnCaption: $filter('translate')('common.button.yes'),
+                        cancelBtnCaption: $filter('translate')('common.button.no'),
+                        okBtnClick: function () {
+                            $http({
+                                method: "POST",
+                                url: "controller/actions/declarationData/delete/selected",
+                                data: data
                             }).then(function (response) {
                                 if (response.data && response.data.uuid && response.data.uuid !== null) {
                                     if (response.data.success) {

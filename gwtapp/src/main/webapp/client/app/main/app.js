@@ -217,6 +217,9 @@
         "ndfl.report.excelTemplate.modal.bySelectedRows" : "по выбранным на странице",
 
         "ndfl.button.importExcel": "Загрузить из ТФ (Excel)",
+        "ndfl.button.deleteSelected":"Удалить выделенные строки",
+        "ndfl.dialog.deleteSelectedConfirmation.title": "Подтверждение удаления строк формы",
+        "ndfl.dialog.deleteSelectedConfirmation.content": "Вы действительно хотите удалить выбранные строки раздела \"{{n}}\"? Также будут удалены данные всех разделов относящихся к {{info}}.",
 
         "ndflReportJournal.button.createReport": "Создать отчетность",
         "ndflReportJournal.button.downloadReport": "Выгрузить",

@@ -1070,6 +1070,226 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 params, Long.class);
     }
 
+    @Override
+    public void deleteRowsBySection1(List<Long> ndflPersonIds) {
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        String sql = "\n" +
+                "--по разделу 1 удалим раздел 4\n" +
+                "delete\n" +
+                "from NDFL_PERSON_PREPAYMENT section4\n" +
+                "where exists(select *\n" +
+                "             from NDFL_PERSON_INCOME section2\n" +
+                "             where section2.NDFL_PERSON_ID = section4.NDFL_PERSON_ID\n" +
+                "               and section2.NDFL_PERSON_ID in (:ids));\n" +
+                "\n" +
+                "--по разделу 1 удалим раздел 3\n" +
+                "delete\n" +
+                "from NDFL_PERSON_DEDUCTION section3\n" +
+                "where exists(select *\n" +
+                "             from NDFL_PERSON_INCOME section2\n" +
+                "             where section2.NDFL_PERSON_ID = section3.NDFL_PERSON_ID\n" +
+                "               and section2.NDFL_PERSON_ID in (:ids));\n" +
+                "\n" +
+                "--по разделу 1 удалим раздел 2\n" +
+                "delete\n" +
+                "from NDFL_PERSON_INCOME section2\n" +
+                "where section2.NDFL_PERSON_ID in (:ids);\n" +
+                "\n" +
+                "\n" +
+                "--проверим в разделе 1 наличие строк, к которым нет соответствие в разделе 2\n" +
+                "delete from NDFL_PERSON section1\n" +
+                "where section1.id in (:ids)\n" +
+                "  and not exists(select * from NDFL_PERSON_INCOME section2 where section1.ID = section2.NDFL_PERSON_ID);\n" +
+                "\n" +
+                "--обновим сортировку в разделе 4\n" +
+                "--по разделу 1\n" +
+                "merge into NDFL_PERSON_PREPAYMENT target\n" +
+                "USING\n" +
+                "    (\n" +
+                "        select section4.ID, dense_rank() over (order by section4.ROW_NUM) new_row_num\n" +
+                "        from NDFL_PERSON_PREPAYMENT section4\n" +
+                "        where exists(select *\n" +
+                "                     from NDFL_PERSON_INCOME section2\n" +
+                "                     where section2.NDFL_PERSON_ID = section4.NDFL_PERSON_ID\n" +
+                "                       and section2.NDFL_PERSON_ID in (:ids))\n" +
+                "    ) sorted\n" +
+                "ON (target.ID = sorted.ID)\n" +
+                "WHEN MATCHED THEN\n" +
+                "    UPDATE\n" +
+                "    SET target.ROW_NUM = sorted.new_row_num;\n" +
+                "\n" +
+                "\n" +
+                "--обновим сортировку в разделе 3\n" +
+                "--по разделу 1\n" +
+                "merge into NDFL_PERSON_DEDUCTION target\n" +
+                "USING\n" +
+                "    (\n" +
+                "        select section3.ID, dense_rank() over (order by section3.ROW_NUM) new_row_num\n" +
+                "        from NDFL_PERSON_DEDUCTION section3\n" +
+                "        where exists(select *\n" +
+                "                     from NDFL_PERSON_INCOME section2\n" +
+                "                     where section2.NDFL_PERSON_ID = section3.NDFL_PERSON_ID\n" +
+                "                       and section2.NDFL_PERSON_ID in (:ids))\n" +
+                "    ) sorted\n" +
+                "ON (target.ID = sorted.ID)\n" +
+                "WHEN MATCHED THEN\n" +
+                "    UPDATE\n" +
+                "    SET target.ROW_NUM = sorted.new_row_num;\n" +
+                "\n" +
+                "--обновим сортировку в разделе 2\n" +
+                "--по разделу 1\n" +
+                "merge into NDFL_PERSON_INCOME target\n" +
+                "USING\n" +
+                "    (\n" +
+                "        select section2.ID, dense_rank() over (order by section2.ROW_NUM) new_row_num\n" +
+                "        from NDFL_PERSON_INCOME section2\n" +
+                "        where section2.NDFL_PERSON_ID in (:ids)\n" +
+                "    ) sorted\n" +
+                "ON (target.ID = sorted.ID)\n" +
+                "WHEN MATCHED THEN\n" +
+                "    UPDATE\n" +
+                "    SET target.ROW_NUM = sorted.new_row_num;\n" +
+                "\n" +
+                "\n" +
+                "--обновим сортировку в разделе 1\n" +
+                "--по разделу 1\n" +
+                "merge into NDFL_PERSON target\n" +
+                "USING\n" +
+                "    (\n" +
+                "        select section1.ID, dense_rank() over (order by section1.ROW_NUM) new_row_num\n" +
+                "        from NDFL_PERSON section1\n" +
+                "        where section1.ID in (:ids)\n" +
+                "    ) sorted\n" +
+                "ON (target.ID = sorted.ID)\n" +
+                "WHEN MATCHED THEN\n" +
+                "    UPDATE\n" +
+                "    SET target.ROW_NUM = sorted.new_row_num;\n";
+
+        //TODO Выпилить эту какашку и отрефакторить
+        sql = replaceIn(sql, "in\\s+\\(\\:ids\\)", ndflPersonIds);
+        getNamedParameterJdbcTemplate().update(sql, params);
+    }
+
+    @Override
+    public void deleteRowsBySection2(List<Long> ndflPersonIncomeIds) {
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        String sql = "\n" +
+                "--по разделу 2 удалим раздел 4\n" +
+                "delete from NDFL_PERSON_PREPAYMENT\n" +
+                "where ID in\n" +
+                "(\n" +
+                "    select section4.ID\n" +
+                "    from NDFL_PERSON_PREPAYMENT section4\n" +
+                "             inner join NDFL_PERSON_INCOME section2 ON section2.NDFL_PERSON_ID = section4.NDFL_PERSON_ID\n" +
+                "                                                      and section2.OPERATION_ID = section4.OPERATION_ID\n" +
+                "        and section2.ID in (:ids)\n" +
+                ");\n" +
+                "\n" +
+                "--по разделу 2 удалим раздел 3\n" +
+                "delete from NDFL_PERSON_DEDUCTION\n" +
+                "where ID in (\n" +
+                "    select section3.id\n" +
+                "    from NDFL_PERSON_DEDUCTION section3\n" +
+                "             inner join NDFL_PERSON_INCOME section2 ON section2.NDFL_PERSON_ID = section3.NDFL_PERSON_ID\n" +
+                "        and section2.OPERATION_ID = section3.OPERATION_ID\n" +
+                "        and section2.ID in (:ids)\n" +
+                ");\n" +
+                "\n" +
+                "--по разделу 2 удалим раздел 2\n" +
+                "delete\n" +
+                "from NDFL_PERSON_INCOME section2\n" +
+                "where section2.ID in (:ids);\n" +
+                "\n" +
+                "--проверим в разделе 1 наличие строк, к которым нет соответствие в разделе 2\n" +
+                "delete\n" +
+                "from NDFL_PERSON section1\n" +
+                "where section1.ID in (\n" +
+                "    select section2.NDFL_PERSON_ID\n" +
+                "    from NDFL_PERSON_INCOME section2\n" +
+                "    where section2.NDFL_PERSON_ID =section1.ID and section2.ID in (:ids))\n" +
+                "  and not exists(select * from NDFL_PERSON_INCOME section2 where section1.ID = section2.NDFL_PERSON_ID);\n" +
+                "\n" +
+                "--обновим сортировку в разделе 4\n" +
+                "--по разделу 2\n" +
+                "merge into NDFL_PERSON_PREPAYMENT target\n" +
+                "USING\n" +
+                "    (\n" +
+                "        select section4.ID, dense_rank() over (order by section4.ROW_NUM) new_row_num\n" +
+                "        from NDFL_PERSON_PREPAYMENT section4\n" +
+                "        where exists(select *\n" +
+                "                     from NDFL_PERSON_INCOME section2\n" +
+                "                     where section2.NDFL_PERSON_ID = section4.NDFL_PERSON_ID\n" +
+                "                       and section2.ID in (:ids))\n" +
+                "    ) sorted\n" +
+                "ON (target.ID = sorted.ID)\n" +
+                "WHEN MATCHED THEN\n" +
+                "    UPDATE\n" +
+                "    SET target.ROW_NUM = sorted.new_row_num;\n" +
+                "\n" +
+                "--обновим сортировку в разделе 3\n" +
+                "--по разделу 2\n" +
+                "merge into NDFL_PERSON_DEDUCTION target\n" +
+                "USING\n" +
+                "    (\n" +
+                "        select section3.ID, dense_rank() over (order by section3.ROW_NUM) new_row_num\n" +
+                "        from NDFL_PERSON_DEDUCTION section3\n" +
+                "        where exists(select *\n" +
+                "                     from NDFL_PERSON_INCOME section2\n" +
+                "                     where section2.NDFL_PERSON_ID = section3.NDFL_PERSON_ID\n" +
+                "                       and section2.ID in (:ids))\n" +
+                "    ) sorted\n" +
+                "ON (target.ID = sorted.ID)\n" +
+                "WHEN MATCHED THEN\n" +
+                "    UPDATE\n" +
+                "    SET target.ROW_NUM = sorted.new_row_num;\n" +
+                "\n" +
+                "--обновим сортировку в разделе 2\n" +
+                "--по разделу 2\n" +
+                "merge into NDFL_PERSON_INCOME target\n" +
+                "USING\n" +
+                "    (\n" +
+                "        select section2.ID, dense_rank() over (order by section2.ROW_NUM) new_row_num\n" +
+                "        from NDFL_PERSON_INCOME section2\n" +
+                "        where section2.ID in (:ids)\n" +
+                "    ) sorted\n" +
+                "ON (target.ID = sorted.ID)\n" +
+                "WHEN MATCHED THEN\n" +
+                "    UPDATE\n" +
+                "    SET target.ROW_NUM = sorted.new_row_num;\n" +
+                "\n" +
+                "\n" +
+                "--обновим сортировку в разделе 1\n" +
+                "--по разделу 2\n" +
+                "merge into NDFL_PERSON target\n" +
+                "USING\n" +
+                "    (\n" +
+                "        select section1.ID, dense_rank() over (order by section1.ROW_NUM) new_row_num\n" +
+                "        from NDFL_PERSON section1\n" +
+                "        where exists(\n" +
+                "                      select *\n" +
+                "                      from NDFL_PERSON_INCOME section2\n" +
+                "                      where section2.ID in (:ids) and section2.NDFL_PERSON_ID = section1.ID\n" +
+                "                  )\n" +
+                "    ) sorted\n" +
+                "ON (target.ID = sorted.ID)\n" +
+                "WHEN MATCHED THEN\n" +
+                "    UPDATE\n" +
+                "    SET target.ROW_NUM = sorted.new_row_num;";
+        //TODO Выпилить эту какашку и отрефакторить
+        sql = replaceIn(sql, "in\\s+\\(\\:ids\\)", ndflPersonIncomeIds);
+        getNamedParameterJdbcTemplate().update(sql, params);
+    }
+
+    private String replaceIn(String sql, String str, List<Long> inSql) {
+        StringBuffer buffer = new StringBuffer();
+        buffer
+                .append(" IN ")
+                .append("(")
+                .append(com.aplana.sbrf.taxaccounting.model.util.StringUtils.join(inSql.toArray(), ','))
+                .append(")");
+        return sql.replaceAll(str, buffer.toString());
+    }
+
     private Collection<Pair<String, String>> toPairs(List<KppOktmoPair> kppOktmoPairs) {
         List<Pair<String, String>> pairs = new ArrayList<>();
         for (KppOktmoPair kppOktmoPair : kppOktmoPairs) {

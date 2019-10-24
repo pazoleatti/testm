@@ -4,7 +4,7 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
     <changeSet id="3.10.0.1-skononova-1" author="skononova">
-	<sql>                          
+	<sql>
 		create or replace view vw_declaration_data as
 		select id, declaration_template_id, tax_organ_code, kpp, oktmo,department_report_period_id, state, last_data_modified, correction_num, created_date,file_name,doc_state_id  from declaration_data;
 		grant select on vw_declaration_data to TAXREC_UNSTABLE;
@@ -83,4 +83,12 @@
 	</changeSet>
 
 
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-8948 Реализовать удаление строк в ПНФ через интерфейс формы -->
+    <changeSet id="3.10.0.1-smolokovskikh-01" author="smolokovskikh">
+        <sql>
+            INSERT INTO ASYNC_TASK_TYPE(ID, NAME, HANDLER_BEAN, SHORT_QUEUE_LIMIT, TASK_LIMIT, LIMIT_KIND)
+            VALUES ('46', 'Удаление строк налоговой формы', 'DeleteSelectedDeclarationRowsAsyncTask',
+            '3000', '1000000', 'количество строк для удаления');
+        </sql>
+    </changeSet>
 </databaseChangeLog>
