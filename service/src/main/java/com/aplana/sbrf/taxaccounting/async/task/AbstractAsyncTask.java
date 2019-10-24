@@ -21,7 +21,6 @@ import org.apache.commons.lang3.time.FastDateFormat;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -44,11 +43,7 @@ public abstract class AbstractAsyncTask implements AsyncTask {
     @Autowired
     private NotificationService notificationService;
     @Autowired
-    @Qualifier("transactionHelper")
     private TransactionHelper tx;
-    @Autowired
-    @Qualifier("transactionHelperGlobal")
-    private TransactionHelper txg;
     @Autowired
     private LogEntryService logEntryService;
     @Autowired
@@ -128,13 +123,7 @@ public abstract class AbstractAsyncTask implements AsyncTask {
             logger.info("Начало выполнения операции %s", sdf_time.format(startDate));
         }
         asyncManager.updateState(taskData.getId(), AsyncTaskState.STARTED);
-        TransactionHelper transactionHelper;
-        if (taskData.getType().equals(AsyncTaskType.SEND_EDO)) {
-            transactionHelper = txg;
-        } else {
-            transactionHelper = tx;
-        }
-        final BusinessLogicResult taskStatus = transactionHelper.executeInNewTransaction(new TransactionLogic<BusinessLogicResult>() {
+        final BusinessLogicResult taskStatus = tx.executeInNewTransaction(new TransactionLogic<BusinessLogicResult>() {
             @Override
             public BusinessLogicResult execute() {
                 try {

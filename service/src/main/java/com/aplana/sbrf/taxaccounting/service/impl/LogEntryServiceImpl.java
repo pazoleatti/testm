@@ -11,7 +11,6 @@ import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.TransactionHelper;
 import com.aplana.sbrf.taxaccounting.service.TransactionLogic;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,7 +30,6 @@ public class LogEntryServiceImpl implements LogEntryService {
     private LogDao logDao;
 
     @Autowired
-    @Qualifier("transactionHelper")
     private TransactionHelper tx;
 
     @Override

@@ -168,7 +168,7 @@ public class DeclarationLockerImpl implements DeclarationLocker {
                                  DeclarationDataService declarationDataService,
                                  DeclarationTemplateService declarationTemplateService,
                                  TAUserService taUserService,
-                                 @Qualifier("transactionHelper") TransactionHelper tx) {
+                                 TransactionHelper tx) {
         this.mainLockKeyGenerator = mainLockKeyGenerator;
         this.checkupLockKeyGenerator = checkupKeyGenerator;
         this.declarationDataKeyLockDescriptor = declarationDataKeyLockDescriptor;

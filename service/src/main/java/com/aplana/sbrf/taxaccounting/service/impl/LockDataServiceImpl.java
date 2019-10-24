@@ -11,7 +11,6 @@ import com.aplana.sbrf.taxaccounting.service.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,7 +29,6 @@ public class LockDataServiceImpl implements LockDataService {
     @Autowired
     private TAUserDao userDao;
     @Autowired
-    @Qualifier("transactionHelper")
     private TransactionHelper tx;
     @Autowired
     private DeclarationDataService declarationDataService;
