@@ -1767,6 +1767,8 @@ class Report2Ndfl extends AbstractScriptClass {
                 new DeductionsPageProcessor().fillPage(new PageVisitor(acroForm, Файл, reference, ++index, page.СведДох, page.ПредВычССИList, page.УведВыч, page.СведСумДохDataList))
             } else if (page instanceof ApplicationPage) {
                 new ApplicationPageProcessor().fillPage(new PageVisitor(acroForm, Файл, reference, ++index, page.СведДох, page.ПредВычССИList, page.УведВыч, page.СведСумДохDataList))
+            } else if (page instanceof NullablePage) {
+                new NUllablePageProcessor().fillPage(new PageVisitor(acroForm, Файл, reference, ++index, null, null, null, null))
             }
             acroForm.flatten()
         }
@@ -1832,6 +1834,13 @@ class Report2Ndfl extends AbstractScriptClass {
     class ApplicationPage extends DocumentWrapper {
 
         ApplicationPage(PDDocument document) {
+            this.document = document
+        }
+    }
+
+    class NullablePage extends DocumentWrapper {
+
+        NullablePage(PDDocument document) {
             this.document = document
         }
     }
@@ -2041,6 +2050,24 @@ class Report2Ndfl extends AbstractScriptClass {
         }
     }
 
+    class EmptyDashedIncomeFiller extends FDFiller {
+
+        @Override
+        void accept(PageVisitor pageVisitor) {
+            processField(pageVisitor.acroForm.getField("taxRate"), null)
+            processField(pageVisitor.acroForm.getField("taxSumIntPart"), null)
+            processField(pageVisitor.acroForm.getField("taxSumFractPart"), null)
+            processField(pageVisitor.acroForm.getField("fixPayments"), null)
+            processField(pageVisitor.acroForm.getField("taxBaseIntPart"), null)
+            processField(pageVisitor.acroForm.getField("taxBaseFractPart"), null)
+            processField(pageVisitor.acroForm.getField("transferPayment"), null)
+            processField(pageVisitor.acroForm.getField("calculatedSum"), null)
+            processField(pageVisitor.acroForm.getField("overholdingTax"), null)
+            processField(pageVisitor.acroForm.getField("withholdingTax"), null)
+            processField(pageVisitor.acroForm.getField("notholdingTax"), null)
+        }
+    }
+
     @TypeChecked(TypeCheckingMode.SKIP)
     class DeductionFiller extends FDFiller {
         @Override
@@ -2172,6 +2199,17 @@ class Report2Ndfl extends AbstractScriptClass {
         }
     }
 
+    class NUllablePageProcessor extends FillPageProcessor {
+        List<FDFiller> pageParts = [new HeaderFiller(), new InfoFiller(), new EmptyDashedIncomeFiller(), new DeductionFiller()]
+
+        @Override
+        void fillPage(PageVisitor pageVisitor) {
+            for (FDFiller pagePart : pageParts) {
+                pagePart.accept(pageVisitor)
+            }
+        }
+    }
+
     @TypeChecked(TypeCheckingMode.SKIP)
     /**
      * Создает и определяет порядок заполнения страниц отчета
@@ -2271,6 +2309,10 @@ class Report2Ndfl extends AbstractScriptClass {
                 applicationPage.СведСумДохDataList = PageСведСумДохDataList
                 documentList << applicationPage
             }
+        }
+
+        if (СведДохList.size() == 0) {
+            documentList << new NullablePage(PDDocument.load(declarationService.getTemplateFileContent(declarationData.getDeclarationTemplateId(), DeclarationTemplateFile.NDFL_2_REPORT_BY_PERSON_PAGE_BASE)))
         }
 
         return documentList
