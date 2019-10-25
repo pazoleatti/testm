@@ -146,7 +146,7 @@ public class PeriodServiceImpl implements PeriodService {
     private void openCorrectionPeriod(DepartmentReportPeriod correctionPeriod, Logger logger) {
         DepartmentReportPeriod drpLast = departmentReportPeriodService.fetchLast(correctionPeriod.getDepartmentId(), correctionPeriod.getReportPeriod().getId());
         if (drpLast.getCorrectionDate() != null && drpLast.isActive() && !drpLast.getCorrectionDate().equals(correctionPeriod.getCorrectionDate())) {
-            throw new ServiceException("%s не может быть открыт, т.к уже открыт другой корректирующий период!",
+            throw new ServiceException("%s не может быть открыт, т.к уже открыт другой корректирующий период.",
                     periodWithCustomCorrectionDateDescription(correctionPeriod));
         }
         if (departmentReportPeriodService.isLaterCorrectionPeriodExists(correctionPeriod)) {
