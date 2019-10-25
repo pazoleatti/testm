@@ -21,6 +21,15 @@ import groovy.transform.EqualsAndHashCode
 import groovy.transform.TypeChecked
 import groovy.transform.TypeCheckingMode
 import org.apache.commons.lang3.time.DateUtils
+import org.jetbrains.annotations.NotNull
+import org.joda.time.LocalDate
+import org.springframework.jdbc.core.RowMapper
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
+import sun.java2d.pipe.SpanShapeRenderer
+
+import java.sql.ResultSet
+import java.sql.SQLException
 
 new Check(this).run()
 
@@ -44,6 +53,7 @@ class Check extends AbstractScriptClass {
     RefBookService refBookService
     SourceService sourceService
     OperationType operationType
+    NamedParameterJdbcTemplate namedParameterJdbcTemplate
 
     // Сервис для получения рабочих дней
     DateConditionWorkDay dateConditionWorkDay
@@ -162,6 +172,8 @@ class Check extends AbstractScriptClass {
     //Кэш Асну
     Map<Long, RefBookAsnu> asnuCache = [:]
 
+    List<BusinessCalendarDay> calendarDays = []
+
     Integer calculatedTaxDifference
 
     boolean section_2_15_fatal
@@ -224,6 +236,7 @@ class Check extends AbstractScriptClass {
         if (scriptClass.getBinding().hasVariable("operationType")) {
             this.operationType = (OperationType) scriptClass.getProperty("operationType")
         }
+        this.namedParameterJdbcTemplate = (NamedParameterJdbcTemplate) scriptClass.getProperty("namedParameterJdbcTemplate")
     }
 
     @Override
@@ -264,6 +277,8 @@ class Check extends AbstractScriptClass {
                 List<NdflPersonPrepayment> ndflPersonPrepaymentList = ndflPersonService.findNdflPersonPrepayment(declarationData.id)
                 logForDebug(SUCCESS_GET_TABLE, T_PERSON_PREPAYMENT_NAME, ndflPersonPrepaymentList.size())
 
+                initCalendar()
+
                 logForDebug("Получение записей из таблиц НФДЛ (" + (System.currentTimeMillis() - time) + " мс)")
 
                 time = System.currentTimeMillis()
@@ -300,6 +315,34 @@ class Check extends AbstractScriptClass {
                 logForDebug("Все проверки (" + (System.currentTimeMillis() - time) + " мс)")
         }
     }
+
+    void initCalendar() {
+        String query = "select cdate, ctype from ref_book_calendar"
+        calendarDays = namedParameterJdbcTemplate.query(query, new MapSqlParameterSource(), new RowMapper<BusinessCalendarDay>() {
+            @Override
+            BusinessCalendarDay mapRow(ResultSet rs, int rowNum) throws SQLException {
+                BusinessCalendarDay bcd = new BusinessCalendarDay(SimpleDateUtils.toStartOfDay(rs.getDate("cdate")), rs.getInt("ctype"))
+                return bcd
+            }
+        })
+        Collections.sort(calendarDays)
+    }
+
+    class BusinessCalendarDay implements Comparable<BusinessCalendarDay> {
+        Date cdate
+        Integer ctype
+
+        BusinessCalendarDay(Date cdate, Integer ctype) {
+            this.cdate = SimpleDateUtils.toStartOfDay(cdate)
+            this.ctype = ctype
+        }
+
+        @Override
+        int compareTo(@NotNull BusinessCalendarDay o) {
+            return cdate.compareTo(o.cdate)
+        }
+    }
+
 
     void readChecksFatals() {
         section_2_15_fatal = declarationService.isCheckFatal(DeclarationCheckCode.RNU_SECTION_2_15, declarationData.declarationTemplateId)
@@ -2482,7 +2525,24 @@ class Check extends AbstractScriptClass {
          */
         Date getWorkDay(Date startDate, int offset) {
             Date resultDate
-            if (offset == 0) {
+            startDate = SimpleDateUtils.toStartOfDay(startDate)
+            int index = 0
+            for (int i= 0; i < calendarDays.size(); i++) {
+                BusinessCalendarDay bcd = calendarDays.get(i)
+                if (bcd.cdate == startDate) {
+                    index = i
+                    break
+                }
+            }
+            int offsetIndex = index + offset
+
+            for (int i=offsetIndex; i < calendarDays.size(); i++) {
+                BusinessCalendarDay result = calendarDays.get(i)
+                if (result.ctype == 0) {
+                    return result.cdate
+                }
+            }
+            /*if (offset == 0) {
                 resultDate = workDayWithOffset0Cache.get(startDate)
                 if (resultDate == null) {
                     resultDate = calendarService.getWorkDay(startDate, offset)
@@ -2500,7 +2560,7 @@ class Check extends AbstractScriptClass {
                     resultDate = calendarService.getWorkDay(startDate, offset)
                     workDayWithOffset30Cache.put(startDate, resultDate)
                 }
-            }
+            }*/
             return resultDate
         }
 
