@@ -1072,15 +1072,16 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 
     @Override
     public void deleteRowsBySection1(List<Long> ndflPersonIds) {
-        MapSqlParameterSource params = new MapSqlParameterSource();
-        String sql = "\n" +
+        MapSqlParameterSource params = new MapSqlParameterSource("ids",ndflPersonIds);
+        String sql = "delete from TMP_NUMBERS0;\n" +
+                "insert into TMP_NUMBERS0 (num) VALUES(:ids);\n" +
                 "--по разделу 1 удалим раздел 4\n" +
                 "delete\n" +
                 "from NDFL_PERSON_PREPAYMENT section4\n" +
                 "where exists(select *\n" +
                 "             from NDFL_PERSON_INCOME section2\n" +
                 "             where section2.NDFL_PERSON_ID = section4.NDFL_PERSON_ID\n" +
-                "               and section2.NDFL_PERSON_ID in (:ids));\n" +
+                "               and section2.NDFL_PERSON_ID in (select NUM from TMP_NUMBERS0));\n" +
                 "\n" +
                 "--по разделу 1 удалим раздел 3\n" +
                 "delete\n" +
@@ -1088,17 +1089,17 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 "where exists(select *\n" +
                 "             from NDFL_PERSON_INCOME section2\n" +
                 "             where section2.NDFL_PERSON_ID = section3.NDFL_PERSON_ID\n" +
-                "               and section2.NDFL_PERSON_ID in (:ids));\n" +
+                "               and section2.NDFL_PERSON_ID in (select NUM from TMP_NUMBERS0));\n" +
                 "\n" +
                 "--по разделу 1 удалим раздел 2\n" +
                 "delete\n" +
                 "from NDFL_PERSON_INCOME section2\n" +
-                "where section2.NDFL_PERSON_ID in (:ids);\n" +
+                "where section2.NDFL_PERSON_ID in (select NUM from TMP_NUMBERS0);\n" +
                 "\n" +
                 "\n" +
                 "--проверим в разделе 1 наличие строк, к которым нет соответствие в разделе 2\n" +
                 "delete from NDFL_PERSON section1\n" +
-                "where section1.id in (:ids)\n" +
+                "where section1.id in (select NUM from TMP_NUMBERS0)\n" +
                 "  and not exists(select * from NDFL_PERSON_INCOME section2 where section1.ID = section2.NDFL_PERSON_ID);\n" +
                 "\n" +
                 "--обновим сортировку в разделе 4\n" +
@@ -1111,7 +1112,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 "        where exists(select *\n" +
                 "                     from NDFL_PERSON_INCOME section2\n" +
                 "                     where section2.NDFL_PERSON_ID = section4.NDFL_PERSON_ID\n" +
-                "                       and section2.NDFL_PERSON_ID in (:ids))\n" +
+                "                       and section2.NDFL_PERSON_ID in (select NUM from TMP_NUMBERS0))\n" +
                 "    ) sorted\n" +
                 "ON (target.ID = sorted.ID)\n" +
                 "WHEN MATCHED THEN\n" +
@@ -1129,7 +1130,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 "        where exists(select *\n" +
                 "                     from NDFL_PERSON_INCOME section2\n" +
                 "                     where section2.NDFL_PERSON_ID = section3.NDFL_PERSON_ID\n" +
-                "                       and section2.NDFL_PERSON_ID in (:ids))\n" +
+                "                       and section2.NDFL_PERSON_ID in (select NUM from TMP_NUMBERS0))\n" +
                 "    ) sorted\n" +
                 "ON (target.ID = sorted.ID)\n" +
                 "WHEN MATCHED THEN\n" +
@@ -1143,7 +1144,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 "    (\n" +
                 "        select section2.ID, dense_rank() over (order by section2.ROW_NUM) new_row_num\n" +
                 "        from NDFL_PERSON_INCOME section2\n" +
-                "        where section2.NDFL_PERSON_ID in (:ids)\n" +
+                "        where section2.NDFL_PERSON_ID in (select NUM from TMP_NUMBERS0)\n" +
                 "    ) sorted\n" +
                 "ON (target.ID = sorted.ID)\n" +
                 "WHEN MATCHED THEN\n" +
@@ -1158,7 +1159,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 "    (\n" +
                 "        select section1.ID, dense_rank() over (order by section1.ROW_NUM) new_row_num\n" +
                 "        from NDFL_PERSON section1\n" +
-                "        where section1.ID in (:ids)\n" +
+                "        where section1.ID in (select NUM from TMP_NUMBERS0)\n" +
                 "    ) sorted\n" +
                 "ON (target.ID = sorted.ID)\n" +
                 "WHEN MATCHED THEN\n" +
@@ -1166,14 +1167,16 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 "    SET target.ROW_NUM = sorted.new_row_num;\n";
 
         //TODO Выпилить эту какашку и отрефакторить
-        sql = replaceIn(sql, "in\\s+\\(\\:ids\\)", ndflPersonIds);
+        //sql = replaceIn(sql, "in\\s+\\(\\:ids\\)", ndflPersonIds);
         getNamedParameterJdbcTemplate().update(sql, params);
     }
 
     @Override
     public void deleteRowsBySection2(List<Long> ndflPersonIncomeIds) {
-        MapSqlParameterSource params = new MapSqlParameterSource();
-        String sql = "\n" +
+        MapSqlParameterSource params = new MapSqlParameterSource("ids",ndflPersonIncomeIds);
+        String sql =
+                "delete from TMP_NUMBERS0;\n" +
+                "insert into TMP_NUMBERS0 (num) VALUES(:ids);\n" +
                 "--по разделу 2 удалим раздел 4\n" +
                 "delete from NDFL_PERSON_PREPAYMENT\n" +
                 "where ID in\n" +
@@ -1182,7 +1185,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 "    from NDFL_PERSON_PREPAYMENT section4\n" +
                 "             inner join NDFL_PERSON_INCOME section2 ON section2.NDFL_PERSON_ID = section4.NDFL_PERSON_ID\n" +
                 "                                                      and section2.OPERATION_ID = section4.OPERATION_ID\n" +
-                "        and section2.ID in (:ids)\n" +
+                "        and section2.ID in (select NUM from TMP_NUMBERS0)\n" +
                 ");\n" +
                 "\n" +
                 "--по разделу 2 удалим раздел 3\n" +
@@ -1192,13 +1195,13 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 "    from NDFL_PERSON_DEDUCTION section3\n" +
                 "             inner join NDFL_PERSON_INCOME section2 ON section2.NDFL_PERSON_ID = section3.NDFL_PERSON_ID\n" +
                 "        and section2.OPERATION_ID = section3.OPERATION_ID\n" +
-                "        and section2.ID in (:ids)\n" +
+                "        and section2.ID in (select NUM from TMP_NUMBERS0)\n" +
                 ");\n" +
                 "\n" +
                 "--по разделу 2 удалим раздел 2\n" +
                 "delete\n" +
                 "from NDFL_PERSON_INCOME section2\n" +
-                "where section2.ID in (:ids);\n" +
+                "where section2.ID in (select NUM from TMP_NUMBERS0);\n" +
                 "\n" +
                 "--проверим в разделе 1 наличие строк, к которым нет соответствие в разделе 2\n" +
                 "delete\n" +
@@ -1206,7 +1209,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 "where section1.ID in (\n" +
                 "    select section2.NDFL_PERSON_ID\n" +
                 "    from NDFL_PERSON_INCOME section2\n" +
-                "    where section2.NDFL_PERSON_ID =section1.ID and section2.ID in (:ids))\n" +
+                "    where section2.NDFL_PERSON_ID =section1.ID and section2.ID in (select NUM from TMP_NUMBERS0))\n" +
                 "  and not exists(select * from NDFL_PERSON_INCOME section2 where section1.ID = section2.NDFL_PERSON_ID);\n" +
                 "\n" +
                 "--обновим сортировку в разделе 4\n" +
@@ -1219,7 +1222,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 "        where exists(select *\n" +
                 "                     from NDFL_PERSON_INCOME section2\n" +
                 "                     where section2.NDFL_PERSON_ID = section4.NDFL_PERSON_ID\n" +
-                "                       and section2.ID in (:ids))\n" +
+                "                       and section2.ID in (select NUM from TMP_NUMBERS0))\n" +
                 "    ) sorted\n" +
                 "ON (target.ID = sorted.ID)\n" +
                 "WHEN MATCHED THEN\n" +
@@ -1236,7 +1239,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 "        where exists(select *\n" +
                 "                     from NDFL_PERSON_INCOME section2\n" +
                 "                     where section2.NDFL_PERSON_ID = section3.NDFL_PERSON_ID\n" +
-                "                       and section2.ID in (:ids))\n" +
+                "                       and section2.ID in (select NUM from TMP_NUMBERS0))\n" +
                 "    ) sorted\n" +
                 "ON (target.ID = sorted.ID)\n" +
                 "WHEN MATCHED THEN\n" +
@@ -1250,7 +1253,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 "    (\n" +
                 "        select section2.ID, dense_rank() over (order by section2.ROW_NUM) new_row_num\n" +
                 "        from NDFL_PERSON_INCOME section2\n" +
-                "        where section2.ID in (:ids)\n" +
+                "        where section2.ID in (select NUM from TMP_NUMBERS0)\n" +
                 "    ) sorted\n" +
                 "ON (target.ID = sorted.ID)\n" +
                 "WHEN MATCHED THEN\n" +
@@ -1268,7 +1271,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 "        where exists(\n" +
                 "                      select *\n" +
                 "                      from NDFL_PERSON_INCOME section2\n" +
-                "                      where section2.ID in (:ids) and section2.NDFL_PERSON_ID = section1.ID\n" +
+                "                      where section2.ID in (select NUM from TMP_NUMBERS0) and section2.NDFL_PERSON_ID = section1.ID\n" +
                 "                  )\n" +
                 "    ) sorted\n" +
                 "ON (target.ID = sorted.ID)\n" +
@@ -1276,7 +1279,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 "    UPDATE\n" +
                 "    SET target.ROW_NUM = sorted.new_row_num;";
         //TODO Выпилить эту какашку и отрефакторить
-        sql = replaceIn(sql, "in\\s+\\(\\:ids\\)", ndflPersonIncomeIds);
+        //sql = replaceIn(sql, "in\\s+\\(\\:ids\\)", ndflPersonIncomeIds);
         getNamedParameterJdbcTemplate().update(sql, params);
     }
 

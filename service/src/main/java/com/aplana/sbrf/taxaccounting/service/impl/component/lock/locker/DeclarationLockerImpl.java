@@ -61,7 +61,8 @@ public class DeclarationLockerImpl implements DeclarationLocker {
             OperationType.RNU_NDFL_PERSON_ALL_DB, OperationType.EXCEL_TEMPLATE_DEC,
             OperationType.RNU_PAYMENT_REPORT, OperationType.RNU_RATE_REPORT, OperationType.RNU_NDFL_DETAIL_REPORT,
             OperationType.RNU_NDFL_2_6_DATA_XLSX_REPORT, OperationType.RNU_NDFL_2_6_DATA_TXT_REPORT,
-            OperationType.LOAD_TRANSPORT_FILE, OperationType.IMPORT_DECLARATION_EXCEL, OperationType.IDENTIFY_PERSON);
+            OperationType.LOAD_TRANSPORT_FILE, OperationType.IMPORT_DECLARATION_EXCEL, OperationType.IDENTIFY_PERSON
+    );
 
     private static final Set<OperationType> SET_UPDATE_PERSONS_DATA = ImmutableSet.of(
             OperationType.ACCEPT_DEC, OperationType.CHECK_DEC, OperationType.CONSOLIDATE,
@@ -149,7 +150,6 @@ public class DeclarationLockerImpl implements DeclarationLocker {
 
     private static final Set<OperationType> SET_REPORT_LINK_DECLARATION = ImmutableSet.of(
             OperationType.DELETE_DEC);
-    private static final Set<OperationType> SET_DELETE_DECLARATION_ROWS = ImmutableSet.of(OperationType.DELETE_DEC_ROWS);
 
     // Зависимости
     private final LockKeyGenerator mainLockKeyGenerator;
@@ -263,7 +263,7 @@ public class DeclarationLockerImpl implements DeclarationLocker {
         } else if (operationType.equals(OperationType.EXCEL_UNLOAD_LIST)){
             return doCheckAndLock(declarationDataIdList, operationType, SET_REPORT_LINK_DECLARATION, additionalParams, userInfo, logger);
         } else if (operationType.equals(OperationType.DELETE_DEC_ROWS)){
-            return doCheckAndLock(declarationDataIdList, operationType, SET_DELETE_DECLARATION_ROWS, additionalParams, userInfo, logger);
+            return doCheckAndLock(declarationDataIdList, operationType, SET_EDIT, additionalParams, userInfo, logger);
         }
         else {
             throw new IllegalArgumentException("Unknown operationType type!");

@@ -11,7 +11,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Проверка правильности заполнения класса {@link LocksRelations}
  */
-@Ignore
 public class LocksRelationsFillingTest {
 
     @Test

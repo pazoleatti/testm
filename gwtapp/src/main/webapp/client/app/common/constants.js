@@ -100,7 +100,8 @@
                 CONSOLIDATE: 1 << 12,
                 EDIT: 1 << 13,
                 UPDATE_DOC_STATE: 1 << 14,
-                PERSON_VIEW: 1 << 16
+                PERSON_VIEW: 1 << 16,
+                DELETE_ROWS: 1 << 17
             },
             USER_ACTIVITY: {
                 YES: {id: 1, name: 'Да'},

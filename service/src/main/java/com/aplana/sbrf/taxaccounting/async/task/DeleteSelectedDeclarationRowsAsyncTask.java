@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.async.task;
 
 import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
+import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.ndfl.NdflPersonDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.action.DeleteSelectedDeclarationRowsAction;
@@ -12,7 +13,6 @@ import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
 import com.aplana.sbrf.taxaccounting.service.LogBusinessService;
 import com.aplana.sbrf.taxaccounting.service.ReportService;
-import com.aplana.sbrf.taxaccounting.service.component.operation.DeclarationDataAsyncTaskDescriptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -46,9 +46,6 @@ public class DeleteSelectedDeclarationRowsAsyncTask extends AbstractAsyncTask {
     private LogBusinessService logBusinessService;
 
     @Autowired
-    private DeclarationDataAsyncTaskDescriptor declarationDataAsyncTaskDescriptor;
-
-    @Autowired
     private AuditService auditService;
 
     @Autowired
@@ -57,12 +54,14 @@ public class DeleteSelectedDeclarationRowsAsyncTask extends AbstractAsyncTask {
     @Autowired
     private ReportService reportService;
 
-    private String totalNotification;
+    @Autowired
+    private DeclarationTemplateDao declarationTemplateDao;
 
 
     @Override
     protected BusinessLogicResult executeBusinessLogic(AsyncTaskData taskData, Logger logger)
             throws InterruptedException {
+
         Collection<DeleteSelectedDeclarationRowsAction> toDeleteRows =
                 (Collection<DeleteSelectedDeclarationRowsAction>) taskData.getParams().get("toDeleteRows");
 
@@ -70,8 +69,16 @@ public class DeleteSelectedDeclarationRowsAsyncTask extends AbstractAsyncTask {
         for (DeleteSelectedDeclarationRowsAction deleteRows : toDeleteRows) {
 
             //Каждый набор deleteRows относится к своей налоговой форме,
-            // (этот комент тут только для, того чтобы помнить об этом)
             Long declarationDataId = deleteRows.getDeclarationDataId();
+            TAUserInfo userInfo = new TAUserInfo();
+            userInfo.setUser(userService.getUser(taskData.getUserId()));
+            DeclarationData declarationData = declarationDataService.get(declarationDataId, userInfo);
+            DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declarationData.getDeclarationTemplateId());
+
+            if (declarationTemplate.getType().getId() != (DeclarationType.NDFL_PRIMARY)) {
+                logger.error("Удаление строк возможно только для первичной формы");
+                continue;
+            }
 
             //Для строк Раздела 1
             if (DeclarationDataSection.SECTION1.equals(deleteRows.getSection())) {
@@ -104,20 +111,17 @@ public class DeleteSelectedDeclarationRowsAsyncTask extends AbstractAsyncTask {
                     asList(DeclarationReportType.SPECIFIC_REPORT_DEC, DeclarationReportType.EXCEL_DEC)
             );
 
+            String fullDeclarationDescription = getFullDeclarationDescription(taskData.getParams());
             //итоговый текст уведомления
-            String totalNotice = declarationDataAsyncTaskDescriptor.createDescription(declarationDataId, TOTAL_MESSAGE);
+            String totalNotice =  getTotalNotice(fullDeclarationDescription);
 
             //итоговый текст оповещения
-            totalNotification = totalNotice;
 
             logger.info(totalNotice);
 
-            TAUserInfo userInfo = new TAUserInfo();
-            userInfo.setUser(userService.getUser(taskData.getUserId()));
-
             //Запись в журнал аудита
-            DeclarationData declarationData = declarationDataService.get(declarationDataId, userInfo);
-            auditService.add(FormDataEvent.DELETE_ROWS, userInfo, declarationData, "Удаление строк с данными операций в ПНФ", null);
+            auditService.add(FormDataEvent.DELETE_ROWS, userInfo, declarationData,
+                    "Удаление строк с данными операций в ПНФ", null);
 
             //запись в историю
             logBusinessService.logFormEvent(declarationDataId,
@@ -126,11 +130,38 @@ public class DeleteSelectedDeclarationRowsAsyncTask extends AbstractAsyncTask {
                     "Успешно выполнено удаление строк формы",
                     userInfo);
 
-
         }
 
 
         return new BusinessLogicResult(true, null);
+    }
+
+
+    /**
+     * Описание формы
+     * @param params
+     * @return
+     */
+    private String getFullDeclarationDescription(Map<String, Object> params) {
+        return (String) params.get("fullDeclarationDescription");
+    }
+
+    /**
+     * Итоговое уведомление
+     * @param fullDeclarationDescription
+     * @return
+     */
+    private String getTotalNotice(String fullDeclarationDescription) {
+        return TOTAL_MESSAGE+fullDeclarationDescription;
+    }
+
+    /**
+     * Итоговое оповещение
+     * @param fullDeclarationDescription
+     * @return
+     */
+    private String getTotalNotification(String fullDeclarationDescription) {
+        return TOTAL_MESSAGE+fullDeclarationDescription;
     }
 
     /**
@@ -155,12 +186,20 @@ public class DeleteSelectedDeclarationRowsAsyncTask extends AbstractAsyncTask {
 
     @Override
     protected String getNotificationMsg(AsyncTaskData taskData) {
-        return totalNotification;
+        String fullDeclarationDescription = getFullDeclarationDescription(taskData.getParams());
+        return getTotalNotification(fullDeclarationDescription);
     }
+
+
 
     @Override
     protected String getErrorMsg(AsyncTaskData taskData, boolean unexpected) {
-        return "Текст ошибки при удалении строк налоговой формы";
+        StringBuilder message = new StringBuilder("Не выполнена операция \"Удаление строк\" для налоговой формы: ");
+        Exception e = (Exception) taskData.getParams().get("exceptionThrown");
+        if (e != null) {
+            message.append("Причина: ").append(e.toString());
+        }
+        return message.toString();
     }
 
     @Override
@@ -177,7 +216,6 @@ public class DeleteSelectedDeclarationRowsAsyncTask extends AbstractAsyncTask {
 
     @Override
     public String createDescription(TAUserInfo userInfo, Map<String, Object> params) {
-        Long declarationDataId = (Long) params.get("declarationDataId");
-        return declarationDataAsyncTaskDescriptor.createDescription(declarationDataId, "Удаление строк формы");
+        return "Удаление строк формы. " +getFullDeclarationDescription(params);
     }
 }

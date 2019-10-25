@@ -3299,10 +3299,13 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 Map<String, Object> params = new HashMap<>();
                 if (declarationDataIds.size() > 1) {
                     params.put("declarationDataIds", declarationDataIds);
-                } else
+                } else {
                     params.put("declarationDataId", declarationDataIds.get(0));
+                    params.put("fullDeclarationDescription", this.getFullDeclarationDescription(declarationDataIds.get(0)));
+                }
 
                 params.put("toDeleteRows", deleteRowsCollection);
+
                 asyncManager.createTask(OperationType.DELETE_DEC_ROWS, userInfo, params, logger);
 
             } catch (Exception e) {

@@ -14,7 +14,6 @@ import com.aplana.sbrf.taxaccounting.service.impl.component.lock.CheckupLockKeyG
 import com.aplana.sbrf.taxaccounting.service.impl.component.lock.MainLockKeyGeneratorImpl;
 import com.aplana.sbrf.taxaccounting.service.impl.component.lock.locker.DeclarationLockerImpl;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -22,19 +21,22 @@ import org.junit.runners.Parameterized.Parameters;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
-import static org.assertj.core.api.Assertions.*;
+import static com.aplana.sbrf.taxaccounting.service.component.lock.locker.LocksRelations.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.not;
 import static org.mockito.Mockito.*;
-import static com.aplana.sbrf.taxaccounting.service.component.lock.locker.LocksRelations.*;
 
 /**
  * Тестирование взаимосвязи блокировок в методе {@link DeclarationLocker#establishLock(Long, OperationType, TAUserInfo, Logger)}
  */
 @RunWith(Parameterized.class)
-@Ignore
+
 public class CrossBlockingTest {
 
     // Тестируемый класс

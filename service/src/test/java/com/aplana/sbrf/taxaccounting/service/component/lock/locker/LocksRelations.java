@@ -58,7 +58,6 @@ class LocksRelations {
     private static final String DECLARATION_DATA_ID_SEND_EDO = "DECLARATION_DATA_1_SEND_EDO";
     private static final String DECLARATION_DATA_ID_TRANSFER = "DECLARATION_DATA_1_TRANSFER_null";
     private static final String DECLARATION_DATA_ID_REPORT_LINK_DECLARATION = "DECLARATION_DATA_1_REPORT_LINK_DECLARATION";
-    private static final String DECLARATION_DATA_ID_DELETE_DECLARATION_ROWS = "DECLARATION_DATA_ID_DELETE_DECLARATION_ROWS";
 
     /**
      * Массив из всех блокировок
@@ -97,7 +96,7 @@ class LocksRelations {
             DECLARATION_DATA_ID_SEND_EDO,
             DECLARATION_DATA_ID_TRANSFER,
             DECLARATION_DATA_ID_REPORT_LINK_DECLARATION,
-            DECLARATION_DATA_ID_DELETE_DECLARATION_ROWS
+
     };
 
     /**
@@ -141,7 +140,6 @@ class LocksRelations {
         OPERATION_BY_LOCK.put(DECLARATION_DATA_ID_SEND_EDO, OperationType.SEND_EDO);
         OPERATION_BY_LOCK.put(DECLARATION_DATA_ID_TRANSFER, OperationType.TRANSFER);
         OPERATION_BY_LOCK.put(DECLARATION_DATA_ID_REPORT_LINK_DECLARATION, OperationType.EXCEL_UNLOAD_LIST);
-        OPERATION_BY_LOCK.put(DECLARATION_DATA_ID_DELETE_DECLARATION_ROWS, OperationType.DELETE_DEC_ROWS);
     }
 
     /**
@@ -172,8 +170,7 @@ class LocksRelations {
                         DECLARATION_DATA_ID_RNU_PAYMENT_REPORT,
                         DECLARATION_DATA_ID_RNU_NDFL_DETAIL_REPORT,
                         DECLARATION_DATA_ID_RNU_NDFL_2_6_DATA_XLSX_REPORT,
-                        DECLARATION_DATA_ID_RNU_NDFL_2_6_DATA_TXT_REPORT
-                )
+                        DECLARATION_DATA_ID_RNU_NDFL_2_6_DATA_TXT_REPORT)
         );
 
         CONFLICTING_LOCKS.put(
@@ -220,8 +217,7 @@ class LocksRelations {
                         EXCEL_TEMPLATE_DECLARATION_ID,
                         IMPORT_DECLARATION_EXCEL_ID,
                         DECLARATION_DATA_ID_CONSOLIDATE,
-                        DECLARATION_DATA_ID_EDIT,
-                        DECLARATION_DATA_ID_DELETE_DECLARATION_ROWS
+                        DECLARATION_DATA_ID_EDIT
                 )
         );
 
@@ -250,8 +246,7 @@ class LocksRelations {
                         DECLARATION_TEMPLATE_ID_6NDFL,
                         DECLARATION_TEMPLATE_ID_2NDFL_FL,
                         EXCEL_TEMPLATE_DECLARATION_ID,
-                        IMPORT_DECLARATION_EXCEL_ID,
-                        DECLARATION_DATA_ID_DELETE_DECLARATION_ROWS
+                        IMPORT_DECLARATION_EXCEL_ID
                 )
         );
 
@@ -267,8 +262,7 @@ class LocksRelations {
                         DECLARATION_DATA_ID_RETURN_DECLARATION,
                         DECLARATION_DATA_ID_UPDATE_PERSONS_DATA,
                         IMPORT_DECLARATION_EXCEL_ID,
-                        DECLARATION_DATA_ID_CHANGE_STATUS,
-                        DECLARATION_DATA_ID_DELETE_DECLARATION_ROWS
+                        DECLARATION_DATA_ID_CHANGE_STATUS
                 )
         );
 
@@ -296,8 +290,7 @@ class LocksRelations {
                         DECLARATION_TEMPLATE_ID_2NDFL_FL,
                         EXCEL_TEMPLATE_DECLARATION_ID,
                         DECLARATION_DATA_ID_IDENTIFY_PERSON,
-                        IMPORT_DECLARATION_EXCEL_ID,
-                        DECLARATION_DATA_ID_DELETE_DECLARATION_ROWS
+                        IMPORT_DECLARATION_EXCEL_ID
                 )
         );
 
@@ -313,8 +306,7 @@ class LocksRelations {
                         DECLARATION_DATA_ID_RETURN_DECLARATION,
                         DECLARATION_DATA_ID_UPDATE_PERSONS_DATA,
                         IMPORT_DECLARATION_EXCEL_ID,
-                        DECLARATION_DATA_ID_CHANGE_STATUS,
-                        DECLARATION_DATA_ID_DELETE_DECLARATION_ROWS
+                        DECLARATION_DATA_ID_CHANGE_STATUS
                 )
         );
 
@@ -331,8 +323,7 @@ class LocksRelations {
                         DECLARATION_DATA_ID_UPDATE_PERSONS_DATA,
                         IMPORT_DECLARATION_EXCEL_ID,
                         DECLARATION_DATA_ID_CHANGE_STATUS,
-                        DECLARATION_DATA_ID_SEND_EDO,
-                        DECLARATION_DATA_ID_DELETE_DECLARATION_ROWS
+                        DECLARATION_DATA_ID_SEND_EDO
                 )
         );
 
@@ -345,16 +336,14 @@ class LocksRelations {
                         DECLARATION_DATA_ID_IDENTIFY_PERSON,
                         DECLARATION_DATA_ID_ACCEPT_DECLARATION,
                         IMPORT_DECLARATION_EXCEL_ID,
-                        DECLARATION_DATA_ID_RETURN_DECLARATION,
-                        DECLARATION_DATA_ID_DELETE_DECLARATION_ROWS
+                        DECLARATION_DATA_ID_RETURN_DECLARATION
                 )
         );
 
         CONFLICTING_LOCKS.put(
                 DECLARATION_DATA_ID_EDIT_FILE,
                 Arrays.asList(
-                        DECLARATION_DATA_ID_DELETE_DECLARATION,
-                        DECLARATION_DATA_ID_DELETE_DECLARATION_ROWS
+                        DECLARATION_DATA_ID_DELETE_DECLARATION
                 )
         );
 
@@ -391,8 +380,7 @@ class LocksRelations {
                         IMPORT_DECLARATION_EXCEL_ID,
                         DECLARATION_DATA_ID_CHANGE_STATUS,
                         DECLARATION_DATA_ID_SEND_EDO,
-                        DECLARATION_DATA_ID_REPORT_LINK_DECLARATION,
-                        DECLARATION_DATA_ID_DELETE_DECLARATION_ROWS
+                        DECLARATION_DATA_ID_REPORT_LINK_DECLARATION
                 )
         );
 
@@ -414,8 +402,7 @@ class LocksRelations {
                         DECLARATION_DATA_ID_IDENTIFY_PERSON,
                         DECLARATION_DATA_ID_IMPORT_TF_DECLARATION,
                         DECLARATION_DATA_ID_UPDATE_PERSONS_DATA,
-                        IMPORT_DECLARATION_EXCEL_ID,
-                        DECLARATION_DATA_ID_DELETE_DECLARATION_ROWS
+                        IMPORT_DECLARATION_EXCEL_ID
                 )
         );
 
@@ -428,8 +415,7 @@ class LocksRelations {
                         DECLARATION_DATA_ID_IDENTIFY_PERSON,
                         DECLARATION_DATA_ID_IMPORT_TF_DECLARATION,
                         DECLARATION_DATA_ID_UPDATE_PERSONS_DATA,
-                        IMPORT_DECLARATION_EXCEL_ID,
-                        DECLARATION_DATA_ID_DELETE_DECLARATION_ROWS
+                        IMPORT_DECLARATION_EXCEL_ID
                 )
         );
 
@@ -441,8 +427,7 @@ class LocksRelations {
                         DECLARATION_DATA_ID_IMPORT_TF_DECLARATION,
                         DECLARATION_DATA_ID_UPDATE_PERSONS_DATA,
                         IMPORT_DECLARATION_EXCEL_ID,
-                        DECLARATION_DATA_ID_EDIT,
-                        DECLARATION_DATA_ID_DELETE_DECLARATION_ROWS
+                        DECLARATION_DATA_ID_EDIT
                 )
         );
 
@@ -455,8 +440,7 @@ class LocksRelations {
                         DECLARATION_DATA_ID_UPDATE_PERSONS_DATA,
                         DECLARATION_DATA_ID_DELETE_DECLARATION,
                         DECLARATION_DATA_ID_EDIT,
-                        DECLARATION_DATA_ID_CONSOLIDATE,
-                        DECLARATION_DATA_ID_DELETE_DECLARATION_ROWS
+                        DECLARATION_DATA_ID_CONSOLIDATE
                 )
         );
 
@@ -469,8 +453,7 @@ class LocksRelations {
                         DECLARATION_DATA_ID_UPDATE_PERSONS_DATA,
                         DECLARATION_DATA_ID_DELETE_DECLARATION,
                         DECLARATION_DATA_ID_EDIT,
-                        DECLARATION_DATA_ID_CONSOLIDATE,
-                        DECLARATION_DATA_ID_DELETE_DECLARATION_ROWS
+                        DECLARATION_DATA_ID_CONSOLIDATE
                 )
         );
 
@@ -483,8 +466,7 @@ class LocksRelations {
                         DECLARATION_DATA_ID_UPDATE_PERSONS_DATA,
                         DECLARATION_DATA_ID_DELETE_DECLARATION,
                         DECLARATION_DATA_ID_EDIT,
-                        DECLARATION_DATA_ID_CONSOLIDATE,
-                        DECLARATION_DATA_ID_DELETE_DECLARATION_ROWS
+                        DECLARATION_DATA_ID_CONSOLIDATE
                 )
         );
 
@@ -497,8 +479,7 @@ class LocksRelations {
                         DECLARATION_DATA_ID_UPDATE_PERSONS_DATA,
                         DECLARATION_DATA_ID_DELETE_DECLARATION,
                         DECLARATION_DATA_ID_EDIT,
-                        DECLARATION_DATA_ID_CONSOLIDATE,
-                        DECLARATION_DATA_ID_DELETE_DECLARATION_ROWS
+                        DECLARATION_DATA_ID_CONSOLIDATE
                 )
         );
 
@@ -511,39 +492,35 @@ class LocksRelations {
                         DECLARATION_DATA_ID_UPDATE_PERSONS_DATA,
                         DECLARATION_DATA_ID_DELETE_DECLARATION,
                         DECLARATION_DATA_ID_EDIT,
-                        DECLARATION_DATA_ID_CONSOLIDATE,
-                        DECLARATION_DATA_ID_DELETE_DECLARATION_ROWS
+                        DECLARATION_DATA_ID_CONSOLIDATE
                 )
         );
 
         CONFLICTING_LOCKS.put(
                 DECLARATION_DATA_ID_PDF,
                 Arrays.asList(
-                        DECLARATION_DATA_ID_DELETE_DECLARATION,
-                        DECLARATION_DATA_ID_DELETE_DECLARATION_ROWS
+                        DECLARATION_DATA_ID_DELETE_DECLARATION
                 )
         );
 
         CONFLICTING_LOCKS.put(
                 EXPORT_REPORTS_ID,
                 Arrays.asList(
-                        DECLARATION_DATA_ID_DELETE_DECLARATION, DECLARATION_DATA_ID_DELETE_DECLARATION_ROWS
+                        DECLARATION_DATA_ID_DELETE_DECLARATION
                 )
         );
 
         CONFLICTING_LOCKS.put(
                 DECLARATION_DATA_ID_REPORT_2NDFL1,
                 Arrays.asList(
-                        DECLARATION_DATA_ID_DELETE_DECLARATION,
-                        DECLARATION_DATA_ID_DELETE_DECLARATION_ROWS
+                        DECLARATION_DATA_ID_DELETE_DECLARATION
                 )
         );
 
         CONFLICTING_LOCKS.put(
                 DECLARATION_DATA_ID_REPORT_2NDFL2,
                 Arrays.asList(
-                        DECLARATION_DATA_ID_DELETE_DECLARATION,
-                        DECLARATION_DATA_ID_DELETE_DECLARATION_ROWS
+                        DECLARATION_DATA_ID_DELETE_DECLARATION
                 )
         );
 
@@ -553,8 +530,7 @@ class LocksRelations {
                         DECLARATION_DATA_ID_CONSOLIDATE,
                         DECLARATION_DATA_ID_DELETE_DECLARATION,
                         DECLARATION_DATA_ID_EDIT,
-                        DECLARATION_DATA_ID_UPDATE_PERSONS_DATA,
-                        DECLARATION_DATA_ID_DELETE_DECLARATION_ROWS
+                        DECLARATION_DATA_ID_UPDATE_PERSONS_DATA
                 )
         );
 
@@ -564,9 +540,7 @@ class LocksRelations {
                         DECLARATION_DATA_ID_CONSOLIDATE,
                         DECLARATION_DATA_ID_DELETE_DECLARATION,
                         DECLARATION_DATA_ID_EDIT,
-                        DECLARATION_DATA_ID_UPDATE_PERSONS_DATA,
-                        DECLARATION_DATA_ID_DELETE_DECLARATION_ROWS
-                )
+                        DECLARATION_DATA_ID_UPDATE_PERSONS_DATA)
         );
 
         CONFLICTING_LOCKS.put(
@@ -575,9 +549,7 @@ class LocksRelations {
                         DECLARATION_DATA_ID_CONSOLIDATE,
                         DECLARATION_DATA_ID_DELETE_DECLARATION,
                         DECLARATION_DATA_ID_EDIT,
-                        DECLARATION_DATA_ID_UPDATE_PERSONS_DATA,
-                        DECLARATION_DATA_ID_DELETE_DECLARATION_ROWS
-                )
+                        DECLARATION_DATA_ID_UPDATE_PERSONS_DATA)
         );
 
         CONFLICTING_LOCKS.put(
@@ -586,9 +558,7 @@ class LocksRelations {
                         DECLARATION_DATA_ID_CONSOLIDATE,
                         DECLARATION_DATA_ID_DELETE_DECLARATION,
                         DECLARATION_DATA_ID_EDIT,
-                        DECLARATION_DATA_ID_UPDATE_PERSONS_DATA,
-                        DECLARATION_DATA_ID_DELETE_DECLARATION_ROWS
-                )
+                        DECLARATION_DATA_ID_UPDATE_PERSONS_DATA)
         );
 
         CONFLICTING_LOCKS.put(
@@ -597,9 +567,7 @@ class LocksRelations {
                         DECLARATION_DATA_ID_CONSOLIDATE,
                         DECLARATION_DATA_ID_DELETE_DECLARATION,
                         DECLARATION_DATA_ID_EDIT,
-                        DECLARATION_DATA_ID_UPDATE_PERSONS_DATA,
-                        DECLARATION_DATA_ID_DELETE_DECLARATION_ROWS
-                )
+                        DECLARATION_DATA_ID_UPDATE_PERSONS_DATA)
         );
 
         CONFLICTING_LOCKS.put(
@@ -609,9 +577,7 @@ class LocksRelations {
                         DECLARATION_DATA_ID_CHECK_DECLARATION,
                         DECLARATION_DATA_ID_DELETE_DECLARATION,
                         DECLARATION_DATA_ID_RETURN_DECLARATION,
-                        DECLARATION_DATA_ID_SEND_EDO,
-                        DECLARATION_DATA_ID_DELETE_DECLARATION_ROWS
-                )
+                        DECLARATION_DATA_ID_SEND_EDO)
         );
 
         CONFLICTING_LOCKS.put(
@@ -619,9 +585,7 @@ class LocksRelations {
                 Arrays.asList(
                         DECLARATION_DATA_ID_DELETE_DECLARATION,
                         DECLARATION_DATA_ID_RETURN_DECLARATION,
-                        DECLARATION_DATA_ID_CHANGE_STATUS,
-                        DECLARATION_DATA_ID_DELETE_DECLARATION_ROWS
-                )
+                        DECLARATION_DATA_ID_CHANGE_STATUS)
         );
 
         CONFLICTING_LOCKS.put(
@@ -631,17 +595,13 @@ class LocksRelations {
                         DECLARATION_DATA_ID_IDENTIFY_PERSON,
                         DECLARATION_DATA_ID_RETURN_DECLARATION,
                         DECLARATION_DATA_ID_UPDATE_PERSONS_DATA,
-                        DECLARATION_DATA_ID_CONSOLIDATE,
-                        DECLARATION_DATA_ID_DELETE_DECLARATION_ROWS
-                )
+                        DECLARATION_DATA_ID_CONSOLIDATE)
         );
 
         CONFLICTING_LOCKS.put(
                 DECLARATION_DATA_ID_REPORT_LINK_DECLARATION,
                 Arrays.asList(
-                        DECLARATION_DATA_ID_DELETE_DECLARATION,
-                        DECLARATION_DATA_ID_DELETE_DECLARATION_ROWS
-                )
+                        DECLARATION_DATA_ID_DELETE_DECLARATION)
         );
     }
 

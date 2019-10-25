@@ -693,6 +693,17 @@
                 };
 
                 $scope.isEnableButtonDeleteSelectedRow = function () {
+
+                    if($scope.declarationData.declarationType !== 100){
+                        return;
+                    }
+
+                    if(!$scope.permissionChecker.check(
+                        $scope.declarationData,
+                        APP_CONSTANTS.DECLARATION_PERMISSION.DELETE_ROWS)) {
+                        return;
+                    }
+
                     if (!$scope.ndflTabsCtrl.getActiveTab) {
                         return;
                     }
@@ -704,7 +715,8 @@
                     var count = section === 1 ? tab.getGrid && tab.getGrid() && tab.getGrid().ctrl &&
                         tab.getGrid().ctrl.getCountRecords && tab.getGrid().ctrl.getCountRecords()
                         : tab.getRowsCount && tab.getRowsCount();
-                    return section < 3 && count > 0;
+
+                    return section < 3 && count > 0 && tab.getSelectedRows().length>0;
                 };
 
                 /**
@@ -723,7 +735,7 @@
                             return r.id;
                         })
                     };
-                    console.log(data);
+
                     $dialogs.confirmDialog({
                         title: $filter('translate')('ndfl.dialog.deleteSelectedConfirmation.title'),
                         content: $filter('translate')('ndfl.dialog.deleteSelectedConfirmation.content', {
