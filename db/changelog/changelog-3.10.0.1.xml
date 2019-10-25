@@ -98,4 +98,10 @@
 			<where>DECLARATION_TEMPLATE_ID = 101 and EVENT_ID = 5</where>
 		</update>
 	</changeSet>
+
+	<changeSet id="3.10.0.1-ytrofimov-3" author="ytrofimov">
+		<sql>
+			INSERT INTO EVENT (ID, NAME) VALUES ('10018', 'Удаление строк формы');
+		</sql>
+	</changeSet>
 </databaseChangeLog>

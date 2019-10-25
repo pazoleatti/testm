@@ -31,7 +31,7 @@ import static java.util.Collections.singletonList;
 public class DeleteSelectedDeclarationRowsAsyncTask extends AbstractAsyncTask {
 
 
-    public static final String DELETE_ROW_MESSAGE = "Раздел%s. Удалена строка \"%s\". %s";
+    public static final String DELETE_ROW_MESSAGE = "Раздел %s. Удалена строка \"%s\". %s";
     public static final String SECTION1_INFO_MESSAGE = "ФЛ: %s";
     public static final String SECTION2_INFO_MESSAGE = "ID операции: %s";
     public static final String TOTAL_MESSAGE = "Выполнено удаление строк формы";
@@ -88,7 +88,7 @@ public class DeleteSelectedDeclarationRowsAsyncTask extends AbstractAsyncTask {
                 //TODO получение строк раздела 1 перетащить в сервис из dao или подумать
                 List<NdflPerson> ndflPersonList = ndflPersonDao.findByIdIn(deleteRows.getSectionIds());
                 for (NdflPerson ndflPerson : ndflPersonList) {
-                    logger.info(DELETE_ROW_MESSAGE, String.format(SECTION1_INFO_MESSAGE, ndflPerson.getFullName()));
+                    logger.info(DELETE_ROW_MESSAGE, "1", ndflPerson.getRowNum(), String.format(SECTION1_INFO_MESSAGE, ndflPerson.getFullName()));
                 }
             }
 
@@ -101,7 +101,7 @@ public class DeleteSelectedDeclarationRowsAsyncTask extends AbstractAsyncTask {
                 //TODO получение строк раздела 2 перетащить в сервис из dao или подумать
                 List<NdflPersonIncome> incomes = ndflPersonDao.findAllIncomesByIdIn(deleteRows.getSectionIds());
                 for (NdflPersonIncome income : incomes) {
-                    logger.info(DELETE_ROW_MESSAGE, String.format(SECTION2_INFO_MESSAGE, income.getOperationId()));
+                    logger.info(DELETE_ROW_MESSAGE, "2", income.getRowNum(), String.format(SECTION2_INFO_MESSAGE, income.getOperationId()));
                 }
             }
 
@@ -120,7 +120,7 @@ public class DeleteSelectedDeclarationRowsAsyncTask extends AbstractAsyncTask {
             logger.info(totalNotice);
 
             //Запись в журнал аудита
-            auditService.add(FormDataEvent.DELETE_ROWS, userInfo, declarationData,
+            auditService.add(null, userInfo, declarationData,
                     "Удаление строк с данными операций в ПНФ", null);
 
             //запись в историю

@@ -1072,37 +1072,33 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 
     @Override
     public void deleteRowsBySection1(List<Long> ndflPersonIds) {
-        MapSqlParameterSource params = new MapSqlParameterSource("ids",ndflPersonIds);
-        String sql = "delete from TMP_NUMBERS0;\n" +
-                "insert into TMP_NUMBERS0 (num) VALUES(:ids);\n" +
-                "--по разделу 1 удалим раздел 4\n" +
+
+        String deleteTemp = "delete from TMP_NUMBERS0";
+        String insertTemp = "insert into TMP_NUMBERS0 (num) VALUES(:ids)";
+        String deleteSection4 = "--по разделу 1 удалим раздел 4\n" +
                 "delete\n" +
                 "from NDFL_PERSON_PREPAYMENT section4\n" +
                 "where exists(select *\n" +
                 "             from NDFL_PERSON_INCOME section2\n" +
                 "             where section2.NDFL_PERSON_ID = section4.NDFL_PERSON_ID\n" +
-                "               and section2.NDFL_PERSON_ID in (select NUM from TMP_NUMBERS0));\n" +
-                "\n" +
-                "--по разделу 1 удалим раздел 3\n" +
+                "               and section2.NDFL_PERSON_ID in (select NUM from TMP_NUMBERS0))";
+
+        String deleteSection3 = "--по разделу 1 удалим раздел 3\n" +
                 "delete\n" +
                 "from NDFL_PERSON_DEDUCTION section3\n" +
                 "where exists(select *\n" +
                 "             from NDFL_PERSON_INCOME section2\n" +
                 "             where section2.NDFL_PERSON_ID = section3.NDFL_PERSON_ID\n" +
-                "               and section2.NDFL_PERSON_ID in (select NUM from TMP_NUMBERS0));\n" +
-                "\n" +
-                "--по разделу 1 удалим раздел 2\n" +
+                "               and section2.NDFL_PERSON_ID in (select NUM from TMP_NUMBERS0))";
+        String deleteSection2 = "--по разделу 1 удалим раздел 2\n" +
                 "delete\n" +
                 "from NDFL_PERSON_INCOME section2\n" +
-                "where section2.NDFL_PERSON_ID in (select NUM from TMP_NUMBERS0);\n" +
-                "\n" +
-                "\n" +
-                "--проверим в разделе 1 наличие строк, к которым нет соответствие в разделе 2\n" +
+                "where section2.NDFL_PERSON_ID in (select NUM from TMP_NUMBERS0)";
+        String deleteSection1 = "--проверим в разделе 1 наличие строк, к которым нет соответствие в разделе 2\n" +
                 "delete from NDFL_PERSON section1\n" +
                 "where section1.id in (select NUM from TMP_NUMBERS0)\n" +
-                "  and not exists(select * from NDFL_PERSON_INCOME section2 where section1.ID = section2.NDFL_PERSON_ID);\n" +
-                "\n" +
-                "--обновим сортировку в разделе 4\n" +
+                "  and not exists(select * from NDFL_PERSON_INCOME section2 where section1.ID = section2.NDFL_PERSON_ID)";
+        String sortSection4 = "--обновим сортировку в разделе 4\n" +
                 "--по разделу 1\n" +
                 "merge into NDFL_PERSON_PREPAYMENT target\n" +
                 "USING\n" +
@@ -1117,10 +1113,8 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 "ON (target.ID = sorted.ID)\n" +
                 "WHEN MATCHED THEN\n" +
                 "    UPDATE\n" +
-                "    SET target.ROW_NUM = sorted.new_row_num;\n" +
-                "\n" +
-                "\n" +
-                "--обновим сортировку в разделе 3\n" +
+                "    SET target.ROW_NUM = sorted.new_row_num";
+        String sortSection3 = "--обновим сортировку в разделе 3\n" +
                 "--по разделу 1\n" +
                 "merge into NDFL_PERSON_DEDUCTION target\n" +
                 "USING\n" +
@@ -1135,9 +1129,9 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 "ON (target.ID = sorted.ID)\n" +
                 "WHEN MATCHED THEN\n" +
                 "    UPDATE\n" +
-                "    SET target.ROW_NUM = sorted.new_row_num;\n" +
-                "\n" +
-                "--обновим сортировку в разделе 2\n" +
+                "    SET target.ROW_NUM = sorted.new_row_num\n";
+
+        String sortSection2 = "--обновим сортировку в разделе 2\n" +
                 "--по разделу 1\n" +
                 "merge into NDFL_PERSON_INCOME target\n" +
                 "USING\n" +
@@ -1149,10 +1143,9 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 "ON (target.ID = sorted.ID)\n" +
                 "WHEN MATCHED THEN\n" +
                 "    UPDATE\n" +
-                "    SET target.ROW_NUM = sorted.new_row_num;\n" +
-                "\n" +
-                "\n" +
-                "--обновим сортировку в разделе 1\n" +
+                "    SET target.ROW_NUM = sorted.new_row_num";
+
+        String sortSection1 = "--обновим сортировку в разделе 1\n" +
                 "--по разделу 1\n" +
                 "merge into NDFL_PERSON target\n" +
                 "USING\n" +
@@ -1164,20 +1157,29 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 "ON (target.ID = sorted.ID)\n" +
                 "WHEN MATCHED THEN\n" +
                 "    UPDATE\n" +
-                "    SET target.ROW_NUM = sorted.new_row_num;\n";
+                "    SET target.ROW_NUM = sorted.new_row_num";
 
-        //TODO Выпилить эту какашку и отрефакторить
-        //sql = replaceIn(sql, "in\\s+\\(\\:ids\\)", ndflPersonIds);
-        getNamedParameterJdbcTemplate().update(sql, params);
+        MapSqlParameterSource emptyParams = new MapSqlParameterSource();
+        MapSqlParameterSource params = new MapSqlParameterSource("ids",ndflPersonIds);
+
+        getNamedParameterJdbcTemplate().update(deleteTemp, emptyParams);
+        getNamedParameterJdbcTemplate().update(insertTemp, params);
+        getNamedParameterJdbcTemplate().update(deleteSection4, emptyParams);
+        getNamedParameterJdbcTemplate().update(deleteSection3, emptyParams);
+        getNamedParameterJdbcTemplate().update(deleteSection2, emptyParams);
+        getNamedParameterJdbcTemplate().update(deleteSection1, emptyParams);
+        getNamedParameterJdbcTemplate().update(sortSection4, emptyParams);
+        getNamedParameterJdbcTemplate().update(sortSection3, emptyParams);
+        getNamedParameterJdbcTemplate().update(sortSection2, emptyParams);
+        getNamedParameterJdbcTemplate().update(sortSection1, emptyParams);
     }
 
     @Override
     public void deleteRowsBySection2(List<Long> ndflPersonIncomeIds) {
-        MapSqlParameterSource params = new MapSqlParameterSource("ids",ndflPersonIncomeIds);
-        String sql =
-                "delete from TMP_NUMBERS0;\n" +
-                "insert into TMP_NUMBERS0 (num) VALUES(:ids);\n" +
-                "--по разделу 2 удалим раздел 4\n" +
+        String deleteTemp = "delete from TMP_NUMBERS0";
+        String insertTemp = "insert into TMP_NUMBERS0 (num) VALUES(:ids)";
+
+        String deleteSection4 = "--по разделу 2 удалим раздел 4\n" +
                 "delete from NDFL_PERSON_PREPAYMENT\n" +
                 "where ID in\n" +
                 "(\n" +
@@ -1185,34 +1187,29 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 "    from NDFL_PERSON_PREPAYMENT section4\n" +
                 "             inner join NDFL_PERSON_INCOME section2 ON section2.NDFL_PERSON_ID = section4.NDFL_PERSON_ID\n" +
                 "                                                      and section2.OPERATION_ID = section4.OPERATION_ID\n" +
-                "        and section2.ID in (select NUM from TMP_NUMBERS0)\n" +
-                ");\n" +
-                "\n" +
-                "--по разделу 2 удалим раздел 3\n" +
+                "        and section2.ID in (select NUM from TMP_NUMBERS0))\n";
+        String deleteSection3 = "--по разделу 2 удалим раздел 3\n" +
                 "delete from NDFL_PERSON_DEDUCTION\n" +
                 "where ID in (\n" +
                 "    select section3.id\n" +
                 "    from NDFL_PERSON_DEDUCTION section3\n" +
                 "             inner join NDFL_PERSON_INCOME section2 ON section2.NDFL_PERSON_ID = section3.NDFL_PERSON_ID\n" +
                 "        and section2.OPERATION_ID = section3.OPERATION_ID\n" +
-                "        and section2.ID in (select NUM from TMP_NUMBERS0)\n" +
-                ");\n" +
-                "\n" +
-                "--по разделу 2 удалим раздел 2\n" +
+                "        and section2.ID in (select NUM from TMP_NUMBERS0))";
+
+        String deleteSection2 = "--по разделу 2 удалим раздел 2\n" +
                 "delete\n" +
                 "from NDFL_PERSON_INCOME section2\n" +
-                "where section2.ID in (select NUM from TMP_NUMBERS0);\n" +
-                "\n" +
-                "--проверим в разделе 1 наличие строк, к которым нет соответствие в разделе 2\n" +
+                "where section2.ID in (select NUM from TMP_NUMBERS0)\n";
+        String checkSection1 = "--проверим в разделе 1 наличие строк, к которым нет соответствие в разделе 2\n" +
                 "delete\n" +
                 "from NDFL_PERSON section1\n" +
                 "where section1.ID in (\n" +
                 "    select section2.NDFL_PERSON_ID\n" +
                 "    from NDFL_PERSON_INCOME section2\n" +
                 "    where section2.NDFL_PERSON_ID =section1.ID and section2.ID in (select NUM from TMP_NUMBERS0))\n" +
-                "  and not exists(select * from NDFL_PERSON_INCOME section2 where section1.ID = section2.NDFL_PERSON_ID);\n" +
-                "\n" +
-                "--обновим сортировку в разделе 4\n" +
+                "  and not exists(select * from NDFL_PERSON_INCOME section2 where section1.ID = section2.NDFL_PERSON_ID)";
+        String sortSection4 = "--обновим сортировку в разделе 4\n" +
                 "--по разделу 2\n" +
                 "merge into NDFL_PERSON_PREPAYMENT target\n" +
                 "USING\n" +
@@ -1227,9 +1224,9 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 "ON (target.ID = sorted.ID)\n" +
                 "WHEN MATCHED THEN\n" +
                 "    UPDATE\n" +
-                "    SET target.ROW_NUM = sorted.new_row_num;\n" +
-                "\n" +
-                "--обновим сортировку в разделе 3\n" +
+                "    SET target.ROW_NUM = sorted.new_row_num\n";
+
+        String sortSection3 = "--обновим сортировку в разделе 3\n" +
                 "--по разделу 2\n" +
                 "merge into NDFL_PERSON_DEDUCTION target\n" +
                 "USING\n" +
@@ -1244,9 +1241,9 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 "ON (target.ID = sorted.ID)\n" +
                 "WHEN MATCHED THEN\n" +
                 "    UPDATE\n" +
-                "    SET target.ROW_NUM = sorted.new_row_num;\n" +
-                "\n" +
-                "--обновим сортировку в разделе 2\n" +
+                "    SET target.ROW_NUM = sorted.new_row_num\n";
+
+        String sortSection2 = "--обновим сортировку в разделе 2\n" +
                 "--по разделу 2\n" +
                 "merge into NDFL_PERSON_INCOME target\n" +
                 "USING\n" +
@@ -1258,10 +1255,8 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 "ON (target.ID = sorted.ID)\n" +
                 "WHEN MATCHED THEN\n" +
                 "    UPDATE\n" +
-                "    SET target.ROW_NUM = sorted.new_row_num;\n" +
-                "\n" +
-                "\n" +
-                "--обновим сортировку в разделе 1\n" +
+                "    SET target.ROW_NUM = sorted.new_row_num\n";
+        String sortSection1 = "--обновим сортировку в разделе 1\n" +
                 "--по разделу 2\n" +
                 "merge into NDFL_PERSON target\n" +
                 "USING\n" +
@@ -1277,20 +1272,22 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 "ON (target.ID = sorted.ID)\n" +
                 "WHEN MATCHED THEN\n" +
                 "    UPDATE\n" +
-                "    SET target.ROW_NUM = sorted.new_row_num;";
-        //TODO Выпилить эту какашку и отрефакторить
-        //sql = replaceIn(sql, "in\\s+\\(\\:ids\\)", ndflPersonIncomeIds);
-        getNamedParameterJdbcTemplate().update(sql, params);
-    }
+                "    SET target.ROW_NUM = sorted.new_row_num";
 
-    private String replaceIn(String sql, String str, List<Long> inSql) {
-        StringBuffer buffer = new StringBuffer();
-        buffer
-                .append(" IN ")
-                .append("(")
-                .append(com.aplana.sbrf.taxaccounting.model.util.StringUtils.join(inSql.toArray(), ','))
-                .append(")");
-        return sql.replaceAll(str, buffer.toString());
+        MapSqlParameterSource params = new MapSqlParameterSource("ids",ndflPersonIncomeIds);
+
+        MapSqlParameterSource emptyParams = new MapSqlParameterSource();
+
+        getNamedParameterJdbcTemplate().update(deleteTemp, emptyParams);
+        getNamedParameterJdbcTemplate().update(insertTemp, params);
+        getNamedParameterJdbcTemplate().update(deleteSection4, emptyParams);
+        getNamedParameterJdbcTemplate().update(deleteSection3, emptyParams);
+        getNamedParameterJdbcTemplate().update(deleteSection2, emptyParams);
+        getNamedParameterJdbcTemplate().update(checkSection1, emptyParams);
+        getNamedParameterJdbcTemplate().update(sortSection4, emptyParams);
+        getNamedParameterJdbcTemplate().update(sortSection3, emptyParams);
+        getNamedParameterJdbcTemplate().update(sortSection2, emptyParams);
+        getNamedParameterJdbcTemplate().update(sortSection1, emptyParams);
     }
 
     private Collection<Pair<String, String>> toPairs(List<KppOktmoPair> kppOktmoPairs) {
