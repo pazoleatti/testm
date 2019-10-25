@@ -23,11 +23,6 @@
 		create unique index idx_ref_book_cal_datetype on ref_book_calendar (cdate asc, ctype asc);
         </sql>
     </changeSet>
-    <changeSet id="3.9.2.4-skononova-1" author="skononova" >
-        <sql>
-		create unique index idx_ref_book_cal_datetype on ref_book_calendar (cdate asc, ctype asc);
-        </sql>
-    </changeSet>
 
     <changeSet id="3.9.2.4-ytrofimov-2" author="ytrofimov" runAlways="true">
         <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
