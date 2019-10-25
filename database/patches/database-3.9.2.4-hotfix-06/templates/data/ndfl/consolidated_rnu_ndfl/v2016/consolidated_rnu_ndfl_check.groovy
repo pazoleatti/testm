@@ -229,7 +229,11 @@ class Check extends AbstractScriptClass {
     void run() {
         initConfiguration()
         switch (formDataEvent) {
+
             case FormDataEvent.CHECK:
+                if (declarationData.state == State.PREPARED) {
+                    return
+                }
                 ScriptUtils.checkInterrupted()
 
                 ConfigurationParamModel configurationParamModel = declarationService.getAllConfig(userInfo)

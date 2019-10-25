@@ -28,11 +28,13 @@ import groovy.transform.TypeCheckingMode
 import org.apache.commons.collections4.CollectionUtils
 import org.apache.commons.lang3.exception.ExceptionUtils
 import org.springframework.dao.DeadlockLoserDataAccessException
+import org.springframework.jdbc.core.BatchPreparedStatementSetter
 import org.springframework.jdbc.core.RowCallbackHandler
 import org.springframework.jdbc.core.RowMapper
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 
+import java.sql.PreparedStatement
 import java.sql.ResultSet
 import java.sql.SQLException
 
@@ -168,10 +170,15 @@ class Calculate extends AbstractScriptClass {
 
     boolean runParallel
 
-    String snilsQuery = "with t as (select np.id, np.search_snils from ndfl_person np where declaration_data_id=:p_declaration and person_id is null) select person2.person_id, person3.id as ref_book_person_id from (select /*+ INDEX (person  IDX_REF_BOOK_PERSON_SRCH_SNILS)*/ t.id as person_id, person.id as ref_book_person_id from  t join ref_book_person person on (t.search_snils is not null and person.search_snils = t.search_snils and person.start_date <= sysdate and ( (person.end_date is null) or (person.end_date >= sysdate) ) ) where  person.record_id=person.old_id) person2 join ref_book_person person3 on (person3.id=person2.ref_book_person_id)"
+    private Map<Long, Map<Long, IdentificationDoc>> documentsMap = [:]
+    private Map<Long, Map<Long, PersonIdentifier>> identitiesMap = [:]
+    private Map<Long, Map<Long, PersonTb>> personTbMap = [:]
+
+
+    String snilsQuery = "with t as (select np.id, np.search_snils, np.snils from ndfl_person np where declaration_data_id=:p_declaration and person_id is null) select person2.person_id, person3.id as ref_book_person_id from (select /*+ INDEX (person  IDX_REF_BOOK_PERSON_SRCH_SNILS)*/ t.id as person_id, person.id as ref_book_person_id from  t join ref_book_person person on (t.snils is not null and person.search_snils = t.search_snils and person.start_date <= sysdate and ( (person.end_date is null) or (person.end_date >= sysdate) ) ) where  person.record_id=person.old_id) person2 join ref_book_person person3 on (person3.id=person2.ref_book_person_id)"
     String inpQuery = "with t as (select * from ndfl_person where declaration_data_id=:p_declaration and person_id is null) select person2.person_id, person2.ref_book_person_id  as ref_book_person_id from (select /*+ INDEX (tax, SRCH_REFB_TAX_PAYER_INP_ASNU ) */ t.id as person_id, person.id as ref_book_person_id from t join ref_book_id_tax_payer tax on tax.inp = t.inp and tax.as_nu =  :asnu join ref_book_person person on tax.person_id = person.id where (person.start_date <= sysdate and ( (person.end_date is null) or (person.end_date >= sysdate) )) and person.record_id=person.old_id ) person2"
     String fioQuery = "with t as (select np.id, np.search_last_name, np.search_first_name, np.search_middle_name, np.birth_day from ndfl_person np where declaration_data_id=:p_declaration and person_id is null) select person2.person_id, person3.id as ref_book_person_id from (select /*+ INDEX (person  IDX_REF_BOOK_PERSON_SRCH_FIO) */ t.id as person_id, person.id as ref_book_person_id from t join ref_book_person person on (person.search_last_name = t.search_last_name and person.search_first_name= t.search_first_name and person.search_middle_name= t.search_middle_name and person.birth_date=t.birth_day and person.start_date <= sysdate and ((person.end_date is null) or (person.end_date >= sysdate) ) ) where person.record_id=person.old_id) person2 join ref_book_person person3 on (person3.id=person2.ref_book_person_id)"
-    String innQuery = "with t as (select np.id, np.search_inn from ndfl_person np where declaration_data_id=:p_declaration and person_id is null) select person2.person_id, person3.id as ref_book_person_id from (select /*+ INDEX (person  IDX_REF_BOOK_PERSON_SRCH_INN)*/ t.id as person_id, person.id as ref_book_person_id from  t join ref_book_person person on (t.search_inn is not null and person.search_inn = t.search_inn and person.start_date <= sysdate and ( (person.end_date is null) or (person.end_date >= sysdate) ) ) where person.record_id=person.old_id) person2 join ref_book_person person3 on (person3.id=person2.ref_book_person_id)"
+    String innQuery = "with t as (select np.id, np.search_inn, np.inn_np from ndfl_person np where declaration_data_id=:p_declaration and person_id is null) select person2.person_id, person3.id as ref_book_person_id from (select /*+ INDEX (person  IDX_REF_BOOK_PERSON_SRCH_INN)*/ t.id as person_id, person.id as ref_book_person_id from  t join ref_book_person person on (t.inn_np is not null and person.search_inn = t.search_inn and person.start_date <= sysdate and ( (person.end_date is null) or (person.end_date >= sysdate) ) ) where person.record_id=person.old_id) person2 join ref_book_person person3 on (person3.id=person2.ref_book_person_id)"
     String innForeignQuery = "with t as (select np.id, np.search_inn_foreign from ndfl_person np where declaration_data_id=:p_declaration and person_id is null) select person2.person_id, person3.id as ref_book_person_id from (select /*+ INDEX (person  IDX_REF_BOOK_PERSON_SRCH_INNF)*/ t.id as person_id, person.id as ref_book_person_id from t join ref_book_person person on (person.start_date <= sysdate and ( (person.end_date is null) or (person.end_date >= sysdate) ) and (t.search_inn_foreign is not null and person.search_inn_foreign = t.search_inn_foreign)) where person.record_id=person.old_id) person2 join ref_book_person person3 on (person3.id=person2.ref_book_person_id)"
     String dulQuery = "with t as (select np.id, np.id_doc_type, np.search_doc_number from ndfl_person np where declaration_data_id=:p_declaration and person_id is null) select person2.person_id, person3.id as ref_book_person_id from (select /*+ INDEX (doc  IDX_REF_BOOK_ID_DOC_SRCH_DOC)*/ t.id as person_id, person.id as ref_book_person_id from t join ref_book_doc_type dt on (dt.code=t.id_doc_type) join ref_book_id_doc doc on (doc.doc_id=dt.id and doc.search_doc_number = t.search_doc_number) join (select distinct r1.id,r2.id id1 from ref_book_person r1 join ref_book_person r2 on r1.record_id=r2.record_id) a on (a.id1 = doc.person_id) join ref_book_person person on (person.id = a.id and person.start_date <= sysdate and ( (person.end_date is null) or (person.end_date >= sysdate) ) ) where person.record_id=person.old_id) person2 join ref_book_person person3 on (person3.id=person2.ref_book_person_id)"
 
@@ -268,18 +275,22 @@ class Calculate extends AbstractScriptClass {
                         MapSqlParameterSource params = new MapSqlParameterSource("p_declaration", declarationData.id)
                         SearchMapper searchMapper = new SearchMapper()
                         namedParameterJdbcTemplate.query(snilsQuery, params, searchMapper)
-                        Map<Long, Long> snilsSearchResult = searchMapper.getResult()
+                        Map<Long, List<Long>> snilsSearchResult = searchMapper.getResult()
 
                         logForDebug("Выборка по СНИЛС (" + snilsSearchResult.size() + " записей, " + ScriptUtils.calcTimeMillis(time))
                         println "Identification #=${declarationData.id} Выборка по СНИЛС (\" ${snilsSearchResult.size()}\" записей,  ${ScriptUtils.calcTimeMillis(time)}"
 
                         if (snilsSearchResult) {
-                            List<NaturalPerson> snilsNaturalPersonList = namedParameterJdbcTemplate.query(getPersonSqlQuery(snilsSearchResult.values() as List), new MapSqlParameterSource(), new NaturalPersonScriptRowMapper())
+
                             time = System.currentTimeMillis()
+                            insertIntoTmpNumbers(snilsSearchResult.values().flatten() as Set)
+                            List<NaturalPerson> snilsNaturalPersonList = namedParameterJdbcTemplate.query(getPersonSqlQuery(), new MapSqlParameterSource(), new NaturalPersonScriptRowMapper())
+                            addDocumentsInpTbToPerson(snilsNaturalPersonList)
                             logForDebug("Получение ФЛ по СНИЛС (" + snilsNaturalPersonList.size() + " записей, " + ScriptUtils.calcTimeMillis(time))
                             println "Identification #=${declarationData.id} Получение ФЛ по СНИЛС (\" ${snilsNaturalPersonList.size()}\" записей,  ${ScriptUtils.calcTimeMillis(time)}"
-
+                            time = System.currentTimeMillis()
                             Map<Long, Map<Long, NaturalPerson>> snilsSimilarityPersonMap = createSimilarityPersonMap(snilsSearchResult, snilsNaturalPersonList)
+                            println "Identification #=${declarationData.id} snilsSimilarityPersonMap,  ${ScriptUtils.calcTimeMillis(time)}"
 
                             updateNaturalPersonRefBookRecords(primaryPersonMap, snilsSimilarityPersonMap)
                         }
@@ -289,13 +300,15 @@ class Calculate extends AbstractScriptClass {
                             params.addValue("asnu", declarationData.asnuId)
                             time = System.currentTimeMillis()
                             namedParameterJdbcTemplate.query(inpQuery, params, searchMapper)
-                            Map<Long, Long> inpSearchResult = searchMapper.getResult()
+                            Map<Long, List<Long>> inpSearchResult = searchMapper.getResult()
                             //noinspection GroovyAssignabilityCheck
                             logForDebug("Выборка по ИНП (" + inpSearchResult.size() + " записей, " + ScriptUtils.calcTimeMillis(time))
                             println "Identification #=${declarationData.id} Выборка по ИНП (\" ${inpSearchResult.size()}\" записей,  ${ScriptUtils.calcTimeMillis(time)}"
                             if (inpSearchResult) {
                                 time = System.currentTimeMillis()
-                                List<NaturalPerson> inpNaturalPersonList = namedParameterJdbcTemplate.query(getPersonSqlQuery(inpSearchResult.values() as List), new MapSqlParameterSource(), new NaturalPersonScriptRowMapper())
+                                insertIntoTmpNumbers(inpSearchResult.values().flatten() as Set)
+                                List<NaturalPerson> inpNaturalPersonList = namedParameterJdbcTemplate.query(getPersonSqlQuery(), new MapSqlParameterSource(), new NaturalPersonScriptRowMapper())
+                                addDocumentsInpTbToPerson(inpNaturalPersonList)
                                 //noinspection GroovyAssignabilityCheck
                                 logForDebug("Получение ФЛ по ИНП (" + inpNaturalPersonList.size() + " записей, " + ScriptUtils.calcTimeMillis(time))
                                 println "Identification #=${declarationData.id} Получение ФЛ по ИНП (\" ${inpNaturalPersonList.size()}\" записей,  ${ScriptUtils.calcTimeMillis(time)}"
@@ -308,14 +321,16 @@ class Calculate extends AbstractScriptClass {
                                 searchMapper = new SearchMapper()
                                 time = System.currentTimeMillis()
                                 namedParameterJdbcTemplate.query(fioQuery, params, searchMapper)
-                                Map<Long, Long> fioSearchResult = searchMapper.getResult()
+                                Map<Long, List<Long>> fioSearchResult = searchMapper.getResult()
                                 //noinspection GroovyAssignabilityCheck
                                 logForDebug("Выборка по ФИО (" + fioSearchResult.size() + " записей, " + ScriptUtils.calcTimeMillis(time))
                                 println "Identification #=${declarationData.id} Выборка по ФИО (\" ${fioSearchResult.size()}\" записей,  ${ScriptUtils.calcTimeMillis(time)}"
 
                                 if (fioSearchResult) {
                                     time = System.currentTimeMillis()
-                                    List<NaturalPerson> fioNaturalPersonList = namedParameterJdbcTemplate.query(getPersonSqlQuery(fioSearchResult.values() as List), new MapSqlParameterSource(), new NaturalPersonScriptRowMapper())
+                                    insertIntoTmpNumbers(fioSearchResult.values().flatten() as Set)
+                                    List<NaturalPerson> fioNaturalPersonList = namedParameterJdbcTemplate.query(getPersonSqlQuery(), new MapSqlParameterSource(), new NaturalPersonScriptRowMapper())
+                                    addDocumentsInpTbToPerson(fioNaturalPersonList)
                                     logForDebug("Получение ФЛ по ФИО (" + fioSearchResult.size() + " записей, " + ScriptUtils.calcTimeMillis(time))
                                     println "Identification #=${declarationData.id} Получение ФЛ по ФИО (\" ${fioSearchResult.size()}\" записей,  ${ScriptUtils.calcTimeMillis(time)}"
 
@@ -331,13 +346,15 @@ class Calculate extends AbstractScriptClass {
                                     searchMapper = new SearchMapper()
                                     time = System.currentTimeMillis()
                                     namedParameterJdbcTemplate.query(innQuery, params, searchMapper)
-                                    Map<Long, Long> innSearchResult = searchMapper.getResult()
+                                    Map<Long, List<Long>> innSearchResult = searchMapper.getResult()
                                     logForDebug("Выборка по по ИНН (" + innSearchResult.size() + " записей, " + ScriptUtils.calcTimeMillis(time))
                                     println "Identification #=${declarationData.id} Выборка по ИНН (\" ${innSearchResult.size()}\" записей,  ${ScriptUtils.calcTimeMillis(time)}"
 
                                     if (innSearchResult) {
                                         time = System.currentTimeMillis()
-                                        List<NaturalPerson> innNaturalPersonList = namedParameterJdbcTemplate.query(getPersonSqlQuery(innSearchResult.values() as List), new MapSqlParameterSource(), new NaturalPersonScriptRowMapper())
+                                        insertIntoTmpNumbers(innSearchResult.values().flatten() as Set)
+                                        List<NaturalPerson> innNaturalPersonList = namedParameterJdbcTemplate.query(getPersonSqlQuery(), new MapSqlParameterSource(), new NaturalPersonScriptRowMapper())
+                                        addDocumentsInpTbToPerson(innNaturalPersonList)
                                         Map<Long, Map<Long, NaturalPerson>> innSimilarityPersonMap = createSimilarityPersonMap(innSearchResult, innNaturalPersonList)
                                         logForDebug("Получение ФЛ по ИНН (" + innNaturalPersonList.size() + " записей, " + ScriptUtils.calcTimeMillis(time))
                                         println "Identification #=${declarationData.id} Получение ФЛ по ИНН (\" ${innNaturalPersonList.size()}\" записей,  ${ScriptUtils.calcTimeMillis(time)}"
@@ -367,13 +384,15 @@ class Calculate extends AbstractScriptClass {
                                             searchMapper = new SearchMapper()
                                             time = System.currentTimeMillis()
                                             namedParameterJdbcTemplate.query(dulQuery, params, searchMapper)
-                                            Map<Long, Long> dulSearchResult = searchMapper.getResult()
+                                            Map<Long, List<Long>> dulSearchResult = searchMapper.getResult()
                                             logForDebug("Выборка по ДУЛ (" + dulSearchResult.size() + " записей, " + ScriptUtils.calcTimeMillis(time))
                                             println "Identification #=${declarationData.id} Выборка по ДУЛ(\" ${dulSearchResult.size()}\" записей,  ${ScriptUtils.calcTimeMillis(time)}"
 
                                             if (dulSearchResult) {
                                                 time = System.currentTimeMillis()
-                                                List<NaturalPerson> dulNaturalPersonList = namedParameterJdbcTemplate.query(getPersonSqlQuery(dulSearchResult.values() as List), new MapSqlParameterSource(), new NaturalPersonScriptRowMapper())
+                                                insertIntoTmpNumbers(dulSearchResult.values().flatten() as Set)
+                                                List<NaturalPerson> dulNaturalPersonList = namedParameterJdbcTemplate.query(getPersonSqlQuery(), new MapSqlParameterSource(), new NaturalPersonScriptRowMapper())
+                                                addDocumentsInpTbToPerson(dulNaturalPersonList)
                                                 Map<Long, Map<Long, NaturalPerson>> dulSimilarityPersonMap = createSimilarityPersonMap(dulSearchResult, dulNaturalPersonList)
                                                 logForDebug("Получение ФЛ по ДУЛ (" + dulNaturalPersonList.size() + " записей, " + ScriptUtils.calcTimeMillis(time))
                                                 println "Identification #=${declarationData.id} Получение ФЛ по ДУЛ(\" ${dulNaturalPersonList.size()}\" записей,  ${ScriptUtils.calcTimeMillis(time)}"
@@ -404,40 +423,170 @@ class Calculate extends AbstractScriptClass {
     }
 
     @TypeChecked(TypeCheckingMode.SKIP)
-    static Map<Long, Map<Long, NaturalPerson>> createSimilarityPersonMap(Map<Long, Long> searchResult, List<NaturalPerson> naturalPersonList) {
+    static Map<Long, Map<Long, NaturalPerson>> createSimilarityPersonMap(Map<Long, List<Long>> searchResult, List<NaturalPerson> naturalPersonList) {
         Map<Long, Map<Long, NaturalPerson>> result = [:]
         Map<Long, NaturalPerson> naturalPersonGroupedById = [:]
         naturalPersonList.each {
             NaturalPerson addedPerson = naturalPersonGroupedById.get(it.id)
             if (!addedPerson) {
                 naturalPersonGroupedById.put(it.id, it)
-            } else {
-                if (it.documents && !addedPerson.getDocuments()?.id?.contains(it.getDocuments().get(0)?.id)) {
-                    addedPerson.getDocuments().add(it.getDocuments()?.get(0))
-                }
-                if (it.personIdentityList && !addedPerson.getPersonIdentityList()?.id?.contains(it.getPersonIdentityList().get(0)?.id)) {
-                    addedPerson.getPersonIdentityList().add(it.getPersonIdentityList()?.get(0))
-                }
-                if (it.personTbList && !addedPerson.getPersonTbList()?.id?.contains(it.getPersonTbList().get(0)?.id)) {
-                    addedPerson.getPersonTbList().add(it.getPersonTbList()?.get(0))
-                }
             }
         }
-        searchResult.each {Long k, Long v ->
+        searchResult.each {Long k, List<Long> v ->
 
             Map<Long, NaturalPerson> matchedMap = result.get(k)
             if (matchedMap == null) {
                 matchedMap = [:]
                 result.put(k, matchedMap)
             }
-            matchedMap.put(v, naturalPersonGroupedById.get(v))
+            v.each {
+                matchedMap.put(it, naturalPersonGroupedById.get(it))
+            }
 
         }
         return result
     }
 
-    static String getPersonSqlQuery(List<Long> values) {
-        return "select distinct person3.id as ref_book_person_id,\n" +
+    class IdentificationDoc extends IdDoc {
+        Long personId
+    }
+
+    class IdentificationInp extends PersonIdentifier {
+        Long personId
+    }
+
+    class IdentificationTb extends PersonTb {
+        Long personId
+    }
+
+    class IdentificationDocRowMapper implements RowMapper<IdentificationDoc>{
+
+        @Override
+        IdentificationDoc mapRow(ResultSet rs, int rowNum) throws SQLException {
+            IdentificationDoc identificationDoc = new IdentificationDoc()
+            Long docId = SqlUtils.getLong(rs, "ref_book_id_doc_id");
+            identificationDoc.personId = SqlUtils.getLong(rs, "person_id");
+
+            if (docId != null) {
+                Long docTypeId = SqlUtils.getLong(rs, "doc_id");
+                RefBookDocType docType = refDataHolder.getDocTypeById(docTypeId);
+                identificationDoc.setId(docId);
+
+                identificationDoc.setDocType(docType);
+                identificationDoc.setDocumentNumber(rs.getString("doc_number"));
+            }
+            return identificationDoc
+        }
+    }
+
+    class IdentificationInpRowMapper implements RowMapper<IdentificationInp>{
+
+        @Override
+        IdentificationInp mapRow(ResultSet rs, int rowNum) throws SQLException {
+            IdentificationInp identificationInp = new IdentificationInp()
+            Long personIdentifierId = SqlUtils.getLong(rs, "book_id_tax_payer_id");
+            identificationInp.personId = SqlUtils.getLong(rs, "person_id");
+
+            if (personIdentifierId != null) {
+                identificationInp.setId(personIdentifierId);
+
+                identificationInp.setInp(rs.getString("inp"));
+                RefBookAsnu asnu = new RefBookAsnu();
+                asnu.setId(SqlUtils.getLong(rs, "as_nu"));
+                identificationInp.setAsnu(asnu);
+            }
+            return identificationInp
+        }
+    }
+
+    class IdentificationTbRowMapper implements RowMapper<IdentificationTb>{
+
+        @Override
+        IdentificationTb mapRow(ResultSet rs, int rowNum) throws SQLException {
+            IdentificationTb identificationTb = new IdentificationTb()
+            Long personTbId = SqlUtils.getLong(rs, "ref_book_person_tb");
+            identificationTb.personId = SqlUtils.getLong(rs, "person_id")
+
+            if (personTbId != null) {
+                identificationTb.setId(personTbId);
+                Department department = new Department();
+                department.setId(rs.getInt("tb_department_id"));
+                identificationTb.setTbDepartment(department);
+                identificationTb.setImportDate(rs.getDate("import_date"))
+            }
+            return identificationTb
+        }
+    }
+
+    void addDocumentsInpTbToPerson(List<NaturalPerson> naturalPersonList) {
+        List<IdentificationDoc> documents = namedParameterJdbcTemplate.query(getIdDocsQuery(naturalPersonList.recordId), new MapSqlParameterSource(), new IdentificationDocRowMapper())
+        List<IdentificationInp> inps = namedParameterJdbcTemplate.query(getInpQuery(naturalPersonList.recordId), new MapSqlParameterSource(), new IdentificationInpRowMapper())
+        List<IdentificationTb> tbs = namedParameterJdbcTemplate.query(getPersonTBQuery(naturalPersonList.recordId), new MapSqlParameterSource(), new IdentificationTbRowMapper())
+
+        Map<Long, List<IdentificationDoc>> documentsGroupedByPersonId = [:]
+        Map<Long, IdentificationDoc> documentsGroupedById = [:]
+        documents.each { IdentificationDoc doc ->
+            documentsGroupedById.put(doc.id, doc)
+            List<IdentificationDoc> documentList = documentsGroupedByPersonId.get(doc.personId)
+            if (documentList == null) {
+                documentList = []
+                documentsGroupedByPersonId.put(doc.personId, documentList)
+            }
+            documentList.add(doc)
+        }
+
+
+        Map<Long, List<IdentificationInp>> inpsGroupedByPersonId = [:]
+        inps.each {IdentificationInp inp ->
+            List<IdentificationInp> inpList = inpsGroupedByPersonId.get(inp.personId)
+            if (inpList == null) {
+                inpList = []
+                inpsGroupedByPersonId.put(inp.personId, inpList)
+            }
+            inpList.add(inp)
+        }
+
+        Map<Long, List<IdentificationTb>> tbsGroupedByPersonId = [:]
+        tbs.each {IdentificationTb tb ->
+            List<IdentificationTb> tbList = tbsGroupedByPersonId.get(tb.personId)
+            if (tbList == null) {
+                tbList = []
+                tbsGroupedByPersonId.put(tb.personId, tbList)
+            }
+            tbList.add(tb)
+        }
+
+        naturalPersonList.each {NaturalPerson naturalPerson ->
+            naturalPerson.documents = []
+            naturalPerson.personIdentityList = []
+            naturalPerson.personTbList = []
+            if (documentsGroupedByPersonId.get(naturalPerson.id)) {
+                naturalPerson.documents.addAll(documentsGroupedByPersonId.get(naturalPerson.id))
+            }
+            if (inpsGroupedByPersonId.get(naturalPerson.id)) {
+                naturalPerson.personIdentityList.addAll(inpsGroupedByPersonId.get(naturalPerson.id))
+            }
+            if (tbsGroupedByPersonId.get(naturalPerson.id)) {
+                naturalPerson.personTbList.addAll(tbsGroupedByPersonId.get(naturalPerson.id))
+            }
+
+            naturalPerson.documents.each {
+                it.person = naturalPerson
+            }
+            naturalPerson.personIdentityList.each {
+                it.person = naturalPerson
+            }
+            naturalPerson.personTbList.each {
+                it.person = naturalPerson
+            }
+
+            IdDoc reportDoc = documentsGroupedById.get(naturalPerson.getReportDoc().getId())
+            naturalPerson.setReportDoc(reportDoc != null ? reportDoc: new IdDoc())
+        }
+    }
+
+    static String getPersonSqlQuery() {
+        return "select person3.id as ref_book_person_id,\n" +
                 "             person3.record_id as person_record_id,\n" +
                 "             person3.last_name,\n" +
                 "             person3.first_name,\n" +
@@ -466,20 +615,44 @@ class Calculate extends AbstractScriptClass {
                 "             person3.appartment,\n" +
                 "             person3.address_foreign,\n" +
                 "             person3.start_date,\n" +
-                "             person3.end_date,\n" +
-                "             tax.id as book_id_tax_payer_id,\n" +
-                "             tax.inp,\n" +
-                "             tax.as_nu,\n" +
-                "             doc.id as ref_book_id_doc_id,\n" +
-                "             doc.doc_id,\n" +
-                "             doc.doc_number,\n" +
-                "             tb.id as ref_book_person_tb_id,\n" +
-                "             tb.tb_department_id,\n" +
-                "             tb.import_date from ref_book_person person3 \n" +
-                "             left join ref_book_id_doc doc on (doc.person_id in (select id from ref_book_person where record_id=person3.record_id))\n" +
-                "             left join ref_book_id_tax_payer tax on (tax.person_id in (select id from ref_book_person where record_id=person3.record_id))\n" +
-                "             left join ref_book_person_tb tb on (tb.person_id in (select id from ref_book_person where record_id=person3.record_id))\n" +
-                "where ${SqlUtils.transformToSqlInStatementViaTmpTable("person3.id", values)}"
+                "             person3.end_date\n" +
+                "from tmp_numbers0 t join ref_book_person rbp on  t.num = rbp.id join ref_book_person person3 on\n" +
+                "    person3.record_id = rbp.record_id \n" +
+                "    where  person3.start_date <= sysdate and ( (person3.end_date is null) or (person3.end_date >= sysdate) ) and person3.record_id = person3.old_id"
+    }
+
+    void insertIntoTmpNumbers(Collection<Long> collection) {
+        getNamedParameterJdbcTemplate().getJdbcOperations().update("delete from tmp_numbers0");
+        final Iterator<? extends Number> iterator = collection.iterator();
+        getNamedParameterJdbcTemplate().getJdbcOperations().batchUpdate("insert into tmp_numbers0 (num) VALUES(?)", new BatchPreparedStatementSetter() {
+            @Override
+            public void setValues(PreparedStatement ps, int i) throws SQLException {
+                ps.setLong(1, iterator.next().longValue());
+            }
+
+            @Override
+            public int getBatchSize() {
+                return collection.size();
+            }
+        });
+    }
+
+    static String getIdDocsQuery(List<Long> personRecordIdList) {
+        return "select doc.id ref_book_id_doc_id, doc.doc_number, doc_id, person_id\n" +
+                "from ref_book_id_doc doc \n" +
+                "where doc.person_id in (select id from ref_book_person where ${SqlUtils.transformToSqlInStatementViaTmpTable("record_id", personRecordIdList)})"
+    }
+
+
+
+    static String getInpQuery(List<Long> personRecordIdList) {
+        return "select inp.id book_id_tax_payer_id, inp.inp, inp.as_nu, person_id from ref_book_id_tax_payer inp " +
+                "where inp.person_id in (select id from ref_book_person where ${SqlUtils.transformToSqlInStatementViaTmpTable("record_id", personRecordIdList)})"
+    }
+
+    static String getPersonTBQuery(List<Long> personRecordIdList) {
+        return "select tb.id ref_book_person_tb, tb.import_date, tb.tb_department_id, person_id from ref_book_person_tb tb " +
+                "where tb.person_id in (select id from ref_book_person where ${SqlUtils.transformToSqlInStatementViaTmpTable("record_id", personRecordIdList)})"
     }
 
     // Вывод информации о количестве обработанных физлиц всего и уникальных
@@ -1539,63 +1712,31 @@ class Calculate extends AbstractScriptClass {
     }
 
     class SearchMapper implements RowCallbackHandler {
-        Map<Long, Long> result = new HashMap<>()
+        Map<Long, List<Long>> result = new HashMap<>()
         @Override
         void processRow(ResultSet rs) throws SQLException {
-            result.put(SqlUtils.getLong(rs, "person_id"), SqlUtils.getLong(rs, "ref_book_person_id"))
+            Long personId = SqlUtils.getLong(rs, "person_id")
+            List<Long> refBookPersons = result.get(personId)
+            if(!refBookPersons) {
+                refBookPersons = []
+                result.put(personId, refBookPersons)
+            }
+            refBookPersons.add(SqlUtils.getLong(rs, "ref_book_person_id"))
         }
     }
 
     class NaturalPersonScriptRowMapper implements RowMapper<NaturalPerson> {
-        private Map<Long, Map<Long, PersonIdentifier>> identitiesMap = [:]
-        private Map<Long, Map<Long, IdDoc>> documentsMap = [:]
-        private Map<Long, Map<Long, PersonTb>> personTbMap = [:]
+
 
         @Override
         NaturalPerson mapRow(ResultSet rs, int rowNum) throws SQLException {
             NaturalPerson naturalPerson = buildNaturalPerson(rs)
-
-            addPersonDocument(rs, naturalPerson);
-
-            // инициализируем ДУЛ включаемый в отчетность
-            initReportDoc(rs, naturalPerson);
-
-            //Добавляем идентификаторы
-            addPersonIdentifier(rs, naturalPerson);
-
-            // добавляем Тербанки
-            addPersonTb(rs, naturalPerson);
 
             //Адрес
             Address address = buildAddress(rs);
             naturalPerson.setAddress(address);
 
             return naturalPerson
-        }
-
-        void addPersonIdentifier(ResultSet rs, NaturalPerson naturalPerson) throws SQLException {
-
-            Long refBookPersonId = naturalPerson.getId();
-            Long personIdentifierId = SqlUtils.getLong(rs, "book_id_tax_payer_id");
-            Map<Long, PersonIdentifier> personIdentityMap = identitiesMap.get(refBookPersonId);
-
-            if (personIdentityMap == null) {
-                personIdentityMap = new HashMap<Long, PersonIdentifier>();
-                identitiesMap.put(refBookPersonId, personIdentityMap);
-            }
-
-            if (personIdentifierId != null && !personIdentityMap.containsKey(personIdentifierId)) {
-                PersonIdentifier personIdentifier = new PersonIdentifier();
-                personIdentifier.setId(personIdentifierId);
-
-                personIdentifier.setInp(rs.getString("inp"));
-                RefBookAsnu asnu = new RefBookAsnu();
-                asnu.setId(SqlUtils.getLong(rs, "as_nu"));
-                personIdentifier.setAsnu(asnu);
-                personIdentifier.setPerson(naturalPerson);
-                personIdentityMap.put(personIdentifierId, personIdentifier);
-                naturalPerson.getPersonIdentityList().add(personIdentifier);
-            }
         }
 
         private NaturalPerson buildNaturalPerson(ResultSet rs) throws SQLException {
@@ -1625,6 +1766,11 @@ class Calculate extends AbstractScriptClass {
                 person.setRecordId(SqlUtils.getLong(rs, "record_id"));
                 person.setOldId(SqlUtils.getLong(rs, "old_id"));
                 person.setVip(rs.getBoolean("vip"));
+                Long reportDocId = rs.getLong("report_doc");
+                IdDoc reportDoc = new IdDoc()
+                reportDoc.setId(reportDocId)
+
+                person.setReportDoc(reportDoc)
 
                 return person;
         }
@@ -1645,60 +1791,5 @@ class Calculate extends AbstractScriptClass {
             address.setAddressIno(rs.getString("address_foreign"));
             return address;
         }
-
-        private void addPersonDocument(ResultSet rs, NaturalPerson naturalPerson) throws SQLException {
-            Long refBookPersonId = naturalPerson.getId();
-            Long docId = SqlUtils.getLong(rs, "ref_book_id_doc_id");
-            Map<Long, IdDoc> pesonDocumentMap = documentsMap.get(refBookPersonId);
-
-            if (pesonDocumentMap == null) {
-                pesonDocumentMap = new HashMap<Long, IdDoc>();
-                documentsMap.put(refBookPersonId, pesonDocumentMap);
-            }
-
-            if (docId != null && !pesonDocumentMap.containsKey(docId)) {
-                Long docTypeId = SqlUtils.getLong(rs, "doc_id");
-                RefBookDocType docType = refDataHolder.getDocTypeById(docTypeId);
-                IdDoc personDocument = new IdDoc();
-                personDocument.setId(docId);
-
-                personDocument.setDocType(docType);
-                personDocument.setDocumentNumber(rs.getString("doc_number"));
-                personDocument.setPerson(naturalPerson);
-                pesonDocumentMap.put(docId, personDocument);
-                naturalPerson.getDocuments().add(personDocument);
-            }
-        }
-
-        private void initReportDoc(ResultSet rs, NaturalPerson naturalPerson) throws SQLException {
-            Long reportDocId = rs.getLong("report_doc");
-            IdDoc personDocument = documentsMap.get(naturalPerson.getId()).get(reportDocId);
-            naturalPerson.setReportDoc(personDocument != null ? personDocument: new IdDoc());
-        }
-
-        private void addPersonTb(ResultSet rs, NaturalPerson naturalPerson) throws SQLException {
-            Long refBookPersonId = naturalPerson.getId();
-            Long personTbId = SqlUtils.getLong(rs, "ref_book_person_tb_id");
-            Map<Long, PersonTb> tbMap = personTbMap.get(refBookPersonId);
-
-            if (tbMap == null) {
-                tbMap = new HashMap<>();
-                personTbMap.put(refBookPersonId, tbMap);
-            }
-
-            if (personTbId != null && !tbMap.containsKey(personTbId)) {
-                PersonTb personTb = new PersonTb();
-                personTb.setId(personTbId);
-                Department department = new Department();
-                department.setId(rs.getInt("tb_department_id"));
-                personTb.setTbDepartment(department);
-                personTb.setImportDate(rs.getDate("import_date"));
-                personTb.setPerson(naturalPerson);
-                tbMap.put(personTbId, personTb);
-                naturalPerson.getPersonTbList().add(personTb);
-            }
-        }
-
-
     }
 }
