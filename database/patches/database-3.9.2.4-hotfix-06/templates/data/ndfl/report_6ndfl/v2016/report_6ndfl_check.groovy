@@ -95,6 +95,9 @@ class Check extends AbstractScriptClass {
     public void run() {
         switch (formDataEvent) {
             case FormDataEvent.CHECK:
+                if (declarationData.state == State.PREPARED) {
+                    return
+                }
                 check()
         }
     }
