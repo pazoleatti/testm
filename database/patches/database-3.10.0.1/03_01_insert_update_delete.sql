@@ -119,3 +119,27 @@ EXCEPTION
 end;
 /
 COMMIT;
+
+declare 
+  v_task_name varchar2(128):='insert_update_delete block #5 - add new event';  
+begin
+	merge into event dst using
+	(select 10018 as id, 'Удаление строк формы' as name from dual
+	) src
+	on (src.id=dst.id)
+	when not matched then
+		insert (id, name)
+		values (src.id, src.name);
+	
+	CASE SQL%ROWCOUNT 
+	WHEN 0 THEN dbms_output.put_line(v_task_name||'[WARNING]:'||' No changes was done');
+	ELSE dbms_output.put_line(v_task_name||'[INFO]:'||' Success');
+	END CASE; 
+
+EXCEPTION
+  when OTHERS then
+    dbms_output.put_line(v_task_name||'[FATAL]:'||sqlerrm);		
+end;
+/
+COMMIT;
+
