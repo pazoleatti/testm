@@ -26,7 +26,7 @@ public class BaseMessageSenderImpl implements MessageSender {
     @Autowired
     private ConfigurationService configurationService;
     @Autowired
-    TransactionHelper transactionHelper;
+    private TransactionHelper transactionHelper;
 
     @Override
     public void sendMessage(final String message) throws ConfigurationParameterAbsentException {
@@ -38,7 +38,6 @@ public class BaseMessageSenderImpl implements MessageSender {
 
         LOG.debug(String.format("Попытка отправить сообщение '%s' в очередь%s", message, configuration.getValue()));
         try {
-            System.out.println("SessionTransacted " + jmsTemplate.isSessionTransacted());
             transactionHelper.executeInNewTransaction(new TransactionLogic<Object>() {
                 @Override
                 public Object execute() {

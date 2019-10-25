@@ -7,6 +7,6 @@
 
 	<virtual-host name="default_host" />
 
-	<resource-ref name="jdbc/TaxAccDS" binding-name="jdbc/DataSource${releasePostfix}"/>
-	<resource-ref name="jdbc/TaxAccDSSecondary" binding-name="jdbc/TaxAccDS${releasePostfix}"/>
+	<resource-ref name="jdbc/TaxAccDS" binding-name="jdbc/TaxAccDS${releasePostfix}"/>
+	<resource-ref name="jdbc/TaxAccDSSecondary" binding-name="jdbc/DataSource${releasePostfix}"/>
 </web-bnd>
