@@ -303,15 +303,4 @@ public interface DeclarationDataDao extends PermissionDao {
      */
     List<Long> findAllIdsFor2NdflFL(int reportPeriodId, long personId, List<KppOktmoPair> kppOktmoPairs);
 
-    /**
-     * Удалить строки разделов 2,3,4 по строкам раздела 1
-     * @param ndflPersonIds
-     */
-    void deleteRowsBySection1(List<Long> ndflPersonIds);
-
-    /**
-     * Удалить строки разделов 1,3,4 по строкам раздела 2
-     * @param ndflPersonIncomeIds
-     */
-    void deleteRowsBySection2(List<Long> ndflPersonIncomeIds);
 }

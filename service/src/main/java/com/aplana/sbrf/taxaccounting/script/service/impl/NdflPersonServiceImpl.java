@@ -593,4 +593,22 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     public List<Long> getPrepaymentsIdsByPersonAndIncomes(long personId, Collection<Long> incomesIds) {
         return ndflPersonService.getPrepaymentsIdsByPersonAndIncomes(personId, incomesIds);
     }
+
+    @Override
+    public void deleteRowsBySection1(List<Long> ndflPersonIds, Long declarationDataId) {
+        ndflPersonDao.deleteNdflPersonBatch(ndflPersonIds);
+        ndflPersonDao.renumerateNdflPersonPrepaymentRowNums(declarationDataId);
+        ndflPersonDao.renumerateNdflPersonDeductionRowNums(declarationDataId);
+        ndflPersonDao.renumerateNdflPersonIncomeRowNums(declarationDataId);
+        ndflPersonDao.renumerateNdflPersonRowNums(declarationDataId);
+    }
+
+    @Override
+    public void deleteRowsBySection2(List<Long> ndflPersonIncomeIds, Long declarationDataId) {
+        ndflPersonDao.deleteRowsBySection2(ndflPersonIncomeIds);
+        ndflPersonDao.renumerateNdflPersonPrepaymentRowNums(declarationDataId);
+        ndflPersonDao.renumerateNdflPersonDeductionRowNums(declarationDataId);
+        ndflPersonDao.renumerateNdflPersonIncomeRowNums(declarationDataId);
+        ndflPersonDao.renumerateNdflPersonRowNums(declarationDataId);
+    }
 }

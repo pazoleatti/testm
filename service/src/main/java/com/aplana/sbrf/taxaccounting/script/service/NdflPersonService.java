@@ -716,5 +716,17 @@ public interface NdflPersonService {
      * @return список идентификаторов сведений о доходах в виде аваносовых платежей у ФЛ
      */
     List<Long> getPrepaymentsIdsByPersonAndIncomes(long personId, Collection<Long> incomesIds);
+
+    /**
+     * Удалить строки разделов 2,3,4 по строкам раздела 1
+     * @param ndflPersonIds
+     */
+    void deleteRowsBySection1(List<Long> ndflPersonIds, Long declarationDataId);
+
+    /**
+     * Удалить строки разделов 1,3,4 по строкам раздела 2
+     * @param ndflPersonIncomeIds
+     */
+    void deleteRowsBySection2(List<Long> ndflPersonIncomeIds, Long declarationDataId);
 }
 

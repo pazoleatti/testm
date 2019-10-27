@@ -810,4 +810,34 @@ public interface NdflPersonDao {
      * @return список идентификаторов сведений о доходах в виде аваносовых платежей у ФЛ
      */
     List<Long> getPrepaymentsIdsByPersonAndIncomes(long personId, Collection<Long> incomesIds);
+
+    /**
+     * Перенумеровывает раннее отсортированный список записей раздела1 на основе №пп.
+     * @param declarationDataId идентификатор налоговой формы
+     */
+    void renumerateNdflPersonRowNums(Long declarationDataId);
+
+    /**
+     * Перенумеровывает раннее отсортированный список записей раздела2 на основе №пп.
+     * @param declarationDataId идентификатор налоговой формы
+     */
+    void renumerateNdflPersonIncomeRowNums(Long declarationDataId);
+
+    /**
+     * Перенумеровывает раннее отсортированный список записей раздела3 на основе №пп.
+     * @param declarationDataId идентификатор налоговой формы
+     */
+    void renumerateNdflPersonDeductionRowNums(Long declarationDataId);
+
+    /**
+     * Перенумеровывает раннее отсортированный список записей раздела4 на основе №пп.
+     * @param declarationDataId идентификатор налоговой формы
+     */
+    void renumerateNdflPersonPrepaymentRowNums(Long declarationDataId);
+
+    /**
+     * Удалить строки разделов 1,3,4 по строкам раздела 2
+     * @param ndflPersonIncomeIds
+     */
+    void deleteRowsBySection2(List<Long> ndflPersonIncomeIds);
 }

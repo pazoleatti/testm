@@ -2693,4 +2693,137 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             return Collections.emptyList();
         }
     }
+
+    @Override
+    public void renumerateNdflPersonRowNums(Long declarationDataId) {
+        String sql = "merge into NDFL_PERSON target\n" +
+                "USING\n" +
+                "(\n" +
+                "select section1.ID, dense_rank() over (order by section1.ROW_NUM) new_row_num\n" +
+                "from NDFL_PERSON section1\n" +
+                "where declaration_data_id = :dd_id\n" +
+                ") sorted\n" +
+                "ON (target.ID = sorted.ID)\n" +
+                "WHEN MATCHED THEN\n" +
+                "UPDATE\n" +
+                "SET target.ROW_NUM = sorted.new_row_num";
+        getNamedParameterJdbcTemplate().update(sql, new MapSqlParameterSource("dd_id", declarationDataId));
+    }
+
+    @Override
+    public void renumerateNdflPersonIncomeRowNums(Long declarationDataId) {
+        String sql = "merge into NDFL_PERSON_INCOME target\n" +
+                "USING\n" +
+                "(\n" +
+                "select section2.ID, dense_rank() over (order by section2.ROW_NUM) new_row_num\n" +
+                "from NDFL_PERSON_INCOME section2\n" +
+                "join NDFL_PERSON section1 on section1.id=section2.ndfl_person_id where declaration_data_id = :dd_id\n" +
+                ") sorted\n" +
+                "ON (target.ID = sorted.ID)\n" +
+                "WHEN MATCHED THEN\n" +
+                "UPDATE\n" +
+                "SET target.ROW_NUM = sorted.new_row_num";
+        getNamedParameterJdbcTemplate().update(sql, new MapSqlParameterSource("dd_id", declarationDataId));
+    }
+
+    @Override
+    public void renumerateNdflPersonDeductionRowNums(Long declarationDataId) {
+        String sql = "merge into NDFL_PERSON_DEDUCTION target\n" +
+                "USING\n" +
+                "(\n" +
+                "select section3.ID, dense_rank() over (order by section3.ROW_NUM) new_row_num\n" +
+                "from NDFL_PERSON_DEDUCTION section3\n" +
+                "join NDFL_PERSON section1 on section1.id=section3.ndfl_person_id where declaration_data_id = :dd_id\n" +
+                ") sorted\n" +
+                "ON (target.ID = sorted.ID)\n" +
+                "WHEN MATCHED THEN\n" +
+                "UPDATE\n" +
+                "SET target.ROW_NUM = sorted.new_row_num";
+        getNamedParameterJdbcTemplate().update(sql, new MapSqlParameterSource("dd_id", declarationDataId));
+    }
+
+    @Override
+    public void renumerateNdflPersonPrepaymentRowNums(Long declarationDataId) {
+        String sql = ("merge into NDFL_PERSON_PREPAYMENT target\n" +
+                "USING\n" +
+                "(\n" +
+                "select section4.ID, dense_rank() over (order by section4.ROW_NUM) new_row_num\n" +
+                "from NDFL_PERSON_PREPAYMENT section4\n" +
+                "join NDFL_PERSON section1 on section1.id=section4.ndfl_person_id where declaration_data_id = :dd_id\n" +
+                ") sorted\n" +
+                "ON (target.ID = sorted.ID)\n" +
+                "WHEN MATCHED THEN\n" +
+                "UPDATE\n" +
+                "SET target.ROW_NUM = sorted.new_row_num");
+        getNamedParameterJdbcTemplate().update(sql, new MapSqlParameterSource("dd_id", declarationDataId));
+    }
+
+    @Override
+    public void deleteRowsBySection2(final List<Long> ndflPersonIncomeIds) {
+        String deleteTemp0 = "delete from TMP_NUMBERS0";
+        String deleteTemp1 = "delete from TMP_NUMBERS1";
+        String insertTemp0 = "insert into TMP_NUMBERS0 (num) VALUES(?)";
+        String insertTemp1 = "insert into tmp_numbers1\n" +
+                "(select distinct ndfl_person_id from ndfl_person_income section2 join tmp_numbers0 tmp on tmp.num = section2.id)";
+        String deleteSection4 = "delete from NDFL_PERSON_PREPAYMENT\n" +
+                "where ID in\n" +
+                "(\n" +
+                "select section4.ID\n" +
+                "from tmp_numbers0 tmp\n" +
+                "inner join NDFL_PERSON_INCOME section2 on tmp.num=section2.id\n" +
+                "inner join NDFL_PERSON_PREPAYMENT section4 ON section2.NDFL_PERSON_ID = section4.NDFL_PERSON_ID\n" +
+                "and section2.OPERATION_ID = section4.OPERATION_ID\n" +
+                ")";
+        String deleteSection3 = "delete from NDFL_PERSON_DEDUCTION\n" +
+                "where ID in (\n" +
+                "select section3.id\n" +
+                "from\n" +
+                "tmp_numbers0 tmp\n" +
+                "inner join NDFL_PERSON_INCOME section2 on tmp.num = section2.id\n" +
+                "inner join NDFL_PERSON_DEDUCTION section3 ON section2.NDFL_PERSON_ID = section3.NDFL_PERSON_ID\n" +
+                "and section2.OPERATION_ID = section3.OPERATION_ID\n" +
+                ")";
+
+        String deleteSection2 = "delete from NDFL_PERSON_INCOME\n" +
+                "where operation_ID in (\n" +
+                "select section2.operation_id\n" +
+                "from NDFL_PERSON_INCOME section2\n" +
+                "inner join tmp_numbers0 tmp on tmp.num = section2.id\n" +
+                "inner join NDFL_PERSON_INCOME section22 on\n" +
+                "section2.NDFL_PERSON_ID = section22.NDFL_PERSON_ID\n" +
+                "and section2.OPERATION_ID = section22.OPERATION_ID\n" +
+                ")";
+        String deleteSection1 = "delete\n" +
+                "from NDFL_PERSON\n" +
+                "where ID in (\n" +
+                "select section1.id from tmp_numbers1 tmp join ndfl_person section1 on tmp.num = section1.id\n" +
+                "left join NDFL_PERSON_INCOME section2\n" +
+                "on section2.NDFL_PERSON_ID =section1.ID\n" +
+                "where section2.id is null\n" +
+                ")";
+
+        MapSqlParameterSource emptyParams = new MapSqlParameterSource();
+
+        getNamedParameterJdbcTemplate().update(deleteTemp0, emptyParams);
+        getNamedParameterJdbcTemplate().update(deleteTemp1, emptyParams);
+
+        getJdbcTemplate().batchUpdate(insertTemp0,
+                new BatchPreparedStatementSetter() {
+                    @Override
+                    public void setValues(PreparedStatement preparedStatement, int i) throws SQLException {
+                        preparedStatement.setLong(1, ndflPersonIncomeIds.get(i));
+                    }
+
+                    @Override
+                    public int getBatchSize() {
+                        return ndflPersonIncomeIds.size();
+                    }
+                });
+        getNamedParameterJdbcTemplate().update(insertTemp1, emptyParams);
+        getNamedParameterJdbcTemplate().update(deleteSection4, emptyParams);
+        getNamedParameterJdbcTemplate().update(deleteSection3, emptyParams);
+        getNamedParameterJdbcTemplate().update(deleteSection2, emptyParams);
+        getNamedParameterJdbcTemplate().update(deleteSection1, emptyParams);
+
+    }
 }

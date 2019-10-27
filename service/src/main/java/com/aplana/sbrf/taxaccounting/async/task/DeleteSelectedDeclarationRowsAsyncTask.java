@@ -8,7 +8,7 @@ import com.aplana.sbrf.taxaccounting.model.action.DeleteSelectedDeclarationRowsA
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome;
-import com.aplana.sbrf.taxaccounting.script.service.DeclarationService;
+import com.aplana.sbrf.taxaccounting.script.service.impl.NdflPersonServiceImpl;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
 import com.aplana.sbrf.taxaccounting.service.LogBusinessService;
@@ -37,9 +37,6 @@ public class DeleteSelectedDeclarationRowsAsyncTask extends AbstractAsyncTask {
     public static final String TOTAL_MESSAGE = "Выполнено удаление строк формы";
 
     @Autowired
-    private DeclarationService declarationService;
-
-    @Autowired
     private NdflPersonDao ndflPersonDao;
 
     @Autowired
@@ -56,6 +53,9 @@ public class DeleteSelectedDeclarationRowsAsyncTask extends AbstractAsyncTask {
 
     @Autowired
     private DeclarationTemplateDao declarationTemplateDao;
+
+    @Autowired
+    private NdflPersonServiceImpl ndflPersonService;
 
 
     @Override
@@ -171,7 +171,7 @@ public class DeleteSelectedDeclarationRowsAsyncTask extends AbstractAsyncTask {
      */
     private void deleteRowsBySection1(DeleteSelectedDeclarationRowsAction deleteRows) {
         List<Long> ndflPersonIds = deleteRows.getSectionIds();
-        declarationService.deleteRowsBySection1(ndflPersonIds);
+        ndflPersonService.deleteRowsBySection1(ndflPersonIds, deleteRows.getDeclarationDataId());
     }
 
     /**
@@ -181,7 +181,7 @@ public class DeleteSelectedDeclarationRowsAsyncTask extends AbstractAsyncTask {
      */
     private void deleteRowsBySection2(DeleteSelectedDeclarationRowsAction deleteRows) {
         List<Long> ndflPersonIncomeIds = deleteRows.getSectionIds();
-        declarationService.deleteRowsBySection2(ndflPersonIncomeIds);
+        ndflPersonService.deleteRowsBySection2(ndflPersonIncomeIds, deleteRows.getDeclarationDataId());
     }
 
     @Override
