@@ -2479,14 +2479,9 @@ class Check extends AbstractScriptClass {
         Date getWorkDay(Date startDate, int offset) {
             Date resultDate
             startDate = SimpleDateUtils.toStartOfDay(startDate)
-            int index = 0
-            for (int i= 0; i < calendarDays.size(); i++) {
-                BusinessCalendarDay bcd = calendarDays.get(i)
-                if (bcd.cdate == startDate) {
-                    index = i
-                    break
-                }
-            }
+            BusinessCalendarDay day = new BusinessCalendarDay(startDate, null)
+            int index = Collections.binarySearch(calendarDays, day)
+
             int offsetIndex = index + offset
 
             for (int i=offsetIndex; i < calendarDays.size(); i++) {
