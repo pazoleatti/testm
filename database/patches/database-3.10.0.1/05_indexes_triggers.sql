@@ -676,6 +676,121 @@ commit
 /
 
 DECLARE
+	v_index_name varchar(30) :='IDX_REF_BOOK_CAL_DATETYPE' ;
+	v_run_condition number(1);
+	v_task_name varchar2(128):='alter_tables block #31 - create index '||v_index_name;  
+
+BEGIN
+	select decode(count(*),0,1,0) into v_run_condition from user_indexes where INDEX_NAME=v_index_name ;
+	IF v_run_condition=1 THEN
+		execute immediate 'create index '|| v_index_name ||' on REF_BOOK_CALENDAR (cdate asc, ctype asc)
+				   COMPUTE STATISTICS';
+		dbms_output.put_line(v_task_name||'[INFO ('||v_index_name||')]:'||' Success');
+	ELSE
+		dbms_output.put_line(v_task_name||'[WARNING ('||v_index_name||')]:'||' changes had already been implemented');
+	END IF;
+
+EXCEPTION
+	when OTHERS then
+		dbms_output.put_line(v_task_name||'[FATAL]:'||sqlerrm);	
+END;
+/
+commit
+/
+
+DECLARE
+	v_index_name varchar(30) :='IDX_REF_BOOK_OKTMO_ID_CODE' ;
+	v_run_condition number(1);
+	v_task_name varchar2(128):='alter_tables block #32 - create index '||v_index_name;  
+
+BEGIN
+	select decode(count(*),0,1,0) into v_run_condition from user_indexes where INDEX_NAME=v_index_name ;
+	IF v_run_condition=1 THEN
+		execute immediate 'create index '|| v_index_name ||' on REF_BOOK_OKTMO (id asc, code asc)
+				   COMPUTE STATISTICS';
+		dbms_output.put_line(v_task_name||'[INFO ('||v_index_name||')]:'||' Success');
+	ELSE
+		dbms_output.put_line(v_task_name||'[WARNING ('||v_index_name||')]:'||' changes had already been implemented');
+	END IF;
+
+EXCEPTION
+	when OTHERS then
+		dbms_output.put_line(v_task_name||'[FATAL]:'||sqlerrm);	
+END;
+/
+commit
+/
+
+DECLARE
+	v_index_name varchar(30) :='IDX_DD_PERSON_PERSON' ;
+	v_run_condition number(1);
+	v_task_name varchar2(128):='alter_tables block #33 - create index '||v_index_name;  
+
+BEGIN
+	select decode(count(*),0,1,0) into v_run_condition from user_indexes where INDEX_NAME=v_index_name ;
+	IF v_run_condition=1 THEN
+		execute immediate 'create index '|| v_index_name ||' on DECLARATION_DATA_PERSON (person_id asc)
+				   COMPUTE STATISTICS';
+		dbms_output.put_line(v_task_name||'[INFO ('||v_index_name||')]:'||' Success');
+	ELSE
+		dbms_output.put_line(v_task_name||'[WARNING ('||v_index_name||')]:'||' changes had already been implemented');
+	END IF;
+
+EXCEPTION
+	when OTHERS then
+		dbms_output.put_line(v_task_name||'[FATAL]:'||sqlerrm);	
+END;
+/
+commit
+/
+
+DECLARE
+	v_index_name varchar(30) :='IDX_TMESS_BLOB_ID' ;
+	v_run_condition number(1);
+	v_task_name varchar2(128):='alter_tables block #34 - create index '||v_index_name;  
+
+BEGIN
+	select decode(count(*),0,1,0) into v_run_condition from user_indexes where INDEX_NAME=v_index_name ;
+	IF v_run_condition=1 THEN
+		execute immediate 'create index '|| v_index_name ||' on TRANSPORT_MESSAGE (blob_id asc)
+				   COMPUTE STATISTICS';
+		dbms_output.put_line(v_task_name||'[INFO ('||v_index_name||')]:'||' Success');
+	ELSE
+		dbms_output.put_line(v_task_name||'[WARNING ('||v_index_name||')]:'||' changes had already been implemented');
+	END IF;
+
+EXCEPTION
+	when OTHERS then
+		dbms_output.put_line(v_task_name||'[FATAL]:'||sqlerrm);	
+END;
+/
+commit
+/
+
+DECLARE
+	v_index_name varchar(30) :='IDX_TMESS_DECLARATION_ID' ;
+	v_run_condition number(1);
+	v_task_name varchar2(128):='alter_tables block #35 - create index '||v_index_name;  
+
+BEGIN
+	select decode(count(*),0,1,0) into v_run_condition from user_indexes where INDEX_NAME=v_index_name ;
+	IF v_run_condition=1 THEN
+		execute immediate 'create index '|| v_index_name ||' on TRANSPORT_MESSAGE (declaration_id asc)
+				   COMPUTE STATISTICS';
+		dbms_output.put_line(v_task_name||'[INFO ('||v_index_name||')]:'||' Success');
+	ELSE
+		dbms_output.put_line(v_task_name||'[WARNING ('||v_index_name||')]:'||' changes had already been implemented');
+	END IF;
+
+EXCEPTION
+	when OTHERS then
+		dbms_output.put_line(v_task_name||'[FATAL]:'||sqlerrm);	
+END;
+/
+commit
+/
+
+DECLARE
 	v_task_name varchar2(128):='indexes change block #1 - PK_REF_BOOK_PERSON'; 
 	v_run_condition number(1); 
 BEGIN
@@ -960,24 +1075,6 @@ EXCEPTION
 END;
 /
 
-DECLARE
-	v_run_condition number(1);
-	v_task_name varchar2(128):='indexes block #19  - idx_ref_book_cal_datetype';  
-BEGIN
-	select count(*) into v_run_condition from user_indexes where INDEX_NAME='IDX_REF_BOOK_CAL_DATETYPE';
-	if (v_run_condition =0) then
-        	execute immediate 'create unique index idx_ref_book_cal_datetype on ref_book_calendar (cdate asc, ctype asc)';
-		dbms_output.put_line(v_task_name||'[INFO ]:'||' Success');
-	ELSE
-		dbms_output.put_line(v_task_name||'[WARNING]:'||' changes had already been implemented');
-	END IF;
-
-
-EXCEPTION
-	when OTHERS then
-		dbms_output.put_line(v_task_name||'[FATAL]:'||sqlerrm);	
-END;
-/
 
 BEGIN
 	FOR c1 IN (
