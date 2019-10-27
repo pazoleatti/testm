@@ -104,4 +104,13 @@
 			INSERT INTO EVENT (ID, NAME) VALUES ('10018', 'Удаление строк формы');
 		</sql>
 	</changeSet>
+    <changeSet id="3.10.0.1-skononova-3" author="skononova">
+	<sql>
+		create index IDX_REF_BOOK_OKTMO_ID_CODE on REF_BOOK_OKTMO (id asc, code asc);
+		create index IDX_DD_PERSON_PERSON on DECLARATION_DATA_PERSON (person_id asc);
+		create index IDX_TMESS_BLOB_ID on TRANSPORT_MESSAGE (blob_id asc);
+		create index IDX_TMESS_DECLARATION_ID on TRANSPORT_MESSAGE (declaration_id asc);	
+	</sql>
+   </changeSet>
+	
 </databaseChangeLog>
