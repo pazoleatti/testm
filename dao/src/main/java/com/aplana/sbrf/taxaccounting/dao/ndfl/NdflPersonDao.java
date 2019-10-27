@@ -212,6 +212,13 @@ public interface NdflPersonDao {
     List<NdflPersonIncome> findAllIncomesByDeclarationId(long declarationDataId);
 
     /**
+     * Найти все "Сведения о доходах физического лица" с данными периода источника привязанные к декларации
+     *
+     * @param declarationDataId идентификатор декларации
+     */
+    List<NdflPersonIncome> findNdflPersonIncomeSourcePeriod(long declarationDataId);
+
+    /**
      * Найти все "Сведения о доходах физического лица" привязанные к налоговой форме, отсортированные по rowNum
      *
      * @param declarationDataId идентификатор налоговой формы
@@ -245,6 +252,13 @@ public interface NdflPersonDao {
     List<NdflPersonDeduction> findAllDeductionsByDeclarationId(long declarationDataId);
 
     /**
+     * Найти все "Стандартные, социальные и имущественные налоговые вычеты" с данными периода источника привязанные к декларации
+     *
+     * @param declarationDataId идентификатор декларации
+     */
+    List<NdflPersonDeduction> findNdflPersonDeductionSourcePeriod(long declarationDataId);
+
+    /**
      * Возвращяет список строк из раздела 3 по списку ид форм
      *
      * @param declarationDataIds списсок ид форм
@@ -267,7 +281,14 @@ public interface NdflPersonDao {
      * @param declarationDataId идентификатор декларации
      * @return список авансов
      */
-    List<NdflPersonPrepayment> fetchNdflPersonPrepaymentByDeclarationData(long declarationDataId);
+    List<NdflPersonPrepayment> findNdflPersonPrepaymentByDeclarationData(long declarationDataId);
+
+    /**
+     * Найти все "Cведения о доходах в виде авансовых платежей" привязанные к декларации
+     *
+     * @param declarationDataId идентификатор декларации
+     */
+    List<NdflPersonPrepayment> findNdflPersonPrepaymentSourcePeriod(long declarationDataId);
 
     /**
      * Возвращает данные по спецотчету по фильтру для вкладки "Сведения о доходах в виде авансовых платежей" (SBRFNDFL-8445)

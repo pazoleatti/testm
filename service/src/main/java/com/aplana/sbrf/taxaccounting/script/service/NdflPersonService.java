@@ -229,6 +229,13 @@ public interface NdflPersonService {
     List<NdflPersonIncome> findNdflPersonIncome(long declarationDataId);
 
     /**
+     * Найти все "Сведения о доходах физического лица" с данными периода источника привязанные к декларации
+     *
+     * @param declarationDataId идентификатор декларации
+     */
+    List<NdflPersonIncome> findNdflPersonIncomeSourcePeriod(long declarationDataId);
+
+    /**
      * Найти все "Сведения о доходах физического лица" привязанные к декларации, отсортированные по rowNum
      *
      * @param declarationDataId идентификатор декларации
@@ -261,6 +268,13 @@ public interface NdflPersonService {
     List<NdflPersonDeduction> findNdflPersonDeduction(long declarationDataId);
 
     /**
+     * Найти все "Стандартные, социальные и имущественные налоговые вычеты" с данными периода источника привязанные к декларации
+     *
+     * @param declarationDataId идентификатор декларации
+     */
+    List<NdflPersonDeduction> findNdflPersonDeductionSourcePeriod(long declarationDataId);
+
+    /**
      * Возвращяет список строк из раздела 3 по списку ид форм
      *
      * @param declarationDataIds список ид форм
@@ -274,6 +288,13 @@ public interface NdflPersonService {
      * @param declarationDataId идентификатор декларации
      */
     List<NdflPersonPrepayment> findNdflPersonPrepayment(long declarationDataId);
+
+    /**
+     * Найти все "Cведения о доходах в виде авансовых платежей" привязанные к декларации
+     *
+     * @param declarationDataId идентификатор декларации
+     */
+    List<NdflPersonPrepayment> findNdflPersonPrepaymentSourcePeriod(long declarationDataId);
 
     /**
      * Найти сведения о доходах

@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.log.LogLevelType
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonOperation
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment
 import com.aplana.sbrf.taxaccounting.model.refbook.*
 import com.aplana.sbrf.taxaccounting.model.util.BaseWeightCalculator
@@ -266,15 +267,15 @@ class Check extends AbstractScriptClass {
                 logForDebug(SUCCESS_GET_TABLE, T_PERSON_NAME, ndflPersonList.size())
 
                 // Сведения о доходах и НДФЛ
-                ndflPersonIncomeList = ndflPersonService.findNdflPersonIncome(declarationData.id)
+                ndflPersonIncomeList = ndflPersonService.findNdflPersonIncomeSourcePeriod(declarationData.id)
                 logForDebug(SUCCESS_GET_TABLE, T_PERSON_INCOME_NAME, ndflPersonIncomeList.size())
 
                 // Сведения о вычетах
-                List<NdflPersonDeduction> ndflPersonDeductionList = ndflPersonService.findNdflPersonDeduction(declarationData.id)
+                List<NdflPersonDeduction> ndflPersonDeductionList = ndflPersonService.findNdflPersonDeductionSourcePeriod(declarationData.id)
                 logForDebug(SUCCESS_GET_TABLE, T_PERSON_DEDUCTION_NAME, ndflPersonDeductionList.size())
 
                 // Сведения о доходах в виде авансовых платежей
-                List<NdflPersonPrepayment> ndflPersonPrepaymentList = ndflPersonService.findNdflPersonPrepayment(declarationData.id)
+                List<NdflPersonPrepayment> ndflPersonPrepaymentList = ndflPersonService.findNdflPersonPrepaymentSourcePeriod(declarationData.id)
                 logForDebug(SUCCESS_GET_TABLE, T_PERSON_PREPAYMENT_NAME, ndflPersonPrepaymentList.size())
 
                 initCalendar()
@@ -384,7 +385,7 @@ class Check extends AbstractScriptClass {
         for (def personId : incomesByPersonId.keySet()) {
             ScriptUtils.checkInterrupted()
             def incomesOfPerson = incomesByPersonId.get(personId)
-            for (def income : incomesOfPerson) {
+            for (NdflPersonIncome income : incomesOfPerson) {
                 NdflPersonFL ndflPersonFL = ndflPersonFLMap.get(income.ndflPersonId)
                 String fioAndInpAndOperId = sprintf(TEMPLATE_PERSON_FL_OPER, [ndflPersonFL.fio, ndflPersonFL.inp, income.operationId])
                 String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [ndflPersonFL.fio, ndflPersonFL.inp])
@@ -395,7 +396,7 @@ class Check extends AbstractScriptClass {
                                 fioAndInp
                         )
                         String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, income.rowNum ?: "")
-                        def period = reportPeriodService.createLogPeriodFormatById(Collections.singletonList(income.id), LogLevelType.INCOME)
+                        def period = getSourceReportPeriodDescription(Collections.singletonList(income))
                         logger.errorExpWithPeriod("%s. %s.", "Для ФЛ в разделе 2 есть только одна фиктивная строка",
                                 fioAndInpAndOperId, period, pathError, errMsg)
                     }
@@ -640,7 +641,7 @@ class Check extends AbstractScriptClass {
                             R_INCOME_CODE
                     )
                     String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
-                    def period = reportPeriodService.createLogPeriodFormatById(Collections.singletonList(ndflPersonIncome.id), LogLevelType.INCOME)
+                    def period = getSourceReportPeriodDescription(Collections.singletonList(ndflPersonIncome))
                     logger.warnExpWithPeriod("%s. %s.", String.format(LOG_TYPE_REFERENCES, R_INCOME_CODE), fioAndInp, period, pathError, errMsg)
                 }
 
@@ -663,7 +664,7 @@ class Check extends AbstractScriptClass {
                                 R_INCOME_TYPE
                         )
                         String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
-                        def period = reportPeriodService.createLogPeriodFormatById(Collections.singletonList(ndflPersonIncome.id), LogLevelType.INCOME)
+                        def period = getSourceReportPeriodDescription(Collections.singletonList(ndflPersonIncome))
                         logger.warnExpWithPeriod("%s. %s.", String.format(LOG_TYPE_REFERENCES, R_INCOME_TYPE), fioAndInp, period, pathError, errMsg)
                     } else {
                         if (ndflPersonIncome.incomeAccruedDate != null) {
@@ -686,8 +687,7 @@ class Check extends AbstractScriptClass {
                                         R_INCOME_TYPE
                                 )
                                 String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
-                                def period = reportPeriodService.createLogPeriodFormatById(
-                                        Collections.singletonList(ndflPersonIncome.id), LogLevelType.INCOME)
+                                def period = getSourceReportPeriodDescription(Collections.singletonList(ndflPersonIncome))
                                 logger.warnExpWithPeriod("%s. %s.", String.format(LOG_TYPE_REFERENCES, R_INCOME_TYPE),
                                         fioAndInp, period, pathError, errMsg)
                             }
@@ -713,8 +713,7 @@ class Check extends AbstractScriptClass {
                         R_TYPE_CODE
                 )
                 String pathError = String.format(SECTION_LINE_MSG, T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum ?: "")
-                def period = reportPeriodService.createLogPeriodFormatById(
-                        Collections.singletonList(ndflPersonDeduction.id), LogLevelType.DEDUCTION)
+                def period = getSourceReportPeriodDescription(Collections.singletonList(ndflPersonDeduction))
                 logger.warnExpWithPeriod("%s. %s.", String.format(LOG_TYPE_REFERENCES, R_TYPE_CODE), fioAndInp, period, pathError, errMsg)
             }
 
@@ -726,8 +725,7 @@ class Check extends AbstractScriptClass {
                         R_NOTIF_SOURCE
                 )
                 String pathError = String.format(SECTION_LINE_MSG, T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum ?: "")
-                def period = reportPeriodService.createLogPeriodFormatById(
-                        Collections.singletonList(ndflPersonDeduction.id), LogLevelType.DEDUCTION)
+                def period = getSourceReportPeriodDescription(Collections.singletonList(ndflPersonDeduction))
                 logger.warnExpWithPeriod("%s. %s.", String.format(LOG_TYPE_REFERENCES, R_NOTIF_SOURCE), fioAndInp, period, pathError, errMsg)
             }
         }
@@ -749,8 +747,7 @@ class Check extends AbstractScriptClass {
                         R_NOTIF_SOURCE
                 )
                 String pathError = String.format(SECTION_LINE_MSG, T_PERSON_PREPAYMENT, ndflPersonPrepayment.rowNum ?: "")
-                def period = reportPeriodService.createLogPeriodFormatById(
-                        Collections.singletonList(ndflPersonPrepayment.id), LogLevelType.PREPAYMENT)
+                def period = getSourceReportPeriodDescription(Collections.singletonList(ndflPersonPrepayment))
                 logger.warnExpWithPeriod("%s. %s.", String.format(LOG_TYPE_REFERENCES, R_NOTIF_SOURCE), fioAndInp, period, pathError, errMsg)
             }
         }
@@ -1060,8 +1057,7 @@ class Check extends AbstractScriptClass {
                     if (columnFillConditionData.columnConditionCheckerAsIs.check(ndflPersonIncome) &&
                             !columnFillConditionData.columnConditionCheckerToBe.check(ndflPersonIncome)) {
                         String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
-                        def period = reportPeriodService.createLogPeriodFormatById(
-                                Collections.singletonList(ndflPersonIncome.id), LogLevelType.INCOME)
+                        def period = getSourceReportPeriodDescription(Collections.singletonList(ndflPersonIncome))
                         logger.logCheckWithPeriod("%s. %s.",
                                 valueCondition_fatal,
                                 "Наличие (отсутствие) значения в графе не соответствует алгоритму заполнения РНУ НДФЛ",
@@ -1079,8 +1075,7 @@ class Check extends AbstractScriptClass {
                             department ? department.name : ""
                     )
                     String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
-                    def period = reportPeriodService.createLogPeriodFormatById(
-                            Collections.singletonList(ndflPersonIncome.id), LogLevelType.INCOME)
+                    def period = getSourceReportPeriodDescription(Collections.singletonList(ndflPersonIncome))
                     logger.warnExpWithPeriod("%s. %s.", "\"КПП\" и \"ОКТМО\" не соответствуют Тербанку", fioAndInpAndOperId, period, pathError,
                             errMsg)
                 }
@@ -1091,8 +1086,7 @@ class Check extends AbstractScriptClass {
                             "которая была бы актуальная на настоящий момент, либо актуальна в периоде \"$reportPeriod.taxPeriod.year, $reportPeriod.name\". " +
                             "По этому сочетанию КПП-ОКТМО не будут сформированы отчетные формы для отправки в ФНС"
                     String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
-                    def period = reportPeriodService.createLogPeriodFormatById(
-                            Collections.singletonList(ndflPersonIncome.id), LogLevelType.INCOME)
+                    def period = getSourceReportPeriodDescription(Collections.singletonList(ndflPersonIncome))
                     logger.warnExpWithPeriod("%s. %s.", "Отсутствие настройки подразделения для \"КПП\" и \"ОКТМО\"",
                             fioAndInpAndOperId, period, pathError, errMsg)
                 }
@@ -1323,9 +1317,6 @@ class Check extends AbstractScriptClass {
                 new Pair<String, Long>(it.operationId, it.asnuId)
             }.values()
             for (List<NdflPersonIncome> allIncomesOfOperation : personOperations) {
-                List<Long> incomesIds = new ArrayList<>(allIncomesOfOperation.size())
-                allIncomesOfOperation.each { income -> incomesIds.add(income.id) }
-
                 def operationId = allIncomesOfOperation.first().operationId
                 List<NdflPersonDeduction> allDeductionsOfOperation = deductionsByPersonIdAndOperationId.get(ndflPersonId)?.get(operationId) ?: new ArrayList<NdflPersonDeduction>()
                 List<NdflPersonPrepayment> allPrepaymentsOfOperation = prepaymentsByPersonIdAndOperationId.get(ndflPersonId)?.get(operationId) ?: new ArrayList<NdflPersonPrepayment>()
@@ -1338,7 +1329,7 @@ class Check extends AbstractScriptClass {
                  * Проверки по операциям
                  */
                 if (!isDummy(allIncomesOfOperation)) {
-                    def period = reportPeriodService.createLogPeriodFormatById(incomesIds, LogLevelType.INCOME)
+                    def period = getSourceReportPeriodDescription(allIncomesOfOperation)
                     // СведДох2 Сумма вычета (Графа 12)
                     BigDecimal incomesAccruedSum = totalOperationIncome.incomeAccruedSumm ?: 0
                     BigDecimal incomesDeductionsSum = totalOperationIncome.totalDeductionsSumm ?: 0
@@ -1402,8 +1393,7 @@ class Check extends AbstractScriptClass {
                                             C_INCOME_TYPE, ndflPersonIncome.incomeType
                                     )
                                     String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
-                                    def period = reportPeriodService.createLogPeriodFormatById(
-                                            Collections.singletonList(ndflPersonIncome.id), LogLevelType.INCOME)
+                                    def period = getSourceReportPeriodDescription(Collections.singletonList(ndflPersonIncome))
                                     logger.warnExpWithPeriod("%s. %s.", LOG_TYPE_2_6, fioAndInpAndOperId, period, pathError, errMsg)
                                 }
                             }
@@ -1415,8 +1405,7 @@ class Check extends AbstractScriptClass {
                         String errMsg = "Значение гр. \"Налоговая база\" \"$ndflPersonIncome.taxBase\" не совпадает с расчетным " +
                                 "\"${(ndflPersonIncome.incomeAccruedSumm ?: 0) - (ndflPersonIncome.totalDeductionsSumm ?: 0)}\""
                         String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
-                        def period = reportPeriodService.createLogPeriodFormatById(
-                                Collections.singletonList(ndflPersonIncome.id), LogLevelType.INCOME)
+                        def period = getSourceReportPeriodDescription(Collections.singletonList(ndflPersonIncome))
                         logger.warnExpWithPeriod("%s. %s.", "\"Налоговая база\" указана некорректно", fioAndInpAndOperId, period, pathError, errMsg)
                     }
 
@@ -1505,8 +1494,7 @@ class Check extends AbstractScriptClass {
                                     ndflPersonIncomingTaxRates.join(", ")
                             )
                             String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
-                            def period = reportPeriodService.createLogPeriodFormatById(
-                                    Collections.singletonList(ndflPersonIncome.id), LogLevelType.INCOME)
+                            def period = getSourceReportPeriodDescription(Collections.singletonList(ndflPersonIncome))
                             logger.warnExpWithPeriod("%s. %s.", LOG_TYPE_2_14, fioAndInpAndOperId, period, pathError, errMsg)
                         }
                     }
@@ -1659,8 +1647,7 @@ class Check extends AbstractScriptClass {
                         if (!logTypeMessagePairList.isEmpty()) {
                             String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
                             for (CheckData checkData : logTypeMessagePairList) {
-                                def period = reportPeriodService.createLogPeriodFormatById(
-                                        Collections.singletonList(ndflPersonIncome.id), LogLevelType.INCOME)
+                                def period = getSourceReportPeriodDescription(Collections.singletonList(ndflPersonIncome))
                                 logger.logCheckWithPeriod("%s. %s",
                                         checkData.fatal, checkData.msgFirst, fioAndInpAndOperId, period, pathError, checkData.msgLast)
                             }
@@ -1687,8 +1674,7 @@ class Check extends AbstractScriptClass {
                                             operationId, var1, ВычисленноеЗначениеНалога
                                     )
                                     String pathError = String.format(SECTION_LINES_MSG, T_PERSON_INCOME, rowNums)
-                                    def period = reportPeriodService.createLogPeriodFormatById(
-                                            Collections.singletonList(ndflPersonIncome.id), LogLevelType.INCOME)
+                                    def period = getSourceReportPeriodDescription(Collections.singletonList(ndflPersonIncome))
                                     logger.logCheckWithPeriod("%s. %s.",
                                             section_2_16Fatal,
                                             LOG_TYPE_2_16, fioAndInpAndOperId, period, pathError, errMsg)
@@ -1704,8 +1690,7 @@ class Check extends AbstractScriptClass {
                                             ndflPersonIncome.calculatedTax, ВычисленноеЗначениеНалога
                                     )
                                     String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
-                                    def period = reportPeriodService.createLogPeriodFormatById(
-                                            Collections.singletonList(ndflPersonIncome.id), LogLevelType.INCOME)
+                                    def period = getSourceReportPeriodDescription(Collections.singletonList(ndflPersonIncome))
                                     logger.logCheckWithPeriod("%s. %s.",
                                             section_2_16Fatal,
                                             LOG_TYPE_2_16, fioAndInpAndOperId, period, pathError, errMsg)
@@ -1918,8 +1903,7 @@ class Check extends AbstractScriptClass {
                                 String errMsg = dateConditionData.checker.check(checkedIncome)
                                 if (checkedIncome != null && errMsg != null) {
                                     String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, checkedIncome.rowNum ?: "")
-                                    def period = reportPeriodService.createLogPeriodFormatById(
-                                            Collections.singletonList(ndflPersonIncome.id), LogLevelType.INCOME)
+                                    def period = getSourceReportPeriodDescription(Collections.singletonList(ndflPersonIncome))
                                     logger.logCheckWithPeriod("%s. %s.",
                                             section_2_21_fatal,
                                             LOG_TYPE_2_21, fioAndInpAndOperId, period, pathError, errMsg)
@@ -2038,7 +2022,7 @@ class Check extends AbstractScriptClass {
             NdflPersonFL ndflPersonFL = ndflPersonFLMap.get(ndflPersonDeduction.ndflPersonId)
             String fioAndInpAndOperId = sprintf(TEMPLATE_PERSON_FL_OPER, [ndflPersonFL.fio, ndflPersonFL.inp, operationId])
 
-            def period = reportPeriodService.createLogPeriodFormatById(Collections.singletonList(ndflPersonDeduction.id), LogLevelType.DEDUCTION)
+            def period = getSourceReportPeriodDescription(Collections.singletonList(ndflPersonDeduction))
 
             // Выч0 Строка Раздела 3 не относится к операции с фиктивной строкой
             for (def income : allIncomesOfOperation) {
@@ -2180,7 +2164,7 @@ class Check extends AbstractScriptClass {
 
             def person = personByIdMap[prepayment.ndflPersonId]
 
-            def period = reportPeriodService.createLogPeriodFormatById(Collections.singletonList(prepayment.id), LogLevelType.PREPAYMENT)
+            def period = getSourceReportPeriodDescription(Collections.singletonList(prepayment))
 
             // 0 Строка Раздела 4 не относится к операции с фиктивной строкой
             for (def income : allIncomesOfOperation) {
@@ -2211,6 +2195,24 @@ class Check extends AbstractScriptClass {
             }
         }
         return true
+    }
+
+    String getSourceReportPeriodDescription(List<? extends NdflPersonOperation> operations) {
+        NdflPersonOperation operationWithMaxPeriod = operations.max {NdflPersonOperation ndflPersonOperation ->
+            ndflPersonOperation.sourcePeriodEndDate
+        }
+
+        StringBuilder result = new StringBuilder()
+        .append(operationWithMaxPeriod.sourcePeriodYear)
+        .append(" :")
+        .append(operationWithMaxPeriod.sourcePeriodName)
+        .append("; ")
+
+        if (operationWithMaxPeriod.sourceCorrectionDate) {
+            result.append(operationWithMaxPeriod.sourceCorrectionDate.format("dd-MM-yy"))
+        }
+
+        return result.toString()
     }
 
     class CheckData {

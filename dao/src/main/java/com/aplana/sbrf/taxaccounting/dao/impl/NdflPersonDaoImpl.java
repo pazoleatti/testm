@@ -483,6 +483,22 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     @Override
+    public List<NdflPersonIncome> findNdflPersonIncomeSourcePeriod(long declarationDataId) {
+        return getJdbcTemplate().query("select " + createColumns(NdflPersonIncome.COLUMNS, "npi") + ", drps.correction_date source_correction_date, rps.name period_name, tps.year period_year, rps.end_date period_end_date, np.inp, rba.NAME as asnu_name\n" +
+                "from ndfl_person_income npi\n" +
+                "inner join ndfl_person np on npi.ndfl_person_id = np.id\n" +
+                "left join ref_book_asnu rba on npi.asnu_id = rba.id\n" +
+                "left join ndfl_person_income npis on npi.source_id = npis.id\n" +
+                "inner join ndfl_person nps on npis.ndfl_person_id = nps.id\n" +
+                "inner join declaration_data dds on nps.declaration_data_id = dds.id\n" +
+                "inner join department_report_period drps on drps.id = dds.department_report_period_id\n" +
+                "inner join report_period rps on rps.id = drps.report_period_id\n" +
+                "inner join tax_period tps on tps.id = rps.tax_period_id\n" +
+                "where np.declaration_data_id = ?\n", new Object[]{declarationDataId}, new NdflPersonDaoImpl.NdflPersonIncomeSourceInfoRowMapper());
+
+    }
+
+    @Override
     public List<NdflPersonIncome> findAllIncomesByDeclarationIdByOrderByRowNumAsc(long declarationDataId) {
         return getJdbcTemplate().query("select " + createColumns(NdflPersonIncome.COLUMNS, "npi") + ", np.inp, rba.NAME as asnu_name " +
                 "from ndfl_person_income npi " +
@@ -617,6 +633,21 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     @Override
+    public List<NdflPersonDeduction> findNdflPersonDeductionSourcePeriod(long declarationDataId) {
+        return getJdbcTemplate().query("select " + createColumns(NdflPersonDeduction.COLUMNS, "npd") + ", drps.correction_date source_correction_date, rps.name period_name, tps.year period_year, rps.end_date period_end_date, np.inp, rba.NAME as asnu_name\n" +
+                "from ndfl_person_deduction npd\n" +
+                "inner join ndfl_person np on npd.ndfl_person_id = np.id\n" +
+                "left join ref_book_asnu rba on npd.asnu_id = rba.id\n" +
+                "left join ndfl_person_deduction npds on npd.source_id = npds.id\n" +
+                "inner join ndfl_person nps on npds.ndfl_person_id = nps.id\n" +
+                "inner join declaration_data dds on nps.declaration_data_id = dds.id\n" +
+                "inner join department_report_period drps on drps.id = dds.department_report_period_id\n" +
+                "inner join report_period rps on rps.id = drps.report_period_id\n" +
+                "inner join tax_period tps on tps.id = rps.tax_period_id\n" +
+                "where np.declaration_data_id = ?", new Object[]{declarationDataId}, new NdflPersonDaoImpl.NdflPersonDeductionSourceRowMapper());
+    }
+
+    @Override
     public List<NdflPersonDeduction> findAllDeductionsByDeclarationIds(List<Long> declarationDataIds) {
         return selectIn("select " + createColumns(NdflPersonDeduction.COLUMNS, "npd") + ", np.inp, rba.NAME as asnu_name " +
                         "from ndfl_person_deduction npd "
@@ -725,7 +756,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     @Override
-    public List<NdflPersonPrepayment> fetchNdflPersonPrepaymentByDeclarationData(long declarationDataId) {
+    public List<NdflPersonPrepayment> findNdflPersonPrepaymentByDeclarationData(long declarationDataId) {
         try {
             return getJdbcTemplate().query("select " + createColumns(NdflPersonPrepayment.COLUMNS, "npp") + ", np.inp, rba.NAME as asnu_name " +
                     "from ndfl_person_prepayment npp "
@@ -735,6 +766,21 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         } catch (EmptyResultDataAccessException e) {
             return new ArrayList<NdflPersonPrepayment>();
         }
+    }
+
+    @Override
+    public List<NdflPersonPrepayment> findNdflPersonPrepaymentSourcePeriod(long declarationDataId) {
+        return getJdbcTemplate().query("select " + createColumns(NdflPersonPrepayment.COLUMNS, "npp") + ", drps.correction_date source_correction_date, rps.name period_name, tps.year period_year, rps.end_date period_end_date, np.inp, rba.NAME as asnu_name\n" +
+                "from ndfl_person_prepayment npp\n" +
+                "inner join ndfl_person np on npp.ndfl_person_id = np.id\n" +
+                "left join ref_book_asnu rba on npp.asnu_id = rba.id\n" +
+                "left join ndfl_person_prepayment npps on npp.source_id = npps.id\n" +
+                "inner join ndfl_person nps on npps.ndfl_person_id = nps.id\n" +
+                "inner join declaration_data dds on nps.declaration_data_id = dds.id\n" +
+                "inner join department_report_period drps on drps.id = dds.department_report_period_id\n" +
+                "inner join report_period rps on rps.id = drps.report_period_id\n" +
+                "inner join tax_period tps on tps.id = rps.tax_period_id\n" +
+                "where np.declaration_data_id = ?", new Object[]{declarationDataId}, new NdflPersonDaoImpl.NdflPersonPrepaymentSourceRowMapper());
     }
 
     @Override
@@ -2074,7 +2120,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
 
-    private static final class NdflPersonIncomeRowMapper implements RowMapper<NdflPersonIncome> {
+    private static class NdflPersonIncomeRowMapper implements RowMapper<NdflPersonIncome> {
         @Override
         public NdflPersonIncome mapRow(ResultSet rs, int index) throws SQLException {
 
@@ -2123,6 +2169,20 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         }
     }
 
+    private static final class NdflPersonIncomeSourceInfoRowMapper extends NdflPersonIncomeRowMapper {
+        @Override
+        public NdflPersonIncome mapRow(ResultSet rs, int index) throws SQLException {
+
+            NdflPersonIncome personIncome = super.mapRow(rs, index);
+
+            personIncome.setSourceCorrectionDate(rs.getDate("source_correction_date"));
+            personIncome.setSourcePeriodName(rs.getString("period_name"));
+            personIncome.setSourcePeriodEndDate(rs.getDate("period_end_date"));
+            personIncome.setSourcePeriodYear(rs.getInt("period_year"));
+            return personIncome;
+        }
+    }
+
     private static class NdflPersonDeductionRowMapper implements RowMapper<NdflPersonDeduction> {
 
         @Override
@@ -2165,6 +2225,20 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         }
     }
 
+    private static final class NdflPersonDeductionSourceRowMapper extends NdflPersonDeductionRowMapper {
+        @Override
+        public NdflPersonDeduction mapRow(ResultSet rs, int index) throws SQLException {
+
+            NdflPersonDeduction personDedution = super.mapRow(rs, index);
+
+            personDedution.setSourceCorrectionDate(rs.getDate("source_correction_date"));
+            personDedution.setSourcePeriodName(rs.getString("period_name"));
+            personDedution.setSourcePeriodEndDate(rs.getDate("period_end_date"));
+            personDedution.setSourcePeriodYear(rs.getInt("period_year"));
+            return personDedution;
+        }
+    }
+
     private static final class NdflPersonConsolidationDeductionRowMapper extends NdflPersonDeductionRowMapper {
         @Override
         public NdflPersonDeduction mapRow(ResultSet rs, int i) throws SQLException {
@@ -2199,6 +2273,20 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             personPrepayment.setOperInfoId(rs.getBigDecimal("oper_info_id"));
             personPrepayment.setOktmo(rs.getString("oktmo"));
             personPrepayment.setKpp(rs.getString("kpp"));
+            return personPrepayment;
+        }
+    }
+
+    private static final class NdflPersonPrepaymentSourceRowMapper extends NdflPersonPrepaymentRowMapper {
+        @Override
+        public NdflPersonPrepayment mapRow(ResultSet rs, int index) throws SQLException {
+
+            NdflPersonPrepayment personPrepayment = super.mapRow(rs, index);
+
+            personPrepayment.setSourceCorrectionDate(rs.getDate("source_correction_date"));
+            personPrepayment.setSourcePeriodName(rs.getString("period_name"));
+            personPrepayment.setSourcePeriodEndDate(rs.getDate("period_end_date"));
+            personPrepayment.setSourcePeriodYear(rs.getInt("period_year"));
             return personPrepayment;
         }
     }

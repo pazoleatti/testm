@@ -258,7 +258,7 @@ public class NdflPersonServiceImpl implements NdflPersonService {
         List<NdflPerson> persons = ndflPersonDao.findAllByDeclarationId(declarationDataId);
         Map<Long, List<NdflPersonIncome>> incomesByPersonId = groupByPersonId(ndflPersonDao.findAllIncomesByDeclarationId(declarationDataId));
         Map<Long, List<NdflPersonDeduction>> deductionsByPersonId = groupByPersonId(ndflPersonDao.findAllDeductionsByDeclarationId(declarationDataId));
-        Map<Long, List<NdflPersonPrepayment>> prepaymentsByPersonId = groupByPersonId(ndflPersonDao.fetchNdflPersonPrepaymentByDeclarationData(declarationDataId));
+        Map<Long, List<NdflPersonPrepayment>> prepaymentsByPersonId = groupByPersonId(ndflPersonDao.findNdflPersonPrepaymentByDeclarationData(declarationDataId));
         for (NdflPerson person : persons) {
             person.setIncomes(incomesByPersonId.get(person.getId()));
             person.setDeductions(deductionsByPersonId.get(person.getId()));
@@ -286,6 +286,11 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     }
 
     @Override
+    public List<NdflPersonIncome> findNdflPersonIncomeSourcePeriod(long declarationDataId) {
+        return ndflPersonDao.findNdflPersonIncomeSourcePeriod(declarationDataId);
+    }
+
+    @Override
     public List<NdflPersonIncome> findAllIncomesByDeclarationIdByOrderByRowNumAsc(long declarationDataId) {
         return ndflPersonDao.findAllIncomesByDeclarationIdByOrderByRowNumAsc(declarationDataId);
     }
@@ -306,13 +311,23 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     }
 
     @Override
+    public List<NdflPersonDeduction> findNdflPersonDeductionSourcePeriod(long declarationDataId) {
+        return ndflPersonDao.findNdflPersonDeductionSourcePeriod(declarationDataId);
+    }
+
+    @Override
     public List<NdflPersonDeduction> findAllDeductionsByDeclarationIds(List<Long> declarationDataIds) {
         return ndflPersonDao.findAllDeductionsByDeclarationIds(declarationDataIds);
     }
 
     @Override
     public List<NdflPersonPrepayment> findNdflPersonPrepayment(long declarationDataId) {
-        return ndflPersonDao.fetchNdflPersonPrepaymentByDeclarationData(declarationDataId);
+        return ndflPersonDao.findNdflPersonPrepaymentByDeclarationData(declarationDataId);
+    }
+
+    @Override
+    public List<NdflPersonPrepayment> findNdflPersonPrepaymentSourcePeriod(long declarationDataId) {
+        return ndflPersonDao.findNdflPersonPrepaymentSourcePeriod(declarationDataId);
     }
 
     @Override
