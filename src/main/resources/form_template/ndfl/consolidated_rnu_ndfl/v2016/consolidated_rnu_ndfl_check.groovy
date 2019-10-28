@@ -2541,7 +2541,9 @@ class Check extends AbstractScriptClass {
                         return result.cdate
                     }
                 }
-            } else return startDate
+            } else {
+                resultDate = DateUtils.addDays(startDate, offset)
+            }
 
             /*if (offset == 0) {
                 resultDate = workDayWithOffset0Cache.get(startDate)
