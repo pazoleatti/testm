@@ -562,7 +562,7 @@ public class EdoMessageServiceImpl implements EdoMessageService {
                 declarationXmlFile = findDeclarationXmlFile();
                 if (DeclarationDataPermission.SEND_EDO.isGranted(getAuthUser(), declarationData, logger, declarationXmlFile.getFileName())) {
                     lockData = declarationLocker.establishLock(declarationData.getId(), OperationType.SEND_EDO, userInfo, logger);
-                    if (lockData != null && !logger.containsLevel(LogLevel.ERROR)) {
+                    if (lockData != null) {
                         tmpXmlFile = createTempFile(declarationXmlFile);
                         validateXml(tmpXmlFile, declarationXmlFile.getFileName());
                         copyToDocumentExchangeDirectory(tmpXmlFile, declarationXmlFile.getFileName());
