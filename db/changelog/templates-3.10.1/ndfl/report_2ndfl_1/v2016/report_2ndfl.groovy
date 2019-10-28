@@ -386,6 +386,10 @@ class Report2Ndfl extends AbstractScriptClass {
                         }
                     }
                     xml.nullifyingSprNumList << nomSprAndCorr.sprNum
+                    if (!reportFormsCreationParams.getReportTypeMode().equals(ReportTypeModeEnum.ANNULMENT)) {
+                        nomSprAndCorr.corrNum = 99
+                        xml.ndflReferences << buildNdflReference(person.id, person.personId, nomSprAndCorr.sprNum, person.lastName, person.firstName, person.middleName, person.birthDay, nomSprAndCorr.corrNum)
+                    }
                 }
             }
         }
@@ -643,6 +647,10 @@ class Report2Ndfl extends AbstractScriptClass {
                         }
                     }
                     xml.nullifyingSprNumList << nomSprAndCorr.sprNum
+                    if (!reportFormsCreationParams.getReportTypeMode().equals(ReportTypeModeEnum.ANNULMENT)) {
+                        nomSprAndCorr.corrNum = 99
+                        xml.ndflReferences << buildNdflReference(person.id, person.personId, nomSprAndCorr.sprNum, person.lastName, person.firstName, person.middleName, person.birthDay, nomSprAndCorr.corrNum)
+                    }
                 }
             }
         }
