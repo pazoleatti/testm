@@ -34,7 +34,7 @@ public class DeleteSelectedDeclarationRowsAsyncTask extends AbstractAsyncTask {
     public static final String DELETE_ROW_MESSAGE = "Раздел %s. Удалена строка \"%s\". %s";
     public static final String SECTION1_INFO_MESSAGE = "ФЛ: %s";
     public static final String SECTION2_INFO_MESSAGE = "ID операции: %s";
-    public static final String TOTAL_MESSAGE = "Выполнено удаление строк формы";
+    public static final String TOTAL_MESSAGE = "Выполнено удаление строк формы ";
 
     @Autowired
     private NdflPersonDao ndflPersonDao;
@@ -65,13 +65,15 @@ public class DeleteSelectedDeclarationRowsAsyncTask extends AbstractAsyncTask {
         Collection<DeleteSelectedDeclarationRowsAction> toDeleteRows =
                 (Collection<DeleteSelectedDeclarationRowsAction>) taskData.getParams().get("toDeleteRows");
 
+        TAUserInfo userInfo = new TAUserInfo();
+        userInfo.setUser(userService.getUser(taskData.getUserId()));
+
         //для каждого набора строк удаления из коллекции
         for (DeleteSelectedDeclarationRowsAction deleteRows : toDeleteRows) {
 
             //Каждый набор deleteRows относится к своей налоговой форме,
+            //TODO задача удаления строк создается из конкретной формы и удаляемые строки всегда принадлежат только одной декларации, не так ли?
             Long declarationDataId = deleteRows.getDeclarationDataId();
-            TAUserInfo userInfo = new TAUserInfo();
-            userInfo.setUser(userService.getUser(taskData.getUserId()));
             DeclarationData declarationData = declarationDataService.get(declarationDataId, userInfo);
             DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declarationData.getDeclarationTemplateId());
 
@@ -82,27 +84,28 @@ public class DeleteSelectedDeclarationRowsAsyncTask extends AbstractAsyncTask {
 
             //Для строк Раздела 1
             if (DeclarationDataSection.SECTION1.equals(deleteRows.getSection())) {
-                //Удаляем соответсвующие строки Разделов 2,3,4
-                deleteRowsBySection1(deleteRows);
-
                 //TODO получение строк раздела 1 перетащить в сервис из dao или подумать
                 List<NdflPerson> ndflPersonList = ndflPersonDao.findByIdIn(deleteRows.getSectionIds());
                 for (NdflPerson ndflPerson : ndflPersonList) {
                     logger.info(DELETE_ROW_MESSAGE, "1", ndflPerson.getRowNum(), String.format(SECTION1_INFO_MESSAGE, ndflPerson.getFullName()));
                 }
+
+                //Удаляем соответсвующие строки Разделов 2,3,4
+                deleteRowsBySection1(deleteRows);
             }
 
             //Для строк Раздела 2
             if (DeclarationDataSection.SECTION2.equals(deleteRows.getSection())) {
-                //Удаляем соответсвующие строки Разделов 3,4
-                //а также строки раздела 1, если удаляемые строки (раздела 2) являются последними
-                //в соответсвующем отношениии с строке раздела 1
-                deleteRowsBySection2(deleteRows);
                 //TODO получение строк раздела 2 перетащить в сервис из dao или подумать
                 List<NdflPersonIncome> incomes = ndflPersonDao.findAllIncomesByIdIn(deleteRows.getSectionIds());
                 for (NdflPersonIncome income : incomes) {
                     logger.info(DELETE_ROW_MESSAGE, "2", income.getRowNum(), String.format(SECTION2_INFO_MESSAGE, income.getOperationId()));
                 }
+
+                //Удаляем соответсвующие строки Разделов 3,4
+                //а также строки раздела 1, если удаляемые строки (раздела 2) являются последними
+                //в соответсвующем отношениии с строке раздела 1
+                deleteRowsBySection2(deleteRows);
             }
 
             //Удалить связанные c формой отчеты
@@ -131,7 +134,6 @@ public class DeleteSelectedDeclarationRowsAsyncTask extends AbstractAsyncTask {
                     userInfo);
 
         }
-
 
         return new BusinessLogicResult(true, null);
     }
