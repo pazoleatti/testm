@@ -112,5 +112,12 @@
 		create index IDX_TMESS_DECLARATION_ID on TRANSPORT_MESSAGE (declaration_id asc);	
 	</sql>
    </changeSet>
+	<!-- https://jira.aplana.com/browse/SBRFNDFL-9015 При создании 6-НДФЛ Ошибка: Ambiguous method overloading for method java.math.BigDecimal#minus. -->
+	<changeSet id="3.10.0.1-avoynov-2" author="avoynov" runAlways="true">
+		<update tableName="DECLARATION_TEMPLATE">
+			<column name="CREATE_SCRIPT" valueClobFile="templates-3.10.0.1/ndfl/report_6ndfl/v2016/report_6ndfl.groovy"/>
+			<where>declaration_type_id = 103</where>
+		</update>
+	</changeSet>
 	
 </databaseChangeLog>
