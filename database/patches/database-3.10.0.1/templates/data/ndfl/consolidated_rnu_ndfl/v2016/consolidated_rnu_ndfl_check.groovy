@@ -269,6 +269,7 @@ class Check extends AbstractScriptClass {
                 // Сведения о доходах и НДФЛ
                 ndflPersonIncomeList = ndflPersonService.findNdflPersonIncomeSourcePeriod(declarationData.id)
                 logForDebug(SUCCESS_GET_TABLE, T_PERSON_INCOME_NAME, ndflPersonIncomeList.size())
+                println "consolidation_check #=${declarationData.id} Размер списка операций ${ndflPersonIncomeList.size()}"
 
                 // Сведения о вычетах
                 List<NdflPersonDeduction> ndflPersonDeductionList = ndflPersonService.findNdflPersonDeductionSourcePeriod(declarationData.id)
@@ -1916,6 +1917,7 @@ class Check extends AbstractScriptClass {
         }
 
         logForDebug("Проверки сведений о доходах (" + (System.currentTimeMillis() - time) + " мс)")
+        println "consolidation_check #=${declarationData.id} Проверки сведений о доходах ( ${ScriptUtils.calcTimeMillis(time)}"
     }
 
     /**
@@ -2528,22 +2530,19 @@ class Check extends AbstractScriptClass {
         Date getWorkDay(Date startDate, int offset) {
             Date resultDate
             startDate = SimpleDateUtils.toStartOfDay(startDate)
-            int index = 0
-            for (int i= 0; i < calendarDays.size(); i++) {
-                BusinessCalendarDay bcd = calendarDays.get(i)
-                if (bcd.cdate == startDate) {
-                    index = i
-                    break
-                }
-            }
-            int offsetIndex = index + offset
+            BusinessCalendarDay day = new BusinessCalendarDay(startDate, null)
+            int index = Collections.binarySearch(calendarDays, day)
+            if (index > 0) {
+                int offsetIndex = index + offset
 
-            for (int i=offsetIndex; i < calendarDays.size(); i++) {
-                BusinessCalendarDay result = calendarDays.get(i)
-                if (result.ctype == 0) {
-                    return result.cdate
+                for (int i=offsetIndex; i < calendarDays.size(); i++) {
+                    BusinessCalendarDay result = calendarDays.get(i)
+                    if (result.ctype == 0) {
+                        return result.cdate
+                    }
                 }
-            }
+            } else return startDate
+
             /*if (offset == 0) {
                 resultDate = workDayWithOffset0Cache.get(startDate)
                 if (resultDate == null) {
