@@ -28,7 +28,7 @@ import static java.util.Collections.singletonList;
  * Created by <i><b>s.molokovskikh</i></b> on 23.10.19.
  */
 @Component("DeleteSelectedDeclarationRowsAsyncTask")
-public class DeleteSelectedDeclarationRowsAsyncTask extends AbstractAsyncTask {
+public class DeleteSelectedDeclarationRowsAsyncTask extends AbstractDeclarationAsyncTask {
 
 
     public static final String DELETE_ROW_MESSAGE = "Раздел %s. Удалена строка \"%s\". %s";
@@ -115,12 +115,6 @@ public class DeleteSelectedDeclarationRowsAsyncTask extends AbstractAsyncTask {
             );
 
             String fullDeclarationDescription = getFullDeclarationDescription(taskData.getParams());
-            //итоговый текст уведомления
-            String totalNotice =  getTotalNotice(fullDeclarationDescription);
-
-            //итоговый текст оповещения
-
-            logger.info(totalNotice);
 
             //Запись в журнал аудита
             auditService.add(null, userInfo, declarationData,
@@ -137,6 +131,7 @@ public class DeleteSelectedDeclarationRowsAsyncTask extends AbstractAsyncTask {
 
         return new BusinessLogicResult(true, null);
     }
+
 
 
     /**
@@ -205,7 +200,7 @@ public class DeleteSelectedDeclarationRowsAsyncTask extends AbstractAsyncTask {
     }
 
     @Override
-    protected AsyncQueue checkTaskLimit(String taskDescription, TAUserInfo user, Map<String, Object> params,
+    public AsyncQueue checkTaskLimit(String taskDescription, TAUserInfo user, Map<String, Object> params,
                                         Logger logger)
             throws AsyncTaskException {
         return AsyncQueue.SHORT;
