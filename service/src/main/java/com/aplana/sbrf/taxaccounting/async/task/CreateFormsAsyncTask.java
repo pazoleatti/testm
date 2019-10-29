@@ -60,6 +60,7 @@ public class CreateFormsAsyncTask extends AbstractAsyncTask {
         ReportFormsCreationParams params = (ReportFormsCreationParams) taskParams.get("params");
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(taskData.getUserId()));
+        userInfo.setIp((String) taskParams.get("userIP"));
 
         declarationDataService.createReportForms(params, new LockStateLogger() {
             @Override
