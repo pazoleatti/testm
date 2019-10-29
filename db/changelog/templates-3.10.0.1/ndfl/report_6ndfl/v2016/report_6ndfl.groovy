@@ -514,7 +514,7 @@ class Report6Ndfl extends AbstractScriptClass {
             return null
         }
         List<Pair<KppOktmoPair, DepartmentConfig>> kppOktmoPairs = departmentConfigService.findAllByDeclaration(sourceKnf)
-        kppOktmoPairs = kppOktmoPairs.findAll{it.second.relatedKppOktmo.kpp == null && it.second.relatedKppOktmo.oktmo == null}
+        kppOktmoPairs = kppOktmoPairs.findAll{it.second?.relatedKppOktmo?.kpp == null && it.second?.relatedKppOktmo?.oktmo == null}
         if (reportFormsCreationParams.kppOktmoPairs) {
             kppOktmoPairs = kppOktmoPairs.findAll {
                 reportFormsCreationParams.kppOktmoPairs.contains(it.first) ||
