@@ -119,5 +119,14 @@
 			<where>declaration_type_id = 103</where>
 		</update>
 	</changeSet>
+    <changeSet id="3.10.0.1-skononova-4" author="skononova">
+	<sql>
+		create index IDX_NDFL_PERSON_INCOME_OPER_ID on NDFL_PERSON_INCOME (operation_id asc) PCTFREE 50 INITRANS 5 COMPUTE STATISTICS;
+		create index IDX_NDFL_PERSON_PP_OPER_ID on NDFL_PERSON_PREPAYMENT (operation_id asc) PCTFREE 50 INITRANS 5 COMPUTE STATISTICS;
+		create index IDX_NDFL_PERSON_DEDUCT_OPER_ID on NDFL_PERSON_DEDUCTION (operation_id asc) PCTFREE 50 INITRANS 5 COMPUTE STATISTICS;
+
+	</sql>
+   </changeSet>
+
 	
 </databaseChangeLog>

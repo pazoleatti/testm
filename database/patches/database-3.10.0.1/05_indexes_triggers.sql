@@ -791,6 +791,75 @@ commit
 /
 
 DECLARE
+	v_index_name varchar(30) :='IDX_NDFL_PERSON_INCOME_OPER_ID' ;
+	v_run_condition number(1);
+	v_task_name varchar2(128):='alter_tables block #36 - create index '||v_index_name;  
+
+BEGIN
+	select decode(count(*),0,1,0) into v_run_condition from user_indexes where INDEX_NAME=v_index_name ;
+	IF v_run_condition=1 THEN
+		execute immediate 'create index '|| v_index_name ||' on NDFL_PERSON_INCOME (operation_id asc)
+				   PCTFREE 50 INITRANS 5 COMPUTE STATISTICS';
+		dbms_output.put_line(v_task_name||'[INFO ('||v_index_name||')]:'||' Success');
+	ELSE
+		dbms_output.put_line(v_task_name||'[WARNING ('||v_index_name||')]:'||' changes had already been implemented');
+	END IF;
+
+EXCEPTION
+	when OTHERS then
+		dbms_output.put_line(v_task_name||'[FATAL]:'||sqlerrm);	
+END;
+/
+commit
+/
+
+DECLARE
+	v_index_name varchar(30) :='IDX_NDFL_PERSON_PP_OPER_ID' ;
+	v_run_condition number(1);
+	v_task_name varchar2(128):='alter_tables block #37 - create index '||v_index_name;  
+
+BEGIN
+	select decode(count(*),0,1,0) into v_run_condition from user_indexes where INDEX_NAME=v_index_name ;
+	IF v_run_condition=1 THEN
+		execute immediate 'create index '|| v_index_name ||' on NDFL_PERSON_PREPAYMENT (operation_id asc)
+				   PCTFREE 50 INITRANS 5 COMPUTE STATISTICS';
+		dbms_output.put_line(v_task_name||'[INFO ('||v_index_name||')]:'||' Success');
+	ELSE
+		dbms_output.put_line(v_task_name||'[WARNING ('||v_index_name||')]:'||' changes had already been implemented');
+	END IF;
+
+EXCEPTION
+	when OTHERS then
+		dbms_output.put_line(v_task_name||'[FATAL]:'||sqlerrm);	
+END;
+/
+commit
+/
+
+DECLARE
+	v_index_name varchar(30) :='IDX_NDFL_PERSON_DEDUCT_OPER_ID' ;
+	v_run_condition number(1);
+	v_task_name varchar2(128):='alter_tables block #38 - create index '||v_index_name;  
+
+BEGIN
+	select decode(count(*),0,1,0) into v_run_condition from user_indexes where INDEX_NAME=v_index_name ;
+	IF v_run_condition=1 THEN
+		execute immediate 'create index '|| v_index_name ||' on NDFL_PERSON_DEDUCTION (operation_id asc)
+				   PCTFREE 50 INITRANS 5 COMPUTE STATISTICS';
+		dbms_output.put_line(v_task_name||'[INFO ('||v_index_name||')]:'||' Success');
+	ELSE
+		dbms_output.put_line(v_task_name||'[WARNING ('||v_index_name||')]:'||' changes had already been implemented');
+	END IF;
+
+EXCEPTION
+	when OTHERS then
+		dbms_output.put_line(v_task_name||'[FATAL]:'||sqlerrm);	
+END;
+/
+commit
+/
+
+DECLARE
 	v_task_name varchar2(128):='indexes change block #1 - PK_REF_BOOK_PERSON'; 
 	v_run_condition number(1); 
 BEGIN
