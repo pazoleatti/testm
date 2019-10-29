@@ -626,4 +626,9 @@ public class NdflPersonServiceImpl implements NdflPersonService {
         ndflPersonDao.renumerateNdflPersonIncomeRowNums(declarationDataId);
         ndflPersonDao.renumerateNdflPersonRowNums(declarationDataId);
     }
+
+    @Override
+    public List<Long> findNdflPersonIncomeByPersonAndOperations(long personId, Collection<String> operationsIds) {
+        return ndflPersonService.findNdflPersonIncomeByPersonAndOperations(personId, operationsIds);
+    }
 }

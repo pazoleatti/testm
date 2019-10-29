@@ -1318,6 +1318,7 @@ class Import extends AbstractScriptClass {
      * Удаляет операции из БД по идентификаторам операций
      */
     void removeOperations(List<Long> incomesIdsForRemove, Collection<NdflPerson> personsFromDeclaration) {
+        List<Long> incomesIdsWithRelatedByOperationIdForRemove = []
         List<Long> deductionsIdsForRemove = []
         List<Long> prepaymentsIdsForRemove = []
         List<LogEntry> removeMessages = []
@@ -1325,15 +1326,23 @@ class Import extends AbstractScriptClass {
         int deductionsCount = 0
         int prepaymentsCount = 0
         for (NdflPerson person : personsFromDeclaration) {
-            List<Long> incomesIdList = person.incomes*.id
-            incomesCount += incomesIdList.size()
+            List<NdflPersonIncome> personIncomes = person.incomes
+            incomesCount += personIncomes.size()
             deductionsCount += person.getDeductions().size()
             prepaymentsCount += person.getPrepayments().size()
 
-            def suitableIncomes = incomesIdList.findAll { incomeId -> incomesIdsForRemove.contains(incomeId) }
-            if (suitableIncomes.isEmpty()) {
+            Set<String> operationsIdsBySuitableIncomes = new HashSet<>()
+            personIncomes.each {
+                incomesIdsForRemove.contains(it.id) ?: operationsIdsBySuitableIncomes.add(it.operationId)
+            }
+
+            if (operationsIdsBySuitableIncomes.isEmpty()) {
                 continue
             }
+
+            def suitableIncomes = ndflPersonService
+                    .findNdflPersonIncomeByPersonAndOperations(person.id, operationsIdsBySuitableIncomes)
+            incomesIdsWithRelatedByOperationIdForRemove.addAll(suitableIncomes)
 
             def deductionsIdsByPerson = ndflPersonService.getDeductionsIdsByPersonAndIncomes(person.id, suitableIncomes)
             deductionsIdsForRemove.addAll(deductionsIdsByPerson)
@@ -1356,14 +1365,15 @@ class Import extends AbstractScriptClass {
             }
         }
 
-        ndflPersonService.deleteNdflPersonIncome(incomesIdsForRemove)
+        ndflPersonService.deleteNdflPersonIncome(incomesIdsWithRelatedByOperationIdForRemove)
         if (!deductionsIdsForRemove.isEmpty()) {
             ndflPersonService.deleteNdflPersonDeduction(deductionsIdsForRemove)
         }
         if (!prepaymentsIdsForRemove.isEmpty()) {
             ndflPersonService.deleteNdflPersonPrepayment(prepaymentsIdsForRemove)
         }
-        logger.info("При загрузке файла: в Разделе 2 удалено ${incomesIdsForRemove.size()} строк из $incomesCount, " +
+        logger.info("При загрузке файла: " +
+                "в Разделе 2 удалено ${incomesIdsWithRelatedByOperationIdForRemove.size()} строк из $incomesCount, " +
                 "в Разделе 3 удалено ${deductionsIdsForRemove.size()} строк из $deductionsCount, " +
                 "в Разделе 4 удалено ${prepaymentsIdsForRemove.size()} строк из $prepaymentsCount.")
         logger.getEntries().addAll(removeMessages)

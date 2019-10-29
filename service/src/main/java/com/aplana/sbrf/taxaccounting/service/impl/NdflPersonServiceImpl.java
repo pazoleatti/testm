@@ -175,4 +175,9 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     public List<Long> getPrepaymentsIdsByPersonAndIncomes(long personId, Collection<Long> incomesIds) {
         return ndflPersonDao.getPrepaymentsIdsByPersonAndIncomes(personId, incomesIds);
     }
+
+    @Override
+    public List<Long> findNdflPersonIncomeByPersonAndOperations(long personId, Collection<String> operationsIds) {
+        return ndflPersonDao.findNdflPersonIncomeByPersonAndOperations(personId, operationsIds);
+    }
 }

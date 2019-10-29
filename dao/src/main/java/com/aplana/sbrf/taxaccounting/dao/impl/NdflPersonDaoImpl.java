@@ -2783,6 +2783,28 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     @Override
+    public List<Long> findNdflPersonIncomeByPersonAndOperations(long personId, Collection<String> operationsIds) {
+        String query = "select\n" +
+                "  npi.id\n" +
+                "from\n" +
+                "  ndfl_person_income npi\n" +
+                "inner join ndfl_person np on np.id = npi.ndfl_person_id \n" +
+                "where \n" +
+                "  np.id = :personId\n" +
+                "  and npi.operation_id in (:operationsIds)";
+
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("personId", personId);
+        params.addValue("operationsIds", operationsIds);
+
+        try {
+            return getNamedParameterJdbcTemplate().queryForList(query, params, Long.class);
+        } catch (EmptyResultDataAccessException ex) {
+            return Collections.emptyList();
+        }
+    }
+
+    @Override
     public void renumerateNdflPersonRowNums(Long declarationDataId) {
         String sql = "merge into NDFL_PERSON target\n" +
                 "USING\n" +

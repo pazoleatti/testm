@@ -739,6 +739,14 @@ public interface NdflPersonService {
     List<Long> getPrepaymentsIdsByPersonAndIncomes(long personId, Collection<Long> incomesIds);
 
     /**
+     * Получить список идентификаторов сведений о доходах и НДФЛ (раздел 2) для конкретного ФЛ по идентификаторам операций
+     *
+     * @param personId идентификатор ФЛ
+     * @param operationsIds идентификаторы операций
+     */
+    List<Long> findNdflPersonIncomeByPersonAndOperations(long personId, Collection<String> operationsIds);
+
+    /**
      * Удалить строки разделов 2,3,4 по строкам раздела 1
      * @param ndflPersonIds
      */
