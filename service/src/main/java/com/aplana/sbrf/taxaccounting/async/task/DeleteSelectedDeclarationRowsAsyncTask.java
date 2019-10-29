@@ -32,8 +32,8 @@ public class DeleteSelectedDeclarationRowsAsyncTask extends AbstractAsyncTask {
 
 
     public static final String DELETE_ROW_MESSAGE = "Раздел %s. Удалена строка \"%s\". %s";
-    public static final String SECTION1_INFO_MESSAGE = "ФЛ: %s";
-    public static final String SECTION2_INFO_MESSAGE = "ID операции: %s";
+    public static final String SECTION1_INFO_MESSAGE = "ФЛ: %s, удалены все операции в форме относящиеся к данному ФЛ";
+    public static final String SECTION2_INFO_MESSAGE = "ID операции: %s, удалены все строки в форме относящиеся к данной операции";
     public static final String TOTAL_MESSAGE = "Выполнено удаление строк формы ";
 
     @Autowired
