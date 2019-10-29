@@ -1378,7 +1378,7 @@ class Import extends AbstractScriptClass {
                 "в Разделе 4 удалено ${prepaymentsIdsForRemove.size()} строк из $prepaymentsCount.")
         logger.getEntries().addAll(removeMessages)
     }
-
+    
     /**
      * Создает сообщение о добавлении даннных
      * @param ndflPerson объект физлица
