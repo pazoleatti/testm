@@ -37,6 +37,8 @@ public class TransportMessageServiceImpl implements TransportMessageService {
     protected DepartmentService departmentService;
     @Autowired
     private PrintingService printingService;
+    @Autowired
+    private TransactionHelper transactionHelper;
 
 
     @Override
@@ -97,15 +99,27 @@ public class TransportMessageServiceImpl implements TransportMessageService {
 
     @Override
     @Transactional
-    public void create(TransportMessage transportMessage) {
-        transportMessageDao.create(transportMessage);
-        LOG.info("Сохранено транспортное сообщение: " + transportMessage);
+    public void create(final TransportMessage transportMessage) {
+        transactionHelper.executeInNewTransaction(new TransactionLogic<Object>() {
+            @Override
+            public Object execute() {
+                transportMessageDao.create(transportMessage);
+                LOG.info("Сохранено транспортное сообщение: " + transportMessage);
+                return null;
+            }
+        });
     }
 
     @Override
     @Transactional
-    public void update(TransportMessage transportMessage) {
-        transportMessageDao.update(transportMessage);
+    public void update(final TransportMessage transportMessage) {
+        transactionHelper.executeInNewTransaction(new TransactionLogic<Object>() {
+            @Override
+            public Object execute() {
+                transportMessageDao.update(transportMessage);
+                return null;
+            }
+        });
     }
 
     @Override
