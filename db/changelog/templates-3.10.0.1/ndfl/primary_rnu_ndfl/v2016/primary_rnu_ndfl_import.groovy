@@ -327,7 +327,9 @@ class Import extends AbstractScriptClass {
             logForDebug("Закончена сортировка загруженных данных декларации")
 
             logForDebug("Поиск идентификаторов операций которые отсутствуют в НФ и изменение их")
-            transformOperationId()
+            for (NdflPerson ndflPerson : ndflPersons) {
+                transformOperationIdsForPersonIfNeed(ndflPerson)
+            }
             logForDebug("Обновление номеров строк данных декларации")
             updatePersonsRowNum(ndflPersons)
             if (!logger.containsLevel(LogLevel.ERROR)) {
@@ -354,8 +356,6 @@ class Import extends AbstractScriptClass {
             List<NdflPersonIncome> incomesForCreate = []
             List<NdflPersonDeduction> deductionsForCreate = []
             List<NdflPersonPrepayment> prepaymentsForCreate = []
-
-            boolean operationsTransformed = false
 
             logForDebug("Запущена процедура обновления данных физ лиц.")
             for (NdflPersonExt ndflPerson : ndflPersons) {
@@ -549,11 +549,9 @@ class Import extends AbstractScriptClass {
 
                     logForDebug("Завершена процедура обновления данных ФЛ $ndflPerson.importId")
                 } else {
-                    if (!operationsTransformed) {
-                        transformOperationId()
-                    }
-                    operationsTransformed = true
-
+                    logForDebug("Запущена процедура обновления идентификатора операций (если необходимо) для физ лица №$ndflPerson.importId")
+                    transformOperationIdsForPersonIfNeed(ndflPerson)
+                    logForDebug("Завершена процедура обновления идентификатора операций (если необходимо) для физ лица №$ndflPerson.importId")
                     ndflPersonsForCreate << ndflPerson
                 }
             }
@@ -900,13 +898,13 @@ class Import extends AbstractScriptClass {
     }
 
     /**
-     * Ищет идентификаторы операций которые отсутствуют в налоговой форме и изменяет их
+     * Ищет идентификаторы операций ФЛ которые отсутствуют в налоговой форме и изменяет их
      */
 
-    void transformOperationId() {
-        Set<String> operationsSet = operationsGrouped.keySet()
+    void transformOperationIdsForPersonIfNeed(NdflPerson ndflPerson) {
+        def operationsSet = ndflPerson.incomes*.operationId
         if (!operationsSet.isEmpty()) {
-            List<String> persistedOperationIdList = ndflPersonService.findIncomeOperationId(new ArrayList<String>(operationsSet))
+            List<String> persistedOperationIdList = ndflPersonService.findIncomeOperationId(operationsSet)
             operationsSet.removeAll(persistedOperationIdList)
             for (String operationId : operationsSet) {
                 List<NdflPersonOperation> operations = operationsGrouped.get(operationId)
@@ -1378,7 +1376,7 @@ class Import extends AbstractScriptClass {
                 "в Разделе 4 удалено ${prepaymentsIdsForRemove.size()} строк из $prepaymentsCount.")
         logger.getEntries().addAll(removeMessages)
     }
-    
+
     /**
      * Создает сообщение о добавлении даннных
      * @param ndflPerson объект физлица
