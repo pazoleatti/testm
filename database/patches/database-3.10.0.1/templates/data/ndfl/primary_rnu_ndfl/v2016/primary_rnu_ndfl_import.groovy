@@ -1331,7 +1331,9 @@ class Import extends AbstractScriptClass {
 
             Set<String> operationsIdsBySuitableIncomes = new HashSet<>()
             personIncomes.each {
-                incomesIdsForRemove.contains(it.id) ?: operationsIdsBySuitableIncomes.add(it.operationId)
+                if (incomesIdsForRemove.contains(it.id)) {
+                    operationsIdsBySuitableIncomes.add(it.operationId)
+                }
             }
 
             if (operationsIdsBySuitableIncomes.isEmpty()) {
