@@ -131,18 +131,18 @@ begin
 end;
 /
 
-select dd.declaration_template_id, count(*) as count_of_income from declaration_data dd join ndfl_person np on np.declaration_data_id=dd.id
+select dd.declaration_template_id, knf_type_id, count(*) as count_of_income from declaration_data dd join ndfl_person np on np.declaration_data_id=dd.id
 join ndfl_person_income npi on npi.ndfl_person_id = np.id
-where declaration_template_id in (100,101) group by declaration_template_id;
+where declaration_template_id in (100,101) group by declaration_template_id, knf_type_id order by 1;
 
 begin 
 	dbms_output. put_line ('Query #15: Forms (count of ndfl_person_deductions)');
 end;
 /
 
-select dd.declaration_template_id, count(*) as count_of_deduction from declaration_data dd join ndfl_person np on np.declaration_data_id=dd.id
+select dd.declaration_template_id, knf_type_id, count(*) as count_of_deduction from declaration_data dd join ndfl_person np on np.declaration_data_id=dd.id
 join ndfl_person_deduction npd on npd.ndfl_person_id = np.id
-where declaration_template_id in (100,101) group by declaration_template_id;
+where declaration_template_id in (100,101) group by declaration_template_id, knf_type_id order by 1;
 
 begin 
 	dbms_output. put_line ('Query #16: Forms (count of ndfl_person_prepayments');

@@ -67,6 +67,7 @@ public class DeleteSelectedDeclarationRowsAsyncTask extends AbstractDeclarationA
 
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(taskData.getUserId()));
+        userInfo.setIp((String) taskData.getParams().get("userIP"));
 
         //для каждого набора строк удаления из коллекции
         for (DeleteSelectedDeclarationRowsAction deleteRows : toDeleteRows) {

@@ -3305,6 +3305,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 }
 
                 params.put("toDeleteRows", deleteRowsCollection);
+                params.put("userIP", userInfo.getIp());
 
                 asyncManager.createTask(OperationType.DELETE_DEC_ROWS, userInfo, params, logger);
 
