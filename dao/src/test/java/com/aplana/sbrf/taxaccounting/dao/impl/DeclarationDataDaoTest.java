@@ -414,6 +414,12 @@ public class DeclarationDataDaoTest {
         assertEquals(new Long(8), declarationDataList.get(0).getId());
     }
 
+    @Test
+    public void isKnfTest() {
+        assertTrue(declarationDataDao.isKnf(6L));
+        assertFalse(declarationDataDao.isKnf(8L));
+    }
+
     private TAUser createUser() {
         TAUser user = new TAUser();
         user.setId(1);

@@ -514,15 +514,18 @@ public class PeriodServiceImpl implements PeriodService {
     }
 
     @Override
-    public String createLogPeriodFormatById(List<Long> idList, Integer logLevelType) {
+    public String createLogPeriodFormatById(List<Long> declarationsIds, Integer logLevelType) {
 
-        if (ObjectUtils.isEmpty(idList)) {
+        if (ObjectUtils.isEmpty(declarationsIds)) {
             return StringUtils.EMPTY;
         }
 
-        List<LogPeriodResult> maxPeriodList = new ArrayList<>();
+        List<LogPeriodResult> maxPeriodList = new ArrayList<>(declarationsIds.size());
 
-        for (Long id : idList) {
+        for (Long id : declarationsIds) {
+            if ( !declarationDataDao.isKnf(id)) {
+                continue;
+            }
             LogPeriodResult logPeriodResult = getFirstInList(reportPeriodDao.createLogPeriodFormatById(id, logLevelType));
             if (!ObjectUtils.isEmpty(logPeriodResult))
                 maxPeriodList.add(logPeriodResult);

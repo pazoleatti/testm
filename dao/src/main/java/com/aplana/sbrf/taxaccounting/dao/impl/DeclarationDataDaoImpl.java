@@ -1156,6 +1156,17 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 params, Long.class);
     }
 
+    @Override
+    public boolean isKnf(Long declarationId) {
+        try {
+            return getJdbcTemplate().queryForObject(
+                    "select 1 from declaration_data where id = ? and declaration_template_id = 101 /* консолидированная */",
+                    Integer.class, declarationId) == 1;
+        } catch (EmptyResultDataAccessException e) {
+            return false;
+        }
+    }
+
     private Collection<Pair<String, String>> toPairs(List<KppOktmoPair> kppOktmoPairs) {
         List<Pair<String, String>> pairs = new ArrayList<>();
         for (KppOktmoPair kppOktmoPair : kppOktmoPairs) {

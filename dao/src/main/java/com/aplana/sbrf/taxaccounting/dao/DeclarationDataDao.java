@@ -331,4 +331,12 @@ public interface DeclarationDataDao extends PermissionDao {
      * @return список ид форм
      */
     List<Long> findAllIdsFor2NdflFL(int reportPeriodId, long personId, List<KppOktmoPair> kppOktmoPairs);
+
+    /**
+     * Определяет, является ли форма консолидированной
+     *
+     * @param declarationId идентификатор декларации
+     * @return true, если форма является консолидированной
+     */
+    boolean isKnf(Long declarationId);
 }

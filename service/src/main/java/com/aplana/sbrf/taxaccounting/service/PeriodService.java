@@ -152,11 +152,11 @@ public interface PeriodService {
     /**
      * Получить сформированное поле периода
      *
-     * @param idList ПНФ список
+     * @param declarationsIds список КНФ
      * @param logLevelType тип операции
      * @return период для логов
      */
-    String createLogPeriodFormatById(List<Long> idList, Integer logLevelType);
+    String createLogPeriodFormatById(List<Long> declarationsIds, Integer logLevelType);
 
     /**
      * Проверка на то, что тип отчетного периода соответствует значению "год" или

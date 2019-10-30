@@ -2857,12 +2857,11 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 sortPersonRows(changedPersonIds);
 
                 NdflPersonIncome incomeAfterUpdate = ndflPersonDao.fetchOneNdflPersonIncome(income.getId());
-                List<Long> idList = new ArrayList<>();
-                idList.add(income.getId());
-                String period = periodService.createLogPeriodFormatById(idList, LogLevelType.INCOME.getId());
+                List<Long> incomesIds = singletonList(income.getId());
+                String period = periodService.createLogPeriodFormatById(incomesIds, LogLevelType.INCOME.getId());
 
                 for (String message : changelogBuilder.build(declarationDataId, incomeBeforeUpdate.getRowNum(), incomeAfterUpdate.getRowNum())) {
-                    logger.infoExpWithPeriod(message, null, null, period, false);
+                    logger.infoExpWithPeriod(message, null, null, period);
                 }
                 logBusinessService.logFormEvent(declarationDataId, FormDataEvent.NDFL_EDIT, logger.getLogId(), null, userInfo);
                 sendNotification(changelogBuilder.notificationMessage, logger.getLogId(), userInfo.getUser().getId());
@@ -2904,7 +2903,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             for (NdflPersonIncome income : incomes) {
                 String period = null;
                 if (declarationTemplate.getType().getId() == (DeclarationType.NDFL_CONSOLIDATE)) {
-                    period = periodService.createLogPeriodFormatById(Collections.singletonList(income.getId()), LogLevelType.INCOME.getId());
+                    List<Long> incomesIds = singletonList(income.getId());
+                    period = periodService.createLogPeriodFormatById(incomesIds, LogLevelType.INCOME.getId());
                 }
                 // ФЛ, к которому относится строка дохода
                 NdflPerson person = ndflPersonDao.findById(income.getNdflPersonId());
@@ -3099,12 +3099,11 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 ndflPersonDao.updateDeductions(updateRowNum(ndflPerson.getDeductions()));
 
                 NdflPersonDeduction deductionAfterUpdate = ndflPersonDao.fetchOneNdflPersonDeduction(deduction.getId());
-                List<Long> idList = new ArrayList<>();
-                idList.add(deduction.getId());
-                String period = periodService.createLogPeriodFormatById(idList, LogLevelType.DEDUCTION.getId());
+                List<Long> deductionsIds = singletonList(deduction.getId());
+                String period = periodService.createLogPeriodFormatById(deductionsIds, LogLevelType.DEDUCTION.getId());
 
                 for (String message : changelogBuilder.build(declarationDataId, deductionBeforeUpdate.getRowNum(), deductionAfterUpdate.getRowNum())) {
-                    logger.infoExpWithPeriod(message, null, null, period, false);
+                    logger.infoExpWithPeriod(message, null, null, period);
                 }
                 logBusinessService.logFormEvent(declarationDataId, FormDataEvent.NDFL_EDIT, logger.getLogId(), null, userInfo);
             } else {
@@ -3138,12 +3137,11 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 ndflPersonDao.updatePrepayments(updateRowNum(ndflPerson.getPrepayments()));
 
                 NdflPersonPrepayment prepaymentAfterUpdate = ndflPersonDao.fetchOneNdflPersonPrepayment(prepayment.getId());
-                List<Long> idList = new ArrayList<>();
-                idList.add(prepayment.getId());
-                String period = periodService.createLogPeriodFormatById(idList, LogLevelType.PREPAYMENT.getId());
+                List<Long> prepaymentsIds = singletonList(prepayment.getId());
+                String period = periodService.createLogPeriodFormatById(prepaymentsIds, LogLevelType.PREPAYMENT.getId());
 
                 for (String message : changelogBuilder.build(declarationDataId, prepaymentBeforeUpdate.getRowNum(), prepaymentAfterUpdate.getRowNum())) {
-                    logger.infoExpWithPeriod(message, null, null, period, false);
+                    logger.infoExpWithPeriod(message, null, null, period);
                 }
                 logBusinessService.logFormEvent(declarationDataId, FormDataEvent.NDFL_EDIT, logger.getLogId(), null, userInfo);
             } else {
