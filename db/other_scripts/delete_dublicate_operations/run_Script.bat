@@ -10,9 +10,9 @@ set /p v_connect="connect (example: TAXDB):"
 set /p v_form_number="Primary Form number (example: 97480):"
 
 
-@echo ..remove..
 
-@sqlplus.exe %v_user%/%v_pwd%@%v_connect% @remove_dublicate_operations.sql %v_form_number% >>delete_dublicate_operations_%v_user%_%date%_%v_form_number%_%random%.txt
+
+@sqlplus.exe %v_user%/%v_pwd%@%v_connect% @remove_dublicate_operations.sql %v_form_number% delete_dublicate_operations_%v_user%_%date%_%v_form_number%_%random%.txt
 
 
 

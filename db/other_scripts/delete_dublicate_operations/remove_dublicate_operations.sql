@@ -1,16 +1,14 @@
-set long 32767
-set pagesize 0
-set linesize 4000
-set feedback off
-set echo off
-set verify off
-set trims on
-set heading off
---set termout off
-set serveroutput on size 1000000;
+set feedback off;
+set verify off;
+set serveroutput on;
+spool &2
 
 var  form_number number;
 
+begin
+	dbms_output.put_line ('Create backup...');
+end;
+/
 
 declare
 	cnt number (19);
@@ -45,20 +43,27 @@ begin
 end;
 /
 
+begin
+	dbms_output.put_line ('Remove operations...');
+end;
+/
+
 declare
     v_np_id number(19);
 begin
    loop
-   select (select ndfl_person_id from ndfl_person np join ndfl_person_income  npi on npi.ndfl_person_id = np.id  
-    join 
-    (select declaration_data_id, npi.row_num, min(npi.id) as min_id from ndfl_person np join ndfl_person_income npi on npi.ndfl_person_id=np.id
-		where declaration_data_id = :form_number
-		group by declaration_data_id, npi.row_num
-		having count(*)>1) npd on np.declaration_data_id = npd.declaration_data_id and npi.row_num= npd.row_num 
-    and npi.id > npd.min_id 
-    where np.declaration_data_id=:form_number and rownum=1) into v_np_id from dual;
-    exit when v_np_id is null;
-    delete from ndfl_person where id=v_np_id;
+	select (select ndfl_person_id from ndfl_person np join ndfl_person_income  npi on npi.ndfl_person_id = np.id  
+	    join 
+	    (select declaration_data_id, npi.row_num, min(npi.id) as min_id from ndfl_person np join ndfl_person_income npi on npi.ndfl_person_id=np.id
+			where declaration_data_id = :form_number
+			group by declaration_data_id, npi.row_num
+			having count(*)>1) 
+	    npd on np.declaration_data_id = npd.declaration_data_id and npi.row_num= npd.row_num 
+	    and npi.id > npd.min_id 
+	    where np.declaration_data_id=:form_number and rownum=1) 
+	into v_np_id from dual;
+    	exit when v_np_id is null;
+    	delete from ndfl_person where id=v_np_id;
     end loop;
 end;
 /
