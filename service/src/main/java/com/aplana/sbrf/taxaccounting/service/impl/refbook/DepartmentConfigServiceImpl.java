@@ -6,22 +6,20 @@ import com.aplana.sbrf.taxaccounting.dao.DepartmentConfigDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.action.DepartmentConfigsFilter;
 import com.aplana.sbrf.taxaccounting.model.action.ImportDepartmentConfigsAction;
-import com.aplana.sbrf.taxaccounting.model.consolidation.ConsolidationIncome;
 import com.aplana.sbrf.taxaccounting.model.consolidation.ConsolidationSourceDataSearchFilter;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.DepartmentConfig;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookSignatoryMark;
 import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 import com.aplana.sbrf.taxaccounting.model.result.ImportDepartmentConfigsResult;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
-import com.aplana.sbrf.taxaccounting.service.BlobDataService;
-import com.aplana.sbrf.taxaccounting.service.DepartmentService;
-import com.aplana.sbrf.taxaccounting.service.LockDataService;
-import com.aplana.sbrf.taxaccounting.service.LogEntryService;
-import com.aplana.sbrf.taxaccounting.service.RefBookScriptingService;
+import com.aplana.sbrf.taxaccounting.service.*;
+import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import com.aplana.sbrf.taxaccounting.service.refbook.DepartmentConfigService;
 import com.google.common.base.Joiner;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -29,12 +27,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -60,6 +55,8 @@ public class DepartmentConfigServiceImpl implements DepartmentConfigService {
     private RefBookScriptingService refBookScriptingService;
     @Autowired
     private DepartmentConfigDao departmentConfigDao;
+    @Autowired
+    private CommonRefBookService refBookService;
 
     @Override
     public DepartmentConfig findById(long id) {
@@ -367,11 +364,38 @@ public class DepartmentConfigServiceImpl implements DepartmentConfigService {
 
     @Override
     public void checkDepartmentConfig(DepartmentConfig departmentConfig, List<DepartmentConfig> relatedDepartmentConfigs) {
+        if (isReorganization(departmentConfig)) {
+            if (isReorganizationDataEmpty(departmentConfig)) {
+                throw new ServiceException("Необходимо заполнить поля " +
+                        "\"Наименование подразделения правопреемника\" и \"КПП подразделения правопреемника\"");
+            }
+        } else if (StringUtils.isEmpty(departmentConfig.getName())) {
+            throw new ServiceException("Необходимо заполнить поле \"Наименование для титульного листа\"");
+        }
+
+        if (departmentConfig.getEndDate() == null && departmentConfig.getRelatedKppOktmo() != null) {
+            throw new ServiceException("Дата окончания действия настройки не заполнена, поле \"Учитывать КПП/ОКТМО\" " +
+                    "должно быть также не заполнено.");
+        }
+
+        if (departmentConfig.getSignatoryMark() != null && departmentConfig.getSignatoryMark().getId() != null) {
+            RefBookSignatoryMark markSignatoryCodeRefBookRecord = refBookService.fetchRecord(
+                    RefBook.Id.MARK_SIGNATORY_CODE.getId(),
+                    departmentConfig.getSignatoryMark().getId()
+            );
+
+            if (isTaxAgentAmbassador(markSignatoryCodeRefBookRecord) && StringUtils.isEmpty(departmentConfig.getApproveDocName())) {
+                throw new ServiceException("Указан признак подписанта " +
+                        "\"(2) Представитель налогового агента, представитель правопреемника налогового агента\", " +
+                        "необходимо заполнить поле \"Документ полномочий подписанта\"");
+            }
+        }
+
         if (departmentConfig.getEndDate() != null && departmentConfig.getStartDate().after(departmentConfig.getEndDate())) {
             throw new ServiceException("Дата начала актуальности записи не может быть больше даты окончания актуальности");
         }
         Date minDate = null, maxDate = new Date(0);
-        List<DepartmentConfig> overlappingDepartmentConfigs = new ArrayList<>();
+        List<DepartmentConfig> overlappingDepartmentConfigs = new ArrayList<>(relatedDepartmentConfigs.size());
         for (DepartmentConfig relatedDepartmentConfig : relatedDepartmentConfigs) {
             if (departmentConfig.getId() == null || !departmentConfig.getId().equals(relatedDepartmentConfig.getId())) {
                 // Проверка пересечения существующей с исходной
@@ -410,6 +434,20 @@ public class DepartmentConfigServiceImpl implements DepartmentConfigService {
                     departmentConfig.getEndDate() == null ? "__" : FastDateFormat.getInstance("dd.MM.yyyy").format(departmentConfig.getEndDate()),
                     departmentConfig.getDepartment().getName());
         }
+    }
+
+    private boolean isReorganization(DepartmentConfig departmentConfig) {
+        return departmentConfig.getReorganization() != null
+                && StringUtils.isNotEmpty(departmentConfig.getReorganization().getCode());
+    }
+
+    private boolean isReorganizationDataEmpty(DepartmentConfig departmentConfig) {
+        return StringUtils.isEmpty(departmentConfig.getReorgSuccessorKpp())
+                || StringUtils.isEmpty(departmentConfig.getReorgSuccessorName());
+    }
+
+    private boolean isTaxAgentAmbassador(RefBookSignatoryMark markSignatoryCodeRefBookRecord) {
+        return ObjectUtils.nullSafeEquals(RefBookSignatoryMark.TAX_AGENT_AMBASSADOR, markSignatoryCodeRefBookRecord.getCode());
     }
 
     private boolean overlaps(Date from1, Date to1, Date from2, Date to2) {

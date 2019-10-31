@@ -9,6 +9,9 @@ import lombok.Setter;
 @Getter
 @Setter
 public class RefBookSignatoryMark extends RefBookSimple<Long> {
+    public final static Integer TAX_AGENT = 1;
+    public final static Integer TAX_AGENT_AMBASSADOR = 2;
+
     private Integer code;
     private String name;
 
