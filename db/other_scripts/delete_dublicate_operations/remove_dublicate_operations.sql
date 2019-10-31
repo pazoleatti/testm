@@ -50,7 +50,9 @@ end;
 
 declare
     v_np_id number(19);
+    cnt number ;
 begin
+   cnt:=0;	
    loop
 	select (select ndfl_person_id from ndfl_person np join ndfl_person_income  npi on npi.ndfl_person_id = np.id  
 	    join 
@@ -64,6 +66,11 @@ begin
 	into v_np_id from dual;
     	exit when v_np_id is null;
     	delete from ndfl_person where id=v_np_id;
+	cnt :=cnt + 1;
+	if mod(cnt, 100) = 0 then
+		dbms_output.put_line ('Deleted '||to_char (cnt) ||' rows');
+		commit;
+	end if;
     end loop;
 end;
 /
