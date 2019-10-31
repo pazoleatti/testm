@@ -46,7 +46,8 @@ public enum OperationType {
     EDIT(null, "Редактирование строки налоговой формы"),
     EDIT_FILE(null, "Добавление/удаление файлов/комментариев"),
     CREATE_ANNULMENT_2NDFL(AsyncTaskType.CREATE_FORMS_DEC, "Формирование аннулирующей 2-НДФЛ в ручном режиме"),
-    TRANSFER(null, "Консолидация данных из формы");
+    TRANSFER(null, "Консолидация данных из формы"),
+    DELETE_DEC_ROWS(AsyncTaskType.DELETE_DEC_ROWS, "Удаление строк налоговой формы");
 
     /**
      * Идентификатор типа асинхронной задачи

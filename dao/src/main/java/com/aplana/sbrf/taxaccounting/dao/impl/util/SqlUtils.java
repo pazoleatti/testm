@@ -302,7 +302,7 @@ public final class SqlUtils extends AbstractDao {
      *
      * @param tableName таблица
      */
-    private static void deleteTable(String tableName) {
+    public static void deleteTable(String tableName) {
         try {
             repository.getJdbcTemplate().update("delete from " + tableName);
         } catch (DataAccessException e) {

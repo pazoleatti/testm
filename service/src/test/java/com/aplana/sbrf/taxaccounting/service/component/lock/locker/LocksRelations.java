@@ -172,8 +172,7 @@ class LocksRelations {
                         DECLARATION_DATA_ID_RNU_PAYMENT_REPORT,
                         DECLARATION_DATA_ID_RNU_NDFL_DETAIL_REPORT,
                         DECLARATION_DATA_ID_RNU_NDFL_2_6_DATA_XLSX_REPORT,
-                        DECLARATION_DATA_ID_RNU_NDFL_2_6_DATA_TXT_REPORT
-                )
+                        DECLARATION_DATA_ID_RNU_NDFL_2_6_DATA_TXT_REPORT)
         );
 
         CONFLICTING_LOCKS.put(
@@ -544,8 +543,7 @@ class LocksRelations {
                         DECLARATION_DATA_ID_CONSOLIDATE,
                         DECLARATION_DATA_ID_DELETE_DECLARATION,
                         DECLARATION_DATA_ID_EDIT,
-                        DECLARATION_DATA_ID_UPDATE_PERSONS_DATA
-                )
+                        DECLARATION_DATA_ID_UPDATE_PERSONS_DATA)
         );
 
         CONFLICTING_LOCKS.put(
@@ -554,8 +552,7 @@ class LocksRelations {
                         DECLARATION_DATA_ID_CONSOLIDATE,
                         DECLARATION_DATA_ID_DELETE_DECLARATION,
                         DECLARATION_DATA_ID_EDIT,
-                        DECLARATION_DATA_ID_UPDATE_PERSONS_DATA
-                )
+                        DECLARATION_DATA_ID_UPDATE_PERSONS_DATA)
         );
 
         CONFLICTING_LOCKS.put(
@@ -564,8 +561,7 @@ class LocksRelations {
                         DECLARATION_DATA_ID_CONSOLIDATE,
                         DECLARATION_DATA_ID_DELETE_DECLARATION,
                         DECLARATION_DATA_ID_EDIT,
-                        DECLARATION_DATA_ID_UPDATE_PERSONS_DATA
-                )
+                        DECLARATION_DATA_ID_UPDATE_PERSONS_DATA)
         );
 
         CONFLICTING_LOCKS.put(
@@ -574,8 +570,7 @@ class LocksRelations {
                         DECLARATION_DATA_ID_CONSOLIDATE,
                         DECLARATION_DATA_ID_DELETE_DECLARATION,
                         DECLARATION_DATA_ID_EDIT,
-                        DECLARATION_DATA_ID_UPDATE_PERSONS_DATA
-                )
+                        DECLARATION_DATA_ID_UPDATE_PERSONS_DATA)
         );
 
         CONFLICTING_LOCKS.put(
@@ -585,8 +580,7 @@ class LocksRelations {
                         DECLARATION_DATA_ID_CHECK_DECLARATION,
                         DECLARATION_DATA_ID_DELETE_DECLARATION,
                         DECLARATION_DATA_ID_RETURN_DECLARATION,
-                        DECLARATION_DATA_ID_SEND_EDO
-                )
+                        DECLARATION_DATA_ID_SEND_EDO)
         );
 
         CONFLICTING_LOCKS.put(
@@ -594,8 +588,7 @@ class LocksRelations {
                 Arrays.asList(
                         DECLARATION_DATA_ID_DELETE_DECLARATION,
                         DECLARATION_DATA_ID_RETURN_DECLARATION,
-                        DECLARATION_DATA_ID_CHANGE_STATUS
-                )
+                        DECLARATION_DATA_ID_CHANGE_STATUS)
         );
 
         CONFLICTING_LOCKS.put(
@@ -605,15 +598,13 @@ class LocksRelations {
                         DECLARATION_DATA_ID_IDENTIFY_PERSON,
                         DECLARATION_DATA_ID_RETURN_DECLARATION,
                         DECLARATION_DATA_ID_UPDATE_PERSONS_DATA,
-                        DECLARATION_DATA_ID_CONSOLIDATE
-                )
+                        DECLARATION_DATA_ID_CONSOLIDATE)
         );
 
         CONFLICTING_LOCKS.put(
                 DECLARATION_DATA_ID_REPORT_LINK_DECLARATION,
                 Arrays.asList(
-                        DECLARATION_DATA_ID_DELETE_DECLARATION
-                )
+                        DECLARATION_DATA_ID_DELETE_DECLARATION)
         );
 
         CONFLICTING_LOCKS.put(

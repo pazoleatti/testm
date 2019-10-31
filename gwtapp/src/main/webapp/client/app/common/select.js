@@ -1358,6 +1358,28 @@
         ])
 
         /**
+         * Контроллер для выбор режима формирования отчета "Шаблон ТФ (Excel)"
+         */
+        .controller('SelectExcelTemplateGenerationTypeCtrl', ['$scope', '$rootScope', 'APP_CONSTANTS', 'GetSelectOption',
+            function ($scope, $rootScope, APP_CONSTANTS, GetSelectOption) {
+                $scope.excelTemplateGenerationTypeSelect = {};
+
+                /**
+                 * Инициализировать список с видами форм, которые можно создать
+                 */
+                $scope.initSelectWithExcelTemplateGenerationTypesForCreate = function (selectedRows, activeTab) {
+                    $scope.excelTemplateGenerationTypeSelect = GetSelectOption.getBasicSingleSelectOptions(false);
+                    $scope.excelTemplateGenerationTypeSelect.options.data.results = [];
+                    $scope.excelTemplateGenerationTypeSelect.options.data.results.push(APP_CONSTANTS.EXCEL_TEMPLATE_GENERATION_TYPE.ALL_DATA);
+                    if (selectedRows && selectedRows.length !== 0
+                        && (activeTab.getSection() == APP_CONSTANTS.NDFL_PERSON_REPORT_ACTIVE_TAB.PERSONS.id || activeTab.getSection() == APP_CONSTANTS.NDFL_PERSON_REPORT_ACTIVE_TAB.INCOMES.id)) {
+                        $scope.excelTemplateGenerationTypeSelect.options.data.results.push(APP_CONSTANTS.EXCEL_TEMPLATE_GENERATION_TYPE.SELECTED_ON_PAGE);
+                    }
+                };
+            }
+        ])
+
+        /**
          * Контроллер для выбора типа КНФ по виду отчетности
          */
         .controller('SelectKnfTypeCtrlByReportPeriod', ['$scope', 'APP_CONSTANTS', 'GetSelectOption',

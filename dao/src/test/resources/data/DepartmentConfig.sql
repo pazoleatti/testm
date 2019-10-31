@@ -22,6 +22,8 @@ insert into department_config(id, kpp, oktmo_id, start_date, end_date, departmen
 (15,  '000000006', 1, to_date('01.01.2016', 'DD.MM.YYYY'), to_date('31.12.2017', 'DD.MM.YYYY'), 2, '0009', 1, 1),
 (151, '000000006', 1, to_date('01.01.2018', 'DD.MM.YYYY'), null,                                3, '0010', 1, 1),
 
+(152, '000000007', 1, to_date('02.01.2018', 'DD.MM.YYYY'), to_date('31.12.2018', 'DD.MM.YYYY'), 2, '1010', 1, 1),
+
 (16,  '000000010', 2, to_date('01.01.2016', 'DD.MM.YYYY'), null,                                3, '0011', 1, 1),
 
 (17,  '000000011', 2, to_date('01.01.2016', 'DD.MM.YYYY'), null,                                3, '0012', 1, 1),

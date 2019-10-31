@@ -7,8 +7,8 @@
 
 	<virtual-host name="default_host" />
 
-    <resource-ref name="jdbc/TaxAccDS" binding-name="jdbc/DataSource${releasePostfix}"/>
-	<resource-ref name="jdbc/TaxAccDSSecondary" binding-name="jdbc/TaxAccDS${releasePostfix}"/>
+    <resource-ref name="jdbc/TaxAccDS" binding-name="jdbc/TaxAccDS${releasePostfix}"/>
+	<resource-ref name="jdbc/TaxAccDSSecondary" binding-name="jdbc/DataSource${releasePostfix}"/>
 
 	<resource-ref name="jms/FundConnectionFactory" binding-name="jms/FundConnectionFactory${releasePostfix}" />
 	<resource-ref name="jms/EdoRequestQueue" binding-name="jms/EdoRequestQueue${releasePostfix}" />

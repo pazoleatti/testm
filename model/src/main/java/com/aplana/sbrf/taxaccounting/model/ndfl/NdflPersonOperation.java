@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.model.ndfl;
 import com.aplana.sbrf.taxaccounting.model.IdentityObject;
 
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 
 
@@ -53,6 +54,20 @@ public abstract class NdflPersonOperation extends IdentityObject<Long> {
      * Доход.Источник выплаты.КПП (Графа 9)
      */
     protected String oktmo;
+
+    /**
+     * Дата корректировки источника
+     */
+    protected Date sourceCorrectionDate;
+
+    /** Наименование периода источника*/
+    protected String sourcePeriodName;
+
+    /** Год периода источника*/
+    protected Integer sourcePeriodYear;
+
+    /** Дата окончания отчетного периода источника*/
+    protected Date sourcePeriodEndDate;
 
     public Long getNdflPersonId() {
         return ndflPersonId;
@@ -132,6 +147,38 @@ public abstract class NdflPersonOperation extends IdentityObject<Long> {
 
     public void setAsnuId(Long asnuId) {
         this.asnuId = asnuId;
+    }
+
+    public Date getSourceCorrectionDate() {
+        return sourceCorrectionDate;
+    }
+
+    public void setSourceCorrectionDate(Date sourceCorrectionDate) {
+        this.sourceCorrectionDate = sourceCorrectionDate;
+    }
+
+    public String getSourcePeriodName() {
+        return sourcePeriodName;
+    }
+
+    public void setSourcePeriodName(String sourcePeriodName) {
+        this.sourcePeriodName = sourcePeriodName;
+    }
+
+    public Integer getSourcePeriodYear() {
+        return sourcePeriodYear;
+    }
+
+    public void setSourcePeriodYear(Integer sourcePeriodYear) {
+        this.sourcePeriodYear = sourcePeriodYear;
+    }
+
+    public Date getSourcePeriodEndDate() {
+        return sourcePeriodEndDate;
+    }
+
+    public void setSourcePeriodEndDate(Date sourcePeriodEndDate) {
+        this.sourcePeriodEndDate = sourcePeriodEndDate;
     }
 
     /**

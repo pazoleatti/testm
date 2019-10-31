@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.service.impl.component.lock;
 
 import com.aplana.sbrf.taxaccounting.model.OperationType;
 import com.aplana.sbrf.taxaccounting.service.component.lock.LockKeyGenerator;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -82,6 +81,8 @@ public class MainLockKeyGeneratorImpl implements LockKeyGenerator {
             return String.format("DECLARATION_TEMPLATE_%s_2NDFL_NEW", declarationDataId);
         else if (operationType.equals(OperationType.TRANSFER)) {
             return String.format("DECLARATION_DATA_%s_TRANSFER_%s", declarationDataId, sourceDeclarationId);
+        } else if (operationType.equals(OperationType.DELETE_DEC_ROWS)) {
+            return String.format("DECLARATION_DATA_%s_DELETE_DECLARATION_ROWS_%s", declarationDataId, sourceDeclarationId);
         }
             throw new IllegalArgumentException("Unknown operationType type!");
     }

@@ -347,4 +347,5 @@ public interface DeclarationService {
      * @return записи выбранного типа события
      */
     Date getMaxLogDateByDeclarationIdAndEvent(Long declarationId, FormDataEvent event);
+
 }

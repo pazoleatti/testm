@@ -229,6 +229,13 @@ public interface NdflPersonService {
     List<NdflPersonIncome> findNdflPersonIncome(long declarationDataId);
 
     /**
+     * Найти все "Сведения о доходах физического лица" с данными периода источника привязанные к декларации
+     *
+     * @param declarationDataId идентификатор декларации
+     */
+    List<NdflPersonIncome> findNdflPersonIncomeSourcePeriod(long declarationDataId);
+
+    /**
      * Найти все "Сведения о доходах физического лица" привязанные к декларации, отсортированные по rowNum
      *
      * @param declarationDataId идентификатор декларации
@@ -261,6 +268,13 @@ public interface NdflPersonService {
     List<NdflPersonDeduction> findNdflPersonDeduction(long declarationDataId);
 
     /**
+     * Найти все "Стандартные, социальные и имущественные налоговые вычеты" с данными периода источника привязанные к декларации
+     *
+     * @param declarationDataId идентификатор декларации
+     */
+    List<NdflPersonDeduction> findNdflPersonDeductionSourcePeriod(long declarationDataId);
+
+    /**
      * Возвращяет список строк из раздела 3 по списку ид форм
      *
      * @param declarationDataIds список ид форм
@@ -274,6 +288,13 @@ public interface NdflPersonService {
      * @param declarationDataId идентификатор декларации
      */
     List<NdflPersonPrepayment> findNdflPersonPrepayment(long declarationDataId);
+
+    /**
+     * Найти все "Cведения о доходах в виде авансовых платежей" привязанные к декларации
+     *
+     * @param declarationDataId идентификатор декларации
+     */
+    List<NdflPersonPrepayment> findNdflPersonPrepaymentSourcePeriod(long declarationDataId);
 
     /**
      * Найти сведения о доходах
@@ -697,5 +718,44 @@ public interface NdflPersonService {
      * @return список сгенерированных идентификаторов
      */
     List<BigDecimal> generateOperInfoIds(int count);
+
+    /**
+     * Получить информацию о вычетах ФЛ (раздел 3), которые связаны со сведениями о доходах и НДФЛ (раздел 2)
+     *
+     * @param personId идентификатор ФЛ
+     * @param incomesIds список идентификаторов строк для сведений о доходах и НДФЛ
+     * @return список идентификаторов вычетов ФЛ
+     */
+    List<Long> getDeductionsIdsByPersonAndIncomes(long personId, Collection<Long> incomesIds);
+
+    /**
+     * Получить информацию о доходах в виде авансовых платежей у ФЛ (раздел 4),
+     * которые связаны со сведениями о доходах и НДФЛ (раздел 2)
+     *
+     * @param personId идентификатор ФЛ
+     * @param incomesIds список идентификаторов строк для сведений о доходах и НДФЛ
+     * @return список идентификаторов сведений о доходах в виде аваносовых платежей у ФЛ
+     */
+    List<Long> getPrepaymentsIdsByPersonAndIncomes(long personId, Collection<Long> incomesIds);
+
+    /**
+     * Получить список идентификаторов сведений о доходах и НДФЛ (раздел 2) для конкретного ФЛ по идентификаторам операций
+     *
+     * @param personId идентификатор ФЛ
+     * @param operationsIds идентификаторы операций
+     */
+    List<Long> findNdflPersonIncomeByPersonAndOperations(long personId, Collection<String> operationsIds);
+
+    /**
+     * Удалить строки разделов 2,3,4 по строкам раздела 1
+     * @param ndflPersonIds
+     */
+    void deleteRowsBySection1(List<Long> ndflPersonIds, Long declarationDataId);
+
+    /**
+     * Удалить строки разделов 1,3,4 по строкам раздела 2
+     * @param ndflPersonIncomeIds
+     */
+    void deleteRowsBySection2(List<Long> ndflPersonIncomeIds, Long declarationDataId);
 }
 

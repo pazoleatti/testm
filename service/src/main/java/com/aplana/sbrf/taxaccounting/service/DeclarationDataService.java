@@ -1,11 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.action.Create2NdflFLParams;
-import com.aplana.sbrf.taxaccounting.model.action.CreateDeclarationDataAction;
-import com.aplana.sbrf.taxaccounting.model.action.CreateReportAction;
-import com.aplana.sbrf.taxaccounting.model.action.CreateReportFormsAction;
-import com.aplana.sbrf.taxaccounting.model.action.PrepareSubreportAction;
+import com.aplana.sbrf.taxaccounting.model.action.*;
 import com.aplana.sbrf.taxaccounting.model.dto.Declaration2NdflFLDTO;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.filter.Declaration2NdflFLFilter;
@@ -693,13 +689,25 @@ public interface DeclarationDataService {
     String createTaskToCreateExcelTemplate(final long declarationDataId, TAUserInfo userInfo);
 
     /**
+     * Выполняет формирование шаблона Excel-файла для формы по выбранным строкам
+     *
+     * @param declarationDataId  ид формы
+     * @param userInfo           информация о пользователе
+     * @param selectedRows       строки, выбранные для выгрузки в Шаблон ТФ
+     * @return uuid сформированного файла
+     */
+    String createExcelTemplateBySelectedPersonList(long declarationDataId, TAUserInfo userInfo, ExcelTemplateSelectedRows selectedRows) throws IOException;
+
+    /**
      * Выполняет формирование шаблона Excel-файла для формы
      *
      * @param declarationData форма
      * @param userInfo        информация о пользователе
+     * @param selectedRows    строки, выбранные для выгрузки в Шаблон ТФ
      * @return uuid сформированного файла
      */
-    String createExcelTemplate(DeclarationData declarationData, TAUserInfo userInfo, Logger logger, LockStateLogger lockStateLogger) throws IOException;
+    String createExcelTemplate(DeclarationData declarationData, TAUserInfo userInfo, Logger logger,
+                               LockStateLogger lockStateLogger, ExcelTemplateSelectedRows selectedRows) throws IOException;
 
     /**
      * Создаёт задачу на загрузку данных из Excel-файла в форму
@@ -844,4 +852,14 @@ public interface DeclarationDataService {
      * @param declarationDataId идентификатор НФ у которой нужно сменить статус на Выдана
      */
     void changeStateToIssued(Long declarationDataId);
+
+    /**
+     * Создать задачу на удаление строк разделов налоговой формы
+     * @param userInfo
+     * @param deleteSelectedDeclarationRowsActionCollection Информация о форме строках и разделе, к которому они относятся
+     * @return
+     */
+    ActionResult createDeleteSelectedDeclarationRowsTask(TAUserInfo userInfo,
+                                                         Collection<DeleteSelectedDeclarationRowsAction> deleteSelectedDeclarationRowsActionCollection);
+
 }

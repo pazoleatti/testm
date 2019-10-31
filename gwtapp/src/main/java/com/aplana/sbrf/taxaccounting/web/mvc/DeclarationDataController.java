@@ -1,11 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.action.Create2NdflFLParams;
-import com.aplana.sbrf.taxaccounting.model.action.CreateDeclarationDataAction;
-import com.aplana.sbrf.taxaccounting.model.action.CreateReportAction;
-import com.aplana.sbrf.taxaccounting.model.action.CreateReportFormsAction;
-import com.aplana.sbrf.taxaccounting.model.action.PrepareSubreportAction;
+import com.aplana.sbrf.taxaccounting.model.action.*;
 import com.aplana.sbrf.taxaccounting.model.dto.Declaration2NdflFLDTO;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.filter.Declaration2NdflFLFilter;
@@ -14,7 +10,10 @@ import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookKnfType;
 import com.aplana.sbrf.taxaccounting.model.result.*;
-import com.aplana.sbrf.taxaccounting.permissions.*;
+import com.aplana.sbrf.taxaccounting.permissions.DeclarationDataFilePermission;
+import com.aplana.sbrf.taxaccounting.permissions.DeclarationDataFilePermissionSetter;
+import com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission;
+import com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermissionSetter;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
@@ -31,14 +30,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.ServletRequestDataBinder;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.InitBinder;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
@@ -48,12 +40,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.aplana.sbrf.taxaccounting.model.SubreportAliasConstants.RNU_NDFL_PERSON_DB;
 import static org.apache.commons.lang3.CharEncoding.UTF_8;
@@ -320,6 +307,20 @@ public class DeclarationDataController {
     public ActionResult deleteDeclarations(@RequestBody List<Long> declarationDataIds) {
         TAUserInfo userInfo = securityService.currentUserInfo();
         return declarationService.createDeleteDeclarationDataTask(userInfo, declarationDataIds);
+    }
+
+    /**
+     * Удаление налоговых форм
+     *
+     * @param deleteSelectedDeclarationRows Строки для удаления из налоговой формы
+     * @return Модель {@link ActionResult}, в которой содержаться данные о результате операции
+     */
+    @PostMapping(value = "/actions/declarationData/delete/selected")
+    public ActionResult deleteSelectedDeclarationRows(
+            @RequestBody DeleteSelectedDeclarationRowsAction deleteSelectedDeclarationRows) {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        return declarationService.createDeleteSelectedDeclarationRowsTask(userInfo,
+                Collections.singletonList(deleteSelectedDeclarationRows));
     }
 
     /**
@@ -908,7 +909,7 @@ public class DeclarationDataController {
      * Формирование спецотчета РНУ НДФЛ по всем ФЛ, по отобранным по фильтру
      *
      * @param declarationDataId идентификатор декларации
-     * @param filter параметры фильтрации на форме
+     * @param filter            параметры фильтрации на форме
      * @return результат с даннымми для представления об операции формирования отчета
      */
     @PostMapping(value = "/actions/declarationData/{declarationDataId}/report/rnuNdflAllPersons/byFilter")
@@ -924,14 +925,14 @@ public class DeclarationDataController {
      * Формирование спецотчета РНУ НДФЛ по всем ФЛ, по выбранным на странице
      *
      * @param declarationDataId идентификатор декларации
-     * @param selectedRows информация о выбранных строках в форме
+     * @param selectedRows      информация о выбранных строках в форме
      * @return результат с даннымми для представления об операции формирования отчета
      */
     @PostMapping(value = "/actions/declarationData/{declarationDataId}/report/rnuNdflAllPersons/bySelected")
     public String createRnuNdflAllPersonsReportBySelected(@PathVariable("declarationDataId") long declarationDataId,
                                                           @RequestBody RnuNdflAllPersonsReportSelectedRows selectedRows) {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        return declarationService.createTaskToCreateRnuNdflByAllPersonsReport(declarationDataId,  userInfo, null, selectedRows);
+        return declarationService.createTaskToCreateRnuNdflByAllPersonsReport(declarationDataId, userInfo, null, selectedRows);
     }
 
     /**
@@ -944,6 +945,21 @@ public class DeclarationDataController {
     public String createExcelTemplate(@PathVariable int declarationDataId) {
         TAUserInfo userInfo = securityService.currentUserInfo();
         return declarationService.createTaskToCreateExcelTemplate(declarationDataId, userInfo);
+    }
+
+    /**
+     * Формирует шаблон ТФ (Excel) для выбранных строк формы
+     * Выполняется синхронно
+     *
+     * @param declarationDataId Идентификатор налоговой формы
+     * @param selectedRows спискок выбранных строк раздела 1 и 2
+     * @return Результат запуска задачи
+     */
+    @PostMapping(value = "/actions/declarationData/{declarationDataId}/selectedExcelTemplate")
+    public String createSelectedExcelTemplate(@PathVariable int declarationDataId,
+                                              @RequestBody ExcelTemplateSelectedRows selectedRows) throws IOException {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        return declarationService.createExcelTemplateBySelectedPersonList(declarationDataId, userInfo, selectedRows);
     }
 
     @PostMapping(value = "/actions/declarationData/{declarationDataId}/pdf")
@@ -961,12 +977,12 @@ public class DeclarationDataController {
      * Формирование выгрузки списка источники-приемники в xlsx
      *
      * @param declarationDataId идентификатор декларации
-     * @param sources        источники
-     * @param destinations   приемники
+     * @param sources           источники
+     * @param destinations      приемники
      * @return Результат запуска задачи
      */
     @PostMapping(value = "/actions/declarationData/{declarationDataId}/unloadListInXlsx")
-    public String createExportSourcesAndDestinations(@PathVariable("declarationDataId") long declarationDataId, @RequestParam boolean sources, @RequestParam boolean destinations ) {
+    public String createExportSourcesAndDestinations(@PathVariable("declarationDataId") long declarationDataId, @RequestParam boolean sources, @RequestParam boolean destinations) {
         TAUserInfo userInfo = securityService.currentUserInfo();
         return declarationService.createTaskToCreateUnloadListInXlsx(userInfo, declarationDataId, sources, destinations);
     }

@@ -205,10 +205,10 @@ public class AsyncTaskDaoImpl extends AbstractDao implements AsyncTaskDao {
             params.addValue("taskId", taskId)
                     .addValue("node", node);
 
-            Long lockedTask = getNamedParameterJdbcTemplateSecondary().queryForObject(select, params, Long.class);
+            Long lockedTask = getNamedParameterJdbcTemplate().queryForObject(select, params, Long.class);
             params.addValue("lockedTask", lockedTask);
 
-            return getNamedParameterJdbcTemplateSecondary().update(update, params) == 1;
+            return getNamedParameterJdbcTemplate().update(update, params) == 1;
         } catch (EmptyResultDataAccessException e) {
             return false;
         }
