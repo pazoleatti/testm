@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.permissions;
 
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
@@ -35,6 +36,8 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
     protected DeclarationTemplateDao declarationTemplateDao;
     @Autowired
     protected DeclarationTypeDao declarationTypeDao;
+    @Autowired
+    protected DepartmentReportPeriodDao departmentReportPeriodDao;
     @Autowired
     protected DepartmentReportPeriodService departmentReportPeriodService;
     @Autowired
