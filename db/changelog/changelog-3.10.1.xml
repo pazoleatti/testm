@@ -322,6 +322,13 @@
 		</update>
 	</changeSet>
 
+	<changeSet id="3.10.1-adudenko-3" author="adudenko" runAlways="true">
+		<update tableName="blob_data">
+			<column name="data"
+					valueBlobFile="templates-3.10.1/refbook/department_configs.groovy"/>
+			<where>id = (select script_id from ref_book r where r.id = 951)</where>
+		</update>
+	</changeSet>
 
 </databaseChangeLog>
         
