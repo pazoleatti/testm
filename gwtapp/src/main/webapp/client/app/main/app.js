@@ -79,6 +79,7 @@
         "button.identifyPersons": "Идентифицировать ФЛ",
         "button.consolidate": "Консолидировать",
         "button.delete": "Удалить",
+        "button.deleteForm": "Удалить форму",
         "button.accept": "Принять",
         "button.return": "Вернуть в Создана",
         "button.add": "Добавить",
