@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
@@ -70,6 +71,8 @@ public class PeriodServiceImplTest {
     DeclarationTemplateService declarationTemplateService;
     @Autowired
     LockDataService lockDataService;
+    @Autowired
+    DeclarationDataDao declarationDataDao;
 
     @Captor
     private ArgumentCaptor<ArrayList<LogEntry>> logEntriesArgumentCaptor;
@@ -520,15 +523,15 @@ public class PeriodServiceImplTest {
 
         Calendar endDate1 = Calendar.getInstance();
         Calendar endDate2 = Calendar.getInstance();
-        endDate1.set(2019, 06, 31);
-        endDate2.set(2019, 11, 31);
+        endDate1.set(2019, Calendar.JULY, 31);
+        endDate2.set(2019, Calendar.DECEMBER, 31);
         logPeriodResultFirst.setEndDate(endDate1.getTime());
         logPeriodResultSecond.setEndDate(endDate2.getTime());
 
         Calendar corrDate1 = Calendar.getInstance();
         Calendar corrDate2 = Calendar.getInstance();
-        corrDate1.set(2020, 01, 21);
-        corrDate2.set(2021, 04, 13);
+        corrDate1.set(2020, Calendar.FEBRUARY, 21);
+        corrDate2.set(2021, Calendar.MAY, 13);
         logPeriodResultFirst.setCorrectionDate(corrDate1.getTime());
         logPeriodResultSecond.setCorrectionDate(corrDate2.getTime());
 
@@ -539,6 +542,7 @@ public class PeriodServiceImplTest {
         final List<LogPeriodResult> logPeriodResults2 = asList(logPeriodResultFirst, logPeriodResultSecond);
         when(reportPeriodDao.createLogPeriodFormatById(1L, logLevelType)).thenReturn(logPeriodResults1);
         when(reportPeriodDao.createLogPeriodFormatById(2L, logLevelType)).thenReturn(logPeriodResults2);
+        when(declarationDataDao.isKnf(anyLong())).thenReturn(true);
 
         String logPeriodFormat = periodService.createLogPeriodFormatById(idList, logLevelType);
         assertEquals("2019: полугодие; (корр. 13.05.2021)", logPeriodFormat);
