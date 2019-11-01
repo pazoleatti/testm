@@ -2664,6 +2664,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         params.put("alias", alias);
         params.put("viewParamValues", new LinkedHashMap<String, String>());
         params.put("subreportParamValues", action.getSubreportParamValues());
+        params.put("userIP", userInfo.getIp());
 
         if (action.getSelectedRow() != null) {
             List<Cell> cellList = new ArrayList<>();
