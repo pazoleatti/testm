@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.utils;
 import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxFormType;
+import com.aplana.sbrf.taxaccounting.service.ScriptExposed;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
 import org.springframework.stereotype.Component;
@@ -13,6 +14,7 @@ import java.text.SimpleDateFormat;
  * Создает название периода
  */
 @Component
+@ScriptExposed
 public class DepartmentReportPeriodFormatter {
 
     private static final FastDateFormat DD_MM_YYYY = FastDateFormat.getInstance("dd.MM.yyyy");
