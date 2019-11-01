@@ -377,7 +377,12 @@
                     var department = _.deep($scope, departmentModelPath);
                     var period = _.deep($scope, periodModelPath);
 
-                    loadReportFormTypesPeriod(knf, department, period);
+                    if (!knf) {
+                        loadReportFormTypesPeriod(knf, department, period);
+                    } else {
+                        loadReportFormTypesByKnfTaxFormTypeId(knf, department, period);
+                    }
+
 
                     $scope.$watchCollection("[" + departmentModelPath + ", " + periodModelPath + "]", function (newValues, oldValues) {
                         var department = newValues && newValues[0], oldDepartment = oldValues && oldValues[0];
@@ -385,7 +390,11 @@
                         if (department && (!oldDepartment || department.id !== oldDepartment.id) ||
                             period && (!oldPeriod || period.id !== oldPeriod.id)
                         ) {
-                            loadReportFormTypesPeriod(knf, department, period);
+                            if (!knf) {
+                                loadReportFormTypesPeriod(knf, department, period);
+                            } else {
+                                loadReportFormTypesByKnfTaxFormTypeId(knf, department, period);
+                            }
                         }
                     });
                 };
@@ -423,6 +432,22 @@
                         if (period.text.indexOf(APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_2.name) > -1 ){
                             $scope.declarationTypeSelect.options.data.results.push(APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_2);
                         }
+                    }
+                }
+
+                /**
+                 * Загружает тип отчетной формы из указанного в периоде формы
+                 */
+                function loadReportFormTypesByKnfTaxFormTypeId(knf, department, period) {
+                    $scope.declarationTypeSelect.options.data.results = [];
+                    if (knf.reportPeriodTaxFormTypeId == APP_CONSTANTS.TAX_FORM_TYPE.REPORT_6_NDFL.id){
+                        $scope.declarationTypeSelect.options.data.results.push(APP_CONSTANTS.DECLARATION_TYPE.REPORT_6_NDFL);
+                    }
+                    if (knf.reportPeriodTaxFormTypeId == APP_CONSTANTS.TAX_FORM_TYPE.REPORT_2_NDFL_1.id){
+                        $scope.declarationTypeSelect.options.data.results.push(APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_1);
+                    }
+                    if (knf.reportPeriodTaxFormTypeId == APP_CONSTANTS.TAX_FORM_TYPE.REPORT_2_NDFL_2.id){
+                        $scope.declarationTypeSelect.options.data.results.push(APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_2);
                     }
                 }
 
