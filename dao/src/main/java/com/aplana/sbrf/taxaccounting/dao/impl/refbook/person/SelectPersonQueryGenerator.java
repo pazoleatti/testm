@@ -278,7 +278,7 @@ class SelectPersonQueryGenerator {
     }
 
     protected String likeIgnoreCase(String field, String value) {
-        return "lower(" + field + ") like '%" + value.toLowerCase() + "%'";
+        return field + " like '%" + value.toUpperCase() + "%'";
     }
 
     protected void addLikeIgnoreCaseAndDelimiters(String field, String value) {
@@ -292,8 +292,8 @@ class SelectPersonQueryGenerator {
             return null;
         }
         String filteredValue = StringUtils.filterDelimiters(value);
-        String lowerCaseValue = filteredValue.toLowerCase();
-        return "regexp_replace(lower(" + field + "),'[^0-9A-Za-zА-Яа-я]','') like '%" + lowerCaseValue + "%'";
+        String upperCaseValue = filteredValue.toUpperCase();
+        return "regexp_replace(" + field + ",'[^0-9A-Za-zА-Яа-я]','') like '%" + upperCaseValue + "%'";
     }
 
     private void addSearchIn(String field, Collection<?> values) {

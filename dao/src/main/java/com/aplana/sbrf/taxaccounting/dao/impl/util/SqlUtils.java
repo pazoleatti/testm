@@ -526,6 +526,6 @@ public final class SqlUtils extends AbstractDao {
     }
 
     public static String likeIgnoreCase(String field, String value) {
-        return "lower(" + field + ") like '%" + value.toLowerCase() + "%'";
+        return field + " like '%" + value.toUpperCase() + "%'";
     }
 }

@@ -74,13 +74,13 @@ public class RefBookPersonDaoTest {
     @Test
     public void test_getPersons_filterByMiddleName() {
         RefBookPersonFilter filter = new RefBookPersonFilter();
-        filter.setMiddleName("СЕРГЕЕВИЧ");
+        filter.setMiddleName("Сергеевич");
 
         PagingResult<RegistryPerson> persons = personDao.getPersons(null, filter);
 
         assertThat(persons).hasSize(3)
                 .extracting("middleName")
-                .containsOnly("Сергеевич");
+                .containsOnly("СЕРГЕЕВИЧ");
     }
 
     @Test
@@ -189,7 +189,7 @@ public class RefBookPersonDaoTest {
 
         assertThat(persons).hasSize(1)
                 .extracting("innForeign")
-                .containsOnly("123-d123");
+                .containsOnly("123-D123");
     }
 
     @Test
@@ -250,7 +250,7 @@ public class RefBookPersonDaoTest {
 
         assertThat(persons).hasSize(1)
                 .extracting("address.street")
-                .containsOnly("Ленинские Горы ул");
+                .containsOnly("ЛЕНИНСКИЕ ГОРЫ УЛ");
     }
 
     @Test
@@ -275,7 +275,7 @@ public class RefBookPersonDaoTest {
         assertThat(persons).hasSize(1);
 
         Address personAddress = persons.get(0).getAddress();
-        assertThat(personAddress.getAddressIno()).isEqualTo("COL, Washington DC, Kennedy street, 20");
+        assertThat(personAddress.getAddressIno()).isEqualTo("COL, WASHINGTON DC, KENNEDY STREET, 20");
     }
 
     @Test

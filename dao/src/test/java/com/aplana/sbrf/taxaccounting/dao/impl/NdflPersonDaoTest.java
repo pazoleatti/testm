@@ -80,7 +80,7 @@ public class NdflPersonDaoTest {
         parameters.put("firstName", "Федор");
         parameters.put("middleName", "Иванович");
         String sql = NdflPersonDaoImpl.buildQuery(parameters, null);
-        assertTrue(sql.contains("lower(np.last_name) like lower(:lastName)"));
+        assertTrue(sql.contains("np.last_name like upper(:lastName)"));
         assertFalse(sql.contains("np.inp = :inp"));
     }
 
@@ -1140,7 +1140,7 @@ public class NdflPersonDaoTest {
         assertEquals("me", ndflPersonListResult.get(1).getModifiedBy());
         assertEquals("Смит", ndflPersonListResult.get(1).getLastName());
         assertNull(ndflPersonListResult.get(2).getModifiedBy());
-        assertEquals("Иванов", ndflPersonListResult.get(2).getLastName());
+        assertEquals("ИВАНОВ", ndflPersonListResult.get(2).getLastName());
     }
 
     @Test

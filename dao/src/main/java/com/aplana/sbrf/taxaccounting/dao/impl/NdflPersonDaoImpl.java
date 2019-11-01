@@ -1185,7 +1185,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     private void appendSqlLikeCondition(String column, String value, StringBuilder queryBuilder, MapSqlParameterSource params, boolean onlyAlphanumeric) {
         if (value != null && !value.isEmpty()) {
             String paramName = column.replace('.', '_');
-            queryBuilder.append("and lower(")
+            queryBuilder.append("and upper(")
                     .append(onlyAlphanumeric && isSupportOver() ? "regexp_replace(" : "")
                     .append(column)
                     .append(onlyAlphanumeric && isSupportOver() ? ", '[^[:alnum:]]', '')" : "")
@@ -1194,7 +1194,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                     .append(paramName)
                     .append(onlyAlphanumeric && isSupportOver() ? ", '[^[:alnum:]]', '')" : "")
                     .append(" || '%' ");
-            params.addValue(paramName, value.toLowerCase());
+            params.addValue(paramName, value.toUpperCase());
         }
     }
 
@@ -1288,36 +1288,36 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         if (parameters != null && !parameters.isEmpty()) {
 
             if (contains(parameters, SubreportAliasConstants.LAST_NAME)) {
-                sb.append("AND lower(np.last_name) like lower(:lastName) \n");
+                sb.append("AND np.last_name like upper(:lastName) \n");
             }
 
             if (contains(parameters, SubreportAliasConstants.FIRST_NAME)) {
-                sb.append("AND lower(np.first_name) like lower(:firstName) \n");
+                sb.append("AND np.first_name like upper(:firstName) \n");
             }
 
             if (contains(parameters, SubreportAliasConstants.MIDDLE_NAME)) {
-                sb.append("AND lower(np.middle_name) like lower(:middleName) \n");
+                sb.append("AND np.middle_name like upper(:middleName) \n");
             }
 
             if (contains(parameters, SubreportAliasConstants.SNILS)) {
-                sb.append("AND (translate(lower(np.snils), '0-, ', '0') like translate(lower(:snils), '0-, ', '0')) \n");
+                sb.append("AND (translate(np.snils, '0-, ', '0') like translate(upper(:snils), '0-, ', '0')) \n");
             }
 
             if (contains(parameters, SubreportAliasConstants.INN)) {
-                sb.append("AND (translate(lower(np.inn_np), '0-, ', '0') like translate(lower(:inn), '0-, ', '0') OR " +
-                        "translate(lower(np.inn_foreign), '0-, ', '0') like translate(lower(:inn), '0-, ', '0')) \n");
+                sb.append("AND (translate(np.inn_np, '0-, ', '0') like translate(upper(:inn), '0-, ', '0') OR " +
+                        "translate(np.inn_foreign, '0-, ', '0') like translate(upper(:inn), '0-, ', '0')) \n");
             }
 
             //добавляю для страницы РНУ НДФЛ на angular
             if (contains(parameters, "innNp")) {
-                sb.append("AND (translate(lower(np.inn_np), '0-, ', '0') like translate(lower(:innNp), '0-, ', '0')) \n");
+                sb.append("AND (translate(np.inn_np, '0-, ', '0') like translate(upper(:innNp), '0-, ', '0')) \n");
             }
             if (contains(parameters, "innForeign")) {
-                sb.append("AND (translate(lower(np.inn_foreign), '0-, ', '0') like translate(lower(:innForeign), '0-, ', '0')) \n");
+                sb.append("AND (translate(np.inn_foreign, '0-, ', '0') like translate(upper(:innForeign), '0-, ', '0')) \n");
             }
 
             if (contains(parameters, SubreportAliasConstants.INP)) {
-                sb.append("AND lower(np.inp) like lower(:inp) \n");
+                sb.append("AND np.inp like upper(:inp) \n");
             }
 
             if (contains(parameters, SubreportAliasConstants.FROM_BIRTHDAY)) {
@@ -1329,7 +1329,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             }
 
             if (contains(parameters, SubreportAliasConstants.ID_DOC_NUMBER)) {
-                sb.append("AND (translate(lower(np.id_doc_number), '0-, ', '0') like translate(lower(:idDocNumber), '0-, ', '0')) \n");
+                sb.append("AND (translate(np.id_doc_number, '0-, ', '0') like translate(upper(:idDocNumber), '0-, ', '0')) \n");
             }
         }
         return sb.toString();
