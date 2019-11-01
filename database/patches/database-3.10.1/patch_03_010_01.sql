@@ -28,10 +28,10 @@ end;
 /
  
 begin 
-	select count(1) into :v_cnt from version_history where status='OK' and version='03.010.00';
+	select count(1) into :v_cnt from version_history where status='OK' and version='03.010.00.01';
 	if :v_cnt = 0 then
-		dbms_output.put_line('Error: 03.010.00 not installed. Check log-files.');
-		raise_application_error(-20999,'Error: 03.010.00 not installed. Check log-files.');
+		dbms_output.put_line('Error: 03.010.00.01 not installed. Check log-files.');
+		raise_application_error(-20999,'Error: 03.010.00.01 not installed. Check log-files.');
 	end if;
 
   	select count(1) into :v_cnt from version_history where status='OK' and version='03.010.01';
@@ -51,14 +51,8 @@ PROMPT ## 01_ddl_dml_periods
 PROMPT ## 02_templates
 @database-3.10.1/02_templates.sql "_log/3.10_1_03_templates.txt" "&4" "&5" "../_log" "../_bad"
 
-PROMPT ## 03_ddl_indexes
-@database-3.10.1/03_ddl_indexes.sql 
-
-PROMPT ## 04_ddl_views
-@database-3.10.1/04_ddl_views.sql  &3 &6
-
-PROMPT ## 05_dml_update
-@database-3.10.1/05_dml_update.sql 
+PROMPT ## 03_dml_update
+@database-3.10.1/03_dml_update.sql 
 
 PROMPT ## 06_check_index_constraints
 @database-3.10.1/06_check_index_constraints.sql
