@@ -156,7 +156,7 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
     private boolean isValid(Logger logger, String xmlFileName, File xmlFile, String xsdFileName, InputStream xsdStream, long timeout) {
         String[] params = new String[StringUtils.isNotBlank(xmlFileName) ? 4 : 3];
 
-        File xsdFile = null, vsax3TempDir = null, vsax3ExeFile, vsax3DllFile;
+        File xsdFile = null, vsax3TempDir = null, vsax3ExeFile = null, vsax3DllFile = null;
         try {
             vsax3TempDir = Files.createTempDir();
             vsax3ExeFile = new File(vsax3TempDir, "VSAX3.exe");
@@ -214,8 +214,18 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
             logger.warn("Произошла ошибка ввода-вывода. Проверка не выполнена.");
             return false;
         } finally {
-            deleteTempFile(xsdFile);
-            deleteTempFile(vsax3TempDir);
+            if (xsdFile != null) {
+                deleteTempFile(xsdFile);
+            }
+            if (vsax3ExeFile != null) {
+                deleteTempFile(vsax3ExeFile);
+            }
+            if (vsax3DllFile != null) {
+                deleteTempFile(vsax3DllFile);
+            }
+            if (vsax3TempDir != null) {
+                deleteTempFile(vsax3TempDir);
+            }
         }
     }
 
