@@ -54,6 +54,9 @@ PROMPT ## 02_templates
 PROMPT ## 03_dml_update
 @database-3.10.1/03_dml_update.sql 
 
+PROMPT ## 05_indexes_triggers
+@database-3.10.1/05_indexes_triggers.sql
+
 PROMPT ## 06_check_index_constraints
 @database-3.10.1/06_check_index_constraints.sql
 
