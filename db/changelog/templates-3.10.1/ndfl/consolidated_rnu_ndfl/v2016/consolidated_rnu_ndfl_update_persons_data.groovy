@@ -31,6 +31,7 @@ class UpdatePersonsData extends AbstractScriptClass {
     DepartmentService departmentService
     RefBookFactory refBookFactory
     ReportPeriodService reportPeriodService
+    StringBuilder msgBuilder
 
     // Кэш провайдеров
     Map<Long, RefBookDataProvider> providerCache = [:]
@@ -69,18 +70,10 @@ class UpdatePersonsData extends AbstractScriptClass {
                     doUpdate()
                 } catch (Throwable e) {
                     e.printStackTrace()
-                    DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
-                    String strCorrPeriod = ""
-                    if (departmentReportPeriod.getCorrectionDate() != null) {
-                        strCorrPeriod = ", с датой сдачи корректировки " + departmentReportPeriod.getCorrectionDate().format(SharedConstants.DATE_FORMAT)
-                    }
-                    Department department = departmentService.get(departmentReportPeriod.departmentId)
-                    logger.error("Невозможно обновить форму: № %s, Период %s, Подразделение %s, Вид: \"%s\". Причина: \"%s\", попробуйте повторить операцию позднее\"",
-                            declarationData.id,
-                            departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + ", " + departmentReportPeriod.getReportPeriod().getName() + strCorrPeriod,
-                            department.getName(),
-                            declarationTemplate.type.name,
-                            e)
+                    String fullFormDesc = declarationService.getFullDeclarationDescription(declarationData.getId())
+                    String msg = "Невозможно обновить форму: $fullFormDesc"
+                    msgBuilder.append(msg)
+                    logger.error(msgBuilder.toString() + ". Причина: \"%s\", попробуйте повторить операцию позднее\"", e)
                 }
         }
     }
@@ -279,20 +272,14 @@ class UpdatePersonsData extends AbstractScriptClass {
         Department department = departmentService.get(declarationData.departmentId)
         DepartmentReportPeriod reportPeriod = departmentReportPeriodService.get(declarationData.getDepartmentReportPeriodId())
 
+        String fullFormDesc = declarationService.getFullDeclarationDescription(declarationData.getId())
+        String msg = "Завершено обновление данных ФЛ формы: $fullFormDesc"
+        msgBuilder.append(msg)
+
         if(!existWarning) {
-            logger.info("Завершено обновление данных ФЛ формы: № %s, Период %s, Подразделение %s, Вид: \"%s\". Обновлено %s записей.",
-                    declarationData.id,
-                    departmentReportPeriodService.formatPeriodName(reportPeriod, SharedConstants.DATE_FORMAT),
-                    department.getName(),
-                    declarationTemplate.type.name,
-                    toUpdatePersons.size())
+            logger.info(msgBuilder.toString() + ". Обновлено %s записей.", toUpdatePersons.size())
         } else {
-            logger.warn("Завершено обновление данных ФЛ формы: № %s, Период %s, Подразделение %s, Вид: \"%s\". Обновлено %s записей.",
-                    declarationData.id,
-                    departmentReportPeriodService.formatPeriodName(reportPeriod, SharedConstants.DATE_FORMAT),
-                    department.getName(),
-                    declarationTemplate.type.name,
-                    toUpdatePersons.size())
+            logger.warn(msgBuilder.toString() + ". Обновлено %s записей.", toUpdatePersons.size())
         }
     }
 
