@@ -48,6 +48,7 @@ public class DeclarationDataKeyLockDescriptorImpl implements DeclarationDataKeyL
             case EXPORT_REPORTS:
             case TRANSFER:
             case EXCEL_UNLOAD_LIST:
+            case DELETE_DEC_ROWS:
                 return createBaseDescription(declarationDataId);
             case PDF_DEC:
             case UPDATE_DOC_STATE:
