@@ -10,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplateFile
 import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod
 import com.aplana.sbrf.taxaccounting.model.Department
+import com.aplana.sbrf.taxaccounting.model.ExcelTemplateSelectedRows
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormSources
 import com.aplana.sbrf.taxaccounting.model.Ndfl2_6DataReportParams
@@ -102,6 +103,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
     Date formCreationDate = null
     Date date = new Date()
     AuditService auditService
+    ExcelTemplateSelectedRows excelTemplateSelectedRows
     /**
      * Дополнительные спецотчеты (SBRFNDFL-8445)
      */
@@ -173,6 +175,9 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         }
         if (scriptClass.getBinding().hasVariable("auditServiceImpl")) {
             this.auditService = (AuditService) scriptClass.getProperty("auditServiceImpl")
+        }
+        if (scriptClass.getBinding().hasVariable("excelTemplateSelectedRows")) {
+            this.excelTemplateSelectedRows = (ExcelTemplateSelectedRows) scriptClass.getProperty("excelTemplateSelectedRows")
         }
     }
 
@@ -2384,16 +2389,37 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
      * @return
      */
     SheetFillerContext createExportDeclarationDataSheetFillerContext() {
-        List<NdflPerson> ndflPersonList = ndflPersonService.findNdflPerson(declarationData.id)
+        List<NdflPerson> ndflPersonList
+        List<NdflPersonIncome> ndflPersonIncomeList
+        List<NdflPersonDeduction> ndflPersonDeductionList
+        List<NdflPersonPrepayment> ndflPersonPrepaymentList
+
+        if (excelTemplateSelectedRows) {
+            if (excelTemplateSelectedRows.persons.size() > 0) {
+                List<String> inpList = excelTemplateSelectedRows.persons.inp
+                ndflPersonList = ndflPersonService.findNdflPersonBySelectedByInp(inpList, declarationData.id)
+                ndflPersonIncomeList = ndflPersonService.findNdflPersonIncomeBySelectedByInp(inpList, declarationData.id)
+                ndflPersonDeductionList = ndflPersonService.findNdflPersonDeductionBySelectedByInp(inpList, declarationData.id)
+                ndflPersonPrepaymentList = ndflPersonService.findNdflPersonPrepaymentBySelectedByInp(inpList, declarationData.id)
+            } else if (excelTemplateSelectedRows.incomes.size() > 0) {
+                List<String> operationIds = excelTemplateSelectedRows.incomes.operationId
+                ndflPersonList = ndflPersonService.findNdflPersonBySelectedByInp(excelTemplateSelectedRows.incomes.inp, declarationData.id)
+                ndflPersonIncomeList = ndflPersonService.findNdflPersonIncomeBySelectedByOperationId(operationIds, declarationData.id)
+                ndflPersonDeductionList = ndflPersonService.findNdflPersonDeductionBySelectedByOperationId(operationIds, declarationData.id)
+                ndflPersonPrepaymentList = ndflPersonService.findNdflPersonPrepaymentBySelectedByOperationId(operationIds, declarationData.id)
+            }
+        } else {
+            ndflPersonList = ndflPersonService.findNdflPerson(declarationData.id)
+            ndflPersonIncomeList = ndflPersonService.findNdflPersonIncome(declarationData.id)
+            ndflPersonDeductionList = ndflPersonService.findNdflPersonDeduction(declarationData.id)
+            ndflPersonPrepaymentList = ndflPersonService.findNdflPersonPrepayment(declarationData.id)
+        }
         Collections.sort(ndflPersonList, new Comparator<NdflPerson>() {
             @Override
             int compare(NdflPerson o1, NdflPerson o2) {
                 return o1.rowNum <=> o2.rowNum
             }
         })
-        List<NdflPersonIncome> ndflPersonIncomeList = ndflPersonService.findNdflPersonIncome(declarationData.id)
-        List<NdflPersonDeduction> ndflPersonDeductionList = ndflPersonService.findNdflPersonDeduction(declarationData.id)
-        List<NdflPersonPrepayment> ndflPersonPrepaymentList = ndflPersonService.findNdflPersonPrepayment(declarationData.id)
         SheetFillerContext context = new SheetFillerContext(ndflPersonList, ndflPersonIncomeList, ndflPersonDeductionList, ndflPersonPrepaymentList)
         for (NdflPersonIncome ndflPersonIncome : ndflPersonIncomeList) {
             context.getIdNdflPersonMap().get(ndflPersonIncome.ndflPersonId).incomes << ndflPersonIncome
@@ -2702,29 +2728,29 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
 
     NdflPerson transformNdflPersonNode(NodeChild node) {
         NdflPerson ndflPerson = new NdflPerson()
-        ndflPerson.inp = toString((GPathResult) node.getProperty('@ИНП'))
+        ndflPerson.inp = toString((GPathResult) node.getProperty('@ИНП'))?.toUpperCase()
         ndflPerson.snils = toString((GPathResult) node.getProperty('@СНИЛС'))
-        ndflPerson.lastName = toString((GPathResult) node.getProperty('@ФамФЛ'))
-        ndflPerson.firstName = toString((GPathResult) node.getProperty('@ИмяФЛ'))
-        ndflPerson.middleName = toString((GPathResult) node.getProperty('@ОтчФЛ'))
+        ndflPerson.lastName = toString((GPathResult) node.getProperty('@ФамФЛ'))?.toUpperCase()
+        ndflPerson.firstName = toString((GPathResult) node.getProperty('@ИмяФЛ'))?.toUpperCase()
+        ndflPerson.middleName = toString((GPathResult) node.getProperty('@ОтчФЛ'))?.toUpperCase()
         ndflPerson.birthDay = toDate((GPathResult) node.getProperty('@ДатаРожд'))
         ndflPerson.citizenship = toString((GPathResult) node.getProperty('@Гражд'))
-        ndflPerson.innNp = toString((GPathResult) node.getProperty('@ИННФЛ'))
-        ndflPerson.innForeign = toString((GPathResult) node.getProperty('@ИННИно'))
+        ndflPerson.innNp = toString((GPathResult) node.getProperty('@ИННФЛ'))?.toUpperCase()
+        ndflPerson.innForeign = toString((GPathResult) node.getProperty('@ИННИно'))?.toUpperCase()
         ndflPerson.idDocType = toString((GPathResult) node.getProperty('@УдЛичнФЛКод'))
-        ndflPerson.idDocNumber = toString((GPathResult) node.getProperty('@УдЛичнФЛНом'))
+        ndflPerson.idDocNumber = toString((GPathResult) node.getProperty('@УдЛичнФЛНом'))?.toUpperCase()
         ndflPerson.status = toString((GPathResult) node.getProperty('@СтатусФЛ'))
-        ndflPerson.postIndex = toString((GPathResult) node.getProperty('@Индекс'))
-        ndflPerson.regionCode = toString((GPathResult) node.getProperty('@КодРегион'))
-        ndflPerson.area = toString((GPathResult) node.getProperty('@Район'))
-        ndflPerson.city = toString((GPathResult) node.getProperty('@Город'))
-        ndflPerson.locality = toString((GPathResult) node.getProperty('@НаселПункт'))
-        ndflPerson.street = toString((GPathResult) node.getProperty('@Улица'))
-        ndflPerson.house = toString((GPathResult) node.getProperty('@Дом'))
-        ndflPerson.building = toString((GPathResult) node.getProperty('@Корпус'))
-        ndflPerson.flat = toString((GPathResult) node.getProperty('@Кварт'))
+        ndflPerson.postIndex = toString((GPathResult) node.getProperty('@Индекс'))?.toUpperCase()
+        ndflPerson.regionCode = toString((GPathResult) node.getProperty('@КодРегион'))?.toUpperCase()
+        ndflPerson.area = toString((GPathResult) node.getProperty('@Район'))?.toUpperCase()
+        ndflPerson.city = toString((GPathResult) node.getProperty('@Город'))?.toUpperCase()
+        ndflPerson.locality = toString((GPathResult) node.getProperty('@НаселПункт'))?.toUpperCase()
+        ndflPerson.street = toString((GPathResult) node.getProperty('@Улица'))?.toUpperCase()
+        ndflPerson.house = toString((GPathResult) node.getProperty('@Дом'))?.toUpperCase()
+        ndflPerson.building = toString((GPathResult) node.getProperty('@Корпус'))?.toUpperCase()
+        ndflPerson.flat = toString((GPathResult) node.getProperty('@Кварт'))?.toUpperCase()
         ndflPerson.countryCode = toString((GPathResult) node.getProperty('@КодСтрИно'))
-        ndflPerson.address = toString((GPathResult) node.getProperty('@АдресИно'))
+        ndflPerson.address = toString((GPathResult) node.getProperty('@АдресИно'))?.toUpperCase()
         ndflPerson.additionalData = toString((GPathResult) node.getProperty('@ДопИнф'))
         ndflPerson.asnuId = declarationData.asnuId
         ndflPerson.modifiedDate = formCreationDate

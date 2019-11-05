@@ -89,22 +89,43 @@ end;
 COMMIT;
 
 declare 
-  v_task_name varchar2(128):='insert_update_delete block #3 - update ref_book_person';  
+  v_task_name varchar2(128):='insert_update_delete block #3 - update ref_book_id_tax_payer';  
 begin
-	update ref_book_person set 
+	update /*+ index (ref_book_id_tax_payer SRCH_REFB_TAX_PAYER_INP_ASNU) */ 
+		ref_book_id_tax_payer set inp=upper (inp) where upper(inp)<>inp;
+	dbms_output.put_line(v_task_name||'[INFO]:'||' Success');
+
+EXCEPTION
+  when OTHERS then 
+    dbms_output.put_line(v_task_name||'[FATAL]:'||sqlerrm);		
+end;
+/
+COMMIT;
+
+
+declare 
+  v_task_name varchar2(128):='insert_update_delete block #4 - update ref_book_person';  
+begin
+	update /*+ index (ref_book_person IDX_REF_BOOK_PERSON_SRCH_FIO) */ ref_book_person set 
 		LAST_NAME = upper(LAST_NAME),
 		FIRST_NAME = upper(FIRST_NAME),
 		MIDDLE_NAME = upper(MIDDLE_NAME),
 		INN = upper(INN),
 		INN_FOREIGN = upper(INN_FOREIGN),
 		SNILS = upper(SNILS),
+		DISTRICT = upper (DISTRICT), CITY = upper (CITY), 
+		LOCALITY = upper (LOCALITY), STREET = upper (STREET), 
+		HOUSE = upper (HOUSE), BUILD = upper (BUILD),
+		APPARTMENT = upper (APPARTMENT), ADDRESS_FOREIGN = upper (ADDRESS_FOREIGN),
 		search_LAST_NAME = replace(nvl(upper(last_name),'empty'),' ',''),
 		search_FIRST_NAME = replace(nvl(upper(FIRST_name),'empty'),' ',''),
 		search_MIDDLE_NAME = replace(nvl(upper(MIDDLE_name),'empty'),' ',''),
                 search_INN = replace(nvl(upper(inn),'empty'),' ',''),
 		search_INN_FOREIGN = replace(nvl(upper(inn_foreign),'empty'),' ',''),
-		search_SNILS = replace(replace(nvl(upper(snils),'empty'),' ',''),'-',''); 
-
+		search_SNILS = replace(replace(nvl(upper(snils),'empty'),' ',''),'-','')
+		where upper(search_last_name)<>search_last_name or 
+		      upper(search_first_name)<>search_first_name or
+		      upper(search_middle_name)<>search_middle_name;
 	dbms_output.put_line(v_task_name||'[INFO]:'||' Success');
 
 EXCEPTION
@@ -115,7 +136,7 @@ end;
 COMMIT;
 
 declare 
-	  v_task_name varchar2(128):='insert_update_delete block #4 - update NDFL_PERSON';  
+	  v_task_name varchar2(128):='insert_update_delete block #5 - update NDFL_PERSON';  
 begin
 	update ndfl_person set 
 		id_doc_number = upper(id_doc_number),
@@ -125,13 +146,40 @@ begin
 		INN_NP = upper(INN_NP),
 		INN_FOREIGN = upper(INN_FOREIGN),
 		SNILS = upper(SNILS),
-		search_doc_number=regexp_replace(upper(id_doc_number),'[^0-9A-Za-zА-Яа-я]',''),
+		INP = upper(INP), 
+		AREA = upper (AREA), CITY = upper (CITY), 
+		LOCALITY = upper (LOCALITY), 
+		STREET = upper (STREET), 
+		HOUSE = upper (HOUSE), 
+		BUILDING = upper (BUILDING), 
+		FLAT = upper (FLAT), 
+		ADDRESS = upper(ADDRESS),
+
 		search_LAST_NAME = replace(nvl(upper(last_name),'empty'),' ',''),
 		search_FIRST_NAME = replace(nvl(upper(FIRST_name),'empty'),' ',''),
 		search_MIDDLE_NAME = replace(nvl(upper(MIDDLE_name),'empty'),' ',''),
                 search_INN = replace(nvl(upper(inn_np),'empty'),' ',''),
 		search_INN_FOREIGN = replace(nvl(upper(inn_foreign),'empty'),' ',''),
-		search_SNILS = replace(replace(nvl(upper(snils),'empty'),' ',''),'-',''); 
+		search_SNILS = replace(replace(nvl(upper(snils),'empty'),' ',''),'-','')
+		where upper(search_last_name)<>search_last_name or 
+		      upper(search_first_name)<>search_first_name or
+		      upper(search_middle_name)<>search_middle_name; 
+	dbms_output.put_line(v_task_name||'[INFO]:'||' Success');
+
+EXCEPTION
+  when OTHERS then 
+    dbms_output.put_line(v_task_name||'[FATAL]:'||sqlerrm);		
+end;
+/
+COMMIT;
+
+
+declare 
+	  v_task_name varchar2(128):='insert_update_delete block #6 - update NDFL_PERSON (2)';  
+begin
+	update ndfl_person set 
+		search_doc_number=regexp_replace(id_doc_number,'[^0-9A-Za-zА-Яа-я]','');
+
 	dbms_output.put_line(v_task_name||'[INFO]:'||' Success');
 
 EXCEPTION
