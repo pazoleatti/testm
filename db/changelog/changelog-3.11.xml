@@ -12,4 +12,12 @@
         </insert>
     </changeSet>
 
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-8761 Реализовать определение настроек подразделений для КНФ с типом "КНФ для Приложения 2" -->
+    <changeSet id="3.11-avoynov-2" author="avoynov" runAlways="true">
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script" valueClobFile="templates-3.11/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl_calculate.groovy"/>
+            <where>DECLARATION_TEMPLATE_ID = 101 and EVENT_ID = 3</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>

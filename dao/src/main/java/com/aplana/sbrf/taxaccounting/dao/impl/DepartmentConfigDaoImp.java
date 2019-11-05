@@ -61,7 +61,7 @@ public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentCon
             "select dc.kpp, dc.oktmo_id, max(dc.start_date) start_date \n" +
                     "from department_config dc\n" +
                     "where\n" +
-                    "  department_id = :departmentId\n" +
+                    "  (:departmentId is null or department_id = :departmentId)\n" +
                     "  and (\n" +
                     "   (dc.start_date <= :relevanceDate and :relevanceDate <= dc.end_date)\n" +
                     "   or dc.end_date is null\n" +

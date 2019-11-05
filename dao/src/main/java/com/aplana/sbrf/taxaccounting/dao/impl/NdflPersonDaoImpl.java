@@ -2395,10 +2395,10 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                 "  select dc.kpp, oktmo.code oktmo, max(dc.start_date) start_date \n" +
                 "  from department_config dc\n" +
                 "  join ref_book_oktmo oktmo on oktmo.id = dc.oktmo_id\n" +
-                "  where department_id = :departmentId and (\n" +
+                "  where (:departmentId is null or department_id = :departmentId) and (\n" +
                 "    dc.start_date <= :currentDate and (dc.end_date is null or :currentDate <= dc.end_date) or (\n" +
                 "      dc.start_date <= :periodEndDate and (dc.end_date is null or :periodStartDate <= dc.end_date) \n" +
-                "      and not exists (select * from department_config where kpp = dc.kpp and oktmo_id = dc.oktmo_id and start_date > dc.start_date and department_id != :departmentId)\n" +
+                "      and (:departmentId is null or not exists (select * from department_config where kpp = dc.kpp and oktmo_id = dc.oktmo_id and start_date > dc.start_date and department_id != :departmentId))\n" +
                 "    )\n" +
                 "  )\n" +
                 "  group by dc.kpp, oktmo.code\n";
