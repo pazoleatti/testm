@@ -23,6 +23,7 @@ import com.aplana.sbrf.taxaccounting.service.ReportService
 import com.aplana.sbrf.taxaccounting.service.component.lock.locker.DeclarationLocker
 import com.aplana.sbrf.taxaccounting.service.refbook.DepartmentConfigService
 import com.aplana.sbrf.taxaccounting.service.refbook.RefBookDeductionTypeService
+import com.aplana.sbrf.taxaccounting.utils.DepartmentReportPeriodFormatter
 import com.aplana.sbrf.taxaccounting.utils.ZipUtils
 import groovy.io.PlatformLineWriter
 import groovy.transform.EqualsAndHashCode
@@ -83,6 +84,7 @@ class Report2Ndfl extends AbstractScriptClass {
     Map<String, Object> paramMap
     NdflReferenceService ndflReferenceService
     AuditService auditService
+    DepartmentReportPeriodFormatter departmentReportPeriodFormatter
 
     @TypeChecked(TypeCheckingMode.SKIP)
     Report2Ndfl(scriptClass) {
@@ -115,6 +117,7 @@ class Report2Ndfl extends AbstractScriptClass {
         this.reportFormsCreationParams = (ReportFormsCreationParams) getSafeProperty("reportFormsCreationParams")
         this.ndflReferenceService = (NdflReferenceService) getSafeProperty("ndflReferenceService")
         this.auditService = (AuditService) getSafeProperty("auditServiceImpl")
+        this.departmentReportPeriodFormatter = (DepartmentReportPeriodFormatter) getSafeProperty("departmentReportPeriodFormatter")
     }
 
     @Override
@@ -1459,15 +1462,7 @@ class Report2Ndfl extends AbstractScriptClass {
      * Формирует описание периода в виде "<Период.Год> <Период.Наим>[ с датой сдачи корректировки <Период.ДатаКорр>]"
      */
     String formatPeriod(DepartmentReportPeriod departmentReportPeriod) {
-        String corrStr = getCorrectionDateExpression(departmentReportPeriod)
-        return "$departmentReportPeriod.reportPeriod.taxPeriod.year ${departmentReportPeriod.reportPeriod.name}$corrStr"
-    }
-
-    /**
-     * Формирует строку с датой корректировки
-     */
-    String getCorrectionDateExpression(DepartmentReportPeriod departmentReportPeriod) {
-        return departmentReportPeriod.correctionDate == null ? "" : " с датой сдачи корректировки ${departmentReportPeriod.correctionDate.format("dd.MM.yyyy")}"
+        return departmentReportPeriodFormatter.getPeriodDescription(departmentReportPeriod)
     }
 
     /**

@@ -2,7 +2,7 @@ create or replace TRIGGER REF_BOOK_ID_DOC_BEFORE_INS_UPD
   before insert or update on ref_book_id_doc
   for each row
 begin
-        :new.search_doc_number := regexp_replace(:new.doc_number,'[^0-9A-Za-zА-Яа-я]','');        
+        :new.search_doc_number := regexp_replace(:new.doc_number,'[^0-9A-Za-zРђ-РЇР°-СЏ]','');        
 end REF_BOOK_ID_DOC_BEFORE_INS_UPD;
 /
 
@@ -42,7 +42,7 @@ begin
 
         :new.search_snils := replace(replace(nvl(:new.snils,'empty'),' ',''),'-','');
 
-        :new.search_doc_number := regexp_replace(:new.id_doc_number,'[^0-9A-Za-zА-Яа-я]','');        
+        :new.search_doc_number := regexp_replace(:new.id_doc_number,'[^0-9A-Za-zРђ-РЇР°-СЏ]','');        
     
 end ndfl_PERSON_BEFORE_INS_UPD;
 /
@@ -536,7 +536,7 @@ END;
 /
 commit;
 
---создание новых индексов
+--СЃРѕР·РґР°РЅРёРµ РЅРѕРІС‹С… РёРЅРґРµРєСЃРѕРІ
 DECLARE
 	v_index_name varchar(30) :='IDX_REF_BOOK_PERSON_REPORT_DOC';
 	v_run_condition number(1);

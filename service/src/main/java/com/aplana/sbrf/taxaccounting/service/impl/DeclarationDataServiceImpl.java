@@ -2664,6 +2664,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         params.put("alias", alias);
         params.put("viewParamValues", new LinkedHashMap<String, String>());
         params.put("subreportParamValues", action.getSubreportParamValues());
+        params.put("userIP", userInfo.getIp());
 
         if (action.getSelectedRow() != null) {
             List<Cell> cellList = new ArrayList<>();
@@ -2788,7 +2789,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 throw new ServiceLoggerException("Возникли ошибки при формировании отчета", logEntryService.save(logger.getEntries()));
             }
             if (stateLogger != null) stateLogger.updateState(AsyncTaskState.SAVING_XLSX);
-            auditService.add(null, userInfo, declaration, "Выгрузка РНУ НДФЛ в файл xls для формы: №" + declaration.getId(), null);
+            auditService.add(null, userInfo, "Выгрузка данных в виде шаблона ТФ (Excel), для налоговой формы: №" + declaration.getId());
             return blobDataService.create(reportFile.getPath(), scriptSpecificReportHolder.getFileName());
         } catch (IOException e) {
             throw new ServiceException(e.getLocalizedMessage(), e);

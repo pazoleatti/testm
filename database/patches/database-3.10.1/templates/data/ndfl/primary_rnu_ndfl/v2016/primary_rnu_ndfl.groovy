@@ -503,7 +503,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         switch (scriptSpecificReportHolder?.declarationSubreport?.alias) {
             case SubreportAliasConstants.RNU_NDFL_PERSON_DB:
                 exportPersonDataToExcel()
-                specReportDescription = "РНУ НДФЛ по физическому лицу"
+                specReportDescription = "\"РНУ НДФЛ по физическому лицу\""
                 break
             case SubreportAliasConstants.RNU_NDFL_PERSON_ALL_DB:
                 exportAllDeclarationDataToExcel()
@@ -513,37 +513,37 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
             case SubreportAliasConstants.RNU_RATE_REPORT:
                 createRateReport()
                 scriptSpecificReportHolder.setFileName("Отчет_в_разрезе_ставок_${declarationData.id}_${date.format('yyyy-MM-dd_HH-mm-ss')}.xlsx")
-                specReportDescription = "Отчет в разрезе ставок"
+                specReportDescription = "\"Отчет в разрезе ставок\""
                 break
             case SubreportAliasConstants.RNU_PAYMENT_REPORT:
                 createPaymentReport()
                 scriptSpecificReportHolder.setFileName("Отчет_в_разрезе_ПП_${declarationData.id}_${date.format('yyyy-MM-dd_HH-mm-ss')}.xlsx")
-                specReportDescription = "Отчет в разрезе платежных поручений"
+                specReportDescription = "\"Отчет в разрезе платежных поручений\""
                 break
             case SubreportAliasConstants.RNU_NDFL_DETAIL_REPORT:
                 createNdflDetailReport()
                 scriptSpecificReportHolder.setFileName("Детализация_${declarationData.id}_${date.format('yyyy-MM-dd_HH-mm-ss')}.xlsx")
-                specReportDescription = "Детализация – доходы, вычеты, налоги"
+                specReportDescription = "\"Детализация – доходы, вычеты, налоги\""
                 break
             case SubreportAliasConstants.RNU_NDFL_2_6_DATA_XLSX_REPORT:
                 create2_6NdflDataReport('xlsx')
                 scriptSpecificReportHolder.setFileName("Данные_для_2_и_6-НДФЛ_${declarationData.id}_${date.format('yyyy-MM-dd_HH-mm-ss')}.xlsx")
                 specReportDescription = "\"Данные для включения в 2-НДФЛ и 6-НДФЛ\" с параметрами: " +
-                        "Включать данные с ${dateFrom.format('yyyy-MM-dd')} по ${dateTo.format('yyyy-MM-dd')} " +
-                        "Отрицательные значения : ${adjustNegativeValues ? "Корректировать" : "Не корректировать"} КПП: ${kppList.size() > 0 ? "Выбранные КПП" : "Все КПП формы"}"
+                        "Включать данные с ${dateFrom.format('dd.MM.yyyy')} по ${dateTo.format('dd.MM.yyyy')} " +
+                        "Отрицательные значения : ${adjustNegativeValues ? "Корректировать" : "Не корректировать"} КПП: ${(kppList && kppList.size() > 0) ? "Выбранные КПП" : "Все КПП формы"}"
                 break
             case SubreportAliasConstants.RNU_NDFL_2_6_DATA_TXT_REPORT:
                 create2_6NdflDataReport('txt')
                 scriptSpecificReportHolder.setFileName("Данные_для_2_и_6-НДФЛ_${declarationData.id}_${date.format('yyyy-MM-dd_HH-mm-ss')}.txt")
                 specReportDescription = "Файл выгрузки: \"Данные для включения в 2-НДФЛ и 6-НДФЛ\" с параметрами: " +
-                        "Включать данные с ${dateFrom.format('yyyy-MM-dd')} по ${dateTo.format('yyyy-MM-dd')} " +
-                        "Отрицательные значения : ${adjustNegativeValues ? "Корректировать" : "Не корректировать"} КПП: ${kppList.size() > 0 ? "Выбранные КПП" : "Все КПП формы"}"
+                        "Включать данные с ${dateFrom.format('dd.MM.yyyy')} по ${dateTo.format('dd.MM.yyyy')} " +
+                        "Отрицательные значения : ${adjustNegativeValues ? "Корректировать" : "Не корректировать"} КПП: ${(kppList && kppList.size() > 0) ? "Выбранные КПП" : "Все КПП формы"}"
                 break
             default:
                 throw new ServiceException("Обработка данного спец. отчета не предусмотрена!")
         }
         auditService.add(null, userInfo, declarationData,
-                "Создание спецотчета: \"${specReportDescription}\"", null)
+                "Создание спецотчета: ${specReportDescription}", null)
     }
 
     void exportPersonDataToExcel() {

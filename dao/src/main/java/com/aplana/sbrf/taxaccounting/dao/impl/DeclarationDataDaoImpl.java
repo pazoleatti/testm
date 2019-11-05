@@ -1160,7 +1160,12 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
     public boolean isKnf(Long declarationId) {
         try {
             return getJdbcTemplate().queryForObject(
-                    "select 1 from declaration_data where id = ? and declaration_template_id = 101 /* консолидированная */",
+                    "select 1\n" +
+                            "from declaration_data dd\n" +
+                            "left join declaration_template dt on dt.id = dd.declaration_template_id\n" +
+                            "where\n" +
+                            "  dd.id = ?\n" +
+                            "  and dt.declaration_type_id = 101 /* консолидированная */",
                     Integer.class, declarationId) == 1;
         } catch (EmptyResultDataAccessException e) {
             return false;

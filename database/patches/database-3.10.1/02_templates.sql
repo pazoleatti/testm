@@ -172,7 +172,7 @@ HOST "&2\sqlldr" &3 control=database-3.10.1/templates/ldr/refbook/blob_data.ldr 
 
 HOST "&2\sqlldr" &3 control=database-3.10.1/templates/ldr/ndfl/template.ldr log=&4/3_10_1_02_03_ndfl_template.txt bad=&5/3_10_1_02_03_ndfl_template.bad
 
---HOST "&2\sqlldr" &3 control=database-3.10.1/templates/ldr/ndfl/template_script.ldr log=&4/3_10_1_02_04_ndfl_template_script.txt bad=&5/3_10_1_02_04_ndfl_template_script.bad
+HOST "&2\sqlldr" &3 control=database-3.10.1/templates/ldr/ndfl/template_script.ldr log=&4/3_10_1_02_04_ndfl_template_script.txt bad=&5/3_10_1_02_04_ndfl_template_script.bad
 
 --3.10.1-skononova-2
 HOST "&2\sqlldr" &3 control=database-3.10.1/templates/ldr/refbook/oktmo.ldr log=&4/3_10_1_02_03_oktmo.txt bad=&5/3_10_1_02_03_oktmo.bad rows=1000
