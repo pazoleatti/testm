@@ -68,3 +68,22 @@ END;
 /
 commit;
 
+DECLARE
+	v_run_condition number(1);
+	v_task_name varchar2(128):='indexes block #2 - SRCH_REFB_TAX_PAYER_INP_ASNU';  
+BEGIN
+	select count(*) into v_run_condition from user_indexes where INDEX_NAME='SRCH_REFB_TAX_PAYER_INP_ASNU';
+	IF v_run_condition>0 THEN
+	        execute immediate 'drop index SRCH_REFB_TAX_PAYER_INP_ASNU';
+	END IF;
+
+	execute immediate 'create index SRCH_REFB_TAX_PAYER_INP_ASNU on REF_BOOK_ID_TAX_PAYER (INP asc, AS_NU asc, PERSON_ID asc) compute statistics ';
+	dbms_output.put_line(v_task_name||'[INFO ]:'||' Success');
+
+EXCEPTION
+	when OTHERS then
+		dbms_output.put_line(v_task_name||'[FATAL]:'||sqlerrm);	
+END;
+/
+commit;
+
