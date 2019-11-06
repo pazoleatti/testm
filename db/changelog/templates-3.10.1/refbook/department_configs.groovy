@@ -1,11 +1,11 @@
-package refbook
+package refbook // department_configs_ref комментарий для локального поиска скрипта
 
-import com.aplana.sbrf.taxaccounting.AbstractScriptClass // department_configs_ref комментарий для локального поиска скрипта
-
+import com.aplana.sbrf.taxaccounting.AbstractScriptClass
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.action.DepartmentConfigsFilter
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.log.Logger
+import com.aplana.sbrf.taxaccounting.model.refbook.*
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
 import com.aplana.sbrf.taxaccounting.script.SharedConstants
 import com.aplana.sbrf.taxaccounting.service.TransactionHelper
@@ -20,6 +20,7 @@ import org.joda.time.LocalDate
 import org.joda.time.format.DateTimeFormat
 
 import static com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils.checkInterrupted
+
 /**
  * Cкрипт Настроек подразделений
  */
