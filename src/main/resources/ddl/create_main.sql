@@ -1776,3 +1776,65 @@ comment on column transport_message.explanation is 'Текст дополнит�
 comment on column transport_message.declaration_id is 'Ссылка на форму, с которой связано сообщение';
 
 create sequence seq_transport_message start with 1000 increment by 1;
+
+----------------------------------------------------------------------------------------------------------
+-- Приложение 2
+----------------------------------------------------------------------------------------------------------
+create table ndfl_app2 (
+    id number(18,0) not null,
+    person_id number(18,0) not null,
+    tax_rate number(2,0) not null,
+    total_income number(17,2) not null,
+    total_deduction number(17,2),
+    tax_base number(17,2) not null,
+    calculated_tax number(15,0) not null,
+    withholding_tax number(15,0),
+    transfered_tax number(15,0),
+    overholding_tax number(15,0),
+    not_holding_tax number(15,0)
+);
+
+comment on column ndfl_app2.id is 'идентификатор';
+comment on column ndfl_app2.person_id is 'ссылка на фл';
+comment on column ndfl_app2.tax_rate is 'налоговая ставка';
+comment on column ndfl_app2.total_income is 'общая сумма дохода';
+comment on column ndfl_app2.total_deduction is 'общая сумма вычетов';
+comment on column ndfl_app2.tax_base is 'налоговая база';
+comment on column ndfl_app2.calculated_tax is 'сумма налога исчисленная';
+comment on column ndfl_app2.withholding_tax is 'сумма налога удержанная';
+comment on column ndfl_app2.transfered_tax is 'сумма налога перечисленная';
+comment on column ndfl_app2.overholding_tax is 'сумма налога, излишне удержанная налоговым агентом';
+comment on column ndfl_app2.not_holding_tax is 'сумма налога, не удержанная налоговым агентом';
+comment on table ndfl_app2 is 'общие сведения приложение 2';
+
+create table ndfl_app2_income (
+    id number(18,0) not null,
+    ndfl_app2_id number(18,0) not null,
+    income_code varchar2(4) not null,
+    income_summ number(17,2) not null
+);
+
+comment on column ndfl_app2_income.id is 'идентификатор';
+comment on column ndfl_app2_income.ndfl_app2_id is 'ссылка на приложение 2';
+comment on column ndfl_app2_income.income_code is 'код дохода';
+comment on column ndfl_app2_income.income_summ is 'сумма дохода';
+comment on table ndfl_app2_income is 'коды и суммы доходов в приложении 2';
+
+create table ndfl_app2_deduction (
+    id number(18,0) not null,
+    ndfl_app2_income_id number(18,0) not null,
+    type_code varchar2(3) not null,
+    deduction_sum number(17,2) not null,
+    deduction_type number(2,0) not null
+);
+
+comment on column ndfl_app2_deduction.id is 'идентификатор';
+comment on column ndfl_app2_deduction.ndfl_app2_income_id is 'ссылка на доход из приложения 2';
+comment on column ndfl_app2_deduction.type_code is 'код вычета';
+comment on column ndfl_app2_deduction.deduction_sum is 'сумма вычета';
+comment on column ndfl_app2_deduction.deduction_type is 'тип вычета';
+comment on table ndfl_app2_deduction is 'вычеты в приложении 2';
+
+create sequence seq_ndfl_app2 start with 1 increment by 1;
+create sequence seq_ndfl_app2_income start with 1 increment by 1;
+create sequence seq_ndfl_app2_deduction start with 1 increment by 1;

@@ -32,5 +32,82 @@
         </update>
     </changeSet>
 
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-8696 Добавить новые атрибуты для формы для обеспечения возможности
+    формирования Приложения 2 в виде ОНФ -->
+    <changeSet id="3.11-adudenko-01" author="adudenko">
+        <sql>
+        CREATE TABLE NDFL_APP2 (
+            ID NUMBER(18,0) NOT NULL,
+            PERSON_ID NUMBER(18,0) NOT NULL,
+            TAX_RATE NUMBER(2,0) NOT NULL,
+            TOTAL_INCOME NUMBER(17,2) NOT NULL,
+            TOTAL_DEDUCTION NUMBER(17,2),
+            TAX_BASE NUMBER(17,2) NOT NULL,
+            CALCULATED_TAX NUMBER(15,0) NOT NULL,
+            WITHHOLDING_TAX NUMBER(15,0),
+            TRANSFERED_TAX NUMBER(15,0),
+            OVERHOLDING_TAX NUMBER(15,0),
+            NOT_HOLDING_TAX NUMBER(15,0),
+            CONSTRAINT PK_NDFL_APP2 PRIMARY KEY (ID),
+            CONSTRAINT FK_NDFL_APP2_PERSON_ID FOREIGN KEY (PERSON_ID) REFERENCES REF_BOOK_PERSON(ID) ON DELETE CASCADE
+        );
+
+        COMMENT ON COLUMN "NDFL_APP2"."ID" IS 'Идентификатор';
+        COMMENT ON COLUMN "NDFL_APP2"."PERSON_ID" IS 'Ссылка на ФЛ';
+        COMMENT ON COLUMN "NDFL_APP2"."TAX_RATE" IS 'Налоговая ставка';
+        COMMENT ON COLUMN "NDFL_APP2"."TOTAL_INCOME" IS 'Общая сумма дохода';
+        COMMENT ON COLUMN "NDFL_APP2"."TOTAL_DEDUCTION" IS 'Общая сумма вычетов';
+        COMMENT ON COLUMN "NDFL_APP2"."TAX_BASE" IS 'Налоговая база';
+        COMMENT ON COLUMN "NDFL_APP2"."CALCULATED_TAX" IS 'Сумма налога исчисленная';
+        COMMENT ON COLUMN "NDFL_APP2"."WITHHOLDING_TAX" IS 'Сумма налога удержанная';
+        COMMENT ON COLUMN "NDFL_APP2"."TRANSFERED_TAX" IS 'Сумма налога перечисленная';
+        COMMENT ON COLUMN "NDFL_APP2"."OVERHOLDING_TAX" IS 'Сумма налога, излишне удержанная налоговым агентом';
+        COMMENT ON COLUMN "NDFL_APP2"."NOT_HOLDING_TAX" IS 'Сумма налога, не удержанная налоговым агентом';
+        COMMENT ON TABLE NDFL_APP2 IS 'Общие сведения Приложение 2';
+
+        --------------------------------------------------------------------------------------------------------
+        CREATE TABLE NDFL_APP2_INCOME (
+            ID NUMBER(18,0) NOT NULL,
+            NDFL_APP2_ID NUMBER(18,0) NOT NULL,
+            INCOME_CODE VARCHAR2(4) NOT NULL,
+            INCOME_SUMM NUMBER(17,2) NOT NULL,
+            CONSTRAINT PK_NDFL_APP2_INCOME PRIMARY KEY (ID),
+            CONSTRAINT FK_NDFL_APP2_NDFL_APP2_ID FOREIGN KEY (ID) REFERENCES NDFL_APP2 (ID) ON DELETE CASCADE
+        );
+
+        COMMENT ON COLUMN "NDFL_APP2_INCOME"."ID" IS 'Идентификатор';
+        COMMENT ON COLUMN "NDFL_APP2_INCOME"."NDFL_APP2_ID" IS 'Ссылка на Приложение 2';
+        COMMENT ON COLUMN "NDFL_APP2_INCOME"."INCOME_CODE" IS 'Код дохода';
+        COMMENT ON COLUMN "NDFL_APP2_INCOME"."INCOME_SUMM" IS 'Сумма дохода';
+        COMMENT ON TABLE NDFL_APP2_INCOME IS 'Коды и суммы доходов в Приложении 2';
+
+        --------------------------------------------------------------------------------------------------------
+        CREATE TABLE NDFL_APP2_DEDUCTION (
+            ID NUMBER(18,0) NOT NULL,
+            NDFL_APP2_INCOME_ID NUMBER(18,0) NOT NULL,
+            TYPE_CODE VARCHAR2(3) NOT NULL,
+            DEDUCTION_SUM NUMBER(17,2) NOT NULL,
+            DEDUCTION_TYPE NUMBER(2,0) NOT NULL,
+            CONSTRAINT PK_NDFL_APP2_DEDUCTION PRIMARY KEY (ID),
+            CONSTRAINT FK_NDFL_APP2_DD_APP2_INCOME_ID FOREIGN KEY (ID) REFERENCES NDFL_APP2_INCOME(ID) ON DELETE CASCADE
+        );
+
+        COMMENT ON COLUMN "NDFL_APP2_DEDUCTION"."ID" IS 'Идентификатор';
+        COMMENT ON COLUMN "NDFL_APP2_DEDUCTION"."NDFL_APP2_INCOME_ID" IS 'Ссылка на доход из Приложения 2';
+        COMMENT ON COLUMN "NDFL_APP2_DEDUCTION"."TYPE_CODE" IS 'Код вычета';
+        COMMENT ON COLUMN "NDFL_APP2_DEDUCTION"."DEDUCTION_SUM" IS 'Сумма вычета';
+        COMMENT ON COLUMN "NDFL_APP2_DEDUCTION"."DEDUCTION_TYPE" IS 'Тип Вычета';
+        COMMENT ON TABLE NDFL_APP2_DEDUCTION IS 'Вычеты в Приложении 2';
+
+        --------------------------------------------------------------------------------------------------------
+        CREATE SEQUENCE SEQ_NDFL_APP2 MINVALUE 1 MAXVALUE 9999999999999999999999999999 INCREMENT BY 1 START WITH 1 CACHE 20 NOORDER NOCYCLE ;
+        CREATE SEQUENCE SEQ_NDFL_APP2_INCOME MINVALUE 1 MAXVALUE 9999999999999999999999999999 INCREMENT BY 1 START WITH 1 CACHE 20 NOORDER NOCYCLE ;
+        CREATE SEQUENCE SEQ_NDFL_APP2_DEDUCTION MINVALUE 1 MAXVALUE 9999999999999999999999999999 INCREMENT BY 1 START WITH 1 CACHE 20 NOORDER NOCYCLE ;
+
+        CREATE INDEX IDX_NDFL_APP2_PERSON_ID ON NDFL_APP2 (PERSON_ID ASC) PCTFREE 30 INITRANS 5 COMPUTE STATISTICS;
+        CREATE INDEX IDX_NDFL_APP2_NDFL_APP2_ID ON NDFL_APP2_INCOME (NDFL_APP2_ID ASC) PCTFREE 30 INITRANS 5 COMPUTE STATISTICS;
+        CREATE INDEX IDX_NDFL_APP2_DD_APP2_INC_ID ON NDFL_APP2_DEDUCTION (NDFL_APP2_INCOME_ID ASC) PCTFREE 30 INITRANS 5 COMPUTE STATISTICS;
+        </sql>
+    </changeSet>
 
 </databaseChangeLog>
