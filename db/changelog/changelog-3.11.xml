@@ -110,4 +110,12 @@
         </sql>
     </changeSet>
 
+    <changeSet id="3.11-adudenko-02" author="adudenko">
+        <sql>
+        insert into ref_book_doc_state(id, name) values(10, 'Не отправлен в НП');
+        insert into ref_book_doc_state(id, name) values(11, 'Выгружен для отправки в НП');
+        insert into ref_book_doc_state(id, name) values(12, 'Загружен в НП');
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>
