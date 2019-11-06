@@ -36,7 +36,6 @@ class UpdatePersonsData extends AbstractScriptClass {
     DepartmentService departmentService
     RefBookFactory refBookFactory
     ReportPeriodService reportPeriodService
-    StringBuilder msgBuilder
 
     // Кэш провайдеров
     Map<Long, RefBookDataProvider> providerCache = [:]
@@ -77,8 +76,7 @@ class UpdatePersonsData extends AbstractScriptClass {
                     e.printStackTrace()
                     String fullFormDesc = declarationService.getFullDeclarationDescription(declarationData.getId())
                     String msg = "Невозможно обновить форму: $fullFormDesc"
-                    msgBuilder.append(msg)
-                    logger.error(msgBuilder.toString() + ". Причина: \"%s\", попробуйте повторить операцию позднее\"", e)
+                    logger.error(msg + ". Причина: \"%s\", попробуйте повторить операцию позднее\"", e)
                 }
         }
     }
@@ -279,12 +277,11 @@ class UpdatePersonsData extends AbstractScriptClass {
 
         String fullFormDesc = declarationService.getFullDeclarationDescription(declarationData.getId())
         String msg = "Завершено обновление данных ФЛ формы: $fullFormDesc"
-        msgBuilder.append(msg)
 
         if(!existWarning) {
-            logger.info(msgBuilder.toString() + ". Обновлено %s записей.", toUpdatePersons.size())
+            logger.info(msg + ". Обновлено %s записей.", toUpdatePersons.size())
         } else {
-            logger.warn(msgBuilder.toString() + ". Обновлено %s записей.", toUpdatePersons.size())
+            logger.warn(msg + ". Обновлено %s записей.", toUpdatePersons.size())
         }
 
      }
