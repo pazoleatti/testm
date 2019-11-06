@@ -514,7 +514,7 @@ class Report6Ndfl extends AbstractScriptClass {
             return null
         }
         List<Pair<KppOktmoPair, DepartmentConfig>> kppOktmoPairs = departmentConfigService.findAllByDeclaration(sourceKnf)
-        kppOktmoPairs = kppOktmoPairs.findAll{it.second.relatedKppOktmo.kpp == null && it.second.relatedKppOktmo.oktmo == null}
+        kppOktmoPairs = kppOktmoPairs.findAll{it.second?.relatedKppOktmo?.kpp == null && it.second?.relatedKppOktmo?.oktmo == null}
         if (reportFormsCreationParams.kppOktmoPairs) {
             kppOktmoPairs = kppOktmoPairs.findAll {
                 reportFormsCreationParams.kppOktmoPairs.contains(it.first) ||
@@ -767,9 +767,10 @@ class Report6Ndfl extends AbstractScriptClass {
                 }
             }
             if (!section2Block.isEmpty()) {
+                Long суммаВНянварь2019 = СуммаВНянварь2019(incomeList)
+                if (суммаВНянварь2019 == null) { суммаВНянварь2019 = 0 }
                 incomeWithholdingTotal = incomeWithholdingTotal -
-                        (section2Block.СуммаВНкРаспределению - section2Block.negativeWithholding.abs()) -
-                        СуммаВНянварь2019(incomeList)
+                        (section2Block.СуммаВНкРаспределению - section2Block.negativeWithholding.abs()) - суммаВНянварь2019
             }
             if (incomeNotHoldingTaxSum > incomeOverholdingTaxSum) {
                 incomeNotHoldingTotal = incomeNotHoldingTaxSum - incomeOverholdingTaxSum
