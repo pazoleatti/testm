@@ -477,6 +477,14 @@
                 };
 
                 /**
+                 * Список периодов для Приложения 2
+                 */
+                $scope.initSelectWithAllPeriodsForApp2 = function (reportPeriodModelPath) {
+                    $scope.periodSelect = GetSelectOption.getBasicMultipleSelectOptions(true, 'periodFormatter');
+                    fillSelectListAndFindLatestPeriod("forApp2", reportPeriodModelPath);
+                };
+
+                /**
                  * @description Инициализировать выпадающий список пустым массивом
                  */
                 $scope.initEmptySelect = function () {

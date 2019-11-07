@@ -64,6 +64,16 @@ public class ReportPeriodController {
     }
 
     /**
+     * Получение всех Отчетных периодов для Приложения 2
+     *
+     * @return Список периодов
+     */
+    @GetMapping(value = "/rest/reportPeriod", params = "projection=forApp2")
+    public List<ReportPeriod> findAllForApp2() {
+        return periodService.findAllForApp2();
+    }
+
+    /**
      * Получает периоды назначенные подразделению
      *
      * @param departmentId идентификатор подразделения
