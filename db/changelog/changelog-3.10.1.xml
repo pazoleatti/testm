@@ -380,6 +380,11 @@
 		      upper(search_middle_name)!=search_middle_name; 
 	</sql>
     </changeSet>
-	
+    <changeSet id="3.10.1-skononova-4" author="skononova">
+	<sql >
+		drop index SRCH_REFB_TAX_PAYER_INP_ASNU;
+		create index SRCH_REFB_TAX_PAYER_INP_ASNU on REF_BOOK_ID_TAX_PAYER (INP asc, AS_NU asc, PERSON_ID asc) compute statistics ;		
+	</sql>
+    </changeSet>		
 </databaseChangeLog>
         
