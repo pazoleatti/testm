@@ -2339,8 +2339,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     private DeclarationData findKnf(DepartmentReportPeriod departmentReportPeriod, RefBookKnfType knfType) {
-        DeclarationData knf = null;
-
+        DeclarationData knf;
         ReportPeriod reportPeriod = departmentReportPeriod.getReportPeriod();
         if (reportPeriodService.isYearPeriodType(reportPeriod) && reportPeriodService.is6NdflOr2Ndfl1TaxFormType(reportPeriod)) {
             DepartmentReportPeriodFilter periodFilter = new DepartmentReportPeriodFilter();
@@ -2351,10 +2350,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             periodFilter.setDictTaxPeriodId(reportPeriod.getDictTaxPeriodId());
 
             knf = declarationDataDao.findKnfByKnfTypeAndPeriodFilter(knfType, periodFilter);
-        } else if (!reportPeriodService.isYearPeriodType(reportPeriod)) {
+        } else {
             knf = declarationDataDao.findKnfByKnfTypeAndPeriodId(knfType, departmentReportPeriod.getId());
         }
-
         return knf;
     }
     /**
