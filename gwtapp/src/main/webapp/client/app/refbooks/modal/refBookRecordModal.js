@@ -4,14 +4,14 @@
     /**
      * @description Модуль для создания, просмотра и редактирования записей справочников
      */
-    angular.module('app.refBookRecordModal', ['ui.router', 'app.rest'])
+    angular.module('app.refBookRecordModal', ['ui.router', 'app.rest', 'app.refBookInterceptors'])
 
     /**
      * @description Контроллер для создания, просмотра и редактирования записей справочников
      */
         .controller('refBookRecordModalCtrl', ['$scope', '$filter', 'APP_CONSTANTS', '$modalInstance', '$shareData',
-            '$http', '$logPanel', 'LogEntryResource', '$dialogs',
-            function ($scope, $filter, APP_CONSTANTS, $modalInstance, $shareData, $http, $logPanel, LogEntryResource, $dialogs) {
+            '$http', '$logPanel', 'LogEntryResource', '$dialogs', '$refBookInterceptors',
+            function ($scope, $filter, APP_CONSTANTS, $modalInstance, $shareData, $http, $logPanel, LogEntryResource, $dialogs, $refBookInterceptors) {
                 $scope.refBook = $shareData.refBook;
                 $scope.isVersionMode = $shareData.recordId && $shareData.recordId !== 'undefined';
                 $scope.isEditMode = $shareData.mode === 'CREATE' || $shareData.mode === 'EDIT';
@@ -102,7 +102,7 @@
                  * Валидация периода актуальности записи.
                  * Нужна так как стандартная валидация min-date, max-date не умеет работать с динамическими ограничениями, но они все равно используются для блокировки дат в самом календаре
                  */
-                $scope.validateVersionDates = function() {
+                $scope.validateVersionDates = function () {
                     var generatedVersionFromId = 'temp_versionfrom';
                     var generatedVersionToId = 'temp_versionto';
 
@@ -127,7 +127,7 @@
                  * Получает разыменованное значение атрибута
                  * @param attribute атрибут справочника
                  */
-                $scope.getAttributeValue = function(attribute) {
+                $scope.getAttributeValue = function (attribute) {
                     if (attribute) {
                         var value = "";
                         var refBookValue = $scope.record[attribute.alias];
@@ -164,7 +164,7 @@
                  * Получает "красивое" значение атрибута, отображаемое в GUI.
                  * @param attribute
                  */
-                $scope.getAttributeFineValue = function(attribute) {
+                $scope.getAttributeFineValue = function (attribute) {
                     var value = $scope.getAttributeValue(attribute);
                     if (value === '' || value === null) {
                         return "-";
@@ -191,13 +191,34 @@
                     } else {
                         url = "controller/actions/refBook/" + $scope.refBook.id + "/createRecord"
                     }
-                    $http({
-                        method: "POST",
-                        url: url,
-                        data: tempRecord
+
+
+                    $refBookInterceptors.beforeSaveRecord({
+                        record: tempRecord,
+                        $shareData: $shareData
                     }).then(function () {
-                        $modalInstance.close(true);
+
+                        $http({
+                            method: "POST",
+                            url: url,
+                            data: tempRecord
+                        }).then(function (result) {
+                            $refBookInterceptors.onSaveRecord({
+                                record: tempRecord,
+                                $shareData: $shareData,
+                                result: result
+                            }).then(function () {
+                                $modalInstance.close(true);
+                            });
+                        }, function (result) {
+                            $refBookInterceptors.onErrorSaveRecord({
+                                record: tempRecord,
+                                $shareData: $shareData,
+                                result: result
+                            });
+                        });
                     });
+
                 };
 
                 /**
@@ -222,19 +243,25 @@
                  * @description закрытие модального окна
                  */
                 $scope.close = function () {
-                    if (($shareData.mode === 'CREATE' || $shareData.mode === 'EDIT') && $scope.refBookRecordForm.$dirty) {
-                        $dialogs.confirmDialog({
-                            title: $filter('translate')('title.confirm'),
-                            content: $filter('translate')('refBook.confirm.cancelEdit'),
-                            okBtnCaption: $filter('translate')('common.button.yes'),
-                            cancelBtnCaption: $filter('translate')('common.button.no'),
-                            okBtnClick: function () {
-                                $modalInstance.close(false);
-                            }
-                        });
-                    } else {
-                        $modalInstance.close(false);
-                    }
+                    $refBookInterceptors.onCloseWindowRecord({
+                        record: $scope.record,
+                        $shareData: $shareData
+                    }).then(function () {
+
+                        if (($shareData.mode === 'CREATE' || $shareData.mode === 'EDIT') && $scope.refBookRecordForm.$dirty) {
+                            $dialogs.confirmDialog({
+                                title: $filter('translate')('title.confirm'),
+                                content: $filter('translate')('refBook.confirm.cancelEdit'),
+                                okBtnCaption: $filter('translate')('common.button.yes'),
+                                cancelBtnCaption: $filter('translate')('common.button.no'),
+                                okBtnClick: function () {
+                                    $modalInstance.close(false);
+                                }
+                            });
+                        } else {
+                            $modalInstance.close(false);
+                        }
+                    });
                 };
 
                 /**

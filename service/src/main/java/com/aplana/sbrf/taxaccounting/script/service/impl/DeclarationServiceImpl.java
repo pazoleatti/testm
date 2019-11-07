@@ -104,8 +104,8 @@ public class DeclarationServiceImpl implements DeclarationService {
     }
 
     @Override
-    public List<DeclarationData> findPreviousONFFor2Ndfl(int declarationTypeId, String reportPeriodTypeCode, int year, String kpp, String oktmo) {
-        return declarationDataDao.findPreviousONFFor2Ndfl(declarationTypeId, reportPeriodTypeCode, year, kpp, oktmo);
+    public List<DeclarationData> findONFFor2Ndfl(int declarationTypeId, String reportPeriodTypeCode, int year, String kpp, String oktmo) {
+        return declarationDataDao.findONFFor2Ndfl(declarationTypeId, reportPeriodTypeCode, year, kpp, oktmo);
     }
 
     @Override

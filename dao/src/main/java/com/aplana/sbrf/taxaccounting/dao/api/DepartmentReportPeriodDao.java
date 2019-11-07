@@ -159,4 +159,16 @@ public interface DepartmentReportPeriodDao extends PermissionDao {
      * @return список отчетных периодов подразделений или пустой список
      */
     List<DepartmentReportPeriodJournalItem> fetchJournalItemByFilter(DepartmentReportPeriodFilter departmentReportPeriodFilter);
+
+    /**
+     * Получение активных корректирующих (или не корректирующих) периодов по подразделению, коду периода и году
+     *
+     * @param departmentId      идентификатор подразделения
+     * @param periodCode        код периода
+     * @param year              год периода
+     * @param correctivePeriods если true, то ищутся только корректирующие периоды, иначе - только не корректирующие периоды
+     * @return список {@link DepartmentReportPeriod} или пустой список
+     */
+    List<DepartmentReportPeriod> getPeriodsSortedByFormTypePriority(long departmentId, String periodCode, int year,
+                                                                    boolean correctivePeriods);
 }

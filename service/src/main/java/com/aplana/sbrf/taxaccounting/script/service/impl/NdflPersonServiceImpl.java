@@ -7,11 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.consolidation.ConsolidationIncome;
 import com.aplana.sbrf.taxaccounting.model.consolidation.ConsolidationSourceDataSearchFilter;
 import com.aplana.sbrf.taxaccounting.model.filter.NdflFilter;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
-import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
-import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction;
-import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome;
-import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonOperation;
-import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment;
+import com.aplana.sbrf.taxaccounting.model.ndfl.*;
 import com.aplana.sbrf.taxaccounting.model.result.NdflPersonDeductionDTO;
 import com.aplana.sbrf.taxaccounting.model.result.NdflPersonIncomeDTO;
 import com.aplana.sbrf.taxaccounting.model.result.NdflPersonPrepaymentDTO;
@@ -20,13 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.nio.LongBuffer;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Andrey Drunk
@@ -268,7 +258,7 @@ public class NdflPersonServiceImpl implements NdflPersonService {
         List<NdflPerson> persons = ndflPersonDao.findAllByDeclarationId(declarationDataId);
         Map<Long, List<NdflPersonIncome>> incomesByPersonId = groupByPersonId(ndflPersonDao.findAllIncomesByDeclarationId(declarationDataId));
         Map<Long, List<NdflPersonDeduction>> deductionsByPersonId = groupByPersonId(ndflPersonDao.findAllDeductionsByDeclarationId(declarationDataId));
-        Map<Long, List<NdflPersonPrepayment>> prepaymentsByPersonId = groupByPersonId(ndflPersonDao.fetchNdflPersonPrepaymentByDeclarationData(declarationDataId));
+        Map<Long, List<NdflPersonPrepayment>> prepaymentsByPersonId = groupByPersonId(ndflPersonDao.findNdflPersonPrepaymentByDeclarationData(declarationDataId));
         for (NdflPerson person : persons) {
             person.setIncomes(incomesByPersonId.get(person.getId()));
             person.setDeductions(deductionsByPersonId.get(person.getId()));
@@ -296,6 +286,11 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     }
 
     @Override
+    public List<NdflPersonIncome> findNdflPersonIncomeSourcePeriod(long declarationDataId) {
+        return ndflPersonDao.findNdflPersonIncomeSourcePeriod(declarationDataId);
+    }
+
+    @Override
     public List<NdflPersonIncome> findAllIncomesByDeclarationIdByOrderByRowNumAsc(long declarationDataId) {
         return ndflPersonDao.findAllIncomesByDeclarationIdByOrderByRowNumAsc(declarationDataId);
     }
@@ -316,13 +311,23 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     }
 
     @Override
+    public List<NdflPersonDeduction> findNdflPersonDeductionSourcePeriod(long declarationDataId) {
+        return ndflPersonDao.findNdflPersonDeductionSourcePeriod(declarationDataId);
+    }
+
+    @Override
     public List<NdflPersonDeduction> findAllDeductionsByDeclarationIds(List<Long> declarationDataIds) {
         return ndflPersonDao.findAllDeductionsByDeclarationIds(declarationDataIds);
     }
 
     @Override
     public List<NdflPersonPrepayment> findNdflPersonPrepayment(long declarationDataId) {
-        return ndflPersonDao.fetchNdflPersonPrepaymentByDeclarationData(declarationDataId);
+        return ndflPersonDao.findNdflPersonPrepaymentByDeclarationData(declarationDataId);
+    }
+
+    @Override
+    public List<NdflPersonPrepayment> findNdflPersonPrepaymentSourcePeriod(long declarationDataId) {
+        return ndflPersonDao.findNdflPersonPrepaymentSourcePeriod(declarationDataId);
     }
 
     @Override
@@ -592,5 +597,38 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     @Override
     public List<BigDecimal> generateOperInfoIds(int count) {
         return ndflPersonDao.generateOperInfoIds(count);
+    }
+
+    @Override
+    public List<Long> getDeductionsIdsByPersonAndIncomes(long personId, Collection<Long> incomesIds) {
+        return ndflPersonService.getDeductionsIdsByPersonAndIncomes(personId, incomesIds);
+    }
+
+    @Override
+    public List<Long> getPrepaymentsIdsByPersonAndIncomes(long personId, Collection<Long> incomesIds) {
+        return ndflPersonService.getPrepaymentsIdsByPersonAndIncomes(personId, incomesIds);
+    }
+
+    @Override
+    public void deleteRowsBySection1(List<Long> ndflPersonIds, Long declarationDataId) {
+        ndflPersonDao.deleteNdflPersonBatch(ndflPersonIds);
+        ndflPersonDao.renumerateNdflPersonPrepaymentRowNums(declarationDataId);
+        ndflPersonDao.renumerateNdflPersonDeductionRowNums(declarationDataId);
+        ndflPersonDao.renumerateNdflPersonIncomeRowNums(declarationDataId);
+        ndflPersonDao.renumerateNdflPersonRowNums(declarationDataId);
+    }
+
+    @Override
+    public void deleteRowsBySection2(List<Long> ndflPersonIncomeIds, Long declarationDataId) {
+        ndflPersonDao.deleteRowsBySection2(ndflPersonIncomeIds);
+        ndflPersonDao.renumerateNdflPersonPrepaymentRowNums(declarationDataId);
+        ndflPersonDao.renumerateNdflPersonDeductionRowNums(declarationDataId);
+        ndflPersonDao.renumerateNdflPersonIncomeRowNums(declarationDataId);
+        ndflPersonDao.renumerateNdflPersonRowNums(declarationDataId);
+    }
+
+    @Override
+    public List<Long> findNdflPersonIncomeByPersonAndOperations(long personId, Collection<String> operationsIds) {
+        return ndflPersonService.findNdflPersonIncomeByPersonAndOperations(personId, operationsIds);
     }
 }

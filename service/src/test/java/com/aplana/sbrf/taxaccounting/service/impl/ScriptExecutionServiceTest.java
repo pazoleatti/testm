@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.service.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.*;
@@ -20,6 +19,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.util.ClassUtils;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 
 import static org.mockito.Matchers.*;
@@ -41,7 +41,7 @@ public class ScriptExecutionServiceTest {
 
     @Autowired
     TAUserDao userDao;
-	
+
     @Before
 	public void init(){
         scriptExecutionService = new ScriptExecutionServiceImpl();
@@ -240,9 +240,9 @@ public class ScriptExecutionServiceTest {
 
         scriptExecutionService.importScripts(logger, Thread.currentThread().getContextClassLoader().getResourceAsStream(COMMON + fileName), fileName, userInfo);
         Assert.assertEquals(5, logger.getEntries().size());
-        Assert.assertEquals("Пропущен каталог \"template3\\declaration_template\", так как его имя не поддерживается", logger.getEntries().get(0).getMessage());
-        Assert.assertEquals("Пропущен каталог \"template3\\form_template\", так как его имя не поддерживается", logger.getEntries().get(1).getMessage());
-        Assert.assertEquals("Пропущен каталог \"template3\\ref_book\", так как его имя не поддерживается", logger.getEntries().get(2).getMessage());
+        Assert.assertEquals("Пропущен каталог \"template3"+ File.separator+"declaration_template\", так как его имя не поддерживается", logger.getEntries().get(0).getMessage());
+        Assert.assertEquals("Пропущен каталог \"template3"+ File.separator+"form_template\", так как его имя не поддерживается", logger.getEntries().get(1).getMessage());
+        Assert.assertEquals("Пропущен каталог \"template3"+ File.separator+"ref_book\", так как его имя не поддерживается", logger.getEntries().get(2).getMessage());
         Assert.assertEquals("Пропущен каталог \"template3\", так как его имя не поддерживается", logger.getEntries().get(3).getMessage());
         Assert.assertEquals("Импорт завершен", logger.getEntries().get(4).getMessage());
     }

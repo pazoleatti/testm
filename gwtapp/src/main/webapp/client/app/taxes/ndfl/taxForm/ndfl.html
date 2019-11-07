@@ -348,6 +348,14 @@
                                             {{::'button.edit.datesFound' | translate}}
                                         </a>
                                     </li>
+
+                                    <!--Удалить выделенные строки Раздела 1 или раздела 2-->
+                                    <li role="menuitem">
+                                        <a data-ng-class="{disabled: !isEnableButtonDeleteSelectedRow()}"
+                                           data-ng-click="deleteSelectedRows()">
+                                            {{::'ndfl.button.deleteSelected' | translate}}
+                                        </a>
+                                    </li>
                                 </ul>
                             </span>
                             <!--Идентифицировать ФЛ -->
@@ -372,7 +380,7 @@
                             <span>
                                 <button type="button" class="btn btn-default"
                                         data-ng-click="check()"
-                                        data-ng-disabled="!permissionChecker.check(declarationData, APP_CONSTANTS.DECLARATION_PERMISSION.CHECK)">
+                                        data-ng-disabled="!permissionChecker.check(declarationData, APP_CONSTANTS.DECLARATION_PERMISSION.CHECK) || !declarationData.hasNdflPersons">
                                     <span data-translate-once="button.check"></span>
                                 </button>
                             </span>
@@ -380,7 +388,7 @@
                             <span>
                                 <button type="button" class="btn btn-default"
                                         data-ng-click="accept()"
-                                        data-ng-disabled="!permissionChecker.check(declarationData, APP_CONSTANTS.DECLARATION_PERMISSION.ACCEPTED)">
+                                        data-ng-disabled="!permissionChecker.check(declarationData, APP_CONSTANTS.DECLARATION_PERMISSION.ACCEPTED) || !declarationData.hasNdflPersons">
                                     <span data-translate-once="button.accept"></span>
                                 </button>
                             </span>
@@ -397,7 +405,7 @@
                                 <button type="button" class="btn btn-default"
                                         data-ng-click="delete()"
                                         data-ng-disabled="!permissionChecker.check(declarationData, APP_CONSTANTS.DECLARATION_PERMISSION.DELETE)">
-                                    <span data-translate-once="button.delete"></span>
+                                    <span data-translate-once="button.deleteForm"></span>
                                 </button>
                             </span>
                             <!--Загрузить Excel-->

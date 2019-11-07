@@ -5,6 +5,7 @@
   "devDependencies": {
     "jasmine-core": "^3.2.1",
     "karma": "^3.0.0",
+    "karma-chrome-launcher": "^3.1.0",
     "karma-coverage": "^1.1.2",
     "karma-ie-launcher": "^1.0.0",
     "karma-jasmine": "^1.1.2",
@@ -13,8 +14,5 @@
   "scripts": {
     "test": "karma start ./gwtapp/src/test/js/unit/karma-unit.conf.js",
     "test-watch": "karma start ./gwtapp/src/test/js/unit/karma-unit.conf.js --no-single-run --auto-watch"
-  },
-  "dependencies": {
-    "file-saver": "^2.0.2"
   }
 }

@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
-import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.action.OpenCorrectionPeriodAction;
@@ -14,8 +13,10 @@ import com.aplana.sbrf.taxaccounting.model.result.*;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.refbook.RefBookFormTypeService;
+import com.aplana.sbrf.taxaccounting.utils.DepartmentReportPeriodFormatter;
 import com.aplana.sbrf.taxaccounting.utils.SimpleDateUtils;
 import net.sf.jasperreports.web.actions.ActionException;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -23,8 +24,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 
-import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -41,6 +42,8 @@ public class PeriodServiceImpl implements PeriodService {
 
     private static final String YEAR_PERIOD_CODE = "34";
     private static final String YEAR_REORG_PERIOD_CODE = "90";
+
+    public static final FastDateFormat DD_MM_YYYY_DATE_FORMAT = FastDateFormat.getInstance("dd.MM.yyyy");
 
     @Autowired
     private ReportPeriodDao reportPeriodDao;
@@ -70,9 +73,6 @@ public class PeriodServiceImpl implements PeriodService {
     private LogEntryService logEntryService;
 
     @Autowired
-    private DepartmentReportPeriodDao departmentReportPeriodDao;
-
-    @Autowired
     private DeclarationDataDao declarationDataDao;
 
     @Autowired
@@ -83,6 +83,9 @@ public class PeriodServiceImpl implements PeriodService {
 
     @Autowired
     private RefBookFormTypeService refBookFormTypeService;
+
+    @Autowired
+    private DepartmentReportPeriodFormatter departmentReportPeriodFormatter;
 
     @Override
     @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).OPEN_DEPARTMENT_REPORT_PERIOD)")
@@ -107,7 +110,7 @@ public class PeriodServiceImpl implements PeriodService {
         } catch (Exception e) {
             throw new ServiceException(String.format("Ошибка при открытии периода \"%s\" для подразделения \"%s\" " +
                             "и всех дочерних подразделений. Обратитесь к администратору.",
-                    getPeriodString(departmentReportPeriod.getReportPeriod()),
+                    departmentReportPeriodFormatter.getPeriodDescription(departmentReportPeriod),
                     departmentDao.getDepartment(departmentReportPeriod.getDepartmentId()).getName()), e);
         }
     }
@@ -116,7 +119,7 @@ public class PeriodServiceImpl implements PeriodService {
     @PreAuthorize("hasPermission(#action.departmentReportPeriodId, 'com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod', T(com.aplana.sbrf.taxaccounting.permissions.DepartmentReportPeriodPermission).OPEN_CORRECT)")
     public OpenPeriodResult openCorrectionPeriod(OpenCorrectionPeriodAction action) {
         LOG.info(String.format("openCorrectionPeriod for departmentReportPeriodId: %s", action.getDepartmentReportPeriodId()));
-        DepartmentReportPeriod mainDrp = departmentReportPeriodDao.fetchOne(action.getDepartmentReportPeriodId());
+        DepartmentReportPeriod mainDrp = departmentReportPeriodService.fetchOne(action.getDepartmentReportPeriodId());
         DepartmentReportPeriod correctionPeriod = new DepartmentReportPeriod();
         correctionPeriod.setReportPeriod(mainDrp.getReportPeriod());
         correctionPeriod.setDepartmentId(mainDrp.getDepartmentId());
@@ -131,9 +134,11 @@ public class PeriodServiceImpl implements PeriodService {
             return new OpenPeriodResult(logEntryService.save(logger.getEntries()))
                     .error(e.getMessage());
         } catch (Exception e) {
-            throw new ServiceException(String.format("Ошибка при открытии корректирующего периода \"%s\" с периодом сдачи корректировки %s для подразделения \"%s\" и всех дочерних подразделений. Обратитесь к администратору.",
-                    getPeriodString(correctionPeriod.getReportPeriod()),
-                    FastDateFormat.getInstance("dd.MM.yyyy").format(correctionPeriod.getCorrectionDate()),
+            throw new ServiceException(String.format("Ошибка при открытии корректирующего периода \"%s\" с периодом " +
+                            "сдачи корректировки %s для подразделения \"%s\" и всех дочерних подразделений. " +
+                            "Обратитесь к администратору.",
+                    departmentReportPeriodFormatter.getPeriodDescriptionWithoutCorrectionDate(correctionPeriod),
+                    DD_MM_YYYY_DATE_FORMAT.format(correctionPeriod.getCorrectionDate()),
                     departmentDao.getDepartment(correctionPeriod.getDepartmentId()).getName()), e);
         }
     }
@@ -141,12 +146,12 @@ public class PeriodServiceImpl implements PeriodService {
     private void openCorrectionPeriod(DepartmentReportPeriod correctionPeriod, Logger logger) {
         DepartmentReportPeriod drpLast = departmentReportPeriodService.fetchLast(correctionPeriod.getDepartmentId(), correctionPeriod.getReportPeriod().getId());
         if (drpLast.getCorrectionDate() != null && drpLast.isActive() && !drpLast.getCorrectionDate().equals(correctionPeriod.getCorrectionDate())) {
-            throw new ServiceException("%s не может быть открыт, т.к уже открыт другой корректирующий период!",
-                    periodWithDescription(correctionPeriod));
+            throw new ServiceException("%s не может быть открыт, т.к уже открыт другой корректирующий период.",
+                    periodWithCustomCorrectionDateDescription(correctionPeriod));
         }
         if (departmentReportPeriodService.isLaterCorrectionPeriodExists(correctionPeriod)) {
             throw new ServiceException("%s не может быть открыт, т.к. для него существует более поздние корректирующие периоды!",
-                    periodWithDescription(correctionPeriod));
+                    periodWithCustomCorrectionDateDescription(correctionPeriod));
         }
 
         open(correctionPeriod, logger);
@@ -172,7 +177,7 @@ public class PeriodServiceImpl implements PeriodService {
         DepartmentReportPeriod savedDepartmentReportPeriod = departmentReportPeriodService.fetchOneByFilter(filterForSinglePeriod(departmentReportPeriod));
         if (savedDepartmentReportPeriod != null) {
             throw new ServiceException("%s уже существует и %s для подразделения \"%s\" и всех дочерних подразделений",
-                    periodWithDescription(savedDepartmentReportPeriod),
+                    periodWithCustomCorrectionDateDescription(savedDepartmentReportPeriod),
                     savedDepartmentReportPeriod.isActive() ? "открыт" : "закрыт",
                     departmentDao.getDepartment(departmentReportPeriod.getDepartmentId()).getName());
         }
@@ -181,8 +186,8 @@ public class PeriodServiceImpl implements PeriodService {
             List<Integer> departmentIds = departmentDao.findAllChildrenIdsById(departmentReportPeriod.getDepartmentId());
             departmentReportPeriodService.create(departmentReportPeriod, departmentIds);
 
-            logger.info("%s открыт для \"%s\" и всех дочерних подразделений",
-                    periodWithDescription(departmentReportPeriod), departmentDao.getDepartment(departmentReportPeriod.getDepartmentId()).getName());
+            logger.info("%s открыт для подразделения \"%s\" и всех дочерних подразделений",
+                    periodWithCustomCorrectionDateDescription(departmentReportPeriod), departmentDao.getDepartment(departmentReportPeriod.getDepartmentId()).getName());
         }
     }
 
@@ -191,7 +196,7 @@ public class PeriodServiceImpl implements PeriodService {
     public ReopenPeriodResult reopen(Integer departmentReportPeriodId) {
         LOG.info(String.format("reopen departmentReportPeriodId: %s", departmentReportPeriodId));
         Logger logger = new Logger();
-        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.fetchOne(departmentReportPeriodId);
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.fetchOne(departmentReportPeriodId);
         try {
             reopen(departmentReportPeriod, logger);
             return new ReopenPeriodResult(logEntryService.save(logger.getEntries()));
@@ -237,7 +242,7 @@ public class PeriodServiceImpl implements PeriodService {
     @PreAuthorize("hasPermission(#departmentReportPeriodId, 'com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod', T(com.aplana.sbrf.taxaccounting.permissions.DepartmentReportPeriodPermission).CLOSE)")
     public ClosePeriodResult close(Integer departmentReportPeriodId, boolean skipHasNotAcceptedCheck) {
         LOG.info(String.format("close departmentReportPeriodId: %s", departmentReportPeriodId));
-        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.fetchOne(departmentReportPeriodId);
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.fetchOne(departmentReportPeriodId);
         Logger logger = new Logger();
         try {
             close(departmentReportPeriod, skipHasNotAcceptedCheck, logger);
@@ -289,7 +294,7 @@ public class PeriodServiceImpl implements PeriodService {
     public DeletePeriodResult delete(Integer departmentReportPeriodId) {
         LOG.info(String.format("delete id: %s", departmentReportPeriodId));
         Logger logger = new Logger();
-        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.fetchOne(departmentReportPeriodId);
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.fetchOne(departmentReportPeriodId);
         try {
             delete(departmentReportPeriod, logger);
             return new DeletePeriodResult(logEntryService.save(logger.getEntries()));
@@ -379,11 +384,19 @@ public class PeriodServiceImpl implements PeriodService {
         List<LockDataDTO> lockDataItems = new ArrayList<>();
 
         if (keysBlocker.size() > 0) {
-            lockDataItems = lockDataService.fetchAllByKeySet(keysBlocker.keySet());
+            lockDataItems = lockDataService.fetchAllByKeyPrefixSet(keysBlocker.keySet());
         }
 
         for (LockDataDTO lockDataItem : lockDataItems) {
-            DeclarationData dd = keysBlocker.get(lockDataItem.getKey());
+            long declarationId = lockDataService.getDeclarationIdByLockKey(lockDataItem.getKey());
+            DeclarationData dd = null;
+            for (DeclarationData declarationData : declarations) {
+                if (declarationData.getId() == declarationId) {
+                    dd = declarationData;
+                    break;
+                }
+            }
+
             DeclarationTemplate template = declarationTemplateService.get(dd.getDeclarationTemplateId());
             logger.error("Форма \"%s\" № %s, Подразделении: \"%s\", Период: \"%s\" заблокирована.",
                     template.getType().getName(), dd.getId(), departmentService.getDepartment(dd.getDepartmentId()).getName(),
@@ -457,7 +470,7 @@ public class PeriodServiceImpl implements PeriodService {
     public void updateDeadline(DepartmentReportPeriodFilter filter) throws ActionException {
         SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy");
         TAUser userInfo = userService.getCurrentUser();
-        DepartmentReportPeriod period = departmentReportPeriodDao.fetchOne(filter.getId());
+        DepartmentReportPeriod period = departmentReportPeriodService.fetchOne(filter.getId());
         String text = "%s назначил подразделению %s новый срок сдачи отчетности для %s в периоде %s %s года: %s";
         List<Notification> notifications = new ArrayList<>();
         if (filter.getDeadline() == null) {
@@ -496,11 +509,6 @@ public class PeriodServiceImpl implements PeriodService {
     }
 
     @Override
-    public ReportPeriod getByDictCodeAndYear(String code, int year) {
-        return reportPeriodDao.getByTaxTypedCodeYear(code, year);
-    }
-
-    @Override
     public List<ReportPeriodType> getPeriodType() {
         return reportPeriodDao.getPeriodType();
     }
@@ -511,49 +519,75 @@ public class PeriodServiceImpl implements PeriodService {
     }
 
     @Override
-    public String createLogPeriodFormatById(List<Long> idList, Integer logLevelType) {
-        String period = "";
-        List<LogPeriodResult> maxPeriodList = new ArrayList<>();
-        List<LogPeriodResult> rsList = new ArrayList<>();
+    public String createLogPeriodFormatById(List<Long> declarationsIds, Integer logLevelType) {
 
-        for (Long id : idList) {
-            rsList = reportPeriodDao.createLogPeriodFormatById(id, logLevelType);
-            if (rsList.size() > 0) maxPeriodList.add(rsList.get(0));
+        if (ObjectUtils.isEmpty(declarationsIds)) {
+            return StringUtils.EMPTY;
         }
 
-        if (maxPeriodList.size() > 0) {
-            Collections.sort(maxPeriodList, new LogPeriodResult.CompDate(true));
-            period = period + maxPeriodList.get(0).getYear() + " :" + maxPeriodList.get(0).getName() + "; ";
-            if (maxPeriodList.get(0).getCorrectionDate() != null) {
-                Format formatter = new SimpleDateFormat("dd-MM-yy");
-                period = period + formatter.format(maxPeriodList.get(0).getCorrectionDate());
+        List<LogPeriodResult> maxPeriodList = new ArrayList<>(declarationsIds.size());
+
+        for (Long id : declarationsIds) {
+            if ( !declarationDataDao.isKnf(id)) {
+                continue;
             }
+            LogPeriodResult logPeriodResult = getFirstInList(reportPeriodDao.createLogPeriodFormatById(id, logLevelType));
+            if (!ObjectUtils.isEmpty(logPeriodResult))
+                maxPeriodList.add(logPeriodResult);
         }
 
-        return period;
+        if (maxPeriodList.isEmpty()) {
+            return StringUtils.EMPTY;
+        }
+
+        StringBuilder periodBuilder = new StringBuilder();
+        Collections.sort(maxPeriodList, new LogPeriodResult.CompDate(true));
+        LogPeriodResult logPeriodResult = getFirstInList(maxPeriodList);
+        periodBuilder.append(periodBuilder)
+                .append(logPeriodResult.getYear())
+                .append(": ")
+                .append(logPeriodResult.getName())
+                .append("; ")
+                .append(getLogPeriodResultCorrectingString(logPeriodResult));
+
+        return periodBuilder.toString();
+    }
+
+
+    /**
+     * Строка корректировки
+     *
+     * @param logPeriodResult
+     * @return
+     */
+    private String getLogPeriodResultCorrectingString(LogPeriodResult logPeriodResult) {
+        if (ObjectUtils.isEmpty(logPeriodResult.getCorrectionDate())) {
+            return StringUtils.EMPTY;
+        }
+        return "(корр. " + DD_MM_YYYY_DATE_FORMAT.format(logPeriodResult.getCorrectionDate()) + ")";
+    }
+
+    /**
+     * Получить первый элемент в списке
+     *
+     * @param list
+     * @param <T>
+     * @return
+     */
+    private <T> T getFirstInList(List<T> list) {
+        return list.size() > 0 ? list.get(0) : null;
     }
 
     private String periodDescription(DepartmentReportPeriod departmentReportPeriod) {
-        return String.format("\"%s%s\"",
-                getPeriodString(departmentReportPeriod.getReportPeriod()),
-                departmentReportPeriod.getCorrectionDate() != null ? " (корр. " + FastDateFormat.getInstance("dd.MM.yyyy").format(departmentReportPeriod.getCorrectionDate()) + ")" : "");
+        return String.format("\"%s\"", departmentReportPeriodFormatter.getPeriodDescription(departmentReportPeriod));
     }
 
-    private String periodWithDescription(DepartmentReportPeriod departmentReportPeriod) {
+    private String periodWithCustomCorrectionDateDescription(DepartmentReportPeriod departmentReportPeriod) {
         return String.format("%s \"%s\"%s",
                 departmentReportPeriod.getCorrectionDate() == null ? "Период" : "Корректирующий период",
-                getPeriodString(departmentReportPeriod.getReportPeriod()),
-                departmentReportPeriod.getCorrectionDate() == null ? "" :
-                        " с периодом сдачи корректировки " + FastDateFormat.getInstance("dd.MM.yyyy").format(departmentReportPeriod.getCorrectionDate()));
-    }
-
-    @Override
-    public String getPeriodString(ReportPeriod reportPeriod) {
-        Integer reportPeriodTaxFormTypeId = reportPeriod.getReportPeriodTaxFormTypeId();
-        RefBookFormType refBookFormType = refBookFormTypeService.findOne(reportPeriodTaxFormTypeId);
-
-        return String.format("%s:%s:%s",
-                reportPeriod.getTaxPeriod().getYear(), reportPeriod.getName(), refBookFormType.getCode());
+                departmentReportPeriodFormatter.getPeriodDescriptionWithoutCorrectionDate(departmentReportPeriod),
+                departmentReportPeriod.getCorrectionDate() == null ? StringUtils.EMPTY :
+                        " с периодом сдачи корректировки " + DD_MM_YYYY_DATE_FORMAT.format(departmentReportPeriod.getCorrectionDate()));
     }
 
     @Override

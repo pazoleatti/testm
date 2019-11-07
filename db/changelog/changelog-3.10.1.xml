@@ -265,5 +265,126 @@
 	</sql>
     </changeSet>
 
+	<changeSet id="3.10.1-adudenko-1" author="adudenko">
+		<update tableName="BLOB_DATA">
+			<column name="data"
+					valueBlobFile="templates-3.10.1/refbook/declaration_type.groovy"/>
+			<where>id in (select script_id from ref_book r where r.id = 207)</where>
+		</update>
+	</changeSet>
 
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-8786 Реализовать запись в ЖА для спецотчетов -->
+    <changeSet id="3.10.1-avoynov-2" author="avoynov" runAlways="true">
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="CREATE_SCRIPT" valueClobFile="templates-3.10.1/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl.groovy"/>
+            <where>declaration_type_id = 101</where>
+        </update>
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="CREATE_SCRIPT" valueClobFile="templates-3.10.1/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl.groovy"/>
+            <where>declaration_type_id = 100</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="3.10.1-adudenko-2" author="adudenko">
+		<sql>
+			update ref_book_form_type set code = '2-НДФЛ (1)' where id = 3;
+			update ref_book_form_type set name = '2-НДФЛ с признаком 1' where id = 3;
+
+			update ref_book_form_type set code = '2-НДФЛ (2)' where id = 4;
+			update ref_book_form_type set name = '2-НДФЛ с признаком 2' where id = 4;
+
+			update ref_book_form_type set code = '6-НДФЛ' where id = 5;
+			update ref_book_form_type set name = '6-НДФЛ' where id = 5;
+
+			update ref_book_form_type set code = '2-НДФЛ (ФЛ)' where id = 6;
+		</sql>
+    </changeSet>
+	<!-- https://jira.aplana.com/browse/SBRFNDFL-8860 Ошибка при создании 6-НДФЛ -->
+	<changeSet id="3.10.1-smolokovskikh-1" author="smolokovskikh" runAlways="true">
+		<update tableName="DECLARATION_TEMPLATE">
+			<column name="CREATE_SCRIPT" valueClobFile="templates-3.10.1/ndfl/report_6ndfl/v2016/report_6ndfl.groovy"/>
+			<where>declaration_type_id = 103</where>
+		</update>
+	</changeSet>
+
+	<!-- https://jira.aplana.com/browse/SBRFNDFL-9000 Реализовать корректировку итогового уведомления операции обновления данных ФЛ -->
+	<changeSet id="3.10.1-mchernyakov-1" author="mchernyakov" runAlways="true">
+		<update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+			<column name="script" valueClobFile="templates-3.10.1\ndfl\primary_rnu_ndfl\v2016\primary_rnu_ndfl_update_persons_data.groovy"/>
+			<where>DECLARATION_TEMPLATE_ID = 100 and EVENT_ID = 11</where>
+		</update>
+	</changeSet>
+
+	<changeSet id="3.10.1-mchernyakov-2" author="mchernyakov" runAlways="true">
+		<update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+			<column name="script" valueClobFile="templates-3.10.1\ndfl\consolidated_rnu_ndfl\v2016\consolidated_rnu_ndfl_update_persons_data.groovy"/>
+			<where>DECLARATION_TEMPLATE_ID = 101 and EVENT_ID = 11</where>
+		</update>
+	</changeSet>
+
+	<changeSet id="3.10.1-adudenko-3" author="adudenko" runAlways="true">
+		<update tableName="blob_data">
+			<column name="data"
+					valueBlobFile="templates-3.10.1/refbook/department_configs.groovy"/>
+			<where>id = (select script_id from ref_book r where r.id = 951)</where>
+		</update>
+	</changeSet>
+    <changeSet id="3.10.1-skononova-3" author="skononova">
+	<sql >
+	update /*+ index (ref_book_person IDX_REF_BOOK_PERSON_SRCH_FIO) */ ref_book_person set 
+		LAST_NAME = upper(LAST_NAME),
+		FIRST_NAME = upper(FIRST_NAME),
+		MIDDLE_NAME = upper(MIDDLE_NAME),
+		INN = upper(INN),
+		INN_FOREIGN = upper(INN_FOREIGN),
+		SNILS = upper(SNILS),
+		DISTRICT = upper (DISTRICT), CITY = upper (CITY), 
+		LOCALITY = upper (LOCALITY), STREET = upper (STREET), 
+		HOUSE = upper (HOUSE), BUILD = upper (BUILD),
+		APPARTMENT = upper (APPARTMENT), ADDRESS_FOREIGN = upper (ADDRESS_FOREIGN),
+		search_LAST_NAME = replace(nvl(upper(last_name),'empty'),' ',''),
+		search_FIRST_NAME = replace(nvl(upper(FIRST_name),'empty'),' ',''),
+		search_MIDDLE_NAME = replace(nvl(upper(MIDDLE_name),'empty'),' ',''),
+                search_INN = replace(nvl(upper(inn),'empty'),' ',''),
+		search_INN_FOREIGN = replace(nvl(upper(inn_foreign),'empty'),' ',''),
+		search_SNILS = replace(replace(nvl(upper(snils),'empty'),' ',''),'-','')
+		where upper(search_last_name)!=search_last_name or 
+		      upper(search_first_name)!=search_first_name or
+		      upper(search_middle_name)!=search_middle_name;
+
+	update ndfl_person set 
+		id_doc_number = upper(id_doc_number),
+		LAST_NAME = upper(LAST_NAME),
+		FIRST_NAME = upper(FIRST_NAME),
+		MIDDLE_NAME = upper(MIDDLE_NAME),
+		INN_NP = upper(INN_NP),
+		INN_FOREIGN = upper(INN_FOREIGN),
+		SNILS = upper(SNILS),
+		INP = upper(INP), 
+		AREA = upper (AREA), CITY = upper (CITY), 
+		LOCALITY = upper (LOCALITY), 
+		STREET = upper (STREET), 
+		HOUSE = upper (HOUSE), 
+		BUILDING = upper (BUILDING), 
+		FLAT = upper (FLAT), 
+		ADDRESS = upper(ADDRESS),
+
+		search_LAST_NAME = replace(nvl(upper(last_name),'empty'),' ',''),
+		search_FIRST_NAME = replace(nvl(upper(FIRST_name),'empty'),' ',''),
+		search_MIDDLE_NAME = replace(nvl(upper(MIDDLE_name),'empty'),' ',''),
+                search_INN = replace(nvl(upper(inn_np),'empty'),' ',''),
+		search_INN_FOREIGN = replace(nvl(upper(inn_foreign),'empty'),' ',''),
+		search_SNILS = replace(replace(nvl(upper(snils),'empty'),' ',''),'-','')
+		where upper(search_last_name)!=search_last_name or 
+		      upper(search_first_name)!=search_first_name or
+		      upper(search_middle_name)!=search_middle_name; 
+	</sql>
+    </changeSet>
+    <changeSet id="3.10.1-skononova-4" author="skononova">
+	<sql >
+		drop index SRCH_REFB_TAX_PAYER_INP_ASNU;
+		create index SRCH_REFB_TAX_PAYER_INP_ASNU on REF_BOOK_ID_TAX_PAYER (INP asc, AS_NU asc, PERSON_ID asc) compute statistics ;		
+	</sql>
+    </changeSet>		
 </databaseChangeLog>
+        

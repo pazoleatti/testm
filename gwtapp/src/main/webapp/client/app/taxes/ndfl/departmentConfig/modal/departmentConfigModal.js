@@ -25,8 +25,8 @@
                         updateDepartmentConfig();
                     }
                 };
-                // Необходимость заполнения фамилии и имени в зависимости от значения поля "признак подписанта"
-                $scope.isSignatoryNameRequired = function ($value) {
+                // Необходимость заполнения поля "документ полномочий подписанта" в зависимости от значения поля "признак подписанта"
+                $scope.isSignatoryAuthorityDocumentRequired = function ($value) {
                     return !(!$scope.record.signatoryMark || $scope.record.signatoryMark.code !== 2 || !!$value);
                 };
                 // Валидация КПП полей

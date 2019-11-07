@@ -16,15 +16,10 @@ import com.aplana.sbrf.taxaccounting.script.SharedConstants
 import com.aplana.sbrf.taxaccounting.script.service.*
 import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService
 import com.aplana.sbrf.taxaccounting.service.util.ExcelImportUtils
-import form_template.ndfl.primary_rnu_ndfl.v2016.Import.Cell
 import groovy.transform.TypeChecked
 import groovy.transform.TypeCheckingMode
 import org.apache.commons.lang3.StringUtils
-import org.springframework.jdbc.core.RowMapper
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 
-import java.sql.ResultSet
-import java.sql.SQLException
 import java.text.SimpleDateFormat
 
 import static com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils.checkInterrupted
@@ -228,6 +223,8 @@ class Import extends AbstractScriptClass {
     void importData() {
         checkInterrupted()
 
+        logForDebug("Начало импорта Excel-файла декларации")
+
         if (!fileName.endsWith(".xlsx")) {
             logger.error("Ошибка при загрузке файла \"$fileName\". Выбранный файл не соответствует расширению xlsx.")
             logger.error("Загрузка файла \"$fileName\" не может быть выполнена")
@@ -238,6 +235,8 @@ class Import extends AbstractScriptClass {
         List<List<String>> headerValues = []
         // отступы сверху и слева для таблицы
         Map<String, Object> paramsMap = ['rowOffset': 0, 'colOffset': 0] as Map<String, Object>
+
+        logForDebug("Начало чтения Excel-файла декларации")
 
         ExcelImportUtils.readSheetsRange(file, allValues, headerValues, HEADER_START_VALUE, 2, paramsMap, 1, null)
         checkHeaders(headerValues)
@@ -251,10 +250,19 @@ class Import extends AbstractScriptClass {
             return
         }
 
+        logForDebug("Завершено чтение Excel-файла декларации")
+
+        persistedPersonsById = ndflPersonService.findNdflPersonWithOperations(declarationData.id)
+                .collectEntries { [it.id, it] }
+        boolean declarationEmpty = persistedPersonsById.isEmpty()
+
+        logForDebug("Обработка прочитанных данных и сохранение их в память из Excel-файла декларации")
+
         int TABLE_DATA_START_INDEX = 3
         int rowIndex = TABLE_DATA_START_INDEX
         List<NdflPersonExt> ndflPersonRows = []
         List<NdflPersonExt> ndflPersons = []
+        Set<Long> incomeIdsForRemove = []
         for (def iterator = allValues.iterator(); iterator.hasNext(); rowIndex++) {
             checkInterrupted()
 
@@ -270,55 +278,77 @@ class Import extends AbstractScriptClass {
             }
             def ndflPerson = createNdflPerson(row)
             ndflPersonRows << ndflPerson
+
+            if (!declarationEmpty) {
+                String[] importIds = splitTechnicalCell(row)
+                if (importIds && importIds.length > 1 && !importIds[1].isEmpty()) {
+                    long incomeId = Long.parseLong(importIds[1])
+                    incomeIdsForRemove << incomeId
+                }
+            }
         }
         if (logger.containsLevel(LogLevel.ERROR)) {
             logger.error("Загрузка файла \"$fileName\" не может быть выполнена")
             return
         }
+        logForDebug("Заврешена обработка и сохранение в память прочитанных данных из Excel-файла декларации")
+
         persistedPersonsById = ndflPersonService.findNdflPersonWithOperations(declarationData.id)
                 .collectEntries { [it.id, it] }
+        logForDebug("Проверка изменения реквизитов для всех строк ТФ в разделе 1")
         checkRows(ndflPersonRows)
+        logForDebug("Завершена проверка изменения реквизитов для всех строк ТФ в разделе 1")
+        logForDebug("Начата процедура обработки ФЛ из файла")
         for (NdflPersonExt mergingPerson : ndflPersonRows) {
             merge(ndflPersons, mergingPerson)
         }
+        logForDebug("Закончена процедура обработки ФЛ из файла")
+        logForDebug("Проверка корректной обработки ФЛ из файла")
         checkPersons(ndflPersons)
+        logForDebug("Закончена проверка корректной обработки ФЛ из файла")
         if (logger.containsLevel(LogLevel.ERROR)) {
             logger.error("Загрузка файла \"$fileName\" не может быть выполнена")
             return
         }
 
-        Collections.sort(ndflPersons, NdflPerson.getComparator())
         ndflPersonService.fillNdflPersonIncomeSortFields((List<? extends NdflPerson>) ndflPersons)
-        for (NdflPerson ndflPerson : ndflPersons) {
-            Collections.sort(ndflPerson.incomes, NdflPersonIncome.getComparator())
-            Collections.sort(ndflPerson.deductions, NdflPersonDeduction.getComparator(ndflPerson))
-            Collections.sort(ndflPerson.prepayments, NdflPersonPrepayment.getComparator(ndflPerson))
-        }
 
         // Если в НФ нет данных, то создаем новые из ТФ
-        if (persistedPersonsById.isEmpty()) {
-            transformOperationId()
+        if (declarationEmpty) {
+            logForDebug("В НФ нет данных, создаем новые из ТФ")
+
+            logForDebug("Запущена сортировка загруженных данных декларации")
+            Collections.sort(ndflPersons, NdflPerson.getComparator())
+            for (NdflPerson ndflPerson : ndflPersons) {
+                Collections.sort(ndflPerson.incomes, NdflPersonIncome.getComparator())
+                Collections.sort(ndflPerson.deductions, NdflPersonDeduction.getComparator(ndflPerson))
+                Collections.sort(ndflPerson.prepayments, NdflPersonPrepayment.getComparator(ndflPerson))
+            }
+            logForDebug("Закончена сортировка загруженных данных декларации")
+
+            logForDebug("Поиск идентификаторов операций которые отсутствуют в НФ и изменение их")
+            for (NdflPerson ndflPerson : ndflPersons) {
+                transformOperationIdsForPersonIfNeed(ndflPerson)
+            }
+            logForDebug("Обновление номеров строк данных декларации")
             updatePersonsRowNum(ndflPersons)
             if (!logger.containsLevel(LogLevel.ERROR)) {
                 checkInterrupted()
+                logForDebug("Сохранение обработанных данных декларации из Excel-файла в базу")
                 ndflPersonService.save((List<? extends NdflPerson>) ndflPersons)
+                logForDebug("Завершено сохранение обработанных данных декларации из Excel-файла в базу")
             } else {
                 logger.error("Загрузка файла \"$fileName\" не может быть выполнена")
             }
         } else {
             // Если в ТФ есть данные
             // Удаляем операции
-            removeOperations(persistedPersonsById)
+            logForDebug("В НФ есть данные. Удаляем операции.")
+            if (!incomeIdsForRemove.isEmpty()) {
+                removeOperations(incomeIdsForRemove.toList(), persistedPersonsById.values())
+            }
+            logForDebug("Удаление существующих операций заверешно.")
             List<LogEntry> messages = []
-
-            long personRowNum = 0
-            long incomeRowNum = 0
-            long deductionRowNum = 0
-            long prepaymentRowNum = 0
-            List<NdflPerson> updateRowNumPersonList = []
-            List<NdflPersonIncome> updateRowNumIncomeList = []
-            List<NdflPersonDeduction> updateRowNumDeductionList = []
-            List<NdflPersonPrepayment> updateRowNumPrepaymentList = []
 
             List<NdflPerson> ndflPersonsForCreate = []
             List<NdflPerson> ndflPersonsForUpdate = []
@@ -326,36 +356,21 @@ class Import extends AbstractScriptClass {
             List<NdflPersonIncome> incomesForCreate = []
             List<NdflPersonDeduction> deductionsForCreate = []
             List<NdflPersonPrepayment> prepaymentsForCreate = []
-            // Операции для обновления
-            List<NdflPersonIncome> incomesForUpdate = []
-            List<NdflPersonDeduction> deductionsForUpdate = []
-            List<NdflPersonPrepayment> prepaymentsForUpdate = []
 
-            boolean operationsTransformed = false
-
+            logForDebug("Запущена процедура обновления данных физ лиц.")
             for (NdflPersonExt ndflPerson : ndflPersons) {
-                ndflPerson.rowNum = ++personRowNum
-
                 if (needPersonUpdate(ndflPerson)) {
+                    logForDebug("Запущена процедура обновления данных ФЛ $ndflPerson.importId")
                     NdflPerson persistedPerson = null
                     // Проверяем обновлялись ли уже у этого физлица реквизиты
                     if (!ndflPersonImportIdCache.contains(ndflPerson.importId)) {
                         persistedPerson = persistedPersonsById.get(ndflPerson.importId)
                         ndflPersonImportIdCache << ndflPerson.importId
                     }
-                    Map<Long, NdflPersonIncome> persistedPersonIncomesById = persistedPerson.incomes.collectEntries {
-                        [it.id, it]
-                    }
-                    Map<Long, NdflPersonDeduction> persistedPersonDeductionsById = persistedPerson.deductions.collectEntries {
-                        [it.id, it]
-                    }
-                    Map<Long, NdflPersonPrepayment> persistedPersonPrepaymentsById = persistedPerson.prepayments.collectEntries {
-                        [it.id, it]
-                    }
 
                     if (persistedPerson != null) {
+                        logForDebug("Начата процедура обновления данных ФЛ $ndflPerson.importId")
                         persistedPerson.personId = null
-                        updateRowNumPersonList << ndflPerson
                         if (ndflPerson.middleName?.isEmpty()) ndflPerson.middleName = null
                         if (ndflPerson.innNp?.isEmpty()) ndflPerson.innNp = null
                         if (ndflPerson.innForeign?.isEmpty()) ndflPerson.innForeign = null
@@ -480,332 +495,88 @@ class Import extends AbstractScriptClass {
                             persistedPerson.modifiedBy = "${userInfo.getUser().getName()} (${userInfo.getUser().getLogin()})"
                             ndflPersonsForUpdate << persistedPerson
                         }
+                        logForDebug("Закончена процедура обновления данных ФЛ $ndflPerson.importId")
                     }
 
-                    // Определяем списки операций которые будут создаваться либо обновляться у ФЛ
                     int incomesCreateCount = 0
+                    logForDebug("Запущена процедура обновления сведений о доходах физ.лиц")
                     for (def income : ndflPerson.incomes) {
-                        income.rowNum = new BigDecimal(++incomeRowNum)
-                        NdflPersonIncome persistedIncome = null
-                        if (income.id != null) {
-                            persistedIncome = persistedPersonIncomesById.get(income.id)
-                        }
-                        if (persistedIncome == null) {
-                            income.ndflPersonId = ndflPerson.importId
-                            income.modifiedDate = new Date()
-                            income.modifiedBy = "${userInfo.getUser().getName()} (${userInfo.getUser().getLogin()})"
-                            incomesForCreate << income
-                            incomesCreateCount++
-                        } else {
-                            updateRowNumIncomeList << income
-                            if (income.incomeCode?.isEmpty()) income.incomeCode = null
-                            if (income.incomeType?.isEmpty()) income.incomeType = null
-                            if (income.paymentNumber?.isEmpty()) income.paymentNumber = null
-                            boolean updated = false
-                            if (income.operationId != persistedIncome.operationId) {
-                                messages << createUpdateOperationMessage(ndflPerson, INCOME_TITLE, income.id, INCOME_OPERATION_ID, persistedIncome.operationId, income.operationId)
-                                persistedIncome.operationId = income.operationId
-                                updated = true
-                            }
-                            if (income.incomeCode != persistedIncome.incomeCode) {
-                                messages << createUpdateOperationMessage(ndflPerson, INCOME_TITLE, income.id, INCOME_CODE, persistedIncome.incomeCode, income.incomeCode)
-                                persistedIncome.incomeCode = income.incomeCode
-                                updated = true
-                            }
-                            if (income.incomeType != persistedIncome.incomeType) {
-                                messages << createUpdateOperationMessage(ndflPerson, INCOME_TITLE, income.id, INCOME_TYPE, persistedIncome.incomeType, income.incomeType)
-                                persistedIncome.incomeType = income.incomeType
-                                updated = true
-                            }
-                            if (income.incomeAccruedDate != persistedIncome.incomeAccruedDate) {
-                                messages << createUpdateOperationMessage(ndflPerson, INCOME_TITLE, income.id, INCOME_ACCRUED_DATE, persistedIncome.incomeAccruedDate?.format(SharedConstants.DATE_FORMAT), income.incomeAccruedDate?.format(SharedConstants.DATE_FORMAT))
-                                persistedIncome.incomeAccruedDate = income.incomeAccruedDate
-                                updated = true
-                            }
-                            if (income.incomePayoutDate != persistedIncome.incomePayoutDate) {
-                                messages << createUpdateOperationMessage(ndflPerson, INCOME_TITLE, income.id, INCOME_PAYOUT_DATE, persistedIncome.incomePayoutDate?.format(SharedConstants.DATE_FORMAT), income.incomePayoutDate?.format(SharedConstants.DATE_FORMAT))
-                                persistedIncome.incomePayoutDate = income.incomePayoutDate
-                                updated = true
-                            }
-                            if (income.kpp != persistedIncome.kpp) {
-                                messages << createUpdateOperationMessage(ndflPerson, INCOME_TITLE, income.id, KPP, persistedIncome.kpp, income.kpp)
-                                persistedIncome.kpp = income.kpp
-                                updated = true
-                            }
-                            if (income.oktmo != persistedIncome.oktmo) {
-                                messages << createUpdateOperationMessage(ndflPerson, INCOME_TITLE, income.id, OKTMO, persistedIncome.oktmo, income.oktmo)
-                                persistedIncome.oktmo = income.oktmo
-                                updated = true
-                            }
-                            if (income.incomeAccruedSumm != persistedIncome.incomeAccruedSumm) {
-                                messages << createUpdateOperationMessage(ndflPerson, INCOME_TITLE, income.id, INCOME_ACCRUED_SUMM, persistedIncome.incomeAccruedSumm?.toString(), income.incomeAccruedSumm?.toString())
-                                persistedIncome.incomeAccruedSumm = income.incomeAccruedSumm
-                                updated = true
-                            }
-                            if (income.incomePayoutSumm != persistedIncome.incomePayoutSumm) {
-                                messages << createUpdateOperationMessage(ndflPerson, INCOME_TITLE, income.id, INCOME_PAYOUT_SUMM, persistedIncome.incomePayoutSumm?.toString(), income.incomePayoutSumm?.toString())
-                                persistedIncome.incomePayoutSumm = income.incomePayoutSumm
-                                updated = true
-                            }
-                            if (income.totalDeductionsSumm != persistedIncome.totalDeductionsSumm) {
-                                messages << createUpdateOperationMessage(ndflPerson, INCOME_TITLE, income.id, TOTAL_DEDUCTIONS_SUMM, persistedIncome.totalDeductionsSumm?.toString(), income.totalDeductionsSumm?.toString())
-                                persistedIncome.totalDeductionsSumm = income.totalDeductionsSumm
-                                updated = true
-                            }
-                            if (income.taxBase != persistedIncome.taxBase) {
-                                messages << createUpdateOperationMessage(ndflPerson, INCOME_TITLE, income.id, TAX_BASE, persistedIncome.taxBase?.toString(), income.taxBase?.toString())
-                                persistedIncome.taxBase = income.taxBase
-                                updated = true
-                            }
-                            if (income.taxRate != persistedIncome.taxRate) {
-                                messages << createUpdateOperationMessage(ndflPerson, INCOME_TITLE, income.id, TAX_RATE, persistedIncome.taxRate?.toString(), income.taxRate?.toString())
-                                persistedIncome.taxRate = income.taxRate
-                                updated = true
-                            }
-                            if (income.taxDate != persistedIncome.taxDate) {
-                                messages << createUpdateOperationMessage(ndflPerson, INCOME_TITLE, income.id, TAX_DATE, persistedIncome.taxDate?.format(SharedConstants.DATE_FORMAT), income.taxDate?.format(SharedConstants.DATE_FORMAT))
-                                persistedIncome.taxDate = income.taxDate
-                                updated = true
-                            }
-                            if (income.calculatedTax != persistedIncome.calculatedTax) {
-                                messages << createUpdateOperationMessage(ndflPerson, INCOME_TITLE, income.id, CALCULATED_TAX, persistedIncome.calculatedTax?.toString(), income.calculatedTax?.toString())
-                                persistedIncome.calculatedTax = income.calculatedTax
-                                updated = true
-                            }
-                            if (income.withholdingTax != persistedIncome.withholdingTax) {
-                                messages << createUpdateOperationMessage(ndflPerson, INCOME_TITLE, income.id, WITHHOLDING_TAX, persistedIncome.withholdingTax?.toString(), income.withholdingTax?.toString())
-                                persistedIncome.withholdingTax = income.withholdingTax
-                                updated = true
-                            }
-                            if (income.notHoldingTax != persistedIncome.notHoldingTax) {
-                                messages << createUpdateOperationMessage(ndflPerson, INCOME_TITLE, income.id, NOT_HOLDING_TAX, persistedIncome.notHoldingTax?.toString(), income.notHoldingTax?.toString())
-                                persistedIncome.notHoldingTax = income.notHoldingTax
-                                updated = true
-                            }
-                            if (income.overholdingTax != persistedIncome.overholdingTax) {
-                                messages << createUpdateOperationMessage(ndflPerson, INCOME_TITLE, income.id, OVERHOLDING_TAX, persistedIncome.overholdingTax?.toString(), income.overholdingTax?.toString())
-                                persistedIncome.overholdingTax = income.overholdingTax
-                                updated = true
-                            }
-                            if (income.refoundTax != persistedIncome.refoundTax) {
-                                messages << createUpdateOperationMessage(ndflPerson, INCOME_TITLE, income.id, REFOUND_TAX, persistedIncome.refoundTax?.toString(), income.refoundTax?.toString())
-                                persistedIncome.refoundTax = income.refoundTax
-                                updated = true
-                            }
-                            if (income.taxTransferDate != persistedIncome.taxTransferDate) {
-                                messages << createUpdateOperationMessage(ndflPerson, INCOME_TITLE, income.id, TAX_TRANSFER_DATE,
-                                        persistedIncome.taxTransferDate?.format(SharedConstants.DATE_FORMAT) != SharedConstants.DATE_ZERO_AS_DATE ? persistedIncome.taxTransferDate?.format(SharedConstants.DATE_FORMAT) : SharedConstants.DATE_ZERO_AS_STRING,
-                                        income.taxTransferDate?.format(SharedConstants.DATE_FORMAT) != SharedConstants.DATE_ZERO_AS_DATE ? income.taxTransferDate?.format(SharedConstants.DATE_FORMAT) : SharedConstants.DATE_ZERO_AS_STRING)
-                                persistedIncome.taxTransferDate = income.taxTransferDate
-                                updated = true
-                            }
-                            if (income.paymentDate != persistedIncome.paymentDate) {
-                                messages << createUpdateOperationMessage(ndflPerson, INCOME_TITLE, income.id, PAYMENT_DATE, persistedIncome.paymentDate?.format(SharedConstants.DATE_FORMAT), income.paymentDate?.format(SharedConstants.DATE_FORMAT))
-                                persistedIncome.paymentDate = income.paymentDate
-                                updated = true
-                            }
-                            if (income.paymentNumber != persistedIncome.paymentNumber) {
-                                messages << createUpdateOperationMessage(ndflPerson, INCOME_TITLE, income.id, PAYMENT_NUMBER, persistedIncome.paymentNumber, income.paymentNumber)
-                                persistedIncome.paymentNumber = income.paymentNumber
-                                updated = true
-                            }
-                            if (income.taxSumm != persistedIncome.taxSumm) {
-                                messages << createUpdateOperationMessage(ndflPerson, INCOME_TITLE, income.id, TAX_SUMM, persistedIncome.taxSumm?.toString(), income.taxSumm?.toString())
-                                persistedIncome.taxSumm = income.taxSumm
-                                updated = true
-                            }
-                            if (updated) {
-                                persistedIncome.modifiedDate = new Date()
-                                persistedIncome.modifiedBy = "${userInfo.getUser().getName()} (${userInfo.getUser().getLogin()})"
-                                incomesForUpdate << persistedIncome
-                            }
-                        }
+                        logForDebug("Процедура обновления сведений о доходах №$income.id")
+                        income.ndflPersonId = ndflPerson.importId
+                        income.modifiedDate = new Date()
+                        income.modifiedBy = "${userInfo.getUser().getName()} (${userInfo.getUser().getLogin()})"
+                        incomesForCreate << income
+                        incomesCreateCount++
+                        logForDebug("Завершена процедура обновления сведений о доходах №$income.id")
                     }
+                    logForDebug("Заверешена процедура обновления сведений о доходах физ.лиц")
+
                     if (incomesCreateCount > 0) {
                         messages << createNewOperationMessage(ndflPerson, "Сведения о доходах и НДФЛ", incomesCreateCount)
                     }
                     int deductionsCreateCount = 0
+                    logForDebug("Запущена процедура обновления сведений о вычетах физ.лиц")
                     for (NdflPersonDeduction deduction : ndflPerson.deductions) {
-                        deduction.rowNum = new BigDecimal(++deductionRowNum)
-                        NdflPersonDeduction persistedDeduction = null
-                        if (deduction.id != null) {
-                            persistedDeduction = persistedPersonDeductionsById.get(deduction.id)
-                        }
-                        if (persistedDeduction == null) {
-                            deduction.ndflPersonId = ndflPerson.importId
-                            deduction.modifiedDate = new Date()
-                            deduction.modifiedBy = "${userInfo.getUser().getName()} (${userInfo.getUser().getLogin()})"
-                            deductionsForCreate << deduction
-                            deductionsCreateCount++
-                        } else {
-                            updateRowNumDeductionList << deduction
-                            boolean updated = false
-                            if (deduction.typeCode != persistedDeduction.typeCode) {
-                                messages << createUpdateOperationMessage(ndflPerson, DEDUCTION_TITLE, deduction.id, TYPE_CODE, persistedDeduction.typeCode, deduction.typeCode)
-                                persistedDeduction.typeCode = deduction.typeCode
-                                updated = true
-                            }
-                            if (deduction.notifType != persistedDeduction.notifType) {
-                                messages << createUpdateOperationMessage(ndflPerson, DEDUCTION_TITLE, deduction.id, NOTIF_TYPE, persistedDeduction.notifType, deduction.notifType)
-                                persistedDeduction.notifType = deduction.notifType
-                                updated = true
-                            }
-                            if (deduction.notifDate != persistedDeduction.notifDate) {
-                                messages << createUpdateOperationMessage(ndflPerson, DEDUCTION_TITLE, deduction.id, NOTIF_DATE, persistedDeduction.notifDate?.format(SharedConstants.DATE_FORMAT), deduction.notifDate?.format(SharedConstants.DATE_FORMAT))
-                                persistedDeduction.notifDate = deduction.notifDate
-                                updated = true
-                            }
-                            if (deduction.notifNum != persistedDeduction.notifNum) {
-                                messages << createUpdateOperationMessage(ndflPerson, DEDUCTION_TITLE, deduction.id, NOTIF_NUM, persistedDeduction.notifNum, deduction.notifNum)
-                                persistedDeduction.notifNum = deduction.notifNum
-                                updated = true
-                            }
-                            if (deduction.notifSource != persistedDeduction.notifSource) {
-                                messages << createUpdateOperationMessage(ndflPerson, DEDUCTION_TITLE, deduction.id, NOTIF_SOURCE, persistedDeduction.notifSource, deduction.notifSource)
-                                persistedDeduction.notifSource = deduction.notifSource
-                                updated = true
-                            }
-                            if (deduction.notifSumm != persistedDeduction.notifSumm) {
-                                messages << createUpdateOperationMessage(ndflPerson, DEDUCTION_TITLE, deduction.id, NOTIF_SUM, persistedDeduction.notifSumm?.toString(), deduction.notifSumm?.toString())
-                                persistedDeduction.notifSumm = deduction.notifSumm
-                                updated = true
-                            }
-                            if (deduction.operationId != persistedDeduction.operationId) {
-                                messages << createUpdateOperationMessage(ndflPerson, DEDUCTION_TITLE, deduction.id, DEDUCTION_OPERATION_ID, persistedDeduction.operationId, deduction.operationId)
-                                persistedDeduction.operationId = deduction.operationId
-                                updated = true
-                            }
-                            if (deduction.incomeAccrued != persistedDeduction.incomeAccrued) {
-                                messages << createUpdateOperationMessage(ndflPerson, DEDUCTION_TITLE, deduction.id, INCOME_ACCRUED, persistedDeduction.incomeAccrued?.format(SharedConstants.DATE_FORMAT), deduction.incomeAccrued?.format(SharedConstants.DATE_FORMAT))
-                                persistedDeduction.incomeAccrued = deduction.incomeAccrued
-                                updated = true
-                            }
-                            if (deduction.incomeCode != persistedDeduction.incomeCode) {
-                                messages << createUpdateOperationMessage(ndflPerson, DEDUCTION_TITLE, deduction.id, DEDUCTION_INCOME_CODE, persistedDeduction.incomeCode, deduction.incomeCode)
-                                persistedDeduction.incomeCode = deduction.incomeCode
-                                updated = true
-                            }
-                            if (deduction.incomeSumm != persistedDeduction.incomeSumm) {
-                                messages << createUpdateOperationMessage(ndflPerson, DEDUCTION_TITLE, deduction.id, INCOME_SUMM, persistedDeduction.incomeSumm?.toString(), deduction.incomeSumm?.toString())
-                                persistedDeduction.incomeSumm = deduction.incomeSumm
-                                updated = true
-                            }
-                            if (deduction.periodPrevDate != persistedDeduction.periodPrevDate) {
-                                messages << createUpdateOperationMessage(ndflPerson, DEDUCTION_TITLE, deduction.id, PERIOD_PREV_DATE, persistedDeduction.periodPrevDate?.format(SharedConstants.DATE_FORMAT), deduction.periodPrevDate?.format(SharedConstants.DATE_FORMAT))
-                                persistedDeduction.periodPrevDate = deduction.periodPrevDate
-                                updated = true
-                            }
-                            if (deduction.periodPrevSumm != persistedDeduction.periodPrevSumm) {
-                                messages << createUpdateOperationMessage(ndflPerson, DEDUCTION_TITLE, deduction.id, PERIOD_PREV_SUMM, persistedDeduction.periodPrevSumm?.toString(), deduction.periodPrevSumm?.toString())
-                                persistedDeduction.periodPrevSumm = deduction.periodPrevSumm
-                                updated = true
-                            }
-                            if (deduction.periodCurrDate != persistedDeduction.periodCurrDate) {
-                                messages << createUpdateOperationMessage(ndflPerson, DEDUCTION_TITLE, deduction.id, PERIOD_CURR_DATE, persistedDeduction.periodCurrDate?.format(SharedConstants.DATE_FORMAT), deduction.periodCurrDate?.format(SharedConstants.DATE_FORMAT))
-                                persistedDeduction.periodCurrDate = deduction.periodCurrDate
-                                updated = true
-                            }
-                            if (deduction.periodCurrSumm != persistedDeduction.periodCurrSumm) {
-                                messages << createUpdateOperationMessage(ndflPerson, DEDUCTION_TITLE, deduction.id, PERIOD_CURR_SUMM, persistedDeduction.periodCurrSumm?.toString(), deduction.periodCurrSumm?.toString())
-                                persistedDeduction.periodCurrSumm = deduction.periodCurrSumm
-                                updated = true
-                            }
-                            if (updated) {
-                                persistedDeduction.modifiedDate = new Date()
-                                persistedDeduction.modifiedBy = "${userInfo.getUser().getName()} (${userInfo.getUser().getLogin()})"
-                                deductionsForUpdate << persistedDeduction
-                            }
-                        }
+                        logForDebug("Запущена процедура обновления сведений о вычетах №$deduction.id")
+                        deduction.ndflPersonId = ndflPerson.importId
+                        deduction.modifiedDate = new Date()
+                        deduction.modifiedBy = "${userInfo.getUser().getName()} (${userInfo.getUser().getLogin()})"
+                        deductionsForCreate << deduction
+                        deductionsCreateCount++
+                        logForDebug("Завершена процедура обновления сведений о вычетах №$deduction.id")
                     }
+                    logForDebug("Заврешена процедура обновления сведений о вычетах физ.лиц")
+
                     if (deductionsCreateCount > 0) {
                         messages << createNewOperationMessage(ndflPerson, "Сведения о вычетах", deductionsCreateCount)
                     }
                     int prepaymentsCreateCount = 0
+                    logForDebug("Запущена процедура обновления сведений о доходах в виде авансовых платежей физ.лиц")
                     for (NdflPersonPrepayment prepayment : ndflPerson.prepayments) {
-                        prepayment.rowNum = new BigDecimal(++prepaymentRowNum)
-                        NdflPersonPrepayment persistedPrepayment = null
-                        if (prepayment.id != null) {
-                            persistedPrepayment = persistedPersonPrepaymentsById.get(prepayment.id)
-                        }
-                        if (persistedPrepayment == null) {
-                            prepayment.ndflPersonId = ndflPerson.importId
-                            prepaymentsForCreate << prepayment
-                            prepayment.modifiedDate = new Date()
-                            prepayment.modifiedBy = "${userInfo.getUser().getName()} (${userInfo.getUser().getLogin()})"
-                            prepaymentsCreateCount++
-                        } else {
-                            updateRowNumPrepaymentList << prepayment
-                            boolean updated = false
-                            if (prepayment.operationId != persistedPrepayment.operationId) {
-                                messages << createUpdateOperationMessage(ndflPerson, PREPAYMENTS_TITLE, prepayment.id, PREPAYMENT_OPERATION_ID, persistedPrepayment.operationId, prepayment.operationId)
-                                persistedPrepayment.operationId = prepayment.operationId
-                                updated = true
-                            }
-                            if (prepayment.summ != persistedPrepayment.summ) {
-                                messages << createUpdateOperationMessage(ndflPerson, PREPAYMENTS_TITLE, prepayment.id, PREPAYMENT_SUMM, persistedPrepayment.summ?.toString(), prepayment.summ?.toString())
-                                persistedPrepayment.summ = prepayment.summ
-                                updated = true
-                            }
-                            if (prepayment.notifNum != persistedPrepayment.notifNum) {
-                                messages << createUpdateOperationMessage(ndflPerson, PREPAYMENTS_TITLE, prepayment.id, PREPAYMENT_NOTIF_NUM, persistedPrepayment.notifNum, prepayment.notifNum)
-                                persistedPrepayment.notifNum = prepayment.notifNum
-                                updated = true
-                            }
-                            if (prepayment.notifDate != persistedPrepayment.notifDate) {
-                                messages << createUpdateOperationMessage(ndflPerson, PREPAYMENTS_TITLE, prepayment.id, PREPAYMENT_NOTIF_DATE, persistedPrepayment.notifDate?.format(SharedConstants.DATE_FORMAT), prepayment.notifDate?.format(SharedConstants.DATE_FORMAT))
-                                persistedPrepayment.notifDate = prepayment.notifDate
-                                updated = true
-                            }
-                            if (prepayment.notifSource != persistedPrepayment.notifSource) {
-                                messages << createUpdateOperationMessage(ndflPerson, PREPAYMENTS_TITLE, prepayment.id, PREPAYMENT_NOTIF_SOURCE, persistedPrepayment.notifSource, prepayment.notifSource)
-                                persistedPrepayment.notifSource = prepayment.notifSource
-                                updated = true
-                            }
-                            if (updated) {
-                                persistedPrepayment.modifiedDate = new Date()
-                                persistedPrepayment.modifiedBy = "${userInfo.getUser().getName()} (${userInfo.getUser().getLogin()})"
-                                prepaymentsForUpdate << persistedPrepayment
-                            }
-                        }
+                        logForDebug("Обновление сведений о доходах в виде авансового платежа №$prepayment.id")
+                        prepayment.ndflPersonId = ndflPerson.importId
+                        prepaymentsForCreate << prepayment
+                        prepayment.modifiedDate = new Date()
+                        prepayment.modifiedBy = "${userInfo.getUser().getName()} (${userInfo.getUser().getLogin()})"
+                        prepaymentsCreateCount++
+                        logForDebug("Закочено обновление сведений о доходах в виде авансового платежа №$prepayment.id")
                     }
+                    logForDebug("Заврешена процедура обновления сведений о доходах в виде авансовых платежей физ.лиц")
+
                     if (prepaymentsCreateCount > 0) {
                         messages << createNewOperationMessage(ndflPerson, "Сведения о доходах в виде авансовых платежей", prepaymentsCreateCount)
                     }
+
+                    logForDebug("Завершена процедура обновления данных ФЛ $ndflPerson.importId")
                 } else {
-                    if (!operationsTransformed) {
-                        transformOperationId()
-                    }
-                    operationsTransformed = true
-                    for (def income : ndflPerson.incomes) {
-                        income.rowNum = new BigDecimal(++incomeRowNum)
-                    }
-                    for (def deduction : ndflPerson.deductions) {
-                        deduction.rowNum = new BigDecimal(++deductionRowNum)
-                    }
-                    for (def prepayment : ndflPerson.prepayments) {
-                        prepayment.rowNum = new BigDecimal(++prepaymentRowNum)
-                    }
+                    logForDebug("Запущена процедура обновления идентификатора операций (если необходимо) для физ лица №$ndflPerson.importId")
+                    transformOperationIdsForPersonIfNeed(ndflPerson)
+                    logForDebug("Завершена процедура обновления идентификатора операций (если необходимо) для физ лица №$ndflPerson.importId")
                     ndflPersonsForCreate << ndflPerson
                 }
             }
-            ndflPersonService.save(ndflPersonsForCreate)
+            logForDebug("Завершена процедура обновления данных физ лиц.")
+            logForDebug("Сохранение созданных ФЛ в базу")
+            if (!ndflPersonsForCreate.isEmpty()) {
+                ndflPersonService.save(ndflPersonsForCreate)
+            }
+            logForDebug("Обновление существующих ФЛ в базе")
             ndflPersonService.updateNdflPersons(ndflPersonsForUpdate)
             if (ndflPersonsForCreate || ndflPersonsForUpdate) {
+                logForDebug("Обновление ID ФЛ в базе")
                 refBookPersonService.clearRnuNdflPerson(declarationData.id)
             }
+            logForDebug("Сохранение созданных сведений о доходах ФЛ в базу")
             ndflPersonService.saveIncomes(incomesForCreate)
+            logForDebug("Сохранение созданных сведений о вычетах ФЛ в базу")
             ndflPersonService.saveDeductions(deductionsForCreate)
+            logForDebug("Сохранение созданных сведений о авансовых платежах ФЛ в базу")
             ndflPersonService.savePrepayments(prepaymentsForCreate)
-            ndflPersonService.updateIncomes(incomesForUpdate)
-            ndflPersonService.updateDeductions(deductionsForUpdate)
-            ndflPersonService.updatePrepayments(prepaymentsForUpdate)
 
+            logForDebug("Сохранение всех сообщений в область уведомлений")
             logger.getEntries().addAll(messages)
 
-            ndflPersonService.updateNdflPersonsRowNum(updateRowNumPersonList)
-            ndflPersonService.updateIncomesRowNum(updateRowNumIncomeList)
-            ndflPersonService.updateDeductionsRowNum(updateRowNumDeductionList)
-            ndflPersonService.updatePrepaymentsRowNum(updateRowNumPrepaymentList)
+            sortAndUpdateRowNumInUpdatedDeclaration()
         }
 
         if (logger.containsLevel(LogLevel.ERROR)) {
@@ -813,22 +584,63 @@ class Import extends AbstractScriptClass {
         }
     }
 
+    private void sortAndUpdateRowNumInUpdatedDeclaration() {
+        logForDebug("Запущена процедура сортировки данных")
+
+        List<NdflPerson> updatedPersons = ndflPersonService.findNdflPersonWithOperations(declarationData.id)
+
+        BigDecimal incomeRowNum = BigDecimal.ZERO
+        BigDecimal deductionRowNum = BigDecimal.ZERO
+        BigDecimal prepaymentRowNum = BigDecimal.ZERO
+        Long personRowNum = 0L
+        ndflPersonService.fillNdflPersonIncomeSortFields((List<? extends NdflPerson>) updatedPersons)
+        logForDebug("Начата сортировка ФЛ")
+        Collections.sort(updatedPersons, NdflPerson.getComparator())
+        logForDebug("Закончена сортировка ФЛ")
+        logForDebug("Начата сортировка всех операций декларации")
+        for (NdflPerson ndflPerson : updatedPersons) {
+            Collections.sort(ndflPerson.incomes, NdflPersonIncome.getComparator())
+            Collections.sort(ndflPerson.deductions, NdflPersonDeduction.getComparator(ndflPerson))
+            Collections.sort(ndflPerson.prepayments, NdflPersonPrepayment.getComparator(ndflPerson))
+
+            for (NdflPersonIncome income : ndflPerson.incomes) {
+                incomeRowNum = incomeRowNum.add(BigDecimal.ONE)
+                income.rowNum = incomeRowNum
+            }
+
+            for (NdflPersonDeduction deduction : ndflPerson.deductions) {
+                deductionRowNum = deductionRowNum.add(BigDecimal.ONE)
+                deduction.rowNum = deductionRowNum
+            }
+
+            for (NdflPersonPrepayment prepayment : ndflPerson.prepayments) {
+                prepaymentRowNum = prepaymentRowNum.add(BigDecimal.ONE)
+                prepayment.rowNum = prepaymentRowNum
+            }
+
+            ndflPerson.rowNum = ++personRowNum
+        }
+        logForDebug("Закончена сортировка операций декларации")
+        logForDebug("Закончена процедура сортировки данных")
+
+        logForDebug("Обновление номеров строк всех разделов")
+        ndflPersonService.updateRowNum(updatedPersons)
+    }
+
     /**
-     * Проверяет имеет ли ФЛ операции с идентификаторами имеющимися в НФ. Результат используется для определния нужно ли обновлять Физлицо или создавать
+     * Проверяет, существует ли ФЛ с пришедшим идентифкатором в НФ.
+     * Результат используется для определния нужно ли обновлять Физлицо или создавать.
+     *
      * @param ndflPerson Объект физлица
      * @return true если физлицо нужно обновлять
      */
-    boolean needPersonUpdate(NdflPerson ndflPerson) {
-        for (NdflPersonIncome income : ndflPerson.incomes) {
-            if (income.id != null && ndflPersonService.checkIncomeExists(income.id, declarationData.id)) return true
+    boolean needPersonUpdate(NdflPersonExt ndflPerson) {
+        boolean result = false
+        if (ndflPerson.importId) {
+            def existingPerson = ndflPersonService.get(ndflPerson.importId)
+            result = existingPerson.getDeclarationDataId() == declarationData.id
         }
-        for (NdflPersonDeduction deduction : ndflPerson.deductions) {
-            if (deduction.id != null && ndflPersonService.checkDeductionExists(deduction.id, declarationData.id)) return true
-        }
-        for (NdflPersonPrepayment prepayment : ndflPerson.prepayments) {
-            if (prepayment.id != null && ndflPersonService.checkPrepaymentExists(prepayment.id, declarationData.id)) return true
-        }
-        return false
+        return result
     }
 
     List<String> header = ["Идентификаторы строк разделов РНУ НДФЛ (технический столбец - не заполнять при добавлении новой строки)",
@@ -862,7 +674,7 @@ class Import extends AbstractScriptClass {
     }
 
     NdflPersonExt createNdflPerson(Row row) {
-        String[] importIds = splitTechnicalCell(row.cell(1).toString())
+        String[] importIds = splitTechnicalCell(row)
         Long incomeImportId = null
         Long deductionImportId = null
         Long prepaymentImportId = null
@@ -891,27 +703,27 @@ class Import extends AbstractScriptClass {
             }
         }
         ndflPerson.declarationDataId = declarationData.id
-        ndflPerson.inp = row.cell(3).toString(25)
-        ndflPerson.lastName = row.cell(4).toString(60)
-        ndflPerson.firstName = row.cell(5).toString(60)
-        ndflPerson.middleName = row.cell(6).toString(60)
+        ndflPerson.inp = row.cell(3).toString(25)?.toUpperCase()
+        ndflPerson.lastName = row.cell(4).toString(60)?.toUpperCase()
+        ndflPerson.firstName = row.cell(5).toString(60)?.toUpperCase()
+        ndflPerson.middleName = row.cell(6).toString(60)?.toUpperCase()
         ndflPerson.birthDay = row.cell(7).toDate()
         ndflPerson.citizenship = row.cell(8).toString(3)
-        ndflPerson.innNp = row.cell(9).toString(12)
-        ndflPerson.innForeign = row.cell(10).toString(50)
+        ndflPerson.innNp = row.cell(9).toString(12)?.toUpperCase()
+        ndflPerson.innForeign = row.cell(10).toString(50)?.toUpperCase()
         ndflPerson.idDocType = row.cell(11).toString(2)
-        ndflPerson.idDocNumber = row.cell(12).toString(25)
+        ndflPerson.idDocNumber = row.cell(12).toString(25)?.toUpperCase()
         ndflPerson.status = row.cell(13).toInteger(1)?.toString()
         ndflPerson.regionCode = row.cell(14).toString(2)
         ndflPerson.postIndex = row.cell(15).toString(6)
-        ndflPerson.area = row.cell(16).toString(50)
-        ndflPerson.city = row.cell(17).toString(50)
-        ndflPerson.locality = row.cell(18).toString(50)
-        ndflPerson.street = row.cell(19).toString(50)
-        ndflPerson.house = row.cell(20).toString(20)
-        ndflPerson.building = row.cell(21).toString(20)
-        ndflPerson.flat = row.cell(22).toString(20)
-        ndflPerson.snils = row.cell(23).toString(14)
+        ndflPerson.area = row.cell(16).toString(50)?.toUpperCase()
+        ndflPerson.city = row.cell(17).toString(50)?.toUpperCase()
+        ndflPerson.locality = row.cell(18).toString(50)?.toUpperCase()
+        ndflPerson.street = row.cell(19).toString(50)?.toUpperCase()
+        ndflPerson.house = row.cell(20).toString(20)?.toUpperCase()
+        ndflPerson.building = row.cell(21).toString(20)?.toUpperCase()
+        ndflPerson.flat = row.cell(22).toString(20)?.toUpperCase()
+        ndflPerson.snils = row.cell(23).toString(14)?.toUpperCase()
         ndflPerson.asnuId = declarationData.asnuId
         ndflPerson.modifiedDate = importDate
 
@@ -1086,13 +898,13 @@ class Import extends AbstractScriptClass {
     }
 
     /**
-     * Ищет идентификаторы операций которые отсутствуют в налоговой форме и изменяет их
+     * Ищет идентификаторы операций ФЛ которые отсутствуют в налоговой форме и изменяет их
      */
 
-    void transformOperationId() {
-        Set<String> operationsSet = operationsGrouped.keySet()
+    void transformOperationIdsForPersonIfNeed(NdflPerson ndflPerson) {
+        def operationsSet = ndflPerson.incomes*.operationId
         if (!operationsSet.isEmpty()) {
-            List<String> persistedOperationIdList = ndflPersonService.findIncomeOperationId(new ArrayList<String>(operationsSet))
+            List<String> persistedOperationIdList = ndflPersonService.findIncomeOperationId(operationsSet)
             operationsSet.removeAll(persistedOperationIdList)
             for (String operationId : operationsSet) {
                 List<NdflPersonOperation> operations = operationsGrouped.get(operationId)
@@ -1411,7 +1223,8 @@ class Import extends AbstractScriptClass {
         }
     }
 
-    String[] splitTechnicalCell(String cellText) {
+    String[] splitTechnicalCell(Row row) {
+        String cellText = row.cell(1).toString()
         if (cellText.isEmpty()) {
             return null
         } else {
@@ -1422,6 +1235,7 @@ class Import extends AbstractScriptClass {
     /**
      * Удаляет операции из БД, идентификаторы которых не найдены в ТФ
      */
+    @Deprecated
     void removeOperations(Map<Long, NdflPerson> persistedPersonsById) {
         Collection<NdflPerson> ndflPersonFromDeclarationData = persistedPersonsById.values()
         int rowsCount = 0
@@ -1498,6 +1312,73 @@ class Import extends AbstractScriptClass {
         logger.getEntries().addAll(removeMessages)
     }
 
+    /**
+     * Удаляет операции из БД по идентификаторам операций
+     */
+    void removeOperations(List<Long> incomesIdsForRemove, Collection<NdflPerson> personsFromDeclaration) {
+        List<Long> incomesIdsWithRelatedByOperationIdForRemove = []
+        List<Long> deductionsIdsForRemove = []
+        List<Long> prepaymentsIdsForRemove = []
+        List<LogEntry> removeMessages = []
+        int incomesCount = 0
+        int deductionsCount = 0
+        int prepaymentsCount = 0
+        for (NdflPerson person : personsFromDeclaration) {
+            List<NdflPersonIncome> personIncomes = person.incomes
+            incomesCount += personIncomes.size()
+            deductionsCount += person.getDeductions().size()
+            prepaymentsCount += person.getPrepayments().size()
+
+            Set<String> operationsIdsBySuitableIncomes = new HashSet<>()
+            personIncomes.each {
+                if (incomesIdsForRemove.contains(it.id)) {
+                    operationsIdsBySuitableIncomes.add(it.operationId)
+                }
+            }
+
+            if (operationsIdsBySuitableIncomes.isEmpty()) {
+                continue
+            }
+
+            def suitableIncomes = ndflPersonService
+                    .findNdflPersonIncomeByPersonAndOperations(person.id, operationsIdsBySuitableIncomes)
+            incomesIdsWithRelatedByOperationIdForRemove.addAll(suitableIncomes)
+
+            def deductionsIdsByPerson = ndflPersonService.getDeductionsIdsByPersonAndIncomes(person.id, suitableIncomes)
+            deductionsIdsForRemove.addAll(deductionsIdsByPerson)
+            def prepaymentsIdsByPerson = ndflPersonService.getPrepaymentsIdsByPersonAndIncomes(person.id, suitableIncomes)
+            prepaymentsIdsForRemove.addAll(prepaymentsIdsByPerson)
+
+            def personInfo = "${person.lastName ?: ""} ${person.firstName ?: ""} ${person.middleName ?: ""}, ИНП: ${person.inp ?: ""}, " +
+                    "ДУЛ: ${person.idDocType ?: ""}, ${person.idDocNumber ?: ""}"
+
+            removeMessages << new LogEntry(LogLevel.INFO, "Удалены данные у ФЛ: $personInfo. " +
+                    "В Разделе ${INCOME_TITLE} удалено строк (${suitableIncomes.size()})")
+
+            if (!deductionsIdsByPerson.isEmpty()) {
+                removeMessages << new LogEntry(LogLevel.INFO, "Удалены данные у ФЛ: $personInfo. " +
+                        "В Разделе ${DEDUCTION_TITLE} удалено строк (${deductionsIdsByPerson.size()})")
+            }
+            if (!prepaymentsIdsByPerson.isEmpty()) {
+                removeMessages << new LogEntry(LogLevel.INFO, "Удалены данные у ФЛ: $personInfo. " +
+                        "В Разделе ${PREPAYMENTS_TITLE} удалено строк (${prepaymentsIdsByPerson.size()})")
+            }
+        }
+
+        ndflPersonService.deleteNdflPersonIncome(incomesIdsWithRelatedByOperationIdForRemove)
+        if (!deductionsIdsForRemove.isEmpty()) {
+            ndflPersonService.deleteNdflPersonDeduction(deductionsIdsForRemove)
+        }
+        if (!prepaymentsIdsForRemove.isEmpty()) {
+            ndflPersonService.deleteNdflPersonPrepayment(prepaymentsIdsForRemove)
+        }
+        logger.info("При загрузке файла: " +
+                "в Разделе 2 удалено ${incomesIdsWithRelatedByOperationIdForRemove.size()} строк из $incomesCount, " +
+                "в Разделе 3 удалено ${deductionsIdsForRemove.size()} строк из $deductionsCount, " +
+                "в Разделе 4 удалено ${prepaymentsIdsForRemove.size()} строк из $prepaymentsCount.")
+        logger.getEntries().addAll(removeMessages)
+    }
+    
     /**
      * Создает сообщение о добавлении даннных
      * @param ndflPerson объект физлица

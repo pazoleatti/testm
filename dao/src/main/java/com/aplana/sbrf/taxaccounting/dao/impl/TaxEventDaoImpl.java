@@ -28,7 +28,7 @@ public class TaxEventDaoImpl extends AbstractDao implements TaxEventDao {
 
     @Override
     public List<TaxChangesEvent> getNewTaxEvents() {
-        return getJdbcTemplateSecondary().query("SELECT tax.* FROM VW_LOG_TABLE_CHANGE tax \n" +
+        return getJdbcTemplate().query("SELECT tax.* FROM VW_LOG_TABLE_CHANGE tax \n" +
                 "LEFT JOIN LOG_TABLE_CHANGE_PROCESSED ndfl ON ndfl.id = tax.id \n" +
                 "WHERE ndfl.id IS NULL " +
                 "ORDER BY tax.id asc " +
@@ -37,6 +37,6 @@ public class TaxEventDaoImpl extends AbstractDao implements TaxEventDao {
 
     @Override
     public void processTaxEvent(TaxChangesEvent event) {
-        getJdbcTemplateSecondary().update("INSERT INTO LOG_TABLE_CHANGE_PROCESSED (id) VALUES (?)", event.getId());
+        getJdbcTemplate().update("INSERT INTO LOG_TABLE_CHANGE_PROCESSED (id) VALUES (?)", event.getId());
     }
 }

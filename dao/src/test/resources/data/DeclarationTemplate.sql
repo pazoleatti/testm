@@ -12,3 +12,5 @@ insert into declaration_template(id, name, version, jrxml, xsd, declaration_type
   values (6, 'Налоговая форма 6', date '2015-01-01', null, null, 3, 0, 2, 2);
   insert into declaration_template(id, name, version, jrxml, xsd, declaration_type_id, status, form_kind, form_type)
     values (101, 'РНУ НДФЛ (консолидированная)', date '2016-01-01', null, null, 101, 0, 2, 2);
+insert into declaration_template(id, name, version, jrxml, xsd, declaration_type_id, status, form_kind, form_type)
+    values (104, '2-НДФЛ (2)', date '2016-01-01', null, null, 104, 0, 7, 4);

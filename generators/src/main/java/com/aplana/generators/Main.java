@@ -71,10 +71,13 @@ public class Main {
 
     private static String generateFileName(String originalFileName, int i) {
         if (originalFileName.contains("FL_")) {
+            String path = originalFileName.substring(0, originalFileName.lastIndexOf(File.separator) + 1);
+            String fileName = originalFileName.substring(originalFileName.lastIndexOf(File.separator) + 1);
             SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
             Date now = new Date();
             String strDate = sdfDate.format(now);
-            originalFileName = originalFileName.replaceAll(originalFileName.substring(originalFileName.length() - 56, originalFileName.length() - 37), strDate);
+            String newFileName = fileName.replaceAll(fileName.substring(3, 22), strDate);
+            return path + File.separator + newFileName;
         }
 
         return originalFileName.replaceAll(originalFileName.substring(originalFileName.length() - 36, originalFileName.length() - 4),

@@ -9,10 +9,10 @@ set NEWP NONE;
 spool 'department_details.csv'
 
 select '"'||dep.sbrf_code||'","'||rnd.kpp||'","'||ro.code||'"'
-from (select t.*, lead(t.version) over(partition by t.record_id order by version) - interval '1' DAY version_end from ref_book_ndfl_detail t where status != -1) rnd
-left join ref_book_oktmo ro on ro.id = rnd.oktmo
+from (select dc.* from department_config dc) rnd
+left join ref_book_oktmo ro on ro.id = rnd.oktmo_id
 left join department dep on rnd.department_id = dep.id
-where rnd.status = 0 and rnd.version <= to_date('31.12.2018','dd.mm.yyyy') and (rnd.version_end is null or to_date('31.12.2018','dd.mm.yyyy') <= rnd.version_end);
+where rnd.end_date is null or to_date('31.12.2019','dd.mm.yyyy') <= rnd.end_date;
 
 	
 spool off;

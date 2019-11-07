@@ -3,6 +3,7 @@ INSERT INTO report_period_type (id,code,name,start_date,end_date,calendar_start_
 INSERT INTO report_period_type (id,code,name,start_date,end_date,calendar_start_date) VALUES (23, '23', 'третий квартал', DATE '1970-01-01', DATE '1970-09-30', DATE '1970-07-01');
 INSERT INTO report_period_type (id,code,name,start_date,end_date,calendar_start_date) VALUES (24, '33', 'год', DATE '1970-01-01', DATE '1970-12-31', DATE '1970-10-01');
 INSERT INTO report_period_type (id,code,name,start_date,end_date,calendar_start_date) VALUES (25, '90', 'год при реорганизации (ликвидации) организации', DATE '1970-01-01', DATE '1970-12-31', DATE '1970-10-01');
+INSERT INTO report_period_type (id,code,name,start_date,end_date,calendar_start_date) VALUES (26, '31', 'полугодие', DATE '1970-01-01', DATE '1970-06-30', DATE '1970-10-01');
 
 INSERT INTO REPORT_PERIOD (id, name, tax_period_id, dict_tax_period_id, start_date, end_date, calendar_start_date, form_type_id) VALUES (1, 'первый квартал',  1, 21, date '2013-01-01', date '2013-03-31', date '2013-01-01', 5);
 INSERT INTO REPORT_PERIOD (id, name, tax_period_id, dict_tax_period_id, start_date, end_date, calendar_start_date, form_type_id) VALUES (2, 'полугодие',  1, 22, date '2013-04-01', date '2013-06-30', date '2013-04-01', 5);
@@ -32,3 +33,13 @@ INSERT INTO REPORT_PERIOD (id, name, tax_period_id, dict_tax_period_id, start_da
 INSERT INTO REPORT_PERIOD (id, name, tax_period_id, dict_tax_period_id, start_date, end_date, calendar_start_date, form_type_id) VALUES (320, '9 месяцев', 1020, 23, date '2018-01-01', date '2018-09-30', date '2018-07-01', 5);
 INSERT INTO REPORT_PERIOD (id, name, tax_period_id, dict_tax_period_id, start_date, end_date, calendar_start_date, form_type_id) VALUES (330, 'год', 1020, 24, date '2018-01-01', date '2018-12-31', date '2018-10-01', 5);
 INSERT INTO REPORT_PERIOD (id, name, tax_period_id, dict_tax_period_id, start_date, end_date, calendar_start_date, form_type_id) VALUES (410, 'год при реорганизации (ликвидации) организации', 1000, 25, date '2016-01-01', date '2016-12-31', date '2016-10-01', 3);
+INSERT INTO REPORT_PERIOD (id, name, tax_period_id, dict_tax_period_id, start_date, end_date, calendar_start_date, form_type_id) VALUES (420, 'год при реорганизации (ликвидации) организации', 1000, 26, date '2016-01-01', date '2016-06-30', date '2016-10-01', 4);
+
+INSERT INTO REPORT_PERIOD (id, name, tax_period_id, dict_tax_period_id, start_date, end_date, calendar_start_date, form_type_id) VALUES (500, 'первый квартал', 1030, 21, date '2018-01-01', date '2018-03-30', date '2018-01-01', 3);
+INSERT INTO REPORT_PERIOD (id, name, tax_period_id, dict_tax_period_id, start_date, end_date, calendar_start_date, form_type_id) VALUES (501, 'первый квартал', 1030, 21, date '2018-01-01', date '2018-03-30', date '2018-01-01', 4);
+INSERT INTO REPORT_PERIOD (id, name, tax_period_id, dict_tax_period_id, start_date, end_date, calendar_start_date, form_type_id) VALUES (502, 'первый квартал', 1030, 21, date '2018-01-01', date '2018-03-30', date '2018-01-01', 5);
+INSERT INTO REPORT_PERIOD (id, name, tax_period_id, dict_tax_period_id, start_date, end_date, calendar_start_date, form_type_id) VALUES (503, 'первый квартал', 1030, 21, date '2018-01-01', date '2018-03-30', date '2018-01-01', 7);
+INSERT INTO REPORT_PERIOD (id, name, tax_period_id, dict_tax_period_id, start_date, end_date, calendar_start_date, form_type_id) VALUES (510, 'год', 1030, 24, date '2019-01-01', date '2019-12-31', date '2019-01-01', 3);
+INSERT INTO REPORT_PERIOD (id, name, tax_period_id, dict_tax_period_id, start_date, end_date, calendar_start_date, form_type_id) VALUES (520, 'год', 1030, 24, date '2019-01-01', date '2019-12-31', date '2019-01-01', 4);
+INSERT INTO REPORT_PERIOD (id, name, tax_period_id, dict_tax_period_id, start_date, end_date, calendar_start_date, form_type_id) VALUES (530, 'год', 1030, 24, date '2019-01-01', date '2019-12-31', date '2019-01-01', 5);
+INSERT INTO REPORT_PERIOD (id, name, tax_period_id, dict_tax_period_id, start_date, end_date, calendar_start_date, form_type_id) VALUES (540, 'год', 1030, 24, date '2019-01-01', date '2019-12-31', date '2019-01-01', 7);

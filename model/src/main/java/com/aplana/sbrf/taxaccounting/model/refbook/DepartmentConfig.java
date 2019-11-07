@@ -111,6 +111,11 @@ public class DepartmentConfig extends IdentityObject<Long> implements SecuredEnt
         return this;
     }
 
+    public DepartmentConfig name(String name) {
+        this.name = name;
+        return this;
+    }
+
     public DepartmentConfig kpp(String kpp) {
         this.kpp = kpp;
         return this;

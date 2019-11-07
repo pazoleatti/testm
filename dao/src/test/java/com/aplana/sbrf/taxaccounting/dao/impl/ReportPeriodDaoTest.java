@@ -23,7 +23,6 @@ import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -55,7 +54,7 @@ public class ReportPeriodDaoTest {
     @Test
     public void test_fetchAll() {
         List<ReportPeriod> allPeriods = reportPeriodDao.findAll();
-        assertThat(allPeriods).hasSize(3);
+        assertThat(allPeriods).hasSize(4);
     }
 
     @Test
@@ -138,7 +137,7 @@ public class ReportPeriodDaoTest {
     public void getPeriodsByTaxTypeAndDepartmentsTest() {
         List<ReportPeriod> reportPeriods;
         reportPeriods = reportPeriodDao.fetchAllByDepartments(asList(1, 2, 3));
-        assertEquals(3, reportPeriods.size());
+        assertEquals(4, reportPeriods.size());
         assertTrue(getReportPeriodIds(reportPeriods).containsAll(asList(1, 2, 3)));
     }
 
@@ -146,7 +145,7 @@ public class ReportPeriodDaoTest {
     public void getAllActivePeriods() {
         List<ReportPeriod> reportPeriods;
         reportPeriods = reportPeriodDao.findAllActive(asList(1, 2, 3));
-        assertEquals(3, reportPeriods.size());
+        assertEquals(4, reportPeriods.size());
         assertTrue(getReportPeriodIds(reportPeriods).containsAll(asList(1, 2, 3)));
     }
 
@@ -193,15 +192,6 @@ public class ReportPeriodDaoTest {
         ReportPeriod reportPeriod = reportPeriodDao.fetchOne(newReportPeriodId);
         assertEquals(date, reportPeriod.getCalendarStartDate());
         assertEquals(2, reportPeriod.getOrder());
-    }
-
-    @Test
-    public void getByTaxTypedCodeYearTest() {
-        ReportPeriod reportPeriod1 = reportPeriodDao.getByTaxTypedCodeYear("21", 2013);
-        ReportPeriod reportPeriod2 = reportPeriodDao.getByTaxTypedCodeYear("99", 2015);
-        assertNull(reportPeriod1);
-        assertNotNull(reportPeriod2);
-        assertEquals(3, reportPeriod2.getId().intValue());
     }
 
     @Test

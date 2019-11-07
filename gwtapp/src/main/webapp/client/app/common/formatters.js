@@ -186,7 +186,8 @@
         }])
 
         /**
-         * @description Форматтер для получения наименования отчетного периода в нужном формате "год: наименование периода"
+         * @description Форматтер для получения наименования отчетного периода из модели НФ
+         * в нужном формате "год: наименование периода: вид отчетности"
          * @param reportPeriod Отчетный период
          */
         .filter('periodFormatter', ['APP_CONSTANTS', function (APP_CONSTANTS) {
@@ -197,6 +198,18 @@
                 return reportPeriod
                     ? reportPeriod.taxPeriod.year + ": " + reportPeriod.name + ": " + reportPeriodTaxFormType
                     : "";
+            };
+        }])
+
+        /**
+         * @description Форматтер для получения наименования отчетного периода из модели отчетного периода подразделения
+         * в нужном формате "год: наименование периода: вид отчетности"
+         * @param reportPeriod Отчетный период
+         */
+        .filter('departmentReportPeriodFormatter', ['APP_CONSTANTS', function (APP_CONSTANTS) {
+            return function (departmentReportPeriod) {
+                var formType = getReportPeriodTaxFormTypeNameFromId(APP_CONSTANTS, departmentReportPeriod.taxFormTypeId);
+                return departmentReportPeriod.year + ": " + departmentReportPeriod.name + ": " + formType;
             };
         }])
 
@@ -331,7 +344,7 @@
 
         /**
          * @description Форматтер периода формы в виде
-         * "<Год>, <Название периода><Дата корректировки через запятую (если имеется)>"
+         * "<Год>: <Название периода> (<Дата корректировки через запятую (если имеется)): <Вид отчетности>"
          * @param value признак активности периода
          */
         .filter('ndflPeriodFormatter', ['$filter', 'APP_CONSTANTS', function ($filter, APP_CONSTANTS) {
@@ -346,7 +359,7 @@
                         correctionString: declarationData.correctionDate ?
                             $filter('translate')('title.period.value.correctionString', {correctionDate: $filter('date')(declarationData.correctionDate, 'dd.MM.yyyy')}) :
                             '',
-                        formType: reportPeriodTaxFormType ? ", " + reportPeriodTaxFormType : ""
+                        formType: reportPeriodTaxFormType
                     });
                 }
                 return '';

@@ -3,11 +3,11 @@ package com.aplana.sbrf.taxaccounting.model;
 import java.io.Serializable;
 
 /**
- * Считаем этот - enum ScriptEvent 
+ * Считаем этот - enum ScriptEvent
  * (рефакторить имя пока не будем т.к. на него завязаны скрипты)
  * TODO: [sgoryachkin] Порефакторить.
  * Задача: SBRFACCTAX-1862
- * 
+ *
  * События системы. К ним привязываются скрипты.
  *
  * @author Vitalii Samolovskikh
@@ -89,7 +89,8 @@ public enum FormDataEvent implements Serializable {
 	NDFL_EDIT(10006, "Редактирование строки РНУ НДФЛ"),
 	NDFL_DATES_EDIT(10007, "Массовое редактирование дат"),
 	SEND_EDO(10008, "Отправка в ЭДО"),
-	EXPORT_REPORT_FROMS(10009, "Выгрузка для отправки в ФНС");
+	EXPORT_REPORT_FROMS(10009, "Выгрузка для отправки в ФНС"),
+	DELETE_ROWS(10018, "Удаление строк формы");
 
 	private String title;
 	private int code;

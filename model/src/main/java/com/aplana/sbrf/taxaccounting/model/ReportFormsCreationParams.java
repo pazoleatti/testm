@@ -47,6 +47,25 @@ public class ReportFormsCreationParams implements Serializable {
      */
     private ReportTypeModeEnum reportTypeMode;
 
+    /**
+     * Выбранный номер справки в xml-файле на основании которой нужно сформировать аннулирующую 2-НДФЛ в ручном режиме
+     */
+    private Integer selectedSprNum;
+
+    /**
+     * Выбранный номер ОНФ на основании которого нужно сформировать аннулирующую 2-НДФЛ в ручном режиме
+     */
+    private Long declarationDataId;
+
+    /**
+     * Выбранное ФИО,  ИНН РФ, № ДУЛ для которого нужно сформировать аннулирующую 2-НДФЛ в ручном режиме
+     */
+    private String lastName;
+    private String firstName;
+    private String middleName;
+    private String innNp;
+    private String idDocNumber;
+
     public ReportFormsCreationParams(CreateReportFormsAction action) {
         declarationTypeId = action.getDeclarationTypeId();
         adjustNegativeValues= action.isAdjustNegativeValues();
@@ -54,5 +73,12 @@ public class ReportFormsCreationParams implements Serializable {
         reportFormCreationMode = action.getReportFormCreationMode();
         kppOktmoPairs = action.getKppOktmoPairs();
         reportTypeMode = action.getReportTypeMode();
+        selectedSprNum = action.getSelectedSprNum();
+        declarationDataId = action.getDeclarationDataId();
+        lastName = action.getLastName();
+        firstName = action.getFirstName();
+        middleName = action.getMiddleName();
+        innNp = action.getInnNp();
+        idDocNumber = action.getIdDocNumber();
     }
 }

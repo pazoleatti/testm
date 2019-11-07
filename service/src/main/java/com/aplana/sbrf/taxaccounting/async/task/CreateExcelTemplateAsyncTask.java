@@ -39,6 +39,7 @@ public class CreateExcelTemplateAsyncTask extends AbstractDeclarationAsyncTask {
         long declarationDataId = (Long) params.get("declarationDataId");
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(taskData.getUserId()));
+        userInfo.setIp((String) params.get("userIp"));
         DeclarationData declarationData = declarationDataService.get(declarationDataId, userInfo);
 
         if (declarationData != null) {
@@ -49,7 +50,7 @@ public class CreateExcelTemplateAsyncTask extends AbstractDeclarationAsyncTask {
                     public void updateState(AsyncTaskState state) {
                         asyncManager.updateState(taskData.getId(), state);
                     }
-                });
+                }, null);
             } catch (Exception e) {
                 throw new ServiceException(String.format("Выгрузка шаблона ТФ (Excel) для Налоговой формы %s не может быть выполнена: %s",
                         getDeclarationDescription(taskData.getUserId(), params),

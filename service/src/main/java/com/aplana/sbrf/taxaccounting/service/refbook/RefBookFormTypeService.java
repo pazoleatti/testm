@@ -16,11 +16,4 @@ public interface RefBookFormTypeService {
      */
     List<RefBookFormType> fetchAll();
 
-    /**
-     * Возвращает запись справочника по идентификатору записи
-     *
-     * @param id идентификатор записи
-     * @return значение справочника RefBookFormType
-     */
-    RefBookFormType findOne(int id);
 }

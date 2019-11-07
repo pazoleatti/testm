@@ -20,15 +20,6 @@ public class RefBookFormTypeDaoImpl extends AbstractDao implements RefBookFormTy
         return getJdbcTemplate().query("select id, code, name from REF_BOOK_FORM_TYPE where id != -1", new RefBookFormTypeRowMapper());
     }
 
-    @Override
-    public RefBookFormType findOne(int id) {
-        return getJdbcTemplate().queryForObject("select id, code,name from REF_BOOK_FORM_TYPE where id = ?",
-                new Object[]{id},
-                new RefBookFormTypeRowMapper()
-        );
-
-    }
-
     public static final class RefBookFormTypeRowMapper implements RowMapper<RefBookFormType> {
         private String prefix;
 

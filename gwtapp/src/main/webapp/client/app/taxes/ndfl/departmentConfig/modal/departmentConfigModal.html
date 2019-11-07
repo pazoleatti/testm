@@ -260,7 +260,7 @@
                                        data-ng-model="record.signatorySurName"
                                        maxlength="60"
                                        placeholder="{{'filter.placeholder.search' | translate}}"
-                                       data-ng-required="isSignatoryNameRequired($value)"/>
+                                       data-ng-required="true"/>
                                 <div data-aplana-validator data-key='required'>
                                     {{::'common.validation.required' | translate}}
                                 </div>
@@ -283,7 +283,7 @@
                                        data-ng-model="record.signatoryFirstName"
                                        maxlength="60"
                                        placeholder="{{'filter.placeholder.search' | translate}}"
-                                       data-ng-required="isSignatoryNameRequired($value)"/>
+                                       data-ng-required="true"/>
                                 <div data-aplana-validator data-key='required'>
                                     {{::'common.validation.required' | translate}}
                                 </div>
@@ -348,7 +348,11 @@
                                 <input class="form-control" type="text"
                                        data-ng-model="record.approveDocName"
                                        maxlength="120"
-                                       placeholder="{{'filter.placeholder.search' | translate}}"/>
+                                       placeholder="{{'filter.placeholder.search' | translate}}"
+                                       data-ng-required="isSignatoryAuthorityDocumentRequired($value)"/>
+                                <div data-aplana-validator data-key='required'>
+                                    {{::'common.validation.required' | translate}}
+                                </div>
                             </div>
                         </div>
                     </div>

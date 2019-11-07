@@ -43,16 +43,19 @@ public class DepartmentConfigDaoImp extends AbstractDao implements DepartmentCon
      * Возвращяет все пары КПП/ОКТМО по настройкам подразделений, актуальные на дату relevanceDate, или
      * пересекающиеся с периодом reportPeriodId, но не имеющая старших версий из другого ТБ
      */
-    private final static String ACTUAL_KPP_OKTMO_SELECT_WITH_PERIOD = "" +
-            "  select dc.kpp, dc.oktmo_id, max(dc.start_date) start_date \n" +
+    public final static String ACTUAL_KPP_OKTMO_SELECT_WITH_PERIOD = "" +
+            "  select dc.kpp, dc.oktmo_id, oktmo.code oktmo, max(dc.start_date) start_date \n" +
             "  from department_config dc\n" +
+            "  join ref_book_oktmo oktmo on oktmo.id = dc.oktmo_id\n" +
             "  join report_period rp on rp.id = :reportPeriodId\n" +
             "  where (:departmentId is null or department_id = :departmentId) and (\n" +
             "    dc.start_date <= :relevanceDate and (dc.end_date is null or :relevanceDate <= dc.end_date)\n" +
             "    or dc.start_date <= rp.end_date and (dc.end_date is null or rp.start_date <= dc.end_date)\n" +
-            "       and (:departmentId is null or not exists (select * from department_config where kpp = dc.kpp and oktmo_id = dc.oktmo_id and start_date > dc.start_date and department_id != :departmentId))\n" +
-            "  )\n" +
-            "  group by dc.kpp, dc.oktmo_id\n";
+            "       and (:departmentId is null or not exists (\n" +
+            "           select * from department_config where kpp = dc.kpp and oktmo_id = dc.oktmo_id " +
+            "           and start_date > dc.start_date and start_date <= rp.end_date and department_id != :departmentId)\n" +
+            "       ))\n" +
+            "  group by dc.kpp, oktmo.code, dc.oktmo_id\n";
 
     /**
      * Возвращяет все пары КПП/ОКТМО по настройкам подразделений, актуальные на дату relevanceDate

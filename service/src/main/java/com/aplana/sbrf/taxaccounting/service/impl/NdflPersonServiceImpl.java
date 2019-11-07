@@ -22,12 +22,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Сервис для работы с ФЛ
@@ -169,5 +164,20 @@ public class NdflPersonServiceImpl implements NdflPersonService {
             }
         }
 
+    }
+
+    @Override
+    public List<Long> getDeductionsIdsByPersonAndIncomes(long personId, Collection<Long> incomesIds) {
+        return ndflPersonDao.getDeductionsIdsByPersonAndIncomes(personId, incomesIds);
+    }
+
+    @Override
+    public List<Long> getPrepaymentsIdsByPersonAndIncomes(long personId, Collection<Long> incomesIds) {
+        return ndflPersonDao.getPrepaymentsIdsByPersonAndIncomes(personId, incomesIds);
+    }
+
+    @Override
+    public List<Long> findNdflPersonIncomeByPersonAndOperations(long personId, Collection<String> operationsIds) {
+        return ndflPersonDao.findNdflPersonIncomeByPersonAndOperations(personId, operationsIds);
     }
 }

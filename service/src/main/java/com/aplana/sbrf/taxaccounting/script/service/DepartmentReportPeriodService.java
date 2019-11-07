@@ -3,13 +3,9 @@ package com.aplana.sbrf.taxaccounting.script.service;
 import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.DepartmentType;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.service.ScriptExposed;
 
-import java.util.Collection;
-import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 /**
  *
@@ -65,6 +61,18 @@ public interface DepartmentReportPeriodService {
      * @return список идентификаторов или пустой список
      */
     List<Integer> getIdsByDepartmentTypeAndReportPeriod(int departmentTypeCode, int departmentReportPeriodId);
+
+    /**
+     * Получение списка активных корректирующих (или не корректирующих) периодов по подразделению, коду периода и году
+     *
+     * @param departmentId      идентификатор подразделения
+     * @param periodCode        код периода
+     * @param year              год периода
+     * @param correctivePeriods если true, то ищутся только корректирующие периоды, иначе - только не корректирующие периоды
+     * @return список {@link DepartmentReportPeriod} или пустой список
+     */
+    List<DepartmentReportPeriod> getPeriodsSortedByFormTypePriority(long departmentId, String periodCode, int year,
+                                                                    boolean correctivePeriods);
 
     /**
      * Формирует название периода с учетом того, является ли период корректировочным

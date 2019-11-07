@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -16,6 +17,7 @@ import static org.mockito.Mockito.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration("RefBookServiceImplTest.xml")
+@DirtiesContext
 public class RefBookServiceImplTest {
 
     @Autowired

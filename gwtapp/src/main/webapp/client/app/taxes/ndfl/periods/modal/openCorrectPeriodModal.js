@@ -14,8 +14,7 @@
             function ($scope, $shareData, $http, $modalInstance, $logPanel, ValidationUtils, $dialogs, $filter) {
 
                 // Данные формы
-                var reportPeriodStr = $shareData.selectedPeriod.year + ":" + $shareData.selectedPeriod.name +
-                    ($shareData.selectedPeriod.formTypeId ? (":" + $shareData.selectedPeriod.formTypeId) : "");
+                var reportPeriodStr = $filter('departmentReportPeriodFormatter')($shareData.selectedPeriod)
                 $scope.form = {department: $shareData.department, correctionDate: undefined,
                     reportPeriod: reportPeriodStr};
 

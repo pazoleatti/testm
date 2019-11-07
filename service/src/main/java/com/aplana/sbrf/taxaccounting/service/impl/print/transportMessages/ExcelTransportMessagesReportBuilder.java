@@ -275,7 +275,7 @@ public class ExcelTransportMessagesReportBuilder extends AbstractReportBuilder {
         cs.setFillForegroundColor(HSSFColor.GREY_25_PERCENT.index);
         cs.setFillPattern(CellStyle.SOLID_FOREGROUND);
         cs.setDataFormat(getTextFormat());
-        cs.setWrapText(false);
+        cs.setWrapText(true);
         return cs;
     }
 

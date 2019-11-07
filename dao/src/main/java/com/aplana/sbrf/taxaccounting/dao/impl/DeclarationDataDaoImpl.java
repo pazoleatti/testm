@@ -219,7 +219,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
     }
 
     @Override
-    public List<DeclarationData> findPreviousONFFor2Ndfl(int declarationTypeId, String reportPeriodTypeCode, int year, String kpp, String oktmo) {
+    public List<DeclarationData> findONFFor2Ndfl(int declarationTypeId, String reportPeriodTypeCode, int year, String kpp, String oktmo) {
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("declarationTypeId", declarationTypeId);
         params.addValue("reportPeriodTypeCode", reportPeriodTypeCode);
@@ -390,7 +390,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 "select dd.id declarationDataId, dkind.name declarationKind, dtype.name declarationType, dep_fullpath.shortname department,\n" +
                         "   asnu.name asnuName, knf_type.name knfTypeName, state.name state, dd.file_name fileName, dd.created_date creationDate, su.name creationUserName,\n" +
                         "   case when drp.correction_date is not null then" +
-                        "       tp.year || ': ' || rp.name || ', корр. (' || to_char(drp.correction_date, 'DD.MM.YYYY') || ')' || nvl2(rp.form_type_id, ': ' || form_type.code, '')\n" +
+                        "       tp.year || ': ' || rp.name || ' (корр. ' || to_char(drp.correction_date, 'DD.MM.YYYY') || ')' || nvl2(rp.form_type_id, ': ' || form_type.code, '')\n" +
                         "       else tp.year || ': ' || rp.name || nvl2(rp.form_type_id, ': ' || form_type.code, '') end as reportPeriod,\n" +
                         "   dd.kpp, dd.oktmo, dd.tax_organ_code taxOrganCode, doc_state.name docState, dd.note, dd.correction_num\n" +
                         "from DECLARATION_DATA dd\n" +
@@ -1023,7 +1023,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 
     @Override
     public List<Long> findExistingDeclarationsForCreationCheck(DeclarationData declarationData, Integer taxPeriodId,
-                                                               String periodCode) {
+                                                               String periodCode, Date periodCorrectionDate) {
         String sql = "select dd.id from declaration_data dd\n" +
                 "join department_report_period drp on drp.id = dd.department_report_period_id\n" +
                 "join report_period rp on rp.id = drp.report_period_id\n" +
@@ -1032,6 +1032,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 "where \n" +
                 "  dd.declaration_template_id = :declarationTemplateId\n" +
                 "  and dd.knf_type_id = :knfTypeId\n" +
+                "  and drp.correction_date is " + (periodCorrectionDate == null ? "null\n" : "not null\n") +
                 "  and rpt.code = :reportPeriodCode\n" +
                 "  and tp.id = :taxPeriodId";
         MapSqlParameterSource params = new MapSqlParameterSource();
@@ -1153,6 +1154,22 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                         ") t on t.report_period_id = drp.report_period_id and t.declaration_type_id = dt.declaration_type_id " +
                         " and t.kpp = dd.kpp and t.oktmo = dd.oktmo and (t.correction_date is null and drp.correction_date is null or t.correction_date = drp.correction_date)",
                 params, Long.class);
+    }
+
+    @Override
+    public boolean isKnf(Long declarationId) {
+        try {
+            return getJdbcTemplate().queryForObject(
+                    "select 1\n" +
+                            "from declaration_data dd\n" +
+                            "left join declaration_template dt on dt.id = dd.declaration_template_id\n" +
+                            "where\n" +
+                            "  dd.id = ?\n" +
+                            "  and dt.declaration_type_id = 101 /* консолидированная */",
+                    Integer.class, declarationId) == 1;
+        } catch (EmptyResultDataAccessException e) {
+            return false;
+        }
     }
 
     private Collection<Pair<String, String>> toPairs(List<KppOktmoPair> kppOktmoPairs) {

@@ -21,12 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.ByteArrayInputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import static com.aplana.sbrf.taxaccounting.model.DeclarationFormKind.CONSOLIDATED;
 import static com.aplana.sbrf.taxaccounting.model.DeclarationFormKind.PRIMARY;
@@ -163,8 +158,8 @@ public class DeclarationDataDaoTest {
     @Test
     public void findPageByFilterTest() {
         DeclarationDataFilter filter = new DeclarationDataFilter();
-        assertArrayEquals(new Long[]{123L, 7L, 6L, 5L, 4L, 3L, 2L, 1L}, declarationDataDao.findIdsByFilter(filter, DeclarationDataSearchOrdering.ID, false).toArray());
-        assertArrayEquals(new Long[]{1L, 2L, 3L, 4L, 5L, 6L, 7L, 123L}, declarationDataDao.findIdsByFilter(filter, DeclarationDataSearchOrdering.ID, true).toArray());
+        assertArrayEquals(new Long[]{123L, 71L, 70L, 8L, 7L, 6L, 5L, 4L, 3L, 2L, 1L}, declarationDataDao.findIdsByFilter(filter, DeclarationDataSearchOrdering.ID, false).toArray());
+        assertArrayEquals(new Long[]{1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 70L, 71L, 123L}, declarationDataDao.findIdsByFilter(filter, DeclarationDataSearchOrdering.ID, true).toArray());
     }
 
     private PagingParams getPagingParams(int page, int count) {
@@ -178,8 +173,8 @@ public class DeclarationDataDaoTest {
     public void findPage_all() {
         DeclarationDataFilter filter = new DeclarationDataFilter();
         PagingResult<DeclarationDataJournalItem> page = declarationDataDao.findPage(filter, getPagingParams(1, Integer.MAX_VALUE));
-        assertEquals(8, page.size());
-        assertEquals(8, page.getTotalCount());
+        assertEquals(11, page.size());
+        assertEquals(11, page.getTotalCount());
     }
 
     @Test
@@ -187,7 +182,7 @@ public class DeclarationDataDaoTest {
         DeclarationDataFilter filter = new DeclarationDataFilter();
         PagingResult<DeclarationDataJournalItem> page = declarationDataDao.findPage(filter, getPagingParams(2, 2));
         assertEquals(2, page.size());
-        assertEquals(8, page.getTotalCount());
+        assertEquals(11, page.getTotalCount());
         assertEquals(new Long(3), page.get(0).getDeclarationDataId());
         assertEquals(new Long(4), page.get(1).getDeclarationDataId());
     }
@@ -222,7 +217,7 @@ public class DeclarationDataDaoTest {
         assertEquals("Банк", page.get(0).getDepartment());
         assertEquals("Принята", page.get(0).getState());
         assertEquals("Контролёр Банка", page.get(0).getCreationUserName());
-        assertEquals("2014: первый квартал, корр. (02.01.2014): 6 НДФЛ", page.get(0).getReportPeriod());
+        assertEquals("2014: первый квартал (корр. 02.01.2014): 6 НДФЛ", page.get(0).getReportPeriod());
     }
 
     @Test
@@ -306,7 +301,7 @@ public class DeclarationDataDaoTest {
         declarationData.setKnfType(RefBookKnfType.ALL);
 
         List<Long> existingDeclarationsIds =
-                declarationDataDao.findExistingDeclarationsForCreationCheck(declarationData, 1000, "33");
+                declarationDataDao.findExistingDeclarationsForCreationCheck(declarationData, 1000, "33", null);
 
         assertEquals(1, existingDeclarationsIds.size());
         assertEquals(new Long(6), existingDeclarationsIds.get(0));
@@ -320,10 +315,24 @@ public class DeclarationDataDaoTest {
         declarationData.setKnfType(RefBookKnfType.ALL);
 
         List<Long> existingDeclarationsIds =
-                declarationDataDao.findExistingDeclarationsForCreationCheck(declarationData, 1000, "90");
+                declarationDataDao.findExistingDeclarationsForCreationCheck(declarationData, 1000, "90", null);
 
         assertEquals(1, existingDeclarationsIds.size());
         assertEquals(new Long(7), existingDeclarationsIds.get(0));
+    }
+
+    @Test
+    public void checkExistingConsolidatedDeclarationInCorrectionPeriodTest() throws Exception {
+        DeclarationData declarationData = new DeclarationData();
+        declarationData.setDeclarationTemplateId(DeclarationType.NDFL_CONSOLIDATE);
+        declarationData.setKnfType(RefBookKnfType.ALL);
+
+        Date correctionDate = SIMPLE_DATE_FORMAT.parse("01.01.2018");
+        List<Long> existingDeclarationsIds =
+                declarationDataDao.findExistingDeclarationsForCreationCheck(declarationData, 1000, "31", correctionDate);
+
+        assertEquals(1, existingDeclarationsIds.size());
+        assertEquals(new Long(71), existingDeclarationsIds.get(0));
     }
 
     @Test
@@ -397,6 +406,18 @@ public class DeclarationDataDaoTest {
         assertEquals(Collections.emptyList(), declarationDataDao.getDeclarationDataKppList(1L));
         declarationDataDao.createDeclarationDataKppList(1L, Sets.newHashSet("1", "2", "3"));
         assertEquals(asList("1", "2", "3"), declarationDataDao.getDeclarationDataKppList(1L));
+    }
+
+    @Test
+    public void testFindONFFor2NDFL() {
+        List<DeclarationData> declarationDataList = declarationDataDao.findONFFor2Ndfl(104, "33", 2018, "123456789", "12345678");
+        assertEquals(new Long(8), declarationDataList.get(0).getId());
+    }
+
+    @Test
+    public void isKnfTest() {
+        assertTrue(declarationDataDao.isKnf(6L));
+        assertFalse(declarationDataDao.isKnf(8L));
     }
 
     private TAUser createUser() {

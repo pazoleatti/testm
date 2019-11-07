@@ -48,5 +48,7 @@
        <bean class="org.mockito.Mockito" factory-method="mock">
               <constructor-arg value="com.aplana.sbrf.taxaccounting.service.refbook.RefBookFormTypeService"/>
        </bean>
+       <bean id="departmentReportPeriodFormatter"
+             class="com.aplana.sbrf.taxaccounting.utils.DepartmentReportPeriodFormatter"/>
 
 </beans>

@@ -9,9 +9,8 @@ import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.service.component.operation.CreateReportsAsyncTaskDescriptor;
+import com.aplana.sbrf.taxaccounting.utils.DepartmentReportPeriodFormatter;
 import org.springframework.stereotype.Component;
-
-import java.text.SimpleDateFormat;
 
 @Component
 public class CreateReportsAsyncTaskDescriptorImpl implements CreateReportsAsyncTaskDescriptor {
@@ -20,13 +19,18 @@ public class CreateReportsAsyncTaskDescriptorImpl implements CreateReportsAsyncT
     private PeriodService periodService;
     private DeclarationTypeDao declarationTypeDao;
     private DepartmentService departmentService;
+    private DepartmentReportPeriodFormatter departmentReportPeriodFormatter;
 
-    public CreateReportsAsyncTaskDescriptorImpl(DepartmentReportPeriodService departmentReportPeriodService, DeclarationTypeDao declarationTypeDao, DepartmentService departmentService,
-                                                PeriodService periodService) {
+    public CreateReportsAsyncTaskDescriptorImpl(DepartmentReportPeriodService departmentReportPeriodService,
+                                                DeclarationTypeDao declarationTypeDao,
+                                                DepartmentService departmentService,
+                                                PeriodService periodService,
+                                                DepartmentReportPeriodFormatter departmentReportPeriodFormatter) {
         this.departmentReportPeriodService = departmentReportPeriodService;
         this.declarationTypeDao = declarationTypeDao;
         this.departmentService = departmentService;
         this.periodService = periodService;
+        this.departmentReportPeriodFormatter = departmentReportPeriodFormatter;
     }
 
     @Override
@@ -35,11 +39,9 @@ public class CreateReportsAsyncTaskDescriptorImpl implements CreateReportsAsyncT
         DeclarationType declarationType = declarationTypeDao.get(declarationTypeId);
         Department department = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
 
-        return String.format("Создание отчетных форм: Вид отчетности: \"%s\", Период: \"%s\", \"%s\"%s, Подразделение: \"%s\"",
+        return String.format("Создание отчетных форм: Вид отчетности: \"%s\", Период: \"%s\", Подразделение: \"%s\"",
                 declarationType.getName(),
-                departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(),
-                departmentReportPeriod.getReportPeriod().getName(),
-                getCorrectionDateString(departmentReportPeriod),
+                departmentReportPeriodFormatter.getPeriodDescription(departmentReportPeriod),
                 department.getName());
     }
 
@@ -52,11 +54,5 @@ public class CreateReportsAsyncTaskDescriptorImpl implements CreateReportsAsyncT
                 declarationType.getName(),
                 reportPeriod.getTaxPeriod().getYear(),
                 reportPeriod.getName());
-    }
-
-    private String getCorrectionDateString(DepartmentReportPeriod reportPeriod) {
-        return reportPeriod.getCorrectionDate() != null ?
-                String.format(" корр. %s", new SimpleDateFormat("dd.MM.yyyy").format(reportPeriod.getCorrectionDate())) :
-                "";
     }
 }

@@ -132,6 +132,7 @@ class Calculate extends AbstractScriptClass {
         ReportPeriod reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
         ConsolidationSourceDataSearchFilter filter = ConsolidationSourceDataSearchFilter.builder()
                 .currentDate(new Date())
+                .periodId(reportPeriod.id)
                 .periodStartDate(reportPeriod.startDate)
                 .periodEndDate(reportPeriod.endDate)
                 .dataSelectionDepth(reportPeriod.taxPeriod.year - dataSelectionDepth)
