@@ -289,10 +289,12 @@
                         url: "controller/actions/declarationData/createReportFormAnnul",
                         data: params
                     }).then(function (response) {
-                        $modalInstance.close(response);
-                    }).catch(function () {
+                        if (response.data.uuid && response.data.uuid !== null) {
+                            $logPanel.open('log-panel-container', response.data.uuid);
+                        }
                         $modalInstance.close();
-                    });
+                    }
+                    );
                 };
 
                 $scope.close = function () {
