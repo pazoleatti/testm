@@ -324,16 +324,11 @@ public class CommonRefBookServiceImpl implements CommonRefBookService {
     @Override
     @PreAuthorize("isAuthenticated()")
     @Transactional(readOnly = true)
-    public <T extends RefBookSimple> PagingResult<T> fetchAllRecords(long refBookId,
-                                                                     List<String> columns,
-                                                                     String searchPattern,
-                                                                     String filter,
-                                                                     PagingParams pagingParams,
-                                                                     Date actualDate) {
+    public <T extends RefBookSimple> PagingResult<T> fetchAllRecords(long refBookId, List<String> columns, String searchPattern, String filter, PagingParams pagingParams) {
         RefBookAttribute sortAttribute = pagingParams != null && StringUtils.isNotEmpty(pagingParams.getProperty()) ?
                 getAttributeByAlias(refBookId, pagingParams.getProperty()) : null;
         String direction = pagingParams != null ? pagingParams.getDirection() : "asc";
-        return refBookSimpleDao.getRecords(get(refBookId), sortAttribute, direction, pagingParams, columns, searchPattern, filter, actualDate);
+        return refBookSimpleDao.getRecords(get(refBookId), sortAttribute, direction, pagingParams, columns, searchPattern, filter);
     }
 
     @Override

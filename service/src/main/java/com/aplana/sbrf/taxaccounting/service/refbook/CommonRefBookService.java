@@ -129,15 +129,9 @@ public interface CommonRefBookService {
      * @param searchPattern шаблон поиска по полям справочника
      * @param filter        параметр фильтрации
      * @param pagingParams  параметры пейджинга
-     * @param actualDate    дата актуальности для версионных справочников
      * @return значения справочника
      */
-    <T extends RefBookSimple> PagingResult<T> fetchAllRecords(long refBookId,
-                                                              List<String> columns,
-                                                              String searchPattern,
-                                                              String filter,
-                                                              PagingParams pagingParams,
-                                                              Date actualDate);
+    <T extends RefBookSimple> PagingResult<T> fetchAllRecords(long refBookId, List<String> columns, String searchPattern, String filter, PagingParams pagingParams);
 
     /**
      * Получение одного значения указанного справочника

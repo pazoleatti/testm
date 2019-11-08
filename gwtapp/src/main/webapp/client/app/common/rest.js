@@ -466,19 +466,5 @@
                 query: {method: 'GET', isArray: false, cache: false}
             });
         }])
-
-
-        /**
-         * @description Версия записи справочника "Коды вида дохода"
-         */
-        .factory('IncomeTypeResource', function ($resource) {
-            return $resource('controller/rest/refBook/922/record'+
-                '?version=:version' +
-                '&recordId=:recordId'+
-                '&id=:id',
-                {}, {
-                    query: {method: 'GET', isArray: false, cache: false}
-                });
-        })
     ;
 }());

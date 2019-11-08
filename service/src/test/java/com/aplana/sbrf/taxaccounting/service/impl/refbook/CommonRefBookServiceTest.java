@@ -68,15 +68,8 @@ public class CommonRefBookServiceTest {
 
     @Test
     public void testFetchAllRecords() {
-        commonRefBookService.fetchAllRecords(0L, anyListOf(String.class), "", "", null, null);
-        verify(refBookSimpleDao, times(1)).getRecords(any(RefBook.class),
-                any(RefBookAttribute.class),
-                anyString(),
-                any(PagingParams.class),
-                anyListOf(String.class),
-                anyString(),
-                anyString(),
-                any(Date.class));
+        commonRefBookService.fetchAllRecords(0L, anyListOf(String.class), "", "", null);
+        verify(refBookSimpleDao, times(1)).getRecords(any(RefBook.class), any(RefBookAttribute.class), anyString(), any(PagingParams.class), anyListOf(String.class), anyString(), anyString());
     }
 
     @Test

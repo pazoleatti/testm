@@ -4,14 +4,14 @@
     /**
      * @description Модуль для создания, просмотра и редактирования записей справочников
      */
-    angular.module('app.refBookRecordModal', ['ui.router', 'app.rest', 'app.refBookInterceptors'])
+    angular.module('app.refBookRecordModal', ['ui.router', 'app.rest'])
 
     /**
      * @description Контроллер для создания, просмотра и редактирования записей справочников
      */
         .controller('refBookRecordModalCtrl', ['$scope', '$filter', 'APP_CONSTANTS', '$modalInstance', '$shareData',
-            '$http', '$logPanel', 'LogEntryResource', '$dialogs', '$refBookInterceptors',
-            function ($scope, $filter, APP_CONSTANTS, $modalInstance, $shareData, $http, $logPanel, LogEntryResource, $dialogs, $refBookInterceptors) {
+            '$http', '$logPanel', 'LogEntryResource', '$dialogs',
+            function ($scope, $filter, APP_CONSTANTS, $modalInstance, $shareData, $http, $logPanel, LogEntryResource, $dialogs) {
                 $scope.refBook = $shareData.refBook;
                 $scope.isVersionMode = $shareData.recordId && $shareData.recordId !== 'undefined';
                 $scope.isEditMode = $shareData.mode === 'CREATE' || $shareData.mode === 'EDIT';
@@ -99,31 +99,10 @@
                 }
 
                 /**
-                 * Проверяет для версионного справочника, заполненность поля versionFrom
-                 * @return true, если не заполнен
-                 */
-                $scope.versionFromIsEmpty = function(){
-                    //для не версионных справочников, считаем что всегда ну пустая дата
-                    if(!$scope.refBook.versioned) {
-                        return false;
-                    }
-                    return !!!$scope.temp.versionFrom;
-                };
-
-                /**
-                 * Функция для возврата значения поля "Действует с" в элемент select,
-                 * для правильных запросов с учетом даты начала действия
-                 * @return {*}
-                 */
-                $scope.actualDateFn = function(){
-                    return $scope.temp.versionFrom;
-                };
-
-                /**
                  * Валидация периода актуальности записи.
                  * Нужна так как стандартная валидация min-date, max-date не умеет работать с динамическими ограничениями, но они все равно используются для блокировки дат в самом календаре
                  */
-                $scope.validateVersionDates = function () {
+                $scope.validateVersionDates = function() {
                     var generatedVersionFromId = 'temp_versionfrom';
                     var generatedVersionToId = 'temp_versionto';
 
@@ -148,7 +127,7 @@
                  * Получает разыменованное значение атрибута
                  * @param attribute атрибут справочника
                  */
-                $scope.getAttributeValue = function (attribute) {
+                $scope.getAttributeValue = function(attribute) {
                     if (attribute) {
                         var value = "";
                         var refBookValue = $scope.record[attribute.alias];
@@ -185,7 +164,7 @@
                  * Получает "красивое" значение атрибута, отображаемое в GUI.
                  * @param attribute
                  */
-                $scope.getAttributeFineValue = function (attribute) {
+                $scope.getAttributeFineValue = function(attribute) {
                     var value = $scope.getAttributeValue(attribute);
                     if (value === '' || value === null) {
                         return "-";
@@ -212,34 +191,13 @@
                     } else {
                         url = "controller/actions/refBook/" + $scope.refBook.id + "/createRecord"
                     }
-
-
-                    $refBookInterceptors.beforeSaveRecord({
-                        record: tempRecord,
-                        $shareData: $shareData
+                    $http({
+                        method: "POST",
+                        url: url,
+                        data: tempRecord
                     }).then(function () {
-
-                        $http({
-                            method: "POST",
-                            url: url,
-                            data: tempRecord
-                        }).then(function (result) {
-                            $refBookInterceptors.onSaveRecord({
-                                record: tempRecord,
-                                $shareData: $shareData,
-                                result: result
-                            }).then(function () {
-                                $modalInstance.close(true);
-                            });
-                        }, function (result) {
-                            $refBookInterceptors.onErrorSaveRecord({
-                                record: tempRecord,
-                                $shareData: $shareData,
-                                result: result
-                            });
-                        });
+                        $modalInstance.close(true);
                     });
-
                 };
 
                 /**
@@ -264,25 +222,19 @@
                  * @description закрытие модального окна
                  */
                 $scope.close = function () {
-                    $refBookInterceptors.onCloseWindowRecord({
-                        record: $scope.record,
-                        $shareData: $shareData
-                    }).then(function () {
-
-                        if (($shareData.mode === 'CREATE' || $shareData.mode === 'EDIT') && $scope.refBookRecordForm.$dirty) {
-                            $dialogs.confirmDialog({
-                                title: $filter('translate')('title.confirm'),
-                                content: $filter('translate')('refBook.confirm.cancelEdit'),
-                                okBtnCaption: $filter('translate')('common.button.yes'),
-                                cancelBtnCaption: $filter('translate')('common.button.no'),
-                                okBtnClick: function () {
-                                    $modalInstance.close(false);
-                                }
-                            });
-                        } else {
-                            $modalInstance.close(false);
-                        }
-                    });
+                    if (($shareData.mode === 'CREATE' || $shareData.mode === 'EDIT') && $scope.refBookRecordForm.$dirty) {
+                        $dialogs.confirmDialog({
+                            title: $filter('translate')('title.confirm'),
+                            content: $filter('translate')('refBook.confirm.cancelEdit'),
+                            okBtnCaption: $filter('translate')('common.button.yes'),
+                            cancelBtnCaption: $filter('translate')('common.button.no'),
+                            okBtnClick: function () {
+                                $modalInstance.close(false);
+                            }
+                        });
+                    } else {
+                        $modalInstance.close(false);
+                    }
                 };
 
                 /**
