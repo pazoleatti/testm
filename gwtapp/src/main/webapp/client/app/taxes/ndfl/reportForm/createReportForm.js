@@ -62,8 +62,8 @@
                     var params = {
                         knfId: $scope.knf ? $scope.knf.id : undefined,
                         declarationTypeId: $scope.reportData.declarationType.id,
-                        departmentId: $scope.knf ? undefined : $scope.reportData.department.id,
-                        periodId: $scope.knf ? undefined : $scope.reportData.period.id
+                        departmentId: $scope.reportData.department.id,
+                        periodId: $scope.reportData.period.id
                     };
                     if ($scope.reportData.kppOktmoPairs) {
                         params.kppOktmoPairs = $scope.reportData.kppOktmoPairs.map(function (kppOktmoPair) {

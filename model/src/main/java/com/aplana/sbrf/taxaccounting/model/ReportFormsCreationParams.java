@@ -58,6 +58,17 @@ public class ReportFormsCreationParams implements Serializable {
     private Long declarationDataId;
 
     /**
+     * Идентификатор отчетного периода
+     */
+    private int reportPeriodId;
+
+    /**
+     * Идентификатор тер.банка
+     */
+    private int departmentId;
+
+
+    /**
      * Выбранное ФИО,  ИНН РФ, № ДУЛ для которого нужно сформировать аннулирующую 2-НДФЛ в ручном режиме
      */
     private String lastName;
@@ -80,5 +91,7 @@ public class ReportFormsCreationParams implements Serializable {
         middleName = action.getMiddleName();
         innNp = action.getInnNp();
         idDocNumber = action.getIdDocNumber();
+        reportPeriodId = action.getPeriodId();
+        departmentId = action.getDepartmentId();
     }
 }
