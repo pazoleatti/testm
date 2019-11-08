@@ -93,7 +93,7 @@
                                      aplana-input-outer-width="400"
                                      data-ng-init="initSelect(attribute.refBookId, attribute.alias, null, false, temp.versionFrom)"
                                      data-ng-model="record[attribute.alias].value"
-                                     data-ng-disabled="attribute.readOnly"
+                                     data-ng-disabled="attribute.readOnly||versionFromIsEmpty()"
                                      data-ng-required="{{attribute.required}}"></div>
                                 <div data-aplana-validator data-key='required'>{{::'common.validation.required' | translate}}</div>
                             </div>
