@@ -75,14 +75,18 @@
 
                         var incomeKind = eventData.record;
                         var id = incomeKind.INCOME_TYPE_ID && incomeKind.INCOME_TYPE_ID.value;
-                        var record_id = incomeKind.INCOME_TYPE_ID.referenceObject &&
-                            incomeKind.INCOME_TYPE_ID.referenceObject.record_id &&
-                            incomeKind.INCOME_TYPE_ID.referenceObject.record_id.value;
-                        //TODO оставил, до правки компонента select с учетом периодических справочников
                         var version = incomeKind.record_version_from.value;
+                        var record_id;
+
+                        //Если не указан id конкретной версии, то получим record_id и будем искать recodr_id+version
+                        if (!id) {
+                            record_id = incomeKind.INCOME_TYPE_ID.referenceObject &&
+                                incomeKind.INCOME_TYPE_ID.referenceObject.record_id &&
+                                incomeKind.INCOME_TYPE_ID.referenceObject.record_id.value;
+                        }
 
                         return IncomeTypeResource.query({
-                            //version: version,
+                            version: version,
                             id: id,
                             recordId: record_id,
                         }).$promise.then(function (incomeType) {

@@ -91,7 +91,7 @@
                             <div data-aplana-field data-model-id="{{attribute.alias}}">
                                 <div data-ui-select2="select.options"
                                      aplana-input-outer-width="400"
-                                     data-ng-init="initSelect(attribute.refBookId, attribute.alias, null, false, temp.versionFrom)"
+                                     data-ng-init="initSelect(attribute.refBookId, attribute.alias, null, false, actualDateFn)"
                                      data-ng-model="record[attribute.alias].value"
                                      data-ng-disabled="attribute.readOnly||versionFromIsEmpty()"
                                      data-ng-required="{{attribute.required}}"></div>
