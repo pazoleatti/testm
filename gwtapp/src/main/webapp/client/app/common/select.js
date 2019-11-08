@@ -946,9 +946,9 @@
                  * Инициализация списка записей справочника
                  * @param refBookId идентификатор справочника, записи которого будут получены
                  * @param attributeAlias алиас атрибута записи справочника, сама которая является ссылочным значением. Используется для подгрузки полного значения в поле объекта
-                 * @param actualDate Дата начала действия элементов версионного справочника
+                 * @param actualDateFn Дата начала действия элементов версионного справочника
                  */
-                $scope.initSelect = function (refBookId, attributeAlias, filter, isMultiple, actualDate) {
+                $scope.initSelect = function (refBookId, attributeAlias, filter, isMultiple, actualDateFn) {
                     if (attributeAlias) {
                         /**
                          * Событие первичного проставления значения в выпадашке. Используется для подгрузки "полного" значения записи справочника по ее идентификатору
@@ -985,16 +985,23 @@
                             || refBookId === APP_CONSTANTS.REFBOOK.TAXPAYER_STATUS
                             || refBookId === APP_CONSTANTS.REFBOOK.ASNU
                         );
+                        var filterColumns = $scope.config.filter;
+
+                        if(actualDateFn){
+                            filterColumns = function() {
+                                var actualDate= actualDateFn();
+                                actualDate = $filter('date')(actualDate,'yyyy-MM-dd');
+                                return $.extend($scope.config.filter,{ actualDate: actualDate });
+                            };
+                        }
+
                         $scope.select = GetSelectOption.getAjaxAdditionalFilterSelectOptions(isMultiple, true, "controller/rest/refBook/" + refBookId + "/records",
-                            $scope.config.filter,
+                            filterColumns,
                             filter ? filter : '',
                             $scope.config.sort ? $scope.config.sort : $scope.refBookConfig.default.sort,
                             $scope.config.formatter,
                             "searchPattern"
                         );
-                        if(actualDate) {
-                            $scope.select.options.dataFilter.actualDate = $filter('date')(actualDate,'yyyy-MM-dd');
-                        }
                     }
                 };
 
