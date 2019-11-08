@@ -518,15 +518,15 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
                 create2_6NdflDataReport('xlsx')
                 scriptSpecificReportHolder.setFileName("Данные_для_2_и_6-НДФЛ_${declarationData.id}_${date.format('yyyy-MM-dd_HH-mm-ss')}.xlsx")
                 specReportDescription = "\"Данные для включения в 2-НДФЛ и 6-НДФЛ\" с параметрами: " +
-                        "Включать данные с ${dateFrom.format('dd.MM.yyyy')} по ${dateTo.format('dd.MM.yyyy')} " +
-                        "Отрицательные значения : ${adjustNegativeValues ? "Корректировать" : "Не корректировать"} КПП: ${(kppList && kppList.size() > 0) ? "Выбранные КПП" : "Все КПП формы"}"
+                        "Включать данные с ${dateFrom.format('dd.MM.yyyy')} по ${dateTo.format('dd.MM.yyyy')}, " +
+                        "Отрицательные значения: ${adjustNegativeValues ? "Корректировать" : "Не корректировать"}, КПП: ${(kppList && kppList.size() > 0) ? "Выбранные КПП" : "Все КПП формы"}"
                 break
             case SubreportAliasConstants.RNU_NDFL_2_6_DATA_TXT_REPORT:
                 create2_6NdflDataReport('txt')
                 scriptSpecificReportHolder.setFileName("Данные_для_2_и_6-НДФЛ_${declarationData.id}_${date.format('yyyy-MM-dd_HH-mm-ss')}.txt")
                 specReportDescription = "Файл выгрузки: \"Данные для включения в 2-НДФЛ и 6-НДФЛ\" с параметрами: " +
-                        "Включать данные с ${dateFrom.format('dd.MM.yyyy')} по ${dateTo.format('dd.MM.yyyy')} " +
-                        "Отрицательные значения : ${adjustNegativeValues ? "Корректировать" : "Не корректировать"} КПП: ${(kppList && kppList.size() > 0) ? "Выбранные КПП" : "Все КПП формы"}"
+                        "Включать данные с ${dateFrom.format('dd.MM.yyyy')} по ${dateTo.format('dd.MM.yyyy')}, " +
+                        "Отрицательные значения: ${adjustNegativeValues ? "Корректировать" : "Не корректировать"}, КПП: ${(kppList && kppList.size() > 0) ? "Выбранные КПП" : "Все КПП формы"}"
                 break
             default:
                 throw new ServiceException("Обработка данного спец. отчета не предусмотрена!");
