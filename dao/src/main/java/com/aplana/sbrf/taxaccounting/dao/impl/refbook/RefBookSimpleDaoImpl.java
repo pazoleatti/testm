@@ -91,14 +91,10 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
                                                                 PagingParams pagingParams,
                                                                 List<String> columns,
                                                                 String searchPattern,
-                                                                String filter,
-                                                                Date actualDate) {
+                                                                String filter) {
         QueryBuilder q;
         if (refBook.isVersioned()) {
-            if(actualDate == null){
-                actualDate = new Date();
-            }
-            q = queryBuilder.allRecordsByVersion(refBook, actualDate, columns, searchPattern, filter, pagingParams, sortAttribute, direction);
+            q = queryBuilder.allRecordsByVersion(refBook, new Date(), columns, searchPattern, filter, pagingParams, sortAttribute, direction);
         } else {
             q = queryBuilder.allRecords(refBook, columns, searchPattern, filter, pagingParams, sortAttribute, direction);
         }
