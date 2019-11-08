@@ -42,11 +42,13 @@ public interface RefBookSimpleDao {
      * @param columns       список колонок в таблице, по которым выполняется фильтрация. Может быть не задано
      * @param searchPattern шаблон поиска. Может быть не задано
      * @param filter        условие фильтрации строк. Может быть не задано
+     * @param actualDate    та самая определенная дата актуальности. Может быть не задано (тогда берется текущая дата на сервере, как актуальная)
      * @return список записей
      */
     <T extends RefBookSimple> PagingResult<T> getRecords(RefBook refBook, RefBookAttribute sortAttribute, String direction,
                                                          PagingParams pagingParams, List<String> columns,
-                                                         String searchPattern, String filter);
+                                                         String searchPattern, String filter,
+                                                         Date actualDate);
 
     PagingResult<Map<String, RefBookValue>> getVersionsInPeriod(RefBook refBook, Date versionFrom, Date versionTo, String filter);
 
