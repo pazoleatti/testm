@@ -610,7 +610,7 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     }
 
     @Override
-    public void deleteRowsBySection1(List<Long> ndflPersonIds, Long declarationDataId) {
+    public void deleteRowsInNdflPerson(List<Long> ndflPersonIds, Long declarationDataId) {
         ndflPersonDao.deleteNdflPersonBatch(ndflPersonIds);
         ndflPersonDao.renumerateNdflPersonPrepaymentRowNums(declarationDataId);
         ndflPersonDao.renumerateNdflPersonDeductionRowNums(declarationDataId);
@@ -619,8 +619,8 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     }
 
     @Override
-    public void deleteRowsBySection2(List<Long> ndflPersonIncomeIds, Long declarationDataId) {
-        ndflPersonDao.deleteRowsBySection2(ndflPersonIncomeIds);
+    public void deleteRowsInPrepayments(List<Long> ndflPersonIncomeIds, Long declarationDataId) {
+        ndflPersonDao.deleteRowsByNdflPersonIncomes(ndflPersonIncomeIds);
         ndflPersonDao.renumerateNdflPersonPrepaymentRowNums(declarationDataId);
         ndflPersonDao.renumerateNdflPersonDeductionRowNums(declarationDataId);
         ndflPersonDao.renumerateNdflPersonIncomeRowNums(declarationDataId);

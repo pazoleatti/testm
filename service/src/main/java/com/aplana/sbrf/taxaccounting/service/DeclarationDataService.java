@@ -856,10 +856,10 @@ public interface DeclarationDataService {
     /**
      * Создать задачу на удаление строк разделов налоговой формы
      * @param userInfo
-     * @param deleteSelectedDeclarationRowsActionCollection Информация о форме строках и разделе, к которому они относятся
+     * @param deleteSelectedDeclarationRowsAction Информация о форме строках и разделе, к которому они относятся
      * @return
      */
     ActionResult createDeleteSelectedDeclarationRowsTask(TAUserInfo userInfo,
-                                                         Collection<DeleteSelectedDeclarationRowsAction> deleteSelectedDeclarationRowsActionCollection);
+                                                         DeleteSelectedDeclarationRowsAction deleteSelectedDeclarationRowsAction);
 
 }

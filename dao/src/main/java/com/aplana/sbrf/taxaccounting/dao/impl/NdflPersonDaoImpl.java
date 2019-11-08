@@ -2871,7 +2871,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     @Override
-    public void deleteRowsBySection2(final List<Long> ndflPersonIncomeIds) {
+    public void deleteRowsByNdflPersonIncomes(final List<Long> ndflPersonIncomeIds) {
         String deleteTemp0 = "delete from TMP_NUMBERS0";
         String deleteTemp1 = "delete from TMP_NUMBERS1";
         String insertTemp0 = "insert into TMP_NUMBERS0 (num) VALUES(?)";

@@ -21,10 +21,7 @@ import org.apache.commons.collections4.Equator;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.joda.time.LocalDate;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1376,6 +1373,29 @@ public class NdflPersonDaoTest {
     public void getPersonIncomesByOperations() {
         List<Long> personIncomesByPersonOperations = ndflPersonDao.findNdflPersonIncomeByPersonAndOperations(101L, asList("1", "2"));
         assertThat(personIncomesByPersonOperations).containsExactlyInAnyOrder(1036L, 1037L);
+    }
+
+    @Test
+    public void testDeleteNdflPersonBatch(){
+        ndflPersonDao.deleteNdflPersonBatch(asList(101L));
+
+        NdflPerson ndflPerson = null;
+        try {
+            ndflPerson = ndflPersonDao.findById(101L);
+        } catch (DaoException e){
+
+        }
+        NdflPersonIncome ndflPersonIncome = ndflPersonDao.fetchOneNdflPersonIncome(1037L);
+        Assert.assertNull("Failed delete NdflPerson",ndflPerson);
+    }
+
+    @Test
+    public void testDeleteRowsByNdflPersonIncomes(){
+        ndflPersonDao.deleteRowsByNdflPersonIncomes(asList(1037L));
+        NdflPersonIncome ndflPersonIncome = ndflPersonDao.fetchOneNdflPersonIncome(1037L);
+        NdflPersonPrepayment ndflPersonPrepayment = ndflPersonDao.fetchOneNdflPersonPrepayment(2);
+        Assert.assertNull("Failed delete NdflPersonIncome",ndflPersonIncome);
+        Assert.assertNull("Failed delete referenced NdflPersonIncome",ndflPersonPrepayment);
     }
 
     private static Date toDate(String dateStr) {

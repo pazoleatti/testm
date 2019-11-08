@@ -4,7 +4,7 @@
 	xsi:schemaLocation="
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
 		http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd">
-    
+
     <import resource="classpath:com/aplana/sbrf/taxaccounting/dao.xml"/>
     <import resource="classpath:com/aplana/sbrf/taxaccounting/cache.xml"/>
 
@@ -16,10 +16,11 @@
     <bean id="dataSourceSecondary" class="org.mockito.Mockito" factory-method="mock">
         <constructor-arg value="org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy"/>
     </bean>
-    
+
     <!-- Встроенная тестовая база данных HSQLDB -->
     <jdbc:embedded-database id="dataSource">
         <jdbc:script location="hsql_init.sql" encoding="UTF-8"/>
+
     </jdbc:embedded-database>
 
     <jdbc:initialize-database ignore-failures="DROPS">
@@ -30,4 +31,5 @@
         <jdbc:script location="file:../src/main/resources/dml/refbook/declaration_kind.sql" encoding="UTF-8"/>
         <jdbc:script location="file:../src/main/resources/dml/refbook/ref_book_form_type.sql" encoding="UTF-8"/>
     </jdbc:initialize-database>
+
 </beans>

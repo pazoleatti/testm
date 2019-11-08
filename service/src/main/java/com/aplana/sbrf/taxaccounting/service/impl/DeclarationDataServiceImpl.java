@@ -2743,7 +2743,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     public String createExcelTemplateBySelectedPersonList(long declarationDataId, TAUserInfo userInfo,
-                                                         ExcelTemplateSelectedRows selectedRows) throws IOException {
+                                                          ExcelTemplateSelectedRows selectedRows) throws IOException {
         Logger logger = logEntryService.createLogger();
         Configuration shotTimingConfiguration = configurationDao.fetchByEnum(ConfigurationParam.SHOW_TIMING);
         boolean isShowTiming = "1".equals(shotTimingConfiguration.getValue());
@@ -3318,40 +3318,27 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     @Transactional
     public ActionResult createDeleteSelectedDeclarationRowsTask(TAUserInfo userInfo,
-                                                                Collection<DeleteSelectedDeclarationRowsAction> deleteSelectedDeclarationRowsActionCollection) {
+                                                                DeleteSelectedDeclarationRowsAction deleteSelectedDeclarationRowsAction) {
         final ActionResult result = new ActionResult();
         Logger logger = new Logger();
-        Collection<DeleteSelectedDeclarationRowsAction> deleteRowsCollection = deleteSelectedDeclarationRowsActionCollection;
 
-        if (!CollectionUtils.isEmpty(deleteRowsCollection)) {
-
-
+        if (deleteSelectedDeclarationRowsAction != null) {
             try {
-                final List<Long> declarationDataIds = new LinkedList<>();
-                for (DeleteSelectedDeclarationRowsAction deleteRows : deleteRowsCollection) {
-                    Long declarationDataId = deleteRows.getDeclarationDataId();
-                    if (permissionEvaluator.hasPermission(SecurityContextHolder.getContext().getAuthentication(),
-                            new TargetIdAndLogger(declarationDataId, logger),
-                            "com.aplana.sbrf.taxaccounting.permissions.logging.TargetIdAndLogger",
-                            DeclarationDataPermission.DELETE_ROWS)) {
-                        declarationDataIds.add(declarationDataId);
-                    } else {
-                        makeNotificationForAccessDenied(logger);
-                    }
-                }
 
-                Map<String, Object> params = new HashMap<>();
-                if (declarationDataIds.size() > 1) {
-                    params.put("declarationDataIds", declarationDataIds);
+                Long declarationDataId = deleteSelectedDeclarationRowsAction.getDeclarationDataId();
+                if (permissionEvaluator.hasPermission(SecurityContextHolder.getContext().getAuthentication(),
+                        new TargetIdAndLogger(declarationDataId, logger),
+                        "com.aplana.sbrf.taxaccounting.permissions.logging.TargetIdAndLogger",
+                        DeclarationDataPermission.DELETE_ROWS)) {
+                    Map<String, Object> params = new HashMap<>();
+                    params.put("declarationDataId", declarationDataId);
+                    params.put("fullDeclarationDescription", this.getFullDeclarationDescription(declarationDataId));
+                    params.put("deleteRows", deleteSelectedDeclarationRowsAction);
+                    params.put("userIP", userInfo.getIp());
+                    asyncManager.createTask(OperationType.DELETE_DEC_ROWS, userInfo, params, logger);
                 } else {
-                    params.put("declarationDataId", declarationDataIds.get(0));
-                    params.put("fullDeclarationDescription", this.getFullDeclarationDescription(declarationDataIds.get(0)));
+                    makeNotificationForAccessDenied(logger);
                 }
-
-                params.put("toDeleteRows", deleteRowsCollection);
-                params.put("userIP", userInfo.getIp());
-
-                asyncManager.createTask(OperationType.DELETE_DEC_ROWS, userInfo, params, logger);
 
             } catch (Exception e) {
                 logger.error("Удаление строк формы: \n%s", e.getMessage());

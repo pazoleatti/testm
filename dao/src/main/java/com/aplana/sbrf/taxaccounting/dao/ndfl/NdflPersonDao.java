@@ -868,5 +868,5 @@ public interface NdflPersonDao {
      * Удалить строки разделов 1,3,4 по строкам раздела 2
      * @param ndflPersonIncomeIds
      */
-    void deleteRowsBySection2(List<Long> ndflPersonIncomeIds);
+    void deleteRowsByNdflPersonIncomes(List<Long> ndflPersonIncomeIds);
 }
