@@ -94,12 +94,6 @@ class Report2Ndfl extends AbstractScriptClass {
         this.departmentService = (DepartmentService) getSafeProperty("departmentService")
         this.reportPeriodService = (ReportPeriodService) getSafeProperty("reportPeriodService")
         this.declarationData = (DeclarationData) getSafeProperty("declarationData")
-        if (this.declarationData) {
-            this.declarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId)
-            this.departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
-            this.department = departmentService.get(departmentReportPeriod.departmentId)
-            this.reportPeriod = this.departmentReportPeriod.reportPeriod
-        }
         this.ndflPersonService = (NdflPersonService) getSafeProperty("ndflPersonService")
         this.departmentConfigService = (DepartmentConfigService) getSafeProperty("departmentConfigService")
         this.sourceService = (SourceService) getSafeProperty("sourceService")
@@ -115,6 +109,16 @@ class Report2Ndfl extends AbstractScriptClass {
         this.applicationVersion = (String) getSafeProperty("applicationVersion")
         this.paramMap = (Map<String, Object>) getSafeProperty("paramMap")
         this.reportFormsCreationParams = (ReportFormsCreationParams) getSafeProperty("reportFormsCreationParams")
+
+        Integer declarationTypeId = reportFormsCreationParams.declarationTypeId
+        this.declarationTemplate = declarationService.getTemplate(declarationTypeId)
+
+        Integer departmentId = reportFormsCreationParams.departmentId
+        this.department = departmentService.get(departmentId)
+        Integer reportPeriodId = reportFormsCreationParams.reportPeriodId
+        this.reportPeriod = reportPeriodService.get(reportPeriodId)
+        this.departmentReportPeriod = departmentReportPeriodService.getLast(departmentId, reportPeriodId)
+
         this.ndflReferenceService = (NdflReferenceService) getSafeProperty("ndflReferenceService")
         this.auditService = (AuditService) getSafeProperty("auditServiceImpl")
         this.departmentReportPeriodFormatter = (DepartmentReportPeriodFormatter) getSafeProperty("departmentReportPeriodFormatter")

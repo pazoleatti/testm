@@ -99,7 +99,7 @@ class Report6Ndfl extends AbstractScriptClass {
         this.department = departmentService.get(departmentId)
         Integer reportPeriodId = reportFormsCreationParams.reportPeriodId
         this.reportPeriod = reportPeriodService.get(reportPeriodId)
-        this.departmentReportPeriod = departmentReportPeriodService.getFirst(departmentId, reportPeriodId)
+        this.departmentReportPeriod = departmentReportPeriodService.getLast(departmentId, reportPeriodId)
         this.periodCode = refBookService.getRecordData(RefBook.Id.PERIOD_CODE.getId(), reportPeriod.dictTaxPeriodId)?.CODE?.stringValue
     }
 
