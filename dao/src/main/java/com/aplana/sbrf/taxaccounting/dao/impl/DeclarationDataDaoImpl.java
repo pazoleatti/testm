@@ -1034,12 +1034,13 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 "  and dd.knf_type_id = :knfTypeId\n" +
                 "  and drp.correction_date is " + (periodCorrectionDate == null ? "null\n" : "not null\n") +
                 "  and rpt.code = :reportPeriodCode\n" +
-                "  and tp.id = :taxPeriodId";
+                "  and tp.id = :taxPeriodId and drp.department_id = :departmentId";
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("declarationTemplateId", declarationData.getDeclarationTemplateId());
         params.addValue("knfTypeId", declarationData.getKnfType().getId());
         params.addValue("reportPeriodCode", periodCode);
         params.addValue("taxPeriodId", taxPeriodId);
+        params.addValue("departmentId", declarationData.getDepartmentId());
         try {
             return getNamedParameterJdbcTemplate().queryForList(sql, params, Long.class);
         } catch (EmptyResultDataAccessException e) {

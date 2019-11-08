@@ -299,6 +299,7 @@ public class DeclarationDataDaoTest {
         DeclarationData declarationData = new DeclarationData();
         declarationData.setDeclarationTemplateId(DeclarationType.NDFL_CONSOLIDATE);
         declarationData.setKnfType(RefBookKnfType.ALL);
+        declarationData.setDepartmentId(1);
 
         List<Long> existingDeclarationsIds =
                 declarationDataDao.findExistingDeclarationsForCreationCheck(declarationData, 1000, "33", null);
@@ -313,6 +314,7 @@ public class DeclarationDataDaoTest {
         DeclarationData declarationData = new DeclarationData();
         declarationData.setDeclarationTemplateId(DeclarationType.NDFL_CONSOLIDATE);
         declarationData.setKnfType(RefBookKnfType.ALL);
+        declarationData.setDepartmentId(1);
 
         List<Long> existingDeclarationsIds =
                 declarationDataDao.findExistingDeclarationsForCreationCheck(declarationData, 1000, "90", null);
@@ -326,6 +328,7 @@ public class DeclarationDataDaoTest {
         DeclarationData declarationData = new DeclarationData();
         declarationData.setDeclarationTemplateId(DeclarationType.NDFL_CONSOLIDATE);
         declarationData.setKnfType(RefBookKnfType.ALL);
+        declarationData.setDepartmentId(1);
 
         Date correctionDate = SIMPLE_DATE_FORMAT.parse("01.01.2018");
         List<Long> existingDeclarationsIds =
