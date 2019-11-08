@@ -58,9 +58,9 @@ public class ReportFormsCreationParams implements Serializable {
     private Long declarationDataId;
 
     /**
-     * Идентификатор отчетного периода
+     * Идентификатор отчетного периода подразделения
      */
-    private int reportPeriodId;
+    private int departmentReportPeriodId;
 
     /**
      * Идентификатор тер.банка
@@ -91,7 +91,6 @@ public class ReportFormsCreationParams implements Serializable {
         middleName = action.getMiddleName();
         innNp = action.getInnNp();
         idDocNumber = action.getIdDocNumber();
-        reportPeriodId = action.getPeriodId();
         departmentId = action.getDepartmentId();
     }
 }

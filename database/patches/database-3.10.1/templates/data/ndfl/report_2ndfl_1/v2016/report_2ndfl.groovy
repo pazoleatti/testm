@@ -115,9 +115,10 @@ class Report2Ndfl extends AbstractScriptClass {
 
         Integer departmentId = reportFormsCreationParams.departmentId
         this.department = departmentService.get(departmentId)
-        Integer reportPeriodId = reportFormsCreationParams.reportPeriodId
-        this.reportPeriod = reportPeriodService.get(reportPeriodId)
-        this.departmentReportPeriod = departmentReportPeriodService.getLast(departmentId, reportPeriodId)
+
+        Integer departmentReportPeriodId = reportFormsCreationParams.departmentReportPeriodId
+        this.departmentReportPeriod = departmentReportPeriodService.get(departmentReportPeriodId)
+        this.reportPeriod = this.departmentReportPeriod.reportPeriod
 
         this.ndflReferenceService = (NdflReferenceService) getSafeProperty("ndflReferenceService")
         this.auditService = (AuditService) getSafeProperty("auditServiceImpl")

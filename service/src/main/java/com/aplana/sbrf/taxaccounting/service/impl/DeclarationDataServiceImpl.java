@@ -258,12 +258,16 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
         DeclarationData knf = findKnfForReport(action, logger);
         if (!logger.containsLevel(LogLevel.ERROR)) {
+            DepartmentReportPeriod departmentReportPeriod =
+                    departmentReportPeriodService.fetchLast(action.getDepartmentId(), action.getPeriodId());
+
             ReportFormsCreationParams params = new ReportFormsCreationParams(action);
             params.setSourceKnfId(knf.getId());
+            params.setDepartmentReportPeriodId(departmentReportPeriod.getId());
             final Map<String, Object> taskParams = new HashMap<>();
             taskParams.put("declarationDataId", knf.getId());
             taskParams.put("declarationTypeId", action.getDeclarationTypeId());
-            taskParams.put("departmentReportPeriodId", knf.getDepartmentReportPeriodId());
+            taskParams.put("departmentReportPeriodId", departmentReportPeriod.getId());
             taskParams.put("params", params);
             taskParams.put("userIP", userInfo.getIp());
             asyncManager.createTask(OperationType.getOperationByDeclarationTypeId(action.getDeclarationTypeId()),
