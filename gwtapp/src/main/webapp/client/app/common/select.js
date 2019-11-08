@@ -946,8 +946,9 @@
                  * Инициализация списка записей справочника
                  * @param refBookId идентификатор справочника, записи которого будут получены
                  * @param attributeAlias алиас атрибута записи справочника, сама которая является ссылочным значением. Используется для подгрузки полного значения в поле объекта
+                 * @param actualDate Дата начала действия элементов версионного справочника
                  */
-                $scope.initSelect = function (refBookId, attributeAlias, filter, isMultiple) {
+                $scope.initSelect = function (refBookId, attributeAlias, filter, isMultiple, actualDate) {
                     if (attributeAlias) {
                         /**
                          * Событие первичного проставления значения в выпадашке. Используется для подгрузки "полного" значения записи справочника по ее идентификатору
@@ -991,6 +992,9 @@
                             $scope.config.formatter,
                             "searchPattern"
                         );
+                        if(actualDate) {
+                            $scope.select.options.dataFilter.actualDate = $filter('date')(actualDate,'yyyy-MM-dd');
+                        }
                     }
                 };
 
