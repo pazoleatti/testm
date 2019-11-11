@@ -85,7 +85,6 @@ class Report2Ndfl extends AbstractScriptClass {
     NdflReferenceService ndflReferenceService
     AuditService auditService
     DepartmentReportPeriodFormatter departmentReportPeriodFormatter
-    RefBookPersonService refBookPersonService
 
     @TypeChecked(TypeCheckingMode.SKIP)
     Report2Ndfl(scriptClass) {
@@ -95,6 +94,12 @@ class Report2Ndfl extends AbstractScriptClass {
         this.departmentService = (DepartmentService) getSafeProperty("departmentService")
         this.reportPeriodService = (ReportPeriodService) getSafeProperty("reportPeriodService")
         this.declarationData = (DeclarationData) getSafeProperty("declarationData")
+        if (this.declarationData) {
+            this.declarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId)
+            this.departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
+            this.department = departmentService.get(departmentReportPeriod.departmentId)
+            this.reportPeriod = this.departmentReportPeriod.reportPeriod
+        }
         this.ndflPersonService = (NdflPersonService) getSafeProperty("ndflPersonService")
         this.departmentConfigService = (DepartmentConfigService) getSafeProperty("departmentConfigService")
         this.sourceService = (SourceService) getSafeProperty("sourceService")
@@ -110,27 +115,9 @@ class Report2Ndfl extends AbstractScriptClass {
         this.applicationVersion = (String) getSafeProperty("applicationVersion")
         this.paramMap = (Map<String, Object>) getSafeProperty("paramMap")
         this.reportFormsCreationParams = (ReportFormsCreationParams) getSafeProperty("reportFormsCreationParams")
-
-        if (FormDataEvent.CREATE_FORMS == this.formDataEvent) {
-            Integer declarationTypeId = reportFormsCreationParams.declarationTypeId
-            this.declarationTemplate = declarationService.getTemplate(declarationTypeId)
-
-            Integer departmentId = reportFormsCreationParams.departmentId
-            this.department = departmentService.get(departmentId)
-
-            Integer departmentReportPeriodId = reportFormsCreationParams.departmentReportPeriodId
-            this.departmentReportPeriod = departmentReportPeriodService.get(departmentReportPeriodId)
-        } else if (this.declarationData) {
-            this.declarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId)
-            this.departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
-            this.department = departmentService.get(departmentReportPeriod.departmentId)
-        }
-        this.reportPeriod = this.departmentReportPeriod.reportPeriod
-
         this.ndflReferenceService = (NdflReferenceService) getSafeProperty("ndflReferenceService")
         this.auditService = (AuditService) getSafeProperty("auditServiceImpl")
         this.departmentReportPeriodFormatter = (DepartmentReportPeriodFormatter) getSafeProperty("departmentReportPeriodFormatter")
-        this.refBookPersonService = (RefBookPersonService) getSafeProperty("refBookPersonService")
     }
 
     @Override
@@ -760,19 +747,18 @@ class Report2Ndfl extends AbstractScriptClass {
             for (def ndflReference : ndflReferenceList) {
                 String corrNum = searchCorrNum(ndflReference.NUM.stringValue, previousONF.id)
                 if (corrNum != "99") {
-                    long ndflPersonId = ndflReference.NDFL_PERSON_ID.numberValue as Long
-                    def person = refBookPersonService.findById(ndflReference.PERSON_ID.value as Long)
-                    if (!personSet.any { it.recordId == person.recordId }) {
-                        NdflPerson ndflPerson = ndflPersonService.get(ndflPersonId)
+                    long referencePersonId = ndflReference.NDFL_PERSON_ID.numberValue as Long
+                    if (!personSet.any { it.personId == referencePersonId }) {
+                        NdflPerson person = ndflPersonService.get(referencePersonId)
                         if (!reportFormsCreationParams.getReportTypeMode().equals(ReportTypeModeEnum.ANNULMENT)) {
-                            nullifyPersonList.add(ndflPerson)
+                            nullifyPersonList.add(person)
                         } else {
-                            if (ndflPerson.getLastName().equals(reportFormsCreationParams.getLastName()) &&
-                                    ndflPerson.getFirstName().equals(reportFormsCreationParams.getFirstName()) &&
-                                    ndflPerson.getMiddleName().equals(reportFormsCreationParams.getMiddleName()) &&
-                                    ndflPerson.getInnNp().equals(reportFormsCreationParams.getInnNp()) &&
-                                    ndflPerson.getIdDocNumber().equals(reportFormsCreationParams.getIdDocNumber())
-                            ) nullifyPersonList.add(ndflPerson)
+                            if (person.getLastName().equals(reportFormsCreationParams.getLastName()) &&
+                                    person.getFirstName().equals(reportFormsCreationParams.getFirstName()) &&
+                                    person.getMiddleName().equals(reportFormsCreationParams.getMiddleName()) &&
+                                    person.getInnNp().equals(reportFormsCreationParams.getInnNp()) &&
+                                    person.getIdDocNumber().equals(reportFormsCreationParams.getIdDocNumber())
+                            ) nullifyPersonList.add(person)
                         }
                     }
                 }

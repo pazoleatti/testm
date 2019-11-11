@@ -89,7 +89,7 @@
                     if ($scope.permissionChecker.check($scope.security.user, $scope.APP_CONSTANTS.USER_PERMISSION.VIEW_TAXES_CREATE_APPLICATION_2)) {
                         $scope.treeTaxes.push({
                             name: $filter('translate')('menu.taxes.application2'),
-                            onClick: openApplication2Modal
+                            href: $state.href('application2Journal')
                         });
                     }
                     if ($scope.permissionChecker.check($scope.security.user, $scope.APP_CONSTANTS.USER_PERMISSION.TAX_NOTIFICATION)) {
@@ -278,15 +278,6 @@
                 });
 
                 startUpdateNotificationCountInterval();
-
-                var openApplication2Modal = function () {
-                    $aplanaModal.open({
-                        title: $filter('translate')('application2.title.modal'),
-                        templateUrl: 'client/app/taxes/application2/application2.html',
-                        controller: 'application2Ctrl',
-                        windowClass: 'modal200'
-                    });
-                };
 
                 var openTaxNotificationModal = function () {
                     $aplanaModal.open({

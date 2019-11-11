@@ -16,7 +16,7 @@
                     <span data-translate-once="link.ndfl.reporting"></span>
                 </div>
                 <ul class="dropdown-menu" role="menu" aria-labelledby="single-button">
-                    <li role="menuitem">
+                    <li role="menuitem" ng-show=" !(isKnfForApp2(declarationData)) ">
                         <div class="row menuitem">
                             <a ng-click="createReportXlsx()" ng-show="declarationData.hasNdflPersons">
                                 {{::'link.ndfl.reporting.formXLSX' | translate}}</a>
@@ -49,7 +49,7 @@
                                 {{::'link.ndfl.reporting.download' | translate}}</a>
                         </div>
                     </li>
-                    <li role="menuitem">
+                    <li role="menuitem" ng-show=" !(isKnfForApp2(declarationData)) ">
                         <div class="row menuitem">
                             <a ng-click="createRateReport()" ng-show="declarationData.hasNdflPersons">
                                 {{::'link.ndfl.reporting.rateReport' | translate}}</a>
@@ -61,7 +61,7 @@
                                 {{::'link.ndfl.reporting.download' | translate}}</a>
                         </div>
                     </li>
-                    <li role="menuitem">
+                    <li role="menuitem" ng-show=" !(isKnfForApp2(declarationData)) ">
                         <div class="row menuitem">
                             <a ng-click="createPaymentReport()" ng-show="declarationData.hasNdflPersons">
                                 {{::'link.ndfl.reporting.paymentReport' | translate}}</a>
@@ -73,7 +73,7 @@
                                 {{::'link.ndfl.reporting.download' | translate}}</a>
                         </div>
                     </li>
-                    <li role="menuitem">
+                    <li role="menuitem" ng-show=" !(isKnfForApp2(declarationData)) ">
                         <div class="row menuitem">
                             <a ng-click="createNdflDetailReport()" ng-show="declarationData.hasNdflPersons">
                                 {{::'link.ndfl.reporting.ndflDetailReport' | translate}}</a>
@@ -85,7 +85,7 @@
                                 {{::'link.ndfl.reporting.download' | translate}}</a>
                         </div>
                     </li>
-                    <li role="menuitem">
+                    <li role="menuitem" ng-show=" !(isKnfForApp2(declarationData)) ">
                         <div class="row menuitem">
                             <a ng-click="showCreateNdfl2_6DataReport('xlsx')" ng-show="declarationData.hasNdflPersons">
                                 {{::'link.ndfl.reporting.ndfl2_6XlsxReport' | translate}}</a>
@@ -97,7 +97,7 @@
                                 {{::'link.ndfl.reporting.download' | translate}}</a>
                         </div>
                     </li>
-                    <li role="menuitem">
+                    <li role="menuitem" ng-show=" !(isKnfForApp2(declarationData)) ">
                         <div class="row menuitem">
                             <a ng-click="showCreateNdfl2_6DataReport('txt')" ng-show="declarationData.hasNdflPersons">
                                 {{::'link.ndfl.reporting.ndfl2_6TxtReport' | translate}}</a>
@@ -109,8 +109,7 @@
                                 {{::'link.ndfl.reporting.download' | translate}}</a>
                         </div>
                     </li>
-                    <li role="menuitem"
-                        ng-show="declarationData.declarationType === APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_CONSOLIDATED.id">
+                    <li role="menuitem" ng-show="isKnf(declarationData)">
                         <div class="row menuitem">
                             <a ng-click="createPairKppOktmo()" ng-show="declarationData.hasNdflPersons">
                                 {{::'link.ndfl.reporting.formForKppOktmo' | translate}}</a>
@@ -131,8 +130,7 @@
                                 {{::'link.ndfl.reporting.download' | translate}}</a>
                         </div>
                     </li>
-                    <li role="menuitem"
-                        ng-show="declarationData.declarationType === APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_CONSOLIDATED.id">
+                    <li role="menuitem" ng-show="isKnf(declarationData)">
                         <hr style="margin: 0;">
                         <div class="row menuitem">
                             <a ng-click="createNdflReport()" ng-show="canCreateNdflReport()">

@@ -209,6 +209,14 @@ public interface DepartmentDao extends PermissionDao {
     List<Department> findAllByIdIn(Collection<Integer> ids);
 
     /**
+     * Получение подразделения по его коду
+     *
+     * @param code код подразделения
+     * @return подразделение
+     */
+    Department findByCode(Long code);
+
+    /**
      * Получение списка названий всех подразделений.
      *
      * @param name поисковая строка

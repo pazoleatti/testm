@@ -1,0 +1,87 @@
+<div class="flex-column">
+    <div>
+        <div class="content-header pull-left">
+            <h1>{{::'header.application2Journal.forms' | translate}}</h1>
+        </div>
+        <div class="pull-right" style="margin: 5px 10px 10px 0;">
+            <button type="button" class="btn btn-default"
+                    data-ng-click="createApp2()">
+                <span data-translate-once="app2Journal.button.createApp2"></span>
+            </button>
+        </div>
+    </div>
+    <div id="application2Journal" class="container-grid box-shadow-block flex-fill flex-column" style="overflow-y: auto">
+        <div id="application2JournalTop" style="flex-shrink: 0;">
+            <!-- Фильтр -->
+            <span data-ng-include="'client/app/taxes/application2/application2JournalFilter.html'"></span>
+
+            <!--Панель кнопок -->
+            <div class="button_panel">
+                <div class="btn-toolbar" role="toolbar">
+                    <!--Проверить -->
+                    <span>
+                        <button type="button" class="btn btn-default"
+                                data-ng-disabled="!checkPermissionForSelectedItems(APP_CONSTANTS.DECLARATION_PERMISSION.CHECK)"
+                                data-ng-click="check()">
+                            <span data-translate-once="button.check"></span>
+                        </button>
+                    </span>
+                    <!--Принять -->
+                    <span>
+                        <button type="button" class="btn btn-default"
+                                data-ng-disabled="!checkPermissionForSelectedItems(APP_CONSTANTS.DECLARATION_PERMISSION.ACCEPTED)"
+                                data-ng-click="accept()">
+                            <span data-translate-once="button.accept"></span>
+                        </button>
+                    </span>
+                    <!--Вернуть в Создана -->
+                    <span>
+                        <button type="button" class="btn btn-default"
+                                data-ng-disabled="!checkPermissionForSelectedItems(APP_CONSTANTS.DECLARATION_PERMISSION.RETURN_TO_CREATED)"
+                                data-ng-click="returnToCreated()">
+                            <span data-translate-once="button.return"></span>
+                        </button>
+                    </span>
+                    <!--Удалить-->
+                    <span>
+                        <button type="button" class="btn btn-default"
+                                data-ng-disabled="!checkPermissionForSelectedItems(APP_CONSTANTS.DECLARATION_PERMISSION.DELETE)"
+                                data-ng-click="delete()">
+                            <span data-translate-once="button.delete"></span>
+                        </button>
+                    </span>
+                    <!--Выгрузить отчетность-->
+                    <span>
+                        <button id="download-reports-button" type="button" class="btn btn-default"
+                                data-bs-dropdown
+                                data-placement="bottom-left"
+                                data-ng-disabled="!user.hasRole(APP_CONSTANTS.USER_ROLE.N_ROLE_CONTROL_UNP, APP_CONSTANTS.USER_ROLE.N_ROLE_CONTROL_NS)">
+                            <span data-translate-once="app2Journal.button.downloadReport"></span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-block" role="menu"
+                            aria-labelledby="download-reports-button">
+                            <li role="menuitem">
+                                <a ng-class="application2JournalGrid.ctrl.getCountRecords() > 0 ? '' : 'disabled'"
+                                   ng-click="downloadReportsByFilter()">{{::'app2Journal.button.byFilter' | translate}}</a>
+                            </li>
+                            <li role="menuitem">
+                                <a ng-class="application2JournalGrid.value.length > 0 ? '' : 'disabled'"
+                                   ng-click="downloadReportsBySelected()">{{::'app2Journal.button.selected' | translate}}</a>
+                            </li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="flex-grid flex-fill" style="min-height: calc(100% - 100px);"
+             data-aplana-grid
+             data-grid-fill-space="true"
+             data-grid-store-page-settings="true"
+             data-grid-fill-space-container-selector="#application2Journal"
+             data-grid-fill-space-container-selector-top="#application2JournalTop"
+             data-grid-options="application2JournalGrid.options"
+             data-grid-ctrl="application2JournalGrid.ctrl"
+             data-ng-model="application2JournalGrid.value"
+             id="application2JournalTable"></div>
+    </div>
+</div>

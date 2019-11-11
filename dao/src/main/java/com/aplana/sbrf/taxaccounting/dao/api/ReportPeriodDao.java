@@ -54,6 +54,11 @@ public interface ReportPeriodDao extends PermissionDao {
     List<ReportPeriod> findAllFor2NdflFL();
 
     /**
+     * Получение списка всех отчётных периодов для Приложения 2
+     */
+    List<ReportPeriod> findAllForApp2();
+
+    /**
      * Получение списка отчётных периодов, входящий в данный налоговый период.
      * Список отсортирован по {@link ReportPeriod#getOrder()} порядковым номерам отчётных периодов
      *
@@ -140,5 +145,4 @@ public interface ReportPeriodDao extends PermissionDao {
      * @return список периодов для логов
      */
     List<LogPeriodResult> createLogPeriodFormatById(Long id, Integer logLevelType);
-
 }

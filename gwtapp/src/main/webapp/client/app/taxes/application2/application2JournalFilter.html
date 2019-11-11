@@ -1,0 +1,134 @@
+<div data-ng-controller="CommonFilterCtrl">
+    <div class="grid-filter">
+        <div data-aplana-collapse data-is-collapsed="searchFilter.hideExtendedFilter"
+             data-label="'filterPanelLabel' | translate">
+            <form class="form-horizontal info-wrapper" style="display: flex;" role="form" novalidate>
+                <div class="row-fluid flex-fill">
+                    <div class="span4">
+                        <div class="row-fluid form-group">
+                            <div class="span4">
+                                <label class="control-label">{{::'app2Journal.filter.periodType' | translate}}:</label>
+                            </div>
+                            <div data-ng-controller="SelectCorrectionTagCtrl"
+                                 data-ui-select2="correctionTagSelect.options"
+                                 data-ng-model="searchFilter.params.correctionTag"
+                                 class="span8">
+                            </div>
+                        </div>
+                        <div class="row-fluid form-group">
+                            <div class="span4">
+                                <label class="control-label">{{::'app2Journal.filter.period' | translate}}:</label>
+                            </div>
+                            <div data-ng-controller="SelectPeriodCtrl"
+                                 data-ui-select2="periodSelect.options"
+                                 data-ng-init="initSelectWithAllPeriodsForApp2()"
+                                 data-ng-model="searchFilter.params.periods"
+                                 class="span8">
+                            </div>
+                        </div>
+                        <div class="row-fluid form-group">
+                            <div class="span4">
+                                <label class="control-label">{{::'app2Journal.filter.application2Number' |
+                                    translate}}:</label>
+                            </div>
+                            <div class="span8">
+                                <input data-ng-model="searchFilter.params.application2Number"
+                                       placeholder="{{'filter.placeholder.search' | translate}}"
+                                       type="text" class="form-control"/>
+                            </div>
+                        </div>
+                        <div class="row-fluid form-group">
+                            <div class="span4">
+                                <label class="control-label">
+                                    {{::'title.correctionNum' | translate}}:</label>
+                            </div>
+                            <div class="span8">
+                                <div data-aplana-field>
+                                    <input data-ng-model="searchFilter.params.correctionNum"
+                                           placeholder="{{'filter.placeholder.search' | translate}}"
+                                           maxlength="3"
+                                           data-ng-pattern="/^\d*$/"
+                                           type="text" class="form-control"/>
+                                    <div data-aplana-validator data-key="pattern">{{::'common.validation.pattern.number3' | translate}}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="span4">
+                        <div class="row-fluid form-group">
+                            <div class="span4">
+                                <label class="control-label">{{::'app2Journal.filter.state' | translate}}:</label>
+                            </div>
+                            <div data-ng-controller="SelectDeclarationStateCtrl"
+                                 data-ui-select2="stateSelect.options"
+                                 data-ng-init="initMultiSelectDeclarationState()"
+                                 data-ng-model="searchFilter.params.states"
+                                 class="span8">
+                            </div>
+                        </div>
+                        <div class="row-fluid form-group">
+                            <div class="span4">
+                                <label class="control-label">{{::'app2Journal.filter.note' |
+                                    translate}}:</label>
+                            </div>
+                            <div class="span8">
+                                <input data-ng-model="searchFilter.params.note"
+                                       placeholder="{{'filter.placeholder.search' | translate}}"
+                                       type="text" class="form-control"/>
+                            </div>
+                        </div>
+                        <div class="row-fluid form-group">
+                            <div class="span4">
+                                <label class="control-label">{{::'app2Journal.filter.creationDate.from' | translate}}:</label>
+                            </div>
+                            <div class="span8">
+                                <div data-aplana-datepicker-timepicker
+                                     data-ng-model="searchFilter.params.creationDateFrom">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row-fluid form-group">
+                            <div class="span4">
+                                <label class="control-label">{{::'app2Journal.filter.creationDate.to' | translate}}:</label>
+                            </div>
+                            <div class="span8">
+                                <div data-aplana-datepicker-timepicker
+                                     data-ng-model="searchFilter.params.creationDateTo">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="span4">
+                        <div class="row-fluid form-group">
+                            <div class="span3">
+                                <label class="control-label">{{::'app2Journal.filter.creationUserName' | translate}}:</label>
+                            </div>
+                            <div class="span8">
+                                <input data-ng-model="searchFilter.params.creationUserName"
+                                       placeholder="{{'filter.placeholder.search' | translate}}"
+                                       type="text" class="form-control"
+                                       title="{{ndflJournal.filter.creationUserName}}"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="vertical-btn-group" style="flex: 0 100px; padding-left: 20px">
+                    <!--Кнопка Найти-->
+                    <button type="button"
+                            class="btn btn-default"
+                            id="searchButton"
+                            data-ng-click="submitSearch()">
+                        <span data-translate-once="common.button.search"></span>
+                    </button>
+                    <!--Кнопка Сбросить-->
+                    <button type="button" data-ng-show="searchFilter.isClear"
+                            class="btn btn-default"
+                            id="clearButton"
+                            data-ng-click="resetFilter()">
+                        <span data-translate-once="common.button.clear"></span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

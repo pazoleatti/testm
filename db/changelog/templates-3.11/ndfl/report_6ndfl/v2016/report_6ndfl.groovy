@@ -86,28 +86,18 @@ class Report6Ndfl extends AbstractScriptClass {
         this.lockDataService = (LockDataService) getSafeProperty("lockDataService")
 
         this.declarationData = (DeclarationData) getSafeProperty("declarationData")
+        if (this.declarationData) {
+            this.declarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId)
+            this.departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
+            this.department = departmentService.get(departmentReportPeriod.departmentId)
+            this.reportPeriod = this.departmentReportPeriod.reportPeriod
+            this.periodCode = refBookService.getRecordData(RefBook.Id.PERIOD_CODE.getId(), reportPeriod.dictTaxPeriodId)?.CODE?.stringValue
+        }
 
         this.scriptSpecificReportHolder = (ScriptSpecificDeclarationDataReportHolder) getSafeProperty("scriptSpecificReportHolder")
         this.applicationVersion = (String) getSafeProperty("applicationVersion")
         this.paramMap = (Map<String, Object>) getSafeProperty("paramMap")
         this.reportFormsCreationParams = (ReportFormsCreationParams) getSafeProperty("reportFormsCreationParams")
-
-        if (FormDataEvent.CREATE_FORMS == this.formDataEvent) {
-            Integer declarationTypeId = reportFormsCreationParams.declarationTypeId
-            this.declarationTemplate = declarationService.getTemplate(declarationTypeId)
-
-            Integer departmentId = reportFormsCreationParams.departmentId
-            this.department = departmentService.get(departmentId)
-
-            Integer departmentReportPeriodId = reportFormsCreationParams.departmentReportPeriodId
-            this.departmentReportPeriod = departmentReportPeriodService.get(departmentReportPeriodId)
-        } else if (this.declarationData) {
-            this.declarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId)
-            this.departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
-            this.department = departmentService.get(departmentReportPeriod.departmentId)
-        }
-        this.reportPeriod = this.departmentReportPeriod.reportPeriod
-        this.periodCode = refBookService.getRecordData(RefBook.Id.PERIOD_CODE.getId(), reportPeriod.dictTaxPeriodId)?.CODE?.stringValue
     }
 
     @Override

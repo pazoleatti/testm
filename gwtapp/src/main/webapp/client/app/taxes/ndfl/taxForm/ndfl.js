@@ -827,6 +827,20 @@
                     });
                 };
 
+                $scope.isKnf = function (declarationData) {
+                    return isKnf(declarationData.declarationType);
+                };
+
+                $scope.isKnfForApp2 = function (declarationData) {
+                    return declarationData
+                        && isKnf(declarationData.declarationType)
+                        && APP_CONSTANTS.KNF_TYPE.FOR_APP2.id === declarationData.knfType.id;
+                };
+
+                function isKnf(declarationTypeId) {
+                    return APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_CONSOLIDATED.id === declarationTypeId;
+                }
+
                 $scope.downloadXlsx = function () {
                     $window.open("controller/rest/declarationData/" + $stateParams.declarationDataId + "/xlsx", '_blank');
                 };

@@ -76,7 +76,7 @@ public class RefBookAuditAspect {
                 getPeriodTypeCode(record.get("REPORT_PERIOD_TYPE_ID").getReferenceValue()), // <Объект."Код периода">
                 getAsnuCode(record.get("ASNU_ID").getReferenceValue()), // <Объект."АСНУ">
                 getFormattedRecordDate(record.get("record_version_from").getDateValue()), // <Объект. "Дата начала действия записи">
-                record.get("record_version_to").getValue() != null ? getFormattedRecordDate(record.get("record_version_to").getDateValue()) : "", // <Объект. "Дата окончания действия записи">
+                record.get("record_version_to").getValue() != null ? getFormattedRecordDate(record.get("record_version_to").getDateValue()) : "не ограничено", // <Объект. "Дата окончания действия записи">
                 getFormattedPeriodDate(record.get("PERIOD_START_DATE").getDateValue()), // <Объект. "Дата начала интервала">
                 getFormattedPeriodDate(record.get("PERIOD_END_DATE").getDateValue()) // <Объект. "Дата окончания интервала">
         );
