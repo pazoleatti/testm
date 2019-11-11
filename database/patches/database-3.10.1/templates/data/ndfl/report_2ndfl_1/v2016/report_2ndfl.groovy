@@ -85,6 +85,7 @@ class Report2Ndfl extends AbstractScriptClass {
     NdflReferenceService ndflReferenceService
     AuditService auditService
     DepartmentReportPeriodFormatter departmentReportPeriodFormatter
+    RefBookPersonService refBookPersonService
 
     @TypeChecked(TypeCheckingMode.SKIP)
     Report2Ndfl(scriptClass) {
@@ -129,6 +130,7 @@ class Report2Ndfl extends AbstractScriptClass {
         this.ndflReferenceService = (NdflReferenceService) getSafeProperty("ndflReferenceService")
         this.auditService = (AuditService) getSafeProperty("auditServiceImpl")
         this.departmentReportPeriodFormatter = (DepartmentReportPeriodFormatter) getSafeProperty("departmentReportPeriodFormatter")
+        this.refBookPersonService = (RefBookPersonService) getSafeProperty("refBookPersonService")
     }
 
     @Override
@@ -758,18 +760,19 @@ class Report2Ndfl extends AbstractScriptClass {
             for (def ndflReference : ndflReferenceList) {
                 String corrNum = searchCorrNum(ndflReference.NUM.stringValue, previousONF.id)
                 if (corrNum != "99") {
-                    long referencePersonId = ndflReference.NDFL_PERSON_ID.numberValue as Long
-                    if (!personSet.any { it.personId == referencePersonId }) {
-                        NdflPerson person = ndflPersonService.get(referencePersonId)
+                    long ndflPersonId = ndflReference.NDFL_PERSON_ID.numberValue as Long
+                    def person = refBookPersonService.findById(ndflReference.PERSON_ID.value as Long)
+                    if (!personSet.any { it.recordId == person.recordId }) {
+                        NdflPerson ndflPerson = ndflPersonService.get(ndflPersonId)
                         if (!reportFormsCreationParams.getReportTypeMode().equals(ReportTypeModeEnum.ANNULMENT)) {
-                            nullifyPersonList.add(person)
+                            nullifyPersonList.add(ndflPerson)
                         } else {
-                            if (person.getLastName().equals(reportFormsCreationParams.getLastName()) &&
-                                    person.getFirstName().equals(reportFormsCreationParams.getFirstName()) &&
-                                    person.getMiddleName().equals(reportFormsCreationParams.getMiddleName()) &&
-                                    person.getInnNp().equals(reportFormsCreationParams.getInnNp()) &&
-                                    person.getIdDocNumber().equals(reportFormsCreationParams.getIdDocNumber())
-                            ) nullifyPersonList.add(person)
+                            if (ndflPerson.getLastName().equals(reportFormsCreationParams.getLastName()) &&
+                                    ndflPerson.getFirstName().equals(reportFormsCreationParams.getFirstName()) &&
+                                    ndflPerson.getMiddleName().equals(reportFormsCreationParams.getMiddleName()) &&
+                                    ndflPerson.getInnNp().equals(reportFormsCreationParams.getInnNp()) &&
+                                    ndflPerson.getIdDocNumber().equals(reportFormsCreationParams.getIdDocNumber())
+                            ) nullifyPersonList.add(ndflPerson)
                         }
                     }
                 }
