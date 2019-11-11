@@ -15,7 +15,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 
 @Service("lockDataService")
@@ -303,8 +305,8 @@ public class LockDataServiceImpl implements LockDataService {
     }
 
     @Override
-    public List<LockDataDTO> fetchAllByKeySet(Set<String> keysBlocker) {
-        List<LockData> lockDataList = dao.fetchAllByKeySet(keysBlocker);
+    public List<LockDataDTO> fetchAllByKeyPrefixSet(Collection<String> keysBlocker) {
+        List<LockData> lockDataList = dao.fetchAllByKeyPrefixSet(keysBlocker);
         List<LockDataDTO> lockDataItems = new ArrayList<>(lockDataList.size());
         for (LockData lockData : lockDataList) {
             LockDataDTO lockDataItem = new LockDataDTO();
@@ -339,7 +341,11 @@ public class LockDataServiceImpl implements LockDataService {
         });
     }
 
-    //<editor-fold defaultstate="collapsed" desc="common private methods">
+    @Override
+    public long getDeclarationIdByLockKey(String lockKey) {
+        String[] lockKeyWords = lockKey.split("_");
+        return Long.parseLong(lockKeyWords[2]);
+    }
 
     /**
      * Проверка, имеет ли пользователь права на снятие данной блокировки.
@@ -409,8 +415,7 @@ public class LockDataServiceImpl implements LockDataService {
     private Integer getLockDeclarationTerbankId(String lockKey) {
         try {
             // Ключ блокировки по Налоговой Форме должен начинаться с DECLARATION_DATA_<ID>
-            String[] lockKeyWords = lockKey.split("_");
-            long declarationId = Long.parseLong(lockKeyWords[2]);
+            long declarationId = getDeclarationIdByLockKey(lockKey);
             DeclarationData declaration = declarationDataService.get(declarationId);
 
             if (declaration != null) {

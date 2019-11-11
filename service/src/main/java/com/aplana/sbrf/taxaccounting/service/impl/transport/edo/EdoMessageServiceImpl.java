@@ -12,6 +12,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDocState;
 import com.aplana.sbrf.taxaccounting.model.result.UploadTransportDataResult;
 import com.aplana.sbrf.taxaccounting.model.util.AppFileUtils;
+import com.aplana.sbrf.taxaccounting.model.validation.ValidationResult;
 import com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.component.factory.TransportMessageFactory;
@@ -58,7 +59,7 @@ public class EdoMessageServiceImpl implements EdoMessageService {
     private final DeclarationLocker declarationLocker;
     private final BlobDataService blobDataService;
     private final ConfigurationService configurationService;
-    private final ValidateXMLService validateXMLService;
+    private final EdoMessageValidator edoMessageValidator;
     private final TransportMessageService transportMessageService;
     private final CommonRefBookService commonRefBookService;
     private final LogBusinessService logBusinessService;
@@ -97,7 +98,7 @@ public class EdoMessageServiceImpl implements EdoMessageService {
 
     @Autowired
     public EdoMessageServiceImpl(DeclarationDataService declarationDataService, DeclarationTemplateService declarationTemplateService, DeclarationLocker declarationLocker,
-                                 BlobDataService blobDataService, ConfigurationService configurationService, ValidateXMLService validateXMLService,
+                                 BlobDataService blobDataService, ConfigurationService configurationService, EdoMessageValidator edoMessageValidator,
                                  TransportMessageService transportMessageService, CommonRefBookService commonRefBookService, LogBusinessService logBusinessService,
                                  LockDataService lockDataService, TransactionHelper transactionHelper, TAUserService taUserService, UploadTransportDataService uploadTransportDataService,
                                  SubsystemService subsystemService, TransportMessageFactory transportMessageFactory, NotificationService notificationService, LogEntryService logEntryService,
@@ -107,7 +108,7 @@ public class EdoMessageServiceImpl implements EdoMessageService {
         this.declarationLocker = declarationLocker;
         this.blobDataService = blobDataService;
         this.configurationService = configurationService;
-        this.validateXMLService = validateXMLService;
+        this.edoMessageValidator = edoMessageValidator;
         this.transportMessageService = transportMessageService;
         this.commonRefBookService = commonRefBookService;
         this.logBusinessService = logBusinessService;
@@ -195,12 +196,9 @@ public class EdoMessageServiceImpl implements EdoMessageService {
     }
 
     private void validateIncomeMessage(String message, TransportMessage transportMessage) {
-        Logger validationLogger = new Logger();
-        RefBook declarationTypeRefBook = commonRefBookService.get(RefBook.Id.DECLARATION_TEMPLATE.getId());
-        BlobData xsd = blobDataService.get(declarationTypeRefBook.getXsdId());
-        if (!validateXMLService.validate(validationLogger, message, xsd.getName(), xsd.getInputStream())) {
-            String errorMessage = "Входящее XML сообщение из ФП \"Фонды\", на основании которого было создано " +
-                    "Транспортное Сообщение №:" + transportMessage.getId() + ", не соответствует XSD схеме.";
+        ValidationResult messageValidationResult = edoMessageValidator.validateIncomeMessage(message);
+        if (!messageValidationResult.isSuccess()) {
+            String errorMessage = String.format(messageValidationResult.getMessage(), transportMessage.getId());
             failHandleEdoMessage(transportMessage, errorMessage);
             throw new IllegalStateException(errorMessage);
         }
@@ -564,7 +562,7 @@ public class EdoMessageServiceImpl implements EdoMessageService {
                     lockData = declarationLocker.establishLock(declarationData.getId(), OperationType.SEND_EDO, userInfo, logger);
                     if (lockData != null) {
                         tmpXmlFile = createTempFile(declarationXmlFile);
-                        validateXml(tmpXmlFile, declarationXmlFile.getFileName());
+                        validateXml(tmpXmlFile, declarationXmlFile.getFileName(), logger);
                         copyToDocumentExchangeDirectory(tmpXmlFile, declarationXmlFile.getFileName());
                         TaxMessageDocument message = buildEdoMessage(declarationXmlFile.getFileName(), userInfo);
                         sendToEdo(message);
@@ -609,9 +607,11 @@ public class EdoMessageServiceImpl implements EdoMessageService {
             }
         }
 
-        private void validateXml(File xmlFile, String fileName) {
-            if (!validateXMLService.validate(declarationData, new Logger(), xmlFile, fileName, null)) {
-                throw new ServiceException("файл не соответствует xsd схеме");
+        private void validateXml(File xmlFile, String fileName, Logger logger) {
+            ValidationResult messageValidationResult = edoMessageValidator.validateOutcomeMessage(xmlFile, fileName, declarationData);
+            if (!messageValidationResult.isSuccess()) {
+                logger.getEntries().addAll(messageValidationResult.getLogEntries());
+                throw new ServiceException(messageValidationResult.getMessage());
             }
         }
 

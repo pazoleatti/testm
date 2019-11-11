@@ -22,6 +22,10 @@ public class ConsolidationSourceDataSearchFilter {
      */
     private Date currentDate;
     /**
+     * Идентификатор периода
+     */
+    private long periodId;
+    /**
      * Дата начала периода
      */
     private Date periodStartDate;

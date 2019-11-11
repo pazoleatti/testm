@@ -212,6 +212,13 @@ public interface NdflPersonDao {
     List<NdflPersonIncome> findAllIncomesByDeclarationId(long declarationDataId);
 
     /**
+     * Найти все "Сведения о доходах физического лица" с данными периода источника привязанные к декларации
+     *
+     * @param declarationDataId идентификатор декларации
+     */
+    List<NdflPersonIncome> findNdflPersonIncomeSourcePeriod(long declarationDataId);
+
+    /**
      * Найти все "Сведения о доходах физического лица" привязанные к налоговой форме, отсортированные по rowNum
      *
      * @param declarationDataId идентификатор налоговой формы
@@ -245,6 +252,13 @@ public interface NdflPersonDao {
     List<NdflPersonDeduction> findAllDeductionsByDeclarationId(long declarationDataId);
 
     /**
+     * Найти все "Стандартные, социальные и имущественные налоговые вычеты" с данными периода источника привязанные к декларации
+     *
+     * @param declarationDataId идентификатор декларации
+     */
+    List<NdflPersonDeduction> findNdflPersonDeductionSourcePeriod(long declarationDataId);
+
+    /**
      * Возвращяет список строк из раздела 3 по списку ид форм
      *
      * @param declarationDataIds списсок ид форм
@@ -267,7 +281,14 @@ public interface NdflPersonDao {
      * @param declarationDataId идентификатор декларации
      * @return список авансов
      */
-    List<NdflPersonPrepayment> fetchNdflPersonPrepaymentByDeclarationData(long declarationDataId);
+    List<NdflPersonPrepayment> findNdflPersonPrepaymentByDeclarationData(long declarationDataId);
+
+    /**
+     * Найти все "Cведения о доходах в виде авансовых платежей" привязанные к декларации
+     *
+     * @param declarationDataId идентификатор декларации
+     */
+    List<NdflPersonPrepayment> findNdflPersonPrepaymentSourcePeriod(long declarationDataId);
 
     /**
      * Возвращает данные по спецотчету по фильтру для вкладки "Сведения о доходах в виде авансовых платежей" (SBRFNDFL-8445)
@@ -791,4 +812,61 @@ public interface NdflPersonDao {
      * @return список сгенерированных идентификаторов
      */
     List<BigDecimal> generateOperInfoIds(int count);
+
+    /**
+     * Получить информацию о вычетах ФЛ (раздел 3), которые связаны со сведениями о доходах и НДФЛ (раздел 2)
+     *
+     * @param personId идентификатор ФЛ
+     * @param incomesIds список идентификаторов строк для сведений о доходах и НДФЛ
+     * @return список идентификаторов вычетов ФЛ
+     */
+    List<Long> getDeductionsIdsByPersonAndIncomes(long personId, Collection<Long> incomesIds);
+
+    /**
+     * Получить информацию о доходах в виде авансовых платежей у ФЛ (раздел 4),
+     * которые связаны со сведениями о доходах и НДФЛ (раздел 2)
+     *
+     * @param personId идентификатор ФЛ
+     * @param incomesIds список идентификаторов строк для сведений о доходах и НДФЛ
+     * @return список идентификаторов сведений о доходах в виде аваносовых платежей у ФЛ
+     */
+    List<Long> getPrepaymentsIdsByPersonAndIncomes(long personId, Collection<Long> incomesIds);
+
+    /**
+     * Получить список идентификаторов сведений о доходах и НДФЛ (раздел 2) для конкретного ФЛ по идентификаторам операций
+     *
+     * @param personId идентификатор ФЛ
+     * @param operationsIds идентификаторы операций
+     */
+    List<Long> findNdflPersonIncomeByPersonAndOperations(long personId, Collection<String> operationsIds);
+
+    /**
+     * Перенумеровывает раннее отсортированный список записей раздела1 на основе №пп.
+     * @param declarationDataId идентификатор налоговой формы
+     */
+    void renumerateNdflPersonRowNums(Long declarationDataId);
+
+    /**
+     * Перенумеровывает раннее отсортированный список записей раздела2 на основе №пп.
+     * @param declarationDataId идентификатор налоговой формы
+     */
+    void renumerateNdflPersonIncomeRowNums(Long declarationDataId);
+
+    /**
+     * Перенумеровывает раннее отсортированный список записей раздела3 на основе №пп.
+     * @param declarationDataId идентификатор налоговой формы
+     */
+    void renumerateNdflPersonDeductionRowNums(Long declarationDataId);
+
+    /**
+     * Перенумеровывает раннее отсортированный список записей раздела4 на основе №пп.
+     * @param declarationDataId идентификатор налоговой формы
+     */
+    void renumerateNdflPersonPrepaymentRowNums(Long declarationDataId);
+
+    /**
+     * Удалить строки разделов 1,3,4 по строкам раздела 2
+     * @param ndflPersonIncomeIds
+     */
+    void deleteRowsBySection2(List<Long> ndflPersonIncomeIds);
 }

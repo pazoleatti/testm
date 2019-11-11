@@ -79,6 +79,7 @@
         "button.identifyPersons": "Идентифицировать ФЛ",
         "button.consolidate": "Консолидировать",
         "button.delete": "Удалить",
+        "button.deleteForm": "Удалить форму",
         "button.accept": "Принять",
         "button.return": "Вернуть в Создана",
         "button.add": "Добавить",
@@ -213,7 +214,14 @@
         "ndfl.report.ndfl2_6XlsxReport.modal.kpp": "КПП",
         "ndfl.report.ndfl2_6XlsxReport.modal.kpp.all": "Все КПП формы",
 
+        "ndfl.report.excelTemplate.modal.title" : "Выбор режима выгрузки данных РНУ НДФЛ в шаблон ТФ",
+        "ndfl.report.excelTemplate.modal.byAllData" : "по всем данным",
+        "ndfl.report.excelTemplate.modal.bySelectedRows" : "по выбранным на странице",
+
         "ndfl.button.importExcel": "Загрузить из ТФ (Excel)",
+        "ndfl.button.deleteSelected":"Удалить выделенные строки",
+        "ndfl.dialog.deleteSelectedConfirmation.title": "Подтверждение удаления строк формы",
+        "ndfl.dialog.deleteSelectedConfirmation.content": "Вы действительно хотите удалить выбранные строки раздела \"{{n}}\"? Также будут удалены данные всех разделов относящихся к {{info}}.",
 
         "ndflReportJournal.button.createReport": "Создать отчетность",
         "ndflReportJournal.button.downloadReport": "Выгрузить",
@@ -257,8 +265,8 @@
         "title.comParams.paramValue": "Значение параметра",
 
         "title.period": "Период",
-        "title.period.value": "{{year}}, {{periodName}}{{correctionString}} {{formType}}",
-        "title.period.value.correctionString": ", корр. ({{correctionDate}})",
+        "title.period.value": "{{year}}: {{periodName}}{{correctionString}}: {{formType}}",
+        "title.period.value.correctionString": " (корр. {{correctionDate}})",
         "title.department": "Подразделение",
         "title.formNumber": "Номер формы",
         "title.formType": "Тип налоговой формы",
@@ -580,6 +588,7 @@
         "reportPeriod.modal.grid.startDate": "Дата начала периода",
         "reportPeriod.modal.grid.endDate": "Дата окончания периода",
         "reportPeriod.modal.grid.calendarDate": "Календарная дата начала периода",
+        "reportPeriod.modal.validation.year": "Необходимо ввести значение от {{minValue}} до {{maxValue}} включительно",
         "reportPeriod.confirm.text": "Назначить нижестоящим подразделениям?",
         "reportPeriod.confirm.closePeriod": "Подтверждение закрытия периода",
         "reportPeriod.confirm.deletePeriod.title": "Удаление периода",

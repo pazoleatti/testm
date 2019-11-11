@@ -135,15 +135,6 @@ public interface PeriodService {
     List<ReportPeriod> getCorrectPeriods(int departmentId);
 
     /**
-     * Получение отчетного периода по коду записи справочника "Коды, определяющие налоговый (отчётный) период" и году
-     *
-     * @param code код записи справочника "Коды, определяющие налоговый (отчётный) период"
-     * @param year год отчетного периода
-     * @return объект {@link ReportPeriod} или null
-     */
-    ReportPeriod getByDictCodeAndYear(String code, int year);
-
-    /**
      * Получение списка всех записей справочника "Коды, определяющие налоговый (отчётный) период"
      *
      * @return список {@link ReportPeriodType} или пустой список
@@ -161,19 +152,11 @@ public interface PeriodService {
     /**
      * Получить сформированное поле периода
      *
-     * @param idList ПНФ список
+     * @param declarationsIds список КНФ
      * @param logLevelType тип операции
      * @return период для логов
      */
-    String createLogPeriodFormatById(List<Long> idList, Integer logLevelType);
-
-    /**
-     * Формирование строки описания периода
-     *
-     * @param reportPeriod период, по которому необходимо получить полное описание
-     * @return строка описания периода
-     */
-    String getPeriodString(ReportPeriod reportPeriod);
+    String createLogPeriodFormatById(List<Long> declarationsIds, Integer logLevelType);
 
     /**
      * Проверка на то, что тип отчетного периода соответствует значению "год" или

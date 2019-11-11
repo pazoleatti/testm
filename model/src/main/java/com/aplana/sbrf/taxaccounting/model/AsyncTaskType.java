@@ -38,6 +38,7 @@ public enum AsyncTaskType {
     CREATE_NOTIFICATIONS_LOGS(43L, "CREATE_NOTIFICATIONS_LOGS", "Выгрузка протоколов по оповещениям за: %s"),
     CREATE_2NDFL_FL(44L, "CREATE_2NDFL_FL", "Формирование ОНФ 2-НДФЛ(ФЛ)"),
     EXCEL_UNLOAD_LIST(45L, "XLSX", "Выгрузка списка источники-приемники в файл формата XLSX"),
+    DELETE_DEC_ROWS(46L, "DELETE_DECLARATION_ROWS", "Удаление строк налоговой формы."),
 
     //Псевдозадачи, которые тут чтобы использоваться в общих механизмах
     IMPORT_TF_DEC("IMPORT_TF_DECLARATION", "Импорт ТФ из каталога загрузки"); //формально является задачей, блокирует форму при импорт из каталога загрузки

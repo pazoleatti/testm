@@ -55,4 +55,22 @@ public class CreateReportFormsAction implements Serializable {
      * см {@link ReportTypeModeEnum}
      */
     private ReportTypeModeEnum reportTypeMode;
+    /**
+     * Выбранный номер справки на основании которой нужно сформировать аннулирующую 2-НДФЛ в ручном режиме
+     */
+    private Integer selectedSprNum;
+    /**
+     * Выбранный номер ОНФ на основании которого нужно сформировать аннулирующую 2-НДФЛ в ручном режиме
+     */
+    private Long declarationDataId;
+    /**
+     * Выбранное ФИО,  ИНН РФ, № ДУЛ для которого нужно сформировать аннулирующую 2-НДФЛ в ручном режиме
+     */
+    private String lastName;
+    private String firstName;
+    private String middleName;
+    private String innNp;
+    private String idDocNumber;
+
+
 }

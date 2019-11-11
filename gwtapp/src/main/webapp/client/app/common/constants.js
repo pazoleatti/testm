@@ -100,7 +100,8 @@
                 CONSOLIDATE: 1 << 12,
                 EDIT: 1 << 13,
                 UPDATE_DOC_STATE: 1 << 14,
-                PERSON_VIEW: 1 << 16
+                PERSON_VIEW: 1 << 16,
+                DELETE_ROWS: 1 << 17
             },
             USER_ACTIVITY: {
                 YES: {id: 1, name: 'Да'},
@@ -170,10 +171,10 @@
             },
             TAX_FORM_TYPE: {
                 RNU_NDFL: {id: 2, name: "РНУ-НДФЛ"},
-                REPORT_2_NDFL_1: {id: 3, name: "2 НДФЛ (1)"},
-                REPORT_2_NDFL_2: {id: 4, name: "2 НДФЛ (2)"},
-                REPORT_6_NDFL: {id: 5, name: "6 НДФЛ"},
-                REPORT_2_NDFL_FL: {id: 6, name: "2 НДФЛ (ФЛ)"},
+                REPORT_2_NDFL_1: {id: 3, name: "2-НДФЛ (1)"},
+                REPORT_2_NDFL_2: {id: 4, name: "2-НДФЛ (2)"},
+                REPORT_6_NDFL: {id: 5, name: "6-НДФЛ"},
+                REPORT_2_NDFL_FL: {id: 6, name: "2-НДФЛ (ФЛ)"},
                 APP_2: {id: 7, name: "Приложение 2"}
             },
             DECLARATION_TYPE: {
@@ -194,6 +195,10 @@
                 INCOMES: {id: 2, name: "Сведения о доходах и НДФЛ"},
                 DEDUCTIONS: {id: 3, name: "Сведения о вычетах"},
                 PREPAYMENTS: {id: 4, name: "Сведения о доходах в виде авансовых платежей"}
+            },
+            EXCEL_TEMPLATE_GENERATION_TYPE: {
+                ALL_DATA: {id: 1, name: "по всем данным"},
+                SELECTED_ON_PAGE: {id: 2, name: "по выбранным на странице"}
             },
             SUBREPORT_ALIAS_CONSTANTS: {
                 RNU_NDFL_PERSON_DB: "rnu_ndfl_person_db", // РНУ НДФЛ по физическому лицу

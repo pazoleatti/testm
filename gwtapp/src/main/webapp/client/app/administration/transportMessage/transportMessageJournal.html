@@ -16,7 +16,8 @@
                         <ul class="dropdown-menu dropdown-menu-block" role="menu"
                             aria-labelledby="download-excel-button">
                             <li role="menuitem">
-                                <a ng-click="downloadExcelAll()" style="font-size: inherit">{{::'transportMessages.excelButton.all' | translate}}</a>
+                                <a ng-class="transportMessageGrid.ctrl.getCountRecords() > 0 ? '': 'disabled'"
+                                   ng-click="downloadExcelAll()" style="font-size: inherit">{{::'transportMessages.excelButton.all' | translate}}</a>
                             </li>
                             <li role="menuitem">
                                 <a ng-class="searchFilter.isClear && transportMessageGrid.ctrl.getCountRecords() > 0 ? '' : 'disabled'"

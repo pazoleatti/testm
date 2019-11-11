@@ -23,7 +23,8 @@
             'app.rnuNdflPersonFace',
             'app.rnuNdflPersonFaceMenu',
             'app.returnToCreatedDialog',
-            'app.createNdfl2_6DataReport'])
+            'app.createNdfl2_6DataReport',
+            'app.createExcelTemplateModal'])
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('ndfl', {
                 url: '/taxes/ndfl/{declarationDataId}?uuid',
@@ -283,12 +284,14 @@
                         $scope.searchFilter.params.income.taxRefundCondition.argument2 = undefined;
                     }
                 });
+
                 // Возвращяет признак того, что объект незаполнен
                 function isEmpty(object) {
                     return Object.keys(object).every(function (key) {
                         return !object[key] || object[key].condition && isFilterConditionEmpty(object[key]) || angular.isObject(object[key]) && isEmpty(object[key]);
                     });
                 }
+
                 // Возвращяет признак того, что объект, задающий условие для фильтрации, незаполнен
                 function isFilterConditionEmpty(filterCondition) {
                     return !filterCondition.operator || !filterCondition.operator.unary && !filterCondition.argument2;
@@ -689,6 +692,78 @@
                     });
                 };
 
+                $scope.isEnableButtonDeleteSelectedRow = function () {
+
+                    if($scope.declarationData.declarationType !== 100){
+                        return;
+                    }
+
+                    if(!$scope.permissionChecker.check(
+                        $scope.declarationData,
+                        APP_CONSTANTS.DECLARATION_PERMISSION.DELETE_ROWS)) {
+                        return;
+                    }
+
+                    if (!$scope.ndflTabsCtrl.getActiveTab) {
+                        return;
+                    }
+                    var tab = $scope.ndflTabsCtrl.getActiveTab();
+                    if (!tab) {
+                        return;
+                    }
+                    var section = tab.getSection && tab.getSection();
+                    var count = section === 1 ? tab.getGrid && tab.getGrid() && tab.getGrid().ctrl &&
+                        tab.getGrid().ctrl.getCountRecords && tab.getGrid().ctrl.getCountRecords()
+                        : tab.getRowsCount && tab.getRowsCount();
+
+                    return section < 3 && count > 0 && tab.getSelectedRows().length>0;
+                };
+
+                /**
+                 * @description Событие, которое возникает по нажатию на кнопку "Удалить выбранные строки"
+                 */
+                $scope.deleteSelectedRows = function () {
+                    var tab = $scope.ndflTabsCtrl.getActiveTab();
+                    var sectionId = tab.getSection();
+                    var rows = tab.getSelectedRows();
+                    console.log(sectionId);
+                    console.log(rows);
+                    var data = {
+                        declarationDataId: $stateParams.declarationDataId,
+                        section: 'SECTION'+sectionId,
+                        sectionIds: _.map(rows, function (r) {
+                            return r.id;
+                        })
+                    };
+
+                    $dialogs.confirmDialog({
+                        title: $filter('translate')('ndfl.dialog.deleteSelectedConfirmation.title'),
+                        content: $filter('translate')('ndfl.dialog.deleteSelectedConfirmation.content', {
+                            n: sectionId,
+                            info: sectionId === 2 ? "выбранным операциям" : "выбранным ФЛ"
+                        }),
+                        okBtnCaption: $filter('translate')('common.button.yes'),
+                        cancelBtnCaption: $filter('translate')('common.button.no'),
+                        okBtnClick: function () {
+                            $http({
+                                method: "POST",
+                                url: "controller/actions/declarationData/delete/selected",
+                                data: data
+                            }).then(function (response) {
+                                if (response.data && response.data.uuid && response.data.uuid !== null) {
+                                    if (response.data.success) {
+                                        //Обновить страницу и, если есть сообщения, показать их
+                                        var params = (response.data && response.data.uuid && response.data.uuid !== null) ? {uuid: response.data.uuid} : {};
+                                        $state.go("ndflJournal", params, {reload: true});
+                                    } else {
+                                        $logPanel.open('log-panel-container', response.data.uuid);
+                                    }
+                                }
+                            });
+                        }
+                    });
+                };
+
                 /**
                  * @description Запрос на подтверждение выполнения опрерации
                  */
@@ -873,12 +948,17 @@
                  * Формирует запрос на создание шаблона Excel-файла для загрузки
                  */
                 $scope.createExcelTemplate = function () {
-                    $http({
-                        method: "POST",
-                        url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/excelTemplate"
-                    }).then(function (response) {
-                        if (response) {
-                            $logPanel.open('log-panel-container', response.data);
+                    $aplanaModal.open({
+                        title: $filter('translate')('ndfl.report.excelTemplate.modal.title'),
+                        templateUrl: 'client/app/taxes/ndfl/taxForm/createExcelTemplateModal.html',
+                        controller: 'createExcelTemplateModalCtrl',
+                        windowClass: 'modal450',
+                        resolve: {
+                            $shareData: function () {
+                                return {
+                                    selectedRow: $scope.ndflTabsCtrl
+                                };
+                            }
                         }
                     });
                 };

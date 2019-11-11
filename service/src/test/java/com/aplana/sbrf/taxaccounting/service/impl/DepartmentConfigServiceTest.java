@@ -4,10 +4,9 @@ import com.aplana.sbrf.taxaccounting.dao.DepartmentConfigDao;
 import com.aplana.sbrf.taxaccounting.model.KppOktmoPair;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.refbook.DepartmentConfig;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDepartment;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookOktmo;
+import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.service.impl.refbook.DepartmentConfigServiceImpl;
+import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
 import org.apache.commons.lang3.time.DateUtils;
 import org.joda.time.LocalDate;
 import org.junit.Before;
@@ -40,6 +39,8 @@ public class DepartmentConfigServiceTest {
     @Mock
     private DepartmentConfigDao departmentConfigDao;
     @Mock
+    private CommonRefBookService commonRefBookService;
+    @Mock
     private Logger logger;
 
     private List<DepartmentConfig> departmentConfigs;
@@ -51,18 +52,23 @@ public class DepartmentConfigServiceTest {
                         .id(0L).kpp("111").oktmo(new RefBookOktmo().code("111"))
                         .startDate(newDate(1, 1, 2018))
                         .endDate(newDate(31, 12, 2018))
+                        .name("name0")
                         .department(new RefBookDepartment().id(1).name("DEP1")),
                 new DepartmentConfig()
                         .id(1L).kpp("111").oktmo(new RefBookOktmo().code("111"))
                         .startDate(newDate(1, 1, 2019))
                         .endDate(newDate(31, 12, 2019))
+                        .name("name1")
                         .department(new RefBookDepartment().id(1).name("DEP1")),
                 new DepartmentConfig()
                         .id(2L).kpp("111").oktmo(new RefBookOktmo().code("111"))
                         .startDate(newDate(1, 1, 2020))
                         .endDate(null)
+                        .name("name2")
                         .department(new RefBookDepartment().id(1).name("DEP1"))
         ));
+        RefBookSignatoryMark refBookSignatoryMark = new RefBookSignatoryMark().id(2L);
+        refBookSignatoryMark.setCode(RefBookSignatoryMark.TAX_AGENT_AMBASSADOR);
         MockitoAnnotations.initMocks(this);
         when(departmentConfigDao.findAllByKppAndOktmo(anyString(), anyString())).thenAnswer(new Answer<List<DepartmentConfig>>() {
             @Override
@@ -98,6 +104,7 @@ public class DepartmentConfigServiceTest {
                 return null;
             }
         });
+        when(commonRefBookService.fetchRecord(anyLong(), anyLong())).thenReturn(refBookSignatoryMark);
         doAnswer(new Answer() {
             @Override
             public Object answer(InvocationOnMock invocation) {
@@ -145,6 +152,98 @@ public class DepartmentConfigServiceTest {
         }).when(departmentConfigDao).updateStartDate(anyLong(), any(Date.class));
     }
 
+    // не заполнен обязательный параметр "Наименование для титульного листа"
+    @Test(expected = ServiceException.class)
+    public void departmentConfigWithoutNameTest(){
+        DepartmentConfig departmentConfig = new DepartmentConfig()
+                .kpp("111").oktmo(new RefBookOktmo().code("111"))
+                .startDate(newDate(1, 1, 2017))
+                .endDate(newDate(31, 12, 2017))
+                .department(new RefBookDepartment().id(1).name("DEP1"));
+
+        try {
+            departmentConfigService.create(departmentConfig, new Logger());
+        } catch (Exception e) {
+            assertThat(
+                    e.getMessage(),
+                    equalTo("Необходимо заполнить поле \"Наименование для титульного листа\""));
+            throw e;
+        }
+    }
+
+    @Test(expected = ServiceException.class)
+    public void reorganizedDepartmentConfigWithoutSuccessorNameAndSuccessorKppTest(){
+        DepartmentConfig departmentConfig = new DepartmentConfig()
+                .kpp("111").oktmo(new RefBookOktmo().code("111"))
+                .startDate(newDate(1, 1, 2017))
+                .endDate(newDate(31, 12, 2017))
+                .name("name")
+                .department(new RefBookDepartment().id(1).name("DEP1"));
+
+        RefBookReorganization refBookReorganization = new RefBookReorganization();
+        refBookReorganization.setCode("reorgCode");
+
+        departmentConfig.setReorganization(refBookReorganization);
+
+        try {
+            departmentConfigService.create(departmentConfig, new Logger());
+        } catch (Exception e) {
+            assertThat(
+                    e.getMessage(),
+                    equalTo("Необходимо заполнить поля \"Наименование подразделения правопреемника\" и \"КПП подразделения правопреемника\""));
+            throw e;
+        }
+    }
+
+    @Test(expected = ServiceException.class)
+    public void departmentConfigWithoutEndDateAndWithRelatedKppOktmoTest(){
+        RelatedKppOktmo relatedKppOktmo = new RelatedKppOktmo();
+        relatedKppOktmo.setKpp("222");
+        relatedKppOktmo.setOktmo("222");
+
+        DepartmentConfig departmentConfig = new DepartmentConfig()
+                .kpp("111").oktmo(new RefBookOktmo().code("111"))
+                .startDate(newDate(1, 1, 2017))
+                .name("name")
+                .department(new RefBookDepartment().id(1).name("DEP1"));
+
+        departmentConfig.setRelatedKppOktmo(relatedKppOktmo);
+
+        try {
+            departmentConfigService.create(departmentConfig, new Logger());
+        } catch (Exception e) {
+            assertThat(
+                    e.getMessage(),
+                    equalTo("Дата окончания действия настройки не заполнена, поле \"Учитывать КПП/ОКТМО\" " +
+                            "должно быть также не заполнено."));
+            throw e;
+        }
+    }
+
+    @Test(expected = ServiceException.class)
+    public void departmentConfigWithSignatoryMarkWithoutApprovedDocumentName(){
+        DepartmentConfig departmentConfig = new DepartmentConfig()
+                .kpp("111").oktmo(new RefBookOktmo().code("111"))
+                .startDate(newDate(1, 1, 2017))
+                .endDate(newDate(31, 12, 2017))
+                .name("name")
+                .department(new RefBookDepartment().id(1).name("DEP1"));
+
+        RefBookSignatoryMark refBookSignatoryMark = new RefBookSignatoryMark().id(2L);
+        departmentConfig.setSignatoryMark(refBookSignatoryMark);
+
+        try {
+            departmentConfigService.create(departmentConfig, new Logger());
+        } catch (Exception e) {
+            assertThat(
+                    e.getMessage(),
+                    equalTo("Указан признак подписанта " +
+                            "\"(2) Представитель налогового агента, представитель правопреемника налогового агента\", " +
+                            "необходимо заполнить поле \"Документ полномочий подписанта\""));
+            throw e;
+        }
+    }
+
     // Не создаёт разрыв перед существующими настройками
     @Test
     public void createBeforeOk() {
@@ -152,6 +251,7 @@ public class DepartmentConfigServiceTest {
                 .kpp("111").oktmo(new RefBookOktmo().code("111"))
                 .startDate(newDate(1, 1, 2017))
                 .endDate(newDate(31, 12, 2017))
+                .name("name")
                 .department(new RefBookDepartment().id(1).name("DEP1")), new Logger());
         check();
     }
@@ -166,6 +266,7 @@ public class DepartmentConfigServiceTest {
                 .kpp("111").oktmo(new RefBookOktmo().code("111"))
                 .startDate(newDate(1, 1, 2021))
                 .endDate(null)
+                .name("name")
                 .department(new RefBookDepartment().id(1).name("DEP1")), new Logger());
         check();
     }

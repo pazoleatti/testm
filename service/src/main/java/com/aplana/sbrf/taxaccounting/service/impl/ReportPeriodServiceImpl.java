@@ -13,13 +13,13 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 
 @Service
-@Transactional(readOnly = true)
 public class ReportPeriodServiceImpl implements ReportPeriodService {
 
     @Autowired
     private ReportPeriodDao reportPeriodDao;
 
     @Override
+    @Transactional
     public ReportPeriod fetchOrCreate(TaxPeriod taxPeriod, ReportPeriodType reportPeriodType, Integer formTypeId) {
         ReportPeriod reportPeriod = reportPeriodDao.fetchOneByTaxPeriodAndDictAndFormType(
                 taxPeriod.getId(), reportPeriodType.getId(), formTypeId);

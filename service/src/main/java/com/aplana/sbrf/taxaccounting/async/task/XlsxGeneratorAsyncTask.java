@@ -44,6 +44,7 @@ public class XlsxGeneratorAsyncTask extends AbstractDeclarationAsyncTask {
         long declarationDataId = (Long) taskData.getParams().get("declarationDataId");
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(taskData.getUserId()));
+        userInfo.setIp((String) taskData.getParams().get("userIP"));
 
         DeclarationData declarationData = declarationDataService.get(declarationDataId, userInfo);
         if (declarationData != null) {

@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataFileDao;
-import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -18,7 +17,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -30,7 +30,7 @@ public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataSer
     private static final Log LOG = LogFactory.getLog(LoadDeclarationDataServiceImpl.class);
 
     @Autowired
-    private DepartmentReportPeriodDao departmentReportPeriodDao;
+    private DepartmentReportPeriodService departmentReportPeriodService;
     @Autowired
     private DeclarationDataFileDao declarationDataFileDao;
 
@@ -159,7 +159,7 @@ public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataSer
         String lockedByUser = userService.getUser(lockData.getUserId()).getName();
         String lockedOnDate = FastDateFormat.getInstance("HH:mm dd.MM.yyyy").format(lockData.getDateLock());
 
-        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.fetchOne(declaration.getDepartmentReportPeriodId());
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.fetchOne(declaration.getDepartmentReportPeriodId());
         ReportPeriod reportPeriod = departmentReportPeriod.getReportPeriod();
         String reportPeriodName = reportPeriod.getTaxPeriod().getYear() + " - " + reportPeriod.getName();
 

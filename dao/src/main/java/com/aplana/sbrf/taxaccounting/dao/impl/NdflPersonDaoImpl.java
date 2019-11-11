@@ -483,6 +483,22 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     @Override
+    public List<NdflPersonIncome> findNdflPersonIncomeSourcePeriod(long declarationDataId) {
+        return getJdbcTemplate().query("select " + createColumns(NdflPersonIncome.COLUMNS, "npi") + ", drps.correction_date source_correction_date, rps.name period_name, tps.year period_year, rps.end_date period_end_date, np.inp, rba.NAME as asnu_name\n" +
+                "from ndfl_person_income npi\n" +
+                "inner join ndfl_person np on npi.ndfl_person_id = np.id\n" +
+                "left join ref_book_asnu rba on npi.asnu_id = rba.id\n" +
+                "left join ndfl_person_income npis on npi.source_id = npis.id\n" +
+                "inner join ndfl_person nps on npis.ndfl_person_id = nps.id\n" +
+                "inner join declaration_data dds on nps.declaration_data_id = dds.id\n" +
+                "inner join department_report_period drps on drps.id = dds.department_report_period_id\n" +
+                "inner join report_period rps on rps.id = drps.report_period_id\n" +
+                "inner join tax_period tps on tps.id = rps.tax_period_id\n" +
+                "where np.declaration_data_id = ?\n", new Object[]{declarationDataId}, new NdflPersonDaoImpl.NdflPersonIncomeSourceInfoRowMapper());
+
+    }
+
+    @Override
     public List<NdflPersonIncome> findAllIncomesByDeclarationIdByOrderByRowNumAsc(long declarationDataId) {
         return getJdbcTemplate().query("select " + createColumns(NdflPersonIncome.COLUMNS, "npi") + ", np.inp, rba.NAME as asnu_name " +
                 "from ndfl_person_income npi " +
@@ -617,6 +633,21 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     @Override
+    public List<NdflPersonDeduction> findNdflPersonDeductionSourcePeriod(long declarationDataId) {
+        return getJdbcTemplate().query("select " + createColumns(NdflPersonDeduction.COLUMNS, "npd") + ", drps.correction_date source_correction_date, rps.name period_name, tps.year period_year, rps.end_date period_end_date, np.inp, rba.NAME as asnu_name\n" +
+                "from ndfl_person_deduction npd\n" +
+                "inner join ndfl_person np on npd.ndfl_person_id = np.id\n" +
+                "left join ref_book_asnu rba on npd.asnu_id = rba.id\n" +
+                "left join ndfl_person_deduction npds on npd.source_id = npds.id\n" +
+                "inner join ndfl_person nps on npds.ndfl_person_id = nps.id\n" +
+                "inner join declaration_data dds on nps.declaration_data_id = dds.id\n" +
+                "inner join department_report_period drps on drps.id = dds.department_report_period_id\n" +
+                "inner join report_period rps on rps.id = drps.report_period_id\n" +
+                "inner join tax_period tps on tps.id = rps.tax_period_id\n" +
+                "where np.declaration_data_id = ?", new Object[]{declarationDataId}, new NdflPersonDaoImpl.NdflPersonDeductionSourceRowMapper());
+    }
+
+    @Override
     public List<NdflPersonDeduction> findAllDeductionsByDeclarationIds(List<Long> declarationDataIds) {
         return selectIn("select " + createColumns(NdflPersonDeduction.COLUMNS, "npd") + ", np.inp, rba.NAME as asnu_name " +
                         "from ndfl_person_deduction npd "
@@ -725,7 +756,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     @Override
-    public List<NdflPersonPrepayment> fetchNdflPersonPrepaymentByDeclarationData(long declarationDataId) {
+    public List<NdflPersonPrepayment> findNdflPersonPrepaymentByDeclarationData(long declarationDataId) {
         try {
             return getJdbcTemplate().query("select " + createColumns(NdflPersonPrepayment.COLUMNS, "npp") + ", np.inp, rba.NAME as asnu_name " +
                     "from ndfl_person_prepayment npp "
@@ -735,6 +766,21 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         } catch (EmptyResultDataAccessException e) {
             return new ArrayList<NdflPersonPrepayment>();
         }
+    }
+
+    @Override
+    public List<NdflPersonPrepayment> findNdflPersonPrepaymentSourcePeriod(long declarationDataId) {
+        return getJdbcTemplate().query("select " + createColumns(NdflPersonPrepayment.COLUMNS, "npp") + ", drps.correction_date source_correction_date, rps.name period_name, tps.year period_year, rps.end_date period_end_date, np.inp, rba.NAME as asnu_name\n" +
+                "from ndfl_person_prepayment npp\n" +
+                "inner join ndfl_person np on npp.ndfl_person_id = np.id\n" +
+                "left join ref_book_asnu rba on npp.asnu_id = rba.id\n" +
+                "left join ndfl_person_prepayment npps on npp.source_id = npps.id\n" +
+                "inner join ndfl_person nps on npps.ndfl_person_id = nps.id\n" +
+                "inner join declaration_data dds on nps.declaration_data_id = dds.id\n" +
+                "inner join department_report_period drps on drps.id = dds.department_report_period_id\n" +
+                "inner join report_period rps on rps.id = drps.report_period_id\n" +
+                "inner join tax_period tps on tps.id = rps.tax_period_id\n" +
+                "where np.declaration_data_id = ?", new Object[]{declarationDataId}, new NdflPersonDaoImpl.NdflPersonPrepaymentSourceRowMapper());
     }
 
     @Override
@@ -2074,7 +2120,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
 
-    private static final class NdflPersonIncomeRowMapper implements RowMapper<NdflPersonIncome> {
+    private static class NdflPersonIncomeRowMapper implements RowMapper<NdflPersonIncome> {
         @Override
         public NdflPersonIncome mapRow(ResultSet rs, int index) throws SQLException {
 
@@ -2123,6 +2169,20 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         }
     }
 
+    private static final class NdflPersonIncomeSourceInfoRowMapper extends NdflPersonIncomeRowMapper {
+        @Override
+        public NdflPersonIncome mapRow(ResultSet rs, int index) throws SQLException {
+
+            NdflPersonIncome personIncome = super.mapRow(rs, index);
+
+            personIncome.setSourceCorrectionDate(rs.getDate("source_correction_date"));
+            personIncome.setSourcePeriodName(rs.getString("period_name"));
+            personIncome.setSourcePeriodEndDate(rs.getDate("period_end_date"));
+            personIncome.setSourcePeriodYear(rs.getInt("period_year"));
+            return personIncome;
+        }
+    }
+
     private static class NdflPersonDeductionRowMapper implements RowMapper<NdflPersonDeduction> {
 
         @Override
@@ -2165,6 +2225,20 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         }
     }
 
+    private static final class NdflPersonDeductionSourceRowMapper extends NdflPersonDeductionRowMapper {
+        @Override
+        public NdflPersonDeduction mapRow(ResultSet rs, int index) throws SQLException {
+
+            NdflPersonDeduction personDedution = super.mapRow(rs, index);
+
+            personDedution.setSourceCorrectionDate(rs.getDate("source_correction_date"));
+            personDedution.setSourcePeriodName(rs.getString("period_name"));
+            personDedution.setSourcePeriodEndDate(rs.getDate("period_end_date"));
+            personDedution.setSourcePeriodYear(rs.getInt("period_year"));
+            return personDedution;
+        }
+    }
+
     private static final class NdflPersonConsolidationDeductionRowMapper extends NdflPersonDeductionRowMapper {
         @Override
         public NdflPersonDeduction mapRow(ResultSet rs, int i) throws SQLException {
@@ -2199,6 +2273,20 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             personPrepayment.setOperInfoId(rs.getBigDecimal("oper_info_id"));
             personPrepayment.setOktmo(rs.getString("oktmo"));
             personPrepayment.setKpp(rs.getString("kpp"));
+            return personPrepayment;
+        }
+    }
+
+    private static final class NdflPersonPrepaymentSourceRowMapper extends NdflPersonPrepaymentRowMapper {
+        @Override
+        public NdflPersonPrepayment mapRow(ResultSet rs, int index) throws SQLException {
+
+            NdflPersonPrepayment personPrepayment = super.mapRow(rs, index);
+
+            personPrepayment.setSourceCorrectionDate(rs.getDate("source_correction_date"));
+            personPrepayment.setSourcePeriodName(rs.getString("period_name"));
+            personPrepayment.setSourcePeriodEndDate(rs.getDate("period_end_date"));
+            personPrepayment.setSourcePeriodYear(rs.getInt("period_year"));
             return personPrepayment;
         }
     }
@@ -2391,20 +2479,9 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
     @Override
     public List<ConsolidationIncome> fetchIncomeSourcesConsolidation(ConsolidationSourceDataSearchFilter searchData) {
-        String departmentConfigsKppOktmoSelect = "" +
-                "  select dc.kpp, oktmo.code oktmo, max(dc.start_date) start_date \n" +
-                "  from department_config dc\n" +
-                "  join ref_book_oktmo oktmo on oktmo.id = dc.oktmo_id\n" +
-                "  where department_id = :departmentId and (\n" +
-                "    dc.start_date <= :currentDate and (dc.end_date is null or :currentDate <= dc.end_date) or (\n" +
-                "      dc.start_date <= :periodEndDate and (dc.end_date is null or :periodStartDate <= dc.end_date) \n" +
-                "      and not exists (select * from department_config where kpp = dc.kpp and oktmo_id = dc.oktmo_id and start_date > dc.start_date and department_id != :departmentId)\n" +
-                "    )\n" +
-                "  )\n" +
-                "  group by dc.kpp, oktmo.code\n";
         String insertSql = "insert into tmp_cons_data(operation_id, asnu_id)\n" +
                 "with kpp_oktmo as (\n" +
-                departmentConfigsKppOktmoSelect +
+                DepartmentConfigDaoImp.ACTUAL_KPP_OKTMO_SELECT_WITH_PERIOD +
                 ")\n" +
                 "select /*+ NO_INDEX(npi NDFL_PERS_INC_KPP_OKTMO) */ distinct npi.operation_id, dd.asnu_id\n" +
                 "from ndfl_person_income npi \n" +
@@ -2423,7 +2500,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                 "and dt.declaration_type_id = :declarationType and tp.year between :dataSelectionDepth and :consolidateDeclarationDataYear";
         String selectSql = "" +
                 "with kpp_oktmo as (\n" +
-                departmentConfigsKppOktmoSelect +
+                DepartmentConfigDaoImp.ACTUAL_KPP_OKTMO_SELECT_WITH_PERIOD +
                 ")\n" +
                 "select /*+ use_hash(cd npi)*/ distinct " + createColumns(NdflPersonIncome.COLUMNS, "npi") + ", dd.id as dd_id, dd.asnu_id, dd.state, np.inp, tp.year, rpt.code as period_code, drp.correction_date, rba.NAME as asnu_name " +
                 "from tmp_cons_data cd \n" +
@@ -2438,9 +2515,10 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                 "left join ref_book_asnu rba on npi.asnu_id = rba.id\n" +
                 "where dd.asnu_id = cd.asnu_id";
         MapSqlParameterSource params = new MapSqlParameterSource();
-        params.addValue("currentDate", searchData.getCurrentDate())
+        params.addValue("relevanceDate", searchData.getCurrentDate())
                 .addValue("periodStartDate", searchData.getPeriodStartDate())
                 .addValue("periodEndDate", searchData.getPeriodEndDate())
+                .addValue("reportPeriodId", searchData.getPeriodId())
                 .addValue("declarationType", searchData.getDeclarationType())
                 .addValue("dataSelectionDepth", searchData.getDataSelectionDepth())
                 .addValue("consolidateDeclarationDataYear", searchData.getConsolidateDeclarationDataYear())
@@ -2471,14 +2549,15 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     @Override
     public List<NdflPersonDeduction> fetchDeductionsForConsolidation(List<Long> incomeIds) {
         String sql = "with person_operation as \n" +
-                "(select distinct npi.operation_id, npi.ndfl_person_id from ndfl_person_income npi where npi.id in (:incomeIds))\n" +
+                "(select distinct npi.operation_id, npi.ndfl_person_id from ndfl_person_income npi where \n" +
+                SqlUtils.transformToSqlInStatementViaTmpTable("npi.id", incomeIds) + ")\n" +
                 "select rba.NAME as asnu_name, " + createColumns(NdflPersonDeduction.COLUMNS, "npd") + " \n" +
                 "from ndfl_person_deduction npd \n" +
                 "left join person_operation po on npd.operation_id = po.operation_id \n" +
                 " left join ref_book_asnu rba on npd.asnu_id = rba.id " +
                 "where npd.operation_id = po.operation_id and npd.ndfl_person_id = po.ndfl_person_id";
-        List<NdflPersonDeduction> result = selectIn(sql, incomeIds, "incomeIds", new NdflPersonConsolidationDeductionRowMapper());
 
+        List<NdflPersonDeduction> result = getNamedParameterJdbcTemplate().query(sql, new NdflPersonConsolidationDeductionRowMapper());
         if (result.isEmpty()) return null;
         return result;
     }
@@ -2486,13 +2565,14 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     @Override
     public List<NdflPersonPrepayment> fetchPrepaymentsForConsolidation(List<Long> incomeIds) {
         String sql = "with person_operation as \n" +
-                "(select distinct npi.operation_id, npi.ndfl_person_id from ndfl_person_income npi where npi.id in (:incomeIds))\n" +
+                "(select distinct npi.operation_id, npi.ndfl_person_id from ndfl_person_income npi where \n" +
+                SqlUtils.transformToSqlInStatementViaTmpTable("npi.id", incomeIds) + ") \n" +
                 "select rba.NAME as asnu_name, " + createColumns(NdflPersonPrepayment.COLUMNS, "npp") + " \n" +
                 "from ndfl_person_prepayment npp \n" +
                 "left join person_operation po on npp.operation_id = po.operation_id \n" +
                 " left join ref_book_asnu rba on npp.asnu_id = rba.id " +
                 "where npp.operation_id = po.operation_id and npp.ndfl_person_id = po.ndfl_person_id";
-        List<NdflPersonPrepayment> result = selectIn(sql, incomeIds, "incomeIds", new NdflPersonConsolidationPrepaymentRowMapper());
+        List<NdflPersonPrepayment> result = getNamedParameterJdbcTemplate().query(sql, new NdflPersonConsolidationPrepaymentRowMapper());
 
         if (result.isEmpty()) return null;
         return result;
@@ -2656,5 +2736,206 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     @Override
     public List<BigDecimal> generateOperInfoIds(int count) {
         return generateIds("seq_oper_info", count, BigDecimal.class);
+    }
+
+    @Override
+    public List<Long> getDeductionsIdsByPersonAndIncomes(long personId, Collection<Long> incomesIds) {
+        String query = "select distinct\n" +
+                "  npd.id\n" +
+                "from\n" +
+                "  ndfl_person_deduction npd\n" +
+                "inner join ndfl_person np on np.id = npd.ndfl_person_id \n" +
+                "inner join ndfl_person_income npi on npi.operation_id = npd.operation_id\n" +
+                "where \n" +
+                "  np.id = :personId\n" +
+                "  and npi.id in (:incomeIds)\n";
+
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("personId", personId);
+        params.addValue("incomeIds", incomesIds);
+
+        try {
+            return getNamedParameterJdbcTemplate().queryForList(query, params, Long.class);
+        } catch (EmptyResultDataAccessException ex) {
+            return Collections.emptyList();
+        }
+    }
+
+    @Override
+    public List<Long> getPrepaymentsIdsByPersonAndIncomes(long personId, Collection<Long> incomesIds) {
+        String query = "select distinct\n" +
+                "  npp.id\n" +
+                "from\n" +
+                "  ndfl_person_prepayment npp\n" +
+                "inner join ndfl_person np on np.id = npp.ndfl_person_id \n" +
+                "inner join ndfl_person_income npi on npi.operation_id = npp.operation_id\n" +
+                "where \n" +
+                "  np.id = :personId\n" +
+                "  and npi.id in (:incomeIds)\n";
+
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("personId", personId);
+        params.addValue("incomeIds", incomesIds);
+
+        try {
+            return getNamedParameterJdbcTemplate().queryForList(query, params, Long.class);
+        } catch (EmptyResultDataAccessException ex) {
+            return Collections.emptyList();
+        }
+    }
+
+    @Override
+    public List<Long> findNdflPersonIncomeByPersonAndOperations(long personId, Collection<String> operationsIds) {
+        String query = "select\n" +
+                "  npi.id\n" +
+                "from\n" +
+                "  ndfl_person_income npi\n" +
+                "inner join ndfl_person np on np.id = npi.ndfl_person_id \n" +
+                "where \n" +
+                "  np.id = :personId\n" +
+                "  and npi.operation_id in (:operationsIds)";
+
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("personId", personId);
+        params.addValue("operationsIds", operationsIds);
+
+        try {
+            return getNamedParameterJdbcTemplate().queryForList(query, params, Long.class);
+        } catch (EmptyResultDataAccessException ex) {
+            return Collections.emptyList();
+        }
+    }
+
+    @Override
+    public void renumerateNdflPersonRowNums(Long declarationDataId) {
+        String sql = "merge into NDFL_PERSON target\n" +
+                "USING\n" +
+                "(\n" +
+                "select section1.ID, dense_rank() over (order by section1.ROW_NUM) new_row_num\n" +
+                "from NDFL_PERSON section1\n" +
+                "where declaration_data_id = :dd_id\n" +
+                ") sorted\n" +
+                "ON (target.ID = sorted.ID)\n" +
+                "WHEN MATCHED THEN\n" +
+                "UPDATE\n" +
+                "SET target.ROW_NUM = sorted.new_row_num";
+        getNamedParameterJdbcTemplate().update(sql, new MapSqlParameterSource("dd_id", declarationDataId));
+    }
+
+    @Override
+    public void renumerateNdflPersonIncomeRowNums(Long declarationDataId) {
+        String sql = "merge into NDFL_PERSON_INCOME target\n" +
+                "USING\n" +
+                "(\n" +
+                "select section2.ID, dense_rank() over (order by section2.ROW_NUM) new_row_num\n" +
+                "from NDFL_PERSON_INCOME section2\n" +
+                "join NDFL_PERSON section1 on section1.id=section2.ndfl_person_id where declaration_data_id = :dd_id\n" +
+                ") sorted\n" +
+                "ON (target.ID = sorted.ID)\n" +
+                "WHEN MATCHED THEN\n" +
+                "UPDATE\n" +
+                "SET target.ROW_NUM = sorted.new_row_num";
+        getNamedParameterJdbcTemplate().update(sql, new MapSqlParameterSource("dd_id", declarationDataId));
+    }
+
+    @Override
+    public void renumerateNdflPersonDeductionRowNums(Long declarationDataId) {
+        String sql = "merge into NDFL_PERSON_DEDUCTION target\n" +
+                "USING\n" +
+                "(\n" +
+                "select section3.ID, dense_rank() over (order by section3.ROW_NUM) new_row_num\n" +
+                "from NDFL_PERSON_DEDUCTION section3\n" +
+                "join NDFL_PERSON section1 on section1.id=section3.ndfl_person_id where declaration_data_id = :dd_id\n" +
+                ") sorted\n" +
+                "ON (target.ID = sorted.ID)\n" +
+                "WHEN MATCHED THEN\n" +
+                "UPDATE\n" +
+                "SET target.ROW_NUM = sorted.new_row_num";
+        getNamedParameterJdbcTemplate().update(sql, new MapSqlParameterSource("dd_id", declarationDataId));
+    }
+
+    @Override
+    public void renumerateNdflPersonPrepaymentRowNums(Long declarationDataId) {
+        String sql = ("merge into NDFL_PERSON_PREPAYMENT target\n" +
+                "USING\n" +
+                "(\n" +
+                "select section4.ID, dense_rank() over (order by section4.ROW_NUM) new_row_num\n" +
+                "from NDFL_PERSON_PREPAYMENT section4\n" +
+                "join NDFL_PERSON section1 on section1.id=section4.ndfl_person_id where declaration_data_id = :dd_id\n" +
+                ") sorted\n" +
+                "ON (target.ID = sorted.ID)\n" +
+                "WHEN MATCHED THEN\n" +
+                "UPDATE\n" +
+                "SET target.ROW_NUM = sorted.new_row_num");
+        getNamedParameterJdbcTemplate().update(sql, new MapSqlParameterSource("dd_id", declarationDataId));
+    }
+
+    @Override
+    public void deleteRowsBySection2(final List<Long> ndflPersonIncomeIds) {
+        String deleteTemp0 = "delete from TMP_NUMBERS0";
+        String deleteTemp1 = "delete from TMP_NUMBERS1";
+        String insertTemp0 = "insert into TMP_NUMBERS0 (num) VALUES(?)";
+        String insertTemp1 = "insert into tmp_numbers1\n" +
+                "(select distinct ndfl_person_id from ndfl_person_income section2 join tmp_numbers0 tmp on tmp.num = section2.id)";
+        String deleteSection4 = "delete from NDFL_PERSON_PREPAYMENT\n" +
+                "where ID in\n" +
+                "(\n" +
+                "select section4.ID\n" +
+                "from tmp_numbers0 tmp\n" +
+                "inner join NDFL_PERSON_INCOME section2 on tmp.num=section2.id\n" +
+                "inner join NDFL_PERSON_PREPAYMENT section4 ON section2.NDFL_PERSON_ID = section4.NDFL_PERSON_ID\n" +
+                "and section2.OPERATION_ID = section4.OPERATION_ID\n" +
+                ")";
+        String deleteSection3 = "delete from NDFL_PERSON_DEDUCTION\n" +
+                "where ID in (\n" +
+                "select section3.id\n" +
+                "from\n" +
+                "tmp_numbers0 tmp\n" +
+                "inner join NDFL_PERSON_INCOME section2 on tmp.num = section2.id\n" +
+                "inner join NDFL_PERSON_DEDUCTION section3 ON section2.NDFL_PERSON_ID = section3.NDFL_PERSON_ID\n" +
+                "and section2.OPERATION_ID = section3.OPERATION_ID\n" +
+                ")";
+
+        String deleteSection2 = "delete from NDFL_PERSON_INCOME\n" +
+                "where operation_ID in (\n" +
+                "select section2.operation_id\n" +
+                "from NDFL_PERSON_INCOME section2\n" +
+                "inner join tmp_numbers0 tmp on tmp.num = section2.id\n" +
+                "inner join NDFL_PERSON_INCOME section22 on\n" +
+                "section2.NDFL_PERSON_ID = section22.NDFL_PERSON_ID\n" +
+                "and section2.OPERATION_ID = section22.OPERATION_ID\n" +
+                ")";
+        String deleteSection1 = "delete\n" +
+                "from NDFL_PERSON\n" +
+                "where ID in (\n" +
+                "select section1.id from tmp_numbers1 tmp join ndfl_person section1 on tmp.num = section1.id\n" +
+                "left join NDFL_PERSON_INCOME section2\n" +
+                "on section2.NDFL_PERSON_ID =section1.ID\n" +
+                "where section2.id is null\n" +
+                ")";
+
+        MapSqlParameterSource emptyParams = new MapSqlParameterSource();
+
+        getNamedParameterJdbcTemplate().update(deleteTemp0, emptyParams);
+        getNamedParameterJdbcTemplate().update(deleteTemp1, emptyParams);
+
+        getJdbcTemplate().batchUpdate(insertTemp0,
+                new BatchPreparedStatementSetter() {
+                    @Override
+                    public void setValues(PreparedStatement preparedStatement, int i) throws SQLException {
+                        preparedStatement.setLong(1, ndflPersonIncomeIds.get(i));
+                    }
+
+                    @Override
+                    public int getBatchSize() {
+                        return ndflPersonIncomeIds.size();
+                    }
+                });
+        getNamedParameterJdbcTemplate().update(insertTemp1, emptyParams);
+        getNamedParameterJdbcTemplate().update(deleteSection4, emptyParams);
+        getNamedParameterJdbcTemplate().update(deleteSection3, emptyParams);
+        getNamedParameterJdbcTemplate().update(deleteSection2, emptyParams);
+        getNamedParameterJdbcTemplate().update(deleteSection1, emptyParams);
+
     }
 }

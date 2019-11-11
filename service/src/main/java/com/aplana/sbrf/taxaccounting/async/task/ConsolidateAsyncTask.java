@@ -1,15 +1,7 @@
 package com.aplana.sbrf.taxaccounting.async.task;
 
 import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
-import com.aplana.sbrf.taxaccounting.model.AsyncQueue;
-import com.aplana.sbrf.taxaccounting.model.AsyncTaskData;
-import com.aplana.sbrf.taxaccounting.model.AsyncTaskState;
-import com.aplana.sbrf.taxaccounting.model.AsyncTaskType;
-import com.aplana.sbrf.taxaccounting.model.DeclarationData;
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.NotificationType;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.permissions.logging.TargetIdAndLogger;
@@ -17,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
+import com.aplana.sbrf.taxaccounting.utils.DepartmentReportPeriodFormatter;
 import org.apache.commons.lang3.time.FastDateFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -41,6 +34,8 @@ public class ConsolidateAsyncTask extends XmlGeneratorAsyncTask {
     private DepartmentReportPeriodService departmentReportPeriodService;
     @Autowired
     private PeriodService periodService;
+    @Autowired
+    private DepartmentReportPeriodFormatter departmentReportPeriodFormatter;
 
     @Override
     protected AsyncTaskType getAsyncTaskType() {
@@ -79,10 +74,9 @@ public class ConsolidateAsyncTask extends XmlGeneratorAsyncTask {
         DepartmentReportPeriod reportPeriod = departmentReportPeriodService.fetchOne(declarationData.getDepartmentReportPeriodId());
         Department department = departmentService.getDepartment(declarationData.getDepartmentId());
         Throwable throwable = (Throwable) taskData.getParams().get("exceptionThrown");
-        return String.format("Операция \"Консолидация\" не выполнена для формы №: %d, Период: \"%s%s\", Подразделение: \"%s\".%s",
+        return String.format("Операция \"Консолидация\" не выполнена для формы №: %d, Период: \"%s\", Подразделение: \"%s\".%s",
                 declarationDataId,
-                periodService.getPeriodString(reportPeriod.getReportPeriod()),
-                reportPeriod.getCorrectionDate() != null ? " (корр. " + FastDateFormat.getInstance("dd.MM.yyyy").format(reportPeriod.getCorrectionDate()) + ")" : "",
+                departmentReportPeriodFormatter.getPeriodDescription(reportPeriod),
                 department.getShortName(),
                 throwable != null && !isEmpty(throwable.getMessage())? " Причина: " + throwable.getMessage() : "");
     }
@@ -95,10 +89,9 @@ public class ConsolidateAsyncTask extends XmlGeneratorAsyncTask {
         DeclarationData declarationData = declarationDataService.get(declarationDataId, userInfo);
         DepartmentReportPeriod reportPeriod = departmentReportPeriodService.fetchOne(declarationData.getDepartmentReportPeriodId());
         Department department = departmentService.getDepartment(declarationData.getDepartmentId());
-        return String.format("Операция \"Консолидация\" завершена для формы №: %d, Период: \"%s%s\", Подразделение: \"%s\"",
+        return String.format("Операция \"Консолидация\" завершена для формы №: %d, Период: \"%s\", Подразделение: \"%s\"",
                 declarationDataId,
-                periodService.getPeriodString(reportPeriod.getReportPeriod()),
-                reportPeriod.getCorrectionDate() != null ? " (корр. " + FastDateFormat.getInstance("dd.MM.yyyy").format(reportPeriod.getCorrectionDate()) + ")" : "",
+                departmentReportPeriodFormatter.getPeriodDescription(reportPeriod),
                 department.getShortName());
     }
 

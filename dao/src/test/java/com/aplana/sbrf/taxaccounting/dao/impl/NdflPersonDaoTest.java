@@ -3,11 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.ndfl.NdflPersonDao;
-import com.aplana.sbrf.taxaccounting.model.KppSelect;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.SubreportAliasConstants;
-import com.aplana.sbrf.taxaccounting.model.URM;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.consolidation.ConsolidationIncome;
 import com.aplana.sbrf.taxaccounting.model.consolidation.ConsolidationSourceDataSearchFilter;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
@@ -1218,6 +1214,7 @@ public class NdflPersonDaoTest {
         endDate.set(2018, Calendar.MARCH, 31);
         ConsolidationSourceDataSearchFilter filter = ConsolidationSourceDataSearchFilter.builder()
                 .currentDate(currentDate.getTime())
+                .periodId(310)
                 .periodStartDate(startDate.getTime())
                 .periodEndDate(endDate.getTime())
                 .consolidateDeclarationDataYear(2018)
@@ -1361,6 +1358,24 @@ public class NdflPersonDaoTest {
         assertThat(result3)
                 .isGreaterThan(declaration50000.size())
                 .isEqualTo(9);
+    }
+
+    @Test
+    public void getDeductionsByPersonIncomesTest() {
+        List<Long> deductionsByPersonIncomes = ndflPersonDao.getDeductionsIdsByPersonAndIncomes(101L, asList(1036L, 1037L));
+        assertThat(deductionsByPersonIncomes).containsExactlyInAnyOrder(1L, 2L);
+    }
+
+    @Test
+    public void getDeductionsByPersonPrepaymentsTest() {
+        List<Long> prepaymentsByPersonIncomes = ndflPersonDao.getPrepaymentsIdsByPersonAndIncomes(101L, asList(1036L, 1037L));
+        assertThat(prepaymentsByPersonIncomes).containsExactlyInAnyOrder(1L, 2L);
+    }
+
+    @Test
+    public void getPersonIncomesByOperations() {
+        List<Long> personIncomesByPersonOperations = ndflPersonDao.findNdflPersonIncomeByPersonAndOperations(101L, asList("1", "2"));
+        assertThat(personIncomesByPersonOperations).containsExactlyInAnyOrder(1036L, 1037L);
     }
 
     private static Date toDate(String dateStr) {

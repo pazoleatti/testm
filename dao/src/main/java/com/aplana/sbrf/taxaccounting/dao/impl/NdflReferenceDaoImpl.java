@@ -34,16 +34,18 @@ public class NdflReferenceDaoImpl extends AbstractDao implements NdflReferenceDa
         return uniqueRecordIds.size();
     }
 
-    public Integer getNextSprNum(Integer year) {
-        Integer sequenceCount = getJdbcTemplate().queryForObject("select count(*) from user_sequences where sequence_name='SEQ_NDFL_REFERENCES_" + year + "'", Integer.class);
-        if (sequenceCount == 0) {
-            createSequence(year);
-        }
-        return getJdbcTemplate().queryForObject("select SEQ_NDFL_REFERENCES_" + year + ".nextval from dual", Integer.class);
-
+    @Override
+    public Integer countSequenceByYear(Integer year) {
+        return getJdbcTemplate().queryForObject("select count(*) from user_sequences where sequence_name='SEQ_NDFL_REFERENCES_" + year + "'", Integer.class);
     }
 
-    private void createSequence(Integer year) {
+    @Override
+    public Integer getNextSprNum(Integer year) {
+        return getJdbcTemplate().queryForObject("select SEQ_NDFL_REFERENCES_" + year + ".nextval from dual", Integer.class);
+    }
+
+    @Override
+    public void createSequence(Integer year) {
         getJdbcTemplate().execute("CREATE SEQUENCE SEQ_NDFL_REFERENCES_" + year
                 + " MINVALUE 1 MAXVALUE 9999999999999999999999999999 INCREMENT BY 1 START WITH 1 CACHE 20 NOORDER NOCYCLE");
     }
@@ -83,4 +85,15 @@ public class NdflReferenceDaoImpl extends AbstractDao implements NdflReferenceDa
             return numFor2Ndfl;
         }
     }
+
+    public Boolean checkExistingAnnulReport(Long declarationDataId, Integer num, String lastName, String firstName, String middleName, String innNp, String idDocNumber) {
+        Boolean result = false;
+        Integer resultCount = getJdbcTemplate().queryForObject("select count(*) from ndfl_references nr " +
+                        "left join ndfl_person np on np.id = nr.ndfl_person_id " +
+                        "where nr.correction_num = 99 and nr.declaration_data_id = ? and nr.num = ? and np.last_name = ? and np.first_name = ? and np.middle_name = ? and np.inn_np = ? and np.id_doc_number = ?  ",
+                new Object[] {declarationDataId, num, lastName, firstName, middleName, innNp, idDocNumber}, Integer.class);
+        if (resultCount > 0) result = true;
+        return result;
+    }
+
 }

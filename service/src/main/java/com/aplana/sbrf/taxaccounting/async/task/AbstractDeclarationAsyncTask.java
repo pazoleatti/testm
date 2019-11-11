@@ -13,6 +13,7 @@ import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
+import com.aplana.sbrf.taxaccounting.utils.DepartmentReportPeriodFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
@@ -21,7 +22,7 @@ import java.util.Map;
 
 public abstract class AbstractDeclarationAsyncTask extends AbstractAsyncTask {
 
-    private static final String DECLARATION_DESCRIPTION = "№: %d, Период: \"%s, %s%s\", Подразделение: \"%s\", Вид: \"%s\"%s";
+    private static final String DECLARATION_DESCRIPTION = "№: %d, Период: \"%s\", Подразделение: \"%s\", Вид: \"%s\"%s";
 
     protected static final String FAIL = "Не выполнена операция \"%s\" для налоговой формы: %s.";
     protected static final String CAUSE = " Причина: %s";
@@ -36,6 +37,8 @@ public abstract class AbstractDeclarationAsyncTask extends AbstractAsyncTask {
     private DepartmentReportPeriodService departmentReportPeriodService;
     @Autowired
     private RefBookFactory refBookFactory;
+    @Autowired
+    private DepartmentReportPeriodFormatter departmentReportPeriodFormatter;
 
     @Override
     public AsyncQueue checkTaskLimit(String taskDescription, TAUserInfo userInfo, Map<String, Object> params, Logger logger) throws AsyncTaskException {
@@ -61,9 +64,7 @@ public abstract class AbstractDeclarationAsyncTask extends AbstractAsyncTask {
 
         return String.format(DECLARATION_DESCRIPTION,
                 declaration.getId(),
-                reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
-                reportPeriod.getReportPeriod().getName(),
-                getCorrectionDateString(reportPeriod),
+                departmentReportPeriodFormatter.getPeriodDescription(reportPeriod),
                 department.getName(),
                 declarationTemplate.getType().getName(),
                 getAdditionalString(declaration, params));

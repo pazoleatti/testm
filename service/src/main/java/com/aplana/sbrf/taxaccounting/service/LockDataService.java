@@ -1,16 +1,10 @@
 package com.aplana.sbrf.taxaccounting.service;
 
-import com.aplana.sbrf.taxaccounting.model.LockData;
-import com.aplana.sbrf.taxaccounting.model.LockDataDTO;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 /**
  * <h1>Сервис блокировок</h1>
@@ -168,12 +162,12 @@ public interface LockDataService {
     void bindTask(String lockKey, long taskId);
 
     /**
-     * Получает список всех блокировок по ключам
+     * Получает список всех блокировок по части ключа
      *
      * @param keysBlocker - множество ключей
      * @return список существующих блокировок
      */
-    List<LockDataDTO> fetchAllByKeySet(Set<String> keysBlocker);
+    List<LockDataDTO> fetchAllByKeyPrefixSet(Collection<String> keysBlocker);
 
     /**
      * Связывает несколько блокировок с асинхронной задачей
@@ -189,4 +183,12 @@ public interface LockDataService {
      * @param keys список ключей блокировок
      */
     void unlockMultipleTasks(Collection<String> keys);
+
+    /**
+     * Получить идентификатор декларации из ключа блокировки
+     *
+     * @param lockKey ключ блокировки
+     * @return идентикатор декларации
+     */
+    long getDeclarationIdByLockKey(String lockKey);
 }

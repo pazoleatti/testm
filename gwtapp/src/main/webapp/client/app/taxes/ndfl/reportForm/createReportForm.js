@@ -35,6 +35,17 @@
                     $scope.$watch("reportData.period", function (period) {
                         if (!period) {
                             $scope.reportData.declarationType = null;
+                        } else {
+                            $scope.reportData.declarationType = null;
+                            if (period.text.indexOf(APP_CONSTANTS.DECLARATION_TYPE.REPORT_6_NDFL.name) > -1 ){
+                                $scope.reportData.declarationType = new Object(APP_CONSTANTS.DECLARATION_TYPE.REPORT_6_NDFL);
+                            }
+                            if (period.text.indexOf(APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_1.name) > -1 ){
+                                $scope.reportData.declarationType = new Object(APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_1);
+                            }
+                            if (period.text.indexOf(APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_2.name) > -1 ){
+                                $scope.reportData.declarationType = new Object(APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_2);
+                            }
                         }
                     });
                 }
@@ -51,8 +62,8 @@
                     var params = {
                         knfId: $scope.knf ? $scope.knf.id : undefined,
                         declarationTypeId: $scope.reportData.declarationType.id,
-                        departmentId: $scope.knf ? undefined : $scope.reportData.department.id,
-                        periodId: $scope.knf ? undefined : $scope.reportData.period.id
+                        departmentId: $scope.reportData.department.id,
+                        periodId: $scope.reportData.period.id
                     };
                     if ($scope.reportData.kppOktmoPairs) {
                         params.kppOktmoPairs = $scope.reportData.kppOktmoPairs.map(function (kppOktmoPair) {

@@ -84,7 +84,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
         String sql = "" +
                 "select ddc.source_declaration_data_id as id, dep.NAME as departmentName, dep.id as departmentId, " +
                 "       drp.correction_date, dt.form_kind, dt.NAME as declaration_type_name, tp.YEAR, tp.tax_type, " +
-                "       rpt.NAME as periodName, dd.STATE, rbft.CODE\n" +
+                "       rpt.NAME as periodName, dd.STATE, rbft.CODE as formTypeCode\n" +
                 "from declaration_data_consolidation ddc \n" +
                 "left join declaration_data dd on dd.id = ddc.source_declaration_data_id\n" +
                 "left join department_report_period drp on drp.id = dd.department_report_period_id\n" +
@@ -105,7 +105,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
     public List<Relation> getDestinationsInfo(long sourceId) {
         String sql = "" +
                 "select ddc.target_declaration_data_id as id, dep.name as departmentName, dep.id as departmentId, drp.correction_date," +
-                "       dt.form_kind, dt.NAME as declaration_type_name, tp.YEAR, tp.tax_type, rpt.NAME as periodName, dd.STATE, rbft.CODE\n" +
+                "       dt.form_kind, dt.NAME as declaration_type_name, tp.YEAR, tp.tax_type, rpt.NAME as periodName, dd.STATE, rbft.CODE as formTypeCode\n" +
                 "from declaration_data_consolidation ddc \n" +
                 "left join declaration_data dd on dd.id = ddc.target_declaration_data_id\n" +
                 "left join department_report_period drp on drp.id = dd.department_report_period_id\n" +
@@ -143,6 +143,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             relation.setYear(rs.getInt("year"));
             relation.setDeclarationTypeName(rs.getString("declaration_type_name"));
             relation.setPeriodName(rs.getString("periodName"));
+            relation.setFormTypeCode(rs.getString("formTypeCode"));
             DeclarationTemplate declarationTemplate = new DeclarationTemplate();
             DeclarationFormKind declarationFormKind = DeclarationFormKind.fromId(rs.getLong("form_kind"));
             declarationTemplate.setDeclarationFormKind(declarationFormKind);

@@ -77,6 +77,7 @@ public class SpecificReportDeclarationDataAsyncTask extends AbstractDeclarationA
 
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(taskData.getUserId()));
+        userInfo.setIp((String) params.get("userIP"));
 
         DeclarationData declarationData = declarationDataService.get(declarationDataId, userInfo);
         DeclarationReportType ddReportType = DeclarationReportType.createSpecificReport();

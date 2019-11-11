@@ -1,0 +1,42 @@
+<form class="form-horizontal" data-aplana-submit-valid="save()">
+    <div class="modal-body">
+        <table class="horizontal-input-table gray-label-table auto-width-uneditable-input-table nowrap-label-table">
+            <tbody>
+            <tr>
+
+                <div>
+                    <div data-aplana-field>
+                        <div style="width: 285px; left: 15px"
+                             data-ng-controller="SelectExcelTemplateGenerationTypeCtrl"
+                             data-ui-select2="excelTemplateGenerationTypeSelect.options"
+                             data-ng-init="initSelectWithExcelTemplateGenerationTypesForCreate(selectedRows, activeTab)"
+                             data-ng-model="excelTemplateType.type"
+                             data-required>
+                        </div>
+                        <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
+                            translate}}
+                        </div>
+                    </div>
+                </div>
+
+            </tr>
+
+            </tbody>
+        </table>
+
+    </div>
+
+    <div class="modal-footer">
+    <!--Кнопка Сформировать-->
+        <button type="button" class="btn btn-default" id="confirmButton" ng-click="create()">
+            <span data-translate-once="common.button.formation"></span>
+        </button>
+
+    <!--Кнопка Выход-->
+        <button type="button" class="btn btn-default-nonBg iconed-btn" id="closeButton" ng-click="close()">
+            <span data-translate-once="button.cancel"></span>
+            <span class="btn-icon-noneBg-close"></span>
+        </button>
+
+    </div>
+</form>

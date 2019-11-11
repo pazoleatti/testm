@@ -4,6 +4,8 @@ import com.aplana.sbrf.taxaccounting.model.Configuration;
 import com.aplana.sbrf.taxaccounting.model.ConfigurationParam;
 import com.aplana.sbrf.taxaccounting.model.exception.ConfigurationParameterAbsentException;
 import com.aplana.sbrf.taxaccounting.service.ConfigurationService;
+import com.aplana.sbrf.taxaccounting.service.TransactionHelper;
+import com.aplana.sbrf.taxaccounting.service.TransactionLogic;
 import com.aplana.sbrf.taxaccounting.service.jms.transport.MessageSender;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -23,10 +25,12 @@ public class BaseMessageSenderImpl implements MessageSender {
     private JmsTemplate jmsTemplate;
     @Autowired
     private ConfigurationService configurationService;
+    @Autowired
+    private TransactionHelper transactionHelper;
 
     @Override
-    public void sendMessage(String message) throws ConfigurationParameterAbsentException {
-        Configuration configuration = configurationService.fetchByEnum(ConfigurationParam.JNDI_QUEUE_OUT);
+    public void sendMessage(final String message) throws ConfigurationParameterAbsentException {
+        final Configuration configuration = configurationService.fetchByEnum(ConfigurationParam.JNDI_QUEUE_OUT);
         if (configuration == null || StringUtils.isEmpty(configuration.getValue())) {
             throw new ConfigurationParameterAbsentException("не задан конфигурационный параметр: \"" +
                     ConfigurationParam.JNDI_QUEUE_OUT.getCaption() + "\"");
@@ -34,7 +38,14 @@ public class BaseMessageSenderImpl implements MessageSender {
 
         LOG.debug(String.format("Попытка отправить сообщение '%s' в очередь%s", message, configuration.getValue()));
         try {
-            jmsTemplate.convertAndSend(configuration.getValue(), message);
+            transactionHelper.executeInNewTransaction(new TransactionLogic<Object>() {
+                @Override
+                public Object execute() {
+                    jmsTemplate.convertAndSend(configuration.getValue(), message);
+                    return null;
+                }
+            });
+
         } catch (JmsException e) {
             throw new RuntimeException(e);
         }

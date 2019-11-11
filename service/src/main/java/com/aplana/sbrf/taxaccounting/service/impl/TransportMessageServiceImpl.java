@@ -37,6 +37,8 @@ public class TransportMessageServiceImpl implements TransportMessageService {
     protected DepartmentService departmentService;
     @Autowired
     private PrintingService printingService;
+    @Autowired
+    private TransactionHelper transactionHelper;
 
 
     @Override
@@ -97,15 +99,27 @@ public class TransportMessageServiceImpl implements TransportMessageService {
 
     @Override
     @Transactional
-    public void create(TransportMessage transportMessage) {
-        transportMessageDao.create(transportMessage);
-        LOG.info("Сохранено транспортное сообщение: " + transportMessage);
+    public void create(final TransportMessage transportMessage) {
+        transactionHelper.executeInNewTransaction(new TransactionLogic<Object>() {
+            @Override
+            public Object execute() {
+                transportMessageDao.create(transportMessage);
+                LOG.info("Сохранено транспортное сообщение: " + transportMessage);
+                return null;
+            }
+        });
     }
 
     @Override
     @Transactional
-    public void update(TransportMessage transportMessage) {
-        transportMessageDao.update(transportMessage);
+    public void update(final TransportMessage transportMessage) {
+        transactionHelper.executeInNewTransaction(new TransactionLogic<Object>() {
+            @Override
+            public Object execute() {
+                transportMessageDao.update(transportMessage);
+                return null;
+            }
+        });
     }
 
     @Override
@@ -139,6 +153,8 @@ public class TransportMessageServiceImpl implements TransportMessageService {
                         ? transportMessageDao.findByFilter(filter, null)
                         : transportMessageDao.findByIds(transportMessageIds);
 
+        sortById(transportMessages);
+
         InputStream inputStream = null;
         try {
             inputStream = buildExcelStream(transportMessages, headerDescription);
@@ -148,6 +164,15 @@ public class TransportMessageServiceImpl implements TransportMessageService {
         if (inputStream == null)
             throw new ServiceException("Нет данных для формирования Excel-файла транспортных сообщений");
         return inputStream;
+    }
+
+    private void sortById(List<TransportMessage> transportMessages) {
+        Collections.sort(transportMessages, new Comparator<TransportMessage>() {
+            @Override
+            public int compare(TransportMessage o1, TransportMessage o2) {
+                return o2.getId().compareTo(o1.getId());
+            }
+        });
     }
 
     private List<Long> getTransportMessageIds(TransportMessageFilter filter) {

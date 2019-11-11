@@ -4,3 +4,4 @@ insert into declaration_type (id, name, status) values (3, 'Вид налого�
 insert into declaration_type (id, name, status) values (4, 'Вид налоговой формы 4', 0);
 insert into declaration_type (id, name, status) values (100, 'РНУ НДФЛ (первичная)', 0);
 insert into declaration_type (id, name, status) values (101, 'РНУ НДФЛ (консолидированная)', 0);
+insert into declaration_type (id, name, status) values (104, '2-НДФЛ (2)', 0);

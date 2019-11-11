@@ -98,7 +98,7 @@
                             {name: 'declarationTypeName', index: 'declarationTypeName', width: 203, sortable: false},
                             {name: 'year', index: 'year', width: 40, sortable: false},
                             {name: 'periodName', index: 'periodName', width: 110, sortable: false},
-                            {name: 'formType', index: 'formType', width: 110, sortable: false},
+                            {name: 'formTypeCode', index: 'formTypeCode', width: 110, sortable: false},
                             {
                                 name: 'declarationState',
                                 index: 'declarationState',

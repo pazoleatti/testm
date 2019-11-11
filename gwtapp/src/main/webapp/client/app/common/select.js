@@ -377,7 +377,12 @@
                     var department = _.deep($scope, departmentModelPath);
                     var period = _.deep($scope, periodModelPath);
 
-                    loadReportFormTypes(knf, department, period);
+                    if (!knf) {
+                        loadReportFormTypesPeriod(knf, department, period);
+                    } else {
+                        loadReportFormTypesByKnfTaxFormTypeId(knf, department, period);
+                    }
+
 
                     $scope.$watchCollection("[" + departmentModelPath + ", " + periodModelPath + "]", function (newValues, oldValues) {
                         var department = newValues && newValues[0], oldDepartment = oldValues && oldValues[0];
@@ -385,7 +390,11 @@
                         if (department && (!oldDepartment || department.id !== oldDepartment.id) ||
                             period && (!oldPeriod || period.id !== oldPeriod.id)
                         ) {
-                            loadReportFormTypes(knf, department, period);
+                            if (!knf) {
+                                loadReportFormTypesPeriod(knf, department, period);
+                            } else {
+                                loadReportFormTypesByKnfTaxFormTypeId(knf, department, period);
+                            }
                         }
                     });
                 };
@@ -405,6 +414,40 @@
                             });
                             $scope.declarationTypeSelect.options.data.results = data;
                         });
+                    }
+                }
+
+                /**
+                 * Загружает тип отчетной формы из указанного в периоде
+                 */
+                function loadReportFormTypesPeriod(knf, department, period) {
+                    if (department && period) {
+                        $scope.declarationTypeSelect.options.data.results = [];
+                        if (period.text.indexOf(APP_CONSTANTS.DECLARATION_TYPE.REPORT_6_NDFL.name) > -1 ){
+                            $scope.declarationTypeSelect.options.data.results.push(APP_CONSTANTS.DECLARATION_TYPE.REPORT_6_NDFL);
+                        }
+                        if (period.text.indexOf(APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_1.name) > -1 ){
+                            $scope.declarationTypeSelect.options.data.results.push(APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_1);
+                        }
+                        if (period.text.indexOf(APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_2.name) > -1 ){
+                            $scope.declarationTypeSelect.options.data.results.push(APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_2);
+                        }
+                    }
+                }
+
+                /**
+                 * Загружает тип отчетной формы из указанного в периоде формы
+                 */
+                function loadReportFormTypesByKnfTaxFormTypeId(knf, department, period) {
+                    $scope.declarationTypeSelect.options.data.results = [];
+                    if (knf.reportPeriodTaxFormTypeId == APP_CONSTANTS.TAX_FORM_TYPE.REPORT_6_NDFL.id){
+                        $scope.declarationTypeSelect.options.data.results.push(APP_CONSTANTS.DECLARATION_TYPE.REPORT_6_NDFL);
+                    }
+                    if (knf.reportPeriodTaxFormTypeId == APP_CONSTANTS.TAX_FORM_TYPE.REPORT_2_NDFL_1.id){
+                        $scope.declarationTypeSelect.options.data.results.push(APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_1);
+                    }
+                    if (knf.reportPeriodTaxFormTypeId == APP_CONSTANTS.TAX_FORM_TYPE.REPORT_2_NDFL_2.id){
+                        $scope.declarationTypeSelect.options.data.results.push(APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_2);
                     }
                 }
 
@@ -1340,35 +1383,63 @@
         ])
 
         /**
+         * Контроллер для выбор режима формирования отчета "Шаблон ТФ (Excel)"
+         */
+        .controller('SelectExcelTemplateGenerationTypeCtrl', ['$scope', '$rootScope', 'APP_CONSTANTS', 'GetSelectOption',
+            function ($scope, $rootScope, APP_CONSTANTS, GetSelectOption) {
+                $scope.excelTemplateGenerationTypeSelect = {};
+
+                /**
+                 * Инициализировать список с видами форм, которые можно создать
+                 */
+                $scope.initSelectWithExcelTemplateGenerationTypesForCreate = function (selectedRows, activeTab) {
+                    $scope.excelTemplateGenerationTypeSelect = GetSelectOption.getBasicSingleSelectOptions(false);
+                    $scope.excelTemplateGenerationTypeSelect.options.data.results = [];
+                    $scope.excelTemplateGenerationTypeSelect.options.data.results.push(APP_CONSTANTS.EXCEL_TEMPLATE_GENERATION_TYPE.ALL_DATA);
+                    if (selectedRows && selectedRows.length !== 0
+                        && (activeTab.getSection() == APP_CONSTANTS.NDFL_PERSON_REPORT_ACTIVE_TAB.PERSONS.id || activeTab.getSection() == APP_CONSTANTS.NDFL_PERSON_REPORT_ACTIVE_TAB.INCOMES.id)) {
+                        $scope.excelTemplateGenerationTypeSelect.options.data.results.push(APP_CONSTANTS.EXCEL_TEMPLATE_GENERATION_TYPE.SELECTED_ON_PAGE);
+                    }
+                };
+            }
+        ])
+
+        /**
          * Контроллер для выбора типа КНФ по виду отчетности
          */
         .controller('SelectKnfTypeCtrlByReportPeriod', ['$scope', 'APP_CONSTANTS', 'GetSelectOption',
             function ($scope, APP_CONSTANTS, GetSelectOption) {
-                $scope.result = {};
+                var periodModelPath = 'declarationData.period';
+                $scope.knfTypeSelect = {};
 
                 /**
                  * Определение возможных типов КНФ по виду отчетности
                  *
                  * @param periodModelPath путь в scope до модели периода
                  */
-                $scope.init = function(periodModelPath) {
-                    $scope.result = GetSelectOption.getBasicSingleSelectOptions(false);
-                    $scope.result.options.data.results = getKnfTypesByPeriod(periodModelPath);
+                $scope.initSelectKnfTypeByReportPeriodTaxFormType = function() {
+                    $scope.knfTypeSelect = GetSelectOption.getBasicSingleSelectOptions(false);
+                    $scope.knfTypeSelect.options.data.results = getKnfTypesByPeriod();
 
-                    function getKnfTypesByPeriod(periodModelPath) {
-                        var period = _.deep($scope, periodModelPath);
-                        switch(period.periodTaxFormTypeId) {
-                            case APP_CONSTANTS.TAX_FORM_TYPE.REPORT_2_NDFL_1:
-                            case APP_CONSTANTS.TAX_FORM_TYPE.REPORT_6_NDFL:
-                                return [APP_CONSTANTS.KNF_TYPE.ALL, APP_CONSTANTS.KNF_TYPE.BY_KPP];
-                            case APP_CONSTANTS.TAX_FORM_TYPE.REPORT_2_NDFL_2:
-                                return [APP_CONSTANTS.KNF_TYPE.BY_NONHOLDING_TAX];
-                            case APP_CONSTANTS.TAX_FORM_TYPE.APP_2:
-                                return [APP_CONSTANTS.KNF_TYPE.FOR_APP2];
-                            //TODO необходимо для корректной работы без отсутствия датафикса SBRFNDFL-8553
-                            default:
-                                return [APP_CONSTANTS.KNF_TYPE.ALL, APP_CONSTANTS.KNF_TYPE.BY_KPP];
+                    $scope.$watch(periodModelPath, function (newValue, oldValue) {
+                        if (!!newValue && (!oldValue || newValue.id !== oldValue.id)) {
+                            var knfTypes = getKnfTypesByPeriod();
+                            $scope.declarationData.knfType = knfTypes[0];
+                            $scope.knfTypeSelect.options.data.results = knfTypes;
                         }
+                    });
+                }
+
+                function getKnfTypesByPeriod() {
+                    var period = _.deep($scope, periodModelPath);
+                    switch(period.reportPeriodTaxFormTypeId) {
+                        case APP_CONSTANTS.TAX_FORM_TYPE.REPORT_2_NDFL_1.id:
+                        case APP_CONSTANTS.TAX_FORM_TYPE.REPORT_6_NDFL.id:
+                            return [APP_CONSTANTS.KNF_TYPE.ALL, APP_CONSTANTS.KNF_TYPE.BY_KPP];
+                        case APP_CONSTANTS.TAX_FORM_TYPE.REPORT_2_NDFL_2.id:
+                            return [APP_CONSTANTS.KNF_TYPE.BY_NONHOLDING_TAX];
+                        case APP_CONSTANTS.TAX_FORM_TYPE.APP_2.id:
+                            return [APP_CONSTANTS.KNF_TYPE.FOR_APP2];
                     }
                 }
             }

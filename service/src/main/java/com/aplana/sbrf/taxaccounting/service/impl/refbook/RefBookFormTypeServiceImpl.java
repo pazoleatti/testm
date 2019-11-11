@@ -21,8 +21,4 @@ public class RefBookFormTypeServiceImpl implements RefBookFormTypeService {
         return refBookFormTypeDao.fetchAll();
     }
 
-    @Override
-    public RefBookFormType findOne(int id) {
-        return refBookFormTypeDao.findOne(id);
-    }
 }

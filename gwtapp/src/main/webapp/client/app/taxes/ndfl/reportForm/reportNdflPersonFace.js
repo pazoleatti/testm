@@ -9,8 +9,8 @@
      * @description Контроллер формы создания отчета 2-НДФЛ по физическому лицу
      */
         .controller('reportNdflPersonFaceFormCtrl', ['$scope', '$modalInstance', '$shareData', '$filter',
-            '$dialogs', 'APP_CONSTANTS', '$logPanel', '$http',
-            function ($scope, $modalInstance, $shareData, $filter, $dialogs, APP_CONSTANTS, $logPanel, $http) {
+            '$dialogs', 'APP_CONSTANTS', '$logPanel', '$http', '$webStorage',
+            function ($scope, $modalInstance, $shareData, $filter, $dialogs, APP_CONSTANTS, $logPanel, $http, $webStorage) {
 
 
                 $scope.searchFilter = {
@@ -258,7 +258,14 @@
                  * @description Сформировать аннулирующей 2-НДФЛ в ручном режиме
                  */
                 $scope.annul2Ndfl = function () {
+                    // Запоминаем период выбранный пользователем
+                    $webStorage.set(APP_CONSTANTS.USER_STORAGE.NAME,
+                        APP_CONSTANTS.USER_STORAGE.KEYS.LAST_SELECTED_PERIOD,
+                        $shareData.declarationData.reportPeriodId,
+                        true);
+
                     var params = {
+                        knfId: undefined,
                         declarationTypeId: $shareData.declarationData.declarationType,
                         departmentId: $shareData.declarationData.departmentId,
                         periodId: $shareData.declarationData.reportPeriodId
@@ -269,16 +276,25 @@
                         params.kppOktmoPairs = kppOktmoPair;
                     }
                     params.reportTypeMode = APP_CONSTANTS.REPORT_TYPE_MODE.ANNULMENT.enumName;
+                    params.selectedSprNum =  $scope.reportNdflGrid.value[0].pNumSpravka;
+                    params.declarationDataId = $shareData.declarationDataId;
+                    params.lastName = $scope.reportNdflGrid.value[0].lastName;
+                    params.firstName = $scope.reportNdflGrid.value[0].firstName;
+                    params.middleName = $scope.reportNdflGrid.value[0].middleName;
+                    params.innNp = $scope.reportNdflGrid.value[0].innNp;
+                    params.idDocNumber = $scope.reportNdflGrid.value[0].idDocNumber;
 
                     $http({
                         method: "POST",
-                        url: "controller/actions/declarationData/createReportForm",
+                        url: "controller/actions/declarationData/createReportFormAnnul",
                         data: params
                     }).then(function (response) {
-                        $modalInstance.close(response);
-                    }).catch(function () {
+                        if (response.data.uuid && response.data.uuid !== null) {
+                            $logPanel.open('log-panel-container', response.data.uuid);
+                        }
                         $modalInstance.close();
-                    });
+                    }
+                    );
                 };
 
                 $scope.close = function () {
