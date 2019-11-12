@@ -236,6 +236,12 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
             // Выборка для доступа к экземплярам деклараций
             // http://conf.aplana.com/pages/viewpage.action?pageId=11380670
 
+            DeclarationType declarationType = declarationTypeDao.get(targetDomainObject.getDeclarationTemplateId());
+
+            if (declarationType.getId() == DeclarationType.APP_2) {
+                return PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP);
+            }
+
             // Контролёр УНП может просматривать все декларации
             if (PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP)) {
                 return true;
@@ -246,8 +252,6 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
             if (systemUserInfo.getUser().equals(taUser)) {
                 return true;
             }
-
-            DeclarationType declarationType = declarationTypeDao.get(targetDomainObject.getDeclarationTemplateId());
 
             // Контролёр НС
             if (PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_NS)) {
@@ -321,6 +325,12 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
                     targetDomainObject.getDepartmentReportPeriodId());
 
             if (VIEW.isGranted(currentUser, targetDomainObject, logger)) {
+                DeclarationType declarationType = declarationTypeDao.get(targetDomainObject.getDeclarationTemplateId());
+
+                if (declarationType.getId() == DeclarationType.APP_2) {
+                    return PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP);
+                }
+
                 if (PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER)) {
                     DeclarationFormKind declarationKind = declarationTemplateDao.get(
                             targetDomainObject.getDeclarationTemplateId()).getDeclarationFormKind();
@@ -357,10 +367,20 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
             if (departmentReportPeriod.isActive()) {
                 if (VIEW.isGranted(currentUser, targetDomainObject, logger)) {
                     if (targetDomainObject.getState() == State.PREPARED) {
-                        if (PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS)) {
-                            return true;
+                        DeclarationType declarationType = declarationTypeDao.get(targetDomainObject.getDeclarationTemplateId());
+
+                        if (declarationType.getId() == DeclarationType.APP_2) {
+                            if (PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP)) {
+                                return true;
+                            } else {
+                                logError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, ROLE_ERROR, logger);
+                            }
                         } else {
-                            logError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, ROLE_ERROR, logger);
+                            if (PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS)) {
+                                return true;
+                            } else {
+                                logError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, ROLE_ERROR, logger);
+                            }
                         }
                     } else {
                         logError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, String.format(STATE_ERROR, OPERATION_NAME, targetDomainObject.getState().getTitle()), logger);
@@ -393,9 +413,26 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
 
             if (targetDomainObject.getState() == State.CREATED) {
                 if (VIEW.isGranted(currentUser, targetDomainObject, logger)) {
+                    DeclarationType declarationType = declarationTypeDao.get(targetDomainObject.getDeclarationTemplateId());
+
+                    if (declarationType.getId() == DeclarationType.APP_2) {
+                        if (PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP)) {
+                            return true;
+                        } else {
+                            logError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, ROLE_ERROR, logger);
+                            return false;
+                        }
+                    }
+
                     if (PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER, TARole.N_ROLE_OPER_2NDFL_FL)) {
                         if (departmentReportPeriod.isActive()) {
-                            return true;
+                            DeclarationFormKind declarationKind = declarationTemplateDao.get(targetDomainObject.getDeclarationTemplateId()).getDeclarationFormKind();
+                            if (declarationKind == DeclarationFormKind.REPORTS && RefBookDocState.NOT_SENT.getId().equals(targetDomainObject.getDocStateId())) {
+                                return true;
+                            } else {
+                                logError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, ROLE_ERROR, logger);
+                                return false;
+                            }
                         }
                     } else {
                         logError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, ROLE_ERROR, logger);
