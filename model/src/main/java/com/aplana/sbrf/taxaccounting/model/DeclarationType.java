@@ -31,6 +31,9 @@ public class DeclarationType implements Serializable {
     //2-НДФЛ (ФЛ)
     public final static int NDFL_2_FL = 105;
     public final static String NDFL_2_FL_NAME = "2-НДФЛ (ФЛ)";
+    //Приложение 2
+    public final static int APP_2 = 106;
+    public final static String APP_2_NAME = "Приложение 2";
 
     private int id;
     private String name;
