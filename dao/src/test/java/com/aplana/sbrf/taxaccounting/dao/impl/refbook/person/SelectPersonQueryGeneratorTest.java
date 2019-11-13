@@ -57,7 +57,7 @@ public class SelectPersonQueryGeneratorTest {
     public void test_generateFilteredQuery_filterByName() {
         filter.setFirstName("John");
         String query = generator.generateFilteredQuery();
-        assertThat(query).contains("like '%john%'");
+        assertThat(query).contains("like '%JOHN%'");
     }
 
     @Test
@@ -95,7 +95,7 @@ public class SelectPersonQueryGeneratorTest {
         filter.setDocumentNumber("D-1");
         String query = generator.generateFilteredQuery();
         assertThat(query).contains("doc_number");
-        assertThat(query).contains("like '%d1%'");
+        assertThat(query).contains("like '%D1%'");
     }
 
     @Test
@@ -123,21 +123,21 @@ public class SelectPersonQueryGeneratorTest {
     public void test_generateFilteredQuery_filterByInp() {
         filter.setInp("D-1");
         String query = generator.generateFilteredQuery();
-        assertThat(query).contains("lower(inp) like '%d-1%'");
+        assertThat(query).contains("inp like '%D-1%'");
     }
 
     @Test
     public void test_generateFilteredQuery_filterByInn() {
         filter.setInn("D-1");
         String query = generator.generateFilteredQuery();
-        assertThat(query).contains("and lower(person.inn) like '%d-1%'");
+        assertThat(query).contains("and person.inn like '%D-1%'");
     }
 
     @Test
     public void test_generateFilteredQuery_filterByInnForeign() {
         filter.setInnForeign("D-1");
         String query = generator.generateFilteredQuery();
-        assertThat(query).contains("and lower(person.inn_foreign) like '%d-1%'");
+        assertThat(query).contains("and person.inn_foreign like '%D-1%'");
     }
 
     @Test
@@ -145,7 +145,7 @@ public class SelectPersonQueryGeneratorTest {
         filter.setSnils("D-1");
         String query = generator.generateFilteredQuery();
         assertThat(query).contains("person.snils");
-        assertThat(query).contains("like '%d1%'");
+        assertThat(query).contains("like '%D1%'");
     }
 
     @Test
@@ -159,12 +159,12 @@ public class SelectPersonQueryGeneratorTest {
 
         String query = generator.generateFilteredQuery();
 
-        assertThat(query).contains("and lower(postal_code) like '%394000%'");
-        assertThat(query).contains("and lower(region_code) like '%36%'");
-        assertThat(query).contains("and lower(district) like '%ново-усманский%'");
-        assertThat(query).contains("and lower(locality) like '%с. отрадное%'");
-        assertThat(query).contains("and lower(city) like '%воронеж%'");
-        assertThat(query).contains("and lower(street) like '%пр. революции%'");
+        assertThat(query).contains("and postal_code like '%394000%'");
+        assertThat(query).contains("and region_code like '%36%'");
+        assertThat(query).contains("and district like '%НОВО-УСМАНСКИЙ%'");
+        assertThat(query).contains("and locality like '%С. ОТРАДНОЕ%'");
+        assertThat(query).contains("and city like '%ВОРОНЕЖ%'");
+        assertThat(query).contains("and street like '%ПР. РЕВОЛЮЦИИ%'");
     }
 
     @Test
@@ -178,7 +178,7 @@ public class SelectPersonQueryGeneratorTest {
     public void test_generateFilteredQuery_filterByForeignAddress() {
         filter.setForeignAddress("г. Алматы, ул. Пушкина");
         String query = generator.generateFilteredQuery();
-        assertThat(query).contains("and lower(person.address_foreign) like '%г. алматы, ул. пушкина%'");
+        assertThat(query).contains("and person.address_foreign like '%Г. АЛМАТЫ, УЛ. ПУШКИНА%'");
     }
 
     @Test

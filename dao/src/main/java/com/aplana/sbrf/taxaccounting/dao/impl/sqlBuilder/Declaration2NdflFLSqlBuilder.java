@@ -158,7 +158,7 @@ public class Declaration2NdflFLSqlBuilder {
         if (isNotEmpty(value)) {
             String paramName = field.replace(".", "_");
             params.addValue(paramName, value);
-            return "lower(" + field + ") like '%' || lower(:" + paramName + ") || '%'";
+            return  field + " like '%' || upper(:" + paramName + ") || '%'";
         }
         return null;
     }
@@ -166,8 +166,8 @@ public class Declaration2NdflFLSqlBuilder {
     private String likeIgnoreCaseAndDelimiters(String field, String value) {
         if (isNotEmpty(value)) {
             String filteredValue = com.aplana.sbrf.taxaccounting.model.util.StringUtils.filterDelimiters(value);
-            String lowerCaseValue = filteredValue.toLowerCase();
-            return "regexp_replace(lower(" + field + "),'[^0-9A-Za-zА-Яа-я]','') like '%" + lowerCaseValue + "%'";
+            String upperCaseValue = filteredValue.toUpperCase();
+            return "regexp_replace(" + field + ",'[^0-9A-Za-zА-Яа-я]','') like '%" + upperCaseValue + "%'";
         }
         return null;
     }
