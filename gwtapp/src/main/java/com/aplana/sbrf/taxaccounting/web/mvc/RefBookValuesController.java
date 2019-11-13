@@ -156,6 +156,16 @@ public class RefBookValuesController {
     }
 
     /**
+     * Получение ТБ, определенного через конфиуграционные параметры, использующиеся для создания отчетности "Приложение 2"
+     *
+     * @return Значения справочника
+     */
+    @GetMapping(value = "/rest/refBookValues/30", params = "projection=application2department")
+    public RefBookDepartment fetchTBForApp2() {
+        return refBookDepartmentService.fetchApplication2Department();
+    }
+
+    /**
      * Получение активных подразделениЙ исключая присутствующие
      * @param presentedTbIdList идентификаторы подразделений которые нужно исключить из выборки
      * @return  список подразделений

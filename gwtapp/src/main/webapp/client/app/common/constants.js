@@ -183,7 +183,8 @@
                 REPORT_2_NDFL_1: {id: 102, name: "2-НДФЛ (1)"},
                 REPORT_6_NDFL: {id: 103, name: "6-НДФЛ"},
                 REPORT_2_NDFL_2: {id: 104, name: "2-НДФЛ (2)"},
-                REPORT_2_NDFL_FL: {id: 105, name: "2-НДФЛ (ФЛ)"}
+                REPORT_2_NDFL_FL: {id: 105, name: "2-НДФЛ (ФЛ)"},
+                APP_2: {id: 106, name: "Приложение 2"}
             },
             NDFL_PERSON_REPORT_GENERATION_TYPE: {
                 ALL_DATA: {id: 1, name: "по всем данным"},

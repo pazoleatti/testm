@@ -12,7 +12,6 @@
         'app.formatters',
         'app.constants',
         'app.permissionUtils',
-        'app.application2',
         'app.taxNotification'
     ])
         .directive('appHeader', function () {

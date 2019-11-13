@@ -202,6 +202,17 @@
         }])
 
         /**
+         * @description Форматтер для получения наименования отчетного периода из модели НФ
+         * в нужном формате "год: наименование периода: вид отчетности"
+         * @param reportPeriod Отчетный период
+         */
+        .filter('periodFormatterWithoutTaxFormType', ['APP_CONSTANTS', function (APP_CONSTANTS) {
+            return function (reportPeriod) {
+                return reportPeriod ? (reportPeriod.taxPeriod.year + ": " + reportPeriod.name) : "";
+            };
+        }])
+
+        /**
          * @description Форматтер для получения наименования отчетного периода из модели отчетного периода подразделения
          * в нужном формате "год: наименование периода: вид отчетности"
          * @param reportPeriod Отчетный период

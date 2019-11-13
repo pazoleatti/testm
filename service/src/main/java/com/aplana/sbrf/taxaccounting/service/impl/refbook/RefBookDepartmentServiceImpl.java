@@ -6,8 +6,10 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.filter.DepartmentFilter;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDepartment;
 import com.aplana.sbrf.taxaccounting.model.result.RefBookDepartmentDTO;
+import com.aplana.sbrf.taxaccounting.service.ConfigurationService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.refbook.RefBookDepartmentService;
+import com.google.common.collect.Iterables;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,11 +28,13 @@ public class RefBookDepartmentServiceImpl implements RefBookDepartmentService {
     private RefBookDepartmentDao refBookDepartmentDao;
     private DepartmentDao departmentDao;
     private DepartmentService departmentService;
+    private ConfigurationService configurationService;
 
-    public RefBookDepartmentServiceImpl(RefBookDepartmentDao refBookDepartmentDao, DepartmentService departmentService, DepartmentDao departmentDao) {
+    public RefBookDepartmentServiceImpl(RefBookDepartmentDao refBookDepartmentDao, DepartmentService departmentService, DepartmentDao departmentDao, ConfigurationService configurationService) {
         this.refBookDepartmentDao = refBookDepartmentDao;
         this.departmentService = departmentService;
         this.departmentDao = departmentDao;
+        this.configurationService = configurationService;
     }
 
     @Override
@@ -106,5 +110,16 @@ public class RefBookDepartmentServiceImpl implements RefBookDepartmentService {
     @Override
     public List<RefBookDepartment> findTbExcludingPresented(List<Integer> presentedTbidList) {
         return refBookDepartmentDao.findActiveByTypeExcludingPresented(DepartmentType.TERR_BANK, presentedTbidList);
+    }
+
+    @Override
+    public RefBookDepartment fetchApplication2Department() {
+        Configuration configuration = configurationService.fetchByEnum(ConfigurationParam.DEPARTMENT_FOR_APP_2);
+
+        DepartmentFilter departmentFilter = new DepartmentFilter();
+        departmentFilter.setCode(Long.parseLong(configuration.getValue()));
+
+        PagingResult<RefBookDepartment> departments = refBookDepartmentDao.findAllByFilter(departmentFilter, new PagingParams());
+        return Iterables.getFirst(departments, null);
     }
 }

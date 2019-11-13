@@ -4,7 +4,7 @@
     /**
      * @description Модуль для работы с журналом "Приложение 2"
      */
-    angular.module('app.application2Journal', ['ui.router', 'app.application2', 'app.updateDocStateModal'])
+    angular.module('app.application2Journal', ['ui.router', 'app.updateDocStateModal'])
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('application2Journal', {
                 url: '/taxes/application2Journal',
@@ -15,9 +15,9 @@
         }])
 
         .controller('application2JournalCtrl', ['$scope', '$stateParams', '$filter', '$http', 'DeclarationDataResource',
-            '$logPanel', '$aplanaModal', 'APP_CONSTANTS', 'PermissionChecker',
+            '$logPanel', '$aplanaModal', 'APP_CONSTANTS', 'PermissionChecker', 'NdflReportService',
             function ($scope, $stateParams, $filter, $http, DeclarationDataResource, $logPanel, $aplanaModal,
-                        APP_CONSTANTS, PermissionChecker) {
+                        APP_CONSTANTS, PermissionChecker, NdflReportService) {
 
                 var defaultCorrectionTag = APP_CONSTANTS.CORRECTION_TAG.ALL;
 
@@ -120,12 +120,7 @@
                  * Показ МО "Создание Приложения 2"
                  */
                 $scope.createApp2 = function () {
-                    $aplanaModal.open({
-                        title: $filter('translate')('application2.title.modal'),
-                        templateUrl: 'client/app/taxes/application2/application2.html',
-                        controller: 'application2Ctrl',
-                        windowClass: 'modal200'
-                    });
+                    NdflReportService.createReport(true /* Создание Приложение 2 */);
                 };
 
                 /**

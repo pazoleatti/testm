@@ -133,4 +133,12 @@
         </update>
     </changeSet>
 
+    <changeSet id="3.11-adudenko-03" author="adudenko">
+        <sql>
+            insert into declaration_type(id, name) values(106, 'Приложение 2');
+            insert into declaration_template(id, version, name, declaration_type_id, form_kind, form_type)
+                values(106, to_date('01.01.2016', 'dd.mm.yyyy'), 'Приложение 2', 106, 7, 7);
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>
