@@ -694,11 +694,11 @@
 
                 $scope.isEnableButtonDeleteSelectedRow = function () {
 
-                    if($scope.declarationData.declarationType !== 100){
+                    if ($scope.declarationData.declarationType !== APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_PRIMARY.id) {
                         return;
                     }
 
-                    if(!$scope.permissionChecker.check(
+                    if (!$scope.permissionChecker.check(
                         $scope.declarationData,
                         APP_CONSTANTS.DECLARATION_PERMISSION.DELETE_ROWS)) {
                         return;
@@ -712,11 +712,13 @@
                         return;
                     }
                     var section = tab.getSection && tab.getSection();
-                    var count = section === 1 ? tab.getGrid && tab.getGrid() && tab.getGrid().ctrl &&
+                    var count = section === APP_CONSTANTS.NDFL_PERSON_REPORT_ACTIVE_TAB.PERSONS.id ? tab.getGrid &&
+                        tab.getGrid() && tab.getGrid().ctrl &&
                         tab.getGrid().ctrl.getCountRecords && tab.getGrid().ctrl.getCountRecords()
                         : tab.getRowsCount && tab.getRowsCount();
 
-                    return section < 3 && count > 0 && tab.getSelectedRows().length>0;
+                    return section < APP_CONSTANTS.NDFL_PERSON_REPORT_ACTIVE_TAB.DEDUCTIONS.id && count > 0 &&
+                        tab.getSelectedRows().length > 0;
                 };
 
                 /**
@@ -726,11 +728,9 @@
                     var tab = $scope.ndflTabsCtrl.getActiveTab();
                     var sectionId = tab.getSection();
                     var rows = tab.getSelectedRows();
-                    console.log(sectionId);
-                    console.log(rows);
                     var data = {
                         declarationDataId: $stateParams.declarationDataId,
-                        section: 'SECTION'+sectionId,
+                        section: 'SECTION' + sectionId,
                         sectionIds: _.map(rows, function (r) {
                             return r.id;
                         })

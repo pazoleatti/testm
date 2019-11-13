@@ -319,8 +319,7 @@ public class DeclarationDataController {
     public ActionResult deleteSelectedDeclarationRows(
             @RequestBody DeleteSelectedDeclarationRowsAction deleteSelectedDeclarationRows) {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        return declarationService.createDeleteSelectedDeclarationRowsTask(userInfo,
-                Collections.singletonList(deleteSelectedDeclarationRows));
+        return declarationService.createDeleteSelectedDeclarationRowsTask(userInfo, deleteSelectedDeclarationRows);
     }
 
     /**
@@ -952,7 +951,7 @@ public class DeclarationDataController {
      * Выполняется синхронно
      *
      * @param declarationDataId Идентификатор налоговой формы
-     * @param selectedRows спискок выбранных строк раздела 1 и 2
+     * @param selectedRows      спискок выбранных строк раздела 1 и 2
      * @return Результат запуска задачи
      */
     @PostMapping(value = "/actions/declarationData/{declarationDataId}/selectedExcelTemplate")

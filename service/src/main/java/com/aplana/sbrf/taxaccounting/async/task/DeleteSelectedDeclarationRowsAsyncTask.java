@@ -8,7 +8,7 @@ import com.aplana.sbrf.taxaccounting.model.action.DeleteSelectedDeclarationRowsA
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome;
-import com.aplana.sbrf.taxaccounting.script.service.impl.NdflPersonServiceImpl;
+import com.aplana.sbrf.taxaccounting.script.service.NdflPersonService;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
 import com.aplana.sbrf.taxaccounting.service.LogBusinessService;
@@ -16,7 +16,6 @@ import com.aplana.sbrf.taxaccounting.service.ReportService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -55,88 +54,81 @@ public class DeleteSelectedDeclarationRowsAsyncTask extends AbstractDeclarationA
     private DeclarationTemplateDao declarationTemplateDao;
 
     @Autowired
-    private NdflPersonServiceImpl ndflPersonService;
+    private NdflPersonService ndflPersonService;
 
 
     @Override
     protected BusinessLogicResult executeBusinessLogic(AsyncTaskData taskData, Logger logger)
             throws InterruptedException {
 
-        Collection<DeleteSelectedDeclarationRowsAction> toDeleteRows =
-                (Collection<DeleteSelectedDeclarationRowsAction>) taskData.getParams().get("toDeleteRows");
+        BusinessLogicResult result = new BusinessLogicResult(true, null);
+
+        DeleteSelectedDeclarationRowsAction deleteRows = (DeleteSelectedDeclarationRowsAction) taskData.getParams().get("deleteRows");
 
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(taskData.getUserId()));
         userInfo.setIp((String) taskData.getParams().get("userIP"));
 
-        //для каждого набора строк удаления из коллекции
-        for (DeleteSelectedDeclarationRowsAction deleteRows : toDeleteRows) {
 
-            //Каждый набор deleteRows относится к своей налоговой форме,
-            //TODO задача удаления строк создается из конкретной формы и удаляемые строки всегда принадлежат только одной декларации, не так ли?
-            Long declarationDataId = deleteRows.getDeclarationDataId();
-            DeclarationData declarationData = declarationDataService.get(declarationDataId, userInfo);
-            DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declarationData.getDeclarationTemplateId());
+        Long declarationDataId = deleteRows.getDeclarationDataId();
+        DeclarationData declarationData = declarationDataService.get(declarationDataId, userInfo);
+        DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declarationData.getDeclarationTemplateId());
 
-            if (declarationTemplate.getType().getId() != (DeclarationType.NDFL_PRIMARY)) {
-                logger.error("Удаление строк возможно только для первичной формы");
-                continue;
-            }
-
-            //Для строк Раздела 1
-            if (DeclarationDataSection.SECTION1.equals(deleteRows.getSection())) {
-                //TODO получение строк раздела 1 перетащить в сервис из dao или подумать
-                List<NdflPerson> ndflPersonList = ndflPersonDao.findByIdIn(deleteRows.getSectionIds());
-                for (NdflPerson ndflPerson : ndflPersonList) {
-                    logger.info(DELETE_ROW_MESSAGE, "1", ndflPerson.getRowNum(), String.format(SECTION1_INFO_MESSAGE, ndflPerson.getFullName()));
-                }
-
-                //Удаляем соответсвующие строки Разделов 2,3,4
-                deleteRowsBySection1(deleteRows);
-            }
-
-            //Для строк Раздела 2
-            if (DeclarationDataSection.SECTION2.equals(deleteRows.getSection())) {
-                //TODO получение строк раздела 2 перетащить в сервис из dao или подумать
-                List<NdflPersonIncome> incomes = ndflPersonDao.findAllIncomesByIdIn(deleteRows.getSectionIds());
-                for (NdflPersonIncome income : incomes) {
-                    logger.info(DELETE_ROW_MESSAGE, "2", income.getRowNum(), String.format(SECTION2_INFO_MESSAGE, income.getOperationId()));
-                }
-
-                //Удаляем соответсвующие строки Разделов 3,4
-                //а также строки раздела 1, если удаляемые строки (раздела 2) являются последними
-                //в соответсвующем отношениии с строке раздела 1
-                deleteRowsBySection2(deleteRows);
-            }
-
-            //Удалить связанные c формой отчеты
-            reportService.deleteDec(
-                    singletonList(declarationDataId),
-                    asList(DeclarationReportType.SPECIFIC_REPORT_DEC, DeclarationReportType.EXCEL_DEC)
-            );
-
-            String fullDeclarationDescription = getFullDeclarationDescription(taskData.getParams());
-
-            //Запись в журнал аудита
-            auditService.add(null, userInfo, declarationData,
-                    "Удаление строк с данными операций в ПНФ", null);
-
-            //запись в историю
-            logBusinessService.logFormEvent(declarationDataId,
-                    FormDataEvent.DELETE_ROWS,
-                    logger.getLogId(),
-                    "Успешно выполнено удаление строк формы",
-                    userInfo);
-
+        if (declarationTemplate.getType().getId() != (DeclarationType.NDFL_PRIMARY)) {
+            logger.error("Удаление строк возможно только для первичной формы");
+            return result;
         }
 
-        return new BusinessLogicResult(true, null);
-    }
+        //Для строк Раздела 1
+        if (DeclarationDataSection.SECTION1.equals(deleteRows.getSection())) {
+            List<NdflPerson> ndflPersonList = ndflPersonDao.findByIdIn(deleteRows.getSectionIds());
+            for (NdflPerson ndflPerson : ndflPersonList) {
+                logger.info(DELETE_ROW_MESSAGE, "1", ndflPerson.getRowNum(), String.format(SECTION1_INFO_MESSAGE, ndflPerson.getFullName()));
+            }
 
+            //Удаляем соответсвующие строки Разделов 2,3,4
+            deleteRowsInNdflPerson(deleteRows);
+        }
+
+        //Для строк Раздела 2
+        if (DeclarationDataSection.SECTION2.equals(deleteRows.getSection())) {
+            List<NdflPersonIncome> incomes = ndflPersonDao.findAllIncomesByIdIn(deleteRows.getSectionIds());
+            for (NdflPersonIncome income : incomes) {
+                logger.info(DELETE_ROW_MESSAGE, "2", income.getRowNum(), String.format(SECTION2_INFO_MESSAGE, income.getOperationId()));
+            }
+
+            //Удаляем соответсвующие строки Разделов 3,4
+            //а также строки раздела 1, если удаляемые строки (раздела 2) являются последними
+            //в соответсвующем отношениии с строке раздела 1
+            deleteRowsInPrepayments(deleteRows);
+        }
+
+        //Удалить связанные c формой отчеты
+        reportService.deleteDec(
+                singletonList(declarationDataId),
+                asList(DeclarationReportType.SPECIFIC_REPORT_DEC, DeclarationReportType.EXCEL_DEC)
+        );
+
+        String fullDeclarationDescription = getFullDeclarationDescription(taskData.getParams());
+
+        //Запись в журнал аудита
+        auditService.add(null, userInfo, declarationData,
+                "Удаление строк с данными операций в ПНФ", null);
+
+        //запись в историю
+        logBusinessService.logFormEvent(declarationDataId,
+                FormDataEvent.DELETE_ROWS,
+                logger.getLogId(),
+                "Успешно выполнено удаление строк формы",
+                userInfo);
+
+        return result;
+    }
 
 
     /**
      * Описание формы
+     *
      * @param params
      * @return
      */
@@ -146,20 +138,22 @@ public class DeleteSelectedDeclarationRowsAsyncTask extends AbstractDeclarationA
 
     /**
      * Итоговое уведомление
+     *
      * @param fullDeclarationDescription
      * @return
      */
     private String getTotalNotice(String fullDeclarationDescription) {
-        return TOTAL_MESSAGE+fullDeclarationDescription;
+        return TOTAL_MESSAGE + fullDeclarationDescription;
     }
 
     /**
      * Итоговое оповещение
+     *
      * @param fullDeclarationDescription
      * @return
      */
     private String getTotalNotification(String fullDeclarationDescription) {
-        return TOTAL_MESSAGE+fullDeclarationDescription;
+        return TOTAL_MESSAGE + fullDeclarationDescription;
     }
 
     /**
@@ -167,9 +161,9 @@ public class DeleteSelectedDeclarationRowsAsyncTask extends AbstractDeclarationA
      *
      * @param deleteRows Удаляемые строки
      */
-    private void deleteRowsBySection1(DeleteSelectedDeclarationRowsAction deleteRows) {
+    private void deleteRowsInNdflPerson(DeleteSelectedDeclarationRowsAction deleteRows) {
         List<Long> ndflPersonIds = deleteRows.getSectionIds();
-        ndflPersonService.deleteRowsBySection1(ndflPersonIds, deleteRows.getDeclarationDataId());
+        ndflPersonService.deleteRowsInNdflPerson(ndflPersonIds, deleteRows.getDeclarationDataId());
     }
 
     /**
@@ -177,9 +171,9 @@ public class DeleteSelectedDeclarationRowsAsyncTask extends AbstractDeclarationA
      *
      * @param deleteRows Удаляемые строки
      */
-    private void deleteRowsBySection2(DeleteSelectedDeclarationRowsAction deleteRows) {
+    private void deleteRowsInPrepayments(DeleteSelectedDeclarationRowsAction deleteRows) {
         List<Long> ndflPersonIncomeIds = deleteRows.getSectionIds();
-        ndflPersonService.deleteRowsBySection2(ndflPersonIncomeIds, deleteRows.getDeclarationDataId());
+        ndflPersonService.deleteRowsInPrepayments(ndflPersonIncomeIds, deleteRows.getDeclarationDataId());
     }
 
     @Override
@@ -187,7 +181,6 @@ public class DeleteSelectedDeclarationRowsAsyncTask extends AbstractDeclarationA
         String fullDeclarationDescription = getFullDeclarationDescription(taskData.getParams());
         return getTotalNotification(fullDeclarationDescription);
     }
-
 
 
     @Override
@@ -202,7 +195,7 @@ public class DeleteSelectedDeclarationRowsAsyncTask extends AbstractDeclarationA
 
     @Override
     public AsyncQueue checkTaskLimit(String taskDescription, TAUserInfo user, Map<String, Object> params,
-                                        Logger logger)
+                                     Logger logger)
             throws AsyncTaskException {
         return AsyncQueue.SHORT;
     }
@@ -214,6 +207,6 @@ public class DeleteSelectedDeclarationRowsAsyncTask extends AbstractDeclarationA
 
     @Override
     public String createDescription(TAUserInfo userInfo, Map<String, Object> params) {
-        return "Удаление строк формы. " +getFullDeclarationDescription(params);
+        return "Удаление строк формы. " + getFullDeclarationDescription(params);
     }
 }
