@@ -101,12 +101,18 @@
                 };
 
                 function getFilter() {
+                    var declarationTypeIds = $filter('idExtractor')($scope.searchFilter.params.declarationTypes)
+                        ? $filter('idExtractor')($scope.searchFilter.params.declarationTypes)
+                        : [APP_CONSTANTS.DECLARATION_TYPE.REPORT_6_NDFL.id,
+                            APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_1.id,
+                            APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_2.id];
+
                     return {
                         docStateIds: $filter('idExtractor')($scope.searchFilter.params.docState),
                         departmentIds: $filter('idExtractor')($scope.searchFilter.params.departments),
                         formKindIds: [APP_CONSTANTS.NDFL_DECLARATION_KIND.REPORTS.id],
                         declarationDataId: $scope.searchFilter.params.declarationNumber,
-                        declarationTypeIds: $filter('idExtractor')($scope.searchFilter.params.declarationTypes),
+                        declarationTypeIds: declarationTypeIds,
                         formStates: $filter('idExtractor')($scope.searchFilter.params.states),
                         fileName: $scope.searchFilter.params.file,
                         note: $scope.searchFilter.params.note,
