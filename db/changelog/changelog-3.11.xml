@@ -141,4 +141,16 @@
         </sql>
     </changeSet>
 
+    <changeSet id="3.11-adudenko-04" author="adudenko">
+        <sql>
+            alter table NDFL_APP2 drop constraint fk_ndfl_app2_person_id;
+            alter table NDFL_APP2 add constraint fk_ndfl_app2_person_id foreign key (person_id) references ref_book_person(id);
+
+            alter table NDFL_APP2 add declaration_id number(18,0) not null;
+            alter table NDFL_APP2 add constraint fk_ndfl_app2_declaration_id foreign key (declaration_id) references declaration_data(id) on delete cascade;
+
+            comment on column "NDFL_APP2"."DECLARATION_ID" IS 'Ссылка на НФ';
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>

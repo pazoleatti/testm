@@ -329,7 +329,8 @@ alter table log_business add constraint log_business_fk_event_id foreign key (ev
 -- Приложение 2
 --------------------------------------------------------------------------------------------------------------------------
 alter table ndfl_app2 add constraint pk_ndfl_app2 primary key (id);
-alter table ndfl_app2 add constraint fk_ndfl_app2_person_id foreign key (person_id) references ref_book_person(id) on delete cascade;
+alter table ndfl_app2 add constraint fk_ndfl_app2_person_id foreign key (person_id) references ref_book_person(id);
+alter table ndfl_app2 add constraint fk_ndfl_app2_declaration_id foreign key (declaration_id) references declaration_data(id) on delete cascade;
 
 alter table ndfl_app2_income add constraint pk_ndfl_app2_income primary key (id);
 alter table ndfl_app2_income add constraint fk_ndfl_app2_ndfl_app2_id foreign key (id) references ndfl_app2 (id) on delete cascade;

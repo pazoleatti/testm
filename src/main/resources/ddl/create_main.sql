@@ -1783,6 +1783,7 @@ create sequence seq_transport_message start with 1000 increment by 1;
 create table ndfl_app2 (
     id number(18,0) not null,
     person_id number(18,0) not null,
+    declaration_id number(18,0) not null,
     tax_rate number(2,0) not null,
     total_income number(17,2) not null,
     total_deduction number(17,2),
@@ -1796,6 +1797,7 @@ create table ndfl_app2 (
 
 comment on column ndfl_app2.id is 'идентификатор';
 comment on column ndfl_app2.person_id is 'ссылка на фл';
+comment on column ndfl_app2.declaration_id is 'ссылка на НФ';
 comment on column ndfl_app2.tax_rate is 'налоговая ставка';
 comment on column ndfl_app2.total_income is 'общая сумма дохода';
 comment on column ndfl_app2.total_deduction is 'общая сумма вычетов';
