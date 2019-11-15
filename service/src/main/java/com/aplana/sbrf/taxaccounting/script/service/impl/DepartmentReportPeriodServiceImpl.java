@@ -49,6 +49,12 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
 
     @Override
     @Transactional(readOnly = true)
+    public DepartmentReportPeriod getActivePeriodForCreateOnf(int departmentId, int reportPeriodId) {
+        return departmentReportPeriodDao.getActivePeriodForCreateOnf(departmentId, reportPeriodId);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<Integer> getIdsByDepartmentTypeAndReportPeriod(int departmentTypeCode, int departmentReportPeriodId) {
         return departmentReportPeriodDao.fetchIdsByDepartmentTypeAndReportPeriod(departmentTypeCode, departmentReportPeriodId);
     }

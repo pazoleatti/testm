@@ -144,7 +144,11 @@ class Report2Ndfl extends AbstractScriptClass {
                 createSpecificReport()
                 break
             case FormDataEvent.CREATE_FORMS: // создание экземпляра
-                createReportForms()
+                if (reportFormsCreationParams.getReportTypeMode().equals(ReportTypeModeEnum.ANNULMENT)) {
+                    createReportFormAnnul()  // создание 2-НДФЛ аннулирующей в ручном режиме
+                } else {
+                    createReportForms()
+                }
                 break
             case FormDataEvent.PRE_CREATE_REPORTS:
                 preCreateReports()
@@ -385,26 +389,46 @@ class Report2Ndfl extends AbstractScriptClass {
                         xml.ndflReferences << buildNdflReference(person.id, person.personId, nomSprAndCorr.sprNum, person.lastName, person.firstName, person.middleName, person.birthDay, nomSprAndCorr.corrNum)
                     }
                 }
-                def nullifyPersonList = getNullifyPersonList(declarationData.kpp, declarationData.oktmo, reportPeriod.taxPeriod.year, reportPeriod.dictTaxPeriodId, declarationTemplate.type.id, persons)
-                for (NdflPerson person : nullifyPersonList) {
-                    def nomSprAndCorr = getNomSpr(person.recordId, reportPeriod.taxPeriod.year, declarationData.kpp, declarationData.oktmo, declarationTemplate.type.id)
-                    "НДФЛ-2"(НомСпр: nomSprAndCorr.sprNum,
-                            НомКорр: "99") {
-                        ПолучДох(ИННФЛ: person.innNp,
-                                Статус: person.status,
-                                ДатаРожд: ScriptUtils.formatDate(person.birthDay),
-                                Гражд: person.citizenship) {
-                            ФИО(Фамилия: person.lastName,
-                                    Имя: person.firstName,
-                                    Отчество: person.middleName)
-                            УдЛичнФЛ(КодУдЛичн: person.idDocType,
-                                    СерНомДок: formatDocNumber(person.idDocType, person.idDocNumber))
+
+                if (!reportFormsCreationParams.getReportTypeMode().equals(ReportTypeModeEnum.ANNULMENT)) {
+                    def nullifyPersonList = getNullifyPersonList(declarationData.kpp, declarationData.oktmo, reportPeriod.taxPeriod.year, reportPeriod.dictTaxPeriodId, declarationTemplate.type.id, persons)
+                    for (NdflPerson person : nullifyPersonList) {
+                        def nomSprAndCorr = getNomSpr(person.recordId, reportPeriod.taxPeriod.year, declarationData.kpp, declarationData.oktmo, declarationTemplate.type.id)
+                        "НДФЛ-2"(НомСпр: nomSprAndCorr.sprNum,
+                                НомКорр: "99") {
+                            ПолучДох(ИННФЛ: person.innNp,
+                                    Статус: person.status,
+                                    ДатаРожд: ScriptUtils.formatDate(person.birthDay),
+                                    Гражд: person.citizenship) {
+                                ФИО(Фамилия: person.lastName,
+                                        Имя: person.firstName,
+                                        Отчество: person.middleName)
+                                УдЛичнФЛ(КодУдЛичн: person.idDocType,
+                                        СерНомДок: formatDocNumber(person.idDocType, person.idDocNumber))
+                            }
                         }
-                    }
-                    xml.nullifyingSprNumList << nomSprAndCorr.sprNum
-                    if (!reportFormsCreationParams.getReportTypeMode().equals(ReportTypeModeEnum.ANNULMENT)) {
+                        xml.nullifyingSprNumList << nomSprAndCorr.sprNum
                         nomSprAndCorr.corrNum = 99
                         xml.ndflReferences << buildNdflReference(person.id, person.personId, nomSprAndCorr.sprNum, person.lastName, person.firstName, person.middleName, person.birthDay, nomSprAndCorr.corrNum)
+                    }
+                } else {
+                    for (NdflPerson person : persons) {
+                        def nomSprAndCorr = getNomSpr(person.recordId, reportPeriod.taxPeriod.year, declarationData.kpp, declarationData.oktmo, declarationTemplate.type.id)
+                        "НДФЛ-2"(НомСпр: nomSprAndCorr.sprNum,
+                                НомКорр: "99") {
+                            ПолучДох(ИННФЛ: person.innNp,
+                                    Статус: person.status,
+                                    ДатаРожд: ScriptUtils.formatDate(person.birthDay),
+                                    Гражд: person.citizenship) {
+                                ФИО(Фамилия: person.lastName,
+                                        Имя: person.firstName,
+                                        Отчество: person.middleName)
+                                УдЛичнФЛ(КодУдЛичн: person.idDocType,
+                                        СерНомДок: formatDocNumber(person.idDocType, person.idDocNumber))
+                            }
+                        }
+                        xml.nullifyingSprNumList << nomSprAndCorr.sprNum
+                        nomSprAndCorr.corrNum = 99
                     }
                 }
             }
@@ -646,26 +670,46 @@ class Report2Ndfl extends AbstractScriptClass {
                         xml.ndflReferences << buildNdflReference(person.id, person.personId, nomSprAndCorr.sprNum, person.lastName, person.firstName, person.middleName, person.birthDay, nomSprAndCorr.corrNum)
                     }
                 }
-                def nullifyPersonList = getNullifyPersonList(declarationData.kpp, declarationData.oktmo, reportPeriod.taxPeriod.year, reportPeriod.dictTaxPeriodId, declarationTemplate.type.id, persons)
-                for (NdflPerson person : nullifyPersonList) {
-                    def nomSprAndCorr = getNomSpr(person.recordId, reportPeriod.taxPeriod.year, declarationData.kpp, declarationData.oktmo, declarationTemplate.type.id)
-                    "НДФЛ-2"(НомСпр: nomSprAndCorr.sprNum,
-                            НомКорр: "99") {
-                        ПолучДох(ИННФЛ: person.innNp,
-                                Статус: person.status,
-                                ДатаРожд: ScriptUtils.formatDate(person.birthDay),
-                                Гражд: person.citizenship) {
-                            ФИО(Фамилия: person.lastName,
-                                    Имя: person.firstName,
-                                    Отчество: person.middleName)
-                            УдЛичнФЛ(КодУдЛичн: person.idDocType,
-                                    СерНомДок: formatDocNumber(person.idDocType, person.idDocNumber))
+
+                if (!reportFormsCreationParams.getReportTypeMode().equals(ReportTypeModeEnum.ANNULMENT)) {
+                    def nullifyPersonList = getNullifyPersonList(declarationData.kpp, declarationData.oktmo, reportPeriod.taxPeriod.year, reportPeriod.dictTaxPeriodId, declarationTemplate.type.id, persons)
+                    for (NdflPerson person : nullifyPersonList) {
+                        def nomSprAndCorr = getNomSpr(person.recordId, reportPeriod.taxPeriod.year, declarationData.kpp, declarationData.oktmo, declarationTemplate.type.id)
+                        "НДФЛ-2"(НомСпр: nomSprAndCorr.sprNum,
+                                НомКорр: "99") {
+                            ПолучДох(ИННФЛ: person.innNp,
+                                    Статус: person.status,
+                                    ДатаРожд: ScriptUtils.formatDate(person.birthDay),
+                                    Гражд: person.citizenship) {
+                                ФИО(Фамилия: person.lastName,
+                                        Имя: person.firstName,
+                                        Отчество: person.middleName)
+                                УдЛичнФЛ(КодУдЛичн: person.idDocType,
+                                        СерНомДок: formatDocNumber(person.idDocType, person.idDocNumber))
+                            }
                         }
-                    }
-                    xml.nullifyingSprNumList << nomSprAndCorr.sprNum
-                    if (!reportFormsCreationParams.getReportTypeMode().equals(ReportTypeModeEnum.ANNULMENT)) {
+                        xml.nullifyingSprNumList << nomSprAndCorr.sprNum
                         nomSprAndCorr.corrNum = 99
                         xml.ndflReferences << buildNdflReference(person.id, person.personId, nomSprAndCorr.sprNum, person.lastName, person.firstName, person.middleName, person.birthDay, nomSprAndCorr.corrNum)
+                    }
+                } else {
+                    for (NdflPerson person : persons) {
+                        def nomSprAndCorr = getNomSpr(person.recordId, reportPeriod.taxPeriod.year, declarationData.kpp, declarationData.oktmo, declarationTemplate.type.id)
+                        "НДФЛ-2"(НомСпр: nomSprAndCorr.sprNum,
+                                НомКорр: "99") {
+                            ПолучДох(ИННФЛ: person.innNp,
+                                    Статус: person.status,
+                                    ДатаРожд: ScriptUtils.formatDate(person.birthDay),
+                                    Гражд: person.citizenship) {
+                                ФИО(Фамилия: person.lastName,
+                                        Имя: person.firstName,
+                                        Отчество: person.middleName)
+                                УдЛичнФЛ(КодУдЛичн: person.idDocType,
+                                        СерНомДок: formatDocNumber(person.idDocType, person.idDocNumber))
+                            }
+                        }
+                        xml.nullifyingSprNumList << nomSprAndCorr.sprNum
+                        nomSprAndCorr.corrNum = 99
                     }
                 }
             }
@@ -693,6 +737,37 @@ class Report2Ndfl extends AbstractScriptClass {
             }
         }
         return persons
+    }
+
+    /**
+     * Возвращяет операции для создания аннулирующей ОНФ в ручном режиме с учетом выбранного ФИО
+     * @return
+     */
+    List<Operation> findOperationsForAnnul() {
+        Map<Long, NdflPerson> personsById = ndflPersonService.findNdflPerson(sourceKnf.id)
+                .collectEntries { [it.id, it] }
+        Map<Long, Map<String, List<NdflPersonIncome>>> incomesByPersonIdAndOperationId = ndflPersonService.findNdflPersonIncome(sourceKnf.id)
+                .groupBy({ NdflPersonIncome it -> it.ndflPersonId }, { NdflPersonIncome it -> it.operationId })
+        List<Operation> operations = [] as LinkedList
+        for (def personId : personsById.keySet()) {
+            def personIncomesByOperationId = incomesByPersonIdAndOperationId[personId]
+            def personIncomes = (List<NdflPersonIncome>) personIncomesByOperationId.values().flatten()
+            for (def operationId : personIncomesByOperationId.keySet()) {
+                def operation = new Operation()
+                operation.operationId = operationId
+                operation.person = personsById[personId]
+                operation.incomes = incomesByPersonIdAndOperationId[personId][operationId]
+                if (operation.person.getLastName().equals(reportFormsCreationParams.getLastName()) &&
+                        operation.person.getFirstName().equals(reportFormsCreationParams.getFirstName()) &&
+                        operation.person.getMiddleName().equals(reportFormsCreationParams.getMiddleName()) &&
+                        operation.person.getInnNp().equals(reportFormsCreationParams.getInnNp()) &&
+                        operation.person.getIdDocNumber().equals(reportFormsCreationParams.getIdDocNumber())) {
+                    operations.add(operation)
+                    return operations
+                }
+            }
+        }
+        return operations
     }
 
     /**
@@ -727,6 +802,7 @@ class Report2Ndfl extends AbstractScriptClass {
                     }
                     operation.deductions = deductionsByPersonIdAndOperationId.get(personId)?.get(operationId) ?: new ArrayList<NdflPersonDeduction>()
                     operation.prepayments = prepaymentsByPersonIdAndOperationId.get(personId)?.get(operationId) ?: new ArrayList<NdflPersonPrepayment>()
+
                     if (isOperationBelongToPeriod(operation)) {
                         if (is2Ndfl2()) {
                             BigDecimal notHoldingTaxSum = sum(operation.incomes.notHoldingTax)
@@ -764,16 +840,7 @@ class Report2Ndfl extends AbstractScriptClass {
                     def person = refBookPersonService.findById(ndflReference.PERSON_ID.value as Long)
                     if (!personSet.any { it.recordId == person.recordId }) {
                         NdflPerson ndflPerson = ndflPersonService.get(ndflPersonId)
-                        if (!reportFormsCreationParams.getReportTypeMode().equals(ReportTypeModeEnum.ANNULMENT)) {
-                            nullifyPersonList.add(ndflPerson)
-                        } else {
-                            if (ndflPerson.getLastName().equals(reportFormsCreationParams.getLastName()) &&
-                                    ndflPerson.getFirstName().equals(reportFormsCreationParams.getFirstName()) &&
-                                    ndflPerson.getMiddleName().equals(reportFormsCreationParams.getMiddleName()) &&
-                                    ndflPerson.getInnNp().equals(reportFormsCreationParams.getInnNp()) &&
-                                    ndflPerson.getIdDocNumber().equals(reportFormsCreationParams.getIdDocNumber())
-                            ) nullifyPersonList.add(ndflPerson)
-                        }
+                        nullifyPersonList.add(ndflPerson)
                     }
                 }
             }
@@ -854,28 +921,6 @@ class Report2Ndfl extends AbstractScriptClass {
             }
         }
         return incomesFor2NDFL2.findAll { it.operationId == operationId }
-    }
-
-    /**
-     * Выбирает операции выбранного ФЛ только для ручного формирования аннулирующей 2-НДФЛ
-     * @param ndflPersonList список операций
-     * @throws ServiceException
-     */
-    List<Operation> findOperationsForAnnul(List<Operation> operations) {
-        if (reportFormsCreationParams.getReportTypeMode().equals(ReportTypeModeEnum.ANNULMENT)) {
-            List<Operation> selectedOperations = new LinkedList<>();
-            for (Operation operation : operations) {
-                if (operation.person.getLastName().equals(reportFormsCreationParams.getLastName()) &&
-                        operation.person.getFirstName().equals(reportFormsCreationParams.getFirstName()) &&
-                        operation.person.getMiddleName().equals(reportFormsCreationParams.getMiddleName()) &&
-                        operation.person.getInnNp().equals(reportFormsCreationParams.getInnNp()) &&
-                        operation.person.getIdDocNumber().equals(reportFormsCreationParams.getIdDocNumber())
-                ) selectedOperations.add(operation)
-            }
-            return selectedOperations
-        } else {
-            return operations
-        }
     }
 
     /**
@@ -1211,16 +1256,6 @@ class Report2Ndfl extends AbstractScriptClass {
             ScriptUtils.checkInterrupted()
             List<DeclarationData> existingDeclarations = declarationService.findAllByTypeIdAndReportPeriodIdAndKppAndOktmo(
                     declarationTemplate.type.id, departmentReportPeriod.reportPeriod.id, departmentConfig.kpp, departmentConfig.oktmo.code)
-            if (reportFormsCreationParams.getReportTypeMode().equals(ReportTypeModeEnum.ANNULMENT)) {
-                for (def existingDeclaration : existingDeclarations) {
-                    if (ndflReferenceService.checkExistingAnnulReport(existingDeclaration.getId(), reportFormsCreationParams.selectedSprNum,
-                            reportFormsCreationParams.lastName, reportFormsCreationParams.firstName, reportFormsCreationParams.middleName, reportFormsCreationParams.innNp, reportFormsCreationParams.idDocNumber)) {
-                        logger.error("Для %s %s %s и справки № %s уже была создана аннулирующая ОНФ 2-НДФЛ № %s",
-                                reportFormsCreationParams.lastName, reportFormsCreationParams.firstName, reportFormsCreationParams.middleName, reportFormsCreationParams.getSelectedSprNum(), existingDeclaration.getId())
-                        return
-                    }
-                }
-            }
             def lastSentForms = existingDeclarations.findAll() { it.docStateId != RefBookDocState.NOT_SENT.id }
             def lastSentForm = lastSentForms.max({ it.correctionNum })
             declarationData = new DeclarationData()
@@ -1245,17 +1280,14 @@ class Report2Ndfl extends AbstractScriptClass {
             Xml xml = null
             try {
                 def kppOktmoOperations = operationsByKppOktmoPair[new KppOktmoPair(departmentConfig.kpp, departmentConfig.oktmo.code)] ?: new ArrayList<Operation>()
-                kppOktmoOperations = findOperationsForAnnul(kppOktmoOperations)
                 xml = buildXml(departmentConfig, kppOktmoOperations)
                 if (xml) {
                     if (existingDeclarations) {
-                        if (!reportFormsCreationParams.getReportTypeMode().equals(ReportTypeModeEnum.ANNULMENT)) {
                             if (!hasDifference(xml, existingDeclarations.first())) {
                                 // Удалять не требуется
                                 continue
                             }
                         }
-                    }
                     def formsToDelete = existingDeclarations.findAll {
                         it.docStateId == RefBookDocState.NOT_SENT.id && departmentReportPeriodService.get(it.departmentReportPeriodId).isActive()
                     }
@@ -1276,8 +1308,6 @@ class Report2Ndfl extends AbstractScriptClass {
                             reportService.attachReportToDeclaration(declarationData.id, uuid, DeclarationReportType.XML_DEC)
                             // Добавление информации о источнике созданной отчетной формы.
                             sourceService.addDeclarationConsolidationInfo(declarationData.id, singletonList(sourceKnf.id))
-
-                            if (!reportFormsCreationParams.getReportTypeMode().equals(ReportTypeModeEnum.ANNULMENT)) {
                                 if (xml.nullifyingSprNumList.size() > 0) {
                                     logger.info("Выполнено создание отчетной формы \"$declarationTemplate.name\": " +
                                             "Период: \"${formatPeriod(departmentReportPeriod)}\", Подразделение: \"$department.name\", " +
@@ -1290,13 +1320,6 @@ class Report2Ndfl extends AbstractScriptClass {
                                             "Вид: \"$declarationTemplate.name\", № $declarationData.id, Налоговый орган: \"$departmentConfig.taxOrganCode\", " +
                                             "КПП: \"$departmentConfig.kpp\", ОКТМО: \"$departmentConfig.oktmo.code\".")
                                 }
-                            } else {
-                                logger.info("Успешно сформирована отчетная форма: " +
-                                        "№ $declarationData.id, " +
-                                        "Период: \"${formatPeriod(departmentReportPeriod)}\", Подразделение: \"$department.name\", " +
-                                        "Вид: \"$declarationTemplate.name, " +
-                                        "с аннулирующей справкой 2-НДФЛ для ФЛ: " + persons.get(0).getLastName() + " " + persons.get(0).getFirstName() + " " + persons.get(0).getMiddleName())
-                            }
                         }
                     } else {
                         logger.error("Не удалось создать форму $declarationTemplate.name, за период ${formatPeriod(departmentReportPeriod)}, " +
@@ -1316,6 +1339,100 @@ class Report2Ndfl extends AbstractScriptClass {
             logger.info("Количество успешно созданных форм: %d. Не удалось создать форм: %d.", createdForms.size(), requiredToCreateCount - createdForms.size())
         }
     }
+
+    // Ручное формирование аннулирующей 2-НДФЛ
+    void createReportFormAnnul() {
+        DeclarationData sourceDeclaration = declarationService.getDeclarationData(reportFormsCreationParams.getDeclarationDataId())
+        ReportPeriod sourceDeclarationReportPeriod = reportPeriodService.get(sourceDeclaration.getReportPeriodId())
+        List<DepartmentConfig> sourceDepartmentConfigs = departmentConfigService.findAllByKppAndOktmo(sourceDeclaration.getKpp(), sourceDeclaration.getOktmo());
+        DepartmentConfig sourceDepartmentConfig = sourceDepartmentConfigs[0]
+        List<ReferenceAnnulResult> referenceAnnulResults = ndflReferenceService.findAllReferencesRegistryAnnulByFio(reportFormsCreationParams.getLastName(), reportFormsCreationParams.getFirstName(), reportFormsCreationParams.getMiddleName())
+
+        for (def referenceAnnul : referenceAnnulResults) {
+            DeclarationData existDeclaration = declarationService.getDeclarationData(referenceAnnul.getDeclarationDataId())
+            ReportPeriod existDeclarationReportPeriod = reportPeriodService.get(existDeclaration.getReportPeriodId())
+            if (existDeclarationReportPeriod.getTaxPeriod().getYear().equals(sourceDeclarationReportPeriod.getTaxPeriod().getYear()) &&
+                    existDeclaration.getKpp().equals(sourceDeclaration.getKpp()) && existDeclaration.getOktmo().equals(sourceDeclaration.getOktmo())) {
+                logger.error(" \"Создание аннулирующей 2-НДФЛ\". Невозможно создать отчетную форму для подразделения:%s " +
+                        "Причина: В системе уже существует аннулирующая справка для ФЛ:%s %s %s за период: Год:%s",
+                        sourceDepartmentConfig.getName(), reportFormsCreationParams.getLastName(), reportFormsCreationParams.getFirstName(), reportFormsCreationParams.getMiddleName(),
+                        sourceDeclarationReportPeriod.getTaxPeriod().getYear())
+                return
+            }
+        }
+
+        DepartmentReportPeriod activeReportPeriod = departmentReportPeriodService.getActivePeriodForCreateOnf(sourceDeclaration.getDepartmentId(), departmentReportPeriod.reportPeriod.id)
+        if (activeReportPeriod == null) {
+            String fullFormDesc = declarationService.getFullDeclarationDescription(sourceDeclaration.getId())
+            logger.error("Не выполнена операция: \"Создание аннулирующей 2-НДФЛ\". Невозможно создать отчетную форму для подразделения: %s " +
+                    "Причина: В системе не открыт период:%s для подразделения:%s",
+                    sourceDepartmentConfig.getName(), fullFormDesc, sourceDepartmentConfig.getName())
+            return
+        }
+
+        declarationData = new DeclarationData()
+        declarationData.declarationTemplateId = sourceDeclaration.getDeclarationTemplateId()
+        declarationData.kpp = sourceDeclaration.getKpp()
+        declarationData.oktmo = sourceDeclaration.getOktmo()
+        declarationData.taxOrganCode = sourceDeclaration.getTaxOrganCode()
+        declarationData.adjustNegativeValues = reportFormsCreationParams.adjustNegativeValues
+        declarationData.taxRefundReflectionMode = reportFormsCreationParams.taxRefundReflectionMode
+        declarationData.docStateId = RefBookDocState.NOT_SENT.id
+        declarationData.departmentId = sourceDeclaration.getDepartmentId()
+        declarationData.departmentReportPeriodId = activeReportPeriod.getId()
+        declarationData.reportPeriodId = sourceDeclaration.getReportPeriodId()
+        declarationData.state = State.CREATED
+        declarationData.correctionNum = 99
+
+        List<DeclarationData> createdForms = []
+        sourceKnf = declarationService.getDeclarationData(reportFormsCreationParams.sourceKnfId)
+
+        List<DepartmentConfig> departmentConfigs = getDepartmentConfigs()
+        if (!departmentConfigs) {
+            return
+        }
+
+        Map<KppOktmoPair, List<Operation>> operationsByKppOktmoPair = findOperationsForAnnul().groupBy {
+            new KppOktmoPair(it.kpp, it.oktmo)
+        }
+        File zipFile = null
+        Xml xml = null
+
+        try {
+            def kppOktmoOperations = operationsByKppOktmoPair[new KppOktmoPair(sourceDepartmentConfig.getKpp(), sourceDepartmentConfig.getOktmo().getCode())] ?: new ArrayList<Operation>()
+            xml = buildXml(sourceDepartmentConfig, kppOktmoOperations)
+            if (xml) {
+                declarationService.validateDeclaration(logger, xml.xmlFile, xml.fileName, declarationService.findXsdIdByTemplateId(declarationTemplate.id))
+                if (!logger.containsLevel(LogLevel.ERROR)) {
+                    declarationData.fileName = xml.fileName
+                    if (!create(declarationData)) {
+                    }
+                    createdForms.add(declarationData)
+                    saveNdflRefences(xml.ndflReferences, declarationData.id)
+                    // Привязывание xml-файла к форме
+                    saveFileInfo(xml.xmlFile, xml.fileName)
+                    zipFile = ZipUtils.archive(xml.xmlFile, xml.fileName + ".xml")
+                    String uuid = blobDataService.create(zipFile, xml.fileName + ".zip", currDate)
+                    reportService.attachReportToDeclaration(declarationData.id, uuid, DeclarationReportType.XML_DEC)
+                    logger.info("Успешно сформирована отчетная форма: " +
+                            "№ $declarationData.id, " +
+                            "Период: \"${formatPeriod(departmentReportPeriod)}\", Подразделение: \"$department.name\", " +
+                            "Вид: \"$declarationTemplate.name, " +
+                            "с аннулирующей справкой 2-НДФЛ для ФЛ: " + reportFormsCreationParams.getLastName() + " " + reportFormsCreationParams.getFirstName() + " " + reportFormsCreationParams.getMiddleName())
+                } else {
+                    logger.error("Не удалось создать форму $declarationTemplate.name, за период ${formatPeriod(departmentReportPeriod)}, " +
+                            "подразделение: $department.name" +
+                            ", КПП: $declarationData.kpp ОКТМО: $declarationData.oktmo . " +
+                            "Причина: \"Не выполнена проверка xml файла утилитой ФНС на соответствие xsd схеме\".")
+                }
+            }
+        } finally {
+            deleteTempFile(zipFile)
+            deleteTempFile(xml?.xmlFile)
+        }
+
+    }
+
 
     boolean create(DeclarationData declaration) {
         ScriptUtils.checkInterrupted()
@@ -1403,7 +1520,7 @@ class Report2Ndfl extends AbstractScriptClass {
 
     boolean deleteForms(List<DeclarationData> formsToDelete) {
         ScriptUtils.checkInterrupted()
-        if (formsToDelete && !reportFormsCreationParams.getReportTypeMode().equals(ReportTypeModeEnum.ANNULMENT)) {
+        if (formsToDelete) {
             List<LockData> locks = []
             List<DeclarationData> errorForms = []
             try {
