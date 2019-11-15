@@ -1,7 +1,9 @@
 package com.aplana.sbrf.taxaccounting.script.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.refbook.NdflReferenceDao;
+import com.aplana.sbrf.taxaccounting.model.ReportFormsCreationParams;
 import com.aplana.sbrf.taxaccounting.model.refbook.NumFor2Ndfl;
+import com.aplana.sbrf.taxaccounting.model.refbook.ReferenceAnnulResult;
 import com.aplana.sbrf.taxaccounting.script.service.NdflReferenceService;
 import com.aplana.sbrf.taxaccounting.service.TransactionHelper;
 import com.aplana.sbrf.taxaccounting.service.TransactionLogic;
@@ -38,8 +40,15 @@ public class NdflReferenceServiceImpl implements NdflReferenceService {
         return ndflReferenceDao.getNextSprNum(year);
     }
 
+    @Override
     public Boolean checkExistingAnnulReport(Long declarationDataId, Integer num, String lastName, String firstName, String middleName, String innNp, String idDocNumber) {
         return ndflReferenceDao.checkExistingAnnulReport(declarationDataId, num, lastName, firstName, middleName, innNp, idDocNumber);
     }
+
+    @Override
+    public List<ReferenceAnnulResult> findAllReferencesRegistryAnnulByFio(String lastName, String firstName, String middleName){
+        return ndflReferenceDao.findAllReferencesRegistryAnnulByFio(lastName, firstName, middleName);
+    }
+
 
 }

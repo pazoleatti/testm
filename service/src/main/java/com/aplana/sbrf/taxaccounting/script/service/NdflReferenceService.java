@@ -1,6 +1,8 @@
 package com.aplana.sbrf.taxaccounting.script.service;
 
+import com.aplana.sbrf.taxaccounting.model.ReportFormsCreationParams;
 import com.aplana.sbrf.taxaccounting.model.refbook.NumFor2Ndfl;
+import com.aplana.sbrf.taxaccounting.model.refbook.ReferenceAnnulResult;
 import com.aplana.sbrf.taxaccounting.service.ScriptExposed;
 
 import java.util.List;
@@ -38,5 +40,15 @@ public interface NdflReferenceService {
      * @return true если есть
      */
     Boolean checkExistingAnnulReport(Long declarationDataId, Integer num, String lastName, String firstName, String middleName, String innNp, String idDocNumber);
+
+    /**
+     * Получение всех записей из реестра справок с номером корректировки 99
+     * @param lastName Фамилия
+     * @param firstName Имя
+     * @param middleName Отчество
+     * @return список найденных записей из реестра справок
+     */
+    List<ReferenceAnnulResult> findAllReferencesRegistryAnnulByFio(String lastName, String firstName, String middleName);
+
 
 }

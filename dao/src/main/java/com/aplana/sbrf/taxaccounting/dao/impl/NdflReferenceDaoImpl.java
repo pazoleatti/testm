@@ -1,7 +1,9 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.refbook.NdflReferenceDao;
+import com.aplana.sbrf.taxaccounting.model.ReportFormsCreationParams;
 import com.aplana.sbrf.taxaccounting.model.refbook.NumFor2Ndfl;
+import com.aplana.sbrf.taxaccounting.model.refbook.ReferenceAnnulResult;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -95,5 +97,30 @@ public class NdflReferenceDaoImpl extends AbstractDao implements NdflReferenceDa
         if (resultCount > 0) result = true;
         return result;
     }
+
+    @Override
+    public List<ReferenceAnnulResult> findAllReferencesRegistryAnnulByFio(String lastName, String firstName, String middleName) {
+        return getJdbcTemplate().query("select nr.declaration_data_id, nr.person_id, nr.num, nr.surname, nr.name, nr.lastname, nr.correction_num " +
+                        "from ndfl_references nr " +
+                        "where nr.correction_num = 99 and nr.surname = ? and nr.name = ? and nr.lastname = ? ",
+                new Object[]{lastName, firstName, middleName},
+                new ReferenceAnnulResultRowMapper());
+    }
+
+    private static final class ReferenceAnnulResultRowMapper implements RowMapper<ReferenceAnnulResult> {
+        @Override
+        public ReferenceAnnulResult mapRow(ResultSet rs, int index) throws SQLException {
+            ReferenceAnnulResult referenceAnnulResult = new ReferenceAnnulResult();
+            referenceAnnulResult.setDeclarationDataId(rs.getLong("declaration_data_id"));
+            referenceAnnulResult.setPersonId(rs.getLong("person_id"));
+            referenceAnnulResult.setSprNum(rs.getInt("num"));
+            referenceAnnulResult.setSurname(rs.getString("surname"));
+            referenceAnnulResult.setName(rs.getString("name"));
+            referenceAnnulResult.setLastname(rs.getString("lastname"));
+            referenceAnnulResult.setCorrNum(rs.getInt("correction_num"));
+            return referenceAnnulResult;
+        }
+    }
+
 
 }

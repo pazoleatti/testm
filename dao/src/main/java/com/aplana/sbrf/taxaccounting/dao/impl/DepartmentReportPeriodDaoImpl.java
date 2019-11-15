@@ -345,6 +345,22 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
     }
 
     @Override
+    public DepartmentReportPeriod getActivePeriodForCreateOnf(int departmentId, int reportPeriodId) {
+        try {
+            MapSqlParameterSource params = new MapSqlParameterSource();
+            params.addValue("departmentId", departmentId).
+                    addValue("reportPeriodId", reportPeriodId);
+            return getNamedParameterJdbcTemplate().queryForObject("SELECT drp.id, drp.department_id, drp.report_period_id, " +
+                            "drp.is_active, drp.correction_date " +
+                            "FROM department_report_period drp " +
+                            "WHERE drp.IS_ACTIVE = 1 AND drp.REPORT_PERIOD_ID = :reportPeriodId AND drp.DEPARTMENT_ID = :departmentId ",
+                    params, mapper);
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
+    }
+
+    @Override
     public DepartmentReportPeriod fetchFirst(int departmentId, int reportPeriodId) {
         try {
             return getJdbcTemplate().queryForObject("SELECT drp.id, drp.department_id, drp.report_period_id, " +

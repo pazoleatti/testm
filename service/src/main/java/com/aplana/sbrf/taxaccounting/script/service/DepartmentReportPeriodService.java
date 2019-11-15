@@ -52,6 +52,17 @@ public interface DepartmentReportPeriodService {
     DepartmentReportPeriod getPrevLast(int departmentId, int reportPeriodId);
 
     /**
+     * Получение активного отчетного периода подразделения по коду подразделения
+     * и коду отчетного периода
+     * Если отчетный период не найден возвращается null
+     *
+     * @param departmentId       код подразделения
+     * @param reportPeriodId     код отчетного периода
+     * @return объект {@link DepartmentReportPeriod} или null
+     */
+    DepartmentReportPeriod getActivePeriodForCreateOnf(int departmentId, int reportPeriodId);
+
+    /**
      * Получение идентификаторов некорректирующих отчетных периодов подразделений по типу подразделения и
      * активному отчетному периоду
      *

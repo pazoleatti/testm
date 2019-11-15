@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao.refbook;
 
 import com.aplana.sbrf.taxaccounting.model.refbook.NumFor2Ndfl;
+import com.aplana.sbrf.taxaccounting.model.refbook.ReferenceAnnulResult;
 
 import java.util.List;
 
@@ -58,5 +59,15 @@ public interface NdflReferenceDao {
      * @return true если есть
      */
     Boolean checkExistingAnnulReport(Long declarationDataId, Integer num, String lastName, String firstName, String middleName, String innNp, String idDocNumber);
+
+    /**
+     * Получение всех записей из реестра справок с номером корректировки 99
+     * @param lastName   Фамилия
+     * @param firstName  Имя
+     * @param middleName Отчество
+     * @return список найденных записей из реестра справок
+     */
+    List<ReferenceAnnulResult> findAllReferencesRegistryAnnulByFio(String lastName, String firstName, String middleName);
+
 
 }
