@@ -427,11 +427,10 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
                     if (PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER, TARole.N_ROLE_OPER_2NDFL_FL)) {
                         if (departmentReportPeriod.isActive()) {
                             DeclarationFormKind declarationKind = declarationTemplateDao.get(targetDomainObject.getDeclarationTemplateId()).getDeclarationFormKind();
-                            if (declarationKind == DeclarationFormKind.REPORTS && RefBookDocState.NOT_SENT.getId().equals(targetDomainObject.getDocStateId())) {
-                                return true;
+                            if (declarationKind == DeclarationFormKind.REPORTS) {
+                                return RefBookDocState.NOT_SENT.getId().equals(targetDomainObject.getDocStateId());
                             } else {
-                                logError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, ROLE_ERROR, logger);
-                                return false;
+                                return true;
                             }
                         }
                     } else {
