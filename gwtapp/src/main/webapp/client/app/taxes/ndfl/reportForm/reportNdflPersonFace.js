@@ -81,6 +81,18 @@
                 };
 
                 /**
+                 * @description видимость кнопки при запуске спецотчета
+                 * @type {boolean}
+                 */
+                $scope.isSubReport = $shareData.isSubReport;
+
+                /**
+                 * @description видимость кнопки при запуске создания 2-НДФЛ
+                 * @type {boolean}
+                 */
+                $scope.isCreateNdfl = $shareData.isCreateNdfl;
+
+                /**
                  * @description видимость грида
                  * @type {boolean}
                  */

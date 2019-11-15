@@ -287,6 +287,30 @@
                                 return {
                                     declarationDataId: $scope.declarationDataId,
                                     reportType: APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.REPORT_2NDFL,
+                                    isSubReport: true,
+                                    declarationData: $scope.declarationData
+                                };
+                            }
+                        }
+                    });
+                };
+
+                /**
+                 * @description Создать 2-НДФЛ по физ лицу
+                 */
+                $scope.createNdflByPersonReport = function () {
+                    var title = $scope.declarationData.declarationType === APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_1.id ? $filter('translate')('reportPersonFace.title') : $filter('translate')('reportPersonFace.title2');
+                    $aplanaModal.open({
+                        title: title,
+                        templateUrl: 'client/app/taxes/ndfl/reportForm/reportNdflPersonFace.html',
+                        controller: 'reportNdflPersonFaceFormCtrl',
+                        windowClass: 'modal1200',
+                        resolve: {
+                            $shareData: function () {
+                                return {
+                                    declarationDataId: $scope.declarationDataId,
+                                    reportType: APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.REPORT_2NDFL,
+                                    isCreateNdfl: true,
                                     declarationData: $scope.declarationData
                                 };
                             }

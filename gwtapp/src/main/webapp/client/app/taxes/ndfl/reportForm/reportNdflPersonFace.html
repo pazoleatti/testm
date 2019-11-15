@@ -146,14 +146,14 @@
     <!--Кнопка Сформировать-->
     <button type="button"
             class="btn btn-default"
-            data-ng-show="reportNdflGrid.value.length"
+            data-ng-show="reportNdflGrid.value.length && isSubReport"
             data-ng-click="createSubreport()">
         <span data-translate-once="common.button.formation"></span>
     </button>
     <!--Кнопка Аннулирующая 2-НДФЛ-->
     <button type="button"
             class="btn btn-default"
-            data-ng-show="reportNdflGrid.value.length"
+            data-ng-show="reportNdflGrid.value.length && isCreateNdfl && (declarationData.declarationType !== APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_FL.id)"
             data-ng-click="annul2Ndfl()">
         <span data-translate-once="common.button.annul2ndfl"></span>
     </button>
