@@ -54,7 +54,7 @@ public class ReportPeriodDaoTest {
     @Test
     public void test_fetchAll() {
         List<ReportPeriod> allPeriods = reportPeriodDao.findAll();
-        assertThat(allPeriods).hasSize(4);
+        assertThat(allPeriods).hasSize(5);
     }
 
     @Test
