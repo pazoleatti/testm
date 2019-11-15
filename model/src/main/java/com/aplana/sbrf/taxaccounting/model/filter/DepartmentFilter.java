@@ -25,4 +25,6 @@ public class DepartmentFilter {
     private Integer assignedToDeclarationTypeId;
     // набор ид подразделений
     private List<Integer> ids;
+    // код подразделения
+    private Long code;
 }

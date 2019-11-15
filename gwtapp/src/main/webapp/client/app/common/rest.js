@@ -85,7 +85,7 @@
         .factory('RefBookValuesResource', ['$resource', function ($resource) {
             return $resource('controller/rest/refBookValues/:refBookId?projection=:projection', {}, {
                 query: {method: 'GET', isArray: true, cache: false},
-                querySource: {method: 'GET', isArray: true, cache: false}
+                querySource: {method: 'GET', isArray: false, cache: false}
             });
         }])
 

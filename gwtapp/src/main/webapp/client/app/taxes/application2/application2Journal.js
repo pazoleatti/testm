@@ -4,7 +4,7 @@
     /**
      * @description Модуль для работы с журналом "Приложение 2"
      */
-    angular.module('app.application2Journal', ['ui.router', 'app.application2', 'app.updateDocStateModal'])
+    angular.module('app.application2Journal', ['ui.router', 'app.updateDocStateModal'])
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('application2Journal', {
                 url: '/taxes/application2Journal',
@@ -15,9 +15,9 @@
         }])
 
         .controller('application2JournalCtrl', ['$scope', '$stateParams', '$filter', '$http', 'DeclarationDataResource',
-            '$logPanel', '$aplanaModal', 'APP_CONSTANTS', 'PermissionChecker',
+            '$logPanel', '$aplanaModal', 'APP_CONSTANTS', 'PermissionChecker', 'NdflReportService',
             function ($scope, $stateParams, $filter, $http, DeclarationDataResource, $logPanel, $aplanaModal,
-                        APP_CONSTANTS, PermissionChecker) {
+                        APP_CONSTANTS, PermissionChecker, NdflReportService) {
 
                 var defaultCorrectionTag = APP_CONSTANTS.CORRECTION_TAG.ALL;
 
@@ -54,7 +54,7 @@
                         angularResource: DeclarationDataResource,
                         requestParameters: function () {
                             return {
-                                projection: 'all',
+                                projection: 'declarations',
                                 filter: JSON.stringify(getFilter())
                             };
                         },
@@ -70,11 +70,11 @@
                             $filter('translate')('title.creator'),
                             $filter('translate')('title.note')],
                         colModel: [
-                            {name: 'application2Id', index: 'application2Id', width: 120, key: true},
+                            {name: 'declarationDataId', index: 'declarationDataId', width: 120, key: true},
                             {name: 'reportPeriod', index: 'reportPeriod', width: 175},
                             {
-                                name: 'application2Type',
-                                index: 'application2Type',
+                                name: 'declarationType',
+                                index: 'declarationType',
                                 width: 170,
                                 formatter: $filter('linkReportFormatter')
                             },
@@ -92,7 +92,7 @@
                         ],
                         rowNum: APP_CONSTANTS.COMMON.PAGINATION[0],
                         rowList: APP_CONSTANTS.COMMON.PAGINATION,
-                        sortname: 'application2Id',
+                        sortname: 'declarationDataId',
                         viewrecords: true,
                         sortorder: "desc",
                         hidegrid: false,
@@ -112,7 +112,9 @@
                         note: $scope.searchFilter.params.note,
                         creationUserName: $scope.searchFilter.params.creationUserName,
                         creationDateFrom: $filter('dateTimeSerializer')($scope.searchFilter.params.creationDateFrom),
-                        creationDateTo: $filter('dateTimeSerializer')($scope.searchFilter.params.creationDateTo)
+                        creationDateTo: $filter('dateTimeSerializer')($scope.searchFilter.params.creationDateTo),
+                        formKindIds: [APP_CONSTANTS.NDFL_DECLARATION_KIND.REPORTS.id],
+                        declarationTypeIds: [APP_CONSTANTS.DECLARATION_TYPE.APP_2.id]
                     };
                 }
 
@@ -120,12 +122,7 @@
                  * Показ МО "Создание Приложения 2"
                  */
                 $scope.createApp2 = function () {
-                    $aplanaModal.open({
-                        title: $filter('translate')('application2.title.modal'),
-                        templateUrl: 'client/app/taxes/application2/application2.html',
-                        controller: 'application2Ctrl',
-                        windowClass: 'modal200'
-                    });
+                    NdflReportService.createReport(true /* Создание Приложение 2 */);
                 };
 
                 /**

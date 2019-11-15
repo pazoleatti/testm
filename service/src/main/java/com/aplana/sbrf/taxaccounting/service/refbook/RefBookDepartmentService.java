@@ -105,4 +105,11 @@ public interface RefBookDepartmentService {
      * @return  список подразделений
      */
     List<RefBookDepartment> findTbExcludingPresented(List<Integer> presentedTbidList);
+
+    /**
+     * Получение ТБ, определенного через конфиуграционные параметры, использующиеся для создания отчетности "Приложение 2"
+     *
+     * @return Подразделение
+     */
+    RefBookDepartment fetchApplication2Department();
 }

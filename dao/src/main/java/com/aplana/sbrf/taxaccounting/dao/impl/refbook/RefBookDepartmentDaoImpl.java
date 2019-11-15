@@ -138,6 +138,10 @@ public class RefBookDepartmentDaoImpl extends AbstractDao implements RefBookDepa
             baseSql += " and (lower(dep.name) like :name or lower(df.shortname) like :name) ";
             params.addValue("name", "%" + filter.getName().toLowerCase() + "%");
         }
+        if (filter.getCode() != null) {
+            baseSql += " and code = :departmentCode ";
+            params.addValue("departmentCode", filter.getCode());
+        }
         if (isNotBlank(pagingParams.getProperty()) && isNotBlank(pagingParams.getDirection())) {
             baseSql += new Formatter().format(" order by %s %s ",
                     FormatUtils.convertToUnderlineStyle(pagingParams.getProperty()),

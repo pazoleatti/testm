@@ -5,6 +5,37 @@
      * @description Модуль для создания отчетности
      */
     angular.module('app.createReportForm', ['app.constants', 'app.rest', 'app.formatters'])
+        /**
+         * @description Сервис для создания отчетности (используется в журналах "Отчетность" и "Приложение 2")
+         */
+        .factory("NdflReportService", ['$filter', '$logPanel', '$aplanaModal',
+            function ($filter, $logPanel, $aplanaModal) {
+                var service = {
+                    createReport: function (isApp2) {
+                        $aplanaModal.open({
+                            title: $filter('translate')('title.creatingReport'),
+                            templateUrl: 'client/app/taxes/ndfl/reportForm/createReportForm.html',
+                            controller: 'createReportFormCtrl',
+                            windowClass: 'modal600',
+                            resolve: {
+                                $shareData: function () {
+                                    return {
+                                        isApp2: !!isApp2
+                                    };
+                                }
+                            }
+                        }).result.then(function (response) {
+                            if (response) {
+                                if (response.data && response.data.uuid && response.data.uuid !== null) {
+                                    $logPanel.open('log-panel-container', response.data.uuid);
+                                }
+                            }
+                        });
+                    }
+                };
+                return service;
+            }
+        ])
 
     /**
      * @description Контроллер окна "Создание отчетности"
@@ -14,6 +45,7 @@
             function ($http, $scope, $rootScope, $filter, $dialogs, $modalInstance, APP_CONSTANTS, $shareData, $webStorage) {
 
                 $scope.knf = angular.copy($shareData.knf);
+                var isApp2 = angular.copy($shareData.isApp2);
                 $scope.reportData = {
                     negativeValuesAdjustment: APP_CONSTANTS.NEGATIVE_VALUE_ADJUSTMENT.NOT_CORRECT,
                     taxRefundReflectionMode: APP_CONSTANTS.TAX_REFUND_REFLECT_MODE.NORMAL
@@ -22,6 +54,8 @@
                 if ($scope.knf) {
                     $scope.reportData.department = {id: $scope.knf.departmentId, name: $scope.knf.department};
                     $scope.reportData.period = {id: $scope.knf.reportPeriodId, name: $scope.knf.reportPeriod};
+                } else if (isApp2) {
+                    $scope.reportData.isApp2 = isApp2;
                 } else {
                     $scope.reportFormKind = [APP_CONSTANTS.NDFL_DECLARATION_KIND.REPORTS.id];
 

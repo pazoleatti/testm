@@ -371,9 +371,15 @@
                  * @param knf КНФ, из которой брать пары КПП/ОКТМО
                  * @param departmentModelPath путь в scope до модели подразделения
                  * @param periodModelPath путь в scope до модели периода
+                 * @param reportData модель данных создания отчетности
                  */
-                $scope.initSelectWithReportDeclarationTypesForCreate = function (knf, departmentModelPath, periodModelPath) {
-                    $scope.declarationTypeSelect = GetSelectOption.getBasicSingleSelectOptions(true);
+                $scope.initSelectWithReportDeclarationTypesForCreate = function (knf, departmentModelPath, periodModelPath, reportData) {
+                    $scope.declarationTypeSelect = GetSelectOption.getBasicSingleSelectOptions(reportData.isApp2 ? false : true);
+                    if (reportData.isApp2) {
+                        $scope.declarationTypeSelect.options.data.results = [APP_CONSTANTS.DECLARATION_TYPE.APP_2];
+                        reportData.declarationType = new Object(APP_CONSTANTS.DECLARATION_TYPE.APP_2);
+                        return;
+                    }
                     var department = _.deep($scope, departmentModelPath);
                     var period = _.deep($scope, periodModelPath);
 
@@ -522,8 +528,11 @@
                 /**
                  * Список периодов для Приложения 2
                  */
-                $scope.initSelectWithAllPeriodsForApp2 = function (reportPeriodModelPath) {
-                    $scope.periodSelect = GetSelectOption.getBasicMultipleSelectOptions(true, 'periodFormatter');
+                $scope.initSelectWithAllPeriodsForApp2 = function (allowClear, reportPeriodModelPath, singleSelect) {
+                    $scope.periodSelect = singleSelect
+                        ? GetSelectOption.getBasicSingleSelectOptions(allowClear, true, 'periodFormatterWithoutTaxFormType')
+                        : GetSelectOption.getBasicMultipleSelectOptions(allowClear, 'periodFormatterWithoutTaxFormType');
+
                     fillSelectListAndFindLatestPeriod("forApp2", reportPeriodModelPath);
                 };
 
@@ -536,25 +545,30 @@
                 };
 
                 /**
-                 * Инициализировать выпадающий список периодами, коорые активны и открыты для определенного подразделения
+                 * Инициализировать выпадающий список периодами, которые активны и открыты для определенного подразделения
                  *
                  * @param departmentModelPath путь в scope до модели подразделения
                  * @param modelPath путь до объекта в scope, содержащем значение периода, для установки его значения через _.deep
                  * @param allowClear добавлять ли крестик очистки
+                 * @param onlyForApp2 загрузить периоды только с видом отчетности "Приложение 2"
                  */
-                $scope.initSelectWithOpenDepartmentPeriods = function (departmentModelPath, modelPath, allowClear) {
-                    $scope.periodSelect = GetSelectOption.getBasicSingleSelectOptions(!!allowClear, true, 'periodFormatterWithCorrectionDate');
-                    $scope.periodSelect.options.data = function () {
-                        // select2 копирует results и его потом изменить уже нельзя, поэтому используем функцию, возвращяющую последние запрошенные данные
-                        return angular.extend({results: $scope.results}, $scope.periodSelect.options.data);
-                    };
-                    var department = _.deep($scope, departmentModelPath);
-                    loadPeriodsAndSetDefault(department, modelPath);
-                    $scope.$watch(departmentModelPath, function (newValue, oldValue) {
-                        if (newValue && (!oldValue || newValue.id !== oldValue.id)) {
-                            loadPeriodsAndSetDefault(newValue, modelPath);
-                        }
-                    });
+                $scope.initSelectWithOpenDepartmentPeriods = function (departmentModelPath, modelPath, allowClear, onlyForApp2) {
+                    if (onlyForApp2) {
+                        $scope.initSelectWithAllPeriodsForApp2(false, modelPath, true /* singleSelect */);
+                    } else {
+                        $scope.periodSelect = GetSelectOption.getBasicSingleSelectOptions(!!allowClear, true, 'periodFormatterWithCorrectionDate');
+                        $scope.periodSelect.options.data = function () {
+                            // select2 копирует results и его потом изменить уже нельзя, поэтому используем функцию, возвращяющую последние запрошенные данные
+                            return angular.extend({results: $scope.results}, $scope.periodSelect.options.data);
+                        };
+                        var department = _.deep($scope, departmentModelPath);
+                        loadPeriodsAndSetDefault(department, modelPath);
+                        $scope.$watch(departmentModelPath, function (newValue, oldValue) {
+                            if (newValue && (!oldValue || newValue.id !== oldValue.id)) {
+                                loadPeriodsAndSetDefault(newValue, modelPath);
+                            }
+                        });
+                    }
                 };
 
                 function loadPeriodsAndSetDefault(department, modelPath) {
@@ -683,8 +697,24 @@
                  */
                 $scope.initAvailableTBSelect = function (departmentModel, allowClear) {
                     $scope.departmentsSelect = GetSelectOption.getBasicSingleSelectOptions(!!allowClear, true);
-                    loadActiveAvailableTBs(departmentModel);
+                    if (departmentModel.isApp2) {
+                        loadTBSelectForApp2(departmentModel);
+                    } else {
+                        loadActiveAvailableTBs(departmentModel);
+                    }
                 };
+
+                function loadTBSelectForApp2(departmentModel) {
+                    RefBookValuesResource.querySource({
+                        refBookId: APP_CONSTANTS.REFBOOK.DEPARTMENT,
+                        projection: "application2department",
+                    }, function (department) {
+                        $scope.departmentsSelect.options.data.results = [department.toJSON()];
+                        if (departmentModel) {
+                            departmentModel.department = department.toJSON();
+                        }
+                    });
+                }
 
                 function loadActiveAvailableTBs(departmentModel) {
                     RefBookValuesResource.query({

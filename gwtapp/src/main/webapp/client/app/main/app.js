@@ -1201,9 +1201,6 @@
         "scriptExecution.button.execute": "Выполнить скрипт",
         "scriptExecution.label.upload": "Выберите архив со скриптом для загрузки",
 
-        "application2.title.modal": "Создание файла Приложения 2 к декларации по налогу на прибыль",
-        "application2.label.year": "Год",
-
         "taxNotification.title.modal": "Параметры для формирования уведомлений",
         "taxNotification.label.department": "Подразделение",
         "taxNotification.label.period": "Период",

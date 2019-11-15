@@ -21,6 +21,7 @@
                                  data-ui-select2="departmentsSelect.options"
                                  data-ng-init="initAvailableTBSelect(reportData)"
                                  data-ng-model="reportData.department"
+                                 data-ng-disabled="reportData.isApp2"
                                  data-required>
                             </div>
                             <div data-aplana-validator data-key='required'>
@@ -43,7 +44,7 @@
                         <div data-aplana-field>
                             <div style="width: 375px;" data-ng-controller="SelectPeriodCtrl"
                                  data-ui-select2="periodSelect.options"
-                                 data-ng-init="initSelectWithOpenDepartmentPeriods('reportData.department', 'reportData.period')"
+                                 data-ng-init="initSelectWithOpenDepartmentPeriods('reportData.department', 'reportData.period', false, reportData.isApp2)"
                                  data-ng-model="reportData.period"
                                  data-ng-disabled="!reportData.department"
                                  data-required>
@@ -65,8 +66,8 @@
                         <div style="width: 375px;" data-ng-controller="SelectDeclarationTypeCtrl"
                              data-ui-select2="declarationTypeSelect.options"
                              data-ng-model="reportData.declarationType"
-                             data-ng-init="initSelectWithReportDeclarationTypesForCreate(knf,  'reportData.department', 'reportData.period')"
-                             data-ng-disabled="!reportData.department || !reportData.period"
+                             data-ng-init="initSelectWithReportDeclarationTypesForCreate(knf, 'reportData.department', 'reportData.period', reportData)"
+                             data-ng-disabled="!reportData.department || !reportData.period || reportData.isApp2"
                              data-required>
                         </div>
                         <div data-aplana-validator data-key='required'>
@@ -133,7 +134,7 @@
                 </td>
             </tr>
             <!--КПП/ОКТМО-->
-            <tr data-ng-if="reportData.declarationType">
+            <tr data-ng-if="reportData.declarationType && reportData.declarationType.id !== APP_CONSTANTS.DECLARATION_TYPE.APP_2.id">
                 <td>
                     <label class="control-label" style="white-space: normal">
                         {{::'createReport.kppOktmo' | translate}}:

@@ -27,6 +27,7 @@ INSERT INTO report_period (id, name, tax_period_id, dict_tax_period_id, start_da
 INSERT INTO report_period (id, name, tax_period_id, dict_tax_period_id, start_date, end_date, calendar_start_date, form_type_id) VALUES (2, 'Transport report period 2', 1, 22, date '2013-04-01', date '2013-06-30', date '2013-04-01', 3);
 INSERT INTO report_period (id, name, tax_period_id, dict_tax_period_id, start_date, end_date, calendar_start_date, form_type_id) VALUES (3, 'VAT report period 1'      , 21, 21, date '2013-01-01', date '2015-03-31', date '2015-01-01', 5);
 INSERT INTO report_period (id, name, tax_period_id, dict_tax_period_id, start_date, end_date, calendar_start_date, form_type_id) VALUES (4, 'Common period 1'      , 41, 21, date '2013-01-01', date '2015-03-31', date '2015-01-01', 5);
+INSERT INTO report_period (id, name, tax_period_id, dict_tax_period_id, start_date, end_date, calendar_start_date, form_type_id) VALUES (5, 'Application 2 period'      , 41, 21, date '2013-01-01', date '2015-03-31', date '2015-01-01', 7);
 
 INSERT INTO department_report_period(id, department_id, report_period_id, is_active) VALUES (1, 1, 1, 1);
 INSERT INTO department_report_period(id, department_id, report_period_id, is_active) VALUES (2, 1, 2, 1);

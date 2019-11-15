@@ -58,6 +58,12 @@ public class ReportPeriodDaoTest {
     }
 
     @Test
+    public void findPeriodsForApp2Test() {
+        List<ReportPeriod> allForApp2 = reportPeriodDao.findAllForApp2();
+        assertThat(allForApp2).hasSize(1);
+    }
+
+    @Test
     // TODO: Тест ничего не делает
     public void getCorrectPeriods() {
         PagingParams pagingParams = new PagingParams();

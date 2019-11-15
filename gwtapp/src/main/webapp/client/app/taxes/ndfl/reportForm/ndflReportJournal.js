@@ -21,9 +21,9 @@
         }])
 
         .controller('ndflReportJournalCtrl', ['$scope', '$state', '$stateParams', '$rootScope', '$filter', 'DeclarationDataResource', '$http',
-            '$logPanel', '$aplanaModal', '$dialogs', 'APP_CONSTANTS', 'PermissionChecker', '$webStorage', 'CommonParamResource',
+            '$logPanel', '$aplanaModal', '$dialogs', 'APP_CONSTANTS', 'PermissionChecker', '$webStorage', 'CommonParamResource', 'NdflReportService',
             function ($scope, $state, $stateParams, $rootScope, $filter, DeclarationDataResource, $http,
-                      $logPanel, $aplanaModal, $dialogs, APP_CONSTANTS, PermissionChecker, $webStorage, CommonParamResource) {
+                      $logPanel, $aplanaModal, $dialogs, APP_CONSTANTS, PermissionChecker, $webStorage, CommonParamResource, NdflReportService) {
                 $scope.reportCreateAllowed = PermissionChecker.check($rootScope.user, APP_CONSTANTS.USER_PERMISSION.CREATE_DECLARATION_REPORT);
                 $rootScope.$broadcast('UPDATE_NOTIF_COUNT');
                 var defaultCorrectionTag = APP_CONSTANTS.CORRECTION_TAG.ALL;
@@ -62,23 +62,7 @@
                  * Показ МО "Создание отчётности"
                  */
                 $scope.createReport = function () {
-                    $aplanaModal.open({
-                        title: $filter('translate')('title.creatingReport'),
-                        templateUrl: 'client/app/taxes/ndfl/reportForm/createReportForm.html',
-                        controller: 'createReportFormCtrl',
-                        windowClass: 'modal600',
-                        resolve: {
-                            $shareData: function () {
-                                return {};
-                            }
-                        }
-                    }).result.then(function (response) {
-                        if (response) {
-                            if (response.data && response.data.uuid && response.data.uuid !== null) {
-                                $logPanel.open('log-panel-container', response.data.uuid);
-                            }
-                        }
-                    });
+                    NdflReportService.createReport(false /* Создание Приложение 2 */);
                 };
 
                 /**
@@ -117,12 +101,18 @@
                 };
 
                 function getFilter() {
+                    var declarationTypeIds = $filter('idExtractor')($scope.searchFilter.params.declarationTypes)
+                        ? $filter('idExtractor')($scope.searchFilter.params.declarationTypes)
+                        : [APP_CONSTANTS.DECLARATION_TYPE.REPORT_6_NDFL.id,
+                            APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_1.id,
+                            APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_2.id];
+
                     return {
                         docStateIds: $filter('idExtractor')($scope.searchFilter.params.docState),
                         departmentIds: $filter('idExtractor')($scope.searchFilter.params.departments),
                         formKindIds: [APP_CONSTANTS.NDFL_DECLARATION_KIND.REPORTS.id],
                         declarationDataId: $scope.searchFilter.params.declarationNumber,
-                        declarationTypeIds: $filter('idExtractor')($scope.searchFilter.params.declarationTypes),
+                        declarationTypeIds: declarationTypeIds,
                         formStates: $filter('idExtractor')($scope.searchFilter.params.states),
                         fileName: $scope.searchFilter.params.file,
                         note: $scope.searchFilter.params.note,
