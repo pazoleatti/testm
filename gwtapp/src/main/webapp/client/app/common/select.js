@@ -697,7 +697,7 @@
                  */
                 $scope.initAvailableTBSelect = function (departmentModel, allowClear) {
                     $scope.departmentsSelect = GetSelectOption.getBasicSingleSelectOptions(!!allowClear, true);
-                    if (departmentModel.isApp2) {
+                    if (departmentModel && departmentModel.isApp2) {
                         loadTBSelectForApp2(departmentModel);
                     } else {
                         loadActiveAvailableTBs(departmentModel);
