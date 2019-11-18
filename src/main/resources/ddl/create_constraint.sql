@@ -334,6 +334,3 @@ alter table ndfl_app2 add constraint fk_ndfl_app2_declaration_id foreign key (de
 
 alter table ndfl_app2_income add constraint pk_ndfl_app2_income primary key (id);
 alter table ndfl_app2_income add constraint fk_ndfl_app2_ndfl_app2_id foreign key (id) references ndfl_app2 (id) on delete cascade;
-
-alter table ndfl_app2_deduction add constraint pk_ndfl_app2_deduction  primary key (id);
-alter table ndfl_app2_deduction add constraint fk_ndfl_app2_dd_app2_income_id foreign key (id) references ndfl_app2_income(id) on delete cascade;

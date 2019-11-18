@@ -153,4 +153,60 @@
         </sql>
     </changeSet>
 
+    <changeSet id="3.11-adudenko-05" author="adudenko">
+        <sql>
+            -- удаляем все касательно таблицы NDFL_APP2_DEDUCTION
+            drop table NDFL_APP2_DEDUCTION;
+            drop SEQUENCE SEQ_NDFL_APP2_DEDUCTION;
+
+            -- удаляем старые колонки "код дохода" и "сумма дохода" из таблицы NDFL_APP2_INCOME
+            alter table NDFL_APP2_INCOME drop column INCOME_CODE;
+            alter table NDFL_APP2_INCOME drop column INCOME_SUMM;
+
+            -- добавляем новые колонки для "кодов доходов", "сумм доходов", "кодов вычетов" и "сумм вычетов"
+            alter table NDFL_APP2_INCOME add (
+                INCOME_CODE_33 VARCHAR2(4),
+                INCOME_SUMM_34 NUMBER(17,2),
+                DEDUCTION_CODE_35 VARCHAR2(3),
+                DEDUCTION_SUMM_36 NUMBER(17,2),
+                DEDUCTION_CODE_37 VARCHAR2(3),
+                DEDUCTION_SUMM_38 NUMBER(17,2),
+                DEDUCTION_CODE_39 VARCHAR2(3),
+                DEDUCTION_SUMM_40 NUMBER(17,2),
+                DEDUCTION_CODE_41 VARCHAR2(3),
+                DEDUCTION_SUMM_42 NUMBER(17,2),
+                DEDUCTION_CODE_43 VARCHAR2(3),
+                DEDUCTION_SUMM_44 NUMBER(17,2),
+                INCOME_CODE_45 VARCHAR2(4),
+                INCOME_SUMM_46 NUMBER(17,2),
+                DEDUCTION_CODE_47 VARCHAR2(3),
+                DEDUCTION_SUMM_48 NUMBER(17,2),
+                DEDUCTION_CODE_49 VARCHAR2(3),
+                DEDUCTION_SUMM_50 NUMBER(17,2),
+                DEDUCTION_CODE_51 VARCHAR2(3),
+                DEDUCTION_SUMM_52 NUMBER(17,2),
+                DEDUCTION_CODE_53 VARCHAR2(3),
+                DEDUCTION_SUMM_54 NUMBER(17,2),
+                DEDUCTION_CODE_55 VARCHAR2(3),
+                DEDUCTION_SUMM_56 NUMBER(17,2),
+                INCOME_CODE_57 VARCHAR2(4),
+                INCOME_SUMM_58 NUMBER(17,2),
+                DEDUCTION_CODE_59 VARCHAR2(3),
+                DEDUCTION_SUMM_60 NUMBER(17,2),
+                DEDUCTION_CODE_61 VARCHAR2(3),
+                DEDUCTION_SUMM_62 NUMBER(17,2),
+                DEDUCTION_CODE_63 VARCHAR2(3),
+                DEDUCTION_SUMM_64 NUMBER(17,2),
+                DEDUCTION_CODE_65 VARCHAR2(3),
+                DEDUCTION_SUMM_66 NUMBER(17,2),
+                DEDUCTION_CODE_67 VARCHAR2(3),
+                DEDUCTION_SUMM_68 NUMBER(17,2),
+                DEDUCTION_CODE_69 VARCHAR2(3),
+                DEDUCTION_SUMM_70 NUMBER(17,2),
+                DEDUCTION_CODE_71 VARCHAR2(3),
+                DEDUCTION_SUMM_72 NUMBER(17,2)
+            );
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>

@@ -1812,31 +1812,51 @@ comment on table ndfl_app2 is 'общие сведения приложение 
 create table ndfl_app2_income (
     id number(18,0) not null,
     ndfl_app2_id number(18,0) not null,
-    income_code varchar2(4) not null,
-    income_summ number(17,2) not null
+    income_code_33 varchar2(4),
+    income_summ_34 number(17,2),
+    deduction_code_35 varchar2(3),
+    deduction_summ_36 number(17,2),
+    deduction_code_37 varchar2(3),
+    deduction_summ_38 number(17,2),
+    deduction_code_39 varchar2(3),
+    deduction_summ_40 number(17,2),
+    deduction_code_41 varchar2(3),
+    deduction_summ_42 number(17,2),
+    deduction_code_43 varchar2(3),
+    deduction_summ_44 number(17,2),
+    income_code_45 varchar2(4),
+    income_summ_46 number(17,2),
+    deduction_code_47 varchar2(3),
+    deduction_summ_48 number(17,2),
+    deduction_code_49 varchar2(3),
+    deduction_summ_50 number(17,2),
+    deduction_code_51 varchar2(3),
+    deduction_summ_52 number(17,2),
+    deduction_code_53 varchar2(3),
+    deduction_summ_54 number(17,2),
+    deduction_code_55 varchar2(3),
+    deduction_summ_56 number(17,2),
+    income_code_57 varchar2(4),
+    income_summ_58 number(17,2),
+    deduction_code_59 varchar2(3),
+    deduction_summ_60 number(17,2),
+    deduction_code_61 varchar2(3),
+    deduction_summ_62 number(17,2),
+    deduction_code_63 varchar2(3),
+    deduction_summ_64 number(17,2),
+    deduction_code_65 varchar2(3),
+    deduction_summ_66 number(17,2),
+    deduction_code_67 varchar2(3),
+    deduction_summ_68 number(17,2),
+    deduction_code_69 varchar2(3),
+    deduction_summ_70 number(17,2),
+    deduction_code_71 varchar2(3),
+    deduction_summ_72 number(17,2)
 );
 
 comment on column ndfl_app2_income.id is 'идентификатор';
 comment on column ndfl_app2_income.ndfl_app2_id is 'ссылка на приложение 2';
-comment on column ndfl_app2_income.income_code is 'код дохода';
-comment on column ndfl_app2_income.income_summ is 'сумма дохода';
 comment on table ndfl_app2_income is 'коды и суммы доходов в приложении 2';
-
-create table ndfl_app2_deduction (
-    id number(18,0) not null,
-    ndfl_app2_income_id number(18,0) not null,
-    type_code varchar2(3) not null,
-    deduction_sum number(17,2) not null,
-    deduction_type number(2,0) not null
-);
-
-comment on column ndfl_app2_deduction.id is 'идентификатор';
-comment on column ndfl_app2_deduction.ndfl_app2_income_id is 'ссылка на доход из приложения 2';
-comment on column ndfl_app2_deduction.type_code is 'код вычета';
-comment on column ndfl_app2_deduction.deduction_sum is 'сумма вычета';
-comment on column ndfl_app2_deduction.deduction_type is 'тип вычета';
-comment on table ndfl_app2_deduction is 'вычеты в приложении 2';
 
 create sequence seq_ndfl_app2 start with 1 increment by 1;
 create sequence seq_ndfl_app2_income start with 1 increment by 1;
-create sequence seq_ndfl_app2_deduction start with 1 increment by 1;
