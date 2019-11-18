@@ -1,26 +1,44 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
-import com.aplana.sbrf.taxaccounting.dao.impl.util.SortDirection;
 import com.aplana.sbrf.taxaccounting.model.AsyncTaskType;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
-import com.aplana.sbrf.taxaccounting.model.refbook.*;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAsnu;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookCountry;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDocType;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookShortInfo;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookSimple;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookTaxpayerState;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
-import com.aplana.sbrf.taxaccounting.service.refbook.*;
+import com.aplana.sbrf.taxaccounting.service.refbook.CommonRefBookService;
+import com.aplana.sbrf.taxaccounting.service.refbook.RefBookAsnuService;
+import com.aplana.sbrf.taxaccounting.service.refbook.RefBookCountryService;
+import com.aplana.sbrf.taxaccounting.service.refbook.RefBookDocTypeService;
+import com.aplana.sbrf.taxaccounting.service.refbook.RefBookTaxpayerStateService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedList;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedResourceAssembler;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.http.MediaType;
-import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.WebDataBinder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.InitBinder;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpServletResponse;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Контроллер для работы с записями справочников
@@ -89,7 +107,6 @@ public class RefBookController {
                                                                           @RequestParam(required = false) boolean exactSearch,
                                                                           @RequestParam PagingParams pagingParams,
                                                                           @RequestBody(required = false) Map<String, String> extraParams) {
-        //TODO В GET запросах с UI невозможно передать JSON как body запроса, поэтому extraParams для GetMapping всегда будет null
         RefBookAttribute sortAttribute = StringUtils.isNotEmpty(pagingParams.getProperty()) ?
                 commonRefBookService.getAttributeByAlias(refBookId, pagingParams.getProperty()) : null;
         PagingResult<Map<String, RefBookValue>> records = commonRefBookService.fetchAllRecords(
@@ -126,40 +143,6 @@ public class RefBookController {
                                                                         @RequestParam(required = false) PagingParams pagingParams) {
         PagingResult<T> result = commonRefBookService.fetchAllRecords(refBookId, columns != null ? Arrays.asList(columns) : null, searchPattern, filter, pagingParams);
         return JqgridPagedResourceAssembler.buildPagedList(result, result.getTotalCount(), pagingParams);
-    }
-
-    /**
-     * Получение одного значения указанного справочника
-     *
-     * @param refBookId идентификатор справочника
-     * @param id  идентификатор версии
-     * @param recordId  идентификатор записи версионного справочника
-     * @param version Дата на которую выполнять отбор для версионных справочников
-     * @return значение записи справочника
-     */
-    @GetMapping(value = "/rest/refBook/{refBookId}/record")
-    public <T extends RefBookValue> Map<String, RefBookValue> findOneRecord(@PathVariable Long refBookId,
-                                                                            @RequestParam(required = false) String id,
-                                                                            @RequestParam(required = false) Long recordId,
-                                                                            @RequestParam(required = false) Date version,
-                                                                            HttpServletResponse response
-    ) {
-        if (StringUtils.isBlank(id)&& ObjectUtils.isEmpty(recordId)){
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            return null;
-        }
-        Map<String, String> extraParams = null;
-        if (!StringUtils.isBlank(id)) {
-            extraParams = new HashMap<>();
-            extraParams.put(RefBook.RECORD_ID_ALIAS, id);
-        }
-        PagingParams pagingParams = new PagingParams();
-        pagingParams.setCount(1);
-        PagingResult<Map<String, RefBookValue>> records = commonRefBookService.fetchAllRecords(refBookId,
-                recordId, version, null, true,
-                extraParams, pagingParams, null, SortDirection.DESC.name());
-
-        return records.getTotalCount() > 0 ? records.get(0) : null;
     }
 
     /**
