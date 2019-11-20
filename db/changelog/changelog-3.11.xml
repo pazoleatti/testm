@@ -209,4 +209,35 @@
         </sql>
     </changeSet>
 
+    <changeSet id="3.11-skononova-1" author="skononova">
+	<sql splitStatements="false">
+		CREATE TABLE CALENDAR_TEMP
+                      (
+			cdate	   DATE,	
+                        ctype      NUMBER(1)
+                      )
+	</sql>
+	<loadData encoding="UTF-8" file="csv/calendar_2020.csv" tableName="CALENDAR_TEMP" separator="|">
+	            <column name="CDATE" type="DATE"/>
+	            <column name="CTYPE" type="string"/>
+        </loadData>
+     </changeSet>
+     <changeSet id="3.11-skononova-2" author="skononova">
+	<sql>
+		merge into ref_book_calendar dst using
+			(select cdate, ctype from calendar_temp) src
+		on (src.cdate = dst.cdate)
+		when not matched then insert (cdate, ctype) values (src.cdate, src.ctype);
+
+	        merge into ref_book_calendar a 
+	        using (select cdate,ctype,id, row_number() over (ORDER by id, cdate) as rn from 
+		ref_book_calendar) b on (a.cdate=b.cdate)
+		when matched then update set a.id=b.rn;
+		
+	</sql>
+	<sql>	
+		DROP TABLE CALENDAR_TEMP;
+	</sql>	
+      </changeSet>
+
 </databaseChangeLog>
