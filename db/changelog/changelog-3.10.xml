@@ -168,7 +168,7 @@
     </changeSet>
 
 	<!-- https://jira.aplana.com/browse/SBRFNDFL-8678 Изменения по проверкам -->
-	<changeSet id="3.10-adudenko-03" author="adudenko" runAlways="true">
+	<changeSet id="3.10-adudenko-03" author="adudenko">
 		<update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
 			<column name="script" valueClobFile="templates-3.10/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl_check.groovy"/>
 			<where>DECLARATION_TEMPLATE_ID = 101 and EVENT_ID = 5</where>
@@ -196,7 +196,7 @@
     </changeSet>
 
 	<!-- https://jira.aplana.com/browse/SBRFNDFL-8670 Реализовать корректировку алгоритма учета ВН в разделе 2 6-НДФЛ -->
-	<changeSet id="3.10-smolokovskikh-1" author="smolokovskikh" runAlways="true">
+	<changeSet id="3.10-smolokovskikh-1" author="smolokovskikh">
 		<update tableName="DECLARATION_TEMPLATE">
 			<column name="CREATE_SCRIPT" valueClobFile="templates-3.10/ndfl/report_6ndfl/v2016/report_6ndfl.groovy"/>
 			<where>declaration_type_id = 103</where>

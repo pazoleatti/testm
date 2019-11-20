@@ -68,14 +68,14 @@
 		</update>
 	</changeSet>
 
-	<changeSet id="3.10.0.1-adudenko-1" author="adudenko" runAlways="true">
+	<changeSet id="3.10.0.1-adudenko-1" author="adudenko">
 		<update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
 			<column name="script" valueClobFile="templates-3.10.0.1/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_import.groovy"/>
 			<where>DECLARATION_TEMPLATE_ID = 100 and EVENT_ID = 7</where>
 		</update>
 	</changeSet>
 
-	<changeSet id="3.10.0.1-ytrofimov-1" author="ytrofimov" runAlways="true">
+	<changeSet id="3.10.0.1-ytrofimov-1" author="ytrofimov">
 		<update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
 			<column name="script" valueClobFile="templates-3.10.0.1/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_calculate.groovy"/>
 			<where>DECLARATION_TEMPLATE_ID = 100 and EVENT_ID = 3</where>
@@ -92,7 +92,7 @@
         </sql>
     </changeSet>
 
-	<changeSet id="3.10.0.1-ytrofimov-2" author="ytrofimov" runAlways="true">
+	<changeSet id="3.10.0.1-ytrofimov-2" author="ytrofimov">
 		<update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
 			<column name="script" valueClobFile="templates-3.10.0.1/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl_check.groovy"/>
 			<where>DECLARATION_TEMPLATE_ID = 101 and EVENT_ID = 5</where>
@@ -113,7 +113,7 @@
 	</sql>
    </changeSet>
 	<!-- https://jira.aplana.com/browse/SBRFNDFL-9015 При создании 6-НДФЛ Ошибка: Ambiguous method overloading for method java.math.BigDecimal#minus. -->
-	<changeSet id="3.10.0.1-avoynov-2" author="avoynov" runAlways="true">
+	<changeSet id="3.10.0.1-avoynov-2" author="avoynov">
 		<update tableName="DECLARATION_TEMPLATE">
 			<column name="CREATE_SCRIPT" valueClobFile="templates-3.10.0.1/ndfl/report_6ndfl/v2016/report_6ndfl.groovy"/>
 			<where>declaration_type_id = 103</where>
