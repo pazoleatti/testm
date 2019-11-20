@@ -1,0 +1,237 @@
+<div data-aplana-collapse data-label="'ndfl.filter.incomes' | translate">
+    <div class="ndfl-subfilter nowrap-select row-fluid">
+        <div class="span4">
+            <!--Налоговая ставка-->
+            <div class="row-fluid form-group">
+                <div class="span4">
+                    <label class="control-label">{{::'title.taxRate2' |
+                        translate}}:</label>
+                </div>
+                <div class="span8">
+                    <input data-ng-model="searchFilter.params.income.taxRate"
+                           placeholder="{{'filter.placeholder.search' | translate}}"
+                           type="text" class="form-control"
+                           title="{{searchFilter.params.income.taxRate}}"/>
+                </div>
+            </div>
+            <!--Общая сумма дохода-->
+            <div class="row-fluid form-group">
+                <div class="span4">
+                    <label class="control-label" style="min-width: 113px;">
+                        {{::'title.totalIncome' | translate}}:
+                    </label>
+                </div>
+                <div class="span8 row-fluid form-group">
+                    <div class="span7">
+                        <div data-ng-controller="SelectFromArrayCtrl" style="width: 100%;"
+                             data-ui-select2="selectFromArray.options"
+                             data-ng-model="searchFilter.params.income.totalIncomeCondition.operator"
+                             data-ng-init="initBasicSingleSelectFromArray(APP_CONSTANTS.OPERATOR, true)">
+                        </div>
+                    </div>
+                    <div class="span5">
+                        <input data-ng-model="searchFilter.params.income.totalIncome.argument2"
+                               type="text" class="form-control"
+                               data-ng-pattern="patterns.number"
+                               maxlength="15"
+                               data-ng-disabled="!searchFilter.params.income.totalIncomeCondition.operator || searchFilter.params.income.totalIncomeCondition.operator.unary"/>
+                    </div>
+                </div>
+            </div>
+            <!--Общая сумма вычетов-->
+            <div class="row-fluid form-group">
+                <div class="span4">
+                    <label class="control-label" style="min-width: 113px;">
+                        {{::'title.totalDeduction' | translate}}:
+                    </label>
+                </div>
+                <div class="span8 row-fluid form-group">
+                    <div class="span7">
+                        <div data-ng-controller="SelectFromArrayCtrl" style="width: 100%;"
+                             data-ui-select2="selectFromArray.options"
+                             data-ng-model="searchFilter.params.income.totalDeductionCondition.operator"
+                             data-ng-init="initBasicSingleSelectFromArray(APP_CONSTANTS.OPERATOR, true)">
+                        </div>
+                    </div>
+                    <div class="span5">
+                        <input data-ng-model="searchFilter.params.income.totalDeduction.argument2"
+                               type="text" class="form-control"
+                               data-ng-pattern="patterns.number"
+                               maxlength="15"
+                               data-ng-disabled="!searchFilter.params.income.totalDeductionCondition.operator || searchFilter.params.income.totalDeductionCondition.operator.unary"/>
+                    </div>
+                </div>
+            </div>
+            <!--Налоговая база-->
+            <div class="row-fluid form-group">
+                <div class="span4">
+                    <label class="control-label" style="min-width: 113px;">
+                        {{::'title.taxBase' | translate}}:
+                    </label>
+                </div>
+                <div class="span8 row-fluid form-group">
+                    <div class="span7">
+                        <div data-ng-controller="SelectFromArrayCtrl" style="width: 100%;"
+                             data-ui-select2="selectFromArray.options"
+                             data-ng-model="searchFilter.params.income.taxBaseCondition.operator"
+                             data-ng-init="initBasicSingleSelectFromArray(APP_CONSTANTS.OPERATOR, true)">
+                        </div>
+                    </div>
+                    <div class="span5">
+                        <input data-ng-model="searchFilter.params.income.taxBase.argument2"
+                               type="text" class="form-control"
+                               data-ng-pattern="patterns.number"
+                               maxlength="15"
+                               data-ng-disabled="!searchFilter.params.income.taxBaseCondition.operator || searchFilter.params.income.taxBaseCondition.operator.unary"/>
+                    </div>
+                </div>
+            </div>
+            <!--Сумма налога исчисленная-->
+            <div class="row-fluid form-group">
+                <div class="span4">
+                    <label class="control-label" style="min-width: 113px;">
+                        {{::'title.calculatedTax2' | translate}}:
+                    </label>
+                </div>
+                <div class="span8 row-fluid form-group">
+                    <div class="span7">
+                        <div data-ng-controller="SelectFromArrayCtrl" style="width: 100%;"
+                             data-ui-select2="selectFromArray.options"
+                             data-ng-model="searchFilter.params.income.calculatedTaxCondition.operator"
+                             data-ng-init="initBasicSingleSelectFromArray(APP_CONSTANTS.OPERATOR, true)">
+                        </div>
+                    </div>
+                    <div class="span5">
+                        <input data-ng-model="searchFilter.params.income.calculatedTax.argument2"
+                               type="text" class="form-control"
+                               data-ng-pattern="patterns.number"
+                               maxlength="15"
+                               data-ng-disabled="!searchFilter.params.income.calculatedTaxCondition.operator || searchFilter.params.income.calculatedTaxCondition.operator.unary"/>
+                    </div>
+                </div>
+            </div>
+            <!--Сумма налога удержанная-->
+            <div class="row-fluid form-group">
+                <div class="span4">
+                    <label class="control-label" style="min-width: 113px;">
+                        {{::'title.withholdingTax2' | translate}}:
+                    </label>
+                </div>
+                <div class="span8 row-fluid form-group">
+                    <div class="span7">
+                        <div data-ng-controller="SelectFromArrayCtrl" style="width: 100%;"
+                             data-ui-select2="selectFromArray.options"
+                             data-ng-model="searchFilter.params.income.withholdingTaxCondition.operator"
+                             data-ng-init="initBasicSingleSelectFromArray(APP_CONSTANTS.OPERATOR, true)">
+                        </div>
+                    </div>
+                    <div class="span5">
+                        <input data-ng-model="searchFilter.params.income.withholdingTax.argument2"
+                               type="text" class="form-control"
+                               data-ng-pattern="patterns.number"
+                               maxlength="15"
+                               data-ng-disabled="!searchFilter.params.income.withholdingTaxCondition.operator || searchFilter.params.income.withholdingTaxCondition.operator.unary"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="span4">
+            <!--Сумма налога перечисленная-->
+            <div class="row-fluid form-group">
+                <div class="span4">
+                    <label class="control-label" style="min-width: 113px;">
+                        {{::'title.transferredTax' | translate}}:
+                    </label>
+                </div>
+                <div class="span8 row-fluid form-group">
+                    <div class="span7">
+                        <div data-ng-controller="SelectFromArrayCtrl" style="width: 100%;"
+                             data-ui-select2="selectFromArray.options"
+                             data-ng-model="searchFilter.params.income.transferredTaxCondition.operator"
+                             data-ng-init="initBasicSingleSelectFromArray(APP_CONSTANTS.OPERATOR, true)">
+                        </div>
+                    </div>
+                    <div class="span5">
+                        <input data-ng-model="searchFilter.params.income.transferredTax.argument2"
+                               type="text" class="form-control"
+                               data-ng-pattern="patterns.number"
+                               maxlength="15"
+                               data-ng-disabled="!searchFilter.params.income.transferredTaxCondition.operator || searchFilter.params.income.transferredTaxCondition.operator.unary"/>
+                    </div>
+                </div>
+            </div>
+            <!--Сумма налога излишне удержанная-->
+            <div class="row-fluid form-group">
+                <div class="span4">
+                    <label class="control-label" style="min-width: 113px;">
+                        {{::'title.overholdingTax2' | translate}}:
+                    </label>
+                </div>
+                <div class="span8 row-fluid form-group">
+                    <div class="span7">
+                        <div data-ng-controller="SelectFromArrayCtrl" style="width: 100%;"
+                             data-ui-select2="selectFromArray.options"
+                             data-ng-model="searchFilter.params.income.overholdingTaxCondition.operator"
+                             data-ng-init="initBasicSingleSelectFromArray(APP_CONSTANTS.OPERATOR, true)">
+                        </div>
+                    </div>
+                    <div class="span5">
+                        <input data-ng-model="searchFilter.params.income.overholdingTax.argument2"
+                               type="text" class="form-control"
+                               data-ng-pattern="patterns.number"
+                               maxlength="15"
+                               data-ng-disabled="!searchFilter.params.income.overholdingTaxCondition.operator || searchFilter.params.income.overholdingTaxCondition.operator.unary"/>
+                    </div>
+                </div>
+            </div>
+            <!--Сумма налога неудержанная-->
+            <div class="row-fluid form-group">
+                <div class="span4">
+                    <label class="control-label" style="min-width: 113px;">
+                        {{::'title.notHoldingTax2' | translate}}:
+                    </label>
+                </div>
+                <div class="span8 row-fluid form-group">
+                    <div class="span7">
+                        <div data-ng-controller="SelectFromArrayCtrl" style="width: 100%;"
+                             data-ui-select2="selectFromArray.options"
+                             data-ng-model="searchFilter.params.income.notHoldingTaxCondition.operator"
+                             data-ng-init="initBasicSingleSelectFromArray(APP_CONSTANTS.OPERATOR, true)">
+                        </div>
+                    </div>
+                    <div class="span5">
+                        <input data-ng-model="searchFilter.params.income.notHoldingTax.argument2"
+                               type="text" class="form-control"
+                               data-ng-pattern="patterns.number"
+                               maxlength="15"
+                               data-ng-disabled="!searchFilter.params.income.notHoldingTaxCondition.operator || searchFilter.params.income.notHoldingTaxCondition.operator.unary"/>
+                    </div>
+                </div>
+            </div>
+            <!--Код дохода-->
+            <div class="row-fluid form-group">
+                <div class="span4">
+                    <label class="control-label">{{::'title.incomeCode' | translate}}:</label>
+                </div>
+                <div class="span8">
+                    <input data-ng-model="searchFilter.params.income.incomeCode"
+                           placeholder="{{'filter.placeholder.search' | translate}}"
+                           type="text" class="form-control"
+                           title="{{searchFilter.params.income.incomeCode}}"/>
+                </div>
+            </div>
+            <!--Код вычета-->
+            <div class="row-fluid form-group">
+                <div class="span4">
+                    <label class="control-label">{{::'title.deductionCode' | translate}}:</label>
+                </div>
+                <div class="span8">
+                    <input data-ng-model="searchFilter.params.income.deductionCode"
+                           placeholder="{{'filter.placeholder.search' | translate}}"
+                           type="text" class="form-control"
+                           title="{{searchFilter.params.income.deductionCode}}"/>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -378,6 +378,26 @@
         }])
 
         /**
+         * @description Форматтер периода формы в виде
+         * "год: наименование периода"
+         * @param reportPeriod Отчетный период
+         */
+        .filter('app2ReportPeriodFormatter', ['$filter', function ($filter) {
+            return function (declarationData) {
+                if (declarationData) {
+                    return $filter('translate')('title.app2Period.value', {
+                        year: declarationData.reportPeriodYear,
+                        periodName: declarationData.reportPeriod,
+                        correctionString: declarationData.correctionDate ?
+                            $filter('translate')('title.period.value.correctionString', {correctionDate: $filter('date')(declarationData.correctionDate, 'dd.MM.yyyy')}) :
+                            ''
+                    });
+                }
+                return '';
+            };
+        }])
+
+        /**
          * @description Соединяет объекты в строку через разделитель,
          * при этом в строку попадает не сам объект, а свойство объекта, полученное по пути
          * @param array массив объектов

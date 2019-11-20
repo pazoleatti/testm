@@ -1,0 +1,293 @@
+<div data-aplana-collapse data-label="'ndfl.filter.FL' | translate">
+    <div class="ndfl-subfilter row-fluid">
+        <div class="span4">
+            <!--ИНП-->
+            <div class="row-fluid form-group">
+                <div class="span4">
+                    <label class="control-label">{{::'title.inp' |
+                        translate}}:</label>
+                </div>
+                <div class="span8">
+                    <input data-ng-model="searchFilter.params.person.inp" type="text"
+                           placeholder="{{'filter.placeholder.search' | translate}}"
+                           class="form-control"
+                           title="{{searchFilter.params.person.inp}}"/>
+                </div>
+            </div>
+            <!--Фамилия-->
+            <div class="row-fluid form-group">
+                <div class="span4">
+                    <label class="control-label">{{::'title.lastName' |
+                        translate}}:</label>
+                </div>
+                <div class="span8">
+                    <input data-ng-model="searchFilter.params.person.lastName" type="text"
+                           placeholder="{{'filter.placeholder.search' | translate}}"
+                           class="form-control"
+                           title="{{searchFilter.params.person.lastName}}"/>
+                </div>
+            </div>
+            <!--Имя-->
+            <div class="row-fluid form-group">
+                <div class="span4">
+                    <label class="control-label">{{::'title.firstName' |
+                        translate}}:</label>
+                </div>
+                <div class="span8">
+                    <input data-ng-model="searchFilter.params.person.firstName" type="text"
+                           placeholder="{{'filter.placeholder.search' | translate}}"
+                           class="form-control"
+                           title="{{searchFilter.params.person.firstName}}"/>
+                </div>
+            </div>
+            <!--Отчество-->
+            <div class="row-fluid form-group">
+                <div class="span4">
+                    <label class="control-label">{{::'title.middleName' |
+                        translate}}:</label>
+                </div>
+                <div class="span8">
+                    <input data-ng-model="searchFilter.params.person.middleName" type="text"
+                           placeholder="{{'filter.placeholder.search' | translate}}"
+                           class="form-control"
+                           title="{{searchFilter.params.person.middleName}}"/>
+                </div>
+            </div>
+            <!--Дата рождения-->
+            <div class="row-fluid form-group">
+                <date-from-to-filter
+                        data-label-width="4"
+                        ng-period-model="searchFilter.params.person"
+                        ng-from-param="dateFrom"
+                        ng-to-param="dateTo"
+                        ng-label="title.dateOfBirthFrom"></date-from-to-filter>
+            </div>
+            <!--Код ДУЛ-->
+            <div class="row-fluid form-group">
+                <div class="span4">
+                    <label class="control-label">{{::'title.idDocType' |
+                        translate}}:</label>
+                </div>
+                <div class="span8">
+                    <input data-ng-model="searchFilter.params.person.idDocType" type="text"
+                           placeholder="{{'filter.placeholder.search' | translate}}"
+                           class="form-control"
+                           title="{{searchFilter.params.person.idDocType}}"/>
+                </div>
+            </div>
+            <!--№ДУЛ-->
+            <div class="row-fluid form-group">
+                <div class="span4">
+                    <label class="control-label">{{::'title.idDocNumber' |
+                        translate}}:</label>
+                </div>
+                <div class="span8">
+                    <input data-ng-model="searchFilter.params.person.idDocNumber" type="text"
+                           placeholder="{{'filter.placeholder.search' | translate}}"
+                           class="form-control"
+                           title="{{searchFilter.params.person.idDocNumber}}"/>
+                </div>
+            </div>
+            <!--Гражданство (код страны)-->
+            <div class="row-fluid form-group">
+                <div class="span4">
+                    <label class="control-label">{{::'title.citizenship' |
+                        translate}}:</label>
+                </div>
+                <div class="span8">
+                    <input data-ng-model="searchFilter.params.person.citizenship" type="text"
+                           placeholder="{{'filter.placeholder.search' | translate}}"
+                           class="form-control"
+                           title="{{searchFilter.params.person.citizenship}}"/>
+                </div>
+            </div>
+            <!--Статус (код)-->
+            <div class="row-fluid form-group">
+                <div class="span4">
+                    <label class="control-label">{{::'title.statusCode' |
+                        translate}}:</label>
+                </div>
+                <div class="span8">
+                    <input data-ng-model="searchFilter.params.person.status" type="text"
+                           placeholder="{{'filter.placeholder.search' | translate}}"
+                           class="form-control"
+                           title="{{searchFilter.params.person.status}}"/>
+                </div>
+            </div>
+        </div>
+        <div class="span4">
+            <!--Код субъекта-->
+            <div class="row-fluid form-group">
+                <div class="span4">
+                    <label class="control-label">{{::'title.region' |
+                        translate}}:</label>
+                </div>
+                <div class="span8">
+                    <input data-ng-model="searchFilter.params.person.regionCode" type="text"
+                           placeholder="{{'filter.placeholder.search' | translate}}"
+                           class="form-control"
+                           title="{{searchFilter.params.person.regionCode}}"/>
+                </div>
+            </div>
+            <!--Индекс-->
+            <div class="row-fluid form-group">
+                <div class="span4">
+                    <label class="control-label">{{::'title.index' |
+                        translate}}:</label>
+                </div>
+                <div class="span8">
+                    <input data-ng-model="searchFilter.params.person.postIndex" type="text"
+                           placeholder="{{'filter.placeholder.search' | translate}}"
+                           class="form-control"
+                           title="{{searchFilter.params.person.postIndex}}"/>
+                </div>
+            </div>
+            <!--Район-->
+            <div class="row-fluid form-group">
+                <div class="span4">
+                    <label class="control-label">{{::'title.area' |
+                        translate}}:</label>
+                </div>
+                <div class="span8">
+                    <input data-ng-model="searchFilter.params.person.area" type="text"
+                           placeholder="{{'filter.placeholder.search' | translate}}"
+                           class="form-control"
+                           title="{{searchFilter.params.person.area}}"/>
+                </div>
+            </div>
+            <!--Город-->
+            <div class="row-fluid form-group">
+                <div class="span4">
+                    <label class="control-label">{{::'title.city' |
+                        translate}}:</label>
+                </div>
+                <div class="span8">
+                    <input data-ng-model="searchFilter.params.person.city" type="text"
+                           placeholder="{{'filter.placeholder.search' | translate}}"
+                           class="form-control"
+                           title="{{searchFilter.params.person.city}}"/>
+                </div>
+            </div>
+            <!--Населенный пункт-->
+            <div class="row-fluid form-group">
+                <div class="span4">
+                    <label class="control-label">{{::'title.locality' |
+                        translate}}:</label>
+                </div>
+                <div class="span8">
+                    <input data-ng-model="searchFilter.params.person.locality" type="text"
+                           placeholder="{{'filter.placeholder.search' | translate}}"
+                           class="form-control"
+                           title="{{searchFilter.params.person.locality}}"/>
+                </div>
+            </div>
+            <!--Улица-->
+            <div class="row-fluid form-group">
+                <div class="span4">
+                    <label class="control-label">{{::'title.street' |
+                        translate}}:</label>
+                </div>
+                <div class="span8">
+                    <input data-ng-model="searchFilter.params.person.street" type="text"
+                           placeholder="{{'filter.placeholder.search' | translate}}"
+                           class="form-control"
+                           title="{{searchFilter.params.person.street}}"/>
+                </div>
+            </div>
+            <!--Корпус-->
+            <div class="row-fluid form-group">
+                <div class="span4">
+                    <label class="control-label">{{::'title.building' |
+                        translate}}:</label>
+                </div>
+                <div class="span8">
+                    <input data-ng-model="searchFilter.params.person.building" type="text"
+                           placeholder="{{'filter.placeholder.search' | translate}}"
+                           class="form-control"
+                           title="{{searchFilter.params.person.building}}"/>
+                </div>
+            </div>
+            <!--Дом-->
+            <div class="row-fluid form-group">
+                <div class="span4">
+                    <label class="control-label">{{::'title.house' |
+                        translate}}:</label>
+                </div>
+                <div class="span8">
+                    <input data-ng-model="searchFilter.params.person.house" type="text"
+                           placeholder="{{'filter.placeholder.search' | translate}}"
+                           class="form-control"
+                           title="{{searchFilter.params.person.house}}"/>
+                </div>
+            </div>
+            <!--Квартира-->
+            <div class="row-fluid form-group">
+                <div class="span4">
+                    <label class="control-label">{{::'title.flat' |
+                        translate}}:</label>
+                </div>
+                <div class="span8">
+                    <input data-ng-model="searchFilter.params.person.flat" type="text"
+                           placeholder="{{'filter.placeholder.search' | translate}}"
+                           class="form-control"
+                           title="{{searchFilter.params.person.flat}}"/>
+                </div>
+            </div>
+        </div>
+        <div class="span4">
+            <!--ИНН РФ-->
+            <div class="row-fluid form-group">
+                <div class="span4">
+                    <label class="control-label">{{::'title.innNp' |
+                        translate}}:</label>
+                </div>
+                <div class="span8">
+                    <input data-ng-model="searchFilter.params.person.innNp" type="text"
+                           placeholder="{{'filter.placeholder.search' | translate}}"
+                           class="form-control"
+                           title="{{searchFilter.params.person.innNp}}"/>
+                </div>
+            </div>
+            <!--ИНН Ино-->
+            <div class="row-fluid form-group" style="margin-bottom: 46px;">
+                <div class="span4">
+                    <label class="control-label">{{::'title.innForeign' |
+                        translate}}:</label>
+                </div>
+                <div class="span8">
+                    <input data-ng-model="searchFilter.params.person.innForeign" type="text"
+                           placeholder="{{'filter.placeholder.search' | translate}}"
+                           class="form-control"
+                           title="{{searchFilter.params.person.innForeign}}"/>
+                </div>
+            </div>
+
+            <!--Адрес за пределами РФ-->
+            <div class="row-fluid form-group">
+                <div class="span4">
+                    <label class="control-label">{{::'title.foreignAddress' |
+                        translate}}:</label>
+                </div>
+                <div class="span8">
+                    <input data-ng-model="searchFilter.params.person.foreignAddress" type="text"
+                           placeholder="{{'filter.placeholder.search' | translate}}"
+                           class="form-control"
+                           title="{{searchFilter.params.person.foreignAddress}}"/>
+                </div>
+            </div>
+            <!--Код страны-->
+            <div class="row-fluid form-group">
+                <div class="span4">
+                    <label class="control-label">{{::'title.citizenship' |
+                        translate}}:</label>
+                </div>
+                <div class="span8">
+                    <input data-ng-model="searchFilter.params.person.citizenship" type="text"
+                           placeholder="{{'filter.placeholder.search' | translate}}"
+                           class="form-control"
+                           title="{{searchFilter.params.person.citizenship}}"/>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

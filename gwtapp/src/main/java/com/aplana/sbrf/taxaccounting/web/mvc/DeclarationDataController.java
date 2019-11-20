@@ -637,12 +637,12 @@ public class DeclarationDataController {
     }
 
     /**
-     * Возвращает признак существования формы и, если она существует, ее тип
+     * Возвращает данные, необходимые для инициализации формы на стороне клиента: признак существования формы, ее тип вид
      *
-     * @param declarationDataId ид формы
+     * @param declarationDataId идентификатор формы
      */
     @GetMapping(value = "/rest/declarationData/{declarationDataId}", params = "projection=existenceAndKind")
-    public DeclarationDataExistenceAndKindResult fetchDeclarationDataExistenceAndKind(@PathVariable long declarationDataId) {
+    public DeclarationInitializationData fetchDeclarationDataExistenceAndKind(@PathVariable long declarationDataId) {
         TAUserInfo userInfo = securityService.currentUserInfo();
         return declarationService.fetchDeclarationDataExistenceAndKind(userInfo, declarationDataId);
     }

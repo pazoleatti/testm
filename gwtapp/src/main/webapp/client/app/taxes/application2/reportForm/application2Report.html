@@ -1,0 +1,207 @@
+<div id="ndflReport" class="flex-column">
+    <div>
+        <!--Заголовок-->
+        <div class="content-header pull-left">
+            <h1><a href="index.html#/taxes/application2Journal">{{::'move_back' |
+                translate}}</a>— {{declarationTypeName}}, №{{declarationDataId}}</h1>
+        </div>
+        <!--Формирование отчетов-->
+        <div class="w200 pull-right" style="margin: 5px 10px 10px 0;">
+            <div class="btn-group" style="float: right;">
+                <button id="single-button" type="button" class="btn btn-default-nonBg"
+                        data-bs-dropdown
+                        data-placement="bottom-right">
+                    <span data-translate-once="link.ndfl.reporting"></span>
+                </button>
+                <ul class="dropdown-menu" role="menu" aria-labelledby="single-button">
+
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="box-shadow-block flex-fill flex-column">
+        <div class="grid-filter"
+             style="min-width: 100%; background: #ffffff; padding-bottom: 1px;">
+            <div class="header-col " style="float: right; margin-top: 10px;">
+                <!-- ссылка на модальное окно измениий по налоговой форме -->
+                <button type="button" class="btn btn-default-nonBg" style="float: right;"
+                        data-ng-click="openHistoryOfChange()"
+                        data-ng-disabled="!permissionChecker.check(declarationData, APP_CONSTANTS.DECLARATION_PERMISSION.VIEW)">
+                    <span data-translate-once="link.ndfl.historyOfChange"></span>
+                </button>
+                <button type="button" class="btn btn-default-nonBg" style="margin: 0 13px; float: right;"
+                        data-ng-click="filesAndComments()"
+                        data-ng-disabled="!permissionChecker.check(declarationData, APP_CONSTANTS.DECLARATION_PERMISSION.VIEW)">
+                    <span data-translate-once="link.ndfl.filesAndComment"></span>
+                </button>
+                <button type="button" class="btn btn-default-nonBg" style="float: right;"
+                        data-ng-click="showSourcesClick()"
+                        data-ng-disabled="!permissionChecker.check(declarationData, APP_CONSTANTS.DECLARATION_PERMISSION.VIEW)">
+                    <span data-translate-once="link.ndfl.sources"></span>
+                </button>
+            </div>
+            <div data-aplana-collapse data-is-collapsed="false" data-label="'infoPanelLabel' | translate"
+                 style="padding: 0 12px 0 12px;">
+                <!--Основная информация-->
+                <div class="form-horizontal header-details">
+                    <div class="row-fluid info-wrapper">
+                        <div class="span3">
+                            <div class="row-fluid">
+                                <div class="span5">
+                                    <label class="control-label">{{::'title.department' | translate}}:</label>
+                                </div>
+                                <div class="span7">
+                                    <label class="font-normal info-text">{{declarationData.department}}</label>
+                                </div>
+                            </div>
+                            <div class="row-fluid">
+                                <div class="span5">
+                                    <label class="control-label">{{::'title.formNumber' | translate}}:</label>
+                                </div>
+                                <div class="span7">
+                                    <label class="font-normal info-text">{{declarationDataId}}</label>
+                                </div>
+                            </div>
+                            <div class="row-fluid">
+                                <div class="span5">
+                                    <label class="control-label">{{::'title.period' | translate}}:</label>
+                                </div>
+                                <div class="span7">
+                                    <label class="font-normal info-text"
+                                           data-ng-bind-html="declarationData | app2ReportPeriodFormatter"></label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="span3" style="margin: 0;">
+                            <div class="row-fluid">
+                                <div class="span6">
+                                    <label class="control-label">{{::'title.formKind' | translate}}:</label>
+                                </div>
+                                <div class="span6">
+                                    <label class="font-normal info-text">{{declarationTypeName}}</label>
+                                </div>
+                            </div>
+                            <div class="row-fluid">
+                                <div class="span6">
+                                    <label class="control-label">{{::'title.formType' | translate}}:</label>
+                                </div>
+                                <div class="span6">
+                                    <label class="font-normal info-text">{{declarationData.declarationFormKind}}</label>
+                                </div>
+                            </div>
+                            <div class="row-fluid">
+                                <div class="span6">
+                                    <label class="control-label">{{::'title.state' | translate}}:</label>
+                                </div>
+                                <div class="span6">
+                                    <label class="font-normal info-text">{{declarationData.state}}</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="span3" style="margin: 0;">
+                            <div class="row-fluid">
+                                <div class="span6">
+                                    <label class="control-label">{{::'title.creator' | translate}}:</label>
+                                </div>
+                                <div class="span6">
+                                    <label class="font-normal info-text">{{declarationData.creationUserName}}</label>
+                                </div>
+                            </div>
+                            <div class="row-fluid">
+                                <div class="span6">
+                                    <label class="control-label">{{::'title.dateAndTimeCreate' | translate}}:</label>
+                                </div>
+                                <div class="span6">
+                                    <label class="font-normal info-text">{{declarationData.creationDate |
+                                        dateTimeFormatter}}</label>
+                                </div>
+                            </div>
+                            <div class="row-fluid">
+                                <div class="span6">
+                                    <label class="control-label">{{::'title.manuallyCreated' | translate}}:</label>
+                                </div>
+                                <div class="span6">
+                                    <label class="font-normal info-text">{{declarationData.manuallyCreated
+                                        | yesNoFormatter}}</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!--Фильтр-->
+                <div data-ng-controller="CommonFilterCtrl">
+                    <div id="ndfl_filter" style="padding: 0 12px 0 12px;"
+                         data-aplana-collapse data-is-collapsed="true"
+                         data-label="(!searchFilter.isClear ? 'filterPanelLabel' : 'filterPanelLabel.set') | translate"
+                         class="child-margin0">
+                        <form id="ndfl_group_filter" class="form-horizontal info-wrapper" novalidate>
+                            <div class="row-fluid">
+                                <div class="span11">
+                                    <span data-ng-include="'client/app/taxes/application2/reportForm/filter/personsFilter.html'"></span>
+                                    <span data-ng-include="'client/app/taxes/application2/reportForm/filter/incomesFilter.html'"></span>
+                                </div>
+                                <div class="span1 vertical-btn-group" style="padding-top: 20px">
+                                    <!--Кнопка Найти-->
+                                    <button type="button"
+                                            class="btn btn-default"
+                                            id="searchButton"
+                                            data-ng-click="submitSearch()">
+                                        <span data-translate-once="common.button.search"></span>
+                                    </button>
+                                    <!--Кнопка Сбросить-->
+                                    <button type="button"
+                                            class="btn btn-default"
+                                            id="clearButton"
+                                            data-ng-click="resetFilter()">
+                                        <span data-translate-once="common.button.clear"></span>
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <!--Панель кнопок -->
+            <div class="button_panel" style="padding: 10px 12px 0;">
+                <div class="btn-toolbar" role="toolbar">
+                    <!--Проверить -->
+                    <span>
+                        <button type="button" class="btn btn-default"
+                                data-ng-click="check()"
+                                data-ng-disabled="!permissionChecker.check(declarationData, APP_CONSTANTS.DECLARATION_PERMISSION.CHECK)">
+                            <span data-translate-once="button.check"></span>
+                        </button>
+                    </span>
+                    <!--Принять -->
+                    <span>
+                        <button type="button" class="btn btn-default"
+                                data-ng-click="accept()"
+                                data-ng-disabled="!permissionChecker.check(declarationData, APP_CONSTANTS.DECLARATION_PERMISSION.ACCEPTED)">
+                            <span data-translate-once="button.accept"></span>
+                        </button>
+                    </span>
+                    <!--Вернуть в Создана -->
+                    <span>
+                        <button type="button" class="btn btn-default"
+                                data-ng-click="returnToCreated()"
+                                data-ng-disabled="!permissionChecker.check(declarationData, APP_CONSTANTS.DECLARATION_PERMISSION.RETURN_TO_CREATED)">
+                            <span data-translate-once="button.return"></span>
+                        </button>
+                    </span>
+                    <!--Удалить-->
+                    <span>
+                        <button type="button" class="btn btn-default"
+                                data-ng-click="delete()"
+                                data-ng-disabled="!permissionChecker.check(declarationData, APP_CONSTANTS.DECLARATION_PERMISSION.DELETE)">
+                            <span data-translate-once="button.delete"></span>
+                        </button>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="flex-fill"
+             style="display: flex;  align-items: flex-start;  align-content: flex-start;  flex-shrink: 0;  width: 100%;">
+        </div>
+    </div>
+</div>
