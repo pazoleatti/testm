@@ -3,6 +3,28 @@ PROMPT Create service tables...
 declare 
 	v_count number;
 begin
+	select count(1) into v_count from user_tables where table_name='CALENDAR_TEMP';
+	dbms_output.put_line('Create table CALENDAR_TEMP...');
+	if v_count = 1 then
+	   execute immediate 'DROP TABLE CALENDAR_TEMP';
+	end if;
+	execute immediate 
+		'		CREATE TABLE CALENDAR_TEMP
+                      (
+			cdate	   DATE,	
+                        ctype      NUMBER(1)
+                      )';
+		dbms_output.put_line('Table CALENDAR_TEMP created.');	
+exception when others then
+   dbms_output.put_line(sqlerrm);
+   raise_application_error(-20999,'Error create table CALENDAR_TEMP.');   
+end;
+/
+
+
+declare 
+	v_count number;
+begin
 	select count(1) into v_count from user_tables where table_name='BLOB_NAMES_TMP';
 	dbms_output.put_line('Create table BLOB_NAMES_TMP...');
 	if v_count = 0 then execute immediate 
@@ -148,11 +170,11 @@ PROMPT Fill service tables...
 
 --HOST "&2\sqlldr" &3 control=database-3.10/templates/ldr/ndfl/blob_data.ldr log=&4/3.10_02_02_ndfl_blob_data.txt bad=&5/3.10_02_02_ndfl_blob_data.bad
 
---3.10-avoynov-1
 HOST "&2\sqlldr" &3 control=database-3.11/templates/ldr/ndfl/template.ldr log=&4/3.11_02_03_ndfl_template.txt bad=&5/3.11_02_03_ndfl_template.bad
 
---3.10-adudenko-03
 HOST "&2\sqlldr" &3 control=database-3.11/templates/ldr/ndfl/template_script.ldr log=&4/3.11_02_04_ndfl_template_script.txt bad=&5/3.11_02_04_ndfl_template_script.bad
+
+HOST "&2\sqlldr" &3 control=database-3.11/templates/ldr/refbook/calendar.ldr log=&4/3_11_02_05_calendar.txt bad=&5/3_11_02_05_calendar.bad rows=100
 
 
 BEGIN

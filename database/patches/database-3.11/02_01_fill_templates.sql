@@ -93,3 +93,29 @@ end;
 
 PROMPT OK.
 
+PROMPT Fill REF_BOOK_CALENDAR... 
+
+begin
+
+		merge into ref_book_calendar dst using
+			(select cdate, ctype from calendar_temp) src
+		on (src.cdate = dst.cdate)
+		when not matched then insert (cdate, ctype) values (src.cdate, src.ctype);
+
+	        merge into ref_book_calendar a 
+	        using (select cdate,ctype,id, row_number() over (ORDER by id, cdate) as rn from 
+		ref_book_calendar) b on (a.cdate=b.cdate)
+		when matched then update set a.id=b.rn;
+
+	
+		commit;
+
+	exception when others then
+	   rollback;
+	   dbms_output.put_line(sqlerrm);
+	   commit;
+	   raise_application_error(-20999,'Error fill table REF_BOOK_CALENDAR.');
+end;   
+/
+
+PROMPT OK.
