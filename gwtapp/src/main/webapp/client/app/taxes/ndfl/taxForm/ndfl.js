@@ -45,12 +45,12 @@
                                     projection: "existenceAndKind"
                                 },
                                 function (data) {
-                                    if (data.exists && (data.declarationKindId === APP_CONSTANTS.NDFL_DECLARATION_KIND.PRIMARY.id || data.declarationKindId === APP_CONSTANTS.NDFL_DECLARATION_KIND.CONSOLIDATED.id)) {
+                                    if (data.existDeclarationData && (data.declarationKindId === APP_CONSTANTS.NDFL_DECLARATION_KIND.PRIMARY.id || data.declarationKindId === APP_CONSTANTS.NDFL_DECLARATION_KIND.CONSOLIDATED.id)) {
                                         d.resolve();
                                     } else {
                                         d.reject();
                                         var message;
-                                        if (data.exists) {
+                                        if (data.existDeclarationData) {
                                             message = $filter('translate')('ndfl.notPersonalOrConsolidatedDeclarationDataBegin') + $stateParams.declarationDataId + $filter('translate')('ndfl.notPersonalOrConsolidatedDeclarationDataEnd');
                                         } else {
                                             message = $filter('translate')('ndfl.removedDeclarationDataBegin') + $stateParams.declarationDataId + $filter('translate')('ndfl.removedDeclarationDataEnd');
@@ -76,10 +76,11 @@
         .controller('ndflCtrl', [
             '$scope', '$q', '$timeout', '$window', '$stateParams', 'ShowToDoDialog', '$http', 'DeclarationDataResource', '$filter', '$logPanel', '$aplanaModal', '$dialogs',
             '$rootScope', 'RefBookValuesResource', 'APP_CONSTANTS', '$state', '$interval', 'acceptDeclarationData',
-            'checkDeclarationData', 'moveToCreatedDeclarationData', 'Upload', 'PermissionChecker',
+            'checkDeclarationData', 'moveToCreatedDeclarationData', 'Upload', 'PermissionChecker', 'CommonFilterUtils',
             function ($scope, $q, $timeout, $window, $stateParams, $showToDoDialog, $http, DeclarationDataResource, $filter,
                       $logPanel, $aplanaModal, $dialogs, $rootScope, RefBookValuesResource, APP_CONSTANTS, $state,
-                      $interval, acceptDeclarationData, checkDeclarationData, moveToCreatedDeclarationData, Upload, PermissionChecker) {
+                      $interval, acceptDeclarationData, checkDeclarationData, moveToCreatedDeclarationData, Upload, PermissionChecker,
+                      CommonFilterUtils) {
 
                 if ($stateParams.uuid) {
                     $logPanel.open('log-panel-container', $stateParams.uuid);
@@ -287,9 +288,7 @@
 
                 // Возвращяет признак того, что объект незаполнен
                 function isEmpty(object) {
-                    return Object.keys(object).every(function (key) {
-                        return !object[key] || object[key].condition && isFilterConditionEmpty(object[key]) || angular.isObject(object[key]) && isEmpty(object[key]);
-                    });
+                    return CommonFilterUtils.isEmpty(object);
                 }
 
                 // Возвращяет признак того, что объект, задающий условие для фильтрации, незаполнен

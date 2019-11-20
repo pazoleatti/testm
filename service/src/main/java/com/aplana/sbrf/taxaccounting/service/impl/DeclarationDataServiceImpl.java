@@ -2287,13 +2287,15 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    public DeclarationDataExistenceAndKindResult fetchDeclarationDataExistenceAndKind(TAUserInfo userInfo, long declarationDataId) {
+    public DeclarationInitializationData fetchDeclarationDataExistenceAndKind(TAUserInfo userInfo, long declarationDataId) {
         if (!declarationDataDao.existDeclarationData(declarationDataId)) {
-            return new DeclarationDataExistenceAndKindResult(false);
+            return new DeclarationInitializationData(false);
         } else {
             DeclarationData declarationData = get(declarationDataId, userInfo);
-            long kind = declarationTemplateService.get(declarationData.getDeclarationTemplateId()).getDeclarationFormKind().getId();
-            return new DeclarationDataExistenceAndKindResult(true, kind);
+            DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
+            long formKindId = declarationTemplate.getDeclarationFormKind().getId();
+            int declarationTypeId = declarationTemplate.getType().getId();
+            return new DeclarationInitializationData(true, formKindId, declarationTypeId);
         }
     }
 

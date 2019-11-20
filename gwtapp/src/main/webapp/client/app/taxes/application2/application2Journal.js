@@ -76,7 +76,7 @@
                                 name: 'declarationType',
                                 index: 'declarationType',
                                 width: 170,
-                                formatter: $filter('linkReportFormatter')
+                                formatter: $filter('app2linkReportFormatter')
                             },
                             {name: 'state', index: 'state', width: 100},
                             {name: 'docState', index: 'docState', width: 130},
@@ -178,5 +178,18 @@
 
                 };
             }
-        ]);
+        ])
+        /**
+         * @description Форматтер для поля 'Вид налоговой формы' для перехода на конкретное "Приложение 2"
+         * @param cellValue Значение ячейки
+         * @param options Данные таблицы
+         */
+        .filter('app2linkReportFormatter', function () {
+            return function (cellValue, options) {
+                if (!cellValue) {
+                    cellValue = '';
+                }
+                return "<a href='index.html#/taxes/app2/app2Report/" + options.rowId + "'>" + cellValue + "</a>";
+            };
+        });
 }());

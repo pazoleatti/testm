@@ -2,30 +2,23 @@
     'use strict';
 
     /**
-     * @description Модуль для для работы со страницей РНУ НДФЛ
+     * @description Модуль для для работы со отчетностью "Приложение 2"
      */
 
-    angular.module('app.ndflReport',
+    angular.module('app.application2Report',
         ['ui.router',
-            'app.ndflFL',
-            'app.incomesAndTax',
-            'app.deduction',
-            'app.prepayment',
             'app.formSources',
             'app.logBusines',
             'app.logPanel',
             'app.filesComments',
-            'app.rest',
-            'app.reportNdflPersonFace',
             'app.returnToCreatedDialog',
             'app.resizer',
-            'app.pager',
-            'app.updateDocStateModal'])
+            'app.pager'])
         .config(['$stateProvider', function ($stateProvider) {
-            $stateProvider.state('ndflReport', {
-                url: '/taxes/ndfl/ndflReport/{declarationDataId}?uuid',
-                templateUrl: 'client/app/taxes/ndfl/reportForm/ndflReport.html',
-                controller: 'ndflReportCtrl',
+            $stateProvider.state('app2Report', {
+                url: '/taxes/app2/app2Report/{declarationDataId}?uuid',
+                templateUrl: 'client/app/taxes/application2/reportForm/application2Report.html',
+                controller: 'app2ReportCtrl',
                 resolve: {
                     checkExistenceAndKind: ['$q', '$interval', 'DeclarationDataResource', '$dialogs', '$state', '$filter', '$stateParams', 'APP_CONSTANTS',
                         function ($q, $interval, DeclarationDataResource, $dialogs, $state, $filter, $stateParams, APP_CONSTANTS) {
@@ -35,16 +28,19 @@
                                     projection: "existenceAndKind"
                                 },
                                 function (data) {
-                                    if (data.existDeclarationData && (data.declarationKindId === APP_CONSTANTS.NDFL_DECLARATION_KIND.REPORTS.id ||
-                                        data.declarationKindId === APP_CONSTANTS.NDFL_DECLARATION_KIND.REPORTS_FL.id) &&
-                                        data.declarationTypeId !== APP_CONSTANTS.DECLARATION_TYPE.APP_2.id
-                                    ) {
+                                    var isApp2ReportForm = data.declarationKindId === APP_CONSTANTS.NDFL_DECLARATION_KIND.REPORTS.id
+                                        && data.declarationTypeId === APP_CONSTANTS.DECLARATION_TYPE.APP_2.id
+                                    if (data.existDeclarationData && isApp2ReportForm) {
                                         d.resolve();
                                     } else {
                                         d.reject();
                                         var message;
                                         if (data.existDeclarationData) {
-                                            message = $filter('translate')('ndfl.notReportDeclarationDataBegin') + $stateParams.declarationDataId + $filter('translate')('ndfl.notReportDeclarationDataEnd');
+                                            if (data.declarationTypeId !== APP_CONSTANTS.DECLARATION_TYPE.APP_2.id) {
+                                                message = $filter('translate')('ndfl.notReportDeclarationDataBegin') + $stateParams.declarationDataId + $filter('translate')('ndfl.notApp2DeclarationDataEnd');
+                                            } else {
+                                                message = $filter('translate')('ndfl.notReportDeclarationDataBegin') + $stateParams.declarationDataId + $filter('translate')('ndfl.notReportDeclarationDataEnd');
+                                            }
                                         } else {
                                             message = $filter('translate')('ndfl.removedDeclarationDataBegin') + $stateParams.declarationDataId + $filter('translate')('ndfl.removedDeclarationDataEnd');
                                         }
@@ -58,26 +54,73 @@
                                 }
                             );
                             return d.promise;
-                        }]
+                        }
+                    ]
                 }
             });
         }])
 
         /**
-         * @description Контроллер страницы РНУ НДФЛ и вкладки "Реквизиты"
+         * @description Контроллер страницы просмотра отчетной формы "Приложение 2"
          */
-        .controller('ndflReportCtrl', [
+        .controller('app2ReportCtrl', [
             '$scope', '$timeout', '$window', '$stateParams', 'ShowToDoDialog', '$http', 'DeclarationDataResource',
             '$filter', '$logPanel', '$dialogs', '$rootScope', 'RefBookValuesResource', 'APP_CONSTANTS', '$state',
-            '$interval', 'acceptDeclarationData', 'getPageImage', 'checkDeclarationData',
-            'moveToCreatedDeclarationData', '$aplanaModal', 'CommonParamResource',
+            '$interval', 'acceptDeclarationData', 'checkDeclarationData', 'moveToCreatedDeclarationData', '$aplanaModal',
+            'CommonParamResource', 'CommonFilterUtils',
             function ($scope, $timeout, $window, $stateParams, $showToDoDialog, $http, DeclarationDataResource, $filter,
                       $logPanel, $dialogs, $rootScope, RefBookValuesResource, APP_CONSTANTS, $state, $interval,
-                      acceptDeclarationData, getPageImage, checkDeclarationData,
-                      moveToCreatedDeclarationData, $aplanaModal, CommonParamResource) {
+                      acceptDeclarationData, checkDeclarationData, moveToCreatedDeclarationData, $aplanaModal,
+                      CommonParamResource, CommonFilterUtils) {
 
                 if ($stateParams.uuid) {
                     $logPanel.open('log-panel-container', $stateParams.uuid);
+                }
+
+                $scope.searchFilter = {
+                    ajaxFilter: [],
+                    params: {
+                        person: {}
+                    },
+                    filterName: 'ndflFilterForApp2_' + $stateParams.declarationDataId
+                };
+
+                $scope.app2Filter = getApp2Filter();
+                $scope.searchFilter.fillFilterParams = function () {
+                    $scope.app2Filter = getApp2Filter();
+                };
+
+                /**
+                 * @description Установка признака заполненности фильтра
+                 */
+                $scope.searchFilter.isClearByFilterParams = function () {
+                    $scope.searchFilter.isClear = !(isEmpty($scope.app2Filter.person));
+                };
+
+                /**
+                 * @description сброс фильтра
+                 */
+                $scope.searchFilter.resetFilterParams = function () {
+                    /* очистка всех инпутов на форме */
+                    $scope.searchFilter.params = {
+                        person: {}
+                    };
+                };
+
+                // Возвращяет признак того, что объект незаполнен
+                function isEmpty(object) {
+                    return CommonFilterUtils.isEmpty(object);
+                }
+
+                /**
+                 * @description возвращяет фильтр, который будет отправлен на сервер для составления запросов
+                 */
+                function getApp2Filter() {
+                    var filter = {
+                        declarationDataId: $stateParams.declarationDataId,
+                        person: $scope.searchFilter.params.person
+                    };
+                    return filter;
                 }
 
                 /**
@@ -97,16 +140,7 @@
                                 } else {
                                     $scope.declarationData = data;
                                     $scope.declarationDataId = $stateParams.declarationDataId;
-                                    var declarationTypes = [APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_1, APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_2,
-                                        APP_CONSTANTS.DECLARATION_TYPE.REPORT_6_NDFL, APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_FL];
-                                    declarationTypes.forEach(function (declarationType) {
-                                        if (declarationType.id === data.declarationType) {
-                                            $scope.declarationTypeName = declarationType.name;
-                                        }
-                                    });
-                                    $scope.isCurrentForm2NDFLFL = $scope.declarationData.declarationType === APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_FL.id;
-                                    $scope.isCurrentForm2NDFL_1_OR_2 = (($scope.declarationData.declarationType === APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_1.id) ||
-                                                                       ($scope.declarationData.declarationType === APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_2.id));
+                                    $scope.declarationTypeName = APP_CONSTANTS.DECLARATION_TYPE.APP_2.name;
                                 }
                             }
                         }
@@ -126,44 +160,11 @@
                     $interval.cancel(updateDeclarationInfoInterval);
                 }
 
-                $scope.pdfLoading = false;
-                $scope.pdfLoaded = false;
-
                 /**
                  * @description Проверяет готовность отчетов у открытой формы
                  */
-                // TODO: Убрать использование постоянных запросов
                 function updateAvailableReports() {
-                    DeclarationDataResource.query({
-                            declarationDataId: $stateParams.declarationDataId,
-                            projection: "availableNdflReports",
-                            nooverlay: true
-                        },
-                        function (data) {
-                            if (data) {
-                                if (!data.declarationDataExist) {
-                                    cancelAllIntervals();
-                                    showDeclarationDataNotExistsError();
-                                } else {
-                                    $scope.availableXml = data.downloadXmlAvailable;
-                                    $scope.availablePdf = data.availablePdf;
-                                    $scope.availableXlsxReport = data.downloadXlsxAvailable;
-                                    if (!$scope.pdfLoaded && data.availablePdf) {
-                                        $http({
-                                            method: "GET",
-                                            url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/pageCount"
-                                        }).success(function (response) {
-                                            $scope.pagesTotal = response;
-                                        });
-                                        $scope.pdfLoaded = true;
-                                    }
-                                    if (!$scope.availablePdf && !$scope.pdfLoading) {
-                                        $scope.pdfMessage = "Область предварительного просмотра. Расчет налоговой формы выполнен. Форма предварительного просмотра не сформирована";
-                                    }
-                                }
-                            }
-                        }
-                    );
+
                 }
 
                 var updateAvailableReportsInterval;
@@ -210,13 +211,7 @@
                  * @description Загружает страницу отчета
                  */
                 $scope.onPageChange = function () {
-                    getPageImage.query({
-                            declarationDataId: $stateParams.declarationDataId,
-                            pageId: $scope.pager.currPage - 1
-                        },
-                        function (response) {
-                            $scope.reportImage = response.requestUrl;
-                        });
+
                 };
 
                 $scope.showToDoDialog = function () {
@@ -270,52 +265,6 @@
                                 }
                             }
                         });
-                    });
-                };
-
-                /**
-                 * @description Формирование спецотчета по физ лицу для 2-НДФЛ
-                 */
-                $scope.createReportNdflByPersonReport = function () {
-                    var title = $scope.declarationData.declarationType === APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_1.id ? $filter('translate')('reportPersonFace.title') : $filter('translate')('reportPersonFace.title2');
-                    $aplanaModal.open({
-                        title: title,
-                        templateUrl: 'client/app/taxes/ndfl/reportForm/reportNdflPersonFace.html',
-                        controller: 'reportNdflPersonFaceFormCtrl',
-                        windowClass: 'modal1200',
-                        resolve: {
-                            $shareData: function () {
-                                return {
-                                    declarationDataId: $scope.declarationDataId,
-                                    reportType: APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.REPORT_2NDFL,
-                                    isSubReport: true,
-                                    declarationData: $scope.declarationData
-                                };
-                            }
-                        }
-                    });
-                };
-
-                /**
-                 * @description Создать 2-НДФЛ по физ лицу
-                 */
-                $scope.createNdflByPersonReport = function () {
-                    var title = $scope.declarationData.declarationType === APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_1.id ? $filter('translate')('reportPersonFace.title') : $filter('translate')('reportPersonFace.title2');
-                    $aplanaModal.open({
-                        title: title,
-                        templateUrl: 'client/app/taxes/ndfl/reportForm/reportNdflPersonFace.html',
-                        controller: 'reportNdflPersonFaceFormCtrl',
-                        windowClass: 'modal1200',
-                        resolve: {
-                            $shareData: function () {
-                                return {
-                                    declarationDataId: $scope.declarationDataId,
-                                    reportType: APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.REPORT_2NDFL,
-                                    isCreateNdfl: true,
-                                    declarationData: $scope.declarationData
-                                };
-                            }
-                        }
                     });
                 };
 
@@ -404,64 +353,6 @@
                 };
 
                 /**
-                 * @description Событие которое возникает при нажатии на кнопку "Показать"
-                 */
-                $scope.createPdf = function () {
-                    $scope.pdfMessage = "Область предварительного просмотра. Расчет налоговой формы выполнен. Идет формирование формы предварительного просмотра";
-                    $scope.pdfLoading = true;
-                    $http({
-                        method: "POST",
-                        url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/pdf"
-                    }).success(function (response) {
-                        if (response) {
-                            $logPanel.open('log-panel-container', response);
-                        }
-                    });
-                };
-
-                /**
-                 * @description Изменить состояние ЭД
-                 */
-                $scope.updateDocState = function () {
-                    $aplanaModal.open({
-                        title: $filter('translate')('title.updateDocState'),
-                        templateUrl: 'client/app/taxes/ndfl/reportForm/updateDocStateModal.html',
-                        controller: 'UpdateDocStateCtrl',
-                        windowClass: 'modal600'
-                    }).result.then(function (docState) {
-                        if (docState) {
-                            $http({
-                                method: "POST",
-                                url: "controller/actions/declarationData/updateDocState",
-                                data: [$stateParams.declarationDataId],
-                                params: {
-                                    docStateId: docState.id
-                                }
-                            }).then(function (response) {
-                                if (response.data && response.data.uuid) {
-                                    $logPanel.open('log-panel-container', response.data.uuid);
-                                }
-                            });
-                        }
-                    });
-                };
-
-                /**
-                 * @description Отправить в ЭДО
-                 */
-                $scope.sendEdo = function () {
-                    $http({
-                        method: "POST",
-                        url: "controller/actions/declarationData/sendEdo",
-                        data: [$stateParams.declarationDataId]
-                    }).then(function (response) {
-                        if (response.data && response.data.uuid) {
-                            $logPanel.open('log-panel-container', response.data.uuid);
-                        }
-                    });
-                };
-
-                /**
                  * @description Обработка события, которое возникает при нажании на ссылку "Источники"
                  */
                 $scope.showSourcesClick = function () {
@@ -473,22 +364,6 @@
                     });
                 };
 
-                $scope.downloadXml = function () {
-                    $window.open("controller/rest/declarationData/" + $stateParams.declarationDataId + "/xml", '_blank');
-                };
-                $scope.downloadPdf = function () {
-                    $window.open("controller/rest/declarationData/" + $stateParams.declarationDataId + "/pdf", '_blank');
-                };
-
-
-                /**
-                 * @description Получение конфигурационного параметра "Отправлять документы в ФП "Фонды""
-                 */
-                 $scope.documentsSendingEnabled = CommonParamResource.query({
-                     codes: [APP_CONSTANTS.CONFIGURATION_PARAM.DOCUMENTS_SENDING_ENABLED],
-                     projection: "allByEnums"
-                 }, function (configurationsByCode) {
-                     $scope.documentsSendingEnabled = configurationsByCode[APP_CONSTANTS.CONFIGURATION_PARAM.DOCUMENTS_SENDING_ENABLED].value;
-                 });
-            }]);
+            }
+        ]);
 }());

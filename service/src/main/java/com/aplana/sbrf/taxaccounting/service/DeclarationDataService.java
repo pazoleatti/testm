@@ -565,7 +565,7 @@ public interface DeclarationDataService {
      * @param userInfo          пользователь
      * @param declarationDataId id формы
      */
-    DeclarationDataExistenceAndKindResult fetchDeclarationDataExistenceAndKind(TAUserInfo userInfo, long declarationDataId);
+    DeclarationInitializationData fetchDeclarationDataExistenceAndKind(TAUserInfo userInfo, long declarationDataId);
 
     /**
      * Запускает ассинхронную задачу на выгрузку отчетности для форм

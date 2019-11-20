@@ -22,6 +22,24 @@
              *           },
          * ...
          */
+            .factory('CommonFilterUtils', [
+                function() {
+                    var service = {
+                        isEmpty: function(object) {
+                            return Object.keys(object).every(function (key) {
+                                var filterCondition = object[key];
+                                var isFilterConditionEmpty = !filterCondition.operator
+                                    || !filterCondition.operator.unary && !filterCondition.argument2;
+                                return !filterCondition
+                                    || filterCondition.condition && isFilterConditionEmpty
+                                    || angular.isObject(filterCondition) && isEmpty(filterCondition);
+                            });
+                        }
+                    };
+                    return service;
+                }
+            ])
+
             .controller('CommonFilterCtrl', ['$scope', '$webStorage', '$rootScope',
                 function ($scope, $webStorage, $rootScope) {
                     // Триггер показа инфозаписей "Сброс"

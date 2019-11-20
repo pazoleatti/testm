@@ -359,7 +359,7 @@
                         declarationDataId: declarationDataId,
                         projection: "existenceAndKind"
                     }, function (response) {
-                        if (response.exists) {
+                        if (response.existDeclarationData) {
                             window.open('controller/rest/declarationData/' + declarationDataId + '/xml', '_self');
                         } else {
                             $dialogs.errorDialog({
