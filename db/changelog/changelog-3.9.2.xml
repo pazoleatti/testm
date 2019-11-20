@@ -44,7 +44,7 @@
     </changeSet>
 
     <!-- https://jira.aplana.com/projects/SBRFNDFL/issues/SBRFNDFL-8282 Реализовать в алгоритме консолидации автозамену данных по старой настройке на данные новой настройки и вывод сообщения о заменах -->
-    <changeSet id="3.9.2-mchernyakov-4" author="mchernyakov" runAlways="true">
+    <changeSet id="3.9.2-mchernyakov-4" author="mchernyakov">
         <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
             <column name="script" valueClobFile="templates-3.9.2\ndfl\consolidated_rnu_ndfl\v2016\consolidated_rnu_ndfl_calculate.groovy"/>
             <where>DECLARATION_TEMPLATE_ID = 101 and EVENT_ID = 3</where>
