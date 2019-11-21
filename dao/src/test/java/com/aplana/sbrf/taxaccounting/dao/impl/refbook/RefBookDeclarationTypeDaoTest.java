@@ -22,7 +22,7 @@ import static org.junit.Assert.assertTrue;
 @Transactional
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class RefBookDeclarationTypeDaoTest {
-    private final static int DECLARATION_TYPES_COUNT = 6;
+    private final static int DECLARATION_TYPES_COUNT = 7;
     private final static String DECLARATION_TYPE_NAME_2 = "2-НДФЛ (2)";
     private final static String DECLARATION_TYPE_NAME_3 = "Вид налоговой формы 2";
 

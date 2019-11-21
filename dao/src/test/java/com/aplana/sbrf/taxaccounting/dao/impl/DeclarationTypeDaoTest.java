@@ -42,7 +42,7 @@ public class DeclarationTypeDaoTest {
 	@Test
 	public void testListAll() {
 		List<DeclarationType> list = declarationTypeDao.fetchAll();
-		assertEquals(6, list.size());
+		assertEquals(7, list.size());
 	}
 
 	@Test

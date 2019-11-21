@@ -69,7 +69,7 @@ public class DepartmentReportPeriodDaoTest {
         // Пустой фильтр
         List<DepartmentReportPeriod> departmentReportPeriodList =
                 departmentReportPeriodDao.fetchAllByFilter(departmentReportPeriodFilter);
-        assertEquals(50, departmentReportPeriodList.size());
+        assertEquals(51, departmentReportPeriodList.size());
         // Фильтр по подразделениям
         departmentReportPeriodFilter = new DepartmentReportPeriodFilter();
         departmentReportPeriodFilter.setDepartmentIdList(asList(4));
@@ -130,7 +130,7 @@ public class DepartmentReportPeriodDaoTest {
         // Пустой фильтр
         List<Integer> departmentReportPeriodList =
                 departmentReportPeriodDao.fetchAllIdsByFilter(departmentReportPeriodFilter);
-        assertEquals(50, departmentReportPeriodList.size());
+        assertEquals(51, departmentReportPeriodList.size());
     }
 
     @Test

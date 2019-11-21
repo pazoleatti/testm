@@ -228,7 +228,7 @@ public class FilterTreeListenerTest {
 
         PreparedStatementData result = new PreparedStatementData();
         simpleFilterTreeListener.setPs(result);
-        Filter.getFilterQuery("LOWER(AliasStringType11) > 5", simpleFilterTreeListener);
+        Filter.getFilterQuery("LOWER(AliasStringType11) > 6", simpleFilterTreeListener);
     }
 
     @Test

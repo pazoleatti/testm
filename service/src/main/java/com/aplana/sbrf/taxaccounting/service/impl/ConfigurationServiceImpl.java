@@ -77,6 +77,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     private static final String REPORT_PERIOD_YEAR_MAX_LOWER_MIN_ERROR = "Максимальное значение отчетного года\" должно быть не меньше \"Минимального значения отчетного года";
     private static final String SUBSYSTEM_PARAM_ERROR = "Значение параметра \"%s\" должно содержаться в справочнике \"Подсистемы АС УН\"";
     private static final String DEPARTMENT_FOR_APP_2_ERROR = "В справочнике \"Подразделения\" не найдено подразделение с кодом : %s";
+    private static final String APP2_DEP_VALUE_NOT_NUMERIC_ERROR = "Значение параметра должно содержать только цифры и не превышать 15 символов";
 
 
     @Autowired
@@ -481,6 +482,10 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
     private void checkDepartmentForApp2(Configuration configuration, Logger logger) {
         String value = configuration.getValue();
+        if (value.length() > 15 || !value.matches("[0-9]+")) {
+            logger.error(APP2_DEP_VALUE_NOT_NUMERIC_ERROR);
+            return;
+        }
         Department dep = departmentService.findByCode(Long.parseLong(value));
         if (dep == null) {
             logger.error(DEPARTMENT_FOR_APP_2_ERROR, value);

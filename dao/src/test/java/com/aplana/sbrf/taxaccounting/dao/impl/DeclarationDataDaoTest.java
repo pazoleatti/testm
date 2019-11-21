@@ -158,8 +158,8 @@ public class DeclarationDataDaoTest {
     @Test
     public void findPageByFilterTest() {
         DeclarationDataFilter filter = new DeclarationDataFilter();
-        assertArrayEquals(new Long[]{123L, 71L, 70L, 8L, 7L, 6L, 5L, 4L, 3L, 2L, 1L}, declarationDataDao.findIdsByFilter(filter, DeclarationDataSearchOrdering.ID, false).toArray());
-        assertArrayEquals(new Long[]{1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 70L, 71L, 123L}, declarationDataDao.findIdsByFilter(filter, DeclarationDataSearchOrdering.ID, true).toArray());
+        assertArrayEquals(new Long[]{123L, 71L, 70L, 9L, 8L, 7L, 6L, 5L, 4L, 3L, 2L, 1L}, declarationDataDao.findIdsByFilter(filter, DeclarationDataSearchOrdering.ID, false).toArray());
+        assertArrayEquals(new Long[]{1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 70L, 71L, 123L}, declarationDataDao.findIdsByFilter(filter, DeclarationDataSearchOrdering.ID, true).toArray());
     }
 
     private PagingParams getPagingParams(int page, int count) {
@@ -173,8 +173,8 @@ public class DeclarationDataDaoTest {
     public void findPage_all() {
         DeclarationDataFilter filter = new DeclarationDataFilter();
         PagingResult<DeclarationDataJournalItem> page = declarationDataDao.findPage(filter, getPagingParams(1, Integer.MAX_VALUE));
-        assertEquals(11, page.size());
-        assertEquals(11, page.getTotalCount());
+        assertEquals(12, page.size());
+        assertEquals(12, page.getTotalCount());
     }
 
     @Test
@@ -182,7 +182,7 @@ public class DeclarationDataDaoTest {
         DeclarationDataFilter filter = new DeclarationDataFilter();
         PagingResult<DeclarationDataJournalItem> page = declarationDataDao.findPage(filter, getPagingParams(2, 2));
         assertEquals(2, page.size());
-        assertEquals(11, page.getTotalCount());
+        assertEquals(12, page.getTotalCount());
         assertEquals(new Long(3), page.get(0).getDeclarationDataId());
         assertEquals(new Long(4), page.get(1).getDeclarationDataId());
     }
@@ -415,6 +415,11 @@ public class DeclarationDataDaoTest {
     public void testFindONFFor2NDFL() {
         List<DeclarationData> declarationDataList = declarationDataDao.findONFFor2Ndfl(104, "33", 2018, "123456789", "12345678");
         assertEquals(new Long(8), declarationDataList.get(0).getId());
+    }
+
+    public void findApplication2ByReportYearTest() {
+        List<DeclarationData> declarationDataList = declarationDataDao.findApplication2ByReportYear(2019);
+        assertEquals(new Long(9), declarationDataList.get(0).getId());
     }
 
     @Test
