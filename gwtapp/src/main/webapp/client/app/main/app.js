@@ -396,7 +396,6 @@
         "title.foreignAddress": "Адрес за пределами РФ",
         "title.totalIncome": "Общая сумма дохода",
         "title.totalDeduction": "Общая сумма вычетов",
-        "title.totalDeduction": "Общая сумма вычетов",
 
         "title.amountCalcIncome": "Начислено",
         "title.amountPaymentIncome": "Выплачено",
