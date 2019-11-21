@@ -35,6 +35,7 @@ public enum OperationType {
     DECLARATION_2NDFL2(AsyncTaskType.CREATE_FORMS_DEC, "Формирование ОНФ 2НДФЛ 2"),
     DECLARATION_6NDFL(AsyncTaskType.CREATE_FORMS_DEC, "Формирование ОНФ 6НДФЛ"),
     DECLARATION_2NDFL_FL(AsyncTaskType.CREATE_2NDFL_FL, "Формирование ОНФ 2НДФЛ ФЛ"),
+    DECLARATION_APP2(AsyncTaskType.CREATE_FORMS_DEC, "Формирование ОНФ Приложение 2"),
     IMPORT_DECLARATION_EXCEL(AsyncTaskType.IMPORT_DECLARATION_EXCEL, "Загрузка данных из Excel файла"),
     EXCEL_TEMPLATE_DEC(AsyncTaskType.EXCEL_TEMPLATE_DEC, "Формирование шаблона ТФ  в Excel"),
     DELETE_DEC(AsyncTaskType.DELETE_DEC, "Удаление налоговой формы"),
@@ -92,6 +93,8 @@ public enum OperationType {
                 return DECLARATION_6NDFL;
             case DeclarationType.NDFL_2_FL:
                 return DECLARATION_2NDFL_FL;
+            case DeclarationType.APP_2:
+                return DECLARATION_APP2;
             default:
                 throw new IllegalArgumentException("unknown declarationTypeId " + declarationTypeId);
         }

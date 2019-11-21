@@ -323,7 +323,8 @@
                         APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_CONSOLIDATED,
                         APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_1,
                         APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_2,
-                        APP_CONSTANTS.DECLARATION_TYPE.REPORT_6_NDFL
+                        APP_CONSTANTS.DECLARATION_TYPE.REPORT_6_NDFL,
+                        APP_CONSTANTS.DECLARATION_TYPE.APP_2
                     ];
                 };
 
@@ -438,6 +439,9 @@
                         if (period.text.indexOf(APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_2.name) > -1 ){
                             $scope.declarationTypeSelect.options.data.results.push(APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_2);
                         }
+                        if (period.text.indexOf(APP_CONSTANTS.DECLARATION_TYPE.APP_2.name) > -1 ){
+                            $scope.declarationTypeSelect.options.data.results.push(APP_CONSTANTS.DECLARATION_TYPE.APP_2);
+                        }
                     }
                 }
 
@@ -454,6 +458,9 @@
                     }
                     if (knf.reportPeriodTaxFormTypeId == APP_CONSTANTS.TAX_FORM_TYPE.REPORT_2_NDFL_2.id){
                         $scope.declarationTypeSelect.options.data.results.push(APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_2);
+                    }
+                    if (knf.reportPeriodTaxFormTypeId == APP_CONSTANTS.TAX_FORM_TYPE.APP_2.id){
+                        $scope.declarationTypeSelect.options.data.results.push(APP_CONSTANTS.DECLARATION_TYPE.APP_2);
                     }
                 }
 

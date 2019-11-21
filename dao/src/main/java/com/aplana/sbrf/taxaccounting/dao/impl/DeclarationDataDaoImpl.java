@@ -966,6 +966,26 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
     }
 
     @Override
+    public List<DeclarationData> findApplication2ByReportYear(int reportYear) {
+        String sql = "select " + DeclarationDataRowMapper.FIELDS + " from declaration_data dd " +
+                "left join department_report_period drp on dd.department_report_period_id = drp.id " +
+                "left join department dep on drp.department_id = dep.id " +
+                "left join report_period rp on drp.report_period_id = rp.id " +
+                "left join report_period_type rpt on rp.dict_tax_period_id = rpt.id " +
+                "left join tax_period tp on rp.tax_period_id = tp.id " +
+                "left join ref_book_knf_type knf_type on knf_type.id = dd.knf_type_id " +
+                "where dd.declaration_template_id = 106 " +
+                "and tp.year = :reportYear " +
+                "order by dd.correction_num, dd.id desc";
+        MapSqlParameterSource params = new MapSqlParameterSource("reportYear", reportYear);
+        try {
+            return getNamedParameterJdbcTemplate().query(sql, params, new DeclarationDataRowMapper());
+        } catch (EmptyResultDataAccessException e) {
+            return Collections.emptyList();
+        }
+    }
+
+    @Override
     public boolean existDeclarationData(DeclarationData declarationData) {
         JdbcTemplate jt = getJdbcTemplate();
         int countOfExisted = 0;

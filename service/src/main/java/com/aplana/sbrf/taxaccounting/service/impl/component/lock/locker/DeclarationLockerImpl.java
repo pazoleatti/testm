@@ -153,6 +153,9 @@ public class DeclarationLockerImpl implements DeclarationLocker {
     private static final Set<OperationType> SET_2NDFL_NEW = ImmutableSet.of(
             OperationType.DELETE_DEC);
 
+    private static final Set<OperationType> SET_REPORT_APP2 = ImmutableSet.of(
+            OperationType.CONSOLIDATE, OperationType.DELETE_DEC, OperationType.EDIT, OperationType.UPDATE_PERSONS_DATA, OperationType.RETURN_DECLARATION);
+
     // Зависимости
     private final LockKeyGenerator mainLockKeyGenerator;
     private final LockKeyGenerator checkupLockKeyGenerator;
@@ -252,6 +255,8 @@ public class DeclarationLockerImpl implements DeclarationLocker {
             return doCheckAndLock(declarationDataIdList, operationType, SET_REPORT_KPP_OKTMO__2NDFL1__2NDFL2__6NDFL, additionalParams, userInfo, logger);
         } else if (operationType.equals(OperationType.DECLARATION_6NDFL)) {
             return doCheckAndLock(declarationDataIdList, operationType, SET_REPORT_KPP_OKTMO__2NDFL1__2NDFL2__6NDFL, additionalParams, userInfo, logger);
+        } else if (operationType.equals(OperationType.DECLARATION_APP2)) {
+            return doCheckAndLock(declarationDataIdList, operationType, SET_REPORT_APP2, additionalParams, userInfo, logger);
         } else if (operationType.equals(OperationType.DECLARATION_2NDFL_FL)) {
             return doCheckAndLock(declarationDataIdList, operationType, SET_REPORT_KPP_OKTMO__2NDFL1__2NDFL2__6NDFL, additionalParams, userInfo, logger);
         } else if (operationType.equals(OperationType.EXPORT_REPORTS)) {

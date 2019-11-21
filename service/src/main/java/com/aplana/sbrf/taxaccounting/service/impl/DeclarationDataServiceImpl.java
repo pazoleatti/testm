@@ -2322,7 +2322,17 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             departmentReportPeriod = departmentReportPeriodService.fetchOne(knf.getDepartmentReportPeriodId());
         } else {
             departmentReportPeriod = departmentReportPeriodService.fetchLast(action.getDepartmentId(), action.getPeriodId());
-            RefBookKnfType knfType = action.getDeclarationTypeId() == DeclarationType.NDFL_2_2 ? RefBookKnfType.BY_NONHOLDING_TAX : RefBookKnfType.ALL;
+            RefBookKnfType knfType;
+            switch (action.getDeclarationTypeId()) {
+                case DeclarationType.APP_2:
+                    knfType = RefBookKnfType.FOR_APP2;
+                    break;
+                case DeclarationType.NDFL_2_2:
+                    knfType = RefBookKnfType.BY_NONHOLDING_TAX;
+                    break;
+                default:
+                    knfType = RefBookKnfType.ALL;
+            }
             knf = findKnf(departmentReportPeriod, knfType);
         }
 

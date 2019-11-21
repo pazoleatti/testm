@@ -263,6 +263,13 @@ public interface DeclarationService {
     List<DeclarationData> find(int declarationTemplate, int departmentReportPeriodId, String taxOrganCode, String kpp, String oktmo);
 
     /**
+     * Найти существующие ОНФ Приложения 2 по отчетному году
+     * @param reportYear год отчетного периода
+     * @return список ранее созданных ОНФ
+     */
+    List<DeclarationData> findApplication2ByReportYear(int reportYear);
+
+    /**
      * Удаляет форму
      *
      * @param declarationDataId идентификатор формы

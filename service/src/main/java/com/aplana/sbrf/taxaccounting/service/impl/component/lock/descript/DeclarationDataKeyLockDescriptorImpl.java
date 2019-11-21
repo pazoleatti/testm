@@ -45,6 +45,7 @@ public class DeclarationDataKeyLockDescriptorImpl implements DeclarationDataKeyL
             case DECLARATION_2NDFL2:
             case DECLARATION_6NDFL:
             case DECLARATION_2NDFL_FL:
+            case DECLARATION_APP2:
             case EXPORT_REPORTS:
             case TRANSFER:
             case EXCEL_UNLOAD_LIST:

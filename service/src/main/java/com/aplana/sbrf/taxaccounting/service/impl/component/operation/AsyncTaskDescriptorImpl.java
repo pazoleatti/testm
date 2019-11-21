@@ -107,7 +107,8 @@ public class AsyncTaskDescriptorImpl implements AsyncTaskDescriptor {
             return createDescription(declarationDataId, "Формирование отчета \"2-НДФЛ (1) по физическому лицу\"");
         else if (operationType.equals(OperationType.REPORT_2NDFL2))
             return createDescription(declarationDataId, "Формирование отчета \"2-НДФЛ (2) по физическому лицу\"");
-        else if (operationType.equals(OperationType.DECLARATION_2NDFL1) || operationType.equals(OperationType.DECLARATION_2NDFL2) || operationType.equals(OperationType.DECLARATION_6NDFL))
+        else if (operationType.equals(OperationType.DECLARATION_2NDFL1) || operationType.equals(OperationType.DECLARATION_2NDFL2)
+                || operationType.equals(OperationType.DECLARATION_6NDFL) || operationType.equals(OperationType.DECLARATION_APP2))
             return createReportsAsyncTaskDescriptor.createDescription(departmentReportPeriodId, declarationTypeId);
         else if (operationType.equals(OperationType.DECLARATION_2NDFL_FL))
             return createReportsAsyncTaskDescriptor.createShortDescription(reportPeriodId, declarationTypeId);

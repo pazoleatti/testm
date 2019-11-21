@@ -83,6 +83,8 @@ public class MainLockKeyGeneratorImpl implements LockKeyGenerator {
             return String.format("DECLARATION_DATA_%s_TRANSFER_%s", declarationDataId, sourceDeclarationId);
         } else if (operationType.equals(OperationType.DELETE_DEC_ROWS)) {
             return String.format("DECLARATION_DATA_%s_DELETE_DECLARATION_ROWS_%s", declarationDataId, sourceDeclarationId);
+        } else if (operationType.equals(OperationType.DECLARATION_APP2)) {
+            return String.format("DECLARATION_DATA_%s_APP2", declarationDataId);
         }
             throw new IllegalArgumentException("Unknown operationType type!");
     }

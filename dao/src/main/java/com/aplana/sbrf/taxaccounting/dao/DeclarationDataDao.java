@@ -276,6 +276,13 @@ public interface DeclarationDataDao extends PermissionDao {
     List<DeclarationData> find(int declarationTemplate, int departmentReportPeriodId, String taxOrganCode, String kpp, String oktmo);
 
     /**
+     * Найти существующие ОНФ Приложения 2 по отчетному году
+     * @param reportYear год отчетного периода
+     * @return список ранее созданных ОНФ
+     */
+    List<DeclarationData> findApplication2ByReportYear(int reportYear);
+
+    /**
      * Проверяет существование НФ по критериям в зависимости от ее вида
      */
     boolean existDeclarationData(DeclarationData declarationData);

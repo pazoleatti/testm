@@ -80,6 +80,9 @@
                             if (period.text.indexOf(APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_2.name) > -1 ){
                                 $scope.reportData.declarationType = new Object(APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_2);
                             }
+                            if (period.text.indexOf(APP_CONSTANTS.DECLARATION_TYPE.APP_2.name) > -1 ){
+                                $scope.reportData.declarationType = new Object(APP_CONSTANTS.DECLARATION_TYPE.APP_2);
+                            }
                         }
                     });
                 }

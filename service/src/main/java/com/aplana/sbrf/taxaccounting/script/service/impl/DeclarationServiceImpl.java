@@ -303,6 +303,11 @@ public class DeclarationServiceImpl implements DeclarationService {
     }
 
     @Override
+    public List<DeclarationData> findApplication2ByReportYear(int reportYear) {
+        return declarationDataDao.findApplication2ByReportYear(reportYear);
+    }
+
+    @Override
     public void delete(long declarationDataId, TAUserInfo userInfo) {
         if (declarationDataDao.existDeclarationData(declarationDataId)) {
             declarationDataDao.setStatus(declarationDataId, State.CREATED);
