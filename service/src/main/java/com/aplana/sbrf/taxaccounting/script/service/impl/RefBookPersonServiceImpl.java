@@ -85,6 +85,11 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
     }
 
     @Override
+    public  List<RegistryPerson> findAllRecordList(long id) {
+        return refBookPersonDao.fetchNonDuplicatesVersions(id);
+    }
+
+    @Override
     public void clearRnuNdflPerson(Long declarationDataId) {
         refBookPersonDao.clearRnuNdflPerson(declarationDataId);
     }

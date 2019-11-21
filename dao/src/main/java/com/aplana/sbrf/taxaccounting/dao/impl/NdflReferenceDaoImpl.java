@@ -2,8 +2,11 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.refbook.NdflReferenceDao;
 import com.aplana.sbrf.taxaccounting.model.ReportFormsCreationParams;
+import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.refbook.NumFor2Ndfl;
 import com.aplana.sbrf.taxaccounting.model.refbook.ReferenceAnnulResult;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -12,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.List;
 
 @Repository
@@ -93,18 +97,35 @@ public class NdflReferenceDaoImpl extends AbstractDao implements NdflReferenceDa
         Integer resultCount = getJdbcTemplate().queryForObject("select count(*) from ndfl_references nr " +
                         "left join ndfl_person np on np.id = nr.ndfl_person_id " +
                         "where nr.correction_num = 99 and nr.declaration_data_id = ? and nr.num = ? and np.last_name = ? and np.first_name = ? and np.middle_name = ? and np.inn_np = ? and np.id_doc_number = ?  ",
-                new Object[] {declarationDataId, num, lastName, firstName, middleName, innNp, idDocNumber}, Integer.class);
+                new Object[]{declarationDataId, num, lastName, firstName, middleName, innNp, idDocNumber}, Integer.class);
         if (resultCount > 0) result = true;
         return result;
     }
 
     @Override
-    public List<ReferenceAnnulResult> findAllReferencesRegistryAnnulByFio(String lastName, String firstName, String middleName) {
-        return getJdbcTemplate().query("select nr.declaration_data_id, nr.person_id, nr.num, nr.surname, nr.name, nr.lastname, nr.correction_num " +
-                        "from ndfl_references nr " +
-                        "where nr.correction_num = 99 and nr.surname = ? and nr.name = ? and nr.lastname = ? ",
-                new Object[]{lastName, firstName, middleName},
-                new ReferenceAnnulResultRowMapper());
+    public List<ReferenceAnnulResult> getAnnulByPersonIdAndSprNum(long personId, int sprNum) {
+            return getJdbcTemplate().query("select nr.declaration_data_id, nr.person_id, nr.num, nr.surname, nr.name, nr.lastname, nr.correction_num, nr.ndfl_person_id " +
+                            "from ndfl_references nr " +
+                            "where nr.correction_num = 99 AND nr.person_id = ? AND nr.num = ? ",
+                    new Object[]{ personId, sprNum},
+                    new int[]{Types.NUMERIC, Types.NUMERIC},
+                    new ReferenceAnnulResultRowMapper());
+    }
+
+    @Override
+    public ReferenceAnnulResult getReferenceByDeclarationAndSprNum(long declarationDataId, int sprNum) {
+        try {
+            return getJdbcTemplate().queryForObject("select nr.declaration_data_id, nr.person_id, nr.num, nr.surname, nr.name, nr.lastname, nr.correction_num, nr.ndfl_person_id " +
+                            "from ndfl_references nr " +
+                            "where nr.declaration_data_id = ? AND nr.num = ? ",
+                    new Object[]{declarationDataId, sprNum},
+                    new int[]{Types.NUMERIC, Types.NUMERIC},
+                    new ReferenceAnnulResultRowMapper());
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        } catch (DataAccessException e) {
+            throw new DaoException(String.format("Не удалось найти в БД выбранную запись №: %s в Форме №: %d", sprNum, declarationDataId), e);
+        }
     }
 
     private static final class ReferenceAnnulResultRowMapper implements RowMapper<ReferenceAnnulResult> {
@@ -118,6 +139,7 @@ public class NdflReferenceDaoImpl extends AbstractDao implements NdflReferenceDa
             referenceAnnulResult.setName(rs.getString("name"));
             referenceAnnulResult.setLastname(rs.getString("lastname"));
             referenceAnnulResult.setCorrNum(rs.getInt("correction_num"));
+            referenceAnnulResult.setNdfl_person_id(rs.getLong("ndfl_person_id"));
             return referenceAnnulResult;
         }
     }

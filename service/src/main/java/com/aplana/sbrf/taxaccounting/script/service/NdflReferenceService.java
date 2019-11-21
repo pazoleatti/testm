@@ -42,13 +42,19 @@ public interface NdflReferenceService {
     Boolean checkExistingAnnulReport(Long declarationDataId, Integer num, String lastName, String firstName, String middleName, String innNp, String idDocNumber);
 
     /**
-     * Получение всех записей из реестра справок с номером корректировки 99
-     * @param lastName Фамилия
-     * @param firstName Имя
-     * @param middleName Отчество
+     * Получение записи из реестра справок с номером корректировки 99
+     * @param personId ФЛ ID
+     * @param sprNum номер справки
      * @return список найденных записей из реестра справок
      */
-    List<ReferenceAnnulResult> findAllReferencesRegistryAnnulByFio(String lastName, String firstName, String middleName);
+    List<ReferenceAnnulResult> getAnnulByPersonIdAndSprNum(long personId, int sprNum);
 
+    /**
+     * Получение записи из реестра справок
+     * @param declarationDataId  номер формы
+     * @param sprNum номер справки
+     * @return запись из реестра справок или NULL
+     */
+    ReferenceAnnulResult getReferenceByDeclarationAndSprNum(long declarationDataId, int sprNum);
 
 }

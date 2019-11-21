@@ -46,8 +46,13 @@ public class NdflReferenceServiceImpl implements NdflReferenceService {
     }
 
     @Override
-    public List<ReferenceAnnulResult> findAllReferencesRegistryAnnulByFio(String lastName, String firstName, String middleName){
-        return ndflReferenceDao.findAllReferencesRegistryAnnulByFio(lastName, firstName, middleName);
+    public List<ReferenceAnnulResult> getAnnulByPersonIdAndSprNum(long personId, int sprNum){
+        return ndflReferenceDao.getAnnulByPersonIdAndSprNum(personId, sprNum);
+    }
+
+    @Override
+    public ReferenceAnnulResult getReferenceByDeclarationAndSprNum(long declarationDataId, int sprNum) {
+        return ndflReferenceDao.getReferenceByDeclarationAndSprNum(declarationDataId ,sprNum);
     }
 
 

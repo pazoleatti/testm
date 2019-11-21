@@ -17,5 +17,6 @@ public class ReferenceAnnulResult {
     private String name;             // Имя
     private String lastname;         // Отчество
     private Integer corrNum;         // Номер корректировки
+    private Long ndfl_person_id;         // Номер корректировки
 
 }

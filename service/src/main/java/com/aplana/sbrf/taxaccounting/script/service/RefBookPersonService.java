@@ -31,6 +31,11 @@ public interface RefBookPersonService {
     RegistryPerson findById(long id);
 
     /**
+     * Возвращяет Список всех ID ФЛ которые у него могут быть
+     */
+    List<RegistryPerson> findAllRecordList(long id);
+
+    /**
      * Очищает данные по ФЛ
      *
      * @param declarationDataId
