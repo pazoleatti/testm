@@ -106,8 +106,10 @@ public class NdflReferenceDaoImpl extends AbstractDao implements NdflReferenceDa
     public List<ReferenceAnnulResult> getAnnulByPersonIdAndSprNum(long personId, int sprNum) {
             return getJdbcTemplate().query("select nr.declaration_data_id, nr.person_id, nr.num, nr.surname, nr.name, nr.lastname, nr.correction_num, nr.ndfl_person_id " +
                             "from ndfl_references nr " +
-                            "where nr.correction_num = 99 AND nr.person_id = ? AND nr.num = ? ",
-                    new Object[]{ personId, sprNum},
+                            "where nr.correction_num = 99 AND nr.num = ? AND nr.person_id IN " +
+                            "( select rbp.id from ref_book_person rbp where rbp.record_id = " +
+                            "( select rbpd.record_id from ref_book_person rbpd where rbpd.id = ? ))",
+                    new Object[]{sprNum, personId},
                     new int[]{Types.NUMERIC, Types.NUMERIC},
                     new ReferenceAnnulResultRowMapper());
     }
