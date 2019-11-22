@@ -25,17 +25,31 @@
                     $logPanel.open('log-panel-container', $stateParams.uuid);
                 }
 
+                function getDefaultFilterParams() {
+                    return {};
+                }
+
                 $scope.searchFilter = {
-                    params: {
-                        correctionTag: defaultCorrectionTag
-                    },
+                    params: getDefaultFilterParams(),
                     ajaxFilter: [],
-                    isClear: false,
                     filterName: 'app2Filter',
                     onCreateComplete: function () {
                         $scope.refreshGrid();
+                    },
+                    resetFilterParams: function () {
+                        $scope.searchFilter.params = getDefaultFilterParams();
+                    },
+                    isClearByFilterParams: function () {
+                        $scope.searchFilter.isClear = stringify($scope.searchFilter.params) !== stringify(getDefaultFilterParams());
                     }
                 };
+
+                // поля со значениями null, undefined или "" будут считаться эквивалентными
+                function stringify(value) {
+                    return JSON.stringify(value, function (key, value) {
+                        return value ? value : undefined;
+                    });
+                }
 
                 /**
                 * @description Обновление грида
@@ -177,6 +191,8 @@
                 $scope.downloadReportsByFilter = function () {
 
                 };
+
+
             }
         ]);
 }());
