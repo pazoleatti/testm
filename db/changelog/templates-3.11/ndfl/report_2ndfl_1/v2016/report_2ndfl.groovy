@@ -813,7 +813,7 @@ class Report2Ndfl extends AbstractScriptClass {
 
     List<NdflPerson> getNullifyPersonList(String kpp, String oktmo, int year, long reportPeriodTypeId, int declarationTypeId, Set<NdflPerson> personSet) {
         List<NdflPerson> nullifyPersonList = new ArrayList<>()
-// для анулирующей в ручном режиме
+// для анулирующей атоматическом режиме
         if (!reportFormsCreationParams.getReportTypeMode().equals(ReportTypeModeEnum.ANNULMENT)) {
             ReportPeriodType reportPeriodType = reportPeriodService.getReportPeriodTypeById(reportPeriodTypeId)
             List<DeclarationData> previousONFList = declarationService.findONFFor2Ndfl(declarationTypeId, reportPeriodType.code, year, kpp, oktmo)
@@ -1181,10 +1181,6 @@ class Report2Ndfl extends AbstractScriptClass {
                 ndflNum.corrNum = 0;
             }
         }
-        if (reportFormsCreationParams.getReportTypeMode().equals(ReportTypeModeEnum.ANNULMENT)) {
-            ndflNum.sprNum = reportFormsCreationParams.getSelectedSprNum()
-            ndflNum.corrNum = 99
-        }
         return ndflNum
     }
     /**
@@ -1365,6 +1361,10 @@ class Report2Ndfl extends AbstractScriptClass {
             return
         }
 
+        List<DeclarationData> existingDeclarations = declarationService.findAllByTypeIdAndReportPeriodIdAndKppAndOktmo(
+                declarationTemplate.type.id, departmentReportPeriod.reportPeriod.id, sourceDeclaration.getKpp(), sourceDeclaration.getOktmo())
+        def lastSentForm = existingDeclarations.max({ it.correctionNum })
+
         declarationData = new DeclarationData()
         declarationData.declarationTemplateId = sourceDeclaration.getDeclarationTemplateId()
         declarationData.kpp = sourceDeclaration.getKpp()
@@ -1377,12 +1377,10 @@ class Report2Ndfl extends AbstractScriptClass {
         declarationData.departmentReportPeriodId = activeReportPeriod.getId()
         declarationData.reportPeriodId = sourceDeclaration.getReportPeriodId()
         declarationData.state = State.CREATED
-        declarationData.correctionNum = 99
+        declarationData.correctionNum = lastSentForm.getCorrectionNum() + 1
 
         List<DeclarationData> createdForms = []
         sourceKnf = declarationService.getDeclarationData(reportFormsCreationParams.sourceKnfId)
-        List<DepartmentConfig> departmentConfigs = null
-        Map<KppOktmoPair, List<Operation>> operationsByKppOktmoPair = null
         File zipFile = null
         Xml xml = null
 
