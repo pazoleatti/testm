@@ -1,7 +1,6 @@
 package form_template.ndfl.report_2ndfl_1.v2016
 
 import com.aplana.sbrf.taxaccounting.AbstractScriptClass
-import com.aplana.sbrf.taxaccounting.dao.impl.refbook.person.RefBookPersonDaoImpl
 import com.aplana.sbrf.taxaccounting.model.*
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
@@ -222,10 +221,11 @@ class Report2Ndfl extends AbstractScriptClass {
         ScriptUtils.checkInterrupted()
         Xml xml = new Xml()
         def operationsByPersonId = null
+        def persons = null
 
         // Для создания Аннулирующий ОНФ в ручном режиме данные проверки не нужны
         if (!reportFormsCreationParams.getReportTypeMode().equals(ReportTypeModeEnum.ANNULMENT)) {
-            def persons = operations*.person.toSet()
+            persons = operations*.person.toSet()
             if (!persons) {
                 if (is2Ndfl2()) {
                     logger.error("Отчетность $declarationTemplate.name для $department.name за период ${formatPeriod(departmentReportPeriod)} не сформирована. " +
@@ -405,7 +405,7 @@ class Report2Ndfl extends AbstractScriptClass {
                 } else {
                     nullifyPersonList = getNullifyPersonList(null,null,0,0,0,null)
                 }
-                    for (NdflPerson person : nullifyPersonList) {
+                for (NdflPerson person : nullifyPersonList) {
                     def nomSprAndCorr = getNomSpr(person.recordId, reportPeriod.taxPeriod.year, declarationData.kpp, declarationData.oktmo, declarationTemplate.type.id)
                     "НДФЛ-2"(НомСпр: nomSprAndCorr.sprNum,
                             НомКорр: "99") {
@@ -439,10 +439,11 @@ class Report2Ndfl extends AbstractScriptClass {
         ScriptUtils.checkInterrupted()
         Xml xml = new Xml()
         def operationsByPersonId = null
+        def persons = null
 
         // Для создания Аннулирующий ОНФ в ручном режиме данные проверки не нужны
         if (!reportFormsCreationParams.getReportTypeMode().equals(ReportTypeModeEnum.ANNULMENT)) {
-            def persons = operations*.person.toSet()
+            persons = operations*.person.toSet()
             if (!persons) {
                 logger.error("Отчетность $declarationTemplate.name для $department.name за период ${formatPeriod(departmentReportPeriod)} не сформирована. " +
                         "В РНУ НДФЛ (консолидированная) № ${sourceKnf.id} для подразделения: $department.name за период ${formatPeriod(departmentReportPeriod)} " +
@@ -501,13 +502,12 @@ class Report2Ndfl extends AbstractScriptClass {
                 // Для создания Аннулирующий ОНФ в ручном режиме формировать данную часть в XML не нужно
                 if (!reportFormsCreationParams.getReportTypeMode().equals(ReportTypeModeEnum.ANNULMENT)) {
 
-                for (NdflPerson person : persons) {
-                    ScriptUtils.checkInterrupted()
-                    person.incomes = (List<NdflPersonIncome>) operationsByPersonId[person.id]*.incomes.flatten()
-                    person.deductions = (List<NdflPersonDeduction>) operationsByPersonId[person.id]*.deductions.flatten()
-                    person.prepayments = (List<NdflPersonPrepayment>) operationsByPersonId[person.id]*.prepayments.flatten()
-                    def nomSprAndCorr = getNomSpr(person.recordId, reportPeriod.taxPeriod.year, declarationData.kpp, declarationData.oktmo, declarationTemplate.type.id)
-                    if (!reportFormsCreationParams.getReportTypeMode().equals(ReportTypeModeEnum.ANNULMENT)) {
+                    for (NdflPerson person : persons) {
+                        ScriptUtils.checkInterrupted()
+                        person.incomes = (List<NdflPersonIncome>) operationsByPersonId[person.id]*.incomes.flatten()
+                        person.deductions = (List<NdflPersonDeduction>) operationsByPersonId[person.id]*.deductions.flatten()
+                        person.prepayments = (List<NdflPersonPrepayment>) operationsByPersonId[person.id]*.prepayments.flatten()
+                        def nomSprAndCorr = getNomSpr(person.recordId, reportPeriod.taxPeriod.year, declarationData.kpp, declarationData.oktmo, declarationTemplate.type.id)
                         "НДФЛ-2"(НомСпр: nomSprAndCorr.sprNum,
                                 НомКорр: sprintf('%02d', nomSprAndCorr.corrNum)) {
                             ПолучДох(ИННФЛ: person.innNp,
@@ -665,13 +665,12 @@ class Report2Ndfl extends AbstractScriptClass {
                                 }
                             }
                         }
-                    }
-                    if (!refPersonIds.contains(person.personId)) {
-                        refPersonIds << person.personId
-                        xml.ndflReferences << buildNdflReference(person.id, person.personId, nomSprAndCorr.sprNum, person.lastName, person.firstName, person.middleName, person.birthDay, nomSprAndCorr.corrNum)
+                        if (!refPersonIds.contains(person.personId)) {
+                            refPersonIds << person.personId
+                            xml.ndflReferences << buildNdflReference(person.id, person.personId, nomSprAndCorr.sprNum, person.lastName, person.firstName, person.middleName, person.birthDay, nomSprAndCorr.corrNum)
+                        }
                     }
                 }
-            }
 
                 def nullifyPersonList = null
                 if (!reportFormsCreationParams.getReportTypeMode().equals(ReportTypeModeEnum.ANNULMENT)) {
