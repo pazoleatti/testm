@@ -247,4 +247,12 @@
 	</sql>
       </changeSet>
 
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-9231 Изменить значение по умолчанию конфигурационного параметра для Приложения 2 -->
+    <changeSet id="3.11-avoynov-5" author="avoynov">
+        <update tableName="configuration">
+            <column name="value" value="113"/>
+            <where>code = 'DEPARTMENT_FOR_APP_2'</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>

@@ -125,7 +125,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         defaultCommonConfig.add(new Configuration(ConfigurationParam.WEIGHT_DUL.getCaption(), COMMON_PARAM_DEPARTMENT_ID, "10"));
         defaultCommonConfig.add(new Configuration(ConfigurationParam.WEIGHT_ADDRESS.getCaption(), COMMON_PARAM_DEPARTMENT_ID, "1"));
         defaultCommonConfig.add(new Configuration(ConfigurationParam.WEIGHT_ADDRESS_INO.getCaption(), COMMON_PARAM_DEPARTMENT_ID, "1"));
-        defaultCommonConfig.add(new Configuration(ConfigurationParam.DEPARTMENT_FOR_APP_2.getCaption(), COMMON_PARAM_DEPARTMENT_ID, "77"));
+        defaultCommonConfig.add(new Configuration(ConfigurationParam.DEPARTMENT_FOR_APP_2.getCaption(), COMMON_PARAM_DEPARTMENT_ID, "113"));
 
         return defaultCommonConfig;
     }
