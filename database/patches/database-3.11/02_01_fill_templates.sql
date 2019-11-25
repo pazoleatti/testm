@@ -100,7 +100,8 @@ begin
 		merge into ref_book_calendar dst using
 			(select cdate, ctype from calendar_temp) src
 		on (src.cdate = dst.cdate)
-		when not matched then insert (cdate, ctype) values (src.cdate, src.ctype);
+		when not matched then insert (cdate, ctype) values (src.cdate, src.ctype) 
+		    where src.cdate >= to_date ('01.01.2020','dd.mm.rrrr');
 
 	        merge into ref_book_calendar a 
 	        using (select cdate,ctype,id, row_number() over (ORDER by id, cdate) as rn from 
