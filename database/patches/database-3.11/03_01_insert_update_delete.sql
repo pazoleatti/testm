@@ -1,9 +1,9 @@
--- 3.11-avoynov-1
+-- 3.11-avoynov-1 3.11-avoynov-5
 declare 
   v_task_name varchar2(128):='insert_update_delete block #3 - merge into configuration';  
 begin
 	merge into configuration dst using
-	(select 'DEPARTMENT_FOR_APP_2' as code, 0 as department_id, 77 as value from dual 
+	(select 'DEPARTMENT_FOR_APP_2' as code, 0 as department_id, 113 as value from dual 
 	) src
 	on (src.code = dst.code and src.department_id = dst.department_id)
 	when not matched then
