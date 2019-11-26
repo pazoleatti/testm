@@ -514,6 +514,17 @@ public class PeriodServiceImpl implements PeriodService {
     }
 
     @Override
+    public List<ReportPeriodType> getPeriodType(Integer reportTypeId) {
+        TaxFormType reportType = TaxFormType.getById(reportTypeId);
+        if (Arrays.asList(TaxFormType.NDFL_2_1.getId(), TaxFormType.NDFL_2_2.getId(), TaxFormType.APPLICATION_2.getId())
+                .contains(reportType.getId())) {
+            return reportPeriodDao.getPeriodType(Arrays.asList(YEAR_PERIOD_CODE, YEAR_REORG_PERIOD_CODE));
+        } else {
+            return getPeriodType();
+        }
+    }
+
+    @Override
     public List<ReportPeriodResult> fetchActiveByDepartment(Integer departmentId) {
         return reportPeriodDao.fetchActiveByDepartment(departmentId);
     }

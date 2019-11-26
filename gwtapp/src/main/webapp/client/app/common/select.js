@@ -359,13 +359,33 @@
                  */
                 $scope.initSelectWithOpenPeriodDeclarationTypes = function () {
                     $scope.declarationTypeSelect = GetSelectOption.getBasicSingleSelectOptions(true);
-                    $scope.declarationTypeSelect.options.data.results = [
+                    $scope.declarationTypeSelect.options.data.results = getCommonTaxFormTypes();
+                    $scope.declarationTypeSelect.options.data.results.push(APP_CONSTANTS.TAX_FORM_TYPE.APP_2);
+                };
+
+                $scope.initSelectWithDeclarationTypes = function (departmentModelPath) {
+                    $scope.declarationTypeSelect = GetSelectOption.getBasicSingleSelectOptions(true);
+                    $scope.declarationTypeSelect.options.data.results = getCommonTaxFormTypes();
+
+                    $scope.$watch(departmentModelPath, function (newValue, oldValue) {
+                        if (!!newValue && (!oldValue || newValue.id !== oldValue.id)) {
+                            $scope.declarationTypeSelect.options.data.results = getCommonTaxFormTypes();
+                            if (newValue.id == $scope.app2departmentId) {
+                                $scope.declarationTypeSelect.options.data.results.push(APP_CONSTANTS.TAX_FORM_TYPE.APP_2);
+                            } else if ($scope.form.type && $scope.form.type.id == APP_CONSTANTS.TAX_FORM_TYPE.APP_2.id) {
+                                $scope.form.type = null;
+                            }
+                        }
+                    });
+                };
+
+                function getCommonTaxFormTypes() {
+                    return [
                         APP_CONSTANTS.TAX_FORM_TYPE.REPORT_2_NDFL_1,
                         APP_CONSTANTS.TAX_FORM_TYPE.REPORT_2_NDFL_2,
-                        APP_CONSTANTS.TAX_FORM_TYPE.REPORT_6_NDFL,
-                        APP_CONSTANTS.TAX_FORM_TYPE.APP_2
+                        APP_CONSTANTS.TAX_FORM_TYPE.REPORT_6_NDFL
                     ];
-                };
+                }
 
                 /**
                  * Инициализировать список с видами отчетных форм, которые можно создать
@@ -766,8 +786,8 @@
         /**
          * Контроллер для выбора периода корректировки
          */
-        .controller('SelectCorrectPeriodCtrl', ['$scope', 'GetSelectOption',
-            function ($scope, GetSelectOption) {
+        .controller('SelectCorrectPeriodCtrl', ['$scope', '$http', 'APP_CONSTANTS', 'GetSelectOption',
+            function ($scope, $http, APP_CONSTANTS, GetSelectOption) {
                 $scope.periodSelect = {};
 
                 /**
@@ -778,10 +798,38 @@
                         "periodFormatter");
                 };
 
-                $scope.initReportPeriodType = function () {
-                    $scope.periodSelect = GetSelectOption.getAjaxSelectOptions(false, true, "controller/rest/refBookValues/reportPeriodType", {}, {},
-                        'periodTypeFormatter');
+                /*
+                 * @param formTypeModelPath путь в scope до модели "вида отчетности"
+                 */
+                $scope.initReportPeriodType = function (formTypeModelPath) {
+                    $scope.periodSelect = GetSelectOption.getBasicSingleSelectOptions(false);
+                    $scope.$watch(formTypeModelPath, function (newValue, oldValue) {
+                        if (!!newValue && (!oldValue || newValue.id !== oldValue.id)) {
+                            initPeriodSelect(newValue.id);
+                            if ($scope.form.dictPeriod && !isYearPeriodType($scope.form.dictPeriod.code)) {
+                                $scope.form.dictPeriod = null;
+                            }
+                        }
+                    });
+
+                    function isYearPeriodType(periodTypeCode) {
+                        return periodTypeCode === APP_CONSTANTS.REPORT_PERIOD_TYPES_CODE.YEAR
+                            || periodTypeCode === APP_CONSTANTS.REPORT_PERIOD_TYPES_CODE.YEAR_REORG;
+                    }
                 };
+
+                function initPeriodSelect(formTypeId) {
+                    $http({
+                        method: "GET",
+                        url: "controller/rest/refBookValues/reportPeriodType",
+                        params: {
+                            formTypeId: formTypeId,
+                            pagingParams: {}
+                        }
+                    }).success(function (data) {
+                        $scope.periodSelect.options.data.results = data.rows;
+                    });
+                }
             }
         ])
 

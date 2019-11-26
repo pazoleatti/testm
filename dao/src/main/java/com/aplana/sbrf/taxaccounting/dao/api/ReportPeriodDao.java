@@ -121,6 +121,13 @@ public interface ReportPeriodDao extends PermissionDao {
     List<ReportPeriodType> getPeriodType();
 
     /**
+     * Получение списка записей справочника "Коды, определяющие налоговый (отчётный) период" по определяющих их кодам
+     *
+     * @return список {@link ReportPeriodType} или пустой список
+     */
+    List<ReportPeriodType> getPeriodType(List<String> periodCodes);
+
+    /**
      * Получение записи справочника "Коды, определяющие налоговый (отчётный) период" по идентификатору
      *
      * @param id идентификатор

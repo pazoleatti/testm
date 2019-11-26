@@ -277,6 +277,20 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
     }
 
     @Override
+    public List<ReportPeriodType> getPeriodType(List<String> periodCodes) {
+        try {
+            MapSqlParameterSource params = new MapSqlParameterSource();
+            params.addValue("periodCodes", periodCodes);
+            return getNamedParameterJdbcTemplate().query("select * from report_period_type where code in (:periodCodes) order by id",
+                    params,
+                    new ReportPeriodTypeMapper()
+            );
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
+    }
+
+    @Override
     public List<ReportPeriod> findAllActive(List<Integer> departmentIds) {
         return getJdbcTemplate().query("" +
                         "select\n " +

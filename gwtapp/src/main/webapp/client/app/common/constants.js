@@ -264,6 +264,10 @@
                 CORRECTION_PERIOD_NOT_CLOSE: "CORRECTION_PERIOD_NOT_CLOSE", //текущий не закрыт
                 EXISTS_OPEN_CORRECTION_PERIOD_BEFORE: "EXISTS_OPEN_CORRECTION_PERIOD_BEFORE" // есть более ранний открытый корректирующий период
             },
+            REPORT_PERIOD_TYPES_CODE: {
+                YEAR: "90",
+                YEAR_REORG: "34"
+            },
             CONFIGURATION_PARAM_TAB: {
                 COMMON_PARAM: "commonParam",
                 ASYNC_PARAM: "asyncParam",
@@ -272,6 +276,7 @@
             CONFIGURATION_PARAM: {
                 REPORT_PERIOD_YEAR_MIN: "REPORT_PERIOD_YEAR_MIN",
                 REPORT_PERIOD_YEAR_MAX: "REPORT_PERIOD_YEAR_MAX",
+                DEPARTMENT_FOR_APP_2: "DEPARTMENT_FOR_APP_2",
                 DOCUMENTS_SENDING_ENABLED: "DOCUMENTS_SENDING_ENABLED"
             },
             ASYNC_HANDLER_CLASS_NAME: {

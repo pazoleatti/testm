@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriodType;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.filter.DepartmentFilter;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAsnu;
@@ -230,13 +227,14 @@ public class RefBookValuesController {
     }
 
     /**
-     * Получение всех типов Отчетных периодов по имени
+     * Получение всех типов Отчетных периодов по виду отчетности
      *
      * @return Список периодов
      */
     @GetMapping(value = "/rest/refBookValues/reportPeriodType")
-    public JqgridPagedList<ReportPeriodType> fetchReportPeriodsType(@RequestParam PagingParams pagingParams) {
-        List<ReportPeriodType> result = periodService.getPeriodType();
+    public JqgridPagedList<ReportPeriodType> fetchReportPeriodsType(@RequestParam Integer formTypeId,
+                                                                    @RequestParam PagingParams pagingParams) {
+        List<ReportPeriodType> result = periodService.getPeriodType(formTypeId);
         pagingParams.setCount(result.size());
         return JqgridPagedResourceAssembler.buildPagedList(result, result.size(), pagingParams);
     }

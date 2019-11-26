@@ -51,15 +51,15 @@
             </tr>
             <tr>
                 <td>
-                    <label class="control-label">{{::'reportPeriod.grid.period' |
+                    <label class="control-label">{{::'reportPeriod.grid.formType' |
                         translate}}:</label>
                 </td>
                 <td>
                     <div data-aplana-field>
-                        <div style="width: 355px;" data-ng-controller="SelectCorrectPeriodCtrl"
-                             data-ui-select2="periodSelect.options"
-                             data-ng-init="initReportPeriodType()"
-                             data-ng-model="form.dictPeriod"
+                        <div style="width: 355px;" data-ng-controller="SelectDeclarationTypeCtrl"
+                             data-ui-select2="declarationTypeSelect.options"
+                             data-ng-init="initSelectWithDeclarationTypes('form.department')"
+                             data-ng-model="form.type"
                              data-required>
                         </div>
                         <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
@@ -70,15 +70,16 @@
             </tr>
             <tr>
                 <td>
-                    <label class="control-label">{{::'reportPeriod.grid.formType' |
+                    <label class="control-label">{{::'reportPeriod.grid.period' |
                         translate}}:</label>
                 </td>
                 <td>
                     <div data-aplana-field>
-                        <div style="width: 355px;" data-ng-controller="SelectDeclarationTypeCtrl"
-                             data-ui-select2="declarationTypeSelect.options"
-                             data-ng-init="initSelectWithOpenPeriodDeclarationTypes()"
-                             data-ng-model="form.type"
+                        <div style="width: 355px;" data-ng-controller="SelectCorrectPeriodCtrl"
+                             data-ui-select2="periodSelect.options"
+                             data-ng-init="initReportPeriodType('form.type')"
+                             data-ng-model="form.dictPeriod"
+                             data-ng-disabled="!form.type"
                              data-required>
                         </div>
                         <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
