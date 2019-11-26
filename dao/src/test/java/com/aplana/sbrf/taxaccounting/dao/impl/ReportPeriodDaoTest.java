@@ -1,10 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookFormType;
 import com.aplana.sbrf.taxaccounting.model.result.ReportPeriodResult;
@@ -209,5 +206,13 @@ public class ReportPeriodDaoTest {
     public void test_FetchActiveByDepartment() {
         List<ReportPeriodResult> result = reportPeriodDao.fetchActiveByDepartment(1);
         assertThat(result.size(), is(3));
+    }
+
+    @Test
+    public void getPeriodTypesByCodesTest() {
+        List<ReportPeriodType> periodTypes = reportPeriodDao.getPeriodType(asList("22", "99"));
+        assertThat(periodTypes.size(), is(2));
+        assertThat(periodTypes.get(0).getId(), is(21L));
+        assertThat(periodTypes.get(1).getId(), is(22L));
     }
 }

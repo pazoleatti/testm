@@ -10,12 +10,20 @@
     /**
      * @description Контроллер создания отчетного периода
      */
-        .controller('reportPeriodCtrlModal', ['$scope', '$filter', 'APP_CONSTANTS', '$modalInstance', '$shareData', '$http', '$logPanel', 'LogEntryResource', '$dialogs',
-            function ($scope, $filter, APP_CONSTANTS, $modalInstance, $shareData, $http, $logPanel, LogEntryResource, $dialogs) {
+        .controller('reportPeriodCtrlModal', ['$scope', '$filter', 'APP_CONSTANTS', '$modalInstance', '$shareData',
+                    '$http', '$logPanel', 'LogEntryResource', '$dialogs', 'CommonParamResource',
+            function ($scope, $filter, APP_CONSTANTS, $modalInstance, $shareData, $http, $logPanel, LogEntryResource, $dialogs, CommonParamResource) {
                 $scope.title = $filter('translate')('reportPeriod.pils.openPeriod');
 
                 $scope.yearMin = $shareData.yearMin;
                 $scope.yearMax = $shareData.yearMax;
+
+                CommonParamResource.query({
+                    codes: [APP_CONSTANTS.CONFIGURATION_PARAM.DEPARTMENT_FOR_APP_2],
+                    projection: "allByEnums"
+                }, function (configurationsByCode) {
+                    $scope.app2departmentId = configurationsByCode[APP_CONSTANTS.CONFIGURATION_PARAM.DEPARTMENT_FOR_APP_2].value;
+                });
 
                 // Данные формы
                 $scope.form = {department: undefined, year: new Date().getFullYear(), dictPeriod: undefined};

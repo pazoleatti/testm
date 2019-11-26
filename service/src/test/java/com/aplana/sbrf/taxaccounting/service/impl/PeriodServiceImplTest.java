@@ -34,8 +34,7 @@ import java.util.*;
 import static com.aplana.sbrf.taxaccounting.mock.UserMockUtils.mockUser;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.*;
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.anySetOf;
 import static org.mockito.Mockito.*;
@@ -547,5 +546,24 @@ public class PeriodServiceImplTest {
         String logPeriodFormat = periodService.createLogPeriodFormatById(idList, logLevelType);
         assertEquals("2019: полугодие; (корр. 13.05.2021)", logPeriodFormat);
         verify(reportPeriodDao, times(2)).createLogPeriodFormatById(anyLong(), anyInt());
+    }
+
+    @Test
+    public void getPeriodTypeByFormTypeIdTest() {
+        periodService.getPeriodType(TaxFormType.APPLICATION_2.getId());
+        verify(reportPeriodDao, times(1)).getPeriodType(anyListOf(String.class));
+        verify(reportPeriodDao, times(0)).getPeriodType();
+
+        periodService.getPeriodType(TaxFormType.NDFL_2_1.getId());
+        verify(reportPeriodDao, times(2)).getPeriodType(anyListOf(String.class));
+        verify(reportPeriodDao, times(0)).getPeriodType();
+
+        periodService.getPeriodType(TaxFormType.NDFL_2_2.getId());
+        verify(reportPeriodDao, times(3)).getPeriodType(anyListOf(String.class));
+        verify(reportPeriodDao, times(0)).getPeriodType();
+
+        periodService.getPeriodType(TaxFormType.NDFL_6.getId());
+        verify(reportPeriodDao, times(3)).getPeriodType(anyListOf(String.class));
+        verify(reportPeriodDao, times(1)).getPeriodType();
     }
 }

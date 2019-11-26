@@ -147,6 +147,13 @@ public interface PeriodService {
     List<ReportPeriodType> getPeriodType();
 
     /**
+     * Получение списка записей справочника "Коды, определяющие налоговый (отчётный) период" в зависимости от вида отчетности
+     *
+     * @return список {@link ReportPeriodType} или пустой список
+     */
+    List<ReportPeriodType> getPeriodType(Integer reportTypeId);
+
+    /**
      * Получить открытые периода назначеннных подразделению
      *
      * @param departmentId идентификатор подразделения
