@@ -8,13 +8,25 @@
         <!--Формирование отчетов-->
         <div class="w200 pull-right" style="margin: 5px 10px 10px 0;">
             <div class="btn-group" style="float: right;">
-                <button id="single-button" type="button" class="btn btn-default-nonBg"
-                        data-bs-dropdown
-                        data-placement="bottom-right">
+                <div id="single-button"
+                     data-aplana-dropdown
+                     data-placement="bottom-right"
+                     class="btn btn-default">
                     <span data-translate-once="link.ndfl.reporting"></span>
-                </button>
+                </div>
                 <ul class="dropdown-menu" role="menu" aria-labelledby="single-button">
-
+                    <li role="menuitem">
+                        <div class="row menuitem">
+                            <a ng-click="createReportXlsx()">
+                                {{::'app2Journal.reporting.downloadXlsx' | translate}}</a>
+                        </div>
+                    </li>
+                    <li role="menuitem">
+                        <div class="row menuitem">
+                            <a ng-click="createReportRNU()">
+                                {{::'app2Journal.reporting.downloadRnu' | translate}}</a>
+                        </div>
+                    </li>
                 </ul>
             </div>
         </div>

@@ -251,6 +251,8 @@
         "app2Journal.filter.creationDate.from": "Дата с",
         "app2Journal.filter.creationDate.to": "Дата по",
         "app2Journal.filter.creationUserName": "Создал",
+        "app2Journal.reporting.downloadXlsx": "Выгрузить в XLSX",
+        "app2Journal.reporting.downloadRnu": "Выгрузить в RNU",
 
         "declarationTypeAssignment.grid.columnName.department": "Подразделение",
         "declarationTypeAssignment.grid.columnName.declarationType": "Макет",
