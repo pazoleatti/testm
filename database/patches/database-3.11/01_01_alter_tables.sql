@@ -89,11 +89,10 @@ BEGIN
 
 	        execute immediate 'CREATE INDEX IDX_NDFL_APP2_PERSON_ID ON NDFL_APP2 (PERSON_ID ASC) PCTFREE 30 INITRANS 5 COMPUTE STATISTICS';
 	        execute immediate 'CREATE INDEX IDX_NDFL_APP2_NDFL_APP2_ID ON NDFL_APP2_INCOME (NDFL_APP2_ID ASC) PCTFREE 30 INITRANS 5 COMPUTE STATISTICS';
-        	execute immediate 'CREATE INDEX IDX_NDFL_APP2_DD_APP2_INC_ID ON NDFL_APP2_DEDUCTION (NDFL_APP2_INCOME_ID ASC) PCTFREE 30 INITRANS 5 COMPUTE STATISTICS';
 
-		dbms_output.put_line(v_task_name||'[INFO (form_type)]:'||' Success');
+		dbms_output.put_line(v_task_name||'[INFO]:'||' Success');
 	ELSE
-		dbms_output.put_line(v_task_name||'[WARNING (form_type)]:'||' changes had already been implemented');
+		dbms_output.put_line(v_task_name||'[WARNING]:'||' changes had already been implemented');
 	END IF;
 
 EXCEPTION
