@@ -210,10 +210,13 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         return getNamedParameterJdbcTemplate().query("" +
                         "select " + DeclarationDataRowMapper.FIELDS +
                         "from declaration_data dd " +
-                        "left join ref_book_knf_type knf_type on knf_type.id = dd.knf_type_id\n" +
-                        "join department_report_period drp on dd.department_report_period_id = drp.id\n" +
-                        "join declaration_template dt on dt.id = dd.declaration_template_id\n" +
-                        "where dt.declaration_type_id = :declarationTypeId and drp.report_period_id = :reportPeriodId and dd.kpp = :kpp and dd.oktmo = :oktmo\n" +
+                        "left join ref_book_knf_type knf_type on knf_type.id = dd.knf_type_id " +
+                        "join department_report_period drp on dd.department_report_period_id = drp.id " +
+                        "join declaration_template dt on dt.id = dd.declaration_template_id " +
+                        "where dt.declaration_type_id = :declarationTypeId " +
+                        "and drp.report_period_id = :reportPeriodId " +
+                        "and dd.kpp = :kpp and dd.oktmo = :oktmo " +
+                        "and dd.annulment_form = 0 " +
                         "order by correction_num desc, id desc",
                 params, new DeclarationDataRowMapper());
     }
@@ -551,6 +554,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         params.addValue("negative_income", declarationData.getNegativeIncome());
         params.addValue("negative_tax", declarationData.getNegativeTax());
         params.addValue("negative_sums_sign", declarationData.getNegativeSumsSign() != null ? declarationData.getNegativeSumsSign().ordinal() : null);
+        params.addValue("annulment_form", declarationData.isAnnulmentForm());
         params.addValue("person_id", declarationData.getPersonId());
         params.addValue("signatory", declarationData.getSignatory());
         params.addValue("created_date", declarationData.getCreatedDate());
@@ -1073,7 +1077,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 "dd.department_report_period_id, dd.asnu_id, dd.file_name, dd.doc_state_id, dd.manually_created, " +
                 "dd.adjust_negative_values, drp.report_period_id, drp.department_id, dd.note, knf_type.id as knf_type_id, " +
                 "knf_type.name as knf_type_name, dd.last_data_modified, dd.correction_num, dd.tax_refund_reflection_mode, " +
-                "dd.negative_income, dd.negative_tax, dd.negative_sums_sign, dd.person_id, dd.signatory, dd.created_date, dd.created_by ";
+                "dd.negative_income, dd.negative_tax, dd.negative_sums_sign, dd.annulment_form, dd.person_id, dd.signatory, dd.created_date, dd.created_by ";
 
         final static String WHERE_DRP_BY_ID_CLAUSE = "where drp.id = :departmentReportPeriodId\n";
 
@@ -1111,6 +1115,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             d.setNegativeIncome(rs.getBigDecimal("negative_income"));
             d.setNegativeTax(rs.getBigDecimal("negative_tax"));
             d.setNegativeSumsSign(NegativeSumsSign.valueOf(SqlUtils.getInteger(rs, "negative_sums_sign")));
+            d.setAnnulmentForm(SqlUtils.getInteger(rs, "annulment_form") == 1);
             d.setPersonId(SqlUtils.getLong(rs, "person_id"));
             d.setSignatory(rs.getString("signatory"));
             d.setCreatedDate(new Date(rs.getTimestamp("created_date").getTime()));

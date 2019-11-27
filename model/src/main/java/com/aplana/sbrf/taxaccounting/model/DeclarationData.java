@@ -118,6 +118,10 @@ public class DeclarationData extends IdentityObject<Long> implements SecuredEnti
      */
     private NegativeSumsSign negativeSumsSign;
     /**
+     * Признак указывающий является ли форма аннулирующей ОНФ созданной вручную
+     */
+    private boolean annulmentForm;
+    /**
      * Дата создания формы
      */
     private Date createdDate;

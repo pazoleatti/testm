@@ -255,4 +255,15 @@
         </update>
     </changeSet>
 
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-9229 Формирование 2-НДФЛ в корр периоде, только со справками содержащими изменения -->
+    <changeSet id="3.11-avoynov-6" author="avoynov">
+        <addColumn tableName="DECLARATION_DATA">
+            <column name="ANNULMENT_FORM" type="number(1)"
+                    remarks="Признак, указывающий является ли форма аннулирующей ОНФ созданной вручную"
+                    defaultValueComputed="0">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>

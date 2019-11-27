@@ -1264,6 +1264,7 @@ class Report2Ndfl extends AbstractScriptClass {
             declarationData.reportPeriodId = departmentReportPeriod.reportPeriod.id
             declarationData.departmentId = departmentReportPeriod.departmentId
             declarationData.state = State.CREATED
+            declarationData.annulmentForm = reportFormsCreationParams.getReportTypeMode() == ReportTypeModeEnum.ANNULMENT
 
             File zipFile = null
             Xml xml = null
@@ -1272,9 +1273,13 @@ class Report2Ndfl extends AbstractScriptClass {
                 xml = buildXml(departmentConfig, kppOktmoOperations)
                 if (xml) {
                     if (existingDeclarations) {
+                        if (departmentReportPeriod.correctionDate != null && lastSentForm) {
+                            if (deleteNotChangedReferences(xml, lastSentForm)) {
+                                continue // изменений не было, новый xml пуст
+                            }
+                        }
                         if (!hasDifference(xml, existingDeclarations.first())) {
-                            // Удалять не требуется
-                            continue
+                            continue // разницы между старым и новым xml нет, ничего не сохраняем
                         }
                     }
                     def formsToDelete = existingDeclarations.findAll {
@@ -1496,6 +1501,52 @@ class Report2Ndfl extends AbstractScriptClass {
             return true
         }
         return false
+    }
+
+    /**
+     * Алгоритм по удалению справок без изменений
+     * @param currentXml текущая сформированная xml
+     * @param lastSentForm Последняя ОНФ, отправленная В ФНС
+     * @return true если всё удалено, т.е. изменений нет
+     */
+    @TypeChecked(value = TypeCheckingMode.SKIP)
+    boolean deleteNotChangedReferences(Xml currentXml, DeclarationData lastSentForm) {
+        def oldXml = declarationService.getXmlData(lastSentForm.id, userInfo)
+        if (!oldXml || !currentXml) {
+            return false
+        }
+        def newXml = FileUtils.readFileToString(currentXml.xmlFile, "windows-1251")
+        def ФайлOld = new XmlParser().parseText(oldXml)
+        def ФайлNew = new XmlParser().parseText(newXml)
+
+        if (ФайлOld.@ВерсФорм != ФайлNew.@ВерсФорм) {
+            return false
+        }
+
+        def oldNodes = ФайлOld.Документ."НДФЛ-2".groupBy { it.@НомСпр }
+
+        ФайлNew.Документ."НДФЛ-2".findAll() { ndfl2Node ->
+            if (oldNodes.get(ndfl2Node.@НомСпр)) {
+                Node oldNode = oldNodes.get(ndfl2Node.@НомСпр).first()
+                !blocksHasDifference(ndfl2Node.ПолучДох, oldNode.ПолучДох) && !blocksHasDifference(ndfl2Node.СведДох, oldNode.СведДох)
+            } else false
+        }*.replaceNode {}
+
+
+        def changedNdflReferences = ФайлNew.Документ."НДФЛ-2".groupBy { it.@НомСпр }
+        currentXml.ndflReferences = currentXml.ndflReferences.findAll { it.values.get(NDFL_REFERENCES_NUM).toString() in changedNdflReferences.keySet() }
+
+        // сериалайзер в groovy формирует xml с кодировкой UTF-8
+        String xml = XmlUtil.serialize(ФайлNew).replaceFirst("UTF-8", "windows-1251")
+        FileUtils.writeStringToFile(currentXml.xmlFile, xml, "windows-1251")
+
+        return ФайлNew.Документ."НДФЛ-2".size() == 0
+    }
+
+    boolean blocksHasDifference(List<Node> a, List<Node> b) {
+        if (a.size() > 0 && b.size() > 0) return nodesHasDifference(a.first(), b.first())
+        if (a.size() == 0 && b.size() == 0) return false
+        return true // если в одном из файлов нет блока, то различие есть
     }
 
     boolean nodesHasDifference(Node a, Node b) {

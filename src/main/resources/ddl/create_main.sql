@@ -384,6 +384,7 @@ create table declaration_data (
   negative_income             number(20,2),
   negative_tax                number(20,2),
   negative_sums_sign          number(1),
+  annulment_form              number(1) default 0 not null,
   person_id                   number(18),
   signatory                   varchar2(60 char),
   created_date                date default sysdate not null,
