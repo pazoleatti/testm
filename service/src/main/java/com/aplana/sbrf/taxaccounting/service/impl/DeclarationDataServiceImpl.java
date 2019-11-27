@@ -68,6 +68,7 @@ import org.apache.commons.lang3.time.FastDateFormat;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.poi.ss.formula.functions.T;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
@@ -255,7 +256,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         LOG.info(String.format("asyncCreateReportForms by %s. action: %s", userInfo, action));
         Logger logger = new Logger();
         ActionResult taskResult = new ActionResult();
-
         DeclarationData knf = findKnfForReport(action, logger);
         if (!logger.containsLevel(LogLevel.ERROR)) {
             DepartmentReportPeriod departmentReportPeriod =
@@ -2343,8 +2343,15 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         }
         // КНФ должна существовать :)
         if (knf == null) {
-            logger.error(generateKnfIsNotFoundErrorText(action.getDeclarationTypeId(), departmentReportPeriod));
-            return null;
+           // Для анулирующей в ручном режиме Тип консолидированной формы так же может быть - КНФ по обособленному подразделению
+            if (action.getReportTypeMode().equals(ReportTypeModeEnum.ANNULMENT)) {
+                RefBookKnfType knfType = RefBookKnfType.BY_KPP;
+                knf = findKnf(departmentReportPeriod, knfType);
+            }
+            if (knf == null) {
+                logger.error(generateKnfIsNotFoundErrorText(action.getDeclarationTypeId(), departmentReportPeriod));
+                return null;
+            }
         }
         // КНФ должна быть Принята
         if (knf.getState() != State.ACCEPTED) {
