@@ -364,6 +364,34 @@
                     });
                 };
 
+                /**
+                 * @description Обработка события, которое возникает при нажании на ссылку Формирование отчетов-> Выгрузить в XLSX
+                 */
+                $scope.createReportXlsx = function () {
+                    // $http({
+                    //     method: "POST",
+                    //     url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/reportXsls"
+                    // }).success(function (response) {
+                    //     if (response) {
+                    //         $logPanel.open('log-panel-container', response);
+                    //     }
+                    // });
+                };
+
+                /**
+                 * @description Обработка события, которое возникает при нажании на ссылку Формирование отчетов-> Выгрузить в RNU
+                 */
+                $scope.createReportRNU = function () {
+                    // $http({
+                    //     method: "POST",
+                    //     url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/reportXsls"
+                    // }).success(function (response) {
+                    //     if (response) {
+                    //         $logPanel.open('log-panel-container', response);
+                    //     }
+                    // });
+                };
+
             }
         ]);
 }());
